@@ -1,0 +1,90 @@
+"""Utils functions."""
+
+import pycuda.gpuarray as pg
+import pycuda.driver as cuda
+import numpy as np
+
+
+def is_cuda_array(var):
+    """Check if var implement the CUDA Array interface."""
+    try:
+        return hasattr(var, "__cuda_array_interface__")
+    except Exception:
+        return False
+
+
+def is_c_array(var):
+    """Check if var is a Contiguous np array."""
+    try:
+        return isinstance(var, np.ndarray) and var.flags.c_contiguous
+    except Exception:
+        return False
+
+
+def ensure_on_gpu(data):
+    """Ensure the data is on gpu, if not copy it."""
+    if is_cuda_array(data):
+        return data
+    else:
+        return pg.to_gpu(data)
+
+
+def extract_column(mat, idx=None):
+    """Extract a column from a GPUArray, and return a copy of it."""
+    dtype = mat.dtype
+    itemsize = np.dtype(dtype).itemsize
+    N, M = mat.shape
+
+    if not mat.flags.c_contiguous:
+        raise ValueError("Array should be C-Contiguous")
+    assert M > idx >= 0
+
+    new_mat = pg.empty(N, dtype)
+
+    copy = cuda.Memcpy2D()   # noqa: E1101
+    copy.set_src_device(mat.gpudata)
+
+    # Offset of the  column in bytes
+    copy.src_x_in_bytes = idx * itemsize
+    copy.set_dst_device(new_mat.gpudata)
+    # Width of a row in bytes in the source array
+    copy.src_pitch = M * itemsize
+    # Width of sliced row
+    copy.dst_pitch = copy.width_in_bytes = itemsize
+    copy.height = N
+    copy(aligned=True)
+
+    return new_mat
+
+
+def extract_columns(mat, start=0, stop=None):
+    """Extract columns from a GPUArray, and return a copy of it."""
+    dtype = mat.dtype
+    itemsize = np.dtype(dtype).itemsize
+    N, M = mat.shape
+    m = stop - start
+
+    assert mat.flags.c_contiguous
+    assert M >= stop > start >= 0
+
+    new_mat = pg.empty((N, m), dtype)
+
+    copy = cuda.Memcpy2D()   # noqa: E1101
+    copy.set_src_device(mat.gpudata)
+
+    # Offset of the first column in bytes
+    copy.src_x_in_bytes = start * itemsize
+    copy.set_dst_device(new_mat.gpudata)
+    # Width of a row in bytes in the source array
+    copy.src_pitch = M * itemsize
+    # Width of sliced row
+    copy.dst_pitch = copy.width_in_bytes = m * itemsize
+    copy.height = N
+    copy(aligned=True)
+
+    return new_mat
+
+
+def get_best_grid_bloc():
+    """Get the best grid and bloc dimension."""
+    pass
