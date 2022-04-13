@@ -9,12 +9,12 @@ import numpy as np
 
 import cufinufft._cufinufft as raw_cf
 
-from .utils import extract_columns, extract_column
+from .utils import extract_col
 
 # If we are shutting down python, we don't need to run __del__
 #   This will avoid any shutdown gc ordering problems.
-exiting = False
-atexit.register(setattr, sys.modules[__name__], 'exiting', True)
+EXITING = False
+atexit.register(setattr, sys.modules[__name__], 'EXITING', True)
 
 
 def _default_opts(nufft_type, dim):
@@ -74,20 +74,20 @@ class RawCufinufft:
 
         self.dtype = np.dtype(dtype)
 
-        if self.dtype == np.float64:
-            self._make_plan = raw_cf._make_plan
-            self._set_pts = raw_cf._set_pts
-            self._exec_plan = raw_cf._exec_plan
-            self._destroy_plan = raw_cf._destroy_plan
-            self.complex_dtype = np.complex128
-        elif self.dtype == np.float32:
+        if self.dtype == np.float32:
             self._make_plan = raw_cf._make_planf
             self._set_pts = raw_cf._set_ptsf
             self._exec_plan = raw_cf._exec_planf
             self._destroy_plan = raw_cf._destroy_planf
             self.complex_dtype = np.complex64
+        # elif self.dtype == np.float64:
+        #     self._make_plan = raw_cf._make_plan
+        #     self._set_pts = raw_cf._set_pts
+        #     self._exec_plan = raw_cf._exec_plan
+        #     self._destroy_plan = raw_cf._destroy_plan
+        #     self.complex_dtype = np.complex128
         else:
-            raise TypeError("Expected np.float32 or np.float64.")
+            raise TypeError("Expected np.float32.")
 
         self.ndim = len(shape)
         self.eps = float(eps)
@@ -118,17 +118,20 @@ class RawCufinufft:
         self.plan1, self.plan2 = c_void_p(None), c_void_p(None)
 
         ier = self._make_plan(1, self.ndim, self.modes, 1,
-                              self.n_trans, eps, 1, byref(self.plan1), self.opts1)
+                              self.n_trans, eps, 1, byref(self.plan1),
+                              self.opts1)
         if ier != 0:
             raise RuntimeError("Type 1 plan initialisation failed.")
 
         ier = self._make_plan(2, self.ndim, self.modes, -1,
-                              self.n_trans, eps, 1, byref(self.plan2), self.opts2)
+                              self.n_trans, eps, 1, byref(self.plan2),
+                              self.opts2)
         if ier != 0:
             raise RuntimeError("Type 2 plan initialisation failed")
-        self._set_pts_plans(extract_column(samples, 0),
-                            extract_column(samples, 1),
-                            extract_column(samples, 2) if self.ndim == 3 else None)
+        self._set_pts_plans(extract_col(samples, 0),
+                            extract_col(samples, 1),
+                            extract_col(samples, 2)
+                            if self.ndim == 3 else None)
 
     def _set_pts_plans(self, kx, ky, kz):
         if kx.dtype != self.dtype:
@@ -181,22 +184,41 @@ class RawCufinufft:
         if ier != 0:
             raise RuntimeError("Error setting non-uniforms points of type2")
 
-    def type1(self, d_c, d_grid):
-        """Type 1 transform, using on-gpu data."""
-        ier = self._exec_plan(d_c.ptr, d_grid.ptr, self.plan1)
+    def type1(self, d_c_ptr, d_grid_ptr):
+        """Type 1 transform, using on-gpu data.
+
+        Parameters
+        ----------
+        d_c_ptr: int
+            pointer to on-device non uniform coefficient array.
+
+        d_grid_ptr: int
+            pointer to on-device uniform grid array.
+        """
+        ier = self._exec_plan(d_c_ptr, d_grid_ptr, self.plan1)
         if ier != 0:
             raise RuntimeError('Error executing Type 1 plan.')
 
-    def type2(self, d_c, d_grid):
-        """Type 2 transform, using on-gpu data."""
-        ier = self._exec_plan(d_c.ptr, d_grid.ptr, self.plan2)
+    def type2(self, d_c_ptr, d_grid_ptr):
+        """
+        Type 2 transform, using on-gpu data.
+
+        Parameters
+        ----------
+        d_c_ptr: int
+            pointer to on-device non uniform coefficient array.
+
+        d_grid_ptr: int
+            pointer to on-device uniform grid array.
+        """
+        ier = self._exec_plan(d_c_ptr, d_grid_ptr, self.plan2)
         if ier != 0:
             raise RuntimeError('Error executing Type 2 plan.')
 
     def __del__(self):
         """Destroy this instance's associated plan and data."""
         # If the process is exiting or we've already cleaned up plan, return.
-        if exiting or (self.plan1 is None and self.plan2 is None):
+        if EXITING or (self.plan1 is None and self.plan2 is None):
             return
         ier = self._destroy_plan(self.plan2)
         if ier != 0:
@@ -209,3 +231,4 @@ class RawCufinufft:
         self.plan1, self.plan2 = None, None
         # Reset our reference.
         self.references = []
+        return
