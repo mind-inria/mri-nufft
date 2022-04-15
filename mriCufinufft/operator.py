@@ -5,7 +5,7 @@ import numpy as np
 import pycuda.driver as cuda
 import pycuda.gpuarray as gp
 
-from .kernels import update_density, sense_adj_mono, sense_forward_all
+from .kernels import update_density, sense_adj_mono, sense_forward
 from .raw_operator import RawCufinufft
 from .utils import ensure_on_gpu, is_c_array, is_cuda_array
 
@@ -125,7 +125,7 @@ class MRICufi:
         self.kspace_coil_offset = self.n_samples * np.complex64.itemsize
 
     def op(self, data):
-        """Non Cartesian MRI forward operator.
+        r"""Non Cartesian MRI forward operator.
 
         Parameters
         ----------
@@ -138,10 +138,8 @@ class MRICufi:
 
         Notes
         -----
-
-        this performs for every coil \\ell:
-        ..math:: \\mathcal{F}\\mathcal{S}_\\ell x
-
+        this performs for every coil \ell:
+        ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
         if self.n_coils == 1:
             return self._op(data)
@@ -149,33 +147,35 @@ class MRICufi:
         if self.uses_sense:
             for i in range(self.n_coils):
                 if self.smaps_cached and is_cuda_array(data):
-                    self.smap_d = self._smaps_d[i]
+                    self._smap_d = self._smaps_d[i]
                     self.image_data_d = data[i]
                 elif self.smaps_cached and is_c_array(data):
-                    self.smap_d = self._smaps[i]
+                    self._smap_d = self._smaps[i]
                     self.image_data_d.set(data[i])
                 elif not self.smaps_cached and is_cuda_array(data):
-                    self.smap_d = self._smaps[i]
+                    self._smap_d = self._smaps[i]
                     self.image_data_d = data[i]
                 else:  # everything is on cpu currently
                     self.image_data_d.set(data[i])
-                    self.smap_d.set(self._smaps[i])
-            sense_forward(self.image_data_d, self.smap_d)
+                    self._smap_d.set(self._smaps[i])
+            sense_forward(self.image_data_d, self._smap_d)
             self.__op(self.image_data_d.ptr,
-                    self.kspace_data_d.ptr + i * self.kspace_coil_offset)
-
-        else:
+                      self.kspace_data_d.ptr + i * self.kspace_coil_offset)
             if is_cuda_array(data):
-                for i in range(self.n_coils):
-                    self.__op(data.ptr + i * self.image_coil_offset,
-                              self.kspace_data_d.ptr + i * self.kspace_coil_offset)
                 return self.kspace_data_d
-            else:
-                for i in range(self.n_coils):
-                    self.image_data_d.set(data[i])
-                    self.__op(self.image_data_d.ptr,
-                              self.kspace_data_d.ptr + i * self.kspace_coil_offset)
-                return self.kspace_data_d.get()
+            return self.kspace_data_d.get()
+        if is_cuda_array(data):
+            for i in range(self.n_coils):
+                self.__op(
+                    data.ptr + i * self.image_coil_offset,
+                    self.kspace_data_d.ptr + i * self.kspace_coil_offset)
+            return self.kspace_data_d
+        for i in range(self.n_coils):
+            self.image_data_d.set(data[i])
+            self.__op(
+                self.image_data_d.ptr,
+                self.kspace_data_d.ptr + i * self.kspace_coil_offset)
+        return self.kspace_data_d.get()
 
     def _op(self, data, coeff_d=None):
         coeff_d = self.kspace_data_d if coeff_d is None else coeff_d
@@ -215,13 +215,15 @@ class MRICufi:
                     self.__adj_op(
                         self.kspace_data_d.ptr + i * self.kspace_coil_offset,
                         coil_image_d.ptr)
-                    sense_adj_mono(self.image_data_d, coil_image_d, self._smaps_d[i])
+                    sense_adj_mono(self.image_data_d,
+                                   coil_image_d, self._smaps_d[i])
                 else:
                     self._smap_d.set(self._smaps[i])
                     self.__adj_op(
                         self.kspace_data_d.ptr + i * self.kspace_coil_offset,
                         coil_image_d.ptr)
-                    sense_adj_mono(self.image_data_d, coil_image_d, self._smap_d)
+                    sense_adj_mono(self.image_data_d,
+                                   coil_image_d, self._smap_d)
         else:
             for i in range(self.n_coils):
                 self.__adj_op(
@@ -230,8 +232,7 @@ class MRICufi:
 
         if is_cuda_array(coeffs):
             return self.image_data_d
-        else:
-            return self.image_data_d.get()
+        return self.image_data_d.get()
 
     def _adj_op(self, coeffs, image_d=None):
         """Non Cartesian MRI  single coil adjoint operator."""
@@ -256,8 +257,16 @@ class MRICufi:
         """Get the size in bytes of allocated device memory for this object."""
         raise NotImplementedError
 
+    def _get_spec_rad(self):
+        pass
+
+    @property
+    def spec_rad(self):
+        return None
+
     @property
     def uses_sense(self):
+        """Return True if the transform uses the SENSE method, else False."""
         return self._uses_sense
 
     @classmethod

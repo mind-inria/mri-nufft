@@ -1,42 +1,77 @@
 #!/usr/bin/env python
 
-# System import
-from __future__ import print_function
 import os
-from setuptools import setup, find_packages
-try:
-    from pip._internal.main import main as pip_main
-except:
-    from pip._internal import main as pip_main
+import sys
 
-# Global parameters
+from setuptools import find_packages, setup, Command
+
+# Package meta-data
+NAME = "mriCufinufft"
+DESCRIPTION = "Non Uniform Fourier Transform for MRI. Based on cufinufft."
+URL = "https://github.com/paquiteau/mriCufinufft"
+EMAIL = "pierre-antoine.comby@cea.fr"
+AUTHOR = "Pierre-Antoine Comby"
+REQUIRES_PYTHON = ">=3.8.0"
+VERSION = "0.0.0"
 CLASSIFIERS = [
     "Development Status :: 1 - Planning",
     "Environment :: Console",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering"]
-AUTHOR = """
-Pierre-Antoine Comby <pierre-antoine.comby@cea.fr>
-"""
-# Write setup
-setup_requires = ["python-pysap"]
 
-pip_main(['install'] + setup_requires)
+# Required packages
+REQUIRED = [
+    "numpy",
+    "pycuda",
+    "python-pysap",
+]
+# Nice to have
+EXTRAS = [
+    "pysap-mri",
+    "pysap-fmri",
+]
 
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+# Import the README and use it as the long-description.
+# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
+try:
+    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+        long_description = '\n' + f.read()
+except FileNotFoundError:
+    long_description = DESCRIPTION
+
+# Load the package's __version__.py module as a dictionary.
+about = {}
+if not VERSION:
+    project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
+    with open(os.path.join(here, project_slug, '__version__.py')) as f:
+        exec(f.read(), about)
+else:
+    about['__version__'] = VERSION
+
+
+# Where the magic happens:
 setup(
-    name="cufinufft-mri",
-    description="Cufinufft extensions for MR Image processing",
-    long_description="Cufinufft extensions for MR Imag processing",
-    license="CeCILL-B",
-    classifiers="CLASSIFIERS",
+    name=NAME,
+    version=about['__version__'],
+    description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author=AUTHOR,
-    author_email="XXX",
-    version="0.0.0",
-    url="https://github.com/paquiteau/cufinufft-mri",
-    packages=find_packages(),
-    setup_requires=setup_requires,
-    install_requires=[
-    ],
-    platforms="OS Independent"
+    author_email=EMAIL,
+    python_requires=REQUIRES_PYTHON,
+    url=URL,
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    # If your package is a single module, use this instead of 'packages':
+    # py_modules=['mypackage'],
+
+    # entry_points={
+    #     'console_scripts': ['mycli=mymodule:cli'],
+    # },
+    install_requires=REQUIRED,
+    extras_require=EXTRAS,
+    include_package_data=True,
 )
