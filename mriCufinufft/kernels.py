@@ -80,3 +80,23 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
         The sensitivity profile of the coil.
     """
     sense_adj_mono_kernel(dest, coil, smap, **kwargs)
+
+
+diff_in_place_kernel = ElementwiseKernel(
+    "pycuda::complex<float> *data, "
+    "pycuda::complex<float> *update",
+    "data[i] = data[i] - update[i]",
+    "diff_in_place_kernel",
+    preamble="#include <pycuda-complex-impl.hpp>"
+)
+
+
+def diff_in_place(data, update, **kwargs):
+    """Perform a complex diff in place on gpu.
+    Parameters
+    ----------
+    data: GPUArray
+        The Data
+    update: The update data
+    """
+    diff_in_place_kernel(data, update, **kwargs)

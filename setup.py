@@ -2,6 +2,7 @@
 
 import os
 import sys
+import io
 
 from setuptools import find_packages, setup, Command
 
@@ -72,6 +73,6 @@ setup(
     #     'console_scripts': ['mycli=mymodule:cli'],
     # },
     install_requires=REQUIRED,
-    extras_require=EXTRAS,
+    extras_require={'all':EXTRAS},
     include_package_data=True,
 )
