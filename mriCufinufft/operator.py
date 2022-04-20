@@ -68,7 +68,7 @@ class MRICufiNUFFT:
 
         # density compensation support
         if density is True:
-            self.density_d = MRICufi.estimate_density(samples_d, shape)
+            self.density_d = MRICufiNUFFT.estimate_density(samples_d, shape)
             self.uses_density = True
         elif is_host_array(density) or is_cuda_array(density):
             if len(density) != len(samples):
