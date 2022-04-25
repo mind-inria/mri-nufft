@@ -24,7 +24,7 @@ CLASSIFIERS = [
 # Required packages
 REQUIRED = [
     "numpy",
-    "pycuda",
+    "cupy",
     "python-pysap",
 ]
 # Nice to have
