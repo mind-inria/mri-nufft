@@ -1,14 +1,30 @@
 """Kernel function for GPUArray data."""
-from pycuda.elementwise import ElementwiseKernel
-
+import cupy as cp
 # Kernels #
 
-update_density_kernel = ElementwiseKernel(
-    "pycuda::complex<float> *density, pycuda::complex<float> *update",
-    "density[i] /= sqrt(abs(update[i]))",
-    "update_density_kernel",
-    preamble="#include <pycuda-complex-impl.hpp>",
+update_density_kernel = cp.RawKernel(
+    """
+    extern "C" __global__
+    void update_density_kernel(float2* density, const float2* update)
+    {
+        int t = blockDim.x * blockIdx.x + threadIdx.x;
+        density[t].x *= rsqrtf(update[t].x *update[t].x + update[t].y * update[t].y);
+    }
+    """,
+    "update_density_kernel"
 )
+
+sense_adj_mono_kernel = cp.RawKernel(
+    """
+    extern "C" __global__
+    void sense_adj_mono_kernel(float2* dest, const float2* img, const float2* smap)
+    {
+        int t = blockDim.x * blockIdx.x + threadIdx.x;
+        dest[t].x += img[t].x * smap[t].x + img[t].y * smap[t].y;
+        dest[t].y += img[t].y * smap[t].x - img[t].x * smap[t].y;
+    }
+    """,
+    "sense_adj_mono_kernel")
 
 
 def update_density(density, update):
@@ -23,48 +39,8 @@ def update_density(density, update):
     -----
     ``density[i] /= sqrt(abs(update[i]))``
     """
-    update_density_kernel(density, update)
+    update_density_kernel((len(density)//1024,), (1024,), (density, update))
 
-
-sense_forward_inplace_kernel = ElementwiseKernel(
-    "pycuda::complex<float> *img, pycuda::complex<float> *smap",
-    "img[i] = img[i] * smaps[i]",
-    preamble="#include <pycuda-complex-impl.hpp")
-
-sense_forward_all_kernel = ElementwiseKernel(
-    "pycuda::complex<float> *dest, "
-    "pycuda::complex<float> *img, "
-    "pycuda::complex<float> *smaps",
-    "dest[i] = img[i] * smaps[i]",
-    preamble="#include <pycuda-complex-impl.hpp")
-
-
-def sense_forward(img, smap, dest=None, **kwargs):
-    """Perform a multiplication of all smaps with all coils.
-
-    Parameters
-    ----------
-    img: GPUArray
-        The coil image estimation
-    smap: GPUArray
-        The sensitivity profiles for one coil.
-    dest: destination array
-        If None, perform the operation in place.
-    """
-    if dest is None:
-        sense_forward_inplace_kernel(img, smap, **kwargs)
-    else:
-        sense_forward_all_kernel(dest, img, smap, **kwargs)
-
-
-sense_adj_mono_kernel = ElementwiseKernel(
-    "pycuda::complex<float> *dest, "
-    "pycuda::complex<float> *coil_img, "
-    "pycuda::complex<float> *smap",
-    "dest[i] = dest[i] + coil_img[i]*smap[i].real() - coil_img[i]*smap[i].imag()",  # noqa: E501
-    "sense_adj_mono_kernel",
-    preamble="#include <pycuda-complex-impl.hpp>"
-)
 
 
 def sense_adj_mono(dest, coil, smap, **kwargs):
@@ -79,24 +55,4 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
     smap: GPUArray
         The sensitivity profile of the coil.
     """
-    sense_adj_mono_kernel(dest, coil, smap, **kwargs)
-
-
-diff_in_place_kernel = ElementwiseKernel(
-    "pycuda::complex<float> *data, "
-    "pycuda::complex<float> *update",
-    "data[i] = data[i] - update[i]",
-    "diff_in_place_kernel",
-    preamble="#include <pycuda-complex-impl.hpp>"
-)
-
-
-def diff_in_place(data, update, **kwargs):
-    """Perform a complex diff in place on gpu.
-    Parameters
-    ----------
-    data: GPUArray
-        The Data
-    update: The update data
-    """
-    diff_in_place_kernel(data, update, **kwargs)
+    sense_adj_mono_kernel((len(dest)//1024,), (1024,), (dest, coil, smap), **kwargs)

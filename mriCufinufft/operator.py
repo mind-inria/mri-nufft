@@ -3,13 +3,11 @@
 import warnings
 
 import numpy as np
-import pycuda.driver as cuda
-import pycuda.gpuarray as gp
-import pycuda.curandom as pcr
+import cupy as cp
 
-from .kernels import update_density, sense_adj_mono, sense_forward, diff_in_place
 from .raw_operator import RawCufinufft
-from .utils import ensure_on_gpu, is_host_array, is_cuda_array, sizeof_fmt
+from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory
+from .kernels import sense_adj_mono, update_density
 
 
 class MRICufiNUFFT:
@@ -55,13 +53,11 @@ class MRICufiNUFFT:
     """
 
     def __init__(self, samples, shape, density=False, n_coils=1, smaps=None,
-                 smaps_cached=False, **kwargs):
+                 smaps_cached=False, verbose=False, **kwargs):
         self.shape = shape
         self.n_samples = len(samples)
         if is_host_array(samples):
-            samples_d = gp.to_gpu(samples)
-        elif is_cuda_array(samples):
-            samples_d = samples
+            samples_d = cp.asarray(np.asfortranarray(samples))
         else:
             raise ValueError("Samples should be either a C-ordered ndarray, "
                              "or a GPUArray.")
@@ -75,11 +71,7 @@ class MRICufiNUFFT:
                 raise ValueError("Density array and samples array should "
                                  "have the same length.")
             self.uses_density = True
-
-            if is_host_array(density):
-                self.density_d = gp.to_gpu(density)
-            elif is_cuda_array(density):
-                self.density_d = density
+            self.density_d = cp.asarray(density)
         else:
             self.density_d = None
             self.uses_density = False
@@ -96,42 +88,28 @@ class MRICufiNUFFT:
                 print(smaps.flags)
                 raise ValueError("Smaps should be either a C-ordered ndarray, "
                                  "or a GPUArray.")
-            if is_cuda_array(smaps):
-                self._smaps_d = smaps
-            elif smaps_cached and is_host_array(smaps):
-                warnings.warn(f"{smaps.nbytes/2**30} GiB will be used on gpu.")
-                self._smaps_d = gp.to_gpu(smaps)
+            if smaps_cached:
+                if verbose:
+                    warnings.warn(f"{sizeof_fmt(smaps.nbytes)} will be used on gpu.")
+                self._smaps_d = cp.array(smaps, order='C', copy=False)
                 self.smaps_cached = True
-                self._smaps = smaps
-
             else:
                 # allocate device memory
-                self._smap_d = gp.empty(shape, dtype=np.complex64)
-                # move smaps to pinned memory
-                self._smaps = cuda.register_host_memory(smaps)  # pylint: disable=E1101 # noqa: E501
+                self._smap_d = cp.empty(shape, dtype=np.complex64)
+                self._smaps_pinned = pin_memory(smaps)
+                self._smaps = smaps
         else:
             self._uses_sense = False
             self._smaps = None
-            # Initialize data holders on device.
-        if self.uses_sense or self.n_coils == 1:
-            self.image_data_d = gp.empty(self.shape, dtype=np.complex64)
-        else:
-            self.image_data_d = gp.empty((self.n_coils, *self.shape),
-                                         dtype=np.complex64)
-        if self.n_coils == 1:
-            self.kspace_data_d = gp.empty(self.n_samples,
-                                          dtype=np.complex64)
-        else:
-            self.kspace_data_d = gp.empty((self.n_coils, self.n_samples),
-                                          dtype=np.complex64)
         # Initialise NUFFT plans
-        self.raw_op = RawCufinufft(samples_d, shape, **kwargs)
+        self.raw_op = RawCufinufft(samples_d, tuple(shape), **kwargs)
 
         # Usefull data sizes:
-        self.image_coil_offset = np.prod(self.shape) * np.dtype(np.complex64).itemsize
-        self.kspace_coil_offset = self.n_samples * np.dtype(np.complex64).itemsize
+        self.img_size = int(
+            np.prod(self.shape) * np.dtype(np.complex64).itemsize)
+        self.ksp_size = int(self.n_samples * np.dtype(np.complex64).itemsize)
 
-    def op(self, data):
+    def op(self, data, ksp_d=None):
         r"""Non Cartesian MRI forward operator.
 
         Parameters
@@ -148,54 +126,76 @@ class MRICufiNUFFT:
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        # monocoil
         if self.n_coils == 1:
-            return self._op(data)
-
+            return self._op_mono(data, ksp_d)
+        # sense
         if self.uses_sense:
-            for i in range(self.n_coils):
-                if self.smaps_cached:
-                    self._smap_d = self._smaps_d[i]
-                else:
-                    self._smap_d.set(self._smaps[i])
-                if is_cuda_array(data):
-                    self.image_data_d = data[i]
-                else:
-                    self.image_data_d.set(data[i])
-            sense_forward(self.image_data_d, self._smap_d)
-            self.__op(self.image_data_d.ptr,
-                      self.kspace_data_d.ptr + i * self.kspace_coil_offset)
-            if is_cuda_array(data):
-                return self.kspace_data_d.copy()
-            return self.kspace_data_d.get()
+            return self._op_sense(data, ksp_d)
+        # calibrationless, data on device
+        return self._op_calibless(data, ksp_d)
 
+    def _op_mono(self, data, ksp_d=None):
+        img_d = cp.asarray(data)
+        if ksp_d is None:
+            ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        self.__op(img_d, ksp_d)
         if is_cuda_array(data):
-            for i in range(self.n_coils):
-                self.__op(
-                    data.ptr + i * self.image_coil_offset,
-                    self.kspace_data_d.ptr + i * self.kspace_coil_offset)
-            return self.kspace_data_d.copy()
-        for i in range(self.n_coils):
-            self.image_data_d.set(data[i])
-            self.__op(
-                self.image_data_d.ptr,
-                self.kspace_data_d.ptr + i * self.kspace_coil_offset)
-        return self.kspace_data_d.get()
+            return ksp_d
+        return ksp_d.get()
 
-    def _op(self, data, coeff_d=None):
-        coeff_d_used = self.kspace_data_d if coeff_d is None else coeff_d
-        data_d = ensure_on_gpu(data)
-        print(coeff_d_used.shape)
-        self.__op(data_d, coeff_d_used)
-        if is_host_array(data) and coeff_d is None:
-            return coeff_d_used.get()
-        return coeff_d_used
+    def _op_sense(self, data, ksp_d=None):
+        img_d = cp.asarray(data)
+        if is_host_array(data):
+            ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+            ksp = np.zeros((self.n_coils, self.n_samples),
+                           dtype=np.complex64)
+        elif is_cuda_array and ksp_d is None:
+            ksp_d = cp.empty((self.n_coils, self.n_samples),
+                             dtype=np.complex64)
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        for i in range(self.n_coils):
+            cp.copyto(coil_img_d, img_d)
+            if self.smaps_cached:
+                coil_img_d *= self._smaps_d[i]  # sense forward
+            else:
+                self._smap_d.set(self._smaps[i])
+                coil_img_d *= self._smap_d  # sense forward
+            if is_host_array(data):
+                self.__op(coil_img_d, ksp_d)
+                cp.asnumpy(ksp_d, out=ksp[i])
+            else:
+                self.__op(coil_img_d.data.ptr, ksp_d.data.ptr + i * self.ksp_size)
+        if is_cuda_array(data):
+            return ksp_d
+        return ksp
+
+    def _op_calibless(self, data, ksp_d=None):
+        if is_cuda_array(data):
+            if ksp_d is None:
+                ksp_d = cp.empty((self.n_coils, self.n_samples),
+                                 dtype=np.complex64)
+            for i in range(self.n_coils):
+                self.__op(data.data.ptr + i * self.img_size,
+                          ksp_d.data.ptr + i * self.ksp_size)
+            return ksp_d
+        # calibrationless, data on host
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        ksp = np.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
+        for i in range(self.n_coils):
+            coil_img_d.set(data[i])
+            self.__op(coil_img_d.data.ptr, ksp_d.data.ptr)
+            cp.asnumpy(ksp_d, out=ksp[i])
+        return ksp
 
     def __op(self, image_d, coeffs_d):
-        if not isinstance(image_d, int):
-            return self.raw_op.type2(coeffs_d.ptr, image_d.ptr)
+        # ensure everything is pointers before going to raw level.
+        if is_cuda_array(image_d) and is_cuda_array(coeffs_d):
+            return self.raw_op.type2(coeffs_d.data.ptr, image_d.data.ptr)
         return self.raw_op.type2(coeffs_d, image_d)
 
-    def adj_op(self, coeffs):
+    def adj_op(self, coeffs, img_d=None):
         """Non Cartesian MRI adjoint operator.
 
         Parameters
@@ -207,63 +207,96 @@ class MRICufiNUFFT:
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if self.n_coils == 1:
-            return self._adj_op(coeffs)
-        if is_cuda_array(coeffs):
-            self.kspace_data_d = coeffs
-        else:
-            self.kspace_data_d.set(coeffs)
-
+            return self._adj_op_mono(coeffs, img_d)
+        # sense
         if self.uses_sense:
-            coil_image_d = gp.empty(self.shape, np.complex64)
-            for i in range(self.n_coils):
-                if self.smaps_cached:
-                    self.__adj_op(
-                        self.kspace_data_d.ptr + i * self.kspace_coil_offset,
-                        coil_image_d.ptr)
-                    sense_adj_mono(self.image_data_d,
-                                   coil_image_d, self._smaps_d[i])
-                else:
-                    self._smap_d.set(self._smaps[i])
-                    self.__adj_op(
-                        self.kspace_data_d.ptr + i * self.kspace_coil_offset,
-                        coil_image_d.ptr)
-                    sense_adj_mono(self.image_data_d,
-                                   coil_image_d, self._smap_d)
-        else:
-            for i in range(self.n_coils):
-                self.__adj_op(
-                    self.kspace_data_d.ptr + i * self.kspace_coil_offset,
-                    self.image_data_d.ptr + i * self.image_coil_offset)
+            return self._adj_op_sense(coeffs, img_d)
+        # calibrationless
+        return self._adj_op_calibless(coeffs, img_d)
 
-        if is_host_array(coeffs):
-            return self.image_data_d.get()
-        return self.image_data_d.copy()
-
-    def _adj_op(self, coeffs, image_d=None):
-        """Non Cartesian MRI  single coil adjoint operator."""
-        image_d_used = self.image_data_d if image_d is None else image_d
-
-        coeffs_d = ensure_on_gpu(coeffs)
+    def _adj_op_mono(self, coeffs, img_d=None):
+        if img_d is None:
+            img_d = cp.empty(self.shape, dtype=np.complex64)
+        coil_ksp_d = cp.asarray(coeffs)
         if self.uses_density:
-            coeffs_d *= self.density_d
-        self.__adj_op(coeffs_d, image_d_used)
+            coil_ksp_d *= self.density_d  # density preconditionning
+        self.__adj_op(coil_ksp_d.data.ptr, img_d.data.ptr)
+        if is_cuda_array(coeffs):
+            return img_d
+        return img_d.get()
 
-        if is_host_array(coeffs) and image_d is None:
-            return image_d_used.get()
-        # image_data has been updated.
-        return image_d_used
+    def _adj_op_sense(self, coeffs, img_d=None):
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        if img_d is None:
+            img_d = cp.empty(self.shape, dtype=np.complex64)
+        if not is_cuda_array(coeffs) or self.uses_density:
+            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        for i in range(self.n_coils):
+            if self.uses_density:
+                if not is_cuda_array(coeffs):
+                    coil_ksp_d = cp.array(coeffs[i], copy=True)
+                    coil_ksp_d *= self.density_d  # density preconditionning
+                else:
+                    cp.copyto(coil_ksp_d, coeffs[i])
+                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+            else:
+                if not is_cuda_array(coeffs):
+                    coil_ksp_d.set(coeffs[i])
+                    self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                else:
+                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size, coil_img_d.data.ptr)
+            if self.smaps_cached:
+                sense_adj_mono(img_d,
+                               coil_img_d,
+                               self._smaps_d[i])
+            else:
+                self._smap_d.set(self._smaps[i])
+                sense_adj_mono(img_d,
+                               coil_img_d,
+                               self._smap_d)
+        if is_cuda_array(coeffs):
+            return img_d
+        return img_d.get()
+
+    def _adj_op_calibless(self, coeffs, img_d=None):
+        if is_cuda_array(coeffs):
+            if img_d is None:
+                img_d = cp.empty((self.n_coils, *self.shape),
+                                 dtype=np.complex64)
+            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+            for i in range(self.n_coils):
+                if self.uses_density:
+                    coil_ksp_d.set(coeffs[i])
+                    coil_ksp_d *= self.density_d
+                    self.__adj_op(coil_ksp_d.data.ptr,
+                                  img_d.data.ptr + i * self.img_size)
+                else:
+                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
+                                  img_d.data.ptr + i * self.img_size)
+            return img_d
+        # calibrationless, data on host
+        img = np.zeros((self.n_coils, *self.shape), dtype=np.complex64)
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        for i in range(self.n_coils):
+            coil_ksp_d.set(coeffs[i])
+            if self.uses_density:
+                coil_ksp_d *= self.density_d
+            self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+            cp.asnumpy(coil_img_d, out=img[i])
+        return img
 
     def __adj_op(self, coeffs_d, image_d):
         if not isinstance(coeffs_d, int):
-            return self.raw_op.type1(coeffs_d.ptr, image_d.ptr)
+            return self.raw_op.type1(coeffs_d.data.ptr, image_d.data.ptr)
         return self.raw_op.type1(coeffs_d, image_d)
 
-
-    def data_consistency(self, image, obs_data):
+    def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
 
-        This mixes the op and adj_op method to perform F_adj(F(x-y)) on a per coil basis.
-        By doing the computation coil wise, it uses less memory than the naive call to adj_op(op(x)-y)
+        This mixes the op and adj_op method to perform F_adj(F(x-y))
+        on a per coil basis. By doing the computation coil wise,
+        it uses less memory than the naive call to adj_op(op(x)-y)
 
         Parameters
         ----------
@@ -274,73 +307,86 @@ class MRICufiNUFFT:
             Observed data.
         """
         if self.n_coils == 1:
-            self._op(image, self.kspace_data_d)
-            if is_cuda_array(obs_data):
-                diff_in_place(self.kspace_data_d,obs_data)
-            else:
-                obs_data_d = gp.empty_like(self.kspace_data_d)
-                diff_in_place(self.kspace_data_d, obs_data_d)
-            self._adj_op(self.kspace_data_d, self.image_data_d)
-
-            if is_host_array(image):
-                return self.image_data_d.get()
-            return self.image_data_d.copy()
-
-        kspace_coil_tmp_d = gp.empty(shape=(1, self.n_samples),dtype=np.complex64)
-        if is_host_array(image):
-            image_tmp_d = gp.empty(shape=self.shape, dtype=np.complex64)
-
-        if is_host_array(obs_data):
-            obs_coil_tmp_d =  gp.empty(shape=(1, self.n_samples),dtype=np.complex64)
-
+            return self._data_consistency_mono(image_data, obs_data)
         if self.uses_sense:
-            if is_cuda_array(image):
-                image_tmp_d = image
+            raise NotImplementedError("Data consistency with smaps is still inconsistent.")
+            return self._data_consistency_sense(image_data, obs_data)
+        return self._data_consistency_calibless(image_data, obs_data)
+
+    def _data_consistency_mono(self, image_data, obs_data):
+        img_d = cp.array(image_data, copy=True)
+        obs_d = cp.asarray(obs_data)
+        ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        self.__op(img_d, ksp_d)
+        ksp_d -= obs_d
+        self.__adj_op(ksp_d, img_d)
+        if is_cuda_array(image_data):
+            return img_d
+        return img_d.get()
+
+    def _data_consistency_sense(self, image_data, obs_data):
+        img_d = cp.array(image_data, copy=True)
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        if not is_cuda_array(obs_data):
+            coil_obs_data = cp.empty(self.n_samples, dtype=np.complex64)
+            obs_data_pinned = pin_memory(obs_data)
+        for i in range(self.n_coils):
+            cp.copyto(coil_img_d, img_d)
+            if self.smaps_cached:
+                coil_img_d *= self._smaps_d[i]
             else:
-                image_tmp_d.set(image)
+                self._smap_d = cp.asarray(self._smaps[i])
+#                self._smap_d.set(self._smaps[i])
+                coil_img_d *= self._smap_d
+            self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr + i * self.ksp_size)
+            if not is_cuda_array(obs_data):
+                coil_obs_data = cp.asarray(obs_data_pinned[i])
+                coil_ksp_d -= coil_obs_data
+            else:
+                coil_ksp_d -= obs_data[i]
+            if self.uses_density:
+                coil_ksp_d *= self.density_d
+            self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+            if self.smaps_cached:
+                sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
+            else:
+                sense_adj_mono(img_d, coil_img_d, self._smap_d)
 
-            image_coil_tmp_d = gp.empty(shape=self.shape, dtype=np.complex64)
+        if not is_cuda_array(obs_data):
+            del obs_data_pinned
+        if is_cuda_array(image_data):
+            return img_d
+        return img_d.get()
+
+    def _data_consistency_calibless(self, image_data, obs_data):
+        if is_cuda_array(image_data):
+            img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
+            ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
-                if self.smaps_cached:
-                    self._smap_d = self._smaps_d[i]
-                else:
-                    self._smap_d.set(self._smaps[i])
-                sense_forward(image_d, self._smap_d, image_coil_tmp_d)
-                self.__op(image_coil_tmp_d.ptr, kspace_coil_tmp_d.ptr)
+                self.__op(image_data.data.ptr + i * self.img_size,
+                          ksp_d.data.ptr)
+                ksp_d -= obs_data[i]
+                if self.uses_density:
+                    ksp_d *= self.density_d
+                self.__adj_op(ksp_d.data.ptr,
+                              img_d.data.ptr + i * self.img_size)
+            return img_d
 
-                if is_cuda_array(obs_data):
-                    kspace_coil_tmp_d -= obs_data[i]
-                else:
-                    obs_coil_tmp_d.set(obs_data[i])
-                    kspace_coil_tmp_d -= obs_coil_tmp_d
-
-                self.__adj_op(kspace_coil_tmp_d.ptr, image_coil_tmp_d.ptr)
-                sense_adj_mono(self.image_data_d, image_coil_tmp_d, self._smap_d)
-            if is_cuda_array(image):
-                return self.image_data_d.copy()
-            return self.image_data_d.get()
-            
-        else:  # image should be a N_coil x ... array.
-            for i in range(self.n_coils):
-                if is_cuda_array(image):
-                    self.__op(image.ptr + i * self.image_coil_offset,
-                              kspace_coil_tmp_d.ptr)
-                else:
-                    img_tmp_d.set(image[i])
-                    self.__op(image_tmp_d, kspace_coil_tmp_d.ptr)
-                if is_cuda_array(obs_data):
-                    kspace_coil_tmp_d -= obs_data[i]
-                else:
-                    obs_coil_tmp_d.set(obs_data[i])
-                    kspace_coil_tmp_d -= obs_coil_tmp_d
-
-                self.__adj_op(kspace_coil_tmp_d.ptr,
-                              self.image_data_d.ptr +i * self.image_coil_offset)
-
-            if is_cuda_array(image):
-                return self.image_data_d.copy()
-            return self.image_data_d.get()
-
+        img_d = cp.empty(self.shape, dtype=np.complex64)
+        img = np.zeros((self.n_coils, *self.shape), dtype=np.complex64)
+        ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        obs_d = cp.empty(self.n_samples, dtype=np.complex64)
+        for i in range(self.n_coils):
+            img_d.set(image_data[i])
+            obs_d.set(obs_data[i])
+            self.__op(img_d.data.ptr, ksp_d.data.ptr)
+            ksp_d -= obs_d
+            if self.uses_density:
+                ksp_d *= self.density_d
+            self.__adj_op(ksp_d.data.ptr, img_d.data.ptr)
+            cp.asnumpy(img_d, out=img[i])
+        return img
 
     def get_device_memory_size(self, verbose=False):
         """Get the size in bytes of allocated device memory for this object."""
@@ -359,23 +405,40 @@ class MRICufiNUFFT:
                 print(f"{attr:15} {attr.shape}: {sizeof_fmt(val)}")
         return device_mem
 
-
     @property
     def uses_sense(self):
         """Return True if the transform uses the SENSE method, else False."""
         return self._uses_sense
 
+    @property
+    def eps(self):
+        """Return the underlying precision parameter."""
+        return self.raw_op.eps
+    
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
         """Estimate the density compensation array."""
         oper = cls(samples, shape, density=False, **kwargs)
 
-        density = gp.empty(samples.shape[0], dtype=np.complex64)
-        density.fill(np.ones((), dtype=np.complex64))
-        update = gp.empty_like(density)
-        img = gp.empty(shape, dtype=np.complex64)
+        density = cp.ones(len(samples), dtype=np.complex64)
+        update = cp.empty_like(density)
+        img = cp.empty(shape, dtype=np.complex64)
         for _ in range(n_iter):
             oper.__adj_op(density, img)
             oper.__op(img, update)
             update_density(density, update)
         return density.real
+
+    def __repr__(self):
+        """Return info about the MRICufiNUFFT Object."""
+        return ("MRICufiNUFFT(\n"
+                f"  shape: {self.shape}\n"
+                f"  n_coils: {self.n_coils}\n"
+                f"  n_samples: {self.n_samples}\n"
+                f"  uses_density: {self.uses_density}\n"
+                f"  uses_sense: {self.uses_sense}\n"
+                f"  smaps_cached: {self.smaps_cached}\n"
+                f"  reuse_plans: {self.raw_op.reuse_plans}\n"
+                f"  eps:{self.raw_op.eps:.0e}\n"
+                ")"
+                )
