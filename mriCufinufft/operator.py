@@ -92,7 +92,8 @@ class MRICufiNUFFT:
                                  "or a GPUArray.")
             if smaps_cached:
                 if verbose:
-                    warnings.warn(f"{sizeof_fmt(smaps.nbytes)} will be used on gpu.")
+                    warnings.warn(
+                        f"{sizeof_fmt(smaps.nbytes)} will be used on gpu.")
                 self._smaps_d = cp.array(smaps, order='C', copy=False)
                 self.smaps_cached = True
             else:
@@ -167,7 +168,8 @@ class MRICufiNUFFT:
                 self.__op(coil_img_d, ksp_d)
                 cp.asnumpy(ksp_d, out=ksp[i])
             else:
-                self.__op(coil_img_d.data.ptr, ksp_d.data.ptr + i * self.ksp_size)
+                self.__op(coil_img_d.data.ptr,
+                          ksp_d.data.ptr + i * self.ksp_size)
         if is_cuda_array(data):
             return ksp_d
         return ksp
@@ -246,7 +248,8 @@ class MRICufiNUFFT:
                     coil_ksp_d.set(coeffs[i])
                     self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
                 else:
-                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size, coil_img_d.data.ptr)
+                    self.__adj_op(coeffs.data.ptr + i *
+                                  self.ksp_size, coil_img_d.data.ptr)
             if self.smaps_cached:
                 sense_adj_mono(img_d,
                                coil_img_d,
@@ -311,7 +314,8 @@ class MRICufiNUFFT:
         if self.n_coils == 1:
             return self._data_consistency_mono(image_data, obs_data)
         if self.uses_sense:
-            raise NotImplementedError("Data consistency with smaps is still inconsistent.")
+            raise NotImplementedError(
+                "Data consistency with smaps is still inconsistent.")
             return self._data_consistency_sense(image_data, obs_data)
         return self._data_consistency_calibless(image_data, obs_data)
 
@@ -341,7 +345,8 @@ class MRICufiNUFFT:
                 self._smap_d = cp.asarray(self._smaps[i])
 #                self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d
-            self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr + i * self.ksp_size)
+            self.__op(coil_img_d.data.ptr,
+                      coil_ksp_d.data.ptr + i * self.ksp_size)
             if not is_cuda_array(obs_data):
                 coil_obs_data = cp.asarray(obs_data_pinned[i])
                 coil_ksp_d -= coil_obs_data
@@ -416,7 +421,7 @@ class MRICufiNUFFT:
     def eps(self):
         """Return the underlying precision parameter."""
         return self.raw_op.eps
-    
+
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
         """Estimate the density compensation array."""
