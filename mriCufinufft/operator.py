@@ -57,7 +57,9 @@ class MRICufiNUFFT:
         self.shape = shape
         self.n_samples = len(samples)
         if is_host_array(samples):
-            samples_d = cp.asarray(np.asfortranarray(samples))
+            samples_d = cp.asarray(samples.copy(order="F"))
+        elif is_cuda_array(samples):
+            samples_d = samples
         else:
             raise ValueError("Samples should be either a C-ordered ndarray, "
                              "or a GPUArray.")
@@ -228,7 +230,7 @@ class MRICufiNUFFT:
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if img_d is None:
-            img_d = cp.empty(self.shape, dtype=np.complex64)
+            img_d = cp.zeros(self.shape, dtype=np.complex64)
         if not is_cuda_array(coeffs) or self.uses_density:
             coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
         for i in range(self.n_coils):
