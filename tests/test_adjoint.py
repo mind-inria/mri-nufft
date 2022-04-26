@@ -98,8 +98,10 @@ def image_data(request):
         1j * np.random.randn(n_coils, *shape)
     image_data = np.squeeze(image_data)
     image_data = image_data.astype(np.complex64)
+    image_data = np.ascontiguousarray(image_data)
     if request.param['data_loc'] == "D":
         image_data = cp.asarray(image_data)
+        image_data = cp.ascontiguousarray(image_data)
     return image_data
 
 
@@ -111,8 +113,10 @@ def kspace_data(request):
     kspace_data = np.squeeze(
         np.random.randn(n_coils, n_samples) + 1j * np.random.randn(n_coils, n_samples))
     kspace_data = kspace_data.astype(np.complex64)
+    kspace_data = np.ascontiguousarray(kspace_data)
     if request.param['data_loc'] == "D":
         kspace_data = cp.asarray(kspace_data)
+        kspace_data = cp.ascontiguousarray(kspace_data)
     return kspace_data
 
 
@@ -169,12 +173,11 @@ def test_adjoint_property(mri_op, kspace_data, image_data, allclose):
                          ids=[make_id(val) for val in CONFIG], indirect=True)
 def test_data_consistency(mri_op, kspace_data, image_data, allclose):
     """Test the data consistency operation in various settings"""
-    val1 = mri_op.data_consistency(image_data, kspace_data)
-
-    assert type(val1) == type(image_data)
-    val1 = cp.asnumpy(val1)
     val2 = mri_op.adj_op(mri_op.op(image_data)-kspace_data)
     val2 = cp.asnumpy(val2)
+    val1 = mri_op.data_consistency(image_data, kspace_data)
+    assert type(val1) == type(image_data)
+    val1 = cp.asnumpy(val1)
 
 
 @pytest.mark.parametrize("shape", SHAPES)
