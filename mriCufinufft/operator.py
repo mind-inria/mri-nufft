@@ -271,7 +271,7 @@ class MRICufiNUFFT:
             coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
                 if self.uses_density:
-                    coil_ksp_d.set(coeffs[i])
+                    cp.copyto(coil_ksp_d, coeffs[i])
                     coil_ksp_d *= self.density_d
                     self.__adj_op(coil_ksp_d.data.ptr,
                                   img_d.data.ptr + i * self.img_size)
@@ -293,8 +293,12 @@ class MRICufiNUFFT:
 
     def __adj_op(self, coeffs_d, image_d):
         if not isinstance(coeffs_d, int):
-            return self.raw_op.type1(coeffs_d.data.ptr, image_d.data.ptr)
-        return self.raw_op.type1(coeffs_d, image_d)
+            ret = self.raw_op.type1(coeffs_d.data.ptr, image_d.data.ptr)
+        else:
+            ret = self.raw_op.type1(coeffs_d, image_d)
+        # Device synchronize is not done by cufinufft, we do it ourself.
+        cp.cuda.runtime.deviceSynchronize()
+        return ret
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
@@ -314,8 +318,6 @@ class MRICufiNUFFT:
         if self.n_coils == 1:
             return self._data_consistency_mono(image_data, obs_data)
         if self.uses_sense:
-            raise NotImplementedError(
-                "Data consistency with smaps is still inconsistent.")
             return self._data_consistency_sense(image_data, obs_data)
         return self._data_consistency_calibless(image_data, obs_data)
 
@@ -342,11 +344,10 @@ class MRICufiNUFFT:
             if self.smaps_cached:
                 coil_img_d *= self._smaps_d[i]
             else:
-                self._smap_d = cp.asarray(self._smaps[i])
-#                self._smap_d.set(self._smaps[i])
+                self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d
             self.__op(coil_img_d.data.ptr,
-                      coil_ksp_d.data.ptr + i * self.ksp_size)
+                      coil_ksp_d.data.ptr)
             if not is_cuda_array(obs_data):
                 coil_obs_data = cp.asarray(obs_data_pinned[i])
                 coil_ksp_d -= coil_obs_data
