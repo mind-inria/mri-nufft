@@ -3,9 +3,11 @@
 import cupy as cp
 import numpy as np
 
+
 def sizeof_fmt(num, suffix="B"):
     """
     Return a number as a XiB format.
+
     Parameters
     ----------
     num: int
@@ -23,6 +25,7 @@ def sizeof_fmt(num, suffix="B"):
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
 
+
 def is_cuda_array(var):
     """Check if var implement the CUDA Array interface."""
     try:
@@ -38,6 +41,7 @@ def is_host_array(var):
     except Exception:
         return False
 
+
 def pin_memory(array):
     """Create a copy of the array in pinned memory."""
     mem = cp.cuda.alloc_pinned_memory(array.nbytes)
@@ -45,6 +49,7 @@ def pin_memory(array):
     ret[...] = array
     return ret
 
-def check_error(ier, message):
+
+def check_error(ier, message):  # noqa: D103
     if ier != 0:
         raise RuntimeError(message)
