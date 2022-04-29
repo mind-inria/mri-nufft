@@ -1,5 +1,7 @@
 """Utils functions."""
 
+from functools import wraps
+
 import cupy as cp
 import numpy as np
 
@@ -53,3 +55,17 @@ def pin_memory(array):
 def check_error(ier, message):  # noqa: D103
     if ier != 0:
         raise RuntimeError(message)
+
+
+def nvtx_mark(color=-1):
+    """Decorate to annotate function for profiling."""
+    def decorator(func):
+        # get litteral arg names
+        @wraps(func)
+        def new_func(*args, **kwargs):
+            cp.cuda.nvtx.RangePush(func.__name__, id_color=color)
+            ret = func(*args, **kwargs)
+            cp.cuda.nvtx.RangePop()
+            return ret
+        return new_func
+    return decorator

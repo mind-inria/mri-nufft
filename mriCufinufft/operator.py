@@ -6,7 +6,7 @@ import numpy as np
 import cupy as cp
 
 from .raw_operator import RawCufinufft
-from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory
+from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
 from .kernels import sense_adj_mono, update_density
 
 
@@ -112,6 +112,7 @@ class MRICufiNUFFT:
             np.prod(self.shape) * np.dtype(np.complex64).itemsize)
         self.ksp_size = int(self.n_samples * np.dtype(np.complex64).itemsize)
 
+    @nvtx_mark()
     def op(self, data, ksp_d=None):
         r"""Non Cartesian MRI forward operator.
 
@@ -291,6 +292,7 @@ class MRICufiNUFFT:
             cp.asnumpy(coil_img_d, out=img[i])
         return img
 
+    @nvtx_mark()
     def __adj_op(self, coeffs_d, image_d):
         if not isinstance(coeffs_d, int):
             ret = self.raw_op.type1(coeffs_d.data.ptr, image_d.data.ptr)
@@ -424,6 +426,7 @@ class MRICufiNUFFT:
         return self.raw_op.eps
 
     @classmethod
+    @nvtx_mark()
     def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
         """Estimate the density compensation array."""
         oper = cls(samples, shape, density=False, **kwargs)
