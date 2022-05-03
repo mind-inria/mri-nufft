@@ -6,7 +6,8 @@ import numpy as np
 import cupy as cp
 
 from .raw_operator import RawCufinufft
-from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
+from .utils import is_host_array, is_cuda_array,\
+    sizeof_fmt, pin_memory, nvtx_mark
 from .kernels import sense_adj_mono, update_density
 
 
@@ -249,8 +250,8 @@ class MRICufiNUFFT:
                     coil_ksp_d.set(coeffs[i])
                     self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
                 else:
-                    self.__adj_op(coeffs.data.ptr + i *
-                                  self.ksp_size, coil_img_d.data.ptr)
+                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
+                                  coil_img_d.data.ptr)
             if self.smaps_cached:
                 sense_adj_mono(img_d,
                                coil_img_d,
@@ -407,7 +408,7 @@ class MRICufiNUFFT:
             val = getattr(self, attr)
             if is_cuda_array(val):
                 if verbose:
-                    mem_table.append((attr, val.size * val.dtype.itemsize))
+                    mem_table.append((attr, val.nbytes))
                 device_mem += val.size * val.dtype.itemsize
         if verbose:
             mem_table = sorted(mem_table, key=lambda x: x[1])

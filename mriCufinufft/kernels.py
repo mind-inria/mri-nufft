@@ -39,8 +39,7 @@ def update_density(density, update):
     -----
     ``density[i] /= sqrt(abs(update[i]))``
     """
-    update_density_kernel((len(density)//1024,), (1024,), (density, update))
-
+    update_density_kernel((len(density) // 1024,), (1024,), (density, update))
 
 
 def sense_adj_mono(dest, coil, smap, **kwargs):
@@ -55,5 +54,5 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
     smap: GPUArray
         The sensitivity profile of the coil.
     """
-    sense_adj_mono_kernel((dest.size//1024,), (1024,),
+    sense_adj_mono_kernel((dest.size // 1024,), (1024,),
                           (dest, coil, smap), **kwargs)

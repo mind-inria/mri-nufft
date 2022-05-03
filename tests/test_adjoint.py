@@ -9,8 +9,6 @@ import numpy as np
 import cupy as cp
 
 from mriCufinufft import MRICufiNUFFT
-from mriCufinufft.utils import is_cuda_array
-
 SHAPES = [(512, 512), (32, 32, 32)]
 SAMPLING_RATIOS = [0.1, 1, 10]
 
@@ -21,7 +19,6 @@ SMAPS_CACHED = [False, True]
 N_COILS = [4]
 
 
-
 def rand11(size):
     """Return a uniformly random array in [-1,1]."""
     return np.random.uniform(low=-1.0, high=1, size=size)
@@ -29,7 +26,8 @@ def rand11(size):
 
 def product_dict(**kwargs):
     """Transform a dict of list into a list of dict."""
-    return [dict(zip(kwargs.keys(), values)) for values in product(*kwargs.values())]
+    return [dict(zip(kwargs.keys(), values))
+            for values in product(*kwargs.values())]
 
 
 CONFIG_NO_SMAPS_H = product_dict(
@@ -56,12 +54,14 @@ CONFIG_WITH_SMAPS = product_dict(
     smaps_cached=SMAPS_CACHED,
     n_coils=[4]
 )
-CONFIG = CONFIG_NO_SMAPS_H + CONFIG_NO_SMAPS_D +  CONFIG_WITH_SMAPS
+CONFIG = CONFIG_NO_SMAPS_H + CONFIG_NO_SMAPS_D + CONFIG_WITH_SMAPS
 CONFIG_H = [c for c in CONFIG if c.get('data_loc') == "H"]
+
 
 def make_id(val):
     return (f"{val['n_coils']}{val['shape']}-{val['sampling_ratio']}"
-            f"-{val['data_loc']}-{val.get('smaps', 0)}{val.get('smaps_cached',0)}-{val['eps']:.0e}")
+            f"-{val['data_loc']}-{val.get('smaps', 0)}"
+            f"{val.get('smaps_cached',0)}-{val['eps']:.0e}")
 
 
 @pytest.fixture()
@@ -71,7 +71,8 @@ def mri_op(request):
     shape = request.param['shape']
     n_coils = request.param['n_coils']
     if request.param.get('smaps', False):
-        smaps = np.random.randn(n_coils, *shape) + 1j * np.random.randn(n_coils, *shape)
+        smaps = np.random.randn(n_coils, *shape) + 1j * \
+            np.random.randn(n_coils, *shape)
         smaps = smaps / np.linalg.norm(smaps, axis=0)
         smaps = smaps.astype(np.complex64)
     else:
@@ -80,7 +81,7 @@ def mri_op(request):
     obj = MRICufiNUFFT(samples, shape, n_coils=n_coils,
                        smaps=smaps,
                        smaps_cached=request.param.get('smaps_cached', False),
-                       reuse_plans=True,
+                       plans="persist",
                        density=False, eps=request.param['eps'])
     yield obj
     del obj
@@ -94,30 +95,30 @@ def image_data(request):
     n_coils = request.param['n_coils']
     if request.param.get('smaps', False):
         n_coils = 1
-    image_data = np.random.randn(n_coils, *shape) + \
+    img = np.random.randn(n_coils, *shape) + \
         1j * np.random.randn(n_coils, *shape)
-    image_data = np.squeeze(image_data)
-    image_data = image_data.astype(np.complex64)
-    image_data = np.ascontiguousarray(image_data)
+    img = np.squeeze(img)
+    img = img.astype(np.complex64)
+    img = np.ascontiguousarray(img)
     if request.param['data_loc'] == "D":
-        image_data = cp.asarray(image_data)
-        image_data = cp.ascontiguousarray(image_data)
-    return image_data
+        img = cp.asarray(img)
+        img = cp.ascontiguousarray(img)
+    return img
 
 
 @pytest.fixture()
 def kspace_data(request):
-    n_samples = int(
+    n_s = int(
         np.prod(request.param['shape']) * request.param['sampling_ratio'])
-    n_coils = request.param['n_coils']
-    kspace_data = np.squeeze(
-        np.random.randn(n_coils, n_samples) + 1j * np.random.randn(n_coils, n_samples))
-    kspace_data = kspace_data.astype(np.complex64)
-    kspace_data = np.ascontiguousarray(kspace_data)
+    n_c = request.param['n_coils']
+    ksp = np.squeeze(
+        np.random.randn(n_c, n_s) + 1j * np.random.randn(n_c, n_s))
+    ksp = ksp.astype(np.complex64)
+    ksp = np.ascontiguousarray(ksp)
     if request.param['data_loc'] == "D":
-        kspace_data = cp.asarray(kspace_data)
-        kspace_data = cp.ascontiguousarray(kspace_data)
-    return kspace_data
+        ksp = cp.asarray(ksp)
+        ksp = cp.ascontiguousarray(ksp)
+    return ksp
 
 
 @pytest.mark.parametrize("mri_op, image_data",
@@ -132,7 +133,8 @@ def test_op_ok_value(mri_op, image_data, allclose):
     assert type(ret_d) == type(image_data_d)
     assert not np.isnan(ret).any()
     assert not cp.isnan(ret_d).any()
-    assert allclose(abs(ret), abs(cp.asnumpy(ret_d)), rtol=10 * mri_op.raw_op.eps)
+    assert allclose(abs(ret), abs(cp.asnumpy(ret_d)),
+                    rtol=10 * mri_op.raw_op.eps)
 
 
 @pytest.mark.parametrize("mri_op, kspace_data",
@@ -166,6 +168,7 @@ def test_adjoint_property(mri_op, kspace_data, image_data, allclose):
     image_data = cp.asnumpy(image_data)
     val1 = np.vdot(adjoint, image_data)
     val2 = np.vdot(kspace_data, forward)
+    assert allclose(val1, val2)
 
 
 @pytest.mark.parametrize("mri_op, kspace_data, image_data",
@@ -173,7 +176,7 @@ def test_adjoint_property(mri_op, kspace_data, image_data, allclose):
                          ids=[make_id(val) for val in CONFIG], indirect=True)
 def test_data_consistency(mri_op, kspace_data, image_data, allclose):
     """Test the data consistency operation in various settings"""
-    val2 = mri_op.adj_op(mri_op.op(image_data)-kspace_data)
+    val2 = mri_op.adj_op(mri_op.op(image_data) - kspace_data)
     val2 = cp.asnumpy(val2)
     val1 = mri_op.data_consistency(image_data, kspace_data)
     assert type(val1) == type(image_data)
@@ -183,12 +186,15 @@ def test_data_consistency(mri_op, kspace_data, image_data, allclose):
 @pytest.mark.parametrize("shape", SHAPES)
 @pytest.mark.parametrize("sampling_ratio", SAMPLING_RATIOS)
 @pytest.mark.parametrize("eps", EPS)
-def test_convergente_density_compensation(shape, sampling_ratio, eps, allclose):
+def test_convergente_density_compensation(shape,
+                                          sampling_ratio,
+                                          eps, allclose):
     """Test the convergence property of the density compensation."""
 
     n_samples = int(np.prod(shape) * sampling_ratio)
     samples = rand11((n_samples, len(shape))).astype(np.float32) * np.pi
     density1 = MRICufiNUFFT.estimate_density(
-        samples, shape, n_iter=40, eps=eps).get()
+        samples, shape, n_iter=40, eps=eps)
     density2 = MRICufiNUFFT.estimate_density(
-        samples, shape, n_iter=60, eps=eps).get()
+        samples, shape, n_iter=60, eps=eps)
+    assert allclose(cp.asnumpy(density1), cp.asnumpy(density2)
