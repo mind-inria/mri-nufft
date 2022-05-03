@@ -210,12 +210,14 @@ class MRICufiNUFFT:
             cp.asnumpy(ksp_d, out=ksp[i])
         return ksp
 
+    @nvtx_mark()
     def __op(self, image_d, coeffs_d):
         # ensure everything is pointers before going to raw level.
         if is_cuda_array(image_d) and is_cuda_array(coeffs_d):
             return self.raw_op.type2(coeffs_d.data.ptr, image_d.data.ptr)
         return self.raw_op.type2(coeffs_d, image_d)
 
+    @nvtx_mark()
     def adj_op(self, coeffs, img_d=None):
         """Non Cartesian MRI adjoint operator.
 

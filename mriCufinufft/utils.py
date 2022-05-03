@@ -5,6 +5,9 @@ from functools import wraps
 import cupy as cp
 import numpy as np
 
+from .colors import CSS4_COLORS_CODE
+from hashlib import md5
+
 
 def sizeof_fmt(num, suffix="B"):
     """
@@ -61,9 +64,15 @@ def nvtx_mark(color=-1):
     """Decorate to annotate function for profiling."""
     def decorator(func):
         # get litteral arg names
+        name = func.__name__
+        id_col = md5(func.__name__.encode("utf-8")).hexdigest()
+        id_col = int(id_col, 16) % len(CSS4_COLORS_CODE)
+
         @wraps(func)
         def new_func(*args, **kwargs):
-            cp.cuda.nvtx.RangePush(func.__name__, id_color=color)
+            cp.cuda.nvtx.RangePush(
+                name,
+                id_color=CSS4_COLORS_CODE[id_col])
             ret = func(*args, **kwargs)
             cp.cuda.nvtx.RangePop()
             return ret
