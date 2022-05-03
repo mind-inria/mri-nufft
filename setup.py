@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+"""mriCufinufft is a wrapper above cufinufft for MRI fourier operators."""
 import os
-import sys
 import io
 
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 
 # Package meta-data
 NAME = "mriCufinufft"
@@ -21,16 +21,17 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering"]
 
-# Required packages
-REQUIRED = [
-    "numpy",
-    "python-pysap",
-]
-# Nice to have
-EXTRAS = [
-    "pysap-mri",
-    "pysap-fmri",
-]
+# Source package requirements from requirements.txt
+with open('requirements.txt') as open_file:
+    install_requires = open_file.read()
+
+# Source test requirements from develop.txt
+with open('develop.txt') as open_file:
+    tests_requires = open_file.read()
+
+# Source doc requirements from docs/requirements.txt
+with open('docs/requirements.txt') as open_file:
+    docs_requires = open_file.read()
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -64,14 +65,9 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
-    # If your package is a single module, use this instead of 'packages':
-    # py_modules=['mypackage'],
-
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
-    install_requires=REQUIRED,
-    extras_require={'all':EXTRAS},
+    packages=find_packages(),
+    install_requires=install_requires,
+    tests_require=tests_requires,
+    extras_require={'develop': tests_requires + docs_requires},
     include_package_data=True,
 )
