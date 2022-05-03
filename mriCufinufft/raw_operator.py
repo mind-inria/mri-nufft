@@ -4,21 +4,26 @@
 import atexit
 import sys
 from ctypes import byref, c_int, c_void_p
-import copy
 
 import numpy as np
-import cufinufft._cufinufft as raw_cf
 
 
 from .utils import check_error, is_cuda_array
-
+from ._cufinufft import (
+    NufftOpts, _default_opts,
+    _make_pland, _make_planf,
+    _exec_pland, _exec_planf,
+    _destroy_pland, _destroy_planf,
+    _set_ptsd, _set_ptsf,
+)
+#
 # If we are shutting down python, we don't need to run __del__
 #   This will avoid any shutdown gc ordering problems.
 EXITING = False
 atexit.register(setattr, sys.modules[__name__], 'EXITING', True)
 
 
-def _default_opts(nufft_type, dim):
+def get_default_opts(nufft_type, dim):
     """
     Generate a cufinufft opt struct of the dtype coresponding to plan.
 
@@ -33,10 +38,9 @@ def _default_opts(nufft_type, dim):
     -------
     nufft_opts structure.
     """
-    nufft_opts = raw_cf.NufftOpts()
+    nufft_opts = NufftOpts()
 
-    ier = raw_cf._default_opts(nufft_type, dim, nufft_opts)
-
+    ier = _default_opts(nufft_type, dim, nufft_opts)
     check_error(ier, 'Configuration not yet implemented.')
 
     return nufft_opts
@@ -76,22 +80,23 @@ class RawCufinufft:
         self.dtype = np.dtype(dtype)
 
         if self.dtype == np.float32:
-            self.__make_plan = raw_cf._make_planf
-            self.__set_pts = raw_cf._set_ptsf
-            self.__exec_plan = raw_cf._exec_planf
-            self.__destroy_plan = raw_cf._destroy_planf
+            self.__make_plan = _make_planf
+            self.__set_pts = _set_ptsf
+            self.__exec_plan = _exec_planf
+            self.__destroy_plan = _destroy_planf
             self.complex_dtype = np.complex64
-        # elif self.dtype == np.float64:
-        #     self._make_plan = raw_cf._make_plan
-        #     self._set_pts = raw_cf._set_pts
-        #     self._exec_plan = raw_cf._exec_plan
-        #     self._destroy_plan = raw_cf._destroy_plan
-        #     self.complex_dtype = np.complex128
+        elif self.dtype == np.float64:
+            self.__make_plan = _make_pland
+            self.__set_pts = _set_ptsd
+            self.__exec_plan = _exec_pland
+            self.__destroy_plan = _destroy_pland
+            self.complex_dtype = np.complex128
         else:
             raise TypeError("Expected np.float32.")
 
         if not samples.flags.f_contiguous and not is_cuda_array(samples):
-            raise ValueError("samples should be a f-contiguous (column major) GPUarray.")
+            raise ValueError(
+                "samples should be a f-contiguous (column major) GPUarray.")
 
         self.samples = samples
 
@@ -106,8 +111,8 @@ class RawCufinufft:
         self.modes = (c_int * 3)(*shape)
 
         # setup optional parameters of the plan.
-        use_opts1 = _default_opts(1, self.ndim)
-        use_opts2 = _default_opts(2, self.ndim)
+        use_opts1 = get_default_opts(1, self.ndim)
+        use_opts2 = get_default_opts(2, self.ndim)
 
         for cls_opts, opts in zip([use_opts1, use_opts2], [opts1, opts2]):
             field_names = [name for name, _ in cls_opts._fields_]
@@ -148,14 +153,16 @@ class RawCufinufft:
 
         n_samples = len(self.samples)
         itemsize = np.dtype(self.dtype).itemsize
+        ptr = self.samples.data.ptr
+        fpts_axes = [None, None, None]
+        # samples are column-major ordered.
+        # We get the internal pointer associated with each axis.
 
-        fpts_axes = [
-            self.samples.data.ptr,
-            self.samples.data.ptr + n_samples * itemsize,
-            self.samples.data.ptr +  2 * n_samples * itemsize if self.samples.shape[1] == 3 else None,
-        ]
+        for i in range(self.samples.shape[1]):
+            fpts_axes[i] = ptr + i * n_samples * itemsize
 
-        ier = self.__set_pts(n_samples, *fpts_axes, 0, None, None, None, self.plans[typ])
+        ier = self.__set_pts(n_samples, *fpts_axes, 0,
+                             None, None, None, self.plans[typ])
         check_error(ier, f"Error setting non-uniforms points of type{typ}")
 
     def _exec_plan(self, typ, c_ptr, f_ptr):
