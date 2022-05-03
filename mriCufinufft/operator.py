@@ -54,7 +54,8 @@ class MRICufiNUFFT:
     """
 
     def __init__(self, samples, shape, density=False, n_coils=1, smaps=None,
-                 smaps_cached=False, verbose=False, **kwargs):
+                 smaps_cached=False, verbose=False,
+                 plan_setup="persist", **kwargs):
         self.shape = shape
         self.n_samples = len(samples)
         if is_host_array(samples):
@@ -106,7 +107,14 @@ class MRICufiNUFFT:
             self._uses_sense = False
             self._smaps = None
         # Initialise NUFFT plans
-        self.raw_op = RawCufinufft(samples_d, tuple(shape), **kwargs)
+        if plan_setup not in ["persist", "multicoil", "single"]:
+            raise ValueError("plan_setup should be either 'persist',"
+                             "'multicoil' or 'single'")
+        self.plan_setup = plan_setup
+        self.raw_op = RawCufinufft(samples_d,
+                                   tuple(shape),
+                                   reuse_plans=plan_setup != "single",
+                                   **kwargs)
 
         # Usefull data sizes:
         self.img_size = int(
@@ -132,13 +140,20 @@ class MRICufiNUFFT:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
         # monocoil
+        if self.plan_setup == "multicoil":
+            self.raw_op._make_plan(2)
         if self.n_coils == 1:
-            return self._op_mono(data, ksp_d)
+            ret = self._op_mono(data, ksp_d)
         # sense
-        if self.uses_sense:
-            return self._op_sense(data, ksp_d)
+        elif self.uses_sense:
+            ret = self._op_sense(data, ksp_d)
         # calibrationless, data on device
-        return self._op_calibless(data, ksp_d)
+        else:
+            ret = self._op_calibless(data, ksp_d)
+
+        if self.plan_setup == "multicoil":
+            self.raw_op._destroy_plan(2)
+        return ret
 
     def _op_mono(self, data, ksp_d=None):
         img_d = cp.asarray(data)
@@ -212,13 +227,21 @@ class MRICufiNUFFT:
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        if self.plan_setup == "multicoil":
+            self.raw_op._make_plan(1)
         if self.n_coils == 1:
-            return self._adj_op_mono(coeffs, img_d)
+            ret = self._adj_op_mono(coeffs, img_d)
         # sense
-        if self.uses_sense:
-            return self._adj_op_sense(coeffs, img_d)
+        elif self.uses_sense:
+            ret = self._adj_op_sense(coeffs, img_d)
         # calibrationless
-        return self._adj_op_calibless(coeffs, img_d)
+        else:
+            ret = self._adj_op_calibless(coeffs, img_d)
+
+        if self.plan_setup == "multicoil":
+            self.raw_op._destroy_plan(1)
+
+        return ret
 
     def _adj_op_mono(self, coeffs, img_d=None):
         if img_d is None:

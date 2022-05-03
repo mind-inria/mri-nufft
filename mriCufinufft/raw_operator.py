@@ -129,15 +129,17 @@ class RawCufinufft:
                 self._make_plan(typ)
                 self._set_pts(typ)
 
-    ### wrapper around builtins __functions: ###
     def _make_plan(self, typ):
-        p = c_void_p(None)
-        ier = self.__make_plan(typ, self.ndim, self.modes,
-                                1 if typ == 1 else -1,
-                                self.n_trans, self.eps, 1, byref(p),
-                                 _default_opts(typ, self.ndim))
-        check_error(ier, f"Type {typ} plan initialisation failed.")
-        self.plans[typ] = p
+        if self.plans[typ] is None:
+            plan = c_void_p(None)
+            ier = self.__make_plan(typ, self.ndim, self.modes,
+                                   1 if typ == 1 else -1,
+                                   self.n_trans, self.eps, 1, byref(plan),
+                                   self.opts[typ])
+            check_error(ier, f"Type {typ} plan initialisation failed.")
+            self.plans[typ] = plan
+        else:
+            raise RuntimeError(f"Type {typ} plan already exist.")
 
     def _set_pts(self, typ):
         if self.samples.dtype != self.dtype:
@@ -161,11 +163,12 @@ class RawCufinufft:
         check_error(ier, f'Error executing Type {typ} plan.')
 
     def _destroy_plan(self, typ):
-        if self.plans[typ] is None or EXITING:
-            return None # nothing to do.
+        if self.plans[typ] is None:
+            return None  # nothing to do.
         ier = self.__destroy_plan(self.plans[typ])
         check_error(ier, f'Error deleting Type {typ} plan.')
         self.plans[typ] = None
+        return None
 
     def _type_exec(self, typ, d_c_ptr, d_grid_ptr):
         if self.reuse_plans:
