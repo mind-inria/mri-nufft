@@ -51,18 +51,19 @@ class RawCufinufft:
 
     Parameters
     ----------
-    samples : np.ndarray
+    samples: np.ndarray
         Samples in the non uniform space (K-space)
-    shape : tuple
+    shape: tuple
         Shape of the uniform space (Image space)
-    n_trans : int
+    n_trans: int, default 1
         Number of transform  executed by the plan.
-    dtype : str or np.dtype
+    dtype: str or np.dtype
         Base dtype for the input data, default float32 (and thus complex64)
-    opts1 : dict
-        Extra parameters for the type 1 plan.
-    opts2 : dict
-        Extra parameters for the type 2 plan.
+    opts: dict or tuple of two dict, optional default None.
+        Extra parameters for the type 1  and type 2 plan.
+        It will be used to set non default argument for NufftOpts object.
+    init_plans: bool default False
+        If True, initialize cufinuffts plans at the end of constructor.
 
     Methods
     -------
@@ -74,8 +75,7 @@ class RawCufinufft:
 
     def __init__(self, samples, shape,
                  n_trans=1, eps=1e-4, dtype=np.float32,
-                 reuse_plans=False,
-                 opts1=None, opts2=None):
+                 init_plans=False, opts=None):
 
         self.dtype = np.dtype(dtype)
 
@@ -128,8 +128,7 @@ class RawCufinufft:
         self.plans = [None, None, None]
         self.opts = [None, use_opts1, use_opts2]
 
-        self.reuse_plans = reuse_plans
-        if self.reuse_plans:
+        if init_plans:
             for typ in [1, 2]:
                 self._make_plan(typ)
                 self._set_pts(typ)
@@ -178,7 +177,7 @@ class RawCufinufft:
         return None
 
     def _type_exec(self, typ, d_c_ptr, d_grid_ptr):
-        if self.reuse_plans:
+        if self.plans[typ] is not None:
             self._exec_plan(typ, d_c_ptr, d_grid_ptr)
         else:
             self._make_plan(typ)
@@ -220,8 +219,7 @@ class RawCufinufft:
         # If the process is exiting or we've already cleaned up plan, return.
         if EXITING or (self.plans[1] is None and self.plans[2] is None):
             return
-        if self.reuse_plans:
-            self._destroy_plan(1)
-            self._destroy_plan(2)
-            # Reset plan to avoid double destroy.
-            self.plans = [None, None, None]
+        self._destroy_plan(1)
+        self._destroy_plan(2)
+        # Reset plan to avoid double destroy.
+        self.plans = [None, None, None]

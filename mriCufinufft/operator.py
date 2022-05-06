@@ -115,7 +115,7 @@ class MRICufiNUFFT:
         self.plan_setup = plan_setup
         self.raw_op = RawCufinufft(samples_d,
                                    tuple(shape),
-                                   reuse_plans=plan_setup != "single",
+                                   init_plans=plan_setup == "persist",
                                    **kwargs)
 
         # Usefull data sizes:
