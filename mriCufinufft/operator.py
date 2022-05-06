@@ -79,7 +79,6 @@ class MRICufiNUFFT:
         else:
             self.density_d = None
             self.uses_density = False
-
         self._uses_sense = False
         self.smaps_cached = False
         # Smaps support
@@ -89,7 +88,6 @@ class MRICufiNUFFT:
         if smaps is not None:
             self._uses_sense = True
             if not(is_host_array(smaps) or is_cuda_array(smaps)):
-                print(smaps.flags)
                 raise ValueError("Smaps should be either a C-ordered ndarray, "
                                  "or a GPUArray.")
             if smaps_cached:
@@ -142,6 +140,7 @@ class MRICufiNUFFT:
         # monocoil
         if self.plan_setup == "multicoil":
             self.raw_op._make_plan(2)
+            self.raw_op._set_pts(2)
         if self.n_coils == 1:
             ret = self._op_mono(data, ksp_d)
         # sense
@@ -231,6 +230,7 @@ class MRICufiNUFFT:
         """
         if self.plan_setup == "multicoil":
             self.raw_op._make_plan(1)
+            self.raw_op._set_pts(1)
         if self.n_coils == 1:
             ret = self._adj_op_mono(coeffs, img_d)
         # sense
