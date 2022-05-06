@@ -58,6 +58,10 @@ class MRICufiNUFFT:
                  plan_setup="persist", **kwargs):
         self.shape = shape
         self.n_samples = len(samples)
+        if samples.max() > np.pi:
+            warnings.warn("samples will be normalized in [-pi, pi]")
+            samples *= np.pi / samples.max()
+            samples = samples.astype(np.float32)
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
         elif is_cuda_array(samples):
