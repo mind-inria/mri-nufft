@@ -114,17 +114,28 @@ class RawCufinufft:
         use_opts1 = get_default_opts(1, self.ndim)
         use_opts2 = get_default_opts(2, self.ndim)
 
-        for cls_opts, opts in zip([use_opts1, use_opts2], [opts1, opts2]):
-            field_names = [name for name, _ in cls_opts._fields_]
-            opts = {} if opts is None else opts
-            # Assign field names from kwargs if they match up, otherwise error.
-            for key, val in opts.items():
-                if key in field_names:
-                    setattr(cls_opts, key, val)
-                else:
-                    raise TypeError(f"Invalid option '{key}'")
+        if opts is not None:
+            if isinstance(opts, dict):
+                _opts = (opts, opts)
+            elif isinstance(opts, tuple) and len(opts) == 2:
+                _opts = opts
+            else:
+                raise ValueError("opts should be a dict or 2-tuple of dict.")
+
+            for cls_opts, opt in zip([use_opts1, use_opts2], _opts):
+                field_names = [name for name, _ in cls_opts._fields_]
+                # Assign field names from kwargs if they match up.
+                for key, val in opt.items():
+                    try:
+                        setattr(cls_opts, key, val)
+                    except AttributeError as exc:
+                        raise ValueError(
+                            f"Invalid option '{key}', "
+                            f"it should be one of {field_names}") from exc
 
         # Easy access to the plans and opts.
+        # the first element is dummy so that we can use index 1 and 2 to access
+        # the relevant type.
         self.plans = [None, None, None]
         self.opts = [None, use_opts1, use_opts2]
 
