@@ -5,23 +5,14 @@ import warnings
 import numpy as np
 import cupy as cp
 
-from .raw_operator import RawCufinufft
-from .utils import is_host_array, is_cuda_array,\
+from .base import FourierOperatorBase
+from .raw import RawCufinufft
+from ..utils import is_host_array, is_cuda_array,\
     sizeof_fmt, pin_memory, nvtx_mark
 from .kernels import sense_adj_mono, update_density
 
 
-try:
-    import tensorflow_nufft as tfnufft
-    import tensorflow_mri as tfmri
-    import tensorflow as tf
-except ImportError as exc:
-    TENSORFLOW_AVAILABLE = False
-else:
-    TENSORFLOW_AVAILABLE = True
-
-
-class MRICufiNUFFT:
+class MRICufiNUFFT(FourierOperatorBase):
     """MRI Transform operator, build around cufinufft.
 
     This operator adds density estimation and compensation (preconditioning)
@@ -93,14 +84,14 @@ class MRICufiNUFFT:
         else:
             self.density_d = None
             self.uses_density = False
-        self._uses_sense = False
+        self.uses_sense = False
         self.smaps_cached = False
         # Smaps support
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
         if smaps is not None:
-            self._uses_sense = True
+            self.uses_sense = True
             if not(is_host_array(smaps) or is_cuda_array(smaps)):
                 raise ValueError("Smaps should be either a C-ordered ndarray, "
                                  "or a GPUArray.")
@@ -116,7 +107,7 @@ class MRICufiNUFFT:
                 self._smaps_pinned = pin_memory(smaps)
                 self._smaps = smaps
         else:
-            self._uses_sense = False
+            self.uses_sense = False
         # Initialise NUFFT plans
         if plan_setup not in ["persist", "multicoil", "single"]:
             raise ValueError("plan_setup should be either 'persist',"
@@ -466,7 +457,7 @@ class MRICufiNUFFT:
     @property
     def uses_sense(self):
         """Return True if the transform uses the SENSE method, else False."""
-        return self._uses_sense
+        return self.uses_sense
 
     @property
     def eps(self):
@@ -503,82 +494,3 @@ class MRICufiNUFFT:
                 )
 
 
-class MRItfnufft:
-    """MRI Transform Operator using Tensorflow NUFFT.
-
-    Parameters
-    ----------
-    samples: np.array
-        The samples location of shape ``Nsamples x N_dimensions``.
-        It should be C-contiguous.
-    shape: tuple
-        Shape of the image space.
-    n_coils: int
-        Number of coils.
-    density: bool or Tensor
-       Density compensation support.
-        - If a Tensor, it will be used for the density.
-        - If True, the density compensation will be automatically estimated,
-          using the fixed point method.
-        - If False, density compensation will not be used.
-    smaps: Tensor
-    """
-    def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
-        if not TENSORFLOW_AVAILABLE:
-            raise RuntimeError("TensorFlow NUFFT is not available.")
-
-        self.samples = samples
-        self.shape = shape
-        self.n_coils = n_coils
-        self.eps = eps
-
-        if density is True:
-            self.density = tfmri.estimate_density
-            self.uses_density = True
-        elif density is False:
-            self.density = None
-            self.uses_density = False
-        elif tf.is_tensor(density):
-            self.density = density
-            self.uses_density = True
-        else:
-            raise ValueError("argument `density` of type"
-                             f"{type(density)} is invalid.")
-        if smaps is None:
-            self.uses_sense = False
-        elif tf.is_tensor(smaps):
-            self.uses_sense = True
-            self.smaps = smaps
-        else:
-            raise ValueError("argument `smaps` of type"
-                             f"{type(smaps)} is invalid")
-
-    def op(self, data):
-        """Forward operation. """
-        if self.uses_sense:
-            data_d = data * self.smaps
-        else:
-            data_d = data
-        return tfnufft.nufft(data_d, self.samples, self.shape,
-                        transform_type="type_2",
-                        fft_direction="backward",
-                        tol=self.eps)
-
-    def adj_op(self, data):
-        if self.uses_density:
-            data_d = data * self.density
-        else:
-            data_d = data
-        img =  tfnufft.nufft(data_d, self.samples, self.shape,
-                        transform_type="type_1",
-                        fft_direction="forward",
-                        tol=self.eps)
-        return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
-
-    def data_consistency(self, data, obs_data):
-        return self.adj_op(self.op(data)-obs_data)
-
-
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=10):
-        return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
