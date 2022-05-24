@@ -5,3 +5,4 @@ dist/
 **/.ipynb_checkpoints/
 examples/*.ipynb
 *.xml
+.coverage*
