@@ -117,7 +117,6 @@ class MRICufiNUFFT:
                 self._smaps = smaps
         else:
             self._uses_sense = False
-            self._smaps = None
         # Initialise NUFFT plans
         if plan_setup not in ["persist", "multicoil", "single"]:
             raise ValueError("plan_setup should be either 'persist',"
@@ -278,23 +277,34 @@ class MRICufiNUFFT:
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if img_d is None:
             img_d = cp.zeros(self.shape, dtype=np.complex64)
-        if not is_cuda_array(coeffs) or self.uses_density:
+        if is_host_array(coeffs):
+            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+            for i in range(self.n_coils):
+                coil_ksp_d.set(coeffs[i])
+                if self.uses_density:
+                    coil_ksp_d *= self.density_d
+                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                if self.smaps_cached:
+                    sense_adj_mono(img_d,
+                                coil_img_d,
+                                self._smaps_d[i])
+                else:
+                    self._smap_d.set(self._smaps[i])
+                    sense_adj_mono(img_d,
+                                coil_img_d,
+                                self._smap_d)
+            return img_d.get()
+        # coeff is on device.
+        if self.uses_density:
             coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
         for i in range(self.n_coils):
             if self.uses_density:
-                if not is_cuda_array(coeffs):
-                    coil_ksp_d = cp.array(coeffs[i], copy=True)
-                    coil_ksp_d *= self.density_d  # density preconditionning
-                else:
-                    cp.copyto(coil_ksp_d, coeffs[i])
+                cp.copyto(coil_ksp_d, coeffs[i])
+                coil_ksp_d *= self.density_d  # density preconditionning
                 self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
             else:
-                if not is_cuda_array(coeffs):
-                    coil_ksp_d.set(coeffs[i])
-                    self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
-                else:
-                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
-                                  coil_img_d.data.ptr)
+                self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
+                              coil_img_d.data.ptr)
             if self.smaps_cached:
                 sense_adj_mono(img_d,
                                coil_img_d,
