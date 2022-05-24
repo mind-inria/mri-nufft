@@ -463,23 +463,6 @@ class MRICufiNUFFT:
             cp.asnumpy(img_d, out=img[i])
         return img
 
-    def get_device_memory_size(self, verbose=False):
-        """Get the size in bytes of allocated device memory for this object."""
-        device_mem = 0
-        if verbose:
-            mem_table = []
-        for attr in dir(self):
-            val = getattr(self, attr)
-            if is_cuda_array(val):
-                if verbose:
-                    mem_table.append((attr, val.nbytes))
-                device_mem += val.size * val.dtype.itemsize
-        if verbose:
-            mem_table = sorted(mem_table, key=lambda x: x[1])
-            for attr in mem_table:
-                print(f"{attr:15} {attr.shape}: {sizeof_fmt(val)}")
-        return device_mem
-
     @property
     def uses_sense(self):
         """Return True if the transform uses the SENSE method, else False."""
