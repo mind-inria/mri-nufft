@@ -179,14 +179,24 @@ class MRICufiNUFFT:
 
     def _op_sense(self, data, ksp_d=None):
         img_d = cp.asarray(data)
+        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if is_host_array(data):
             ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             ksp = np.zeros((self.n_coils, self.n_samples),
                            dtype=np.complex64)
-        elif is_cuda_array and ksp_d is None:
-            ksp_d = cp.empty((self.n_coils, self.n_samples),
-                             dtype=np.complex64)
-        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+            for i in range(self.n_coils):
+                cp.copyto(coil_img_d, img_d)
+                if self.smaps_cached:
+                    coil_img_d *= self._smaps_d[i]  # sense forward
+                else:
+                    self._smap_d.set(self._smaps[i])
+                    coil_img_d *= self._smap_d  # sense forward
+                self.__op(coil_img_d, ksp_d)
+                cp.asnumpy(ksp_d, out=ksp[i])
+            return ksp
+        # data is already on device
+        ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples),
+                                 dtype=np.complex64)
         for i in range(self.n_coils):
             cp.copyto(coil_img_d, img_d)
             if self.smaps_cached:
@@ -194,15 +204,9 @@ class MRICufiNUFFT:
             else:
                 self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d  # sense forward
-            if is_host_array(data):
-                self.__op(coil_img_d, ksp_d)
-                cp.asnumpy(ksp_d, out=ksp[i])
-            else:
-                self.__op(coil_img_d.data.ptr,
-                          ksp_d.data.ptr + i * self.ksp_size)
-        if is_cuda_array(data):
-            return ksp_d
-        return ksp
+            self.__op(coil_img_d.data.ptr,
+                      ksp_d.data.ptr + i * self.ksp_size)
+        return ksp_d
 
     def _op_calibless(self, data, ksp_d=None):
         if is_cuda_array(data):
