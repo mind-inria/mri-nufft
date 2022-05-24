@@ -392,9 +392,29 @@ class MRICufiNUFFT:
         img_d = cp.array(image_data, copy=True)
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        if not is_cuda_array(obs_data):
+        if is_host_array(obs_data):
             coil_obs_data = cp.empty(self.n_samples, dtype=np.complex64)
             obs_data_pinned = pin_memory(obs_data)
+            for i in range(self.n_coils):
+                cp.copyto(coil_img_d, img_d)
+                if self.smaps_cached:
+                    coil_img_d *= self._smaps_d[i]
+                else:
+                    self._smap_d.set(self._smaps[i])
+                    coil_img_d *= self._smap_d
+                self.__op(coil_img_d.data.ptr,
+                            coil_ksp_d.data.ptr)
+                coil_obs_data = cp.asarray(obs_data_pinned[i])
+                coil_ksp_d -= coil_obs_data
+                if self.uses_density:
+                    coil_ksp_d *= self.density_d
+                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                if self.smaps_cached:
+                    sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
+                else:
+                    sense_adj_mono(img_d, coil_img_d, self._smap_d)
+            del obs_data_pinned
+            return img_d.get()
         for i in range(self.n_coils):
             cp.copyto(coil_img_d, img_d)
             if self.smaps_cached:
@@ -404,11 +424,7 @@ class MRICufiNUFFT:
                 coil_img_d *= self._smap_d
             self.__op(coil_img_d.data.ptr,
                       coil_ksp_d.data.ptr)
-            if not is_cuda_array(obs_data):
-                coil_obs_data = cp.asarray(obs_data_pinned[i])
-                coil_ksp_d -= coil_obs_data
-            else:
-                coil_ksp_d -= obs_data[i]
+            coil_ksp_d -= obs_data[i]
             if self.uses_density:
                 coil_ksp_d *= self.density_d
             self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
@@ -416,12 +432,7 @@ class MRICufiNUFFT:
                 sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
             else:
                 sense_adj_mono(img_d, coil_img_d, self._smap_d)
-
-        if not is_cuda_array(obs_data):
-            del obs_data_pinned
-        if is_cuda_array(image_data):
-            return img_d
-        return img_d.get()
+        return img_d
 
     def _data_consistency_calibless(self, image_data, obs_data):
         if is_cuda_array(image_data):
