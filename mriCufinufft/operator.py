@@ -497,7 +497,7 @@ class MRICufiNUFFT:
                 f"  uses_density: {self.uses_density}\n"
                 f"  uses_sense: {self.uses_sense}\n"
                 f"  smaps_cached: {self.smaps_cached}\n"
-                f"  reuse_plans: {self.raw_op.reuse_plans}\n"
+                f"  plan_setup: {self.plan_setup}\n"
                 f"  eps:{self.raw_op.eps:.0e}\n"
                 ")"
                 )
