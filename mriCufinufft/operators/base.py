@@ -29,6 +29,8 @@ class FourierOperatorBase:
     adj_op(coeffs)
         The adjoint operation (kspace -> image)
     """
+    def __init__(self):
+        self._uses_sense = False
 
     def op(self, data):
         """Compute operator transform.
@@ -63,7 +65,7 @@ class FourierOperatorBase:
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""
-        return False
+        return self._uses_sense
 
     @property
     def shape(self):
@@ -81,6 +83,6 @@ class FourierOperatorBase:
 
     @n_coils.setter
     def n_coils(self, n_coils):
-        if n_coils < 1 or not isinstance(n_coils, int):
-            raise ValueError("n_coils should be a positive integer")
-        self._n_coils = n_coils
+        if n_coils < 1 or not int(n_coils) == n_coils:
+            raise ValueError(f"n_coils should be a positive integer, {type(n_coils)}")
+        self._n_coils = int(n_coils)
