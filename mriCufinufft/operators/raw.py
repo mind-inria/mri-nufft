@@ -8,7 +8,7 @@ from ctypes import byref, c_int, c_void_p
 import numpy as np
 
 
-from .utils import check_error, is_cuda_array
+from ..utils import check_error, is_cuda_array
 from ._cufinufft import (
     NufftOpts, _default_opts,
     _make_pland, _make_planf,
