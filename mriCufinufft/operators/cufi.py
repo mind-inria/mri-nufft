@@ -84,14 +84,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             self.density_d = None
             self.uses_density = False
-        self.uses_sense = False
+        self._uses_sense = False
         self.smaps_cached = False
         # Smaps support
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
         if smaps is not None:
-            self.uses_sense = True
+            self._uses_sense = True
             if not(is_host_array(smaps) or is_cuda_array(smaps)):
                 raise ValueError("Smaps should be either a C-ordered ndarray, "
                                  "or a GPUArray.")
@@ -107,7 +107,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self._smaps_pinned = pin_memory(smaps)
                 self._smaps = smaps
         else:
-            self.uses_sense = False
+            self._uses_sense = False
         # Initialise NUFFT plans
         if plan_setup not in ["persist", "multicoil", "single"]:
             raise ValueError("plan_setup should be either 'persist',"
@@ -455,11 +455,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         return img
 
     @property
-    def uses_sense(self):
-        """Return True if the transform uses the SENSE method, else False."""
-        return self.uses_sense
-
-    @property
     def eps(self):
         """Return the underlying precision parameter."""
         return self.raw_op.eps
@@ -486,7 +481,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 f"  n_coils: {self.n_coils}\n"
                 f"  n_samples: {self.n_samples}\n"
                 f"  uses_density: {self.uses_density}\n"
-                f"  uses_sense: {self.uses_sense}\n"
+                f"  uses_sense: {self._uses_sense}\n"
                 f"  smaps_cached: {self.smaps_cached}\n"
                 f"  plan_setup: {self.plan_setup}\n"
                 f"  eps:{self.raw_op.eps:.0e}\n"
