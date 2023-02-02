@@ -5,10 +5,9 @@ import warnings
 import numpy as np
 import cupy as cp
 
-from .base import FourierOperatorBase
-from .raw import RawCufinufft
-from ..utils import is_host_array, is_cuda_array,\
-    sizeof_fmt, pin_memory, nvtx_mark
+from ..base import FourierOperatorBase
+from ._cufinufft import RawCufinufft
+from ..utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
 from .kernels import sense_adj_mono, update_density
 
 
@@ -54,9 +53,18 @@ class MRICufiNUFFT(FourierOperatorBase):
     cufinufft.raw_operator.RawCufinufft
     """
 
-    def __init__(self, samples, shape, density=False, n_coils=1, smaps=None,
-                 smaps_cached=False, verbose=False,
-                 plan_setup="persist", **kwargs):
+    def __init__(
+        self,
+        samples,
+        shape,
+        density=False,
+        n_coils=1,
+        smaps=None,
+        smaps_cached=False,
+        verbose=False,
+        plan_setup="persist",
+        **kwargs,
+    ):
         self.shape = shape
         self.n_samples = len(samples)
         if samples.max() > np.pi:
@@ -68,8 +76,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         elif is_cuda_array(samples):
             samples_d = samples
         else:
-            raise ValueError("Samples should be either a C-ordered ndarray, "
-                             "or a GPUArray.")
+            raise ValueError(
+                "Samples should be either a C-ordered ndarray, " "or a GPUArray."
+            )
 
         # density compensation support
         if density is True:
@@ -77,8 +86,9 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.uses_density = True
         elif is_host_array(density) or is_cuda_array(density):
             if len(density) != len(samples):
-                raise ValueError("Density array and samples array should "
-                                 "have the same length.")
+                raise ValueError(
+                    "Density array and samples array should " "have the same length."
+                )
             self.uses_density = True
             self.density_d = cp.asarray(density)
         else:
@@ -92,14 +102,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         if smaps is not None:
             self._uses_sense = True
-            if not(is_host_array(smaps) or is_cuda_array(smaps)):
-                raise ValueError("Smaps should be either a C-ordered ndarray, "
-                                 "or a GPUArray.")
+            if not (is_host_array(smaps) or is_cuda_array(smaps)):
+                raise ValueError(
+                    "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
+                )
             if smaps_cached:
                 if verbose:
-                    warnings.warn(
-                        f"{sizeof_fmt(smaps.nbytes)} will be used on gpu.")
-                self._smaps_d = cp.array(smaps, order='C', copy=False)
+                    warnings.warn(f"{sizeof_fmt(smaps.nbytes)} will be used on gpu.")
+                self._smaps_d = cp.array(smaps, order="C", copy=False)
                 self.smaps_cached = True
             else:
                 # allocate device memory
@@ -110,17 +120,16 @@ class MRICufiNUFFT(FourierOperatorBase):
             self._uses_sense = False
         # Initialise NUFFT plans
         if plan_setup not in ["persist", "multicoil", "single"]:
-            raise ValueError("plan_setup should be either 'persist',"
-                             "'multicoil' or 'single'")
+            raise ValueError(
+                "plan_setup should be either 'persist'," "'multicoil' or 'single'"
+            )
         self.plan_setup = plan_setup
-        self.raw_op = RawCufinufft(samples_d,
-                                   tuple(shape),
-                                   init_plans=plan_setup == "persist",
-                                   **kwargs)
+        self.raw_op = RawCufinufft(
+            samples_d, tuple(shape), init_plans=plan_setup == "persist", **kwargs
+        )
 
         # Usefull data sizes:
-        self.img_size = int(
-            np.prod(self.shape) * np.dtype(np.complex64).itemsize)
+        self.img_size = int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
         self.ksp_size = int(self.n_samples * np.dtype(np.complex64).itemsize)
 
     @nvtx_mark()
@@ -172,8 +181,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if is_host_array(data):
             ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-            ksp = np.zeros((self.n_coils, self.n_samples),
-                           dtype=np.complex64)
+            ksp = np.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
             for i in range(self.n_coils):
                 cp.copyto(coil_img_d, img_d)
                 if self.smaps_cached:
@@ -185,8 +193,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 cp.asnumpy(ksp_d, out=ksp[i])
             return ksp
         # data is already on device
-        ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples),
-                                 dtype=np.complex64)
+        ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=np.complex64)
         for i in range(self.n_coils):
             cp.copyto(coil_img_d, img_d)
             if self.smaps_cached:
@@ -194,18 +201,18 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d  # sense forward
-            self.__op(coil_img_d.data.ptr,
-                      ksp_d.data.ptr + i * self.ksp_size)
+            self.__op(coil_img_d.data.ptr, ksp_d.data.ptr + i * self.ksp_size)
         return ksp_d
 
     def _op_calibless(self, data, ksp_d=None):
         if is_cuda_array(data):
             if ksp_d is None:
-                ksp_d = cp.empty((self.n_coils, self.n_samples),
-                                 dtype=np.complex64)
+                ksp_d = cp.empty((self.n_coils, self.n_samples), dtype=np.complex64)
             for i in range(self.n_coils):
-                self.__op(data.data.ptr + i * self.img_size,
-                          ksp_d.data.ptr + i * self.ksp_size)
+                self.__op(
+                    data.data.ptr + i * self.img_size,
+                    ksp_d.data.ptr + i * self.ksp_size,
+                )
             return ksp_d
         # calibrationless, data on host
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -276,14 +283,10 @@ class MRICufiNUFFT(FourierOperatorBase):
                     coil_ksp_d *= self.density_d
                 self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
                 if self.smaps_cached:
-                    sense_adj_mono(img_d,
-                                coil_img_d,
-                                self._smaps_d[i])
+                    sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
                 else:
                     self._smap_d.set(self._smaps[i])
-                    sense_adj_mono(img_d,
-                                coil_img_d,
-                                self._smap_d)
+                    sense_adj_mono(img_d, coil_img_d, self._smap_d)
             return img_d.get()
         # coeff is on device.
         if self.uses_density:
@@ -294,17 +297,12 @@ class MRICufiNUFFT(FourierOperatorBase):
                 coil_ksp_d *= self.density_d  # density preconditionning
                 self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
             else:
-                self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
-                              coil_img_d.data.ptr)
+                self.__adj_op(coeffs.data.ptr + i * self.ksp_size, coil_img_d.data.ptr)
             if self.smaps_cached:
-                sense_adj_mono(img_d,
-                               coil_img_d,
-                               self._smaps_d[i])
+                sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
             else:
                 self._smap_d.set(self._smaps[i])
-                sense_adj_mono(img_d,
-                               coil_img_d,
-                               self._smap_d)
+                sense_adj_mono(img_d, coil_img_d, self._smap_d)
         if is_cuda_array(coeffs):
             return img_d
         return img_d.get()
@@ -312,18 +310,20 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _adj_op_calibless(self, coeffs, img_d=None):
         if is_cuda_array(coeffs):
             if img_d is None:
-                img_d = cp.empty((self.n_coils, *self.shape),
-                                 dtype=np.complex64)
+                img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
             coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
                 if self.uses_density:
                     cp.copyto(coil_ksp_d, coeffs[i])
                     coil_ksp_d *= self.density_d
-                    self.__adj_op(coil_ksp_d.data.ptr,
-                                  img_d.data.ptr + i * self.img_size)
+                    self.__adj_op(
+                        coil_ksp_d.data.ptr, img_d.data.ptr + i * self.img_size
+                    )
                 else:
-                    self.__adj_op(coeffs.data.ptr + i * self.ksp_size,
-                                  img_d.data.ptr + i * self.img_size)
+                    self.__adj_op(
+                        coeffs.data.ptr + i * self.ksp_size,
+                        img_d.data.ptr + i * self.img_size,
+                    )
             return img_d
         # calibrationless, data on host
         img = np.zeros((self.n_coils, *self.shape), dtype=np.complex64)
@@ -393,8 +393,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 else:
                     self._smap_d.set(self._smaps[i])
                     coil_img_d *= self._smap_d
-                self.__op(coil_img_d.data.ptr,
-                            coil_ksp_d.data.ptr)
+                self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
                 coil_obs_data = cp.asarray(obs_data_pinned[i])
                 coil_ksp_d -= coil_obs_data
                 if self.uses_density:
@@ -413,8 +412,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d
-            self.__op(coil_img_d.data.ptr,
-                      coil_ksp_d.data.ptr)
+            self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
             coil_ksp_d -= obs_data[i]
             if self.uses_density:
                 coil_ksp_d *= self.density_d
@@ -430,13 +428,11 @@ class MRICufiNUFFT(FourierOperatorBase):
             img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
             ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
-                self.__op(image_data.data.ptr + i * self.img_size,
-                          ksp_d.data.ptr)
+                self.__op(image_data.data.ptr + i * self.img_size, ksp_d.data.ptr)
                 ksp_d -= obs_data[i]
                 if self.uses_density:
                     ksp_d *= self.density_d
-                self.__adj_op(ksp_d.data.ptr,
-                              img_d.data.ptr + i * self.img_size)
+                self.__adj_op(ksp_d.data.ptr, img_d.data.ptr + i * self.img_size)
             return img_d
 
         img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -476,16 +472,15 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def __repr__(self):
         """Return info about the MRICufiNUFFT Object."""
-        return ("MRICufiNUFFT(\n"
-                f"  shape: {self.shape}\n"
-                f"  n_coils: {self.n_coils}\n"
-                f"  n_samples: {self.n_samples}\n"
-                f"  uses_density: {self.uses_density}\n"
-                f"  uses_sense: {self._uses_sense}\n"
-                f"  smaps_cached: {self.smaps_cached}\n"
-                f"  plan_setup: {self.plan_setup}\n"
-                f"  eps:{self.raw_op.eps:.0e}\n"
-                ")"
-                )
-
-
+        return (
+            "MRICufiNUFFT(\n"
+            f"  shape: {self.shape}\n"
+            f"  n_coils: {self.n_coils}\n"
+            f"  n_samples: {self.n_samples}\n"
+            f"  uses_density: {self.uses_density}\n"
+            f"  uses_sense: {self._uses_sense}\n"
+            f"  smaps_cached: {self.smaps_cached}\n"
+            f"  plan_setup: {self.plan_setup}\n"
+            f"  eps:{self.raw_op.eps:.0e}\n"
+            ")"
+        )
