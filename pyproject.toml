@@ -1,0 +1,47 @@
+[project]
+name = "mri-nufft"
+description = "MRI Non Cartesian Fourier Operators based on (cu)finufft."
+authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
+requires-python = ">=3.8"
+
+dynamic = ["version"]
+dependencies = ["numpy", "scipy", "matplotlib", "tqdm", "finufft"]
+
+[project.optional-dependencies]
+
+gpu = ["cupy-wheel"]
+test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar"]
+dev = ["black", "isort", "ruff"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel"]
+
+[tool.coverage.run]
+omit = ["*tests*"]
+
+[tool.coverage.report]
+precision = 2
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+# Formatting using black.
+[tool.black]
+
+#linting using ruff
+[tool.ruff]
+src = ["src", "tests"]
+select = ["E", "F", "B", "Q", "UP", "D"]
+
+ignore = ["D100", "D102", "D103", "D104", "D105"]
+[tool.ruff.pydocstyle]
+convention="numpy"
+
+[tool.isort]
+profile="black"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "--cov=denoiser",
+    "--cov-report=term-missing",
+    "--cov-report=xml"
+]

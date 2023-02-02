@@ -1,8 +1,0 @@
-coverage>=5.5
-flake8>=4
-pytest>=6.2.2
-pytest-cov>=2.11.1
-pytest-pep8>=1.0.6
-pytest-emoji>=0.2.0
-pytest-flake8>=1.0.7
-pytest-pydocstyle>=2.2.0
