@@ -1,10 +1,11 @@
 """
-Base Fourier Operator.
+Base Fourier Operator interface
 
 from https://github.com/CEA-COSMIC/pysap-mri
 
 :author: Pierre-Antoine Comby
 """
+
 
 class FourierOperatorBase:
     """Base Fourier Operator class.
@@ -29,6 +30,7 @@ class FourierOperatorBase:
     adj_op(coeffs)
         The adjoint operation (kspace -> image)
     """
+
     def __init__(self):
         self._uses_sense = False
 

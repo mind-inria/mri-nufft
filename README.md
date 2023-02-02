@@ -1,9 +1,33 @@
-# MRI Cufinufft
+# MRI-NUFFT 
 
-This is a python  package which extend the [cufinufft](https://github.com/flatironinstitute/cufinufft/) to be efficiently use for MRI reconstruction. It currently only support single precision (float32/complex64.)
+This python package extends various NUFFT (Non Uniform Fast Fourier Transform) python bindings for MRI Reconstruction usage. 
 
+In particular it provides an unified interface for all the methods, with extra forward Model step, such as coil sensitivity, density compensated adjoint and Off Resonance corrections (B0 inhomogeneities)
 
-For high level utilization you can check the [pysap](https://github.com/CEA-COSMIC/pysap/) package suite, in particular the `NonCartesianFFT` class in [pysap-mri](https://github.com/CEA-COSMIC/pysap-mri).
+Supported Library are: 
+- GPU :
+   - [cufinufft](https://github.com/flatironinstitute/cufinufft/) 
+     
+     Only for  single precision float32/complex64. Requires a separate installation of cufinufft C++/CUDA library. 
+     
+   - [tensorflow-nufft](https://github.com/mrphys/tensorflow-nufft) 
+     
+     
+   - [pyNUFFT](https://github.com/jyhmiinlin/pynufft) 
+     (Not Yet Implemented)
+   
+   - [pygpuNUFFT](https://github.com/paquiteau/pygpuNUFFT)
+     (Not Yet Implemented)
+     
+- CPU : 
+   - [pyNUFFT](https://github.com/jyhmiinlin/pynufft)
+   
+     (Not Yet Implemented)
+    
+
+The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
+
+you can check the [pysap](https://github.com/CEA-COSMIC/pysap/) package suite and  [pysap-mri](https://github.com/CEA-COSMIC/pysap-mri) for MRI dedicated solutions.
 
 # Installation 
 
