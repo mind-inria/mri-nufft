@@ -128,9 +128,13 @@ class MRICufiNUFFT(FourierOperatorBase):
             samples_d, tuple(shape), init_plans=plan_setup == "persist", **kwargs
         )
 
-        # Usefull data sizes:
-        self.img_size = int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
-        self.ksp_size = int(self.n_samples * np.dtype(np.complex64).itemsize)
+    @property
+    def img_size(self):
+        return int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
+
+    @property
+    def ksp_size(self):
+        return int(self.n_samples * np.dtype(np.complex64).itemsize)
 
     @nvtx_mark()
     def op(self, data, ksp_d=None):
