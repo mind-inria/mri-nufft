@@ -11,7 +11,7 @@ Supported Library are:
      Only for  single precision float32/complex64. Requires a separate installation of cufinufft C++/CUDA library. 
      
    - [tensorflow-nufft](https://github.com/mrphys/tensorflow-nufft) 
-     
+     Requires a separate installation of Tensorflow.
      
    - [pyNUFFT](https://github.com/jyhmiinlin/pynufft) 
      (Not Yet Implemented)
@@ -23,7 +23,6 @@ Supported Library are:
    - [pyNUFFT](https://github.com/jyhmiinlin/pynufft)
    
      (Not Yet Implemented)
-    
 
 The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
 
