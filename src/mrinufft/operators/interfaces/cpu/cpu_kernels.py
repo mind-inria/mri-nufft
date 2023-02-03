@@ -1,53 +1,21 @@
 """Kernel function for GPUArray data."""
 import numpy as np
 
-NUMBA_AVAILABLE = True
-try:
-    import numba
-except ImportError:
-    NUMBA_AVAILABLE = False
-# Kernels #
-# TODO write numba gufuncs  for kernels.
-
-update_density_kernel = cp.RawKernel(
-    """
-    extern "C" __global__
-    void update_density_kernel(float2* density, const float2* update)
-    {
-        int t = blockDim.x * blockIdx.x + threadIdx.x;
-        density[t].x *= rsqrtf(update[t].x *update[t].x + update[t].y * update[t].y);
-    }
-    """,
-    "update_density_kernel",
-)
-
-sense_adj_mono_kernel = cp.RawKernel(
-    """
-    extern "C" __global__
-    void sense_adj_mono_kernel(float2* dest, const float2* img, const float2* smap)
-    {
-        int t = blockDim.x * blockIdx.x + threadIdx.x;
-        dest[t].x += img[t].x * smap[t].x + img[t].y * smap[t].y;
-        dest[t].y += img[t].y * smap[t].x - img[t].x * smap[t].y;
-    }
-    """,
-    "sense_adj_mono_kernel",
-)
-
 
 def update_density(density, update):
     """Perform an element wise normalization.
 
     Parameters
     ----------
-    density: GPUArray
-    update: GPUArray
+    density: array
+    update: array complex
 
     Notes
     -----
-    ``density[i] /= sqrt(abs(update[i]))``
+    performs :math:`d / \|u\|_2` element wise.
     """
-    update_density_kernel((len(density) // 1024,), (1024,), (density, update))
+    density /= np.abs(update)
+    return density
 
 
 def sense_adj_mono(dest, coil, smap, **kwargs):
@@ -55,11 +23,12 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
 
     Parameters
     ----------
-    dest: GPUArray
+    dest: array
         The image to update with the sense updated data
-    coil_img: GPUArray
+    coil_img: array
         The coil image estimation
-    smap: GPUArray
+    smap: array
         The sensitivity profile of the coil.
     """
-    sense_adj_mono_kernel((dest.size // 1024,), (1024,), (dest, coil, smap), **kwargs)
+    dest += coil * smap.conjugate()
+    return dest

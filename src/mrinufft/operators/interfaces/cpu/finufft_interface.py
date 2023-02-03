@@ -5,6 +5,7 @@ import numpy as np
 
 from ..base import FourierOperatorBase
 from ._finufft_interface import FINUFFT_AVAILABLE, RawFinufft
+from .cpu_kernels import sense_adj_mono, update_density
 
 
 class MRIfinufft(FourierOperatorBase):
@@ -84,7 +85,11 @@ class MRIfinufft(FourierOperatorBase):
             )
         self.plan_setup = plan_setup
         self.raw_op = RawFinufft(
-            self.samples, tuple(shape), init_plans=plan_setup == "persist", **kwargs
+            self.samples,
+            tuple(shape),
+            init_plans=plan_setup == "persist",
+            n_trans=n_coils,
+            **kwargs,
         )
 
     def op(self, data, ksp=None):
@@ -128,12 +133,10 @@ class MRIfinufft(FourierOperatorBase):
         return ksp
 
     def _op_sense(self, data, ksp_d=None):
-        coil_img = np.empty(self.shape, dtype=np.complex64)
+        coil_img = np.empty((self.n_coils, *self.shape), dtype=np.complex64)
         ksp = np.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
-        for i in range(self.n_coils):
-            np.copyto(coil_img, data)
-            coil_img *= self._smaps[i]  # sense forward
-            self.__op(coil_img, ksp[i])
+        coil_img = data * self._smaps
+        self.__op(coil_img)
         return ksp
 
     def _op_calibless(self, data, ksp=None):
@@ -190,32 +193,23 @@ class MRIfinufft(FourierOperatorBase):
         coil_img = np.empty(self.shape, dtype=np.complex64)
         if img is None:
             img = np.zeros(self.shape, dtype=np.complex64)
-        coil_ksp = np.empty(self.n_samples, dtype=np.complex64)
-        for i in range(self.n_coils):
-            if self.uses_density:
-                coil_ksp = np.copy(coeffs[i])
-                coil_ksp *= self.density
-            else:
-                coil_ksp = coeffs[i]
-            self.__adj_op(coil_ksp, coil_img)
-            sense_adj_mono(img, coil_img, self._smaps[i])
+        if self.uses_density:
+            coil_ksp = coeffs * self.density
+        else:
+            coil_ksp = coeffs
+        self.__adj_op(coil_ksp, coil_img)
+        img = np.sum(coil_img * self._smaps.conjugate(), axis=0)
         return img
 
-    def _adj_op_calibless(self, coeffs, img_d=None):
-        if img_d is None:
-            img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
-        coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        for i in range(self.n_coils):
-            if self.uses_density:
-                cp.copyto(coil_ksp_d, coeffs[i])
-                coil_ksp_d *= self.density_d
-                self.__adj_op(coil_ksp_d.data.ptr, img_d.data.ptr + i * self.img_size)
-            else:
-                self.__adj_op(
-                    coeffs.data.ptr + i * self.ksp_size,
-                    img_d.data.ptr + i * self.img_size,
-                )
-        return img_d
+    def _adj_op_calibless(self, coeffs, img=None):
+        if img is None:
+            img = np.empty((self.n_coils, *self.shape), dtype=np.complex64)
+        if self.uses_density:
+            coil_ksp = coeffs * self.density
+        else:
+            coil_ksp = coeffs
+        self.__adj_op(coil_ksp, img)
+        return img
 
     def __adj_op(self, coeffs, image):
         return self.raw_op.type1(coeffs, image)
@@ -242,85 +236,37 @@ class MRIfinufft(FourierOperatorBase):
         return self._data_consistency_calibless(image_data, obs_data)
 
     def _data_consistency_mono(self, image_data, obs_data):
-        img_d = cp.array(image_data, copy=True)
-        obs_d = cp.asarray(obs_data)
-        ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        self.__op(img_d, ksp_d)
-        ksp_d -= obs_d
-        self.__adj_op(ksp_d, img_d)
-        if is_cuda_array(image_data):
-            return img_d
-        return img_d.get()
+        ksp = np.empty(self.n_samples, dtype=np.complex64)
+        img = np.empty(self.shape, dtype=np.complex64)
+        self.__op(image_data, ksp)
+        ksp -= obs_data
+        self.__adj_op(ksp, img)
+        return img
 
     def _data_consistency_sense(self, image_data, obs_data):
-        img_d = cp.array(image_data, copy=True)
-        coil_img_d = cp.empty(self.shape, dtype=np.complex64)
-        coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        if is_host_array(obs_data):
-            coil_obs_data = cp.empty(self.n_samples, dtype=np.complex64)
-            obs_data_pinned = pin_memory(obs_data)
-            for i in range(self.n_coils):
-                cp.copyto(coil_img_d, img_d)
-                if self.smaps_cached:
-                    coil_img_d *= self._smaps_d[i]
-                else:
-                    self._smap_d.set(self._smaps[i])
-                    coil_img_d *= self._smap_d
-                self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
-                coil_obs_data = cp.asarray(obs_data_pinned[i])
-                coil_ksp_d -= coil_obs_data
-                if self.uses_density:
-                    coil_ksp_d *= self.density_d
-                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
-                if self.smaps_cached:
-                    sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
-                else:
-                    sense_adj_mono(img_d, coil_img_d, self._smap_d)
-            del obs_data_pinned
-            return img_d.get()
+        img = np.empty_like(image_data)
+        coil_img = np.empty(self.shape, dtype=np.complex64)
+        coil_ksp = np.empty(self.n_samples, dtype=np.complex64)
         for i in range(self.n_coils):
-            cp.copyto(coil_img_d, img_d)
-            if self.smaps_cached:
-                coil_img_d *= self._smaps_d[i]
-            else:
-                self._smap_d.set(self._smaps[i])
-                coil_img_d *= self._smap_d
-            self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
-            coil_ksp_d -= obs_data[i]
+            np.copyto(coil_img, img)
+            coil_img *= self._smap
+            self.__op(coil_img, coil_ksp)
+            coil_ksp -= obs_data[i]
             if self.uses_density:
-                coil_ksp_d *= self.density_d
-            self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
-            if self.smaps_cached:
-                sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
-            else:
-                sense_adj_mono(img_d, coil_img_d, self._smap_d)
-        return img_d
+                coil_ksp *= self.density_d
+            self.__adj_op(coil_ksp, coil_img)
+            sense_adj_mono(img, coil_img, self._smaps[i])
+        return img
 
     def _data_consistency_calibless(self, image_data, obs_data):
-        if is_cuda_array(image_data):
-            img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
-            ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-            for i in range(self.n_coils):
-                self.__op(image_data.data.ptr + i * self.img_size, ksp_d.data.ptr)
-                ksp_d -= obs_data[i]
-                if self.uses_density:
-                    ksp_d *= self.density_d
-                self.__adj_op(ksp_d.data.ptr, img_d.data.ptr + i * self.img_size)
-            return img_d
-
-        img_d = cp.empty(self.shape, dtype=np.complex64)
-        img = np.zeros((self.n_coils, *self.shape), dtype=np.complex64)
-        ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        obs_d = cp.empty(self.n_samples, dtype=np.complex64)
+        img = np.empty((self.n_coils, *self.shape), dtype=np.complex64)
+        ksp = np.empty(self.n_samples, dtype=np.complex64)
         for i in range(self.n_coils):
-            img_d.set(image_data[i])
-            obs_d.set(obs_data[i])
-            self.__op(img_d.data.ptr, ksp_d.data.ptr)
-            ksp_d -= obs_d
+            self.__op(image_data[i], ksp)
+            ksp -= obs_data[i]
             if self.uses_density:
-                ksp_d *= self.density_d
-            self.__adj_op(ksp_d.data.ptr, img_d.data.ptr)
-            cp.asnumpy(img_d, out=img[i])
+                ksp *= self.density_d
+            self.__adj_op(ksp, img[i])
         return img
 
     @property
@@ -334,7 +280,7 @@ class MRIfinufft(FourierOperatorBase):
         oper = cls(samples, shape, density=False, **kwargs)
 
         density = np.ones(len(samples), dtype=np.complex64)
-        update = np.empty_like(density)
+        update = np.empty_like(density, dtupe=np.complex64)
         img = np.empty(shape, dtype=np.complex64)
         for _ in range(n_iter):
             oper.__adj_op(density, img)
