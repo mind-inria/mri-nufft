@@ -4,7 +4,7 @@ from functools import wraps
 from hashlib import md5
 
 import numpy as np
-from css_colors import CSS4_COLORS_CODE
+from .css_colors import CSS4_COLORS_CODE
 
 CUPY_AVAILABLE = True
 try:

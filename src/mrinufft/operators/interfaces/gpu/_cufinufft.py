@@ -9,6 +9,7 @@ differentiated by 'f' suffix.
 """
 
 import atexit
+import warnings
 import ctypes
 import importlib
 import os
@@ -44,8 +45,8 @@ except OSError:
             #    which rpaths the libraries we care about.
             LIB = ctypes.cdll.LoadLibrary(full_lib_path)
 
-    except Exception as exc:
-        raise RuntimeError("Failed to find cufinufft library") from exc
+    except Exception:
+        warnings.warn("Failed to find cufinufft library")
 
 
 def _get_ctypes(dtype):
@@ -117,100 +118,105 @@ class NufftOpts(ctypes.Structure):
         return ret
 
 
-CufinufftPlan = c_void_p
-CufinufftPlanf = c_void_p
+_default_opts = None
+_make_pland, _make_planf = None, None
+_set_ptsd, _set_ptsf = None, None
+_exec_pland, _exec_planf = None, None
+_destroy_pland, _destroy_planf = None, None
 
-CufinufftPlan_p = ctypes.POINTER(CufinufftPlan)
-CufinufftPlanf_p = ctypes.POINTER(CufinufftPlanf)
+if LIB is not None:
+    CufinufftPlan = c_void_p
+    CufinufftPlanf = c_void_p
 
-NufftOpts_p = ctypes.POINTER(NufftOpts)
+    CufinufftPlan_p = ctypes.POINTER(CufinufftPlan)
+    CufinufftPlanf_p = ctypes.POINTER(CufinufftPlanf)
 
-_default_opts = LIB.cufinufft_default_opts
-_default_opts.argtypes = [c_int, c_int, NufftOpts_p]
-_default_opts.restype = c_int
+    NufftOpts_p = ctypes.POINTER(NufftOpts)
 
-_make_pland = LIB.cufinufft_makeplan
-_make_pland.argtypes = [
-    c_int,
-    c_int,
-    c_int_p,
-    c_int,
-    c_int,
-    c_double,
-    c_int,
-    CufinufftPlan_p,
-    NufftOpts_p,
-]
-_make_pland.restypes = c_int
+    _default_opts = LIB.cufinufft_default_opts
+    _default_opts.argtypes = [c_int, c_int, NufftOpts_p]
+    _default_opts.restype = c_int
 
-_make_planf = LIB.cufinufftf_makeplan
-_make_planf.argtypes = [
-    c_int,
-    c_int,
-    c_int_p,
-    c_int,
-    c_int,
-    c_float,
-    c_int,
-    CufinufftPlanf_p,
-    NufftOpts_p,
-]
-_make_planf.restypes = c_int
+    _make_pland = LIB.cufinufft_makeplan
+    _make_pland.argtypes = [
+        c_int,
+        c_int,
+        c_int_p,
+        c_int,
+        c_int,
+        c_double,
+        c_int,
+        CufinufftPlan_p,
+        NufftOpts_p,
+    ]
+    _make_pland.restypes = c_int
 
-_set_ptsd = LIB.cufinufft_setpts
-_set_ptsd.argtypes = [
-    c_int,
-    c_void_p,
-    c_void_p,
-    c_void_p,
-    ctypes.c_int,
-    c_double_p,
-    c_double_p,
-    c_double_p,
-    c_void_p,
-]
-_set_ptsd.restype = c_int
+    _make_planf = LIB.cufinufftf_makeplan
+    _make_planf.argtypes = [
+        c_int,
+        c_int,
+        c_int_p,
+        c_int,
+        c_int,
+        c_float,
+        c_int,
+        CufinufftPlanf_p,
+        NufftOpts_p,
+    ]
+    _make_planf.restypes = c_int
 
-_set_ptsf = LIB.cufinufftf_setpts
-_set_ptsf.argtypes = [
-    c_int,
-    c_void_p,
-    c_void_p,
-    c_void_p,
-    ctypes.c_int,
-    c_float_p,
-    c_float_p,
-    c_float_p,
-    c_void_p,
-]
-_set_ptsf.restype = c_int
+    _set_ptsd = LIB.cufinufft_setpts
+    _set_ptsd.argtypes = [
+        c_int,
+        c_void_p,
+        c_void_p,
+        c_void_p,
+        ctypes.c_int,
+        c_double_p,
+        c_double_p,
+        c_double_p,
+        c_void_p,
+    ]
+    _set_ptsd.restype = c_int
 
-_exec_pland = LIB.cufinufft_execute
-_exec_pland.argtypes = [c_void_p, c_void_p, c_void_p]
-_exec_pland.restype = c_int
+    _set_ptsf = LIB.cufinufftf_setpts
+    _set_ptsf.argtypes = [
+        c_int,
+        c_void_p,
+        c_void_p,
+        c_void_p,
+        ctypes.c_int,
+        c_float_p,
+        c_float_p,
+        c_float_p,
+        c_void_p,
+    ]
+    _set_ptsf.restype = c_int
 
-_exec_planf = LIB.cufinufftf_execute
-_exec_planf.argtypes = [c_void_p, c_void_p, c_void_p]
-_exec_planf.restype = c_int
+    _exec_pland = LIB.cufinufft_execute
+    _exec_pland.argtypes = [c_void_p, c_void_p, c_void_p]
+    _exec_pland.restype = c_int
 
-_destroy_pland = LIB.cufinufft_destroy
-_destroy_pland.argtypes = [c_void_p]
-_destroy_pland.restype = c_int
+    _exec_planf = LIB.cufinufftf_execute
+    _exec_planf.argtypes = [c_void_p, c_void_p, c_void_p]
+    _exec_planf.restype = c_int
 
-_destroy_planf = LIB.cufinufftf_destroy
-_destroy_planf.argtypes = [c_void_p]
-_destroy_planf.restype = c_int
+    _destroy_pland = LIB.cufinufft_destroy
+    _destroy_pland.argtypes = [c_void_p]
+    _destroy_pland.restype = c_int
 
+    _destroy_planf = LIB.cufinufftf_destroy
+    _destroy_planf.argtypes = [c_void_p]
+    _destroy_planf.restype = c_int
 
-###########################
-# END OF BINDINGS LINKING #
-###########################
+    ###########################
+    # END OF BINDINGS LINKING #
+    ###########################
 
-
-# If we are shutting down python, we don't need to run __del__
-#   This will avoid any shutdown gc ordering problems.
-EXITING = False
-atexit.register(setattr, sys.modules[__name__], "EXITING", True)
+    # If we are shutting down python, we don't need to run __del__
+    #   This will avoid any shutdown gc ordering problems.
+    EXITING = False
+    atexit.register(setattr, sys.modules[__name__], "EXITING", True)
 
 
 def get_default_opts(nufft_type, dim):

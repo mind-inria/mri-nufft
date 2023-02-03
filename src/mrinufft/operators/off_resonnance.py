@@ -1,16 +1,24 @@
 """
 Off Resonance correction Operator wrapper.
 """
-import cupy as cp
 import numpy as np
 
-from .base import FourierOperatorBase
-from ..utils  import is_cuda_array
+from .interfaces.base import FourierOperatorBase
+from .interfaces.gpu.utils import is_cuda_array
 
-class MRIFourierCorrected(FourierOperatorBase):
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
+
+
+class MRIFourierCorrectedGPU(FourierOperatorBase):
     """Fourier Operator with B0 Inhomogeneities compensation."""
 
     def __init__(self, fourier_op, B, C, indices):
+        if not CUPY_AVAILABLE:
+            raise RuntimeWarning("Cupy is not installed.")
         self._fourier_op = fourier_op
 
         self._uses_sense = fourier_op.uses_sense

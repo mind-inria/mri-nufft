@@ -3,12 +3,17 @@
 import warnings
 
 import numpy as np
-import cupy as cp
 
 from ..base import FourierOperatorBase
-from ._cufinufft import RawCufinufft
-from ..utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
-from .kernels import sense_adj_mono, update_density
+from ._cufinufft import RawCufinufft, LIB
+from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
+from .cupy_kernels import sense_adj_mono, update_density
+
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
 
 
 class MRICufiNUFFT(FourierOperatorBase):
@@ -65,6 +70,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         plan_setup="persist",
         **kwargs,
     ):
+        if not CUPY_AVAILABLE:
+            raise RuntimeError("cupy is not installed")
+        if LIB is None:
+            raise RuntimeError("Failed to found cufinufft binary.")
+
         self.shape = shape
         self.n_samples = len(samples)
         if samples.max() > np.pi:

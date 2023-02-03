@@ -1,3 +1,3 @@
-from .cufi import MRICufiNUFFT
-from .tfnufft import MRITensorflowNUFFT
-from .off_resonnance import MRIFourierCorrected
+from .interfaces import MRICufiNUFFT, MRITensorflowNUFFT, MRIfinufft
+
+from .off_resonnance import MRIFourierCorrectedGPU
