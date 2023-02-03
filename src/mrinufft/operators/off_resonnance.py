@@ -45,7 +45,6 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
             return y
         return y.get()
 
-
     def adj_op(self, coeffs, *args):
         """
         This method calculates an inverse masked Fourier
@@ -63,8 +62,7 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
         coeffs_d = cp.array(coeffs)
         for l in range(self.n_interpolators):
             y += cp.conj(self.C[l, self.indices]) * self._fourier_op.adj_op(
-                cp.conj(self.B[..., l]) * coeffs_d,
-                *args
+                cp.conj(self.B[..., l]) * coeffs_d, *args
             )
         if is_cuda_array(coeffs):
             return y

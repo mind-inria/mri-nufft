@@ -64,5 +64,4 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
     smap: GPUArray
         The sensitivity profile of the coil.
     """
-    sense_adj_mono_kernel((dest.size // 1024,), (1024,),
-                          (dest, coil, smap), **kwargs)
+    sense_adj_mono_kernel((dest.size // 1024,), (1024,), (dest, coil, smap), **kwargs)
