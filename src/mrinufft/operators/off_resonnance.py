@@ -35,9 +35,9 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
     def op(self, data, *args):
         y = cp.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
         data_d = cp.asarray(data)
-        for l in range(self.n_interpolators):
-            y += self.B[..., l] * self._fourier_op.op(
-                self.C[l, self.indices] * data_d, *args
+        for idx in range(self.n_interpolators):
+            y += self.B[..., idx] * self._fourier_op.op(
+                self.C[idx, self.indices] * data_d, *args
             )
         if is_cuda_array(data):
             return y
@@ -45,8 +45,7 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
 
     def adj_op(self, coeffs, *args):
         """
-        This method calculates an inverse masked Fourier
-        transform of a distorded N-D k-space.
+        Compute Adjoint Operation with off-resonnance effect.
 
         Parameters
         ----------
@@ -58,9 +57,9 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
         """
         y = cp.zeros(self.shape, dtype=np.complex64)
         coeffs_d = cp.array(coeffs)
-        for l in range(self.n_interpolators):
-            y += cp.conj(self.C[l, self.indices]) * self._fourier_op.adj_op(
-                cp.conj(self.B[..., l]) * coeffs_d, *args
+        for idx in range(self.n_interpolators):
+            y += cp.conj(self.C[idx, self.indices]) * self._fourier_op.adj_op(
+                cp.conj(self.B[..., idx]) * coeffs_d, *args
             )
         if is_cuda_array(coeffs):
             return y
