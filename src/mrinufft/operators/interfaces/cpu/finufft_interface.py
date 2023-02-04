@@ -50,22 +50,20 @@ class MRIfinufft(FourierOperatorBase):
         # we will access the samples by their coordinate first.
         self.samples = np.asfortranarray(samples)
 
+        self._uses_sense = False
+
+        # Density Compensation Setup
         if density is True:
             self.density = MRIfinufft.estimate_density(samples, shape)
-            self.uses_density = True
-            print("density done", flush=True)
         elif isinstance(density, np.ndarray):
             if len(density) != len(samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
-            self.uses_density = True
             self.density = np.asfortranarray(density)
         else:
             self.density = None
-            self.uses_density = False
-        self._uses_sense = False
-
+        # Multi Coil Setup
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
@@ -160,38 +158,30 @@ class MRIfinufft(FourierOperatorBase):
     def _adj_op_mono(self, coeffs, img=None):
         if img is None:
             img = np.empty(self.shape, dtype=coeffs.dtype)
-        if self.uses_density:
-            coil_ksp = np.copy(coeffs)
-            coil_ksp *= self.density  # density preconditionning
-        else:
-            coil_ksp = coeffs
-        self._adj_op(coil_ksp, img)
+        self._adj_op(coeffs, img)
         return img
 
     def _adj_op_sense(self, coeffs, img=None):
         coil_img = np.empty(self.shape, dtype=coeffs.dtype)
         if img is None:
             img = np.zeros(self.shape, dtype=coeffs.dtype)
-        if self.uses_density:
-            coil_ksp = coeffs * self.density
-        else:
-            coil_ksp = coeffs
-        self._adj_op(coil_ksp, coil_img)
+        self._adj_op(coeffs, coil_img)
         img = np.sum(coil_img * self._smaps.conjugate(), axis=0)
         return img
 
     def _adj_op_calibless(self, coeffs, img=None):
         if img is None:
             img = np.empty((self.n_coils, *self.shape), dtype=coeffs.dtype)
-        if self.uses_density:
-            coil_ksp = coeffs * self.density
-        else:
-            coil_ksp = coeffs
-        self._adj_op(coil_ksp, img)
+        self._adj_op(coeffs, img)
         return img
 
+    def _apply_dc(self, coeffs):
+        if self.density is not None:
+            return coeffs * self.density
+        return coeffs
+
     def _adj_op(self, coeffs, image):
-        return self.raw_op.type1(coeffs, image)
+        return self.raw_op.type1(self._apply_dc(coeffs), image)
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
@@ -254,7 +244,7 @@ class MRIfinufft(FourierOperatorBase):
         return self.raw_op.eps
 
     @classmethod
-    def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
+    def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
         """Estimate the density compensation array."""
         oper = cls(samples, shape, density=False, **kwargs)
         density = np.ones(len(samples), dtype=np.complex64)
@@ -264,7 +254,7 @@ class MRIfinufft(FourierOperatorBase):
             oper._adj_op(density, img)
             oper._op(img, update)
             density /= np.abs(update)
-        return density
+        return density.real
 
     def __repr__(self):
         """Return info about the MRICufiNUFFT Object."""
