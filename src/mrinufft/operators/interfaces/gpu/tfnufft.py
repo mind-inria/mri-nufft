@@ -92,7 +92,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
 
     def adj_op(self, data):
         """
-        Backward Operation
+        Backward Operation.
 
         Parameters
         ----------

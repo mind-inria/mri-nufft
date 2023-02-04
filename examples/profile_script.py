@@ -20,7 +20,7 @@ parser.add_argument("device", type=str, choices=("H", "D"), default="H")
 parser.add_argument("--coils", type=int, default=1)
 parser.add_argument("--smaps", action="store_true", default=False)
 parser.add_argument("--cached", action="store_true", default=False)
-parser.add_argument("--plans", type=str, dest='plans')
+parser.add_argument("--plans", type=str, dest="plans")
 parser.add_argument("--eps", type=float, default=1e-4)
 parser.add_argument("--ratio", type=float, default=1.0,
                     help="sampling ratio #Upts/#NUpts")

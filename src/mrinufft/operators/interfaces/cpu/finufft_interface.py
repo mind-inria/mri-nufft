@@ -5,7 +5,7 @@ import numpy as np
 
 from ..base import FourierOperatorBase
 from ._finufft_interface import FINUFFT_AVAILABLE, RawFinufftPlan
-from .cpu_kernels import sense_adj_mono, update_density
+from .cpu_kernels import sense_adj_mono
 
 
 class MRIfinufft(FourierOperatorBase):

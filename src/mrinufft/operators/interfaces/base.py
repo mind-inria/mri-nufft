@@ -1,5 +1,5 @@
 """
-Base Fourier Operator interface
+Base Fourier Operator interface.
 
 from https://github.com/CEA-COSMIC/pysap-mri
 

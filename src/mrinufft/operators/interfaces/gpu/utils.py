@@ -75,7 +75,7 @@ def sizeof_fmt(num, suffix="B"):
         The unit suffix
 
     References
-    -----
+    ----------
     https://stackoverflow.com/a/1094933
     """
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:

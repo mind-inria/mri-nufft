@@ -1,6 +1,4 @@
-"""
-Off Resonance correction Operator wrapper.
-"""
+"""Off Resonance correction Operator wrapper."""
 import numpy as np
 
 from .interfaces.base import FourierOperatorBase

@@ -1,1 +1,1 @@
-"""Bindings for PyNUFFT"""
+"""Bindings for PyNUFFT."""

@@ -1,4 +1,4 @@
-"""GPU-based NUFFT Interfaces"""
+"""GPU-based NUFFT Interfaces."""
 
 from .cufinufft import MRICufiNUFFT, CUFI_LIB
 from .tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
