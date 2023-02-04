@@ -24,17 +24,17 @@ c_int_p = ctypes.POINTER(c_int)
 c_float_p = ctypes.POINTER(c_float)
 c_double_p = ctypes.POINTER(c_double)
 
-LIB = None
+CUFI_LIB = None
 # Try to load a local library directly.
 try:
-    LIB = ctypes.cdll.LoadLibrary("libcufinufft.so")
+    CUFI_LIB = ctypes.cdll.LoadLibrary("libcufinufft.so")
 except OSError:
     # Should that not work, try to find the full path of a packaged lib.
     #   The packaged lib should have a py/platform decorated name,
     #   and be rpath'ed the true CUDA C cufinufft library through the
     #   Extension and wheel systems.
     try:
-        if LIB is None:
+        if CUFI_LIB is None:
             # Find the library.
             fh = importlib.util.find_spec("cufinufftc")[0]
             # Get the full path for the ctypes loader.
@@ -43,7 +43,7 @@ except OSError:
 
             # Load the library,
             #    which rpaths the libraries we care about.
-            LIB = ctypes.cdll.LoadLibrary(full_lib_path)
+            CUFI_LIB = ctypes.cdll.LoadLibrary(full_lib_path)
 
     except Exception:
         warnings.warn("Failed to find cufinufft library")
@@ -124,7 +124,7 @@ _set_ptsd, _set_ptsf = None, None
 _exec_pland, _exec_planf = None, None
 _destroy_pland, _destroy_planf = None, None
 
-if LIB is not None:
+if CUFI_LIB is not None:
     CufinufftPlan = c_void_p
     CufinufftPlanf = c_void_p
 
@@ -133,11 +133,11 @@ if LIB is not None:
 
     NufftOpts_p = ctypes.POINTER(NufftOpts)
 
-    _default_opts = LIB.cufinufft_default_opts
+    _default_opts = CUFI_LIB.cufinufft_default_opts
     _default_opts.argtypes = [c_int, c_int, NufftOpts_p]
     _default_opts.restype = c_int
 
-    _make_pland = LIB.cufinufft_makeplan
+    _make_pland = CUFI_LIB.cufinufft_makeplan
     _make_pland.argtypes = [
         c_int,
         c_int,
@@ -151,7 +151,7 @@ if LIB is not None:
     ]
     _make_pland.restypes = c_int
 
-    _make_planf = LIB.cufinufftf_makeplan
+    _make_planf = CUFI_LIB.cufinufftf_makeplan
     _make_planf.argtypes = [
         c_int,
         c_int,
@@ -165,7 +165,7 @@ if LIB is not None:
     ]
     _make_planf.restypes = c_int
 
-    _set_ptsd = LIB.cufinufft_setpts
+    _set_ptsd = CUFI_LIB.cufinufft_setpts
     _set_ptsd.argtypes = [
         c_int,
         c_void_p,
@@ -179,7 +179,7 @@ if LIB is not None:
     ]
     _set_ptsd.restype = c_int
 
-    _set_ptsf = LIB.cufinufftf_setpts
+    _set_ptsf = CUFI_LIB.cufinufftf_setpts
     _set_ptsf.argtypes = [
         c_int,
         c_void_p,
@@ -193,19 +193,19 @@ if LIB is not None:
     ]
     _set_ptsf.restype = c_int
 
-    _exec_pland = LIB.cufinufft_execute
+    _exec_pland = CUFI_LIB.cufinufft_execute
     _exec_pland.argtypes = [c_void_p, c_void_p, c_void_p]
     _exec_pland.restype = c_int
 
-    _exec_planf = LIB.cufinufftf_execute
+    _exec_planf = CUFI_LIB.cufinufftf_execute
     _exec_planf.argtypes = [c_void_p, c_void_p, c_void_p]
     _exec_planf.restype = c_int
 
-    _destroy_pland = LIB.cufinufft_destroy
+    _destroy_pland = CUFI_LIB.cufinufft_destroy
     _destroy_pland.argtypes = [c_void_p]
     _destroy_pland.restype = c_int
 
-    _destroy_planf = LIB.cufinufftf_destroy
+    _destroy_planf = CUFI_LIB.cufinufftf_destroy
     _destroy_planf.argtypes = [c_void_p]
     _destroy_planf.restype = c_int
 

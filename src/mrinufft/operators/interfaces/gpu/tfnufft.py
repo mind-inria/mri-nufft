@@ -2,6 +2,8 @@
 
 from ..base import FourierOperatorBase
 
+TENSORFLOW_AVAILABLE = True
+
 try:
     import tensorflow_nufft as tfnufft
     import tensorflow_mri as tfmri
@@ -9,8 +11,6 @@ try:
 
 except ImportError:
     TENSORFLOW_AVAILABLE = False
-else:
-    TENSORFLOW_AVAILABLE = True
 
 
 class MRITensorflowNUFFT(FourierOperatorBase):
