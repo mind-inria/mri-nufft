@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 from ..base import FourierOperatorBase
-from ._cufinufft import RawCufinufft, LIB
+from ._cufinufft import RawCufinufft, CUFI_LIB
 from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
 from .cupy_kernels import sense_adj_mono, update_density
 
@@ -72,7 +72,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     ):
         if not CUPY_AVAILABLE:
             raise RuntimeError("cupy is not installed")
-        if LIB is None:
+        if CUFI_LIB is None:
             raise RuntimeError("Failed to found cufinufft binary.")
 
         self.shape = shape
