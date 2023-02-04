@@ -7,21 +7,18 @@ In particular it provides an unified interface for all the methods, with extra f
 Supported Library are: 
 - GPU :
    - [cufinufft](https://github.com/flatironinstitute/cufinufft/) 
-     
-     Only for  single precision float32/complex64. Requires a separate installation of cufinufft C++/CUDA library. 
+     Setup only single precision float32/complex64. Requires a separate installation of cufinufft C++/CUDA library. 
      
    - [tensorflow-nufft](https://github.com/mrphys/tensorflow-nufft) 
      Requires a separate installation of Tensorflow.
      
-   - [pyNUFFT](https://github.com/jyhmiinlin/pynufft) 
+   - [TBA] [pyNUFFT](https://github.com/jyhmiinlin/pynufft) 
      (Not Yet Implemented)
    
-   - [pygpuNUFFT](https://github.com/paquiteau/pygpuNUFFT)
-     (Not Yet Implemented)
      
 - CPU : 
-   - [pyNUFFT](https://github.com/jyhmiinlin/pynufft)
-   
+   - [finufft](https://github.com/flatironinstitute/finufft)
+   - [TBA] [pyNUFFT](https://github.com/jyhmiinlin/pynufft)
      (Not Yet Implemented)
 
 The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
