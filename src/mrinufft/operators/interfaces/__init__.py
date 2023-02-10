@@ -24,5 +24,32 @@ def check_backend(backend_name: str):
     elif backend_name == "tensorflow":
         return TENSORFLOW_AVAILABLE
     else:
-        print(f"unknown backend: '{backend_name}'")
-        return False
+        raise ValueError(f"unknown backend: '{backend_name}'")
+
+
+def get_operator(backend_name: str):
+    """Return an MRI Fourier operator interface using the correct backend,
+
+    Parameters
+    ----------
+    backend_name: str
+        Backend name,
+
+    Returns
+    -------
+    FourierOperatorBase Interface
+
+    Raises
+    ------
+    ValueError if the backend is not available.
+    """
+
+    backend_ops = {
+        "cufinufft": MRICufiNUFFT,
+        "tensorflow": MRITensorflowNUFFT,
+        "finufft": MRIfinufft,
+    }
+    try:
+        return backend_ops[backend_name]
+    except KeyError as exc:
+        raise ValueError("backend is not available") from exc
