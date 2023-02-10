@@ -9,9 +9,13 @@ from .operators import (
     MRITensorflowNUFFT,
     MRIFourierCorrectedGPU,
     MRIfinufft,
+    get_operator,
+    check_backend,
 )
 
 __all__ = [
+    "get_operator",
+    "check_backend",
     "MRICufiNUFFT",
     "MRITensorflowNUFFT",
     "MRIFourierCorrectedGPU",
