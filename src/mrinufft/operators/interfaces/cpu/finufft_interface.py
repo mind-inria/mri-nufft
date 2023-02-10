@@ -254,7 +254,7 @@ class MRIfinufft(FourierOperatorBase):
         """Estimate the density compensation array."""
         oper = cls(samples, shape, density=False, **kwargs)
         density = np.ones(len(samples), dtype=oper._cpx_dtype)
-        update = np.empty_like(density, dtype=oper.cpx_dtype)
+        update = np.empty_like(density, dtype=oper._cpx_dtype)
         img = np.empty(shape, dtype=oper._cpx_dtype)
         for _ in range(n_iter):
             oper._adj_op(density, img)
