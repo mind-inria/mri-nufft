@@ -1,10 +1,7 @@
 """GPU-based NUFFT Interfaces."""
 
-from .cufinufft import MRICufiNUFFT, CUFI_LIB
+from .cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
 from .tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
-
-
-CUFINUFFT_AVAILABLE = CUFI_LIB is not None
 
 
 __all__ = [

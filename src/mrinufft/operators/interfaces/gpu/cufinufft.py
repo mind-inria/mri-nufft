@@ -16,6 +16,9 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
+CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFI_LIB is not None
+
+
 class MRICufiNUFFT(FourierOperatorBase):
     """MRI Transform operator, build around cufinufft.
 
