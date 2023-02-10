@@ -50,6 +50,8 @@ class MRIfinufft(FourierOperatorBase):
         # we will access the samples by their coordinate first.
         self.samples = np.asfortranarray(samples)
 
+        self._dtype = self.samples.dtype
+        self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
         self._uses_sense = False
 
         # Density Compensation Setup
@@ -100,6 +102,8 @@ class MRIfinufft(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        if data.dtype != self._cpx_dtype:
+            raise ValueError(f"Data should be of dtype {self._cpx_dtype}")
         # monocoil
         if self.n_coils == 1:
             ret = self._op_mono(data, ksp)
@@ -145,6 +149,8 @@ class MRIfinufft(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        if coeffs.dtype != self._cpx_dtype:
+            raise ValueError(f"coeffs should be of dtype {self._cpx_dtype}")
         if self.n_coils == 1:
             ret = self._adj_op_mono(coeffs, img)
         # sense
@@ -247,9 +253,9 @@ class MRIfinufft(FourierOperatorBase):
     def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
         """Estimate the density compensation array."""
         oper = cls(samples, shape, density=False, **kwargs)
-        density = np.ones(len(samples), dtype=np.complex64)
-        update = np.empty_like(density, dtype=np.complex64)
-        img = np.empty(shape, dtype=np.complex64)
+        density = np.ones(len(samples), dtype=oper._cpx_dtype)
+        update = np.empty_like(density, dtype=oper.cpx_dtype)
+        img = np.empty(shape, dtype=oper._cpx_dtype)
         for _ in range(n_iter):
             oper._adj_op(density, img)
             oper._op(img, update)
