@@ -103,7 +103,10 @@ class MRIfinufft(FourierOperatorBase):
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
         if data.dtype != self._cpx_dtype:
-            raise ValueError(f"Data should be of dtype {self._cpx_dtype}")
+            warnings.warn(
+                f"Data should be of dtype {self._cpx_dtype}. Casting it for you."
+            )
+            data = data.astype(self._cpx_dtype)
         # monocoil
         if self.n_coils == 1:
             ret = self._op_mono(data, ksp)
@@ -150,7 +153,10 @@ class MRIfinufft(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if coeffs.dtype != self._cpx_dtype:
-            raise ValueError(f"coeffs should be of dtype {self._cpx_dtype}")
+            warnings.warn(
+                f"coeffs should be of dtype {self._cpx_dtype}. Casting it for you."
+            )
+            coeffs = coeffs.astype(self._cpx_dtype)
         if self.n_coils == 1:
             ret = self._adj_op_mono(coeffs, img)
         # sense
