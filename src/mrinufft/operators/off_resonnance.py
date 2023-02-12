@@ -11,12 +11,18 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
-class MRIFourierCorrectedGPU(FourierOperatorBase):
+class MRIFourierCorrected(FourierOperatorBase):
     """Fourier Operator with B0 Inhomogeneities compensation."""
 
-    def __init__(self, fourier_op, B, C, indices):
-        if not CUPY_AVAILABLE:
-            raise RuntimeWarning("Cupy is not installed.")
+    def __init__(self, fourier_op, B, C, indices, backend="cpu"):
+        if backend == "gpu" and not CUPY_AVAILABLE:
+            raise RuntimeError("Cupy is required for gpu computations.")
+        if backend == "gpu":
+            self.xp = cp
+        elif backend == "cpu":
+            self.xp = np
+        else:
+            raise ValueError("Unsupported backend.")
         self._fourier_op = fourier_op
 
         self._uses_sense = fourier_op.uses_sense
@@ -27,19 +33,19 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.n_interpolators = len(C)
-        self.B = cp.array(B)
-        self.B = cp.tile(self.B, (self._fourier_op.n_samples // len(B), 1))
-        self.C = cp.array(C)
+        self.B = self.xp.array(B)
+        self.B = self.xp.tile(self.B, (self._fourier_op.n_samples // len(B), 1))
+        self.C = self.xp.array(C)
         self.indices = indices
 
     def op(self, data, *args):
-        y = cp.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
-        data_d = cp.asarray(data)
+        y = self.xp.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
+        data_d = self.xp.asarray(data)
         for idx in range(self.n_interpolators):
             y += self.B[..., idx] * self._fourier_op.op(
                 self.C[idx, self.indices] * data_d, *args
             )
-        if is_cuda_array(data):
+        if self.xp.__name__ == "cupy" and is_cuda_array(data):
             return y
         return y.get()
 
@@ -55,13 +61,13 @@ class MRIFourierCorrectedGPU(FourierOperatorBase):
         -------
             inverse Fourier transform of the distorded input k-space.
         """
-        y = cp.zeros(self.shape, dtype=np.complex64)
-        coeffs_d = cp.array(coeffs)
+        y = self.xp.zeros(self.shape, dtype=np.complex64)
+        coeffs_d = self.xp.array(coeffs)
         for idx in range(self.n_interpolators):
             y += cp.conj(self.C[idx, self.indices]) * self._fourier_op.adj_op(
                 cp.conj(self.B[..., idx]) * coeffs_d, *args
             )
-        if is_cuda_array(coeffs):
+        if self.xp.__name__ == "cupy" and is_cuda_array(coeffs):
             return y
         return y.get()
 

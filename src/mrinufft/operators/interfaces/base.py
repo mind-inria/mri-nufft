@@ -88,3 +88,9 @@ class FourierOperatorBase:
         if n_coils < 1 or not int(n_coils) == n_coils:
             raise ValueError(f"n_coils should be a positive integer, {type(n_coils)}")
         self._n_coils = int(n_coils)
+
+    def with_off_resonnance_correction(self, B, C, indices):
+        """Return a new operator with Off Resonnance Correction."""
+        from ..off_resonnance import MRIFourierCorrected
+
+        return MRIFourierCorrected(self, B, C, indices)
