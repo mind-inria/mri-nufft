@@ -27,14 +27,15 @@ Where:
   Typically images (:math:`d=2`) or volumes (:math:`d=3`) are acquired.
 - :math:`n_i` is a zero-mean complex valued Gaussian Noise, modeling the "thermal noise" of the scanner.
 
-.. info::
+.. note::
 
    In order to reconstruct :math:`x` from :math:`y`, one has to solve the inverse problem, stated usually as:
    .. math::
+
       \hat{x} = \arg\min_x \frac12 \|\mathcal{F}_\Omega_\bm{x} - \bm{y}\|_2^2 + g(\bm{x}).
 
    This package focuses solely on computing :math:`\mathcal{F}\bm{x}` or :math:`\mathcal{F}^*\bm{y}`.
-   solving this problem is **not** the purpose of the
+   solving this problem is **not** addressed here, but you can check pysap-mri`https://github.com:CEA-COSMIC/pysap-mri`_
 
 Extension of the Acquisition model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -70,7 +71,8 @@ Apart from MRI, The NUFFT operator is also used for:
  - Electron tomography
  - Probability Density Function estimation
  - ...
-These topic are not covered by this package, do it yourself !
+
+These applications are not covered by this package, do it yourself !
 
 References
 ----------
