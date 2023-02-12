@@ -5,11 +5,11 @@ import numpy as np
 from .base import AbstractMRIcpuNUFFT
 
 
-PYNUFFT_AVAILABLE = True
+PYNUFFT_CPU_AVAILABLE = True
 try:
     import pynufft
 except ImportError:
-    PYNUFFT_AVAILABLE = False
+    PYNUFFT_CPU_AVAILABLE = False
 
 
 class RawPyNUFFT:
@@ -37,6 +37,8 @@ class RawPyNUFFT:
 
 
 class MRIPynufft(AbstractMRIcpuNUFFT):
+    """PyNUFFT implementation of MRI NUFFT transform."""
+
     def __init__(
         self,
         samples,
@@ -47,7 +49,7 @@ class MRIPynufft(AbstractMRIcpuNUFFT):
         osf=2,
         **kwargs,
     ):
-        if not PYNUFFT_AVAILABLE:
+        if not PYNUFFT_CPU_AVAILABLE:
             raise RuntimeError("Pynufft is not available.")
         super().__init__(samples, shape, density, n_coils, smaps)
 

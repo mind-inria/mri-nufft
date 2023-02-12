@@ -5,30 +5,34 @@ from .gpu import (
     TENSORFLOW_AVAILABLE,
 )
 
-from .cpu import MRIfinufft, FINUFFT_AVAILABLE
+from .cpu import MRIfinufft, FINUFFT_AVAILABLE, MRIPynufft, PYNUFFT_CPU_AVAILABLE
 
 __all__ = [
     "MRICufiNUFFT",
     "MRITensorflowNUFFT",
     "MRIfinufft",
+    "MRIPynufft",
     "check_backend",
 ]
+
+_REGISTERED_BACKENDS = {
+    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
+    "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
+    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
+    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
+}
 
 
 def check_backend(backend_name: str):
     """Check if a specific backend is available."""
-    if backend_name == "finufft":
-        return FINUFFT_AVAILABLE
-    elif backend_name == "cufinufft":
-        return CUFINUFFT_AVAILABLE
-    elif backend_name == "tensorflow":
-        return TENSORFLOW_AVAILABLE
-    else:
-        raise ValueError(f"unknown backend: '{backend_name}'")
+    try:
+        return _REGISTERED_BACKENDS[backend_name][0]
+    except KeyError as e:
+        raise ValueError(f"unknown backend: '{backend_name}'") from e
 
 
 def get_operator(backend_name: str):
-    """Return an MRI Fourier operator interface using the correct backend,
+    """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
     ----------
@@ -43,13 +47,10 @@ def get_operator(backend_name: str):
     ------
     ValueError if the backend is not available.
     """
-
-    backend_ops = {
-        "cufinufft": MRICufiNUFFT,
-        "tensorflow": MRITensorflowNUFFT,
-        "finufft": MRIfinufft,
-    }
     try:
-        return backend_ops[backend_name]
+        available, operator = _REGISTERED_BACKENDS[backend_name]
     except KeyError as exc:
         raise ValueError("backend is not available") from exc
+    if not available:
+        raise ValueError("backend is registered, but dependencies are not met.")
+    return operator
