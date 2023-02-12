@@ -17,8 +17,8 @@ class RawPyNUFFT:
 
     def __init__(self, samples, shape, osf=2, interpolator_shape=6):
 
-        self.nufft_obj = pynufft.NUFFT()
-        self.nufft_obj.plan(
+        self._nufft_obj = pynufft.NUFFT()
+        self._nufft_obj.plan(
             samples,
             shape,
             tuple(osf * s for s in shape),
@@ -27,12 +27,12 @@ class RawPyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        coeffs_data = self.nufft_obj.forward(grid_data)
+        coeffs_data = self._nufft_obj.forward(grid_data)
         return coeffs_data
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
-        grid_data = self.nufft_obj.backward(coeffs_data)
+        grid_data = self._nufft_obj.backward(coeffs_data)
         return grid_data
 
 
