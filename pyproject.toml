@@ -17,6 +17,11 @@ doc = ["sphinx", "pydata-sphinx-theme", "sphinx-gallery", "matplotlib"]
 [build-system]
 requires = ["setuptools", "setuptools-scm", "wheel"]
 
+[tool.setuptools_scm]
+write_to = "src/patch_denoise/_version.py"
+version_scheme = "python-simplified-semver"
+local_scheme="no-local-version"
+
 [tool.coverage.run]
 omit = ["*tests*"]
 

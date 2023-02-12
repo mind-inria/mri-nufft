@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+jobs:
+  linter-check:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout 
+        uses: actions/checkout@v3
+      - name: Set up Python "3.10"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Black setup
+        shell: bash
+        run: pip install black ruff
+      - name: Black Check
+        shell: bash
+        run: black . --diff --color
+      - name: ruff Check
+        shell: bash
+        run: ruff src
+        
+  test-suite:
+    runs-on: ${{ matrix.os }}
+    needs: linter-check
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.8"]
+        
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+          python -m pip install .[test]
+      - name: Run Tests
+        shell: bash
+        run: | 
+          pytest -n auto -x
