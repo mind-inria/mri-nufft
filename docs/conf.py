@@ -24,7 +24,7 @@ project = "mri-nufft"
 copyright = "2022, Pierre-Antoine Comby"
 author = "Pierre-Antoine Comby"
 
-release = version("mrinufft")
+release = version("mri-nufft")
 # for example take major/minor
 version = ".".join(release.split(".")[:2])
 
