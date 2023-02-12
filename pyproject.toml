@@ -2,10 +2,12 @@
 name = "mri-nufft"
 description = "MRI Non Cartesian Fourier Operators based on (cu)finufft."
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
+
+readme = "README.md"
+dependencies = ["numpy", "scipy", "matplotlib", "tqdm"]
 requires-python = ">=3.8"
 
 dynamic = ["version"]
-dependencies = ["numpy", "scipy", "matplotlib", "tqdm", "finufft"]
 
 [project.optional-dependencies]
 
@@ -15,7 +17,7 @@ dev = ["black", "isort", "ruff"]
 doc = ["sphinx", "pydata-sphinx-theme", "sphinx-gallery", "matplotlib"]
 
 [build-system]
-requires = ["setuptools", "setuptools-scm", "wheel"]
+requires = ["setuptools", "setuptools-scm[toml]", "wheel"]
 
 [tool.setuptools_scm]
 write_to = "src/patch_denoise/_version.py"
