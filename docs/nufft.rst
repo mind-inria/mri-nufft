@@ -35,7 +35,7 @@ Where:
       \hat{x} = \arg\min_x \frac12 \|\mathcal{F}_\Omega_\bm{x} - \bm{y}\|_2^2 + g(\bm{x}).
 
    This package focuses solely on computing :math:`\mathcal{F}\bm{x}` or :math:`\mathcal{F}^*\bm{y}`.
-   solving this problem is **not** addressed here, but you can check pysap-mri`https://github.com:CEA-COSMIC/pysap-mri`_
+   solving this problem is **not** addressed here, but you can check `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for this purpose.
 
 Extension of the Acquisition model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
