@@ -40,7 +40,7 @@ $ python mri-cufinufft/setup.py install
 
 - [x] Add support for finufft
 - [ ] Expose a single Operator interface with `backend` argument and `**kwargs` for interface specific stuff.
-- [ ] Add support for PyNUFFT CPU
+- [-] Add support for PyNUFFT CPU
 - [ ] Add support for PyNUFFT GPU 
 - [ ] Add density compensation estimation using standalone method (e.g. Voronoi)
 - [ ] Add Documentation on NUFFT main principles (spread/ interpolation Kernel)
