@@ -8,10 +8,12 @@ In particular it provides an unified interface for all the methods, with extra f
 
 Supported Library are:
 
-- GPU:
+- GPU Implementations:
 
   - `cufinufft <https://github.com/flatironinstitute/cufinufft/>`_
-     Setup only single precision float32/complex64. Requires a separate installation of cufinufft C++/CUDA library.
+    Developed and maintained by the `Flat Iron Institute <https://github.com/flatironinstitut>`_.
+    Requires a separate installation of cufinufft C++/CUDA library.
+    Current bindings only support float32/complex64 data.
 
   - `tensorflow-nufft <https://github.com/mrphys/tensorflow-nufft>`_
      Requires a separate installation of Tensorflow.
@@ -19,17 +21,21 @@ Supported Library are:
   - TBA `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
      (Not Yet Implemented)
 
-- CPU :
+- CPU Implementations:
 
   - `finufft <https://github.com/flatironinstitute/finufft>`_
+    Developed and maintained by the `Flat Iron Institute <https://github.com/flatironinstitut>`_.
+    C/C++ implementation with Multithread and batch computation support.
 
   - `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
+    CPU version of pyNUFFT, using standard python libraries.
 
 The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
 
 you can check the `pysap <https://github.com/CEA-COSMIC/pysap/>`_ package suite and  `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for MRI dedicated solutions.
 
-# Installation
+Installation
+------------
 
 Be sure that you have your GPU librairies properly installed (CUDA, Pytorch, Tensorflow, etc).
 Cufinufft requires an external installation.
