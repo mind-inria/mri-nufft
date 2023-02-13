@@ -22,8 +22,8 @@ The acquisition model is usually described as:
 
 Where:
 
-- :math: `x(\boldsymbol{u})` is the spatially varying image contrast acquired.
-- :math:`y_1, \dots, y_M` are the sampled points at locations :math:`\Omega=\lbrace k_1, \dots, k_n \in \mathbb{R}^d\rbrace`.
+- :math:`x(\boldsymbol{u})` is the spatially varying image contrast acquired.
+- :math:`y_1, \dots, y_M` are the sampled points at locations :math:`\Omega=\lbrace \boldsymbol{k}_1, \dots, \boldsymbol{k}_n \in \mathbb{R}^d\rbrace`.
   Typically images (:math:`d=2`) or volumes (:math:`d=3`) are acquired.
 - :math:`n_i` is a zero-mean complex valued Gaussian Noise, modeling the "thermal noise" of the scanner.
 
@@ -32,7 +32,7 @@ Where:
    In order to reconstruct :math:`x` from :math:`y`, one has to solve the inverse problem, stated usually as:
 
    .. math::
-      \hat{x} = \arg\min_x \frac{1}{2} \|\mathcal{F}_\Omega_\boldsymbol{x} - \boldsymbol{y}\|_2^2 + g(\boldsymbol{x}).
+      \hat{x} = \arg\min_x \frac{1}{2} \|\mathcal{F}_\Omega(\boldsymbol{x}) - \boldsymbol{y}\|_2^2 + g(\boldsymbol{x}).
 
    This package focuses solely on computing :math:`\mathcal{F}\boldsymbol{x}` or :math:`\mathcal{F}^*\boldsymbol{y}`.
    solving this problem is **not** addressed here, but you can check `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for this purpose.
