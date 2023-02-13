@@ -7,6 +7,7 @@ This python package extends various NUFFT (Non Uniform Fast Fourier Transform) p
 In particular it provides an unified interface for all the methods, with extra forward Model step, such as coil sensitivity, density compensated adjoint and Off Resonance corrections (B0 inhomogeneities)
 
 Supported Library are:
+
 - GPU:
 
   - `cufinufft <https://github.com/flatironinstitute/cufinufft/>`_
@@ -18,10 +19,11 @@ Supported Library are:
   - TBA `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
      (Not Yet Implemented)
 
-
 - CPU :
-   - `finufft <https://github.com/flatironinstitute/finufft>`_
-   - `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
+
+  - `finufft <https://github.com/flatironinstitute/finufft>`_
+
+  - `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
 
 The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
 
