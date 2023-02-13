@@ -17,8 +17,7 @@ In order to accelerate the acquisition of required data, using a non Cartesian (
 The acquisition model is usually described as:
 
 .. math::
-
-   y_i = \int_\mathbb{R}^d x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{k_i}} d\boldsymbol{u} + n_i
+   y_i = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{k_i}} d\boldsymbol{u} + n_i
 
 Where:
 
@@ -27,6 +26,14 @@ Where:
   Typically images (:math:`d=2`) or volumes (:math:`d=3`) are acquired.
 - :math:`n_i` is a zero-mean complex valued Gaussian Noise, modeling the "thermal noise" of the scanner.
 
+
+In practise we have the following operation:
+
+.. math::
+
+   \boldsymbol{y} = \mathcal{F}_\Omega (\boldsymbol{x}) + \boldsymbol{n}
+
+
 .. note::
 
    In order to reconstruct :math:`x` from :math:`y`, one has to solve the inverse problem, stated usually as:
@@ -34,7 +41,7 @@ Where:
    .. math::
       \hat{x} = \arg\min_x \frac{1}{2} \|\mathcal{F}_\Omega(\boldsymbol{x}) - \boldsymbol{y}\|_2^2 + g(\boldsymbol{x}).
 
-   This package focuses solely on computing :math:`\mathcal{F}\boldsymbol{x}` or :math:`\mathcal{F}^*\boldsymbol{y}`.
+   This package focuses solely on computing :math:`\mathcal{F}_\Omega\boldsymbol{x}` or :math:`\mathcal{F}_\Omega^*\boldsymbol{y}`.
    solving this problem is **not** addressed here, but you can check `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for this purpose.
 
 Extension of the Acquisition model
