@@ -18,11 +18,11 @@ The acquisition model is usually described as:
 
 .. math::
 
-   y_i = \int_\mathbb{R}^d x(\bm{u}) e^{-2i\pi \bm{u} \cdot \bm{k_i}} d\bm{u} + n_i
+   y_i = \int_\mathbb{R}^d x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{k_i}} d\boldsymbol{u} + n_i
 
 Where:
 
-- :math: `x(\bm{u})` is the spatially varying image contrast acquired.
+- :math: `x(\boldsymbol{u})` is the spatially varying image contrast acquired.
 - :math:`y_1, \dots, y_M` are the sampled points at locations :math:`\Omega=\lbrace k_1, \dots, k_n \in \mathbb{R}^d\rbrace`.
   Typically images (:math:`d=2`) or volumes (:math:`d=3`) are acquired.
 - :math:`n_i` is a zero-mean complex valued Gaussian Noise, modeling the "thermal noise" of the scanner.
@@ -30,11 +30,11 @@ Where:
 .. note::
 
    In order to reconstruct :math:`x` from :math:`y`, one has to solve the inverse problem, stated usually as:
+
    .. math::
+      \hat{x} = \arg\min_x \frac{1}{2} \|\mathcal{F}_\Omega_\boldsymbol{x} - \boldsymbol{y}\|_2^2 + g(\boldsymbol{x}).
 
-      \hat{x} = \arg\min_x \frac12 \|\mathcal{F}_\Omega_\bm{x} - \bm{y}\|_2^2 + g(\bm{x}).
-
-   This package focuses solely on computing :math:`\mathcal{F}\bm{x}` or :math:`\mathcal{F}^*\bm{y}`.
+   This package focuses solely on computing :math:`\mathcal{F}\boldsymbol{x}` or :math:`\mathcal{F}^*\boldsymbol{y}`.
    solving this problem is **not** addressed here, but you can check `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for this purpose.
 
 Extension of the Acquisition model
