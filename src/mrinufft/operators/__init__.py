@@ -6,7 +6,7 @@ from .interfaces import (
     check_backend,
 )
 
-from .off_resonnance import MRIFourierCorrectedGPU
+from .off_resonnance import MRIFourierCorrected
 
 __all__ = [
     "get_operator",
@@ -14,5 +14,5 @@ __all__ = [
     "MRICufiNUFFT",
     "MRITensorflowNUFFT",
     "MRIfinufft",
-    "MRIFourierCorrectedGPU",
+    "MRIFourierCorrected",
 ]

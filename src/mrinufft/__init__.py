@@ -7,7 +7,7 @@ reconstruction.
 from .operators import (
     MRICufiNUFFT,
     MRITensorflowNUFFT,
-    MRIFourierCorrectedGPU,
+    MRIFourierCorrected,
     MRIfinufft,
     get_operator,
     check_backend,
@@ -18,7 +18,7 @@ __all__ = [
     "check_backend",
     "MRICufiNUFFT",
     "MRITensorflowNUFFT",
-    "MRIFourierCorrectedGPU",
+    "MRIFourierCorrected",
     "MRIfinufft",
 ]
 
