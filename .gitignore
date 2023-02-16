@@ -6,3 +6,17 @@ dist/
 examples/*.ipynb
 *.xml
 .coverage*
+
+.idea
+*.log
+tmp/
+
+*_cache/
+*.py[cod]
+*.egg
+
+docs/_autosummary
+docs/auto_examples/
+docs_build/
+
+src/mrinufft/_version.py
