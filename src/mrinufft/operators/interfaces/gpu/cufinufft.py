@@ -143,10 +143,12 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     @property
     def img_size(self):
+        """Image size in bytes."""
         return int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
 
     @property
     def ksp_size(self):
+        """k-space size in bytes."""
         return int(self.n_samples * np.dtype(np.complex64).itemsize)
 
     @nvtx_mark()

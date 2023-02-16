@@ -1,3 +1,4 @@
+"""Base interface for the CPU backends."""
 import warnings
 
 import numpy as np

@@ -1,3 +1,4 @@
+"""Interface for the NUFFT operator of each backend."""
 from .gpu import (
     MRICufiNUFFT,
     MRITensorflowNUFFT,

@@ -1,6 +1,5 @@
 """Off Resonance correction Operator wrapper.
 
-
 Based on the implementation of Guillaume Daval-Frérot in pysap-mri:
 https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wrapper.py
 """
@@ -17,7 +16,21 @@ except ImportError:
 
 
 class MRIFourierCorrected(FourierOperatorBase):
-    """Fourier Operator with B0 Inhomogeneities compensation."""
+    """Fourier Operator with B0 Inhomogeneities compensation.
+
+    This is a wrapper around the Fourier Operator to compensate for the
+    B0 inhomogeneities  in the  k-space.
+
+    Parameters
+    ----------
+    fourier_op: object of class FourierBase
+        the fourier operator to wrap
+    B: numpy.ndarray
+    C: numpy.ndarray
+    indices: numpy.ndarray
+    backend: str, default 'cpu'
+        the backend to use for computations. Either 'cpu' or 'gpu'.
+    """
 
     def __init__(self, fourier_op, B, C, indices, backend="cpu"):
         if backend == "gpu" and not CUPY_AVAILABLE:
@@ -44,6 +57,18 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.indices = indices
 
     def op(self, data, *args):
+        """Compute Forward Operation with off-resonnances effect.
+
+        Parameters
+        ----------
+        x: numpy.ndarray or cupy.ndarray
+            N-D input image
+
+        Returns
+        -------
+        numpy.ndarray or cupy.ndarray
+            masked distorded N-D k-space
+        """
         y = self.xp.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
         data_d = self.xp.asarray(data)
         for idx in range(self.n_interpolators):
@@ -60,7 +85,7 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         Parameters
         ----------
-        x: numpy.ndarray
+        x: numpy.ndarray or cupy.ndarray
             masked distorded N-D k-space
         Returns
         -------
@@ -77,4 +102,18 @@ class MRIFourierCorrected(FourierOperatorBase):
         return y.get()
 
     def data_consistency(self, image_data, obs_data):
+        """Compute the data consistency error.
+
+        Parameters
+        ----------
+        image_data: numpy.ndarray or cupy.ndarray
+            N-D input image
+        obs_data: numpy.ndarray or cupy.ndarray
+            N-D observed k-space
+
+        Returns
+        -------
+        numpy.ndarray or cupy.ndarray
+            data consistency error in image space.
+        """
         return self.adj_op(self.op(image_data) - obs_data)

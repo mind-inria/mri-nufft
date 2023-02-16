@@ -117,8 +117,43 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
 
     def data_consistency(self, data, obs_data):
+        """Compute the data consistency.
+
+        Parameters
+        ----------
+        data: Tensor
+            Image data
+        obs_data: Tensor
+            Observed data
+
+        Returns
+        -------
+        Tensor
+            The data consistency error in image space.
+        """
         return self.adj_op(self.op(data) - obs_data)
 
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=10):
+        """Estimate the density compensation vector.
+
+        Parameters
+        ----------
+        samples: Tensor
+            The samples location of shape ``Nsamples x N_dimensions``.
+            It should be C-contiguous.
+        shape: tuple
+            Shape of the image space.
+        n_iter: int
+            Number of iterations.
+
+        Returns
+        -------
+        Tensor
+            The density compensation vector.
+
+        Notes
+        -----
+        This method is based on the fixed point method of Pipe et al.
+        """
         return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
