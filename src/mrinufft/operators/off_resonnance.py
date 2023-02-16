@@ -1,4 +1,9 @@
-"""Off Resonance correction Operator wrapper."""
+"""Off Resonance correction Operator wrapper.
+
+
+Based on the implementation of Guillaume Daval-Frérot in pysap-mri:
+https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wrapper.py
+"""
 import numpy as np
 
 from .interfaces.base import FourierOperatorBase
