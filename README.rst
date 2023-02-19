@@ -81,13 +81,7 @@ To view the html doc locally you can use ::
 
 And visit `localhost:8000` on your web browser.
 
-TODO
-----
 
-- [X] Add support for finufft
-- [ ] Expose a single Operator interface with `backend` argument and `**kwargs` for interface specific stuff.
-- [X] Add support for PyNUFFT CPU
-- [ ] Add support for PyNUFFT GPU
-- [ ] Add density compensation estimation using standalone method (e.g. Voronoi)
-- [ ] Add Documentation on NUFFT main principles (spread/ interpolation Kernel)
-- [ ] Add benchmark
+Related Packages
+----------------
+For Reconstruction methods of MRI image from non cartesian sampling, see `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ and `ModOpt <https://github.com/CEA-COSMIC/ModOpt>`_ 
