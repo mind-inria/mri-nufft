@@ -1,3 +1,5 @@
+.. include:: <isonum.txt>
+
 The NUFFT Operator
 ==================
 
@@ -45,7 +47,19 @@ This is stated using the operator notation:
 .. math::
     \boldsymbol{y} = \mathcal{F}_\Omega (\boldsymbol{x}) + \boldsymbol{n}
 
-As the sampling locations :math:`\Omega` are non uniform and the image locations :math:`\boldsymbol{u}_j` are uniform, :math:`\mathcal{F}_\Omega` is a NUDFT operator, and the equation above describe a type II NUDFT.
+As the sampling locations :math:`\Omega` are non uniform and the image locations :math:`\boldsymbol{u}_j` are uniform, :math:`\mathcal{F}_\Omega` is a NUDFT operator, and the equation above describe a Type 2 NUDFT. Similarly the adjoint operator is:
+
+
+
+.. table:: Correspondance Table between NUFFT and MRI acquisition model.
+    :widths: 25 25 25
+
+    ==========  =========  =================== ==========
+    NUFFT Type  Operation  MRI Transform       Operator
+    ==========  =========  =================== ==========
+    Type 1      Adjoint    Kspace |rarr| Image :math:`\mathcal{F}_\Omega^*`
+    Type 2      Forward    Image |rarr| Kspace :math:`\mathcal{F}_\Omega`
+    ==========  =========  =================== ==========
 
 
 .. attention::
