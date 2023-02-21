@@ -9,11 +9,25 @@ This document gives a general overview of the Non Uniform Fast fourier transform
 The Non Uniform Discrete Fourier Transform
 ------------------------------------------
 
-The non uniform discrete fourier transform (NUDFT) is a generalization of the discrete fourier transform (DFT) to non uniform sampling. The NUDFT is defined as:
+The non uniform discrete fourier transform (NUDFT) is a generalization of the discrete fourier transform (DFT) to non uniform sampling.
 
+For a signal :math:`x` sampled at location :math:`p_0, p_1, \ldots, p_{N-1}` we want to get the frequency points (non uniformly spaced) at :math:`\nu_0, \nu_1, \ldots, \nu_{N-1}`
 
+The NUDFT [1]_ is defined as:
 
-https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
+.. math::
+
+    X_k = \sum_{n=0}^{N-1} x(p_n) \exp(-2\pi i p_n \nu_k)
+
+where :math:`X_k` is the frequency point at :math:`\nu_k`.
+
+There exists 3 types of NUDFT:
+
+* Type 1: :math:`p_n = n/N` and :math:`\nu_k` are non uniformly spaced
+* Type 2: :math:`p_n` are non uniformly spaced and :math:`\nu_k = k/N`
+* Type 3: :math:`p_n` and :math:`\nu_k` are non uniformly spaced
+* If  :math:`p_n=n/N` and :math:`\nu_k=k/N` then the NUDFT is simply the Discrete Fourier Transform.
+
 
 Application in MRI
 ------------------
@@ -85,7 +99,7 @@ The Acquisition model for parallel imaging with :math:`L` coils  is:
 
 .. math::
 
-   y_{i,\ell} = \int_{\mathbb{R}^d} S_\ell(\boldsymbol{u})x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{k_i}} d\boldsymbol{u} + n_{i,\ell}
+   y_{i,\ell} = \int_{\mathbb{R}^d} S_\ell(\boldsymbol{u})x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} d\boldsymbol{u} + n_{i,\ell}
 
 Or using the operator notation:
 
@@ -132,3 +146,5 @@ These applications are not covered by this package, do it yourself !
 
 References
 ----------
+
+.. [1] https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
