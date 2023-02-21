@@ -1,36 +1,41 @@
 .. include:: <isonum.txt>
 
-The NUFFT Operator
-==================
+====================
+ The NUFFT Operator
+====================
 
 This document gives a general overview of the Non Uniform Fast fourier transform (NUFFT), and its application in MRI.
 
 
 The Non Uniform Discrete Fourier Transform
-------------------------------------------
+==========================================
 
 The non uniform discrete fourier transform (NUDFT) is a generalization of the discrete fourier transform (DFT) to non uniform sampling.
 
-For a signal :math:`x` sampled at location :math:`p_0, p_1, \ldots, p_{N-1}` we want to get the frequency points (non uniformly spaced) at :math:`\nu_0, \nu_1, \ldots, \nu_{N-1}`
+For a signal :math:`x` sampled at location :math:`p_0, p_1, \ldots, p_{N-1}` we want to get the frequency points (non uniformly spaced) at :math:`\nu_0, \nu_1, \ldots, \nu_{M-1}`
 
-The NUDFT [1]_ is defined as:
+The 1D-NUDFT [1]_ is defined as:
 
 .. math::
 
-    X_k = \sum_{n=0}^{N-1} x(p_n) \exp(-2\pi i p_n \nu_k)
+    X_k = \sum_{n=0}^{N-1} x(p_n) e^{ -2\pi i p_n \nu_k}
 
 where :math:`X_k` is the frequency point at :math:`\nu_k`.
+
+The multidimensional cases is derived by using vectorized location e.g :math:`\boldsymbol{p}_n` and  :math:`\boldsymbol{\nu_k}` as for the classical DFT.
 
 There exists 3 types of NUDFT:
 
 * Type 1: :math:`p_n = n/N` and :math:`\nu_k` are non uniformly spaced
-* Type 2: :math:`p_n` are non uniformly spaced and :math:`\nu_k = k/N`
+* Type 2: :math:`p_n` are non uniformly spaced and :math:`\nu_k = k/M`
 * Type 3: :math:`p_n` and :math:`\nu_k` are non uniformly spaced
-* If  :math:`p_n=n/N` and :math:`\nu_k=k/N` then the NUDFT is simply the Discrete Fourier Transform.
+* If  :math:`p_n=n/N` and :math:`\nu_k=k/M` then the NUDFT is simply the Discrete Fourier Transform.
+
+The naive implementation of the NUDFT is :math:`O(NM)`. This becomes problematic for large N and M. The NUFFT is a fast algorithm to compute the NUDFT. The NUFFT is a generalization of the fast fourier transform (FFT) to non uniform sampling. The underlying principles of the NUFFT algorithm are described briefly :ref:`down in the document <nufft-algo>`
 
 
 Application in MRI
-------------------
+==================
 
 In Magnetic Resonance Imaging (MRI) the raw data is acquired in the spatial Fourier domain (k-space).
 Traditional sampling scheme of the k-space usually consist of acquired line in a specific  direction, in a Cartesian fashion.
@@ -40,6 +45,7 @@ In order to accelerate the acquisition of required data, using a non Cartesian (
 The acquisition model is usually described as:
 
 .. math::
+
    y(\boldsymbol{\nu}_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} d\boldsymbol{u} + n_i, \quad i=1,\dots,M
 
 Where:
@@ -68,12 +74,12 @@ As the sampling locations :math:`\Omega` are non uniform and the image locations
 .. table:: Correspondance Table between NUFFT and MRI acquisition model.
     :widths: 25 25 25
 
-    ==========  =========  =================== ==========
-    NUFFT Type  Operation  MRI Transform       Operator
-    ==========  =========  =================== ==========
-    Type 1      Adjoint    Kspace |rarr| Image :math:`\mathcal{F}_\Omega^*`
-    Type 2      Forward    Image |rarr| Kspace :math:`\mathcal{F}_\Omega`
-    ==========  =========  =================== ==========
+    ==========  =========  ===================  ============================
+    NUFFT Type  Operation  MRI Transform        Operator
+    ==========  =========  ===================  ============================
+    Type 1      Adjoint    Kspace |rarr| Image  :math:`\mathcal{F}_\Omega^*`
+    Type 2      Forward    Image |rarr| Kspace  :math:`\mathcal{F}_\Omega`
+    ==========  =========  ===================  ============================
 
 
 .. attention::
@@ -87,11 +93,11 @@ As the sampling locations :math:`\Omega` are non uniform and the image locations
    solving this problem is **not** addressed here, but you can check `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for this purpose.
 
 Extension of the Acquisition model
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 The MRI Acquisition model can be extended in two main way. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensibility profile.
 
 Parallel Imaging Model
-""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~
 
 In MRI the acquired signal can be received by multiple antenna ("coils"). Each coils possess a specific sensitivity profile (each sees the object differently due to their physical layout).
 
@@ -118,24 +124,24 @@ Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coils. Such sensi
     TODO Add ref to SENSE and CG-Sense
 
 Off-Resonance Correction Model
-""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ..
     See ref in Guillaume Daval-Frerot Thesis
-
+.. _nufft-algo:
 
 The general NUFFT algorithm
----------------------------
+===========================
 
 
 Density Compensation
---------------------
+====================
 
 
 
 
 Other Application
------------------
+=================
 Apart from MRI, The NUFFT operator is also used for:
 
  - Electron tomography
@@ -145,6 +151,6 @@ Apart from MRI, The NUFFT operator is also used for:
 These applications are not covered by this package, do it yourself !
 
 References
-----------
+==========
 
 .. [1] https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
