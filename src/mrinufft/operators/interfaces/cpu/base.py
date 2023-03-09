@@ -112,7 +112,7 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
         return ksp
 
     def _op(self, image, coeffs):
-        return self.raw_op.type2(coeffs, image)
+        return self.raw_op.op(coeffs, image)
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -166,7 +166,7 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
         return coeffs
 
     def _adj_op(self, coeffs, image):
-        return self.raw_op.type1(self._apply_dc(coeffs), image)
+        return self.raw_op.adj_op(self._apply_dc(coeffs), image)
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
