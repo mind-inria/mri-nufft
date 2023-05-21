@@ -46,7 +46,7 @@ except OSError:
             CUFI_LIB = ctypes.cdll.LoadLibrary(full_lib_path)
 
     except Exception:
-        warnings.warn("Failed to find cufinufft library")
+        CUFI_LIB = None
 
 
 def _get_ctypes(dtype):
@@ -279,6 +279,8 @@ class RawCufinufft:
         init_plans=False,
         opts=None,
     ):
+        if CUFI_LIB is None:
+            raise RuntimeError("cufinufft library not found. Please install it first.")
 
         self.dtype = np.dtype(dtype)
 
