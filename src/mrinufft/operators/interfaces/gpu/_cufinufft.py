@@ -9,7 +9,6 @@ differentiated by 'f' suffix.
 """
 
 import atexit
-import warnings
 import ctypes
 import importlib
 import os
