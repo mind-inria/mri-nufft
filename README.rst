@@ -8,8 +8,8 @@ MRI-NUFFT
 
    * - .. image:: https://img.shields.io/badge/coverage-TBA-green
         :target: https://app.codecov.io/gh/paquiteau/mri-nufft
-     - .. image:: https://github.com/paquiteau/mri-nufft/workflows/CI/badge.svg
-     - .. image:: https://github.com/paquiteau/mri-nufft/workflows/CD/badge.svg
+     - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CI/badge.svg
+     - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
         :target: https://paquiteau.github.io/mri-nufft
@@ -67,7 +67,7 @@ Tests
 Documentation
 -------------
 
-Documentation is available online at https://paquiteau.github.io/mri-nufft
+Documentation is available online at https://mind-inria.github.io/mri-nufft
 
 It can also be built locally ::
 
