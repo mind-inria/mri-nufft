@@ -7,12 +7,12 @@ MRI-NUFFT
    :header-rows: 0
 
    * - .. image:: https://img.shields.io/badge/coverage-TBA-green
-        :target: https://app.codecov.io/gh/paquiteau/mri-nufft
+        :target: https://app.codecov.io/gh/mind-inria/mri-nufft
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CI/badge.svg
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
-        :target: https://paquiteau.github.io/mri-nufft
+        :target: https://mind-inria.github.io/mri-nufft
      - .. image:: https://img.shields.io/badge/release-TBA-blue
         :target: https://pypi.org/project/mri-nufft/
 
@@ -57,7 +57,7 @@ Cufinufft requires an external installation.
 
 Then clone and install the package::
 
-    $ git clone https://github.com:paquiteau/mri-nufft
+    $ git clone https://github.com:mind-inria/mri-nufft
     $ pip install ./mri-nufft
 
 Tests
