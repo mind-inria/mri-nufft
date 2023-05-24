@@ -52,7 +52,7 @@ profile="black"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    "--cov=denoiser",
+    "--cov=mrinufft",
     "--cov-report=term-missing",
     "--cov-report=xml"
 ]
