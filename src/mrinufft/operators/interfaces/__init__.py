@@ -14,6 +14,7 @@ __all__ = [
     "MRIfinufft",
     "MRIPynufft",
     "check_backend",
+    "get_operator",
 ]
 
 _REGISTERED_BACKENDS = {
