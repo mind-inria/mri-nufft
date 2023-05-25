@@ -13,7 +13,7 @@ MRI-NUFFT
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
         :target: https://mind-inria.github.io/mri-nufft
-     - .. image:: https://img.shields.io/badge/release-TBA-blue
+     - .. image:: https://img.shields.io/pypi/v/mri-nufft
         :target: https://pypi.org/project/mri-nufft/
 
 
