@@ -8,6 +8,9 @@ jobs:
   build-n-publish:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
+    environment: pypi-release
+    permissions:
+      id-token: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -31,5 +34,16 @@ jobs:
 
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_TOKEN }}
+
+  gh-release:
+    name: Create Draft Github Release
+    environment: pypi-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - uses: fregante/release-with-changelog@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
