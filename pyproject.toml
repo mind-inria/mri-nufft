@@ -1,6 +1,6 @@
 [project]
 name = "mri-nufft"
-description = "MRI Non Cartesian Fourier Operators based on (cu)finufft."
+description = "MRI Non Cartesian Fourier Operators with multiple computation backend."
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
 readme = "README.md"

@@ -1,7 +1,9 @@
-"""MRICufinufft Package.
+"""MRI-NUFFT
 
-MRICufinufft provides a easy to use fourier operator for non cartesian
+MRI-NUFFT provides a easy to use fourier operator for non cartesian
 reconstruction.
+
+Doing Non Cartesian MR Imaging has never been so easier.
 """
 
 from .operators import (
