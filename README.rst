@@ -2,6 +2,8 @@
 MRI-NUFFT
 =========
 
+Doing Non Cartesian MR Imaging has never been so easier.
+
 .. list-table::
    :widths: 25 25 25
    :header-rows: 0
@@ -13,7 +15,7 @@ MRI-NUFFT
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
         :target: https://mind-inria.github.io/mri-nufft
-     - .. image:: https://img.shields.io/badge/release-TBA-blue
+     - .. image:: https://img.shields.io/pypi/v/mri-nufft
         :target: https://pypi.org/project/mri-nufft/
 
 
@@ -21,7 +23,54 @@ This python package extends various NUFFT (Non Uniform Fast Fourier Transform) p
 
 In particular it provides an unified interface for all the methods, with extra forward Model step, such as coil sensitivity, density compensated adjoint and Off Resonance corrections (B0 inhomogeneities)
 
-Supported Library are:
+
+Usage
+=====
+
+.. TODO use a include file directive.
+.. code:: python
+
+    import mrinufft
+    import numpy as np
+
+    from scipy.dataset import face
+
+    # Create a 2D Radial trajectory for demo
+    samples_loc = mrinufft.initialize_2D_radial(20, 200)
+    # Get a 2D image for the demo
+    image = face(gray=True)[:512, :512]
+
+    ## The real deal ##
+    # Choose your NUFFT backend (installed independly from the package)
+    # And create the associated operator.
+    NufftOperator = mrinufft.get_operator("finufft")
+    nufft = NufftOperator(samples_loc, shape=(512, 512), density=True, n_coils=1)
+
+
+    kspace_data = nufft.op(image)  # Image -> Kspace
+    image2 = nufft.adj_op(kspace_data) # Kspace -> Image
+
+    # Show the results
+    fig, ax =  plt.subplots(2,1)
+
+    ax[0].imshow(image)
+    ax[1].imshow(abs(image2))
+    plt.show()
+
+.. TODO Add image
+
+For best image quality embed these step in a more complex reconstruction pipeline (for instance using `PySAP <https://github.com/CEA-COSMIC/pysap-mri>`_)
+
+Want to see more ?
+
+- Checks the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
+
+- Or Go visit the  `Examples <https://mind-inria.github.io/mri-nufft/auto_examples/index.html>`_
+
+Supported Libraries
+-------------------
+
+These library needs to be installed seperatly from this package.
 
 - GPU Implementations:
 
@@ -62,6 +111,7 @@ Then clone and install the package::
 
 Tests
 -----
+TBA
 
 
 Documentation
