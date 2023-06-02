@@ -165,8 +165,23 @@ Where :math:`E_mn = e^i\Delta\omega_0(u_n}t_m`.
 
 .. _nufft-algo:
 
-The general NUFFT algorithm
-===========================
+
+The Non Uniform Fast Fourier Transform
+======================================
+
+
+In order to lower the computational cost of the Non Uniform Fourier Transform, the main idea to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to `O(M\log(N))`). Thus, the main steps of the *Non Uniform Fast Fourier Transform* are for the type 1:
+
+1. Spreading/Interpolation of the non uniform point to an oversampled cartesian grid (typically with twice the resolution of the final image)
+2. Perform the (I)FFT on this image
+3. Downsampling to the final grid, and apply some bias correction.
+
+This package proposes interfaces to the main NUFFT libraries available. The choice of the Spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods.
+
+Type 2 Transform performs those steps in reverse order.
+
+.. TODO Add Reference to all the NUFFT methods article
+   Maybe to Fessler never-going-to-be-published book.
 
 
 Density Compensation
@@ -181,6 +196,7 @@ Apart from MRI, The NUFFT operator is also used for:
 
  - Electron tomography
  - Probability Density Function estimation
+ - Astronomical Imaging
  - ...
 
 These applications are not covered by this package, do it yourself !
