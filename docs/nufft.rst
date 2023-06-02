@@ -126,8 +126,43 @@ Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coils. Such sensi
 Off-Resonance Correction Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-..
-    See ref in Guillaume Daval-Frerot Thesis
+The Constant magnetic field applied in a MRI Machine :math:`B0` (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at interfaces with different magnetic susceptibility (such as air-tissue interfaces in the nose and ear canals). Those field perturbation introduces a (spatially varying) shift in the frequency acquired (noted :math:`\Delta\omega_0`) modifies the forward model of acquisition. Fortunately such Inhomogeneity map can be acquired separatly (or estimated from the data at hand, but this goes beyond the scope of this package)
+
+.. math::
+
+   y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u} t_i)} d\boldsymbol{u}
+
+where :math:`t_i` is the time at which the frequency :math:`\nu_i` is acquired.
+With these field pertubation, the fourier model of the acquisition does not hold anymore.
+Similarly at the reconstruction we have
+
+.. math::
+
+   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n} t_m}
+
+The main approach (initially proposed by Noll et al. [2]_) is to approximate the mixed-domain exponential term, by a splitting scheme
+
+.. math::
+
+   e^{i\Delta\omega(\boldsymbol{u_n} t_m)} = \sum_{\ell=1}^L b_{m, \ell}c_{\ell, n}
+
+Yielding the following model, where :math:`L \ll M, N` regular Fourier Transform are performed.
+
+   x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}
+
+The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C=(c_\ell, n) \in \mathbb{C}^{L\times N}` can be (optimally) estimated by solving the following matrix factorisation problem [3]_:
+
+.. math::
+
+   \hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2
+
+Where :math:`E_mn = e^i\Delta\omega_0(u_n}t_m`.
+
+
+.. TODO Add Reference to the Code doing this.
+.. TODO Reference for SVI, MTI, MFI and pointers to pysap-mri for their estimation.
+
+
 .. _nufft-algo:
 
 The general NUFFT algorithm
@@ -154,3 +189,5 @@ References
 ==========
 
 .. [1] https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
+.. [2] Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., "A homogeneity correction method for magnetic resonance imaging with time-varying gradients", IEEE Transaction on Medical Imaging (1991), pp. 629-637
+.. [3] Fessler, J. A., Lee, S., Olafsson, V. T., Shi, H. R., Noll, D. C., "Toeplitz-based iterative image reconstruction for MRI with correction for magnetic field inhomogeneity",  IEEE Transactions on Signal Processing 53.9 (2005), pp. 3393–3402.
