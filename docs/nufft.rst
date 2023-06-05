@@ -4,13 +4,13 @@
  The NUFFT Operator
 ====================
 
-This document gives a general overview of the Non Uniform Fast fourier transform (NUFFT), and its application in MRI.
+This document gives a general overview of the Non-Uniform Fast fourier transform (NUFFT), and its application in MRI.
 
 
-The Non Uniform Discrete Fourier Transform
+The Non-Uniform Discrete Fourier Transform
 ==========================================
 
-The non uniform discrete fourier transform (NUDFT) is a generalization of the discrete fourier transform (DFT) to non uniform sampling.
+The Non-Uniform Discrete Fourier Transform (NUDFT) is a generalization of the Discrete Fourier Transform (DFT) to non-uniform sampling.
 
 For a signal :math:`x` sampled at location :math:`p_0, p_1, \ldots, p_{N-1}` we want to get the frequency points (non uniformly spaced) at :math:`\nu_0, \nu_1, \ldots, \nu_{M-1}`
 
@@ -22,7 +22,7 @@ The 1D-NUDFT [1]_ is defined as:
 
 where :math:`X_k` is the frequency point at :math:`\nu_k`.
 
-The multidimensional cases is derived by using vectorized location e.g :math:`\boldsymbol{p}_n` and  :math:`\boldsymbol{\nu_k}` as for the classical DFT.
+The multidimensional cases are derived by using vectorized location e.g :math:`\boldsymbol{p}_n` and  :math:`\boldsymbol{\nu_k}` as for the classical DFT.
 
 There exists 3 types of NUDFT:
 
@@ -31,14 +31,14 @@ There exists 3 types of NUDFT:
 * Type 3: :math:`p_n` and :math:`\nu_k` are non uniformly spaced
 * If  :math:`p_n=n/N` and :math:`\nu_k=k/M` then the NUDFT is simply the Discrete Fourier Transform.
 
-The naive implementation of the NUDFT is :math:`O(NM)`. This becomes problematic for large N and M. The NUFFT is a fast algorithm to compute the NUDFT. The NUFFT is a generalization of the fast fourier transform (FFT) to non uniform sampling. The underlying principles of the NUFFT algorithm are described briefly :ref:`down in the document <nufft-algo>`
+The naive implementation of the NUDFT is :math:`O(NM)`. This becomes problematic for large N and M. The NUFFT is a fast algorithm to compute the NUDFT. The NUFFT is a generalization of the Fast Fourier Transform (FFT) to non-uniform sampling. The underlying principles of the NUFFT algorithm are described briefly :ref:`down in the document <nufft-algo>`
 
 
 Application in MRI
 ==================
 
-In Magnetic Resonance Imaging (MRI) the raw data is acquired in the spatial Fourier domain (k-space).
-Traditional sampling scheme of the k-space usually consist of acquired line in a specific  direction, in a Cartesian fashion.
+In Magnetic Resonance Imaging (MRI) the raw data is acquired in the k-space, ideally corresponding to the Fourier domain.
+Traditional sampling schemes of the k-space usually consist of acquired line in a specific direction, in a Cartesian fashion.
 
 In order to accelerate the acquisition of required data, using a non Cartesian (i.e. non uniformly distributed in *every* direction) sampling scheme offer great opportunity.
 
@@ -67,7 +67,7 @@ This is stated using the operator notation:
 .. math::
     \boldsymbol{y} = \mathcal{F}_\Omega (\boldsymbol{x}) + \boldsymbol{n}
 
-As the sampling locations :math:`\Omega` are non uniform and the image locations :math:`\boldsymbol{u}_j` are uniform, :math:`\mathcal{F}_\Omega` is a NUDFT operator, and the equation above describe a Type 2 NUDFT. Similarly the adjoint operator is:
+As the sampling locations :math:`\Omega` are non-uniform and the image locations :math:`\boldsymbol{u}_j` are uniform, :math:`\mathcal{F}_\Omega` is a NUDFT operator, and the equation above describe a Type 2 NUDFT. Similarly the adjoint operator is:
 
 
 
@@ -94,14 +94,14 @@ As the sampling locations :math:`\Omega` are non uniform and the image locations
 
 Extension of the Acquisition model
 ----------------------------------
-The MRI Acquisition model can be extended in two main way. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensibility profile.
+The MRI acquisition model can be extended in two main way. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensitivity profile.
 
 Parallel Imaging Model
 ~~~~~~~~~~~~~~~~~~~~~~
 
-In MRI the acquired signal can be received by multiple antenna ("coils"). Each coils possess a specific sensitivity profile (each sees the object differently due to their physical layout).
+In MRI the acquired signal can be received by multiple antenna ("coils"). Each coil possesses a specific sensitivity profile (i.e. each sees the object differently due to its physical layout).
 
-The Acquisition model for parallel imaging with :math:`L` coils  is:
+The acquisition model for parallel imaging with :math:`L` coils  is:
 
 .. math::
 
@@ -118,7 +118,7 @@ Or using the operator notation:
     \end{bmatrix}
     \boldsymbol{x} + \boldsymbol{n}_\ell  = \mathcal{F}_\Omega S \otimes \boldsymbol{x} + \tilde{\boldsymbol{n}}
 
-Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coils. Such sensitivity maps can be acquired separetely by acquiring low frequency of the kspace, or estimated from the data.
+Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coil. Such sensitivity maps can be acquired separetely by acquiring low frequency of the kspace, or estimated from the data.
 
 ..
     TODO Add ref to SENSE and CG-Sense
@@ -126,31 +126,32 @@ Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coils. Such sensi
 Off-Resonance Correction Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Constant magnetic field applied in a MRI Machine :math:`B0` (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at interfaces with different magnetic susceptibility (such as air-tissue interfaces in the nose and ear canals). Those field perturbation introduces a (spatially varying) shift in the frequency acquired (noted :math:`\Delta\omega_0`) modifies the forward model of acquisition. Fortunately such Inhomogeneity map can be acquired separatly (or estimated from the data at hand, but this goes beyond the scope of this package)
+The constant magnetic field applied in a MRI machine :math:`B0` (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at interfaces with different magnetic susceptibilities (such as air-tissue interfaces in the nose and ear canals). Those field perturbations introduce a spatially varying phase shift in the frequencies acquired (noted :math:`\Delta\omega_0`), making the acquisition deviate from the convenient Fourier model. Fortunately, this inhomogeneity map can be acquired separatly or estimated (but this goes beyond the scope of this package) and integrated in the model as:
 
 .. math::
 
-   y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u} t_i)} d\boldsymbol{u}
+   y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}
 
-where :math:`t_i` is the time at which the frequency :math:`\nu_i` is acquired.
-With these field pertubation, the fourier model of the acquisition does not hold anymore.
-Similarly at the reconstruction we have
+where :math:`t_i` is the time at which the frequency :math:`\nu_i` is acquired. Similarly at the reconstruction we have
 
 .. math::
 
-   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n} t_m}
+   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}
 
-The main approach (initially proposed by Noll et al. [2]_) is to approximate the mixed-domain exponential term, by a splitting scheme
+With these mixed-domain field pertubations, the Fourier model does not hold anymore and the FFT algorithm can not be used.
+The main approach (initially proposed by Noll et al. [2]_) is to approximate the mixed-domain exponential term by splitting it into single-domain weights :math:`b_{m, \ell}` and :math:`c_{\ell, n}`:
 
 .. math::
 
-   e^{i\Delta\omega(\boldsymbol{u_n} t_m)} = \sum_{\ell=1}^L b_{m, \ell}c_{\ell, n}
+   e^{i\Delta\omega(\boldsymbol{u_n}) t_m} = \sum_{\ell=1}^L b_{m, \ell}c_{\ell, n}
 
-Yielding the following model, where :math:`L \ll M, N` regular Fourier Transform are performed.
+Yielding the following model, where :math:`L \ll M, N` regular Fourier transforms are performed to approximate the non-Fourier transform.
+
+.. math::
 
    x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}
 
-The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C=(c_\ell, n) \in \mathbb{C}^{L\times N}` can be (optimally) estimated by solving the following matrix factorisation problem [3]_:
+The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C=(c_\ell, n) \in \mathbb{C}^{L\times N}` can be (optimally) estimated for any given :math:`L` by solving the following matrix factorisation problem [3]_:
 
 .. math::
 
@@ -170,15 +171,15 @@ The Non Uniform Fast Fourier Transform
 ======================================
 
 
-In order to lower the computational cost of the Non Uniform Fourier Transform, the main idea to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to `O(M\log(N))`). Thus, the main steps of the *Non Uniform Fast Fourier Transform* are for the type 1:
+In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to `O(M\log(N))`). Thus, the main steps of the *Non-Uniform Fast Fourier Transform* are for the type 1:
 
-1. Spreading/Interpolation of the non uniform point to an oversampled cartesian grid (typically with twice the resolution of the final image)
+1. Spreading/Interpolation of the non-uniform point to an oversampled Cartesian grid (typically with twice the resolution of the final image)
 2. Perform the (I)FFT on this image
 3. Downsampling to the final grid, and apply some bias correction.
 
-This package proposes interfaces to the main NUFFT libraries available. The choice of the Spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods.
+This package proposes interfaces to the main NUFFT libraries available. The choice of the spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods.
 
-Type 2 Transform performs those steps in reverse order.
+Type 2 transform performs those steps in reversed order.
 
 .. TODO Add Reference to all the NUFFT methods article
    Maybe to Fessler never-going-to-be-published book.
