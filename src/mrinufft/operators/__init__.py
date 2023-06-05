@@ -1,4 +1,4 @@
-"""Collection of operators applying the NUFFT used in a MRI  context."""
+"""Collection of operators applying the NUFFT used in a MRI context."""
 from .interfaces import (
     MRICufiNUFFT,
     MRITensorflowNUFFT,

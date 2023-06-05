@@ -1,9 +1,9 @@
 """MRI-NUFFT
 
-MRI-NUFFT provides a easy to use fourier operator for non cartesian
+MRI-NUFFT provides an easy to use Fourier operator for non-Cartesian
 reconstruction.
 
-Doing Non Cartesian MR Imaging has never been so easier.
+Doing non-Cartesian MRI has never been so easy.
 """
 
 from .operators import (
@@ -15,6 +15,19 @@ from .operators import (
     check_backend,
 )
 
+from .trajectories import (
+    initialize_2D_radial,
+    initialize_2D_spiral,
+    initialize_2D_cones,
+    initialize_2D_sinusoide,
+    initialize_2D_rosette,
+    initialize_2D_polar_lissajous,
+    initialize_2D_lissajous,
+    initialize_2D_waves,
+    initialize_3D_from_2D_expansion,
+    initialize_3D_cones,
+)
+
 __all__ = [
     "get_operator",
     "check_backend",
@@ -22,6 +35,16 @@ __all__ = [
     "MRITensorflowNUFFT",
     "MRIFourierCorrected",
     "MRIfinufft",
+    "initialize_2D_radial",
+    "initialize_2D_spiral",
+    "initialize_2D_cones",
+    "initialize_2D_sinusoide",
+    "initialize_2D_rosette",
+    "initialize_2D_polar_lissajous",
+    "initialize_2D_lissajous",
+    "initialize_2D_waves",
+    "initialize_3D_from_2D_expansion",
+    "initialize_3D_cones",
 ]
 
 
