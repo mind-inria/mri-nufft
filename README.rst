@@ -2,7 +2,7 @@
 MRI-NUFFT
 =========
 
-Doing Non Cartesian MR Imaging has never been so easier.
+Doing non-Cartesian MR Imaging has never been so easy.
 
 .. list-table::
    :widths: 25 25 25
@@ -19,9 +19,9 @@ Doing Non Cartesian MR Imaging has never been so easier.
         :target: https://pypi.org/project/mri-nufft/
 
 
-This python package extends various NUFFT (Non Uniform Fast Fourier Transform) python bindings for MRI Reconstruction usage.
+This python package extends various NUFFT (Non Uniform Fast Fourier Transform) python bindings used for MRI reconstruction.
 
-In particular it provides an unified interface for all the methods, with extra forward Model step, such as coil sensitivity, density compensated adjoint and Off Resonance corrections (B0 inhomogeneities)
+In particular, it provides a unified interface for all the methods with extra features, such as coil sensitivity, density compensated adjoint and off-resonance corrections (for B0 inhomogeneities).
 
 
 Usage
@@ -59,18 +59,18 @@ Usage
 
 .. TODO Add image
 
-For best image quality embed these step in a more complex reconstruction pipeline (for instance using `PySAP <https://github.com/CEA-COSMIC/pysap-mri>`_)
+For best image quality, embed these steps in a more complex reconstruction pipeline (for instance using `PySAP <https://github.com/CEA-COSMIC/pysap-mri>`_).
 
 Want to see more ?
 
-- Checks the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
+- Check the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
 
-- Or Go visit the  `Examples <https://mind-inria.github.io/mri-nufft/auto_examples/index.html>`_
+- Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/auto_examples/index.html>`_
 
 Supported Libraries
 -------------------
 
-These library needs to be installed seperatly from this package.
+These libraries needs to be installed seperately from this package.
 
 - GPU Implementations:
 
@@ -94,7 +94,7 @@ These library needs to be installed seperatly from this package.
   - `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
       CPU version of pyNUFFT, using standard python libraries.
 
-The NUFFT operation is often not enough to provide good image quality by itself. It is best used in an Compress Sensing setup. For such use cases,
+The NUFFT operation is often not enough to provide good image quality by itself: It is best used in a Compress Sensing setup. For such use cases,
 
 you can check the `pysap <https://github.com/CEA-COSMIC/pysap/>`_ package suite and  `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for MRI dedicated solutions.
 
@@ -134,4 +134,4 @@ And visit `localhost:8000` on your web browser.
 
 Related Packages
 ----------------
-For Reconstruction methods of MRI image from non cartesian sampling, see `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ and `ModOpt <https://github.com/CEA-COSMIC/ModOpt>`_ 
+For reconstruction methods of MR images from non-Cartesian sampling, see `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ and `ModOpt <https://github.com/CEA-COSMIC/ModOpt>`_ 
