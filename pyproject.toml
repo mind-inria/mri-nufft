@@ -14,7 +14,9 @@ dynamic = ["version"]
 gpu = ["cupy-wheel"]
 test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar"]
 dev = ["black", "isort", "ruff"]
-doc = ["sphinx<5", "pydata-sphinx-theme", "sphinx-gallery", "matplotlib"]
+
+doc = ["sphinx", "pydata-sphinx-theme", "sphinx-gallery", "matplotlib", "pooch"]
+# pooch is for scipy.datasets
 
 [build-system]
 requires = ["setuptools", "setuptools-scm[toml]", "wheel"]

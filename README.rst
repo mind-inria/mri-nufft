@@ -34,7 +34,7 @@ Usage
     import mrinufft
     import numpy as np
 
-    from scipy.dataset import face
+    from scipy.datasets import face
 
 
     # Create a 2D Radial trajectory for demo
@@ -123,7 +123,7 @@ It can also be built locally ::
 
   $ cd mri-nufft
   $ pip install -e .[doc]
-  $ python -m sphinx-build docs docs_build
+  $ python -m sphinx docs docs_build
 
 To view the html doc locally you can use ::
 

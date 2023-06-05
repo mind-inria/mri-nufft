@@ -72,7 +72,7 @@ As the sampling locations :math:`\Omega` are non-uniform and the image locations
 
 
 .. table:: Correspondance Table between NUFFT and MRI acquisition model.
-    :widths: 25 25 25
+    :widths: 25 25 25 25
 
     ==========  =========  ===================  ============================
     NUFFT Type  Operation  MRI Transform        Operator
