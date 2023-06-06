@@ -15,6 +15,7 @@ from .trajectory3D import (
     initialize_3D_cones,
 )
 
+from .display import display_2D_trajectory
 
 __all__ = [
     "initialize_2D_radial",
@@ -27,5 +28,6 @@ __all__ = [
     "initialize_2D_waves",
     "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
+    "display_2D_trajectory",
 ]
 
