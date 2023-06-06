@@ -1,15 +1,18 @@
 import numpy as np
 
-from .utils import (KMAX,
-                    R2D,
-                    initialize_tilt,
-                    initialize_spiral,
-                    compute_coprime_factors)
+from .utils import (
+    KMAX,
+    R2D,
+    initialize_tilt,
+    initialize_spiral,
+    compute_coprime_factors,
+)
 
 
 ################################
 # 2D TRAJECTORY INITIALIZATION #
 ################################
+
 
 def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     # Initialize a first shot
@@ -25,13 +28,13 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     return trajectory2D
 
 
-def initialize_2D_spiral(Nc, Ns, tilt="uniform", in_out=False,
-                         nb_revolutions=1, spiral="archimedes"):
+def initialize_2D_spiral(
+    Nc, Ns, tilt="uniform", in_out=False, nb_revolutions=1, spiral="archimedes"
+):
     # Initialize a first shot in polar coordinates
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
-    angles = 2 * np.pi * nb_revolutions \
-           * (np.abs(segment) ** initialize_spiral(spiral))
+    angles = 2 * np.pi * nb_revolutions * (np.abs(segment) ** initialize_spiral(spiral))
 
     # Convert to Cartesian coordinates and rotate Nc times
     trajectory2D = np.zeros((Nc, Ns, 2))
@@ -42,16 +45,14 @@ def initialize_2D_spiral(Nc, Ns, tilt="uniform", in_out=False,
     return trajectory2D
 
 
-def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False,
-                        nb_zigzags=5, width=1):
+def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1):
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
     angles = 2 * np.pi * nb_zigzags * np.abs(segment)
     trajectory2D = np.zeros((Nc, Ns, 2))
     trajectory2D[0, :, 0] = radius
-    trajectory2D[0, :, 1] = radius * np.sin(angles) \
-                          * width * np.pi / Nc / (1 + in_out)
+    trajectory2D[0, :, 1] = radius * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out))
@@ -60,16 +61,16 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False,
     return trajectory2D
 
 
-def initialize_2D_sinusoide(Nc, Ns, tilt="uniform", in_out=False,
-                            nb_zigzags=5, width=1):
+def initialize_2D_sinusoide(
+    Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1
+):
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
     angles = 2 * np.pi * nb_zigzags * segment
     trajectory2D = np.zeros((Nc, Ns, 2))
     trajectory2D[0, :, 0] = radius
-    trajectory2D[0, :, 1] = KMAX * np.sin(angles) \
-                          * width * np.pi / Nc / (1 + in_out)
+    trajectory2D[0, :, 1] = KMAX * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out))
@@ -79,13 +80,13 @@ def initialize_2D_sinusoide(Nc, Ns, tilt="uniform", in_out=False,
 
 
 def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
-    # Prepare to parametrize with coprime factor according to Nc parity
+    # Prepare to parametrize with coprime factor according to Nc parity
     odd = Nc % 2
     coprime = compute_coprime_factors(
         Nc // (2 - odd),
         coprime_index + 1,
         start=1 if odd else (Nc // 2) % 2 + 1,
-        update=2
+        update=2,
     )[-1]
 
     # Define the whole curve in polar coordinates
@@ -110,7 +111,12 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
     shift = np.pi * (Nc % 2 - in_out) / 2
     radius = KMAX * np.sin(Nc * segment + shift)
     coprime_factors = compute_coprime_factors(Nc, coprime_index + 1, start=Nc % 2 + 1)
-    angles = np.pi / (1 + in_out) / nb_segments * np.sin((Nc - coprime_factors[-1]) * segment)
+    angles = (
+        np.pi
+        / (1 + in_out)
+        / nb_segments
+        * np.sin((Nc - coprime_factors[-1]) * segment)
+    )
 
     # Convert polar to Cartesian coordinates for one segment
     trajectory2D = np.zeros((Nc * nb_segments, Ns, 2))

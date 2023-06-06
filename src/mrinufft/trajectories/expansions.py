@@ -1,14 +1,20 @@
 import numpy as np
 
-from .utils import (KMAX,
-                    DEFAULT_CONE_ANGLE,
-                    DEFAULT_HELIX_ANGLE,
-                    Rx, Ry, Rz, initialize_tilt)
+from .utils import (
+    KMAX,
+    DEFAULT_CONE_ANGLE,
+    DEFAULT_HELIX_ANGLE,
+    Rx,
+    Ry,
+    Rz,
+    initialize_tilt,
+)
 
 
 ########################
-# TRAJECTORY EXPANSION #
+# TRAJECTORY EXPANSION #
 ########################
+
 
 def stack_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
     # Initialize output and z-axis
@@ -19,12 +25,12 @@ def stack_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
 
     # Start stacking the planes
     new_trajectory[0, :, :2] = trajectory
-    new_trajectory[0, :,  2] = z_axis[0]
+    new_trajectory[0, :, 2] = z_axis[0]
     for i in range(1, nb_repetitions):
         angle_tilt = i * delta_tilt
         rotation_tilt = Rz(angle_tilt)
         new_trajectory[i] = new_trajectory[0] @ rotation_tilt
-        new_trajectory[i, :,  2] = z_axis[i]
+        new_trajectory[i, :, 2] = z_axis[i]
     return new_trajectory.reshape(nb_repetitions * Nc, Ns, 3)
 
 
@@ -47,51 +53,65 @@ def rotate_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
     return new_trajectory.reshape(nb_repetitions * Nc, Ns, 3)
 
 
-def cone_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps",
-                            in_out=False, max_angle=DEFAULT_CONE_ANGLE):
+def cone_2D_to_3D_expansion(
+    trajectory,
+    nb_repetitions,
+    tilt="intergaps",
+    in_out=False,
+    max_angle=DEFAULT_CONE_ANGLE,
+):
     # Initialize angles
     Nc, Ns = trajectory.shape[:2]
     delta_tilt = initialize_tilt(tilt, nb_repetitions)
-    alphas = np.linspace(-max_angle if (not in_out) else 0,
-                         +max_angle, nb_repetitions // (1 + in_out) + 2)[1:-1] # Avoid 0 angles
+    alphas = np.linspace(
+        -max_angle if (not in_out) else 0,
+        +max_angle,
+        nb_repetitions // (1 + in_out) + 2,
+    )[
+        1:-1
+    ]  # Avoid 0 angles
 
     # Start processing the trajectory
     new_trajectory = np.zeros((nb_repetitions, Nc, Ns, 3))
     new_trajectory[..., :2] = trajectory[None]
     new_trajectory = new_trajectory.reshape((nb_repetitions, Nc * Ns, 3))
     for i, alpha in enumerate(alphas):
-        # Apply tilt
+        # Apply tilt
         angle_tilt = i * delta_tilt
         rotation_tilt = Rz(angle_tilt)
         new_trajectory[i] = new_trajectory[i] @ rotation_tilt
 
-        # Apply cone expansion
-        new_trajectory[i, :, 2] = np.sin(alpha) \
-                                * np.linalg.norm(new_trajectory[i, :, :2], axis=-1)
+        # Apply cone expansion
+        new_trajectory[i, :, 2] = np.sin(alpha) * np.linalg.norm(
+            new_trajectory[i, :, :2], axis=-1
+        )
         new_trajectory[i, :, 0] = np.cos(alpha) * new_trajectory[i, :, 0]
         new_trajectory[i, :, 1] = np.cos(alpha) * new_trajectory[i, :, 1]
 
     # Adjust planes to be continuous if in-out
-    if (in_out):
+    if in_out:
         # Flatten planes
         new_trajectory = new_trajectory.reshape((nb_repetitions, Nc, 2, Ns // 2, 3))
         even, odd = new_trajectory[..., 0, :, :], new_trajectory[..., 1, :, :]
         odd[..., 2] = -odd[..., 2]
         new_trajectory = np.stack([even, odd], axis=2)
-        # Duplicate planes
+        # Duplicate planes
         fhalf = nb_repetitions // 2
-        shalf = nb_repetitions - fhalf # Handle odd repetition numbers
+        shalf = nb_repetitions - fhalf  # Handle odd repetition numbers
         new_trajectory[shalf:] = new_trajectory[:fhalf]
         new_trajectory[shalf:, ..., 2] = -new_trajectory[:fhalf, ..., 2]
     return new_trajectory.reshape(nb_repetitions * Nc, Ns, 3)
 
 
-def helix_2D_to_3D_expansion(trajectory, nb_repetitions, in_out=False,
-                             max_angle=DEFAULT_HELIX_ANGLE):
-    # TODO: fix max_angle
+def helix_2D_to_3D_expansion(
+    trajectory, nb_repetitions, in_out=False, max_angle=DEFAULT_HELIX_ANGLE
+):
+    # TODO: fix max_angle
     # Initialize angles and radius
     Nc, Ns = trajectory.shape[:2]
-    alphas = max_angle * np.linspace(0, 1, nb_repetitions * Nc + 2)[1:-1] # Avoid 0 angles
+    alphas = (
+        max_angle * np.linspace(0, 1, nb_repetitions * Nc + 2)[1:-1]
+    )  # Avoid 0 angles
     radius = np.linspace(-1 if (in_out) else 0, 1, Ns)
 
     # Start processing the trajectory
@@ -102,7 +122,7 @@ def helix_2D_to_3D_expansion(trajectory, nb_repetitions, in_out=False,
         new_trajectory[i, :, 2] = KMAX * radius * np.cos(alpha)
 
     # Adjust shots to be continuous if in-out
-    if (in_out):
+    if in_out:
         # Rotate second halves
         new_trajectory = new_trajectory.reshape((nb_repetitions, Nc, 2, Ns // 2, 3))
         even, odd = new_trajectory[..., 0, :, :], new_trajectory[..., 1, :, :]

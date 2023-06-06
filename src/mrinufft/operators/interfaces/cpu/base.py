@@ -19,7 +19,6 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
         n_coils=1,
         smaps=None,
     ):
-
         self.shape = shape
         self.n_samples = len(samples)
         if samples.max() > np.pi:

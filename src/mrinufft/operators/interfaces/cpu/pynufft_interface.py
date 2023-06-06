@@ -16,7 +16,6 @@ class RawPyNUFFT:
     """Wrapper around PyNUFFT object."""
 
     def __init__(self, samples, shape, osf=2, interpolator_shape=6):
-
         self._nufft_obj = pynufft.NUFFT()
         self._nufft_obj.plan(
             samples,

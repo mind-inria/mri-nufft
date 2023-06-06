@@ -30,4 +30,3 @@ __all__ = [
     "initialize_3D_cones",
     "display_2D_trajectory",
 ]
-
