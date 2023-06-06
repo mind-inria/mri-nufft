@@ -1,3 +1,4 @@
+"""Display function for trajectories."""
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,6 +24,7 @@ FONTSIZE = 18
 
 
 def setup_2D_ticks(size, ax=None):
+    """Add ticks to 2D plot."""
     if ax is None:
         plt.figure(figsize=(size, size))
         ax = plt.gca()
@@ -37,6 +39,7 @@ def setup_2D_ticks(size, ax=None):
 
 
 def setup_3D_ticks(size):
+    """Add ticks to 3D plot."""
     fig = plt.figure(figsize=(size, size))
     ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -55,6 +58,26 @@ def setup_3D_ticks(size):
 def display_2D_trajectory(
     trajectory, size=5, one_shot=False, constraints=False, subfigure=None
 ):
+    """Display of 2D trajectory.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to display.
+    size : float, optional
+        Size of the figure.
+    one_shot : bool, optional
+        If True, highlight the trajectory of the middle repetition.
+    constraints : bool, optional
+        If True, display the points where the gradients and slews are above the
+        default limits.
+    subfigure: plt.Axes or None, optional
+
+    Returns
+    -------
+    ax : plt.Axes
+        Axes of the figure.
+    """
     Nc, Ns = trajectory.shape[:2]
     ax = setup_2D_ticks(size, subfigure)
     trajectory = trajectory.reshape((Nc, -1, 2))
@@ -96,6 +119,33 @@ def display_3D_trajectory(
     one_shot=False,
     constraints=False,
 ):
+    """Display of 3D trajectory.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to display.
+    nb_repetitions : int
+        Number of repetitions.
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shots.
+    size : float, optional
+        Size of the figure.
+    per_plane : bool, optional
+        If True, display the trajectory for each plane.
+    one_shot : bool, optional
+        If True, highlight the trajectory of the middle repetition.
+    constraints : bool, optional
+        If True, display the points where the gradients and slews are above the
+        default limits.
+
+    Returns
+    -------
+    ax : plt.Axes
+        Axes of the figure.
+    """
     ax = setup_3D_ticks(size)
     trajectory = trajectory.reshape((nb_repetitions, Nc, Ns, 3))
     for i in range(nb_repetitions):
