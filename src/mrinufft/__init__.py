@@ -1,4 +1,4 @@
-"""MRI-NUFFT
+"""MRI-NUFFT.
 
 MRI-NUFFT provides an easy to use Fourier operator for non-Cartesian
 reconstruction.

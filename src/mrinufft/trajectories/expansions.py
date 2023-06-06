@@ -3,9 +3,7 @@ import numpy as np
 from .utils import (KMAX,
                     DEFAULT_CONE_ANGLE,
                     DEFAULT_HELIX_ANGLE,
-                    Rx, Ry, Rz, Rv,
-                    initialize_tilt,
-                    initialize_spiral)
+                    Rx, Ry, Rz, initialize_tilt)
 
 
 ########################

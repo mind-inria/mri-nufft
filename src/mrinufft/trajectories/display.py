@@ -27,7 +27,7 @@ FONTSIZE = 18
 
 def setup_2D_ticks(size, ax=None):
     if (ax is None):
-        fig = plt.figure(figsize=(size, size))
+        plt.figure(figsize=(size, size))
         ax = plt.gca()
     ax.grid(True)
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -41,7 +41,7 @@ def setup_2D_ticks(size, ax=None):
 
 def setup_3D_ticks(size):
     fig = plt.figure(figsize=(size, size))
-    ax = fig.add_subplot(projection='3d')
+    ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])

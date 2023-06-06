@@ -9,9 +9,8 @@ from .trajectory2D import (initialize_2D_radial,
                            initialize_2D_rosette,
                            initialize_2D_cones)
 from .utils import (KMAX,
-                    Rx, Ry, Rz, Rv,
-                    initialize_tilt,
-                    initialize_spiral)
+                    Rv,
+                    initialize_tilt)
 
 
 ################################
@@ -30,7 +29,7 @@ def initialize_3D_from_2D_expansion(basis, expansion, Nc, Ns, nb_repetitions,
     if (isinstance(basis, np.ndarray)):
         trajectory2D = basis
     elif (basis not in bases.keys()):
-        raise NotImplementedError("Unknown 2D trajectory basis: {}".format(basis))
+        raise NotImplementedError(f"Unknown 2D trajectory basis: {basis}")
     else:
         basis_function = bases[basis]
         trajectory2D = basis_function(Nc, Ns, **basis_kwargs)
@@ -43,7 +42,7 @@ def initialize_3D_from_2D_expansion(basis, expansion, Nc, Ns, nb_repetitions,
         "helices": helix_2D_to_3D_expansion,
     }
     if (expansion not in expansions.keys()):
-        raise NotImplementedError("Unknown 3D expansion: {}".format(expansion))
+        raise NotImplementedError(f"Unknown 3D expansion: {expansion}")
     expansion_function = expansions[expansion]
     trajectory3D = expansion_function(trajectory2D, nb_repetitions,
                                       **expansion_kwargs)

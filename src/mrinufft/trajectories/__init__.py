@@ -1,4 +1,4 @@
-""" Collection of trajectories and tools used for non-Cartesian MRI. """
+"""Collection of trajectories and tools used for non-Cartesian MRI."""
 from .trajectory2D import (
     initialize_2D_radial,
     initialize_2D_spiral,
