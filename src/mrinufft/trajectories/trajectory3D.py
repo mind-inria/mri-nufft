@@ -1,3 +1,4 @@
+"""3D Trajectory initialization functions."""
 import numpy as np
 
 from .expansions import (
@@ -21,8 +22,37 @@ from .utils import KMAX, Rv, initialize_tilt
 
 
 def initialize_3D_from_2D_expansion(
-    basis, expansion, Nc, Ns, nb_repetitions, basis_kwargs={}, expansion_kwargs={}
+    basis, expansion, Nc, Ns, nb_repetitions, basis_kwargs=None, expansion_kwargs=None
 ):
+    """Initialize 3D trajectories from 2D trajectories.
+
+    Parameters
+    ----------
+    basis : str or array_like
+        2D trajectory basis.
+    expansion : str
+        3D trajectory expansion.
+    Nc : int
+        Number of shots
+    Ns: int
+        Number of samples per shot.
+    nb_repetitions : int
+        Number of repetitions of the 2D trajectory.
+    basis_kwargs : dict, optional
+        Keyword arguments for the 2D trajectory basis, by default {}
+    expansion_kwargs : dict, optional
+        Keyword arguments for the 3D trajectory expansion, by default {}
+
+    Returns
+    -------
+    array_like
+        3D trajectory
+    """
+    # Initialization of the keyword arguments
+    if basis_kwargs is None:
+        basis_kwargs = {}
+    if expansion_kwargs is None:
+        expansion_kwargs = {}
     # Initialization and warnings for 2D trajectory basis
     bases = {
         "radial": initialize_2D_radial,
@@ -55,6 +85,29 @@ def initialize_3D_from_2D_expansion(
 def initialize_3D_cones(
     Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, nb_overlaps=0
 ):
+    """Initialize 3D trajectories with cones.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns: int
+        Number of samples per shot.
+    tilt : str, optional
+        Tilt of the cones, by default "golden"
+    in_out : bool, optional
+        Whether the cones are going in and out, by default False
+    nb_zigzags : int, optional
+        Number of zigzags of the cones, by default 5
+    nb_overlaps : int, optional
+        Number of overlaps of the cones, by default 0
+
+    Returns
+    -------
+    array_like
+        3D cones trajectory
+    """
+
     # Initialize first cone characteristics
     radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
     angles = np.linspace(
@@ -99,6 +152,21 @@ def initialize_3D_cones(
 
 
 def duplicate_per_axes(trajectory, axes=(0, 1, 2)):
+    """
+    Duplicate a trajectory along the specified axes.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to duplicate.
+    axes : tuple, optional
+        Axes along which to duplicate the trajectory, by default (0, 1, 2)
+
+    Returns
+    -------
+    array_like
+        Duplicated trajectory along the specified axes.
+    """
     # Copy input trajectory along other axes
     new_trajectory = []
     if 0 in axes:
@@ -116,6 +184,7 @@ def duplicate_per_axes(trajectory, axes=(0, 1, 2)):
 
 
 def _radialize_center_out(trajectory, nb_samples):
+    """Radialize a trajectory from the center to the outside."""
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     for i in range(Nc):
@@ -127,6 +196,7 @@ def _radialize_center_out(trajectory, nb_samples):
 
 
 def _radialize_in_out(trajectory, nb_samples):
+    """Radialize a trajectory from the inside to the outside."""
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     first, half, second = (Ns - nb_samples) // 2, Ns // 2, (Ns + nb_samples) // 2
@@ -143,6 +213,17 @@ def _radialize_in_out(trajectory, nb_samples):
 
 
 def radialize_center(trajectory, nb_samples, in_out=False):
+    """Radialize a trajectory.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to radialize.
+    nb_samples : int
+        Number of samples to keep.
+    in_out : bool, optional
+        Whether the radialization is from the inside to the outside, by default False
+    """
     # Make nb_samples into straight lines around the center
     if in_out:
         return _radialize_in_out(trajectory, nb_samples)
