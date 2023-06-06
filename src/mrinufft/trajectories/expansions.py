@@ -1,3 +1,4 @@
+"""Functions to expands 2D trajectories into 3D trajectories."""
 import numpy as np
 
 from .utils import (
@@ -17,6 +18,22 @@ from .utils import (
 
 
 def stack_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
+    """Stack 2D trajectories into 3D trajectories.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to expand.
+    nb_repetitions : int
+        Number of repetitions.
+    tilt : str, optional
+        Tilt of the planes, by default "intergaps".
+
+    Returns
+    -------
+    array_like
+        Expanded trajectory.
+    """
     # Initialize output and z-axis
     Nc, Ns, trajectory = *(trajectory.shape[:2]), trajectory.reshape((-1, 2))
     new_trajectory = np.zeros((nb_repetitions, trajectory.shape[0], 3))
@@ -35,6 +52,22 @@ def stack_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
 
 
 def rotate_2D_to_3D_expansion(trajectory, nb_repetitions, tilt="intergaps"):
+    """Rotate 2D trajectories into 3D trajectories.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to expand.
+    nb_repetitions : int
+        Number of repetitions.
+    tilt : str, optional
+        Tilt of the planes, by default "intergaps".
+
+    Returns
+    -------
+    array_like
+        Expanded trajectory.
+    """
     # Initialize angle and output
     Nc, Ns, trajectory = *(trajectory.shape[:2]), trajectory.reshape((-1, 2))
     trajectory = trajectory.reshape((-1, 2))
@@ -60,6 +93,26 @@ def cone_2D_to_3D_expansion(
     in_out=False,
     max_angle=DEFAULT_CONE_ANGLE,
 ):
+    """Expand 2D trajectories into 3D trajectories using a cone expansion.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to expand.
+    nb_repetitions : int
+        Number of repetitions.
+    tilt : str, optional
+        Tilt of the planes, by default "intergaps".
+    in_out : bool, optional
+        Whether to expand in and out, by default False.
+    max_angle : float, optional
+        Maximum angle of the cone, by default DEFAULT_CONE_ANGLE.
+
+    Returns
+    -------
+    array_like
+        Expanded trajectory.
+    """
     # Initialize angles
     Nc, Ns = trajectory.shape[:2]
     delta_tilt = initialize_tilt(tilt, nb_repetitions)
@@ -106,6 +159,25 @@ def cone_2D_to_3D_expansion(
 def helix_2D_to_3D_expansion(
     trajectory, nb_repetitions, in_out=False, max_angle=DEFAULT_HELIX_ANGLE
 ):
+    """
+    Expand 2D trajectories into 3D trajectories using a helix expansion.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to expand.
+    nb_repetitions : int
+        Number of repetitions.
+    in_out : bool, optional
+        Whether to expand in and out, by default False.
+    max_angle : float, optional
+        Maximum angle of the helix, by default DEFAULT_HELIX_ANGLE.
+
+    Returns
+    -------
+    array_like
+        Expanded trajectory.
+    """
     # TODO: fix max_angle
     # Initialize angles and radius
     Nc, Ns = trajectory.shape[:2]
