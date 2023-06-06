@@ -1,3 +1,4 @@
+"""2D trajectory initializations."""
 import numpy as np
 
 from .utils import (
@@ -15,6 +16,19 @@ from .utils import (
 
 
 def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
+    """Initialize a 2D radial trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    tilt : str, optional
+        Tilt of the shots, by default "uniform"
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
@@ -31,6 +45,28 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
 def initialize_2D_spiral(
     Nc, Ns, tilt="uniform", in_out=False, nb_revolutions=1, spiral="archimedes"
 ):
+    """Initialize a 2D spiral trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    tilt : str, optional
+        Tilt of the shots, by default "uniform"
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_revolutions : int, optional
+        Number of revolutions, by default 1
+    spiral : str, optional
+        Spiral type, by default "archimedes"
+
+    Returns
+    -------
+    array_like
+        2D spiral trajectory
+    """
     # Initialize a first shot in polar coordinates
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
@@ -46,6 +82,28 @@ def initialize_2D_spiral(
 
 
 def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1):
+    """Initialize a 2D cone trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    tilt : str, optional
+        Tilt of the shots, by default "uniform"
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_zigzags : int, optional
+        Number of zigzags, by default 5
+    width : int, optional
+        Width of the cone, by default 1
+
+    Returns
+    -------
+     array_like
+         2D cone trajectory
+    """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
@@ -64,6 +122,28 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
 def initialize_2D_sinusoide(
     Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1
 ):
+    """Initialize a 2D sinusoide trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    tilt : str, optional
+        Tilt of the shots, by default "uniform"
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_zigzags : int, optional
+        Number of zigzags, by default 5
+    width : int, optional
+        Width of the sinusoide, by default 1
+
+    Returns
+    -------
+     array_like
+         2D sinusoide trajectory
+    """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
@@ -80,6 +160,24 @@ def initialize_2D_sinusoide(
 
 
 def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
+    """Initialize a 2D rosette trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    coprime_index : int, optional
+        Index of the coprime factor, by default 0
+
+    Returns
+    -------
+    array_like
+        2D rosette trajectory
+    """
     # Prepare to parametrize with coprime factor according to Nc parity
     odd = Nc % 2
     coprime = compute_coprime_factors(
@@ -102,6 +200,26 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
 
 
 def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_index=0):
+    """Initialize a 2D polar Lissajous trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_segments : int, optional
+        Number of segments, by default 1
+    coprime_index : int, optional
+        Index of the coprime factor, by default 0
+
+    Returns
+    -------
+    array_like
+        2D polar Lissajous trajectory
+    """
     # Adapt the parameters to subcases
     nb_segments = nb_segments * (2 - in_out)
     Nc = Nc // nb_segments
@@ -131,6 +249,24 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
 
 
 def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
+    """Initialize a 2D Lissajous trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    density : int, optional
+        Density of the trajectory, by default 1
+    spread : int, optional
+        Spread of the trajectory, by default 1
+
+    Returns
+    -------
+    array_like
+        2D Lissajous trajectory
+    """
     # Define the whole curve in Cartesian coordinates
     segment = np.linspace(-1, 1, Ns)
     angles = np.pi / 2 * np.sign(segment) * np.abs(segment) ** spread
@@ -145,6 +281,26 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
 
 
 def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
+    """Initialize a 2D waves trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_zigzags : int, optional
+        Number of zigzags, by default 1
+    width : int, optional
+        Width of the trajectory, by default 1
+    spread : int, optional
+        Spread of the trajectory, by default 1
+
+    Returns
+    -------
+    array_like
+        2D waves trajectory
+    """
     # Initialize a first shot
     segment = np.linspace(-1, 1, Ns)
     segment = np.sign(segment) * np.abs(segment) ** spread
