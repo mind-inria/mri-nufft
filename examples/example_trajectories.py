@@ -1,9 +1,9 @@
 """
-===================
-Zoo of Trajectories
-===================
+===============
+2D Trajectories
+===============
 
-A Zoo of non cartesian trajectories with  analytical definition.
+A collection of 2D non-Cartesian trajectories with analytical definitions.
 
 """
 
@@ -79,11 +79,12 @@ one_shot = True  # Highlight one shot in particular
 # The most basic non-Cartesian trajectory composed of straight lines with
 # no customization arguments besides the common ones.
 #
-# Arguments: - ``Nc (int)``: number of individual shots - ``Ns (int)``:
-# number of samples per shot - ``tilt (str, float)``: angle between each
-# consecutive shot (in radians) ``(default "uniform")`` -
-# ``in_out (bool)``: define whether the shots should travel toward the
-# center then outside or not (center-out). ``(default False)``
+# Arguments:
+# - ``Nc (int)``: number of individual shots
+# - ``Ns (int)``: number of samples per shot
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians) ``(default "uniform")``
+# - ``in_out (bool)``: define whether the shots should travel toward the center then outside
+# or not (center-out). ``(default False)``
 #
 
 trajectory = nct2d.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=in_out)
@@ -151,12 +152,12 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 # %%
 # It allows to switch between different ways to define how the shot should
-# travel through the k-space: - in-out: starting from the outer regions,
-# then passing through the center then going back to outer regions, often
-# on the opposite side (radial, cones) - center-out or center-center: when
-# ``in_out=False`` the trajectory will start at the center, but depending
-# on the specific trajectory formula the path might end up in the outer
-# regions (radial, spiral, cones, etc) or back to the center (rosette,
+# travel through the k-space:
+# - in-out: starting from the outer regions, then passing through the center
+# then going back to outer regions, often on the opposite side (radial, cones)
+# - center-out or center-center: when ``in_out=False`` the trajectory will start
+# at the center, but depending on the specific trajectory formula the path might
+# end up in the outer regions (radial, spiral, cones, etc) or back to the center (rosette,
 # lissajous).
 #
 
@@ -177,15 +178,16 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # :math:`\theta` the polar angle. Note that the most common spirals,
 # Archimedes and Fermat, are subcases of this equation.
 #
-# Arguments: - ``Nc (int)``: number of individual shots. See radial -
-# ``Ns (int)``: number of samples per shot. See radial -
-# ``tilt (str, float)``: angle between each consecutive shot (in radians).
-# ``(default "uniform")``. See radial - ``in_out (bool)``: define whether
-# the shots should travel toward the center then outside or not
-# (center-out). ``(default False)``. See radial -
-# ``nb_revolutions (float)``: number of revolutions performed from the
-# center. ``(default 1)`` - ``spiral (str, float)``: type of spiral
-# defined through the above-mentionned equation.
+# Arguments:
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+# ``(default "uniform")``. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+# then outside or not (center-out). ``(default False)``. See radial
+# - ``nb_revolutions (float)``: number of revolutions performed from the
+# center. ``(default 1)``
+# - ``spiral (str, float)``: type of spiral defined through the above-mentionned equation.
 # ``(default "archimedes")``
 #
 
@@ -242,15 +244,17 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # A radial-like trajectory zigzaging within cones over the k-space to
 # offer a better coverage with more customization parameters.
 #
-# Arguments: - ``Nc (int)``: number of individual shots. See radial -
-# ``Ns (int)``: number of samples per shot. See radial -
-# ``tilt (str, float)``: angle between each consecutive shot (in radians).
-# ``(default "uniform")``. See radial - ``in_out (bool)``: define whether
-# the shots should travel toward the center then outside or not
-# (center-out). ``(default False)``. See radial - ``nb_zigzags (float)``:
-# number of times a cone border will be reached from the center.
-# ``(default 5)`` - ``width (float)``: cone width, normalized by the
-# default uniform width. ``(default 1)``
+# Arguments:
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+# ``(default "uniform")``. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the
+# center then outside or not (center-out). ``(default False)``. See radial
+# - ``nb_zigzags (float)``: number of times a cone border will be reached
+# from the center. ``(default 5)``
+# - ``width (float)``: cone width, normalized by the default uniform width. 
+# ``(default 1)``
 #
 
 trajectory = nct2d.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out)
@@ -307,15 +311,17 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # Another radial-like trajectory zigzaging similarly to cones, but over a
 # whole band rather than cones reducing around the center.
 #
-# Arguments: - ``Nc (int)``: number of individual shots. See radial -
-# ``Ns (int)``: number of samples per shot. See radial -
-# ``tilt (str, float)``: angle between each consecutive shot (in radians).
-# ``(default "uniform")``. See radial - ``in_out (bool)``: define whether
-# the shots should travel toward the center then outside or not
-# (center-out). ``(default False)``. See radial - ``nb_zigzags (float)``:
-# number of times a cone border will be reached from the center.
-# ``(default 5)``. See cones - ``width (float)``: band width, normalized
-# by the default uniform width. ``(default 1)``. See cones
+# Arguments: 
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+# - ``(default "uniform")``. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+# then outside or not (center-out). ``(default False)``. See radial
+# - ``nb_zigzags (float)``: number of times a cone border will be reached
+# from the center. ``(default 5)``. See cones
+# - ``width (float)``: band width, normalized by the default uniform width.
+# ``(default 1)``. See cones
 #
 
 trajectory = nct2d.initialize_2D_sinusoide(Nc, Ns, tilt=tilt, in_out=in_out)
@@ -333,11 +339,12 @@ plt.show()
 # A repeating pattern composed of a single long curve going through the
 # center multiple times and split into multiple shots.
 #
-# Arguments: - ``Nc (int)``: number of individual shots. See radial -
-# ``Ns (int)``: number of samples per shot. See radial -
-# ``in_out (bool)``: define whether the shots should travel toward the
-# center then outside or not (center-center). ``(default False)``. See
-# radial - ``coprime_index (int)``: the index of the coprime factor used
+# Arguments:
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the
+# center then outside or not (center-center). ``(default False)``. See radial
+# - ``coprime_index (int)``: the index of the coprime factor used
 # to define the shot curvature. ``(default 0)``
 #
 
@@ -365,7 +372,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 
 # %%
-# Lissajous (WIP)
+# Polar Lissajous (WIP)
 # ---------------
 #
 
@@ -375,14 +382,15 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # single long curve going through the center multiple times and split into
 # multiple shots.
 #
-# Arguments: - ``Nc (int)``: number of individual shots. See radial -
-# ``Ns (int)``: number of samples per shot. See radial -
-# ``in_out (bool)``: define whether the shots should travel toward the
-# center then outside or not (center-center). ``(default False)``. See
-# radial - ``coprime_index (int)``: the index of the coprime factor used
-# to define the shot curvature. ``(default 0)`` - ``nb_segments (int)``:
-# number of indepedent Lissajous curves covering different segments of the
-# k-space. ``(default 1)``
+# Arguments:
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the
+# center then outside or not (center-center). ``(default False)``. See radial
+# - ``coprime_index (int)``: the index of the coprime factor used # to define
+# the shot curvature. ``(default 0)``
+# - ``nb_segments (int)``: number of indepedent Lissajous curves covering
+# different segments of the k-space. ``(default 1)``
 #
 
 trajectory = nct2d.initialize_2D_polar_lissajous(Nc, Ns, in_out=in_out)
@@ -427,6 +435,8 @@ function = lambda x: nct2d.initialize_2D_polar_lissajous(
     Nc, Ns, in_out=in_out, nb_segments=x
 )
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+#
 
 arguments = [6, 8, 12]
 function = lambda x: nct2d.initialize_2D_polar_lissajous(
