@@ -107,7 +107,6 @@ def initialize_3D_cones(
     array_like
         3D cones trajectory
     """
-
     # Initialize first cone characteristics
     radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
     angles = np.linspace(
