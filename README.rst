@@ -30,39 +30,31 @@ Usage
 .. TODO use a include file directive.
 .. code:: python
 
-      import matplotlib.pyplot as plt
-      from scipy.datasets import face
-
+      from scipy.datasets import face # For demo
+      import numpy as np
       import mrinufft
       from mrinufft.trajectories import display
+      from mrinufft.trajectories.density import voronoi
 
       # Create a 2D Radial trajectory for demo
       samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)
-      # Get a 2D image for the demo
-      image = face(gray=True)[256:768, 256:768]
+      # Get a 2D image for the demo (512x512)
+      image = np.complex64(face(gray=True)[256:768, 256:768])
 
       ## The real deal starts here ##
       # Choose your NUFFT backend (installed independly from the package)
-      # And create the associated operator.
       NufftOperator = mrinufft.get_operator("finufft")
+
+      # For better image quality we use a density compensation
+      density = voronoi(samples_loc.reshape(-1, 2))
+
+      # And create the associated operator.
       nufft = NufftOperator(
-          samples_loc.reshape(-1, 2), shape=(512, 512), density=True, n_coils=1
+          samples_loc.reshape(-1, 2), shape=image.shape, density=density, n_coils=1
       )
 
       kspace_data = nufft.op(image)  # Image -> Kspace
       image2 = nufft.adj_op(kspace_data)  # Kspace -> Image
-
-      # Show the results
-      fig, ax = plt.subplots(1, 3)
-
-      ax[0].imshow(image)
-      ax[0].set_title("original image")
-      display.display_2D_trajectory(samples_loc, subfigure=ax[1])
-      ax[1].set_aspect("equal")
-      ax[1].set_title("Sampled points in k-space")
-      ax[2].imshow(abs(image2))
-      ax[2].set_title("Auto adjoint image")
-      plt.show()
 
 
 .. TODO Add image
