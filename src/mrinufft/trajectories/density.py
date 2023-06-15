@@ -4,29 +4,45 @@ Estimation of the density compensation array methods.
 Those methods are agnostic of the NUFFT operator.
 """
 import numpy as np
-from scipy.spatial import Voronoi, ConvexHull
+from scipy.spatial import Voronoi
+
+
+def vol3d(points):
+    """Compute the volume of a 3D (convex) polyhedron."""
+    base_point = points[0]
+    A = points[:-2] - base_point
+    B = points[1:-1] - base_point
+    C = points[2:] - base_point
+    return np.sum(np.abs(np.dot(np.cross(B, C), A.T))) / 6.0
+
+
+def vol2d(points):
+    """Compute the area of a 2D (convex) polygon."""
+    # https://stackoverflow.com/questions/451426/how-do-i-calculate-the-area-of-a-2d-polygon
+    area = 0
+    area = np.sum(points[1:-1, 0] * (points[2:, 1] - points[:-2, 0]))
+    # Finishing the cycle
+    area += points[-1, 0] * (points[0, 1] - points[-2, 1])
+    area += points[0, 0] * (points[1, 1] - points[-1, 1])
+    return abs(area) / 2.0
 
 
 def _voronoi(kspace):
     M = kspace.shape[0]
     wi = np.zeros(M)
     v = Voronoi(kspace.astype(float))
-    nbad = 0
-
+    if kspace.shape[1] == 2:
+        vol = vol2d
+    else:
+        vol = vol3d
     for mm in range(M):
         idx_vertices = v.regions[v.point_region[mm]]
         if np.all([i != -1 for i in idx_vertices]):
-            try:
-                hull = ConvexHull(v.vertices[idx_vertices])
-                wi[mm] = hull.volume
-            except Exception:
-                nbad += 1
-    if nbad:
-        print("bad edge points", nbad, "of", M)
+            wi[mm] = vol(v.vertices[idx_vertices])
     # For edge point (infinite voronoi cells) we extrapolate from neighbours
     # Initial implementation in Jeff Fessler's MIRT
     rho = np.sum(kspace**2, axis=1)
-    igood = (rho > 0.6 * np.max(rho)) & (wi > 0)
+    igood = (rho > 0.7 * np.max(rho)) & (wi > 0)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
 
