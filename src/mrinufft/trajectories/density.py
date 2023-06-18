@@ -8,21 +8,43 @@ from scipy.spatial import Voronoi
 
 
 def compute_tetrahedron_volume(A, B, C, D):
+    """Compute the volume of a tetrahedron."""
     return np.abs(np.dot(np.cross(B - A, C - A), D - A)) / 6.0
 
 
 def vol3d(points):
     base_point = points[0]
     volume = 0.0
+    """Compute the volume of a convex 3D polygon.
+
+    Parameters
+    ----------
+    points: array_like
+        array of shape (N, 3) containing the coordinates of the points.
 
     for i in range(1, len(points) - 2):
         A = points[i]
         B = points[i + 1]
         C = points[i + 2]
         volume += compute_tetrahedron_volume(A, B, C, base_point)
+    Returns
+    ------
+    volume: float
+    """
 
 
 def vol2d(points):
+    """Compute the area of a convex 2D polygon.
+
+    Parameters
+    ----------
+    points: array_like
+        array of shape (N, 2) containing the coordinates of the points.
+
+    Returns
+    ------
+    area: float
+    """
     # https://stackoverflow.com/questions/451426/how-do-i-calculate-the-area-of-a-2d-polygon
     area = 0
     for i in range(1, len(points) - 1):
@@ -34,6 +56,20 @@ def vol2d(points):
 
 
 def _voronoi(kspace):
+    """Estimate  density compensation weight using voronoi parcellation.
+
+    This assume unicity of the point in the kspace.
+
+    Parameters
+    ----------
+    kspace: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+
+    Returns
+    ------
+    wi: array_like
+        array of shape (M,) containing the density compensation weights.
+    """
     M = kspace.shape[0]
     if kspace.shape[1] == 2:
         vol = vol2d
@@ -60,7 +96,15 @@ def _voronoi(kspace):
 
 
 def voronoi(kspace):
-    """Estimate  density compensation weight using voronoi parcellation."""
+    """Estimate  density compensation weight using voronoi parcellation.
+
+    In case of multiple point in the center of kspace, the weight is split evenly.
+
+    Parameters
+    ----------
+    kspace: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    """
     # deduplication only works for the 0,0 coordinate !!
     i0 = np.sum(np.abs(kspace), axis=1) == 0
     if np.any(i0):
