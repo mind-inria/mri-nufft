@@ -157,7 +157,7 @@ The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C
 
    \hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2
 
-Where :math:`E_mn = e^i\Delta\omega_0(u_n}t_m`.
+Where :math:`E_mn = e^i\Delta\omega_0(u_n)t_m`.
 
 
 .. TODO Add Reference to the Code doing this.
