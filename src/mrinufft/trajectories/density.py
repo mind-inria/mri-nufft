@@ -13,8 +13,6 @@ def compute_tetrahedron_volume(A, B, C, D):
 
 
 def vol3d(points):
-    base_point = points[0]
-    volume = 0.0
     """Compute the volume of a convex 3D polygon.
 
     Parameters
@@ -22,15 +20,15 @@ def vol3d(points):
     points: array_like
         array of shape (N, 3) containing the coordinates of the points.
 
-    for i in range(1, len(points) - 2):
-        A = points[i]
-        B = points[i + 1]
-        C = points[i + 2]
-        volume += compute_tetrahedron_volume(A, B, C, base_point)
     Returns
     ------
     volume: float
     """
+    base_point = points[0]
+    A = points[:-2] - base_point
+    B = points[1:-1] - base_point
+    C = points[2:] - base_point
+    return np.sum(np.abs(np.dot(np.cross(B, C), A.T))) / 6.0
 
 
 def vol2d(points):
@@ -88,8 +86,6 @@ def _voronoi(kspace):
     igood = rho > 0.6 * np.max(rho)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
-    # pp, _, pc = np.polyfit(rho[igood], wi[igood], 2, full=True)
-    # wi[wi == 0] = np.polyval(pp, (rho[wi == 0] - pc[0]) / pc[1])
     poly = np.polynomial.Polynomial.fit(rho[igood], wi[igood], 3)
     wi[wi == 0] = poly(rho[wi == 0])
     return wi
