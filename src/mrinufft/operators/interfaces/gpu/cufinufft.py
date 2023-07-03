@@ -6,7 +6,14 @@ import numpy as np
 
 from ..base import FourierOperatorBase
 from ._cufinufft import RawCufinufft, CUFI_LIB
-from .utils import is_host_array, is_cuda_array, sizeof_fmt, pin_memory, nvtx_mark
+from .utils import (
+    is_host_array,
+    is_cuda_array,
+    sizeof_fmt,
+    pin_memory,
+    nvtx_mark,
+    get_ptr,
+)
 from .cupy_kernels import sense_adj_mono, update_density
 
 CUPY_AVAILABLE = True
@@ -220,7 +227,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d  # sense forward
-            self.__op(coil_img_d.data.ptr, ksp_d.data.ptr + i * self.ksp_size)
+            self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
         return ksp_d
 
     def _op_calibless(self, data, ksp_d=None):
@@ -229,8 +236,8 @@ class MRICufiNUFFT(FourierOperatorBase):
                 ksp_d = cp.empty((self.n_coils, self.n_samples), dtype=np.complex64)
             for i in range(self.n_coils):
                 self.__op(
-                    data.data.ptr + i * self.img_size,
-                    ksp_d.data.ptr + i * self.ksp_size,
+                    get_ptr(data) + i * self.img_size,
+                    get_ptr(ksp_d) + i * self.ksp_size,
                 )
             return ksp_d
         # calibrationless, data on host
@@ -239,7 +246,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         ksp = np.zeros((self.n_coils, self.n_samples), dtype=np.complex64)
         for i in range(self.n_coils):
             coil_img_d.set(data[i])
-            self.__op(coil_img_d.data.ptr, ksp_d.data.ptr)
+            self.__op(get_ptr(coil_img_d), get_ptr(ksp_d))
             cp.asnumpy(ksp_d, out=ksp[i])
         return ksp
 
@@ -247,7 +254,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     def __op(self, image_d, coeffs_d):
         # ensure everything is pointers before going to raw level.
         if is_cuda_array(image_d) and is_cuda_array(coeffs_d):
-            return self.raw_op.type2(coeffs_d.data.ptr, image_d.data.ptr)
+            return self.raw_op.type2(get_ptr(coeffs_d), get_ptr(image_d))
         return self.raw_op.type2(coeffs_d, image_d)
 
     @nvtx_mark()
@@ -285,7 +292,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         coil_ksp_d = cp.asarray(coeffs)
         if self.uses_density:
             coil_ksp_d *= self.density_d  # density preconditionning
-        self.__adj_op(coil_ksp_d.data.ptr, img_d.data.ptr)
+        self.__adj_op(get_ptr(coil_ksp_d), get_ptr(img_d))
         if is_cuda_array(coeffs):
             return img_d
         return img_d.get()
@@ -300,7 +307,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 coil_ksp_d.set(coeffs[i])
                 if self.uses_density:
                     coil_ksp_d *= self.density_d
-                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
                 if self.smaps_cached:
                     sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
                 else:
@@ -314,9 +321,9 @@ class MRICufiNUFFT(FourierOperatorBase):
             if self.uses_density:
                 cp.copyto(coil_ksp_d, coeffs[i])
                 coil_ksp_d *= self.density_d  # density preconditionning
-                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
             else:
-                self.__adj_op(coeffs.data.ptr + i * self.ksp_size, coil_img_d.data.ptr)
+                self.__adj_op(get_ptr(coeffs) + i * self.ksp_size, get_ptr(coil_img_d))
             if self.smaps_cached:
                 sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
             else:
@@ -336,12 +343,12 @@ class MRICufiNUFFT(FourierOperatorBase):
                     cp.copyto(coil_ksp_d, coeffs[i])
                     coil_ksp_d *= self.density_d
                     self.__adj_op(
-                        coil_ksp_d.data.ptr, img_d.data.ptr + i * self.img_size
+                        get_ptr(coil_ksp_d), get_ptr(img_d) + i * self.img_size
                     )
                 else:
                     self.__adj_op(
-                        coeffs.data.ptr + i * self.ksp_size,
-                        img_d.data.ptr + i * self.img_size,
+                        get_ptr(coeffs) + i * self.ksp_size,
+                        get_ptr(img_d) + i * self.img_size,
                     )
             return img_d
         # calibrationless, data on host
@@ -352,14 +359,14 @@ class MRICufiNUFFT(FourierOperatorBase):
             coil_ksp_d.set(coeffs[i])
             if self.uses_density:
                 coil_ksp_d *= self.density_d
-            self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+            self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
             cp.asnumpy(coil_img_d, out=img[i])
         return img
 
     @nvtx_mark()
     def __adj_op(self, coeffs_d, image_d):
         if not isinstance(coeffs_d, int):
-            ret = self.raw_op.type1(coeffs_d.data.ptr, image_d.data.ptr)
+            ret = self.raw_op.type1(get_ptr(coeffs_d), get_ptr(image_d))
         else:
             ret = self.raw_op.type1(coeffs_d, image_d)
         # Device synchronize is not done by cufinufft, we do it ourself.
@@ -412,12 +419,12 @@ class MRICufiNUFFT(FourierOperatorBase):
                 else:
                     self._smap_d.set(self._smaps[i])
                     coil_img_d *= self._smap_d
-                self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
+                self.__op(get_ptr(coil_img_d), get_ptr(coil_ksp_d))
                 coil_obs_data = cp.asarray(obs_data_pinned[i])
                 coil_ksp_d -= coil_obs_data
                 if self.uses_density:
                     coil_ksp_d *= self.density_d
-                self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
                 if self.smaps_cached:
                     sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
                 else:
@@ -431,11 +438,11 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 self._smap_d.set(self._smaps[i])
                 coil_img_d *= self._smap_d
-            self.__op(coil_img_d.data.ptr, coil_ksp_d.data.ptr)
+            self.__op(get_ptr(coil_img_d), get_ptr(coil_ksp_d))
             coil_ksp_d -= obs_data[i]
             if self.uses_density:
                 coil_ksp_d *= self.density_d
-            self.__adj_op(coil_ksp_d.data.ptr, coil_img_d.data.ptr)
+            self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
             if self.smaps_cached:
                 sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
             else:
@@ -447,11 +454,11 @@ class MRICufiNUFFT(FourierOperatorBase):
             img_d = cp.empty((self.n_coils, *self.shape), dtype=np.complex64)
             ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
-                self.__op(image_data.data.ptr + i * self.img_size, ksp_d.data.ptr)
+                self.__op(get_ptr(image_data) + i * self.img_size, get_ptr(ksp_d))
                 ksp_d -= obs_data[i]
                 if self.uses_density:
                     ksp_d *= self.density_d
-                self.__adj_op(ksp_d.data.ptr, img_d.data.ptr + i * self.img_size)
+                self.__adj_op(get_ptr(ksp_d), get_ptr(img_d) + i * self.img_size)
             return img_d
 
         img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -461,11 +468,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         for i in range(self.n_coils):
             img_d.set(image_data[i])
             obs_d.set(obs_data[i])
-            self.__op(img_d.data.ptr, ksp_d.data.ptr)
+            self.__op(get_ptr(img_d), get_ptr(ksp_d))
             ksp_d -= obs_d
             if self.uses_density:
                 ksp_d *= self.density_d
-            self.__adj_op(ksp_d.data.ptr, img_d.data.ptr)
+            self.__adj_op(get_ptr(ksp_d), get_ptr(img_d))
             cp.asnumpy(img_d, out=img[i])
         return img
 
