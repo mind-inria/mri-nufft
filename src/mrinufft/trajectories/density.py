@@ -21,7 +21,7 @@ def vol3d(points):
         array of shape (N, 3) containing the coordinates of the points.
 
     Returns
-    ------
+    -------
     volume: float
     """
     base_point = points[0]
@@ -40,7 +40,7 @@ def vol2d(points):
         array of shape (N, 2) containing the coordinates of the points.
 
     Returns
-    ------
+    -------
     area: float
     """
     # https://stackoverflow.com/questions/451426/how-do-i-calculate-the-area-of-a-2d-polygon
@@ -64,7 +64,7 @@ def _voronoi(kspace):
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
 
     Returns
-    ------
+    -------
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
