@@ -13,6 +13,7 @@ from .utils import (
     pin_memory,
     nvtx_mark,
     get_ptr,
+    check_size,
 )
 from .cupy_kernels import sense_adj_mono, update_density
 
@@ -166,15 +167,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
 
-    @property
-    def img_size(self):
-        """Image size in bytes."""
-        return int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
-
-    @property
-    def ksp_size(self):
-        """k-space size in bytes."""
-        return int(self.n_samples * np.dtype(np.complex64).itemsize)
     @nvtx_mark()
     def op(self, data, ksp_d=None):
         r"""Non Cartesian MRI forward operator.
@@ -514,6 +506,16 @@ class MRICufiNUFFT(FourierOperatorBase):
     def bsize_img(self):
         """Size in Bytes of the compute batch of images."""
         self.n_trans * self.img_size
+
+    @property
+    def img_size(self):
+        """Image size in bytes."""
+        return int(np.prod(self.shape) * np.dtype(np.complex64).itemsize)
+
+    @property
+    def ksp_size(self):
+        """k-space size in bytes."""
+        return int(self.n_samples * np.dtype(np.complex64).itemsize)
 
     @classmethod
     @nvtx_mark()
