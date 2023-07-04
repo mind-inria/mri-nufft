@@ -203,7 +203,7 @@ if CUFI_LIB is not None:
     _spread_interp = CUFI_LIB.cufinufft_spread_interp
     _spread_interp.argtypes = [
         c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
-        c_double_p, c_double_p, c_double_p, # kx, ky, kz
+        c_void_p, c_void_p, c_void_p, # kx, ky, kz
         c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
     ]
     _spread_interp.restype = c_int
@@ -211,7 +211,7 @@ if CUFI_LIB is not None:
     _spread_interpf = CUFI_LIB.cufinufftf_spread_interp
     _spread_interpf.argtypes = [
         c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
-        c_float_p, c_float_p, c_float_p, # kx, ky, kz
+        c_void_p, c_void_p, c_void_p, # kx, ky, kz
         c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
     ]
     _spread_interpf.restype = c_int
@@ -259,12 +259,12 @@ def get_default_opts(nufft_type, dim):
 
 def get_kx_ky_kz_pointers(samples):
     n_samples = len(samples)
-    itemsize = np.dtype(samples).itemsize
+    itemsize = samples.dtype.itemsize
     ptr = samples.data.ptr
     fpts_axes = [None, None, None]
     # samples are column-major ordered.
     # We get the internal pointer associated with each axis.
-    for i in range(samples.shape[1]):
+    for i in range(samples.shape[-1]):
         fpts_axes[i] = ptr + i * n_samples * itemsize
     return n_samples, fpts_axes
     
@@ -281,7 +281,7 @@ def spread(samples, c, f):
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(1, samples.shape[-1])
     spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-6)
-    
+    f 
     
 
 class RawCufinufft:
