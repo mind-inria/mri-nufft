@@ -200,6 +200,22 @@ if CUFI_LIB is not None:
     _exec_planf.argtypes = [c_void_p, c_void_p, c_void_p]
     _exec_planf.restype = c_int
 
+    _spread_interp = CUFI_LIB.cufinufft_spread_interp
+    _spread_interp.argtypes = [
+        c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
+        c_double_p, c_double_p, c_double_p, # kx, ky, kz
+        c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
+    ]
+    _spread_interp.restype = c_int
+
+    _spread_interpf = CUFI_LIB.cufinufftf_spread_interp
+    _spread_interpf.argtypes = [
+        c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
+        c_float_p, c_float_p, c_float_p, # kx, ky, kz
+        c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
+    ]
+    _spread_interpf.restype = c_int
+
     _destroy_pland = CUFI_LIB.cufinufft_destroy
     _destroy_pland.argtypes = [c_void_p]
     _destroy_pland.restype = c_int
@@ -240,6 +256,33 @@ def get_default_opts(nufft_type, dim):
 
     return nufft_opts
 
+
+def get_kx_ky_kz_pointers(samples):
+    n_samples = len(samples)
+    itemsize = np.dtype(samples).itemsize
+    ptr = samples.data.ptr
+    fpts_axes = [None, None, None]
+    # samples are column-major ordered.
+    # We get the internal pointer associated with each axis.
+    for i in range(samples.shape[1]):
+        fpts_axes[i] = ptr + i * n_samples * itemsize
+    return n_samples, fpts_axes
+    
+def convert_shape_to_3D(shape, dim):
+    return shape[::-1] + (1,) * (3 - dim) 
+    
+
+def spread(samples, c, f):
+    if samples.dtype == np.float64:
+        spread_interp = _spread_interp
+    elif samples.dtype == np.float32:
+        spread_interp = _spread_interpf
+    n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
+    shape = convert_shape_to_3D(f.shape, samples.shape[-1])
+    opts = get_default_opts(1, samples.shape[-1])
+    spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-6)
+    
+    
 
 class RawCufinufft:
     """GPU implementation of N-D non uniform Fast Fourrier Transform class.
@@ -373,16 +416,8 @@ class RawCufinufft:
         if self.samples.dtype != self.dtype:
             raise TypeError("cufinufft plan.dtype and " "samples dtypes do not match.")
 
-        n_samples = len(self.samples)
-        itemsize = np.dtype(self.dtype).itemsize
-        ptr = self.samples.data.ptr
-        fpts_axes = [None, None, None]
-        # samples are column-major ordered.
-        # We get the internal pointer associated with each axis.
-
-        for i in range(self.samples.shape[1]):
-            fpts_axes[i] = ptr + i * n_samples * itemsize
-
+        n_samples, fpts_axes = get_kx_ky_kz_pointers(self.samples)
+        
         ier = self.__set_pts(
             n_samples, *fpts_axes, 0, None, None, None, self.plans[typ]
         )
