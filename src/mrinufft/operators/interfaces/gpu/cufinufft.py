@@ -178,6 +178,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         # monocoil
         if self.plan_setup == "multicoil":
+        check_size(data, (self.n_batchs, self.n_coils, *self.shape))
             self.raw_op._make_plan(2)
             self.raw_op._set_pts(2)
         if self.n_coils == 1:
@@ -270,6 +271,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if self.plan_setup == "multicoil":
+        check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
             self.raw_op._make_plan(1)
             self.raw_op._set_pts(1)
         if self.n_coils == 1:
