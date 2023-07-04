@@ -79,22 +79,13 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
                 f"Data should be of dtype {self._cpx_dtype}. Casting it for you."
             )
             data = data.astype(self._cpx_dtype)
-        # monocoil
-        if self.n_coils == 1:
-            ret = self._op_mono(data, ksp)
         # sense
-        elif self.uses_sense:
+        if self.uses_sense:
             ret = self._op_sense(data, ksp)
-        # calibrationless, data on device
+        # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
         return ret
-
-    def _op_mono(self, data, ksp=None):
-        if ksp is None:
-            ksp = np.empty(self.n_samples, dtype=data.dtype)
-        self._op(data, ksp)
-        return ksp
 
     def _op_sense(self, data, ksp_d=None):
         coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
@@ -129,21 +120,12 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
                 f"coeffs should be of dtype {self._cpx_dtype}. Casting it for you."
             )
             coeffs = coeffs.astype(self._cpx_dtype)
-        if self.n_coils == 1:
-            ret = self._adj_op_mono(coeffs, img)
-        # sense
-        elif self.uses_sense:
+        if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
-        # calibrationless
+        # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
         return ret
-
-    def _adj_op_mono(self, coeffs, img=None):
-        if img is None:
-            img = np.empty(self.shape, dtype=coeffs.dtype)
-        self._adj_op(coeffs, img)
-        return img
 
     def _adj_op_sense(self, coeffs, img=None):
         coil_img = np.empty(self.shape, dtype=coeffs.dtype)
@@ -182,19 +164,9 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
-        if self.n_coils == 1:
-            return self._data_consistency_mono(image_data, obs_data)
         if self.uses_sense:
             return self._data_consistency_sense(image_data, obs_data)
         return self._data_consistency_calibless(image_data, obs_data)
-
-    def _data_consistency_mono(self, image_data, obs_data):
-        ksp = np.empty(self.n_samples, dtype=obs_data.dtype)
-        img = np.empty(self.shape, dtype=image_data.dtype)
-        self._op(image_data, ksp)
-        ksp -= obs_data
-        self._adj_op(ksp, img)
-        return img
 
     def _data_consistency_sense(self, image_data, obs_data):
         img = np.empty_like(image_data)
