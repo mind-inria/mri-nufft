@@ -93,7 +93,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         shape,
         density=False,
         n_coils=1,
-        n_batches=1,
+        n_batchs=1,
         n_trans=1,
         smaps=None,
         keep_dims=False,
@@ -134,7 +134,8 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
             self._smaps = smaps
         else:
             self._uses_sense = False
-
+        self.n_batchs = n_batchs
+        self.n_trans = n_trans
         # Initialise NUFFT plans
         self.raw_op = RawFinufftPlan(
             self.samples,
