@@ -136,6 +136,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
             self._uses_sense = False
         self.n_batchs = n_batchs
         self.n_trans = n_trans
+        self.keep_dims = keep_dims
         # Initialise NUFFT plans
         self.raw_op = RawFinufftPlan(
             self.samples,
@@ -171,7 +172,10 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
-        return ret
+        if self.keep_dims:
+            return ret
+        else:
+            return ret.squeeze(axis=(0, 0))
 
     def _op_sense(self, data, ksp_d=None):
         if self.n_batchs > 1:
@@ -216,7 +220,10 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        return ret
+        if self.keep_dims:
+            return ret
+        else:
+            return ret.squeeze(axis=(0, 0))
 
     def _adj_op_sense(self, coeffs, img=None):
         if self.n_batchs > 1:
