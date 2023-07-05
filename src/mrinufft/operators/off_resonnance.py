@@ -87,6 +87,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         ----------
         x: numpy.ndarray or cupy.ndarray
             masked distorded N-D k-space
+
         Returns
         -------
             inverse Fourier transform of the distorded input k-space.
