@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from .base import AbstractMRIcpuNUFFT,
+from .base import AbstractMRIcpuNUFFT
 from ..base import proper_trajectory
 
 FINUFFT_AVAILABLE = True

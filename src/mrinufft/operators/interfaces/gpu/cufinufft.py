@@ -251,7 +251,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         ksp = np.zeros(
             (self.n_batchs * self.n_coils, self.n_samples), dtype=np.complex64
         )
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device and batch n-1 to host
+        # TODO: Add concurrency compute batch n while copying batch n+1 to device
+        # and batch n-1 to host
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
             coil_img_d.set(
                 data.flatten()[i * self.bsize_img : (i + 1) * self.bsize_img]
@@ -362,7 +363,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         # calibrationless, data on host
         img = np.zeros((self.n_batches * self.n_coils, *self.shape), dtype=np.complex64)
         img_batched = cp.empty(self.n_trans, self.shape, dtype=np.complex64)
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device and batch n-1 to host
+        # TODO: Add concurrency compute batch n while copying batch n+1 to device
+        # and batch n-1 to host
         for i in range((self.n_batches * self.n_coils) // self.n_trans):
             ksp_batched.set(coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp])
             if self.uses_density:
