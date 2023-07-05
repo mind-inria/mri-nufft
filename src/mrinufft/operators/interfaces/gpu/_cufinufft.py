@@ -9,60 +9,30 @@ differentiated by 'f' suffix.
 """
 
 import atexit
-import ctypes
-import importlib
-import os
 import sys
-from ctypes import byref, c_double, c_float, c_int, c_void_p
 
+import ctypes
+from ctypes import c_void_p, byref, c_int64, c_float
 import numpy as np
 
 from .utils import check_error, is_cuda_array
-
-c_int_p = ctypes.POINTER(c_int)
 c_float_p = ctypes.POINTER(c_float)
-c_double_p = ctypes.POINTER(c_double)
 
-CUFI_LIB = None
-# Try to load a local library directly.
 try:
-    CUFI_LIB = ctypes.cdll.LoadLibrary("libcufinufft.so")
-except OSError:
-    # Should that not work, try to find the full path of a packaged lib.
-    #   The packaged lib should have a py/platform decorated name,
-    #   and be rpath'ed the true CUDA C cufinufft library through the
-    #   Extension and wheel systems.
-    try:
-        if CUFI_LIB is None:
-            # Find the library.
-            fh = importlib.util.find_spec("cufinufftc")[0]
-            # Get the full path for the ctypes loader.
-            full_lib_path = os.path.realpath(fh.name)
-            fh.close()  # Be nice and close the open file handle.
+    from cufinufft._cufinufft import (
+        NufftOpts, _default_opts,
+        _make_plan, _make_planf,
+        _set_pts, _set_ptsf,
+        _exec_plan, _exec_planf,
+        _spread_interp, _spread_interpf,
+        _destroy_plan, _destroy_planf,
+    )
+    CUFINUFFT_LIB_AVAILABLE = True
+    EXITING = False
+    atexit.register(setattr, sys.modules[__name__], "EXITING", True)
+except ImportError:
+    CUFINUFFT_LIB_AVAILABLE = False
 
-            # Load the library,
-            #    which rpaths the libraries we care about.
-            CUFI_LIB = ctypes.cdll.LoadLibrary(full_lib_path)
-
-    except Exception:
-        CUFI_LIB = None
-
-
-def _get_ctypes(dtype):
-    """Check if dtype is float32 or float64.
-
-    Returns floating point and floating point pointer.
-    """
-    if dtype == np.float64:
-        real_t = c_double
-    elif dtype == np.float32:
-        real_t = c_float
-    else:
-        raise TypeError("Expected np.float32 or np.float64.")
-
-    real_ptr = ctypes.POINTER(real_t)
-
-    return real_t, real_ptr
 
 
 OPTS_FIELD_DECODE = {
@@ -75,163 +45,27 @@ OPTS_FIELD_DECODE = {
     },
 }
 
-
-class NufftOpts(ctypes.Structure):
-    """Optional Parameters for the plan setup."""
-
-    _fields_ = [
-        ("upsampfac", c_double),
-        ("gpu_method", c_int),
-        ("gpu_sort", c_int),
-        ("gpu_binsizex", c_int),
-        ("gpu_binsizey", c_int),
-        ("gpu_binsizez", c_int),
-        ("gpu_obinsizex", c_int),
-        ("gpu_obinsizey", c_int),
-        ("gpu_obinsizez", c_int),
-        ("gpu_maxsubprobsize", c_int),
-        ("gpu_nstreams", c_int),
-        ("gpu_kerevalmeth", c_int),
-        ("gpu_spreadinterponly", c_int),
-        ("gpu_device_id", c_int),
-    ]
-
-    def __repr__(self):
-        """Get the value of the struct, like a dict."""
-        ret = "Struct(\n"
-        for fieldname, _ in self._fields_:
-            ret += f"{fieldname}: {getattr(self, fieldname)},\n"
-        ret += ")"
-        return ret
-
-    def __str__(self):
-        """Get the value of the struct, with their meaning."""
-        ret = "Struct(\n"
-        for fieldname, _ in self._fields_:
-            ret += f"{fieldname}: {getattr(self, fieldname)}"
-            decode = OPTS_FIELD_DECODE.get(fieldname)
-            if decode:
-                ret += f" [{decode[getattr(self, fieldname)]}]"
-            ret += "\n"
-        ret += ")"
-        return ret
-
-
-_default_opts = None
-_make_pland, _make_planf = None, None
-_set_ptsd, _set_ptsf = None, None
-_exec_pland, _exec_planf = None, None
-_destroy_pland, _destroy_planf = None, None
-
-if CUFI_LIB is not None:
-    CufinufftPlan = c_void_p
-    CufinufftPlanf = c_void_p
-
-    CufinufftPlan_p = ctypes.POINTER(CufinufftPlan)
-    CufinufftPlanf_p = ctypes.POINTER(CufinufftPlanf)
-
-    NufftOpts_p = ctypes.POINTER(NufftOpts)
-
-    _default_opts = CUFI_LIB.cufinufft_default_opts
-    _default_opts.argtypes = [c_int, c_int, NufftOpts_p]
-    _default_opts.restype = c_int
-
-    _make_pland = CUFI_LIB.cufinufft_makeplan
-    _make_pland.argtypes = [
-        c_int,
-        c_int,
-        c_int_p,
-        c_int,
-        c_int,
-        c_double,
-        c_int,
-        CufinufftPlan_p,
-        NufftOpts_p,
-    ]
-    _make_pland.restypes = c_int
-
-    _make_planf = CUFI_LIB.cufinufftf_makeplan
-    _make_planf.argtypes = [
-        c_int,
-        c_int,
-        c_int_p,
-        c_int,
-        c_int,
-        c_float,
-        c_int,
-        CufinufftPlanf_p,
-        NufftOpts_p,
-    ]
-    _make_planf.restypes = c_int
-
-    _set_ptsd = CUFI_LIB.cufinufft_setpts
-    _set_ptsd.argtypes = [
-        c_int,
-        c_void_p,
-        c_void_p,
-        c_void_p,
-        ctypes.c_int,
-        c_double_p,
-        c_double_p,
-        c_double_p,
-        c_void_p,
-    ]
-    _set_ptsd.restype = c_int
-
-    _set_ptsf = CUFI_LIB.cufinufftf_setpts
-    _set_ptsf.argtypes = [
-        c_int,
-        c_void_p,
-        c_void_p,
-        c_void_p,
-        ctypes.c_int,
-        c_float_p,
-        c_float_p,
-        c_float_p,
-        c_void_p,
-    ]
-    _set_ptsf.restype = c_int
-
-    _exec_pland = CUFI_LIB.cufinufft_execute
-    _exec_pland.argtypes = [c_void_p, c_void_p, c_void_p]
-    _exec_pland.restype = c_int
-
-    _exec_planf = CUFI_LIB.cufinufftf_execute
-    _exec_planf.argtypes = [c_void_p, c_void_p, c_void_p]
-    _exec_planf.restype = c_int
-
-    _spread_interp = CUFI_LIB.cufinufft_spread_interp
-    _spread_interp.argtypes = [
-        c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
-        c_void_p, c_void_p, c_void_p, # kx, ky, kz
-        c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
-    ]
-    _spread_interp.restype = c_int
-
-    _spread_interpf = CUFI_LIB.cufinufftf_spread_interp
-    _spread_interpf.argtypes = [
-        c_int, c_int, c_int, c_int, c_int, c_int, # type, dim, nf1, nf2, nf3, M
-        c_void_p, c_void_p, c_void_p, # kx, ky, kz
-        c_void_p, c_void_p, NufftOpts_p, c_float # c, f, opts, tol
-    ]
-    _spread_interpf.restype = c_int
-
-    _destroy_pland = CUFI_LIB.cufinufft_destroy
-    _destroy_pland.argtypes = [c_void_p]
-    _destroy_pland.restype = c_int
-
-    _destroy_planf = CUFI_LIB.cufinufftf_destroy
-    _destroy_planf.argtypes = [c_void_p]
-    _destroy_planf.restype = c_int
-
-    ###########################
-    # END OF BINDINGS LINKING #
-    ###########################
-
-    # If we are shutting down python, we don't need to run __del__
-    #   This will avoid any shutdown gc ordering problems.
-    EXITING = False
-    atexit.register(setattr, sys.modules[__name__], "EXITING", True)
+def repr_opts(self):
+    """Get the value of the struct, like a dict."""
+    ret = "Struct(\n"
+    for fieldname, _ in self._fields_:
+        ret += f"{fieldname}: {getattr(self, fieldname)},\n"
+    ret += ")"
+    return ret
+def str_opts(self):
+    """Get the value of the struct, with their meaning."""
+    ret = "Struct(\n"
+    for fieldname, _ in self._fields_:
+        ret += f"{fieldname}: {getattr(self, fieldname)}"
+        decode = OPTS_FIELD_DECODE.get(fieldname)
+        if decode:
+            ret += f" [{decode[getattr(self, fieldname)]}]"
+        ret += "\n"
+    ret += ")"
+    return ret
+    
+NufftOpts.__repr__ = lambda self: repr_opts(self)
+NufftOpts.__str__ = lambda self: str_opts(self)
 
 
 def get_default_opts(nufft_type, dim):
@@ -271,17 +105,28 @@ def get_kx_ky_kz_pointers(samples):
 def convert_shape_to_3D(shape, dim):
     return shape[::-1] + (1,) * (3 - dim) 
     
-
-def spread(samples, c, f):
-    if samples.dtype == np.float64:
+def get_spread_interp_func(dtype):
+    if dtype == np.float64:
         spread_interp = _spread_interp
-    elif samples.dtype == np.float32:
+    elif dtype == np.float32:
         spread_interp = _spread_interpf
+    return spread_interp
+
+
+def _spread(samples, c, f):
+    spread_interp = get_spread_interp_func(samples.dtype)
     n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(1, samples.shape[-1])
-    spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-6)
-    f 
+    spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-4)
+
+
+def _interp(samples, c, f):
+    spread_interp = get_spread_interp_func(samples.dtype)
+    n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
+    shape = convert_shape_to_3D(f.shape, samples.shape[-1])
+    opts = get_default_opts(2, samples.shape[-1])
+    spread_interp(2, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-4)
     
 
 class RawCufinufft:
@@ -321,7 +166,7 @@ class RawCufinufft:
         init_plans=False,
         opts=None,
     ):
-        if CUFI_LIB is None:
+        if not CUFINUFFT_LIB_AVAILABLE:
             raise RuntimeError("cufinufft library not found. Please install it first.")
 
         self.dtype = np.dtype(dtype)
@@ -333,10 +178,10 @@ class RawCufinufft:
             self.__destroy_plan = _destroy_planf
             self.complex_dtype = np.complex64
         elif self.dtype == np.float64:
-            self.__make_plan = _make_pland
-            self.__set_pts = _set_ptsd
-            self.__exec_plan = _exec_pland
-            self.__destroy_plan = _destroy_pland
+            self.__make_plan = _make_plan
+            self.__set_pts = _set_pts
+            self.__exec_plan = _exec_plan
+            self.__destroy_plan = _destroy_plan
             self.complex_dtype = np.complex128
         else:
             raise TypeError("Expected np.float32.")
@@ -356,7 +201,7 @@ class RawCufinufft:
         #   and reorder from C/python ndarray.shape style input (nZ, nY, nX)
         #   to the (F) order expected by the low level library (nX, nY, nZ).
         shape = shape[::-1] + (1,) * (3 - self.ndim)
-        self.modes = (c_int * 3)(*shape)
+        self.modes = (c_int64 * 3)(*shape)
 
         # setup optional parameters of the plan.
         use_opts1 = get_default_opts(1, self.ndim)
@@ -403,7 +248,6 @@ class RawCufinufft:
                 1 if typ == 1 else -1,
                 self.n_trans,
                 self.eps,
-                1,
                 byref(plan),
                 self.opts[typ],
             )
@@ -419,12 +263,12 @@ class RawCufinufft:
         n_samples, fpts_axes = get_kx_ky_kz_pointers(self.samples)
         
         ier = self.__set_pts(
-            n_samples, *fpts_axes, 0, None, None, None, self.plans[typ]
+            self.plans[typ], n_samples, *fpts_axes, 0, None, None, None,
         )
         check_error(ier, f"Error setting non-uniforms points of type{typ}")
 
     def _exec_plan(self, typ, c_ptr, f_ptr):
-        ier = self.__exec_plan(c_ptr, f_ptr, self.plans[typ])
+        ier = self.__exec_plan(self.plans[typ], c_ptr, f_ptr)
         check_error(ier, f"Error executing Type {typ} plan.")
 
     def _destroy_plan(self, typ):

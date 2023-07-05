@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 from ..base import FourierOperatorBase
-from ._cufinufft import RawCufinufft, CUFI_LIB
+from ._cufinufft import RawCufinufft, CUFINUFFT_LIB_AVAILABLE
 from .utils import (
     is_host_array,
     is_cuda_array,
@@ -24,7 +24,7 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
-CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFI_LIB is not None
+CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFINUFFT_LIB_AVAILABLE is not None
 
 
 class MRICufiNUFFT(FourierOperatorBase):
@@ -96,7 +96,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     ):
         if not CUPY_AVAILABLE:
             raise RuntimeError("cupy is not installed")
-        if CUFI_LIB is None:
+        if not CUFINUFFT_LIB_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
 
         if (n_batchs * n_coils) % n_trans != 0:
