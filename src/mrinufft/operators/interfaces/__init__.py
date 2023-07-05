@@ -7,6 +7,7 @@ from .gpu import (
 )
 
 from .cpu import MRIfinufft, FINUFFT_AVAILABLE, MRIPynufft, PYNUFFT_CPU_AVAILABLE
+from .base import proper_trajectory
 
 __all__ = [
     "MRICufiNUFFT",
@@ -15,6 +16,7 @@ __all__ = [
     "MRIPynufft",
     "check_backend",
     "get_operator",
+    "proper_trajectory",
 ]
 
 _REGISTERED_BACKENDS = {

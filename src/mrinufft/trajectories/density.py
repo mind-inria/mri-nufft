@@ -5,6 +5,7 @@ Those methods are agnostic of the NUFFT operator.
 """
 import numpy as np
 from scipy.spatial import Voronoi
+from mrinufft.operators.interfaces import proper_trajectory
 
 
 def compute_tetrahedron_volume(A, B, C, D):
@@ -68,6 +69,7 @@ def _voronoi(kspace):
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
+    kspace = proper_trajectory(kspace)
     M = kspace.shape[0]
     if kspace.shape[1] == 2:
         vol = vol2d
