@@ -5,6 +5,40 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 :author: Pierre-Antoine Comby
 """
+import warnings
+import numpy as np
+
+
+def proper_trajectory(trajectory, normalize=True):
+    """Normalize the trajectory to be used by NUFFT operators.
+
+    Parameters
+    ----------
+    trajectory: np.ndarray
+        The trajectory to normalize, it might be of shape (Nc, Ns, dim) of (Ns, dim)
+
+    normalize: bool
+        If True and if the trajectory is in [-0.5,0.5] the trajectory is
+        multiplied by 2pi to lie in [-pi, pi]
+
+    Returns
+    -------
+    new_traj: np.ndarray
+        The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
+    """
+    # flatten to a list of point
+    try:
+        new_traj = np.asarray(trajectory)
+    except Exception as e:
+        raise ValueError(
+            "trajectory should be array_like, with the last dimension being coordinates"
+        ) from e
+    new_traj = new_traj.reshape(-1, trajectory.shape[-1])
+
+    # normalize the trajectory to -pi, pi if i
+    if normalize and np.isclose(np.max(abs(new_traj)), 0.5):
+        warnings.warn("samples will be rescaled in [-pi, pi]")
+        new_traj *= 2 * np.pi
 
 
 class FourierOperatorBase:

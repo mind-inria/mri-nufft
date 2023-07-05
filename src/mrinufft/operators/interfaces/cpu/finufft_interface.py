@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from .base import AbstractMRIcpuNUFFT
+from .base import AbstractMRIcpuNUFFT, proper_trajectory
 
 FINUFFT_AVAILABLE = True
 try:
@@ -102,11 +102,9 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
             raise RuntimeError("finufft is not available.")
         self.shape = shape
         self.n_samples = len(samples)
-        if samples.max() > np.pi:
-            warnings.warn("samples will be normalized in [-pi, pi]")
-            samples *= np.pi / samples.max()
+
         # we will access the samples by their coordinate first.
-        self.samples = np.asfortranarray(samples)
+        self.samples = proper_trajectory(np.asfortranarray(samples), normalize=True)
 
         self._dtype = self.samples.dtype
         self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64

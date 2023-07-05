@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, proper_trajectory
 from ._cufinufft import RawCufinufft, CUFI_LIB
 from .utils import (
     is_host_array,
@@ -106,10 +106,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_batchs = n_batchs
 
         self.n_samples = len(samples)
-        if samples.max() > np.pi:
-            warnings.warn("samples will be normalized in [-pi, pi]")
-            samples *= np.pi / samples.max()
-            samples = samples.astype(np.float32)
+        samples = proper_trajectory(samples, normalize=True).astype(np.float32)
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
         elif is_cuda_array(samples):
