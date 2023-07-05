@@ -107,7 +107,7 @@ class MRIfinufft(FourierOperatorBase):
         self.n_samples = len(self.samples)
         self._dtype = self.samples.dtype
         self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
-        self.uses_sense = False
+        self._uses_sense = False
 
         # Density Compensation Setup
         if density is True:
