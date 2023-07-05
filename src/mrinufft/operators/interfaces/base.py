@@ -39,6 +39,7 @@ def proper_trajectory(trajectory, normalize=True):
     if normalize and np.isclose(np.max(abs(new_traj)), 0.5):
         warnings.warn("samples will be rescaled in [-pi, pi]")
         new_traj *= 2 * np.pi
+    return new_traj
 
 
 class FourierOperatorBase:
