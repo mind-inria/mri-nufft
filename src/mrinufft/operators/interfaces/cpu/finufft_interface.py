@@ -169,6 +169,7 @@ class MRIfinufft(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
+        ret /= self.norm_factor
         if self.keep_dims:
             return ret
         else:  # squeeze the batch and coil dimensions.
@@ -195,7 +196,6 @@ class MRIfinufft(FourierOperatorBase):
 
     def _op(self, image, coeffs):
         self.raw_op.op(coeffs, image)
-        return coeffs / self.norm_factor
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -218,6 +218,7 @@ class MRIfinufft(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
+        ret /= self.norm_factor
         if self.keep_dims:
             return ret
         else:
@@ -252,7 +253,6 @@ class MRIfinufft(FourierOperatorBase):
         else:
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
-        return coeffs2 / self.norm_factor
 
     @property
     def norm_factor(self):
