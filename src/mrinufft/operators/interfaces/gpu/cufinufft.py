@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 from ..base import FourierOperatorBase
-from ._cufinufft import RawCufinufft, CUFINUFFT_LIB_AVAILABLE
+from ._cufinufft import RawCufinufft, spreader, interpolator, CUFINUFFT_LIB_AVAILABLE
 from .utils import (
     is_host_array,
     is_cuda_array,
@@ -25,6 +25,58 @@ except ImportError:
 
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFINUFFT_LIB_AVAILABLE is not None
+
+
+def spread(sample_loc, sample_data, grid_shape, tol=1e-4):
+    """Spread the data onto the grid.
+
+    Parameters
+    ----------
+    sample_loc: np.ndarray
+        Array of shape (Nsamples, 2) or (Nsamples, 3) containing the coordinates
+        of the samples location.
+    sample_data: np.ndarray
+        Array of shape (Nsamples, Ncoils) containing the samples data.
+    grid_shape: tuple
+        Shape of the image grid.
+    tol: float, optional
+        Tolerance for error.
+
+    Returns
+    -------
+    gridded_data: np.ndarray
+        Array of shape (Ncoils, *grid_shape) containing the gridded data.
+    """
+    if is_host_array(sample_loc):
+        sample_loc = cp.asarray(sample_loc.copy(order="F"))
+    gridded_data = cp.empty(grid_shape, dtype=np.complex64)
+    spreader(sample_loc, sample_data, gridded_data, tol)
+    return gridded_data
+
+
+def interpolate(sample_loc, gridded_data, tol=1e-4):
+    """Interpolate the data from the grid onto the samples location.
+    
+    Parameters
+    ----------
+    sample_loc: np.ndarray
+        Array of shape (Nsamples, 2) or (Nsamples, 3) containing the coordinates
+        of the samples location.
+    gridded_data: np.ndarray
+        Array of shape (Ncoils, *grid_shape) containing the gridded data.
+    tol: float, optional
+        Tolerance for error.
+
+    Returns
+    -------
+    sample_data: np.ndarray
+        Array of shape (Nsamples, Ncoils) containing the interpolated data.
+    """
+    if is_host_array(sample_loc):
+        sample_loc = cp.asarray(sample_loc.copy(order="F"))
+    sample_data = cp.empty(len(sample_loc), dtype=np.complex64)
+    interpolator(sample_loc, sample_data, gridded_data, tol)
+    return sample_data
 
 
 class MRICufiNUFFT(FourierOperatorBase):

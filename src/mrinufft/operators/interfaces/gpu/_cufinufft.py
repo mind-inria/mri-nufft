@@ -113,7 +113,7 @@ def get_spread_interp_func(dtype):
     return spread_interp
 
 
-def _spread(samples, c, f):
+def spreader(samples, c, f):
     spread_interp = get_spread_interp_func(samples.dtype)
     n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
@@ -121,7 +121,7 @@ def _spread(samples, c, f):
     spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-4)
 
 
-def _interp(samples, c, f):
+def interpolator(samples, c, f):
     spread_interp = get_spread_interp_func(samples.dtype)
     n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
