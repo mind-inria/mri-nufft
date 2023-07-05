@@ -5,8 +5,6 @@ import numpy as np
 
 from ..base import FourierOperatorBase
 
-from .cpu_kernels import sense_adj_mono
-
 
 class AbstractMRIcpuNUFFT(FourierOperatorBase):
     """Base class for CPU-based NUFFT operator."""
@@ -180,7 +178,7 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
             if self.uses_density:
                 coil_ksp *= self.density_d
             self._adj_op(coil_ksp, coil_img)
-            sense_adj_mono(img, coil_img, self._smaps[i])
+            img += coil_img * self._smaps[i].conjugate()
         return img
 
     def _data_consistency_calibless(self, image_data, obs_data):
