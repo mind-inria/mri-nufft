@@ -63,7 +63,7 @@ class RawFinufftPlan:
         return self.plans[2].execute(grid_data, coeff_data)
 
 
-class MRIfinufft(AbstractMRIcpuNUFFT):
+class MRIfinufft:
     """MRI Transform Operator using finufft.
 
     Parameters
@@ -243,6 +243,15 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
 
         img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
+
+    def _adj_op(self, coeffs, image):
+        if self.density is not None:
+            coeffs2 = coeffs.copy()
+            for i in range(self.n_trans):
+                coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
+        else:
+            coeffs2 = coeffs
+        return self.raw_op.adj_op(coeffs2, image) / self.norm_factor
 
     @property
     def norm_factor(self):
