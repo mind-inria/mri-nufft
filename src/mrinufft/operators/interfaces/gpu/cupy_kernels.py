@@ -29,7 +29,7 @@ if CUPY_AVAILABLE:
           if(t < len)
             density[t].x *= rsqrtf(update[t].x *update[t].x + update[t].y * update[t].y);
         }
-        """,
+        """,  # noqa: E501
         "update_density_kernel",
     )
 
@@ -45,7 +45,7 @@ if CUPY_AVAILABLE:
             dest[t].y += img[t].y * smap[t].x - img[t].x * smap[t].y;
           }
         }
-        """,
+        """,  # noqa: E501
         "sense_adj_mono_kernel",
     )
 
