@@ -108,7 +108,7 @@ class MRIfinufft:
         self.n_samples = len(self.samples)
         self._dtype = self.samples.dtype
         self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
-        self._uses_sense = False
+        self.uses_sense = False
 
         # Density Compensation Setup
         if density is True:
@@ -126,12 +126,12 @@ class MRIfinufft:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
         if smaps is not None:
-            self._uses_sense = True
+            self.uses_sense = True
             if isinstance(smaps, np.ndarray):
                 raise ValueError("Smaps should be either a C-ordered ndarray")
             self._smaps = smaps
         else:
-            self._uses_sense = False
+            self.uses_sense = False
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.keep_dims = keep_dims
