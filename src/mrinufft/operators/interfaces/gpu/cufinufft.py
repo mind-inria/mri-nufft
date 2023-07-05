@@ -197,7 +197,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._destroy_plan(2)
 
         if self.keep_dims:
-            return ret
+            return ret / self.norm_factor
         else:
             return ret.squeeze(axis=(0, 1))
 
@@ -293,7 +293,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.persist_plan:
             self.raw_op._destroy_plan(1)
 
-        return ret
+        return ret / self.norm_factor
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -509,6 +509,11 @@ class MRICufiNUFFT(FourierOperatorBase):
     def ksp_size(self):
         """k-space size in bytes."""
         return int(self.n_samples * np.dtype(np.complex64).itemsize)
+
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
 
     @classmethod
     @nvtx_mark()

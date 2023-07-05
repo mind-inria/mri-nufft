@@ -147,7 +147,7 @@ class AbstractMRIcpuNUFFT(FourierOperatorBase):
         return coeffs
 
     def _adj_op(self, coeffs, image):
-        return self.raw_op.adj_op(self._apply_dc(coeffs), image)
+        return self.raw_op.adj_op(self._apply_dc(coeffs), image) / self.norm_factor
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.

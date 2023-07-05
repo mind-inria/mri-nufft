@@ -195,7 +195,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         return ksp
 
     def _op(self, image, coeffs):
-        return self.raw_op.op(coeffs, image)
+        return self.raw_op.op(coeffs, image) / self.norm_factor
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -243,6 +243,11 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
 
         img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
+
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
 
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
