@@ -194,7 +194,8 @@ class MRIfinufft(FourierOperatorBase):
         return ksp
 
     def _op(self, image, coeffs):
-        return self.raw_op.op(coeffs, image) / self.norm_factor
+        self.raw_op.op(coeffs, image)
+        return coeffs / self.norm_factor
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -250,7 +251,8 @@ class MRIfinufft(FourierOperatorBase):
                 coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
         else:
             coeffs2 = coeffs
-        return self.raw_op.adj_op(coeffs2, image) / self.norm_factor
+        self.raw_op.adj_op(coeffs2, image)
+        return coeffs2 / self.norm_factor
 
     @property
     def norm_factor(self):
