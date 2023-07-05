@@ -28,7 +28,7 @@ def proper_trajectory(trajectory, normalize=True):
     """
     # flatten to a list of point
     try:
-        new_traj = np.asarray(trajectory)
+        new_traj = np.asarray(trajectory).copy()
     except Exception as e:
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"

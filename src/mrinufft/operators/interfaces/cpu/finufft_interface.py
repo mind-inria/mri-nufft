@@ -102,20 +102,19 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         if not FINUFFT_AVAILABLE:
             raise RuntimeError("finufft is not available.")
         self.shape = shape
-        self.n_samples = len(samples)
 
         # we will access the samples by their coordinate first.
         self.samples = proper_trajectory(np.asfortranarray(samples), normalize=True)
-
+        self.n_samples = len(self.samples)
         self._dtype = self.samples.dtype
         self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
         self._uses_sense = False
 
         # Density Compensation Setup
         if density is True:
-            self.density = self.estimate_density(samples, shape)
+            self.density = self.estimate_density(self.samples, shape)
         elif isinstance(density, np.ndarray):
-            if len(density) != len(samples):
+            if len(density) != len(self.samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
@@ -173,8 +172,8 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
             ret = self._op_calibless(data, ksp)
         if self.keep_dims:
             return ret
-        else:
-            return ret.squeeze(axis=(0, 0))
+        else:  # squeeze the batch and coil dimensions.
+            return ret.squeeze(axis=(0, 1))
 
     def _op_sense(self, data, ksp_d=None):
         if self.n_batchs > 1:
@@ -222,7 +221,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         if self.keep_dims:
             return ret
         else:
-            return ret.squeeze(axis=(0, 0))
+            return ret.squeeze(axis=(0, 1))
 
     def _adj_op_sense(self, coeffs, img=None):
         if self.n_batchs > 1:
@@ -248,7 +247,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
     @property
     def norm_factor(self):
         """Norm factor of the operator."""
-        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
+        return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
 
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=1, **kwargs):

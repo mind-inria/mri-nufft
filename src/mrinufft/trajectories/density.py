@@ -69,7 +69,6 @@ def _voronoi(kspace):
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
-    kspace = proper_trajectory(kspace)
     M = kspace.shape[0]
     if kspace.shape[1] == 2:
         vol = vol2d
@@ -104,6 +103,7 @@ def voronoi(kspace):
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
     """
     # deduplication only works for the 0,0 coordinate !!
+    kspace = proper_trajectory(kspace)
     i0 = np.sum(np.abs(kspace), axis=1) == 0
     if np.any(i0):
         i0f = np.where(i0)
