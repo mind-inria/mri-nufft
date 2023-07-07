@@ -5,6 +5,7 @@ Those methods are agnostic of the NUFFT operator.
 """
 import numpy as np
 from scipy.spatial import Voronoi
+from mrinufft.operators.interfaces import proper_trajectory
 
 from ..operators.interfaces.gpu._cufinufft import CUFINUFFT_AVAILABLE, spreader, interpolator
 from ..operators.interfaces.gpu.utils import is_host_array
@@ -105,6 +106,7 @@ def voronoi(kspace):
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
     """
     # deduplication only works for the 0,0 coordinate !!
+    kspace = proper_trajectory(kspace)
     i0 = np.sum(np.abs(kspace), axis=1) == 0
     if np.any(i0):
         i0f = np.where(i0)

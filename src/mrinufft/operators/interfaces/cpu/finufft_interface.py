@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from .base import AbstractMRIcpuNUFFT
+from ..base import FourierOperatorBase, proper_trajectory
 
 FINUFFT_AVAILABLE = True
 try:
@@ -62,7 +62,7 @@ class RawFinufftPlan:
         return self.plans[2].execute(grid_data, coeff_data)
 
 
-class MRIfinufft(AbstractMRIcpuNUFFT):
+class MRIfinufft(FourierOperatorBase):
     """MRI Transform Operator using finufft.
 
     Parameters
@@ -101,22 +101,19 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         if not FINUFFT_AVAILABLE:
             raise RuntimeError("finufft is not available.")
         self.shape = shape
-        self.n_samples = len(samples)
-        if samples.max() > np.pi:
-            warnings.warn("samples will be normalized in [-pi, pi]")
-            samples *= np.pi / samples.max()
-        # we will access the samples by their coordinate first.
-        self.samples = np.asfortranarray(samples)
 
+        # we will access the samples by their coordinate first.
+        self.samples = proper_trajectory(np.asfortranarray(samples), normalize=True)
+        self.n_samples = len(self.samples)
         self._dtype = self.samples.dtype
         self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
         self._uses_sense = False
 
         # Density Compensation Setup
         if density is True:
-            self.density = self.estimate_density(samples, shape)
+            self.density = self.estimate_density(self.samples, shape)
         elif isinstance(density, np.ndarray):
-            if len(density) != len(samples):
+            if len(density) != len(self.samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
@@ -172,10 +169,11 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
+        ret /= self.norm_factor
         if self.keep_dims:
             return ret
-        else:
-            return ret.squeeze(axis=(0, 0))
+        else:  # squeeze the batch and coil dimensions.
+            return ret.squeeze(axis=(0, 1))
 
     def _op_sense(self, data, ksp_d=None):
         if self.n_batchs > 1:
@@ -197,7 +195,7 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         return ksp
 
     def _op(self, image, coeffs):
-        return self.raw_op.op(coeffs, image)
+        self.raw_op.op(coeffs, image)
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -220,10 +218,11 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
+        ret /= self.norm_factor
         if self.keep_dims:
             return ret
         else:
-            return ret.squeeze(axis=(0, 0))
+            return ret.squeeze(axis=(0, 1))
 
     def _adj_op_sense(self, coeffs, img=None):
         if self.n_batchs > 1:
@@ -245,6 +244,20 @@ class MRIfinufft(AbstractMRIcpuNUFFT):
 
         img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
+
+    def _adj_op(self, coeffs, image):
+        if self.density is not None:
+            coeffs2 = coeffs.copy()
+            for i in range(self.n_trans):
+                coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
+        else:
+            coeffs2 = coeffs
+        self.raw_op.adj_op(coeffs2, image)
+
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
 
     @classmethod
     def estimate_density(cls, samples, shape, n_iter=1, **kwargs):

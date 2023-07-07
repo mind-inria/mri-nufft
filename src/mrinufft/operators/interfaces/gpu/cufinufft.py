@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, proper_trajectory
 from ._cufinufft import RawCufinufft, spreader, interpolator, CUFINUFFT_LIB_AVAILABLE
 from .utils import (
     is_host_array,
@@ -163,10 +163,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_batchs = n_batchs
 
         self.n_samples = len(samples)
-        if samples.max() > np.pi:
-            warnings.warn("samples will be normalized in [-pi, pi]")
-            samples *= np.pi / samples.max()
-            samples = samples.astype(np.float32)
+        samples = proper_trajectory(samples, normalize=True).astype(np.float32)
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
         elif is_cuda_array(samples):
@@ -257,7 +254,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._destroy_plan(2)
 
         if self.keep_dims:
-            return ret
+            return ret / self.norm_factor
         else:
             return ret.squeeze(axis=(0, 1))
 
@@ -311,7 +308,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         ksp = np.zeros(
             (self.n_batchs * self.n_coils, self.n_samples), dtype=np.complex64
         )
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device and batch n-1 to host
+        # TODO: Add concurrency compute batch n while copying batch n+1 to device
+        # and batch n-1 to host
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
             coil_img_d.set(
                 data.flatten()[i * self.bsize_img : (i + 1) * self.bsize_img]
@@ -353,7 +351,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.persist_plan:
             self.raw_op._destroy_plan(1)
 
-        return ret
+        return ret / self.norm_factor
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -422,7 +420,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         # calibrationless, data on host
         img = np.zeros((self.n_batches * self.n_coils, *self.shape), dtype=np.complex64)
         img_batched = cp.empty(self.n_trans, self.shape, dtype=np.complex64)
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device and batch n-1 to host
+        # TODO: Add concurrency compute batch n while copying batch n+1 to device
+        # and batch n-1 to host
         for i in range((self.n_batches * self.n_coils) // self.n_trans):
             ksp_batched.set(coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp])
             if self.uses_density:
@@ -569,6 +568,11 @@ class MRICufiNUFFT(FourierOperatorBase):
     def ksp_size(self):
         """k-space size in bytes."""
         return int(self.n_samples * np.dtype(np.complex64).itemsize)
+
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
 
     def __repr__(self):
         """Return info about the MRICufiNUFFT Object."""

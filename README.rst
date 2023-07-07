@@ -72,46 +72,35 @@ Supported Libraries
 
 These libraries needs to be installed seperately from this package.
 
-- GPU Implementations:
+.. Don't touch the spacing ! ..
 
-  - `cufinufft <https://github.com/flatironinstitute/cufinufft/>`_
-      Developed and maintained by the `Flat Iron Institute <https://github.com/flatironinstitut>`_.
-      Requires a separate installation of cufinufft C++/CUDA library.
-      Current bindings only support float32/complex64 data.
+==================== ============ =================== =============== ============== ===============
+Backend              Hardward     Batch computation   Precision       Auto Density   Array Interface
+==================== ============ =================== =============== ============== ===============
+cufinufft_           GPU (CUDA)   ✔                   single          TBA            cupy/torch
+finufft_             CPU          ✔                   single/double   TBA            numpy
+tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
+pynufft_             CPU          ✘                   single/double   ✘              numpy
+pynufft_             GPU          ✘                   ✘               ✘              Not Supported
+==================== ============ =================== =============== ============== ===============
 
-  - `tensorflow-nufft <https://github.com/mrphys/tensorflow-nufft>`_
-      Requires a separate installation of Tensorflow.
 
-  - TBA `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
-      (Not Yet Implemented)
+.. _cufinufft: https://github.com/flatironinstitute/finufft
+.. _finufft: https://github.com/flatironinstitute/finufft
+.. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
+.. _pynufft: https://github.com/jyhmiinlin/pynufft
 
-- CPU Implementations:
+**The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.  It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
-  - `finufft <https://github.com/flatironinstitute/finufft>`_
-      Developed and maintained by the `Flat Iron Institute <https://github.com/flatironinstitut>`_.
-      C/C++ implementation with Multithread and batch computation support.
-
-  - `pyNUFFT <https://github.com/jyhmiinlin/pynufft>`_
-      CPU version of pyNUFFT, using standard python libraries.
-
-The NUFFT operation is often not enough to provide good image quality by itself: It is best used in a Compress Sensing setup. For such use cases,
-
-you can check the `pysap <https://github.com/CEA-COSMIC/pysap/>`_ package suite and  `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ for MRI dedicated solutions.
 
 Installation
 ------------
-
-Be sure that you have your GPU librairies properly installed (CUDA, Pytorch, Tensorflow, etc).
-Cufinufft requires an external installation.
+Install the required backend (e.g. `pip install finufft`) you want to use.
 
 Then clone and install the package::
 
     $ git clone https://github.com:mind-inria/mri-nufft
     $ pip install ./mri-nufft
-
-Tests
------
-TBA
 
 
 Documentation
@@ -134,4 +123,12 @@ And visit `localhost:8000` on your web browser.
 
 Related Packages
 ----------------
-For reconstruction methods of MR images from non-Cartesian sampling, see `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_ and `ModOpt <https://github.com/CEA-COSMIC/ModOpt>`_ 
+
+- pysap-mri_
+- Modopt_
+- deepinv_
+
+
+.. _pysap-mri: https://github.com/CEA-COSMIC/pysap-mri/
+.. _Modopt: https://github.com/CEA-COSMIC/ModOpt/
+.. _deepinv: https:/github.com/deepinv/deepinv/

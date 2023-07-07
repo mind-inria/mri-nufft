@@ -22,12 +22,10 @@ image = np.complex64(face(gray=True)[256:768, 256:768])
 NufftOperator = mrinufft.get_operator("finufft")
 
 # For better image quality we use a density compensation
-density = voronoi(samples_loc.reshape(-1, 2))
+density = voronoi(samples_loc)
 
 # And create the associated operator.
-nufft = NufftOperator(
-    samples_loc.reshape(-1, 2), shape=image.shape, density=density, n_coils=1
-)
+nufft = NufftOperator(samples_loc, shape=image.shape, density=density, n_coils=1)
 
 kspace_data = nufft.op(image)  # Image -> Kspace
 image2 = nufft.adj_op(kspace_data)  # Kspace -> Image
