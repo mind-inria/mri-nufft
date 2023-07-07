@@ -15,7 +15,7 @@ def _get_block_size():
     """Get the warp size of the current device."""
     if CUPY_AVAILABLE:
         device = cp.cuda.runtime.getDevice()
-        return cp.cuda.runtime.getDeviceProoperties(device)["MaxThreadsPerBlock"]
+        return cp.cuda.runtime.getDeviceProperties(device)["MaxThreadsPerBlock"]
     raise RuntimeError("Cupy is not available")
 
 
