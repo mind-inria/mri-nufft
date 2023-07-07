@@ -146,9 +146,9 @@ def pipe(kspace, grid_shape, num_iter=10):
     if is_host_array(kspace):
         kspace = cp.array(kspace.copy(order='F'))
     if kspace.dtype == np.float32:
-        density = cp.ones(kspace.shape[1], dtype=np.complex64)
+        density = cp.ones(kspace.shape[0], dtype=np.complex64)
     elif kspace.dtype == np.float64:
-        density = cp.ones(kspace.shape[1], dtype=np.complex128)
+        density = cp.ones(kspace.shape[0], dtype=np.complex128)
     image = cp.empty(grid_shape, dtype=np.complex64)
     update = cp.empty_like(density)
     for _ in range(num_iter):
