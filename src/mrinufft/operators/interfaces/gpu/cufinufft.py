@@ -441,8 +441,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             ret = self.raw_op.type1(get_ptr(coeffs_d), get_ptr(image_d))
         else:
             ret = self.raw_op.type1(coeffs_d, image_d)
-        # Device synchronize is not done by cufinufft, we do it ourself.
-        cp.cuda.runtime.deviceSynchronize()
         return ret
 
     def data_consistency(self, image_data, obs_data):
