@@ -56,7 +56,7 @@ def spread(sample_loc, sample_data, grid_shape, tol=1e-4):
 
 def interpolate(sample_loc, gridded_data, tol=1e-4):
     """Interpolate the data from the grid onto the samples location.
-    
+
     Parameters
     ----------
     sample_loc: np.ndarray
@@ -74,7 +74,7 @@ def interpolate(sample_loc, gridded_data, tol=1e-4):
     """
     if is_host_array(sample_loc):
         sample_loc = cp.asarray(sample_loc.copy(order="F"))
-    if sample_loc.dtype == np.float32:   
+    if sample_loc.dtype == np.float32:
         sample_data = cp.empty(len(sample_loc), dtype=np.complex64)
     elif sample_loc.dtype == np.float64:
         sample_data = cp.empty(len(sample_loc), dtype=np.complex128)
@@ -161,9 +161,10 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         self.shape = shape
         self.n_batchs = n_batchs
-
-        self.n_samples = len(samples)
+        self.n_trans = n_trans
+        self.keep_dims = keep_dims
         samples = proper_trajectory(samples, normalize=True).astype(np.float32)
+        self.n_samples = len(samples)
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
         elif is_cuda_array(samples):
@@ -253,10 +254,10 @@ class MRICufiNUFFT(FourierOperatorBase):
         if not self.persist_plan:
             self.raw_op._destroy_plan(2)
 
+        ret /= self.norm_factor
         if self.keep_dims:
-            return ret / self.norm_factor
-        else:
             return ret.squeeze(axis=(0, 1))
+        return ret
 
     def _op_sense(self, data, ksp_d=None):
         img_d = cp.asarray(data)
@@ -351,7 +352,10 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.persist_plan:
             self.raw_op._destroy_plan(1)
 
-        return ret / self.norm_factor
+        ret /= self.norm_factor
+        if self.keep_dims:
+            return ret.squeeze(axis=(0, 1))
+        return ret
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -418,17 +422,17 @@ class MRICufiNUFFT(FourierOperatorBase):
                     )
             return img_d
         # calibrationless, data on host
-        img = np.zeros((self.n_batches * self.n_coils, *self.shape), dtype=np.complex64)
-        img_batched = cp.empty(self.n_trans, self.shape, dtype=np.complex64)
+        img = np.zeros((self.n_batchs * self.n_coils, *self.shape), dtype=np.complex64)
+        img_batched = cp.empty((self.n_trans, *self.shape), dtype=np.complex64)
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
-        for i in range((self.n_batches * self.n_coils) // self.n_trans):
+        for i in range((self.n_batchs * self.n_coils) // self.n_trans):
             ksp_batched.set(coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp])
             if self.uses_density:
                 ksp_batched *= density_batched
             self.__adj_op(get_ptr(ksp_batched), get_ptr(img_batched))
-            cp.asnumpy(img_batched, out=img[i])
-            img = img.reshape((self.n_batches, self.n_coils, *self.shape))
+            cp.asnumpy(img_batched, out=img[i * self.n_trans : (i + 1) * self.n_trans])
+            img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
 
     @nvtx_mark()
@@ -550,14 +554,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         return self.raw_op.eps
 
     @property
-    def bsize_samples(self):
+    def bsize_ksp(self):
         """Size in Bytes of the compute batch of samples."""
         return self.n_trans * self.ksp_size
 
     @property
     def bsize_img(self):
         """Size in Bytes of the compute batch of images."""
-        self.n_trans * self.img_size
+        return self.n_trans * self.img_size
 
     @property
     def img_size(self):

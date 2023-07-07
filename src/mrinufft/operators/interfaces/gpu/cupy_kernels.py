@@ -15,7 +15,7 @@ def _get_block_size():
     """Get the warp size of the current device."""
     if CUPY_AVAILABLE:
         device = cp.cuda.runtime.getDevice()
-        return cp.cuda.runtime.getDeviceProperties(device)["MaxThreadsPerBlock"]
+        return cp.cuda.runtime.getDeviceProperties(device)["maxThreadsPerBlock"]
     raise RuntimeError("Cupy is not available")
 
 
@@ -66,8 +66,7 @@ def update_density(density, update):
     update_density_kernel(
         ((len(density) // block_size) + 1,),
         (block_size,),
-        (density, update),
-        len(density),
+        (density, update, len(density)),
     )
 
 

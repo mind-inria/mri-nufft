@@ -6,11 +6,11 @@ Those methods are agnostic of the NUFFT operator.
 import numpy as np
 from scipy.spatial import Voronoi
 from mrinufft.operators.interfaces import proper_trajectory
-
 from ..operators.interfaces.gpu.cufinufft import CUFINUFFT_AVAILABLE
 from ..operators.interfaces.gpu._cufinufft import spreader, interpolator
 from ..operators.interfaces.gpu.utils import is_host_array
 from ..operators.interfaces.gpu.cupy_kernels import update_density
+
 
 def compute_tetrahedron_volume(A, B, C, D):
     """Compute the volume of a tetrahedron."""
@@ -141,10 +141,14 @@ def pipe(kspace, grid_shape, num_iter=10):
         array of shape (M,) containing the density compensation weights.
     """
     if not CUFINUFFT_AVAILABLE:
-        raise ImportError("cuFINUFFT library not available to do Pipe density estimation")
+        raise ImportError(
+            "cuFINUFFT library not available to do Pipe density estimation"
+        )
     import cupy as cp
+
+    kspace = proper_trajectory(kspace)
     if is_host_array(kspace):
-        kspace = cp.array(kspace.copy(order='F'))
+        kspace = cp.array(kspace.copy(order="F"))
     if kspace.dtype == np.float32:
         density = cp.ones(kspace.shape[0], dtype=np.complex64)
     elif kspace.dtype == np.float64:

@@ -15,24 +15,31 @@ import ctypes
 from ctypes import c_void_p, byref, c_int64, c_float
 import numpy as np
 
-from .utils import check_error, is_cuda_array
+from .utils import check_error, is_cuda_array, get_ptr
+
 c_float_p = ctypes.POINTER(c_float)
 
 try:
     from cufinufft._cufinufft import (
-        NufftOpts, _default_opts,
-        _make_plan, _make_planf,
-        _set_pts, _set_ptsf,
-        _exec_plan, _exec_planf,
-        _spread_interp, _spread_interpf,
-        _destroy_plan, _destroy_planf,
+        NufftOpts,
+        _default_opts,
+        _make_plan,
+        _make_planf,
+        _set_pts,
+        _set_ptsf,
+        _exec_plan,
+        _exec_planf,
+        _spread_interp,
+        _spread_interpf,
+        _destroy_plan,
+        _destroy_planf,
     )
+
     CUFINUFFT_LIB_AVAILABLE = True
     EXITING = False
     atexit.register(setattr, sys.modules[__name__], "EXITING", True)
 except ImportError:
     CUFINUFFT_LIB_AVAILABLE = False
-
 
 
 OPTS_FIELD_DECODE = {
@@ -45,6 +52,7 @@ OPTS_FIELD_DECODE = {
     },
 }
 
+
 def repr_opts(self):
     """Get the value of the struct, like a dict."""
     ret = "Struct(\n"
@@ -52,6 +60,8 @@ def repr_opts(self):
         ret += f"{fieldname}: {getattr(self, fieldname)},\n"
     ret += ")"
     return ret
+
+
 def str_opts(self):
     """Get the value of the struct, with their meaning."""
     ret = "Struct(\n"
@@ -63,7 +73,8 @@ def str_opts(self):
         ret += "\n"
     ret += ")"
     return ret
-    
+
+
 NufftOpts.__repr__ = lambda self: repr_opts(self)
 NufftOpts.__str__ = lambda self: str_opts(self)
 
@@ -94,17 +105,19 @@ def get_default_opts(nufft_type, dim):
 def get_kx_ky_kz_pointers(samples):
     n_samples = len(samples)
     itemsize = samples.dtype.itemsize
-    ptr = samples.data.ptr
+    ptr = get_ptr(samples)
     fpts_axes = [None, None, None]
     # samples are column-major ordered.
     # We get the internal pointer associated with each axis.
     for i in range(samples.shape[-1]):
         fpts_axes[i] = ptr + i * n_samples * itemsize
     return n_samples, fpts_axes
-    
+
+
 def convert_shape_to_3D(shape, dim):
-    return shape[::-1] + (1,) * (3 - dim) 
-    
+    return shape[::-1] + (1,) * (3 - dim)
+
+
 def get_spread_interp_func(dtype):
     if dtype == np.float64:
         spread_interp = _spread_interp
@@ -113,21 +126,41 @@ def get_spread_interp_func(dtype):
     return spread_interp
 
 
-def spreader(samples, c, f):
+def spreader(samples, c, f, tol=1e-4):
     spread_interp = get_spread_interp_func(samples.dtype)
     n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(1, samples.shape[-1])
-    spread_interp(1, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-4)
+    spread_interp(
+        1,
+        samples.shape[-1],
+        *shape,
+        n_samples,
+        *fpts_axes,
+        get_ptr(c),
+        get_ptr(f),
+        opts,
+        tol,
+    )
 
 
-def interpolator(samples, c, f):
+def interpolator(samples, c, f, tol=1e-4):
     spread_interp = get_spread_interp_func(samples.dtype)
     n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(2, samples.shape[-1])
-    spread_interp(2, samples.shape[-1], *shape, n_samples, *fpts_axes, c.data.ptr, f.data.ptr, opts, 1e-4)
-    
+    spread_interp(
+        2,
+        samples.shape[-1],
+        *shape,
+        n_samples,
+        *fpts_axes,
+        get_ptr(c),
+        get_ptr(f),
+        opts,
+        tol,
+    )
+
 
 class RawCufinufft:
     """GPU implementation of N-D non uniform Fast Fourrier Transform class.
@@ -261,9 +294,15 @@ class RawCufinufft:
             raise TypeError("cufinufft plan.dtype and " "samples dtypes do not match.")
 
         n_samples, fpts_axes = get_kx_ky_kz_pointers(self.samples)
-        
+
         ier = self.__set_pts(
-            self.plans[typ], n_samples, *fpts_axes, 0, None, None, None,
+            self.plans[typ],
+            n_samples,
+            *fpts_axes,
+            0,
+            None,
+            None,
+            None,
         )
         check_error(ier, f"Error setting non-uniforms points of type{typ}")
 
