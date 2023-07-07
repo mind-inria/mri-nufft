@@ -7,7 +7,8 @@ import numpy as np
 from scipy.spatial import Voronoi
 from mrinufft.operators.interfaces import proper_trajectory
 
-from ..operators.interfaces.gpu._cufinufft import CUFINUFFT_AVAILABLE, spreader, interpolator
+from ..operators.interfaces.gpu.cufinufft import CUFINUFFT_AVAILABLE
+from ..operators.interfaces.gpu._cufinufft import spreader, interpolator
 from ..operators.interfaces.gpu.utils import is_host_array
 from ..operators.interfaces.gpu.cupy_kernels import update_density
 
