@@ -74,7 +74,12 @@ def interpolate(sample_loc, gridded_data, tol=1e-4):
     """
     if is_host_array(sample_loc):
         sample_loc = cp.asarray(sample_loc.copy(order="F"))
-    sample_data = cp.empty(len(sample_loc), dtype=np.complex64)
+    if sample_loc.dtype == np.float32:   
+        sample_data = cp.empty(len(sample_loc), dtype=np.complex64)
+    elif sample_loc.dtype == np.float64:
+        sample_data = cp.empty(len(sample_loc), dtype=np.complex128)
+    else:
+        raise ValueError("sample_loc should be float32 or float64")
     interpolator(sample_loc, sample_data, gridded_data, tol)
     return sample_data
 
@@ -564,21 +569,6 @@ class MRICufiNUFFT(FourierOperatorBase):
     def ksp_size(self):
         """k-space size in bytes."""
         return int(self.n_samples * np.dtype(np.complex64).itemsize)
-
-    @classmethod
-    @nvtx_mark()
-    def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-
-        density = cp.ones(len(samples), dtype=np.complex64)
-        update = cp.empty_like(density)
-        img = cp.empty(shape, dtype=np.complex64)
-        for _ in range(n_iter):
-            oper.__adj_op(density, img)
-            oper.__op(img, update)
-            update_density(density, update)
-        return density.real
 
     def __repr__(self):
         """Return info about the MRICufiNUFFT Object."""
