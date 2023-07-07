@@ -153,7 +153,6 @@ def pipe(kspace, grid_shape, num_iter=10):
     update = cp.empty_like(density)
     for _ in range(num_iter):
         spreader(kspace, density, image)
-        interpolator(image, update, image)
+        interpolator(kspace, update, image)
         update_density(density, update)
     return density.real
-        
