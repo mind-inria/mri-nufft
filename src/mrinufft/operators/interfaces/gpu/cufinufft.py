@@ -263,19 +263,19 @@ class MRICufiNUFFT(FourierOperatorBase):
         img_d = cp.asarray(data)
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if is_host_array(data):
-            ksp_d = cp.empty(self.n_batchs, self.n_samples, dtype=np.complex64)
+            ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=np.complex64)
             ksp = np.zeros(
                 (self.n_batchs, self.n_coils, self.n_samples), dtype=np.complex64
             )
             for i in range(self.n_coils):
-                cp.copyto(coil_img_d, img_d)
+                cp.copyto(coil_img_d, img_d[i])
                 if self.smaps_cached:
                     coil_img_d *= self._smaps_d[i]  # sense forward
                 else:
                     self._smap_d.set(self._smaps[i])
                     coil_img_d *= self._smap_d  # sense forward
                 self.__op(coil_img_d, ksp_d)
-                cp.asnumpy(ksp_d, out=ksp[i])
+                cp.asnumpy(ksp_d, out=ksp[:, i])
             return ksp
         # data is already on device
         ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=np.complex64)
@@ -362,9 +362,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         if img_d is None:
             img_d = cp.zeros(self.shape, dtype=np.complex64)
         if is_host_array(coeffs):
-            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+            coil_ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=np.complex64)
             for i in range(self.n_coils):
-                coil_ksp_d.set(coeffs[i])
+                coil_ksp_d.set(coeffs[:, i])
                 if self.uses_density:
                     coil_ksp_d *= self.density_d
                 self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))

@@ -84,9 +84,9 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
     """
     block_size = _get_block_size()
     sense_adj_mono_kernel(
-        (dest.size // block_size,),
+        (dest.size // block_size + 1,),
         (block_size,),
-        (dest, coil, smap),
+        (dest, coil, smap, dest.size),
         dest.size,
         **kwargs,
     )
