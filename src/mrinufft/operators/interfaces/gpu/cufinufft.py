@@ -242,6 +242,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         # monocoil
         check_size(data, (self.n_batchs, self.n_coils, *self.shape))
+        data = data.astype(np.complex64)
         if not self.persist_plan:
             self.raw_op._make_plan(2)
             self.raw_op._set_pts(2)
@@ -258,7 +259,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         return self._safe_squeeze(ret)
 
     def _op_sense(self, data, ksp_d=None):
-        img_d = cp.asarray(data)
+        img_d = cp.asarray(data, dtype=np.complex64)
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
         if is_host_array(data):
             ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=np.complex64)
