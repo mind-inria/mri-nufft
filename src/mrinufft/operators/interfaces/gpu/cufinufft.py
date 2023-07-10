@@ -114,9 +114,8 @@ class MRICufiNUFFT(FourierOperatorBase):
     smaps_cached: bool, default False
         - If False the smaps are copied on device and free at each iterations.
         - If True, the smaps are copied on device and stay on it.
-    keep_dims: bool, default False
-        If True, the output will have dimension (n_batchs, n_coils, *shappe), even if
-        n_coils or n_batchs is 1.
+    squeeze_dims: bool, default False
+        If True, will try to remove the singleton dimension for batch and coils.
     n_trans: int, default 1
         Number of transform to perform in parallel by cufinufft.
     kwargs :
@@ -147,7 +146,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         smaps_cached=False,
         verbose=False,
         persist_plan=True,
-        keep_dims=False,
+        squeeze_dim=False,
         n_trans=1,
         **kwargs,
     ):
@@ -162,7 +161,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.shape = shape
         self.n_batchs = n_batchs
         self.n_trans = n_trans
-        self.keep_dims = keep_dims
+        self.squeeze_dim = squeeze_dim
         samples = proper_trajectory(samples, normalize=True).astype(np.float32)
         self.samples = samples
         self.n_samples = len(samples)
@@ -256,9 +255,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._destroy_plan(2)
 
         ret /= self.norm_factor
-        if self.keep_dims:
-            return ret.squeeze(axis=(0, 1))
-        return ret
+        return self._safe_squeeze(ret)
 
     def _op_sense(self, data, ksp_d=None):
         img_d = cp.asarray(data)
@@ -354,9 +351,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._destroy_plan(1)
 
         ret /= self.norm_factor
-        if self.keep_dims:
-            return ret.squeeze(axis=(0, 1))
-        return ret
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
@@ -547,6 +542,20 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.__adj_op(get_ptr(ksp_d), get_ptr(img_d))
             cp.asnumpy(img_d, out=img[i])
         return img
+
+    @staticmethod
+    def _safe_squeeze(self, arr):
+        """Squeeze the shape of the operator."""
+       if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
 
     @property
     def eps(self):
