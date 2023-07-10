@@ -164,6 +164,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_trans = n_trans
         self.keep_dims = keep_dims
         samples = proper_trajectory(samples, normalize=True).astype(np.float32)
+        self.samples = samples
         self.n_samples = len(samples)
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
