@@ -266,12 +266,11 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _op_sense(self, data, ksp_d=None):
         img_d = cp.asarray(data, dtype=np.complex64)
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
-        streams = [
-            cp.cuda.Stream(non_blocking=True)
-            for _ in range(self.n_streams)
-        ]
-        for cur_stream_id in range(self.n_streams-1):
-            self._smap_d[cur_stream_id].set(self._smaps[cur_stream_id], streams[cur_stream_id])
+        streams = [cp.cuda.Stream(non_blocking=True) for _ in range(self.n_streams)]
+        for cur_stream_id in range(self.n_streams - 1):
+            self._smap_d[cur_stream_id].set(
+                self._smaps[cur_stream_id], streams[cur_stream_id]
+            )
         if self.n_streams == 1:
             cur_stream_id = 0
         if is_host_array(data):
@@ -297,7 +296,9 @@ class MRICufiNUFFT(FourierOperatorBase):
                 coil_img_d = img_d * self._smaps_d[i]  # sense forward
             else:
                 if i < self.n_coils - self.n_streams + 1:
-                    self._smap_d[next_stream_id].set(self._smaps[i+self.n_streams-1], streams[next_stream_id])
+                    self._smap_d[next_stream_id].set(
+                        self._smaps[i + self.n_streams - 1], streams[next_stream_id]
+                    )
                 streams[cur_stream_id].synchronize()
                 coil_img_d = img_d * self._smap_d[cur_stream_id]  # sense forward
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
@@ -372,10 +373,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
-        streams = [
-            cp.cuda.Stream(non_blocking=True)
-            for _ in range(self.n_streams)
-        ]
+        streams = [cp.cuda.Stream(non_blocking=True) for _ in range(self.n_streams)]
         if img_d is None:
             img_d = cp.zeros(self.shape, dtype=np.complex64)
         if not is_host_array(coeffs) and self.uses_density:
@@ -384,15 +382,21 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             # TODO: FIX streams here too
             coil_ksp_d = cp.empty((self.n_streams, self.n_samples), dtype=np.complex64)
-            for cur_stream_id in range(self.n_streams-1):
-                self._smap_d[cur_stream_id].set(self._smaps[cur_stream_id], streams[cur_stream_id])
-                coil_ksp_d[cur_stream_id].set(coeffs[:, cur_stream_id], streams[cur_stream_id])
+            for cur_stream_id in range(self.n_streams - 1):
+                self._smap_d[cur_stream_id].set(
+                    self._smaps[cur_stream_id], streams[cur_stream_id]
+                )
+                coil_ksp_d[cur_stream_id].set(
+                    coeffs[:, cur_stream_id], streams[cur_stream_id]
+                )
             if self.n_streams == 1:
                 cur_stream_id = 0
             for i in range(self.n_coils):
                 next_stream_id = (cur_stream_id + 1) % self.n_streams
                 if i < self.n_coils - self.n_streams + 1:
-                    coil_ksp_d[next_stream_id].set(coeffs[:, i+self.n_streams-1], streams[next_stream_id])
+                    coil_ksp_d[next_stream_id].set(
+                        coeffs[:, i + self.n_streams - 1], streams[next_stream_id]
+                    )
                 streams[cur_stream_id].synchronize()
                 if self.uses_density:
                     coil_ksp_d[cur_stream_id] *= self.density_d
@@ -401,23 +405,31 @@ class MRICufiNUFFT(FourierOperatorBase):
                     sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
                 else:
                     if i < self.n_coils - self.n_streams + 1:
-                        self._smap_d[next_stream_id].set(self._smaps[i+self.n_streams-1], streams[cur_stream_id])
+                        self._smap_d[next_stream_id].set(
+                            self._smaps[i + self.n_streams - 1], streams[cur_stream_id]
+                        )
                     sense_adj_mono(img_d, coil_img_d, self._smap_d)
                 cur_stream_id = next_stream_id
             return img_d.get()
-        
-        for cur_stream_id in range(self.n_streams-1):
-            self._smap_d[cur_stream_id].set(self._smaps[cur_stream_id], streams[cur_stream_id])
+
+        for cur_stream_id in range(self.n_streams - 1):
+            self._smap_d[cur_stream_id].set(
+                self._smaps[cur_stream_id], streams[cur_stream_id]
+            )
         if self.n_streams == 1:
             cur_stream_id = 0
         for i in range(self.n_coils):
             next_stream_id = (cur_stream_id + 1) % self.n_streams
-            self.__adj_op(get_ptr(coeffs) + i * self.ksp_size, get_ptr(coil_img_d[cur_stream_id]))
+            self.__adj_op(
+                get_ptr(coeffs) + i * self.ksp_size, get_ptr(coil_img_d[cur_stream_id])
+            )
             if self.smaps_cached:
                 sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
             else:
                 if i < self.n_coils - self.n_streams + 1:
-                    self._smap_d[next_stream_id].set(self._smaps[i+self.n_streams-1], streams[next_stream_id])
+                    self._smap_d[next_stream_id].set(
+                        self._smaps[i + self.n_streams - 1], streams[next_stream_id]
+                    )
                 streams[cur_stream_id].synchronize()
                 sense_adj_mono(img_d, coil_img_d, self._smap_d)
             cur_stream_id = next_stream_id
@@ -582,7 +594,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     @staticmethod
     def _safe_squeeze(self, arr):
         """Squeeze the shape of the operator."""
-       if self.squeeze_dims:
+        if self.squeeze_dims:
             try:
                 arr = arr.squeeze(axis=1)
             except ValueError:
