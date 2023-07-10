@@ -104,6 +104,7 @@ def get_default_opts(nufft_type, dim):
 
 def get_kx_ky_kz_pointers(samples):
     n_samples = len(samples)
+    dim = samples.shape[-1]
     itemsize = samples.dtype.itemsize
     ptr = get_ptr(samples)
     fpts_axes = [None, None, None]
@@ -111,6 +112,15 @@ def get_kx_ky_kz_pointers(samples):
     # We get the internal pointer associated with each axis.
     for i in range(samples.shape[-1]):
         fpts_axes[i] = ptr + i * n_samples * itemsize
+    # Because FINUFFT/cufinufft are internally column major,
+    # we will reorder the pts axes. Reordering references
+    # save us from having to actually transpose signal data
+    # from row major (Python default) to column major.
+    # We do this by following translation:
+    #   (x, None, None) ~>  (x, None, None)
+    #   (x, y, None)    ~>  (y, x, None)
+    #   (x, y, z)       ~>  (z, y, x)
+    fpts_axes[:dim] = fpts_axes[:dim][::-1]
     return n_samples, fpts_axes
 
 
