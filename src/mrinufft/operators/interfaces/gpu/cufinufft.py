@@ -5,7 +5,6 @@ import warnings
 import numpy as np
 
 from ..base import FourierOperatorBase, proper_trajectory
-from ._cufinufft import RawCufinufft, spreader, interpolator, CUFINUFFT_LIB_AVAILABLE
 from .utils import (
     is_host_array,
     is_cuda_array,
@@ -23,65 +22,90 @@ try:
 except ImportError:
     CUPY_AVAILABLE = False
 
-
-CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFINUFFT_LIB_AVAILABLE is not None
-
-
-def spread(sample_loc, sample_data, grid_shape, tol=1e-4):
-    """Spread the data onto the grid.
-
-    Parameters
-    ----------
-    sample_loc: np.ndarray
-        Array of shape (Nsamples, 2) or (Nsamples, 3) containing the coordinates
-        of the samples location.
-    sample_data: np.ndarray
-        Array of shape (Nsamples, Ncoils) containing the samples data.
-    grid_shape: tuple
-        Shape of the image grid.
-    tol: float, optional
-        Tolerance for error.
-
-    Returns
-    -------
-    gridded_data: np.ndarray
-        Array of shape (Ncoils, *grid_shape) containing the gridded data.
-    """
-    if is_host_array(sample_loc):
-        sample_loc = cp.asarray(sample_loc.copy(order="F"))
-    gridded_data = cp.empty(grid_shape, dtype=np.complex64)
-    spreader(sample_loc, sample_data, gridded_data, tol)
-    return gridded_data
+CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
+try:
+    from cufinufft._plan import Plan
+except ImportError:
+    CUFINUFFT_AVAILABLE = False
 
 
-def interpolate(sample_loc, gridded_data, tol=1e-4):
-    """Interpolate the data from the grid onto the samples location.
+DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
-    Parameters
-    ----------
-    sample_loc: np.ndarray
-        Array of shape (Nsamples, 2) or (Nsamples, 3) containing the coordinates
-        of the samples location.
-    gridded_data: np.ndarray
-        Array of shape (Ncoils, *grid_shape) containing the gridded data.
-    tol: float, optional
-        Tolerance for error.
 
-    Returns
-    -------
-    sample_data: np.ndarray
-        Array of shape (Nsamples, Ncoils) containing the interpolated data.
-    """
-    if is_host_array(sample_loc):
-        sample_loc = cp.asarray(sample_loc.copy(order="F"))
-    if sample_loc.dtype == np.float32:
-        sample_data = cp.empty(len(sample_loc), dtype=np.complex64)
-    elif sample_loc.dtype == np.float64:
-        sample_data = cp.empty(len(sample_loc), dtype=np.complex128)
-    else:
-        raise ValueError("sample_loc should be float32 or float64")
-    interpolator(sample_loc, sample_data, gridded_data, tol)
-    return sample_data
+def _error_check(ier, msg):
+    if ier != 0:
+        raise RuntimeError(msg)
+
+
+class RawCufinufftPlan:
+    """Light wrapper around the guru interface of finufft."""
+
+    def __init__(
+        self,
+        samples,
+        shape,
+        n_trans=1,
+        eps=1e-6,
+        **kwargs,
+    ):
+        self.shape = shape
+        self.samples = cp.array(samples, order="F")
+        self.ndim = len(shape)
+        self.eps = float(eps)
+        self.n_trans = n_trans
+
+        # the first element is dummy to index type 1 with 1
+        # and type 2 with 2.
+        self.plans = [None, None, None]
+
+        for i in [1, 2]:
+            self._make_plan(i, **kwargs)
+            self._set_pts(i)
+
+    @property
+    def dtype(self):
+        """Return the dtype (precision) of the transform."""
+        try:
+            return self.plans[1].dtype
+        except AttributeError:
+            return DTYPE_R2C[str(self.samples.dtype)]
+
+    def _make_plan(self, typ, **kwargs):
+        self.plans[typ] = Plan(
+            typ,
+            self.shape,
+            self.n_trans,
+            self.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            **kwargs,
+        )
+
+    def _set_pts(self, typ):
+        x, y, z = None, None, None
+        x = cp.ascontiguousarray(self.samples[:, 0])
+        y = cp.ascontiguousarray(self.samples[:, 1])
+        fpts_axes = [get_ptr(y), get_ptr(x), None]
+        if self.ndim == 3:
+            z = cp.ascontiguousarray(self.samples[:, 2])
+            fpts_axes.insert(0, get_ptr(z))
+        M = x.size
+        self.plans[typ]._setpts(
+            self.plans[typ]._plan, M, *fpts_axes[:3], 0, None, None, None
+        )
+
+    def type1(self, coeff_data_ptr, grid_data_ptr):
+        """Type 1 transform. Non Uniform to Uniform."""
+        ier = self.plans[1]._exec_plan(
+            self.plans[1]._plan, coeff_data_ptr, grid_data_ptr
+        )
+        _error_check(ier, "Error in type 1 transform")
+
+    def type2(self, coeff_data_ptr, grid_data_ptr):
+        """Type 2 transform. Uniform to non-uniform."""
+        ier = self.plans[2]._exec_plan(
+            self.plans[2]._plan, coeff_data_ptr, grid_data_ptr
+        )
+        _error_check(ier, "Error in type 2 transform")
 
 
 class MRICufiNUFFT(FourierOperatorBase):
@@ -153,7 +177,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     ):
         if not CUPY_AVAILABLE:
             raise RuntimeError("cupy is not installed")
-        if not CUFINUFFT_LIB_AVAILABLE:
+        if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
 
         if (n_batchs * n_coils) % n_trans != 0:
@@ -216,11 +240,10 @@ class MRICufiNUFFT(FourierOperatorBase):
             self._uses_sense = False
         # Initialise NUFFT plans
         self.persist_plan = persist_plan
-        self.raw_op = RawCufinufft(
+        self.raw_op = RawCufinufftPlan(
             samples_d,
             tuple(shape),
             n_trans=n_trans,
-            init_plans=self.persist_plan,
             **kwargs,
         )
 
@@ -413,7 +436,8 @@ class MRICufiNUFFT(FourierOperatorBase):
                     else:
                         if i < self.n_coils - self.n_streams + 1:
                             self._smap_d[next_stream_id].set(
-                                self._smaps[i + self.n_streams - 1], streams[cur_stream_id]
+                                self._smaps[i + self.n_streams - 1],
+                                streams[cur_stream_id],
                             )
                         sense_adj_mono(img_d, coil_img_d, self._smap_d)
                     cur_stream_id = next_stream_id
@@ -429,7 +453,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             next_stream_id = (cur_stream_id + 1) % self.n_streams
             with streams[cur_stream_id]:
                 self.__adj_op(
-                    get_ptr(coeffs) + i * self.ksp_size, get_ptr(coil_img_d[cur_stream_id])
+                    get_ptr(coeffs) + i * self.ksp_size,
+                    get_ptr(coil_img_d[cur_stream_id]),
                 )
                 if self.smaps_cached:
                     sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
