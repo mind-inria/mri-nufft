@@ -312,12 +312,12 @@ class MRICufiNUFFT(FourierOperatorBase):
         )
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
+        dataf = data.flatten()
+        size_batch = self.n_trans * np.prod(self.shape)
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
-            coil_img_d.set(
-                data.flatten()[i * self.bsize_img : (i + 1) * self.bsize_img]
-            )
+            coil_img_d.set(dataf[i * size_batch : (i + 1) * size_batch])
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_d))
-            cp.asnumpy(ksp_d, out=ksp[i])  # FIXME
+            ksp[i * self.n_trans : (i + 1) * self.n_trans] = ksp_d.get()
             ksp = ksp.reshape((self.n_batchs, self.n_coils, self.n_samples))
         return ksp
 
@@ -363,9 +363,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         if img_d is None:
             img_d = cp.zeros(self.shape, dtype=np.complex64)
         if is_host_array(coeffs):
-            coil_ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=np.complex64)
+            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
             for i in range(self.n_coils):
-                coil_ksp_d.set(coeffs[:, i])
+                coil_ksp_d.set(coeffs[i])
                 if self.uses_density:
                     coil_ksp_d *= self.density_d
                 self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
@@ -396,7 +396,8 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _adj_op_calibless(self, coeffs, img_d=None):
         coeffs_f = coeffs.flatten()
-        ksp_batched = cp.empty((self.n_trans * self.n_samples), dtype=np.complex64)
+        n_trans_samples = self.n_trans * self.n_samples
+        ksp_batched = cp.empty(n_trans_samples, dtype=np.complex64)
         if self.uses_density:
             density_batched = cp.repeat(
                 self.density_d[None, :], self.n_trans, axis=0
@@ -428,11 +429,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
-            ksp_batched.set(coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp])
+            ksp_batched.set(coeffs_f[i * n_trans_samples : (i + 1) * n_trans_samples])
             if self.uses_density:
                 ksp_batched *= density_batched
             self.__adj_op(get_ptr(ksp_batched), get_ptr(img_batched))
-            cp.asnumpy(img_batched, out=img[i * self.n_trans : (i + 1) * self.n_trans])
+            img[i * self.n_trans : (i + 1) * self.n_trans] = img_batched.get()
             img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
 
