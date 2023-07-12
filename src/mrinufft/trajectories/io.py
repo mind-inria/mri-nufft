@@ -2,33 +2,26 @@
 import warnings
 import numpy as np
 
-def get_kspace_points_grads_n_slew(shots, params, check=True, normalized=True):
-    FOV = params['recon_params']['FOV']
-    img_size = params['recon_params']['img_size']
-    if normalized:
-        for dim in range(shots.shape[2]):
-            shots[:, :, dim] = \
-                shots[:, :, dim] * img_size[dim] / (2 * FOV[dim]) * 2 * np.pi
-    gradients = np.diff(shots, axis=1) / (
-            params['scan_consts']['gyromagnetic_constant'] *
-            params['scan_consts']['gradient_raster_time']
-        )
-    start_positions = shots[:, 0, :]
-    slew_rate = np.diff(gradients, axis=1) / \
-        (params['scan_consts']['gradient_raster_time'])
-    if check:
-        if np.max(gradients) > params['scan_consts']['gradient_mag_max']:
-            warnings.warn("Gradient Maximum Maginitude "
-                          "overflow from Machine capabilities")
-        if np.max(slew_rate) > params['scan_consts']['slew_rate_max']:
-            occurences = \
-                np.where(slew_rate > params['scan_consts']['slew_rate_max'])
-            warnings.warn("Slew Rate overflow from Machine capabilities!\n"
-                          "Occurences per shot : " +
-                          str(len(occurences[0]) / shots.shape[0]) + "\n"
-                          "Max Value : " +
-                          str(np.max(np.abs(slew_rate)))
-                          )
+
+def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normalization_factor=0.5,
+                                 gyromagnetic_constant=42.576e3, gradient_raster_time=0.01, 
+                                 check_constraints=True, gradient_mag_max=40e-3,
+                                 slew_rate_max=100e-3):
+    if trajectory_normalization_factor:
+        trajectory = trajectory * np.array(img_size) / (2 * np.array(FOV)) / trajectory_normalization_factor
+    gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
+    start_positions = trajectory[:, 0, :]
+    slew_rate = np.diff(gradients, axis=1) / gradient_raster_time
+    if check_constraints:
+        if np.max(gradients) > gradient_mag_max:
+            warnings.warn("Gradient Maximum Maginitude overflow from Machine capabilities")
+        if np.max(slew_rate) > slew_rate_max:
+            occurences = np.where(slew_rate > slew_rate_max)
+            warnings.warn(
+                "Slew Rate overflow from Machine capabilities!\n"
+                "Occurences per shot : " + str(len(occurences[0]) / trajectory.shape[0]) + "\n"
+                "Max Value : " + str(np.max(np.abs(slew_rate)))
+            )
     return gradients, start_positions, slew_rate
 
 
