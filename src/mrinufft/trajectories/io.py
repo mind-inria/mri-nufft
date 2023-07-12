@@ -198,15 +198,58 @@ def create_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
         os.remove(grad_filename + '.txt')
 
 
-def get_kspace_loc_from_gradfile(grad_filename, dwell_time=0.01, num_adc_samples=None, 
-                                 gyromagnetic_constant=42.576e3, gradient_raster_time=0.010,
-                                 read_shots=False):
-    def _pop_elements(array, num_elements=1, type='float'):
-        if num_elements == 1:
-            return array[0].astype(type), array[1:]
-        else:
-            return array[0:num_elements].astype(type), \
-                   array[num_elements:]
+
+def _pop_elements(array, num_elements=1, type='float'):
+    """A function to pop elements from an array.
+    Parameters
+    ----------
+    array : np.ndarray
+        Array to pop elements from.
+    num_elements : int, optional
+        number of elements to pop, by default 1
+    type : str, optional
+        Type of the element being popped, by default 'float'
+    
+    Returns
+    -------
+    element_popped: 
+        Element popped from array with type as specified.
+    array: np.ndarray
+        Array with elements popped.
+    """
+    
+    if num_elements == 1:
+        return array[0].astype(type), array[1:]
+    else:
+        return array[0:num_elements].astype(type), \
+               array[num_elements:]
+                   
+                   
+def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num_adc_samples: int=None, 
+                                 gyromagnetic_constant: float=42.576e3, gradient_raster_time: float=0.010,
+                                 read_shots: bool=False):
+    """Get k-space locations from gradient file.
+
+    Parameters
+    ----------
+    grad_filename : str
+        Gradient filename.
+    dwell_time : float, optional
+        Dwell time of ADC, by default 0.01
+    num_adc_samples : int, optional
+        Number of ADC samples, by default None
+    gyromagnetic_constant : float, optional
+        Gyromagnetic Constant, by default 42.576e3
+    gradient_raster_time : float, optional
+        Gradient raster time, by default 0.010
+    read_shots : bool, optional
+        Whether in read shots configuration which accepts an extra point at end, by default False
+
+    Returns
+    -------
+    kspace_loc : np.ndarray
+        K-space locations. Shape (num_shots, num_adc_samples, dimension).
+    """    
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = gradient_raster_time * 1e6
     with open(grad_filename, 'rb') as binfile:
