@@ -198,9 +198,9 @@ def create_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
         os.remove(grad_filename + '.txt')
 
 
-def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
-                                 num_adc_samples=None, gamma=42.576e3,
-                                 gradient_raster_time=0.010, verbose=0, read_shots=False):
+def get_kspace_loc_from_gradfile(grad_filename, dwell_time=0.01, num_adc_samples=None, 
+                                 gyromagnetic_constant=42.576e3, gradient_raster_time=0.010,
+                                 read_shots=False):
     def _pop_elements(array, num_elements=1, type='float'):
         if num_elements == 1:
             return array[0].astype(type), array[1:]
@@ -209,7 +209,7 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
                    array[num_elements:]
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = gradient_raster_time * 1e6
-    with open(filename, 'rb') as binfile:
+    with open(grad_filename, 'rb') as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
@@ -221,8 +221,8 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
             fov, data = _pop_elements(data, dimension)
             img_size, data = _pop_elements(data, dimension, type='int')
             min_osf, data = _pop_elements(data, type='int')
-            gamma, data = _pop_elements(data)
-            gamma = gamma / 1000
+            gyromagnetic_constant, data = _pop_elements(data)
+            gyromagnetic_constant = gyromagnetic_constant / 1000
         (num_shots,
          num_samples_per_shot), data = _pop_elements(data, 2, type='int')
         if num_adc_samples is None:
@@ -243,8 +243,8 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
             _, data = _pop_elements(data, left_over)
-        k0, data = _pop_elements(data, dimension*num_shots)
-        k0 = np.reshape(k0, (num_shots, dimension))
+        start_positions, data = _pop_elements(data, dimension*num_shots)
+        start_positions = np.reshape(start_positions, (num_shots, dimension))
         if version < 4.1:
             grad_max, data = _pop_elements(data)
         gradients, data = _pop_elements(
@@ -254,10 +254,12 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
         gradients = np.reshape(grad_max * gradients,
                                (num_shots * num_samples_per_shot, dimension))
         # Convert gradients from mT/m to T/m
-        gradients = convert_NCNSxD_to_NCxNSxD(gradients * 1e-3,
-                                              num_samples_per_shot)
+        gradients = np.reshape(
+            gradients * 1e-3,
+            (-1, num_samples_per_shot, dimension)
+        )
         kspace_loc = np.zeros((num_shots, num_adc_samples, dimension))
-        kspace_loc[:, 0, :] = k0
+        kspace_loc[:, 0, :] = start_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
         Q, R = divmod(adc_times, gradient_raster_time_ns)
         Q = Q.astype('int')
@@ -276,27 +278,23 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
                                   "obtained in binary file!\n"
                                   "Data will be extended")
                 kspace_loc[:, i+1, :] = (
-                        k0 + (
+                        start_positions + (
                             grad_accumulated[:, gradients.shape[1]-1, :] +
                             gradients[:, gradients.shape[1]-1, :] * r
-                        ) * gamma * 1e-6
+                        ) * gyromagnetic_constant * 1e-6
                     )
             else:
                 if q == 0:
                     kspace_loc[:, i+1, :] = (
-                            k0 + gradients[:, q, :] * r * gamma * 1e-6
+                            start_positions + gradients[:, q, :] * r * gyromagnetic_constant * 1e-6
                     )
                 else:
                     kspace_loc[:, i+1, :] = (
-                            k0 + (
+                            start_positions + (
                                 grad_accumulated[:, q-1, :] +
                                 gradients[:, q, :] * r
-                            ) * gamma * 1e-6
+                            ) * gyromagnetic_constant * 1e-6
                         )
-        if verbose:
-            loc = kspace_loc / \
-                  np.max(np.max(np.abs(kspace_loc), axis=0), axis=0)
-            scatter_shots(loc, num_shots='all', isnormalized=True)
         params = {
             'version': version,
             'dimension': dimension,
@@ -307,7 +305,7 @@ def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
             params['FOV'] = fov
             params['img_size'] = img_size
             params['min_osf'] = min_osf
-            params['gamma'] = gamma
+            params['gamma'] = gyromagnetic_constant
             params['recon_tag'] = recon_tag
             if version >= 4.2:
                 params['timestamp'] = timestamp
