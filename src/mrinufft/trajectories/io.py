@@ -1,6 +1,10 @@
 """Holds functions for reading and writing trajectories from and to binary files."""
 import warnings
+import os
 import numpy as np
+from datetime import datetime
+from array import array
+
 
 
 def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normalization_factor=0.5,
@@ -63,28 +67,25 @@ def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normaliza
     return gradients, start_positions, slew_rate
 
 
-def create_gradient_file(gradients, k0, filename, keep_txt_file=False,
-                         version=4.2, acq_params={}, recon_tag=1.1, timestamp=None):
+def create_gradient_file(gradients, start_positions, grad_filename, img_size, FOV, in_out=True,
+                         min_osf=5, gyromagnetic_constant=42.576e3, version=4.2, recon_tag=1.1, 
+                         timestamp=None, keep_txt_file=False):
     num_shots = gradients.shape[0]
     num_samples_per_shot = gradients.shape[1]
-    dimension = k0.shape[-1]
-    if version >= 4.1 and acq_params == {}:
-        warnings.warn("For Gradient spec version of 4.1, we need acq_params, "
-                      "writing binaries based on base version which wont have "
-                      "FOV and img_size related information\n"
-                      "This will be raised as an error in future!")
-        version = 1
+    dimension = start_positions.shape[-1]
+    if len(gradients.shape) == 3:
+        gradients = gradients.reshape(-1, gradients.shape[-1])
     # Convert gradients to mT/m
-    gradients = convert_NCxNSxD_to_NCNSxD(gradients) * 1e3
+    gradients = gradients * 1e3
     max_grad = np.max(np.abs(gradients))
-    file = open(filename + '.txt', 'w')
+    file = open(grad_filename + '.txt', 'w')
     if version >= 4.1:
         file.write(str(version) + '\n')
     # Write the dimension, num_samples_per_shot and num_shots
     file.write(str(dimension) + '\n')
     if version >= 4.1:
-        img_size = acq_params['recon_params']['img_size']
-        FOV = acq_params['recon_params']['FOV']
+        img_size = img_size
+        FOV = FOV
         if type(img_size) is int:
             img_size = (img_size,) * dimension
         if type(FOV) is float:
@@ -93,17 +94,15 @@ def create_gradient_file(gradients, k0, filename, keep_txt_file=False,
             file.write(str(fov) + '\n')
         for sz in img_size:
             file.write(str(sz) + '\n')
-        file.write(str(acq_params['traj_params']
-                       ['oversampling_factor']) + '\n')
-        file.write(str(acq_params['scan_consts']
-                       ['gyromagnetic_constant'] * 1000) + '\n')
+        file.write(str(min_osf) + '\n')
+        file.write(str(gyromagnetic_constant * 1000) + '\n')
     file.write(str(num_shots) + '\n')
     file.write(str(num_samples_per_shot) + '\n')
     if version >= 4.1:
-        initialization = acq_params['traj_params']['initialization']
-        if initialization == 'RadialIO' or \
-                initialization == 'SpiralIO' or \
-                initialization == 'PappusIO':
+        if not in_out and np.sum(start_positions) != 0:
+            warnings.warn("The start positions are not all zero for center-out trajectory")
+            
+        if in_out:
             file.write('0.5\n')
         else:
             file.write('0\n')
@@ -120,29 +119,35 @@ def create_gradient_file(gradients, k0, filename, keep_txt_file=False,
             left_over -= 1
         file.write(str('0\n'*left_over))
     # Write all the k0 values
-    file.write('\n'.join(' '.join(["{0:5.4f}".format(iter2)
-                                   for iter2 in iter1])
-                         for iter1 in k0) + '\n')
+    file.write('\n'.join(
+        ' '.join(
+                ["{0:5.4f}".format(iter2) for iter2 in iter1]
+            )
+        for iter1 in start_positions) + '\n'
+    )
     if version < 4.1:
         # Write the maximum Gradient
         file.write(str(max_grad) + '\n')
     # Normalize gradients
     gradients = gradients / max_grad
-    file.write('\n'.join(' '.join(["{0:5.6f}".format(iter2)
-                                   for iter2 in iter1])
-                         for iter1 in gradients) + '\n')
+    file.write('\n'.join(
+        ' '.join(
+            ["{0:5.6f}".format(iter2) for iter2 in iter1]
+        )
+        for iter1 in gradients) + '\n'
+    )
     file.close()
     y = []
-    with open(filename + '.txt', 'r') as txtfile:
+    with open(grad_filename + '.txt', 'r') as txtfile:
         for line in txtfile:
             x = line.split(' ')
             for val in x:
                 y.append(float(val))
     float_array = array('f', y)
-    with open(filename + '.bin', 'wb') as binfile:
+    with open(grad_filename + '.bin', 'wb') as binfile:
         float_array.tofile(binfile)
-    if keep_txt_file is False:
-        os.remove(filename + '.txt')
+    if not keep_txt_file:
+        os.remove(grad_filename + '.txt')
 
 
 def get_kspace_loc_from_gradfile(filename, dwell_time=0.01,
