@@ -7,11 +7,49 @@ def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normaliza
                                  gyromagnetic_constant=42.576e3, gradient_raster_time=0.01, 
                                  check_constraints=True, gradient_mag_max=40e-3,
                                  slew_rate_max=100e-3):
+    """Calculate gradients from k-space points. Also returns start positions, slew rates and 
+    allows for checking of scanner constraints.
+    
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Trajectory in k-space points. Shape (num_shots, num_samples_per_shot, dimension).
+    FOV : float or tuple
+        Field of view
+    img_size : int or tuple
+        Image size
+    trajectory_normalization_factor : float, optional
+        Trajectory normalization factor, by default 0.5
+    gyromagnetic_constant : float, optional
+        Gyromagnetic constant, by default 42.576e3
+    gradient_raster_time : float, optional
+        Gradient raster time, by default 0.01
+    check_constraints : bool, optional
+        Check scanner constraints, by default True
+    gradient_mag_max : float, optional
+        Maximum gradient magnitude, by default 40e-3
+    slew_rate_max : float, optional
+        Maximum slew rate, by default 100e-3
+        
+    Returns
+    -------
+    gradients : np.ndarray
+        Gradients. Shape (num_shots-1, num_samples_per_shot, dimension).
+    start_positions : np.ndarray
+        Start positions. Shape (num_shots, dimension).
+    slew_rate : np.ndarray
+        Slew rates. Shape (num_shots-2, num_samples_per_shot, dimension).
+    """
+    # normalize trajectory by image size
     if trajectory_normalization_factor:
         trajectory = trajectory * np.array(img_size) / (2 * np.array(FOV)) / trajectory_normalization_factor
+
+    # calculate gradients and slew
     gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
     start_positions = trajectory[:, 0, :]
     slew_rate = np.diff(gradients, axis=1) / gradient_raster_time
+
+    # check constraints
     if check_constraints:
         if np.max(gradients) > gradient_mag_max:
             warnings.warn("Gradient Maximum Maginitude overflow from Machine capabilities")
