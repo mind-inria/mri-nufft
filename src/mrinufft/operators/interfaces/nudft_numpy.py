@@ -5,6 +5,19 @@ from .base import FourierOperatorCPU
 import numpy as np
 
 
+def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
+    """Get the NDFT Fourier Matrix."""
+    n = np.prod(shape)
+    matrix = np.zeros((n, n), dtype=complex)
+    r = [np.arange(shape[i]) for i in range(ndim)]
+    grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
+    traj_grid = ktraj @ grid_r
+    matrix = np.exp(-2j * np.pi * traj_grid)
+    if do_ifft:
+        matrix = matrix.conj().T
+    return matrix / np.sqrt(n)
+
+
 class RawNDFT:
     def __init__(self, samples, shape, explicit_matrix=False):
         self.samples = samples
@@ -13,16 +26,19 @@ class RawNDFT:
         self.ndim = len(shape)
 
         if explicit_matrix:
-            self._fourier_matrix = self.get_fourier_matrix()
-            self.op = lambda x: self._fourier_matrix @ x
-            self.adj_op = lambda x: self._fourier_matrix.conj() @ x
+            self._fourier_matrix = get_fourier_matrix(
+                self.samples, self.shape, self.ndim
+            )
+            self.op = lambda x: self._fourier_matrix @ x.flatten()
+            self.adj_op = lambda x: np.reshape(
+                (self._fourier_matrix.conj() @ x), self.shape
+            )
         else:
             self.op = self._op_sum
             self.adj_op = self._adj_op_sum
 
     def _op_sum(self, x):
         """Compute the type 2 NUDFT."""
-
         y = np.zeros(self.n_samples, dtype=x.dtype)
         for i in range(self.n_samples):
             for j in range(self.ndim):
@@ -36,31 +52,16 @@ class RawNDFT:
 
     def _adj_op_sum(self, x):
         """Compute the type 1 NUDFT."""
-            y = np.zeros((self.ndim, np.prod(self.shape)), dtype=x.dtype)
-            for i in range(self.n_samples):
-                for j in range(self.ndim):
-                    y[j, :] += (
-                        np.exp(
-                            1j * 2 * np.pi * self.samples[i, j] * np.arange(self.shape[j])
-                        )
-                        * x[i]
+        y = np.zeros((self.ndim, np.prod(self.shape)), dtype=x.dtype)
+        for i in range(self.n_samples):
+            for j in range(self.ndim):
+                y[j, :] += (
+                    np.exp(
+                        1j * 2 * np.pi * self.samples[i, j] * np.arange(self.shape[j])
                     )
-            return y
-
-    def get_fourier_matrix(self):
-        """Get the NDFT Fourier Matrix"""
-        r = [
-            np.linspace(-self.shape[i] / 2, self.shape[i] / 2 - 1, self.shape[i])
-            for i in range(self.ndim)
-        ]
-        grid_r = np.reshape(
-            np.meshgrid(*r, indexing="ij"), (self.ndim, np.prod(self.shape))
-        )
-        traj_grid = self.samples @ grid_r
-        A = np.exp(-1j * traj_grid)
-        scale = np.sqrt(np.prod(self.shape)) * np.power(np.sqrt(2), self.ndim)
-        A = A / scale
-        return A
+                    * x[i]
+                )
+        return y
 
 
 class MRInumpy(FourierOperatorCPU):
