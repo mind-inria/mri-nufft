@@ -7,7 +7,6 @@ import numpy as np
 from .base import FourierOperatorBase, proper_trajectory
 from .utils import (
     CUPY_AVAILABLE,
-    check_error,
     check_size,
     get_ptr,
     is_cuda_array,

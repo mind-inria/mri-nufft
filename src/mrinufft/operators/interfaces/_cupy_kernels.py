@@ -1,12 +1,13 @@
 """Kernel function for GPUArray data."""
 from .utils.gpu_utils import get_maxThreadBlock, CUPY_AVAILABLE
 
-
 update_density_kernel = lambda *args, **kwargs: None  # noqa: E731
 sense_adj_mono = lambda *args, **kwargs: None  # noqa: E731
 
 
 if CUPY_AVAILABLE:
+    import cupy as cp
+
     update_density_kernel = cp.RawKernel(
         """
         extern "C" __global__

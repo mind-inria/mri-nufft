@@ -19,6 +19,8 @@ def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
 
 
 class RawNDFT:
+    """Implementation of the NUDFT using numpy."""
+
     def __init__(self, samples, shape, explicit_matrix=False):
         self.samples = samples
         self.shape = shape
@@ -65,6 +67,11 @@ class RawNDFT:
 
 
 class MRInumpy(FourierOperatorCPU):
+    """MRI operator using numpy NUDFT backend.
+
+    For testing purposes only, as it is very slow.
+    """
+
     def __init_(self, samples, shape, n_coils=1, smaps=None, explicit_matrix=False):
         super().__init__(samples, shape, density=False, n_coils=n_coils, smaps=smaps)
 
