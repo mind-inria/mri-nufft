@@ -2,9 +2,8 @@
 
 from functools import wraps
 from hashlib import md5
-
+from pathlib import Path
 import numpy as np
-from .css_colors import CSS4_COLORS_CODE
 
 CUPY_AVAILABLE = True
 try:
@@ -48,6 +47,12 @@ def pin_memory(array):
 def check_error(ier, message):  # noqa: D103
     if ier != 0:
         raise RuntimeError(message)
+
+
+# Load CSS4 colors
+with open(str(Path(__file__).parent / "css_colors.txt"), "r") as f:
+    CSS4_COLORS_CODE = f.read().splitlines()[1:]
+CSS4_COLORS_CODE = [int(c) for c in CSS4_COLORS_CODE]
 
 
 def nvtx_mark(color=-1):

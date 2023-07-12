@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .base import AbstractMRIcpuNUFFT
+from .base import FourierOperatorCPU
 
 
 PYNUFFT_CPU_AVAILABLE = True
@@ -35,7 +35,7 @@ class RawPyNUFFT:
         return grid_data
 
 
-class MRIPynufft(AbstractMRIcpuNUFFT):
+class MRIPynufft(FourierOperatorCPU):
     """PyNUFFT implementation of MRI NUFFT transform."""
 
     def __init__(
@@ -53,16 +53,3 @@ class MRIPynufft(AbstractMRIcpuNUFFT):
         super().__init__(samples, shape, density, n_coils, smaps)
 
         self.raw_op = RawPyNUFFT(samples, shape, osf, **kwargs)
-
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-        density = np.ones(len(samples), dtype=oper._cpx_dtype)
-        update = np.empty_like(density, dtype=oper._cpx_dtype)
-        img = np.empty(shape, dtype=oper._cpx_dtype)
-        for _ in range(n_iter):
-            oper._adj_op(density, img)
-            oper._op(img, update)
-            density /= np.abs(update)
-        return density.real

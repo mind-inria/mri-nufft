@@ -1,12 +1,10 @@
 """Interface for the NUFFT operator of each backend."""
-from .gpu import (
-    MRICufiNUFFT,
-    MRITensorflowNUFFT,
-    CUFINUFFT_AVAILABLE,
-    TENSORFLOW_AVAILABLE,
-)
 
-from .cpu import MRIfinufft, FINUFFT_AVAILABLE, MRIPynufft, PYNUFFT_CPU_AVAILABLE
+from tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
+from cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
+from finufft import MRIfinufft, FINUFFT_AVAILABLE
+from pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
+
 from .base import proper_trajectory
 
 __all__ = [

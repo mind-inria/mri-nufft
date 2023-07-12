@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from ..base import FourierOperatorBase, proper_trajectory
+from .base import FourierOperatorBase, proper_trajectory
 from .utils import (
     is_host_array,
     is_cuda_array,
@@ -14,7 +14,7 @@ from .utils import (
     get_ptr,
     check_size,
 )
-from .cupy_kernels import sense_adj_mono, update_density
+from ._cupy_kernels import sense_adj_mono
 
 CUPY_AVAILABLE = True
 try:
