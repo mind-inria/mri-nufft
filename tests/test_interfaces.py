@@ -1,8 +1,7 @@
 """Test the interfaces module."""
 import numpy as np
 import scipy as sp
-import pytest
-from pytest_cases import parametrize_with_cases, parametrize
+from pytest_cases import parametrize_with_cases
 
 from mrinufft.operators.interfaces.nudft_numpy import RawNDFT
 
