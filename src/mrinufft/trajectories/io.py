@@ -1,16 +1,24 @@
 """Holds functions for reading and writing trajectories from and to binary files."""
 import warnings
 import os
+from typing import Tuple, Union, Optional
 import numpy as np
 from datetime import datetime
 from array import array
 
 
 
-def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normalization_factor=0.5,
-                                 gyromagnetic_constant=42.576e3, gradient_raster_time=0.01, 
-                                 check_constraints=True, gradient_mag_max=40e-3,
-                                 slew_rate_max=100e-3):
+def get_grads_from_kspace_points(
+    trajectory: np.ndarray,
+    FOV: Tuple[float, ...],
+    img_size: Tuple[int, ...],
+    trajectory_normalization_factor: float = 0.5,
+    gyromagnetic_constant: float = 42.576e3,
+    gradient_raster_time: float = 0.01,
+    check_constraints: bool = True,
+    gradient_mag_max: float = 40e-3,
+    slew_rate_max: float = 100e-3,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate gradients from k-space points. Also returns start positions, slew rates and 
     allows for checking of scanner constraints.
     
@@ -18,9 +26,9 @@ def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normaliza
     ----------
     trajectory : np.ndarray
         Trajectory in k-space points. Shape (num_shots, num_samples_per_shot, dimension).
-    FOV : float or tuple
+    FOV : tuple
         Field of view
-    img_size : int or tuple
+    img_size : tuple
         Image size
     trajectory_normalization_factor : float, optional
         Trajectory normalization factor, by default 0.5
@@ -46,7 +54,9 @@ def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normaliza
     """
     # normalize trajectory by image size
     if trajectory_normalization_factor:
-        trajectory = trajectory * np.array(img_size) / (2 * np.array(FOV)) / trajectory_normalization_factor
+        trajectory = trajectory * np.array(img_size) / (
+            2 * np.array(FOV)
+        ) / trajectory_normalization_factor
 
     # calculate gradients and slew
     gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
@@ -56,20 +66,59 @@ def get_grads_from_kspace_points(trajectory, FOV, img_size, trajectory_normaliza
     # check constraints
     if check_constraints:
         if np.max(gradients) > gradient_mag_max:
-            warnings.warn("Gradient Maximum Maginitude overflow from Machine capabilities")
+            warnings.warn(
+                "Gradient Maximum Maginitude overflow from Machine capabilities"
+            )
         if np.max(slew_rate) > slew_rate_max:
             occurences = np.where(slew_rate > slew_rate_max)
             warnings.warn(
                 "Slew Rate overflow from Machine capabilities!\n"
-                "Occurences per shot : " + str(len(occurences[0]) / trajectory.shape[0]) + "\n"
-                "Max Value : " + str(np.max(np.abs(slew_rate)))
+                "Occurences per shot : "
+                + str(len(occurences[0]) / trajectory.shape[0])
+                + "\n"
+                "Max Value : "
+                + str(np.max(np.abs(slew_rate)))
             )
     return gradients, start_positions, slew_rate
 
 
-def create_gradient_file(gradients, start_positions, grad_filename, img_size, FOV, in_out=True,
-                         min_osf=5, gyromagnetic_constant=42.576e3, version=4.2, recon_tag=1.1, 
-                         timestamp=None, keep_txt_file=False):
+def create_gradient_file(gradients: np.ndarray, start_positions: np.ndarray, 
+                         grad_filename: str, img_size: Tuple[int, ...], 
+                         FOV: Tuple[float, ...], in_out: bool = True,
+                         min_osf: int = 5, gyromagnetic_constant: float = 42.576e3, 
+                         version: float = 4.2, recon_tag: float = 1.1, 
+                         timestamp: Optional[float] = None, keep_txt_file: bool = False):
+    """Create gradient file from gradients and start positions.
+
+    Parameters
+    ----------
+    gradients : np.ndarray
+        Gradients. Shape (num_shots, num_samples_per_shot, dimension).
+    start_positions : np.ndarray
+        Start positions. Shape (num_shots, dimension).
+    grad_filename : str
+        Gradient filename.
+    img_size : Tuple[int, ...]
+        Image size.
+    FOV : Tuple[float, ...]
+        Field of view.
+    in_out : bool, optional
+        Whether it is In-Out trajectory?, by default True
+    min_osf : int, optional
+        Minimum oversampling factor needed at ADC, by default 5
+    gyromagnetic_constant : float, optional
+        Gyromagnetic Constant, by default 42.576e3
+    version : float, optional
+        Trajectory versioning, by default 4.2
+    recon_tag : float, optional
+        Reconstruction tag for online recon, by default 1.1
+    timestamp : Optional[float], optional
+        Timestamp of trajectory, by default None
+    keep_txt_file : bool, optional
+        Whether to keep the text file used temporarily which holds data pushed to 
+        binary file, by default False
+    
+    """
     num_shots = gradients.shape[0]
     num_samples_per_shot = gradients.shape[1]
     dimension = start_positions.shape[-1]
@@ -99,13 +148,12 @@ def create_gradient_file(gradients, start_positions, grad_filename, img_size, FO
     file.write(str(num_shots) + '\n')
     file.write(str(num_samples_per_shot) + '\n')
     if version >= 4.1:
-        if not in_out and np.sum(start_positions) != 0:
-            warnings.warn("The start positions are not all zero for center-out trajectory")
-            
-        if in_out:
-            file.write('0.5\n')
-        else:
+        if not in_out:
+            if np.sum(start_positions) != 0:
+                warnings.warn("The start positions are not all zero for center-out trajectory")
             file.write('0\n')
+        else:
+            file.write('0.5\n')
         # Write the maximum Gradient
         file.write(str(max_grad) + '\n')
         # Write recon Pipeline version tag
