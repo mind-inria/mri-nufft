@@ -1,9 +1,10 @@
 """Interface for the NUFFT operator of each backend."""
 
-from tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
-from cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
-from finufft import MRIfinufft, FINUFFT_AVAILABLE
-from pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
+from .tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
+from .cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
+from .finufft import MRIfinufft, FINUFFT_AVAILABLE
+from .pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
+from .nudft_numpy import MRInumpy
 
 from .base import proper_trajectory
 
@@ -11,6 +12,7 @@ __all__ = [
     "MRICufiNUFFT",
     "MRITensorflowNUFFT",
     "MRIfinufft",
+    "MRInumpy",
     "MRIPynufft",
     "check_backend",
     "get_operator",
@@ -22,6 +24,7 @@ _REGISTERED_BACKENDS = {
     "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
     "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
     "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
+    "numpy": (True, MRInumpy),
 }
 
 

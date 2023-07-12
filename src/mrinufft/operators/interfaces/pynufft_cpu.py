@@ -1,7 +1,5 @@
 """PyNUFFT CPU Interface."""
 
-import numpy as np
-
 from .base import FourierOperatorCPU
 
 
