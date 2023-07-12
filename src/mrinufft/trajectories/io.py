@@ -17,10 +17,6 @@ These trajectories nees to follow the format specified as shown below:
 |Empty places  |FLOAT|9      |n.a.   |Yet unused : Default initialized with 0                                  |
 |kStarts       |FLOAT|D*Nc   |1/m    |K-space location start 	                                               |
 |Gradient array|FLOAT|D*Nc*Ns|unitary|Gradient trajectory expressed in the range [-1; 1] relative to MaxGrad   |
-
-
-
-
 """
 import warnings
 import os
