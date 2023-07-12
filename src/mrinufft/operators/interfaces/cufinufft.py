@@ -5,20 +5,22 @@ import warnings
 import numpy as np
 
 from .base import FourierOperatorBase, proper_trajectory
-from .utils.gpu_utils import (
+from .utils import (
     CUPY_AVAILABLE,
-    is_host_array,
-    is_cuda_array,
-    sizeof_fmt,
-    pin_memory,
-    nvtx_mark,
-    get_ptr,
+    check_error,
     check_size,
+    get_ptr,
+    is_cuda_array,
+    is_host_array,
+    nvtx_mark,
+    pin_memory,
+    sizeof_fmt,
 )
 from ._cupy_kernels import sense_adj_mono
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
+    import cupy as cp
     from cufinufft._plan import Plan
 except ImportError:
     CUFINUFFT_AVAILABLE = False

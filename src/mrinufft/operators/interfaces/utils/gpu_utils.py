@@ -50,7 +50,7 @@ def pin_memory(array):
 
 
 # Load CSS4 colors
-with open(str(Path(__file__).parent / "css_colors.txt")) as f:
+with open(str(Path(__file__).parent / "css_color.txt")) as f:
     CSS4_COLORS_CODE = f.read().splitlines()[1:]
 CSS4_COLORS_CODE = [int(c) for c in CSS4_COLORS_CODE]
 
