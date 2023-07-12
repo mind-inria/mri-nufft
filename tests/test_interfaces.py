@@ -41,7 +41,10 @@ class CasesTrajectories:
 
 @parametrize_with_cases(
     "kspace_grid, shape",
-    cases=[CasesTrajectories.case_grid1D, CasesTrajectories.case_grid2D],
+    cases=[
+        CasesTrajectories.case_grid1D,
+        CasesTrajectories.case_grid2D,
+    ],  # 3D is ignored (too much possibility for the reordering)
 )
 def test_ndft_matrix(kspace_grid, shape):
     """Test that  the ndft matrix is a good matrix for doing fft."""
