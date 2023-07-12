@@ -24,7 +24,7 @@ These trajectories nees to follow the format specified as shown below:
 """
 import warnings
 import os
-from typing import Tuple, Union, Optional
+from typing import Tuple, Optional
 import numpy as np
 from datetime import datetime
 from array import array
