@@ -1,79 +1,11 @@
 """Utility functions for GPU Interface."""
 
-from functools import wraps
-from hashlib import md5
-from pathlib import Path
 import numpy as np
-
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-
-def is_cuda_array(var):
-    """Check if var implement the CUDA Array interface."""
-    try:
-        return hasattr(var, "__cuda_array_interface__")
-    except Exception:
-        return False
-
-
-def is_host_array(var):
-    """Check if var is a host contiguous np array."""
-    try:
-        return isinstance(var, np.ndarray) and var.flags.c_contiguous
-    except Exception:
-        return False
-
-
-def get_ptr(var):
-    """Return the pointer to data that follow a __cuda_array_interface__."""
-    try:
-        return var.__cuda_array_interface__["data"][0]
-    except RuntimeError:  # Special case for torch tensors with gradients.
-        return var.data_ptr()
-
-
-def pin_memory(array):
-    """Create a copy of the array in pinned memory."""
-    mem = cp.cuda.alloc_pinned_memory(array.nbytes)
-    ret = np.frombuffer(mem, array.dtype, array.size).reshape(array.shape)
-    ret[...] = array
-    return ret
 
 
 def check_error(ier, message):  # noqa: D103
     if ier != 0:
         raise RuntimeError(message)
-
-
-# Load CSS4 colors
-with open(str(Path(__file__).parent / "css_colors.txt"), "r") as f:
-    CSS4_COLORS_CODE = f.read().splitlines()[1:]
-CSS4_COLORS_CODE = [int(c) for c in CSS4_COLORS_CODE]
-
-
-def nvtx_mark(color=-1):
-    """Decorate to annotate function for profiling."""
-
-    def decorator(func):
-        # get litteral arg names
-        name = func.__name__
-        id_col = md5(func.__name__.encode("utf-8")).hexdigest()
-        id_col = int(id_col, 16) % len(CSS4_COLORS_CODE)
-
-        @wraps(func)
-        def new_func(*args, **kwargs):
-            cp.cuda.nvtx.RangePush(name, id_color=CSS4_COLORS_CODE[id_col])
-            ret = func(*args, **kwargs)
-            cp.cuda.nvtx.RangePop()
-            return ret
-
-        return new_func
-
-    return decorator
 
 
 def sizeof_fmt(num, suffix="B"):

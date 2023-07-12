@@ -5,7 +5,8 @@ import warnings
 import numpy as np
 
 from .base import FourierOperatorBase, proper_trajectory
-from .utils import (
+from .utils.gpu_utils import (
+    CUPY_AVAILABLE,
     is_host_array,
     is_cuda_array,
     sizeof_fmt,
@@ -15,12 +16,6 @@ from .utils import (
     check_size,
 )
 from ._cupy_kernels import sense_adj_mono
-
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
