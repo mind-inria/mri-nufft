@@ -82,6 +82,7 @@ finufft_             CPU          ✔                   single/double   TBA     
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
 pynufft_             CPU          ✘                   single/double   ✘              numpy
 pynufft_             GPU          ✘                   ✘               ✘              Not Supported
+pynfft_              CPU          ✘                   singles/double   ✘             Not Supported
 ==================== ============ =================== =============== ============== ===============
 
 
@@ -89,6 +90,7 @@ pynufft_             GPU          ✘                   ✘               ✘   
 .. _finufft: https://github.com/flatironinstitute/finufft
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
 .. _pynufft: https://github.com/jyhmiinlin/pynufft
+.. _pynfft: https://github.com/ghisvail/pynfft
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.  It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
