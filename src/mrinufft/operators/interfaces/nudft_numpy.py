@@ -21,49 +21,23 @@ def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
 class RawNDFT:
     """Implementation of the NUDFT using numpy."""
 
-    def __init__(self, samples, shape, explicit_matrix=False):
+    def __init__(self, samples, shape):
         self.samples = samples
         self.shape = shape
         self.n_samples = len(samples)
         self.ndim = len(shape)
 
-        if explicit_matrix:
-            self._fourier_matrix = get_fourier_matrix(
-                self.samples, self.shape, self.ndim
-            )
-            self.op = lambda x: self._fourier_matrix @ x.flatten()
-            self.adj_op = lambda x: np.reshape(
-                (self._fourier_matrix.conj() @ x), self.shape
-            )
-        else:
-            self.op = self._op_sum
-            self.adj_op = self._adj_op_sum
+        self._fourier_matrix = get_fourier_matrix(self.samples, self.shape, self.ndim)
 
-    def _op_sum(self, x):
-        """Compute the type 2 NUDFT."""
-        y = np.zeros(self.n_samples, dtype=x.dtype)
-        for i in range(self.n_samples):
-            for j in range(self.ndim):
-                y[i] += (
-                    np.exp(
-                        -1j * 2 * np.pi * self.samples[i, j] * np.arange(self.shape[j])
-                    )
-                    @ x[j, :]
-                )
-        return y
+    def op(self, image, coeffs):
+        """Compute the forward NUDFT."""
+        coeffs = self._fourier_matrix.T @ image.flatten()
+        return coeffs
 
-    def _adj_op_sum(self, x):
-        """Compute the type 1 NUDFT."""
-        y = np.zeros((self.ndim, np.prod(self.shape)), dtype=x.dtype)
-        for i in range(self.n_samples):
-            for j in range(self.ndim):
-                y[j, :] += (
-                    np.exp(
-                        1j * 2 * np.pi * self.samples[i, j] * np.arange(self.shape[j])
-                    )
-                    * x[i]
-                )
-        return y
+    def adj_op(self, coeffs, image):
+        """Compute the adjoint NUDFT."""
+        image = np.reshape((self._fourier_matrix.conj() @ coeffs), self.shape)
+        return image
 
 
 class MRInumpy(FourierOperatorCPU):
@@ -72,7 +46,11 @@ class MRInumpy(FourierOperatorCPU):
     For testing purposes only, as it is very slow.
     """
 
-    def __init_(self, samples, shape, n_coils=1, smaps=None, explicit_matrix=False):
-        super().__init__(samples, shape, density=False, n_coils=n_coils, smaps=smaps)
+    def __init_(self, samples, shape, n_coils=1, smaps=None):
+        rndft = RawNDFT(samples, shape)
 
-        self.raw_op = RawNDFT(samples, shape, explicit_matrix=explicit_matrix)
+        assert rndft is not None
+        self.raw_op = rndft
+        super().__init__(
+            samples, shape, density=False, n_coils=n_coils, smaps=smaps, raw_op=rndft
+        )

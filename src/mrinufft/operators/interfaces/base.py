@@ -119,8 +119,13 @@ class FourierOperatorBase(ABC):
 
     @property
     def n_coils(self):
-        """Return number of coil of the image space of the operator."""
+        """Number of coil for the operator."""
         return self._n_coils
+
+    @property
+    def ndim(self):
+        """Number of dimensions in image space of the operator."""
+        return len(self._shape)
 
     @n_coils.setter
     def n_coils(self, n_coils):
@@ -134,17 +139,32 @@ class FourierOperatorBase(ABC):
 
         return MRIFourierCorrected(self, B, C, indices)
 
+    @property
+    def samples(self):
+        """Return the samples used by the operator."""
+        return self._samples
+
+    @samples.setter
+    def samples(self, samples):
+        self._samples = samples
+
+    def __repr__(self):
+        """Return info about the Fourier operator."""
+        return (
+            f"{self.__class__.__name__}(\n"
+            f"  shape: {self.shape}\n"
+            f"  n_coils: {self.n_coils}\n"
+            f"  n_samples: {self.n_samples}\n"
+            f"  uses_sense: {self._uses_sense}\n"
+            ")"
+        )
+
 
 class FourierOperatorCPU(FourierOperatorBase):
     """Base class for CPU-based NUFFT operator."""
 
     def __init__(
-        self,
-        samples,
-        shape,
-        density=False,
-        n_coils=1,
-        smaps=None,
+        self, samples, shape, density=False, n_coils=1, smaps=None, raw_op=None
     ):
         super().__init__()
         self.shape = shape
@@ -183,7 +203,8 @@ class FourierOperatorCPU(FourierOperatorBase):
             self._uses_sense = False
 
         # Raw_op should be instantiated by subclasses.
-        self.raw_op = None
+
+        self.raw_op = raw_op
 
     def op(self, data, ksp=None):
         r"""Non Cartesian MRI forward operator.
@@ -326,31 +347,3 @@ class FourierOperatorCPU(FourierOperatorBase):
     def eps(self):
         """Return the underlying precision parameter."""
         return self.raw_op.eps
-
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-        density = np.ones(len(samples), dtype=oper._cpx_dtype)
-        update = np.empty_like(density, dtype=oper._cpx_dtype)
-        img = np.empty(shape, dtype=oper._cpx_dtype)
-        for _ in range(n_iter):
-            oper._adj_op(density, img)
-            oper._op(img, update)
-            density /= np.abs(update)
-        return density.real
-
-    def __repr__(self):
-        """Return info about the MRICufiNUFFT Object."""
-        return (
-            "MRICufiNUFFT(\n"
-            f"  shape: {self.shape}\n"
-            f"  n_coils: {self.n_coils}\n"
-            f"  n_samples: {self.n_samples}\n"
-            f"  uses_density: {self.uses_density}\n"
-            f"  uses_sense: {self._uses_sense}\n"
-            f"  smaps_cached: {self.smaps_cached}\n"
-            f"  plan_setup: {self.plan_setup}\n"
-            f"  eps:{self.raw_op.eps:.0e}\n"
-            ")"
-        )

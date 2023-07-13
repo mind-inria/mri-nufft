@@ -126,11 +126,11 @@ class MRIfinufft(FourierOperatorBase):
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
+        self.smaps = smaps
         if smaps is not None:
             self._uses_sense = True
             if isinstance(smaps, np.ndarray):
                 raise ValueError("Smaps should be either a C-ordered ndarray")
-            self._smaps = smaps
         else:
             self._uses_sense = False
         self.n_batchs = n_batchs
@@ -182,7 +182,7 @@ class MRIfinufft(FourierOperatorBase):
             raise ValueError("Sense cannot be used with batchs.")
         coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
         ksp = np.zeros((self.n_coils, self.n_samples), dtype=data.dtype)
-        coil_img = data * self._smaps
+        coil_img = data * self.smaps
         self._op(coil_img)
         return ksp
 
@@ -233,7 +233,7 @@ class MRIfinufft(FourierOperatorBase):
         if img is None:
             img = np.zeros(self.shape, dtype=coeffs.dtype)
         self._adj_op(coeffs, coil_img)
-        img = np.sum(coil_img * self._smaps.conjugate(), axis=0)
+        img = np.sum(coil_img * self.smaps.conjugate(), axis=0)
         return img
 
     def _adj_op_calibless(self, coeffs, img=None):
@@ -260,16 +260,3 @@ class MRIfinufft(FourierOperatorBase):
     def norm_factor(self):
         """Norm factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
-
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-        density = np.ones(len(samples), dtype=oper._cpx_dtype)
-        update = np.empty_like(density, dtype=oper._cpx_dtype)
-        img = np.empty(shape, dtype=oper._cpx_dtype)
-        for _ in range(n_iter):
-            oper._adj_op(density, img)
-            oper._op(img, update)
-            density /= np.abs(update)
-        return density.real
