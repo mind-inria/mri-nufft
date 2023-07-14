@@ -21,7 +21,7 @@ from case_trajectories import CasesTrajectories
         "finufft",
         pytest.param(
             "cufinufft",
-            marks=pytest.mark.xfail(
+            marks=pytest.mark.skipif(
                 not CUFINUFFT_AVAILABLE, reason="cufinufft not yet implemented"
             ),
         ),
