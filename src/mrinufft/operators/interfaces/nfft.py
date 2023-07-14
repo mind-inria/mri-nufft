@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .base import FourierOperatorCPU
+from .base import FourierOperatorCPU, proper_trajectory
 
 PYNFFT_AVAILABLE = True
 try:
@@ -30,9 +30,8 @@ class RawPyNFFT:
     def __init__(self, samples, shape):
         self.samples = samples
         self.shape = shape
-        self.n_samples = len(samples)
         self.ndim = len(shape)
-        self.plan = pynfft.NFFT(N=shape, M=self.n_samples)
+        self.plan = pynfft.NFFT(N=shape, M=len(samples))
         self.plan.x = self.samples
         self.plan.precompute()
         self.shape = shape
@@ -57,11 +56,12 @@ class MRInfft(FourierOperatorCPU):
     """
 
     def __init__(self, samples, shape, n_coils=1, smaps=None):
-        r = RawPyNFFT(samples, shape)
         super().__init__(
             samples,
             shape,
             n_coils=n_coils,
             smaps=smaps,
-            raw_op=r,
+            raw_op=None,  # is set later, after normalizing samples.
+            normalize_samples=False,
         )
+        self.raw_op = RawPyNFFT(self.samples, shape)

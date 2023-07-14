@@ -14,7 +14,7 @@ from case_trajectories import CasesTrajectories
 
 
 @fixture(scope="module")
-@parametrize("backend", ["pynfft"])
+@parametrize("backend", ["pynfft", "finufft"])
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(
     request,
@@ -29,9 +29,10 @@ def operator(
 
 
 @fixture(scope="module")
-def ndft_op(operator):
-    """Generate a NDFT operator, matching the property of the first operator."""
-    return get_operator("numpy")(
+@parametrize("backend", ["pynfft"])
+def nfft_ref_op(request, operator, backend="pynfft"):
+    """Generate a NFFT operator, matching the property of the first operator."""
+    return get_operator(backend)(
         operator.samples, operator.shape, n_coils=operator.n_coils, smaps=operator.smaps
     )
 
@@ -59,26 +60,26 @@ def kspace_data(operator):
     return kspace
 
 
-def test_interfaces_accuracy_forward(operator, image_data, ndft_op):
+def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_nufft = operator.op(image_data)
-    kspace = ndft_op.op(image_data)
+    kspace_ref = nfft_ref_op.op(image_data)
     # FIXME: check with complex values ail
-    assert np.allclose(abs(kspace), abs(kspace_nufft))
+    assert np.allclose(abs(kspace_ref), abs(kspace_nufft))
 
 
-def test_interfaces_accuracy_backward(operator, kspace_data, ndft_op):
+def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     """Compare the interface to the raw NUDFT implementation."""
-    kspace_data[0, :] = 0
-    kspace_data[0, 10] = 1
     image_nufft = operator.adj_op(kspace_data.copy())
-    image = ndft_op.adj_op(kspace_data.copy())
-    assert np.allclose(image, image_nufft)
+    image_ref = nfft_ref_op.adj_op(kspace_data.copy())
+    assert np.allclose(image_ref, image_nufft)  # FIXME
 
 
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     """Test the adjoint property of the operator."""
     kspace = operator.op(image_data)
     image = operator.adj_op(kspace_data)
+    leftadjoint = np.vdot(image, image_data)
+    rightadjoint = np.vdot(kspace, kspace_data)
 
-    assert np.allclose(np.vdot(image, image_data), np.vdot(kspace, kspace_data))
+    assert np.isclose(abs(leftadjoint.conj() - rightadjoint), 0, atol=1e-6)

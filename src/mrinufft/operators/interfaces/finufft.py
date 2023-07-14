@@ -106,10 +106,7 @@ class MRIfinufft(FourierOperatorBase):
 
         # we will access the samples by their coordinate first.
         self.samples = proper_trajectory(np.asfortranarray(samples), normalize=True)
-        self.n_samples = len(self.samples)
-        self._dtype = self.samples.dtype
-        self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
-        self._uses_sense = False
+        self.dtype = self.samples.dtype
 
         # Density Compensation Setup
         if density is True:
@@ -127,12 +124,6 @@ class MRIfinufft(FourierOperatorBase):
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
         self.smaps = smaps
-        if smaps is not None:
-            self._uses_sense = True
-            if isinstance(smaps, np.ndarray):
-                raise ValueError("Smaps should be either a C-ordered ndarray")
-        else:
-            self._uses_sense = False
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.keep_dims = keep_dims
@@ -160,11 +151,11 @@ class MRIfinufft(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        if data.dtype != self._cpx_dtype:
+        if data.dtype != self.cpx_dtype:
             warnings.warn(
-                f"Data should be of dtype {self._cpx_dtype}. Casting it for you."
+                f"Data should be of dtype {self.cpx_dtype}. Casting it for you."
             )
-            data = data.astype(self._cpx_dtype)
+            data = data.astype(self.cpx_dtype)
         # sense
         if self.uses_sense:
             ret = self._op_sense(data, ksp)
@@ -197,7 +188,7 @@ class MRIfinufft(FourierOperatorBase):
         return ksp
 
     def _op(self, image, coeffs):
-        self.raw_op.op(coeffs, image)
+        self.raw_op.op(coeffs, np.asfortranarray(image))
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -210,11 +201,11 @@ class MRIfinufft(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if coeffs.dtype != self._cpx_dtype:
+        if coeffs.dtype != self.cpx_dtype:
             warnings.warn(
-                f"coeffs should be of dtype {self._cpx_dtype}. Casting it for you."
+                f"coeffs should be of dtype {self.cpx_dtype}. Casting it for you."
             )
-            coeffs = coeffs.astype(self._cpx_dtype)
+            coeffs = coeffs.astype(self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
         # calibrationless or monocoil.

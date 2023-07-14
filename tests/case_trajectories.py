@@ -28,7 +28,7 @@ class CasesTrajectories:
         trajectory = initialize_2D_radial(Nc, Ns)
         return trajectory, (N, N)
 
-    def case_radial3D(self, Nc=10, Ns=10, Nr=10, N=64, expansion="rotation"):
+    def case_radial3D(self, Nc=10, Ns=10, Nr=10, N=64, expansion="rotations"):
         """Create a 3D radial trajectory."""
         trajectory = initialize_3D_from_2D_expansion("radial", expansion, Nc, Ns, Nr)
         return trajectory, (N, N, N)

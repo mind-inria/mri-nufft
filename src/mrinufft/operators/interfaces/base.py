@@ -155,7 +155,8 @@ class FourierOperatorBase(ABC):
             self._smaps = None
         elif len(smaps) != self.n_coils:
             raise ValueError(
-                f"Number of sensitivity maps ({len(smaps)}) should be equal to n_coils ({self.n_coils})"
+                f"Number of sensitivity maps ({len(smaps)})"
+                "should be equal to n_coils ({self.n_coils})"
             )
         else:
             self._uses_sense = True
@@ -183,6 +184,11 @@ class FourierOperatorBase(ABC):
     @samples.setter
     def samples(self, samples):
         self._samples = samples
+
+    @property
+    def n_samples(self):
+        """Return the number of samples used by the operator."""
+        return self._samples.shape[0]
 
     @property
     def norm_factor(self):
@@ -219,16 +225,24 @@ class FourierOperatorCPU(FourierOperatorBase):
         The number of coils.
     smaps: np.ndarray
         The sensitivity maps.
-    raw_op: An object implementing the NUFFT API. it should be responsible to compute a single type 1 /type 2 NUFFT.
+    raw_op: object
+        An object implementing the NUFFT API. Ut should be responsible to compute a
+        single type 1 /type 2 NUFFT.
     """
 
     def __init__(
-        self, samples, shape, density=False, n_coils=1, smaps=None, raw_op=None
+        self,
+        samples,
+        shape,
+        density=False,
+        n_coils=1,
+        smaps=None,
+        raw_op=None,
+        normalize_samples=False,
     ):
         super().__init__()
         self.shape = shape
-        self.n_samples = len(samples)
-        self.samples = samples
+        self.samples = proper_trajectory(samples, normalize=normalize_samples)
         self._dtype = self.samples.dtype
         self._uses_sense = False
 
