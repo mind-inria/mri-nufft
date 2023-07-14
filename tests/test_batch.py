@@ -38,31 +38,25 @@ def operator(
 def flat_operator(operator):
     """Generate a batch operator."""
     return get_operator(operator.backend)(
-        operators.kspace_locs, operator.shape, n_coils=n_coils
+        operator.samples, operator.shape, n_coils=operator.n_coils
     )
 
 
 @fixture(scope="module")
 def image_data(operator):
     """Generate a random image."""
-    img = np.random.rand(operator.n_batch, operator.n_coils, *operator.shape).astype(
-        operator.cpx_dtype
-    )
-    img = 1j * np.random.rand(
-        operator.n_batch, operator.n_coils, *operator.shape
-    ).astype(operator.cpx_dtype)
+    shape = (operator.n_batchs, operator.n_coils, *operator.shape)
+    img = np.random.rand(*shape).astype(operator.cpx_dtype)
+    img = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
     return img
 
 
 @fixture(scope="module")
-def image_data(operator):
+def kspace_data(operator):
     """Generate a random image."""
-    img = np.random.rand(operator.n_batch, operator.n_coils, operator.n_samples).astype(
-        operator.cpx_dtype
-    )
-    img = 1j * np.random.rand(
-        operator.n_batch, operator.n_coils, *operator.n_samples
-    ).astype(operator.cpx_dtype)
+    shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
+    img = np.random.rand(*shape).astype(operator.cpx_dtype)
+    img = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
     return img
 
 
@@ -70,14 +64,14 @@ def test_batch_type2(operator, flat_operator, image_data):
     """Test the batch type 1."""
     kspace_data = operator.op(image_data)
 
-    image_flat = image.reshape(-1, operator.shape)
-    kspace_flat = [] * operator.n_batch * operator.n_coils
-    for i in range():
-        kspace_flat[i] = flat_operator.op(image_data[i])
+    image_flat = image_data.reshape(-1, operator.n_coils, *operator.shape)
+    kspace_flat = [None] * operator.n_batchs
+    for i in range(len(kspace_flat)):
+        kspace_flat[i] = flat_operator.op(image_flat[i])
 
     kspace_flat = np.reshape(
         np.concatenate(kspace_flat, axis=0),
-        (operator.n_batch, operator.n_coils, operator.n_samples),
+        (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
 
     assert np.allclose(kspace_data, kspace_flat)
@@ -87,14 +81,14 @@ def test_batch_type1(operator, flat_operator, kspace_data):
     """Test the batch type 1."""
     image_data = operator.adj_op(kspace_data)
 
-    kspace_flat = kspace_data.reshape(-1, operator.shape)
-    image_flat = [] * operator.n_batch * operator.n_coils
-    for i in range():
-        image_flat[i] = flat_operator.adj_op(kspace_data[i])
+    kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
+    image_flat = [None] * operator.n_batchs
+    for i in range(len(image_flat)):
+        image_flat[i] = flat_operator.adj_op(kspace_flat[i])
 
     image_flat = np.reshape(
         np.concatenate(image_flat, axis=0),
-        (operator.n_batch, operator.n_coils, *operator.shape),
+        (operator.n_batchs, operator.n_coils, *operator.shape),
     )
 
     assert np.allclose(kspace_data, kspace_flat)

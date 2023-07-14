@@ -276,7 +276,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             check_size(data, (self.n_batchs, self.n_coils, *self.shape))
         data = data.astype(self.cpx_dtype)
-        if not self.persist_plan:
+        if not self.persist_plan or self.raw_op.plans[2] is None:
             self.raw_op._make_plan(2)
             self.raw_op._set_pts(2)
 
@@ -387,7 +387,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
-        if not self.persist_plan:
+        if not self.persist_plan or self.raw_op.plans[1] is None:
             self.raw_op._make_plan(1)
             self.raw_op._set_pts(1)
         if self.uses_sense:
@@ -396,7 +396,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             ret = self._adj_op_calibless(coeffs, img_d)
 
-        if self.persist_plan:
+        if not self.persist_plan:
             self.raw_op._destroy_plan(1)
 
         ret /= self.norm_factor
