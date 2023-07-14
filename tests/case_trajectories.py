@@ -19,7 +19,7 @@ class CasesTrajectories:
         samples *= -0.5
         return samples, (N, N)
 
-    def case_random3D(self, M=20000, N=64, pdf="uniform", seed=0):
+    def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
         """Create a random 3D trajectory."""
         np.random.seed(seed)
         samples = np.random.rand(M, 3) - 0.5
@@ -27,12 +27,12 @@ class CasesTrajectories:
         samples *= -0.5
         return samples, (N, N, N)
 
-    def case_radial2D(self, Nc=10, Ns=100, N=64):
+    def case_radial2D(self, Nc=10, Ns=500, N=64):
         """Create a 2D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         return trajectory, (N, N)
 
-    def case_radial3D(self, Nc=10, Ns=10, Nr=10, N=64, expansion="rotations"):
+    def case_radial3D(self, Nc=20, Ns=1000, Nr=20, N=64, expansion="rotations"):
         """Create a 3D radial trajectory."""
         trajectory = initialize_3D_from_2D_expansion("radial", expansion, Nc, Ns, Nr)
         return trajectory, (N, N, N)

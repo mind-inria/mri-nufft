@@ -553,7 +553,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 if self.uses_density:
                     cp.copyto(
                         ksp_batched,
-                        coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp],
+                        coeffs_f[i * n_trans_samples : (i + 1) * n_trans_samples],
                     )
                     ksp_batched *= density_batched
                     self.__adj_op(
@@ -805,9 +805,9 @@ def pipe(kspace, grid_shape, num_iter=10):
         )
     import cupy as cp
 
-    kspace = proper_trajectory(kspace)
+    kspace = proper_trajectory(kspace).astype(np.float32)
     if is_host_array(kspace):
-        kspace = cp.array(kspace.copy(order="F"))
+        kspace = cp.array(kspace, order="F")
     image = cp.empty(grid_shape, dtype=np.complex64)
     density = cp.ones(kspace.shape[0], dtype=np.complex64)
     update = cp.empty_like(density)

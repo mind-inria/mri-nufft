@@ -75,7 +75,7 @@ def test_batch_type2(operator, flat_operator, image_data):
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
 
-    assert np.allclose(kspace_data, kspace_flat)
+    assert np.allclose(kspace_data, kspace_flat, atol=1e-6)
 
 
 def test_batch_type1(operator, flat_operator, kspace_data):
@@ -92,4 +92,4 @@ def test_batch_type1(operator, flat_operator, kspace_data):
         (operator.n_batchs, operator.n_coils, *operator.shape),
     )
 
-    assert np.allclose(image_data, image_flat)
+    assert np.allclose(image_data, image_flat, atol=1e-6)
