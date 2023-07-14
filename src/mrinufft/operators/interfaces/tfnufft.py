@@ -34,6 +34,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     smaps: Tensor
     """
 
+    backend = "tensorflow"
+
     def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
         super().__init__()
         if not TENSORFLOW_AVAILABLE:

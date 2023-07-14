@@ -163,6 +163,8 @@ class MRICufiNUFFT(FourierOperatorBase):
     cufinufft.raw_operator.RawCufinufft
     """
 
+    backend = "cufinufft"
+
     def __init__(
         self,
         samples,

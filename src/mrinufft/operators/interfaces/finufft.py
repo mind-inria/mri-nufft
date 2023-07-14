@@ -87,6 +87,8 @@ class MRIfinufft(FourierOperatorBase):
     smaps: array
     """
 
+    backend = "finufft"
+
     def __init__(
         self,
         samples,
