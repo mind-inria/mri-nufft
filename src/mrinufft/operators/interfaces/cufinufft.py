@@ -699,7 +699,7 @@ def _get_samples_ptr(samples):
     if self.ndim == 3:
         z = cp.ascontiguousarray(samples[:, 2])
         fpts_axes.insert(0, get_ptr(z))
-    return fpts_axes[:3]
+    return fpts_axes[:3], x.size
 
 
 def _convert_shape_to_3D(shape, dim):
@@ -707,7 +707,7 @@ def _convert_shape_to_3D(shape, dim):
 
 
 def _do_spread_interp(samples, c, f, tol=1e-4, type=1):
-    n_samples, fpts_axes = get_kx_ky_kz_pointers(samples)
+    fpts_axes, n_samples = get_kx_ky_kz_pointers(samples)
     shape = convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(type, samples.shape[-1])
     _spread_interpf(
