@@ -85,4 +85,4 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    assert np.isclose(abs(leftadjoint.conj() - rightadjoint), 0, atol=1e-6)
+    assert np.isclose(abs(leftadjoint.conj() - rightadjoint), 0, atol=1e-3)

@@ -37,11 +37,6 @@ class CasesTrajectories:
         trajectory = initialize_3D_from_2D_expansion("radial", expansion, Nc, Ns, Nr)
         return trajectory, (N, N, N)
 
-    def case_grid1D(self, N=256):
-        """Create a 1D cartesian grid of frequencies locations."""
-        freq_1d = sp.fft.fftfreq(N)
-        return freq_1d.reshape(-1, 1), (N,)
-
     def case_grid2D(self, N=16):
         """Create a 2D cartesian grid of frequencies locations."""
         freq_1d = sp.fft.fftfreq(N)
@@ -53,3 +48,9 @@ class CasesTrajectories:
         freq_1d = sp.fft.fftfreq(N)
         freq_3d = np.stack(np.meshgrid(freq_1d, freq_1d, freq_1d), axis=-1)
         return freq_3d.reshape(-1, 3), (N, N, N)
+
+
+def case_grid1D(N=256):
+    """Create a 1D cartesian grid of frequencies locations."""
+    freq_1d = sp.fft.fftfreq(N)
+    return freq_1d.reshape(-1, 1), (N,)

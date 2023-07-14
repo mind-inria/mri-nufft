@@ -415,8 +415,3 @@ class FourierOperatorCPU(FourierOperatorBase):
                 ksp *= self.density_d
             self._adj_op(ksp, img[i])
         return img
-
-    @property
-    def eps(self):
-        """Return the underlying precision parameter."""
-        return self.raw_op.eps

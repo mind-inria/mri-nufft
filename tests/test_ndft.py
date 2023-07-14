@@ -10,13 +10,13 @@ from mrinufft.operators.interfaces.nudft_numpy import (
     RawNDFT,
 )
 
-from case_trajectories import CasesTrajectories
+from case_trajectories import CasesTrajectories, case_grid1D
 
 
 @parametrize_with_cases(
     "kspace_grid, shape",
     cases=[
-        CasesTrajectories.case_grid1D,
+        case_grid1D,
         CasesTrajectories.case_grid2D,
     ],  # 3D is ignored (too much possibility for the reordering)
 )
@@ -80,7 +80,7 @@ def test_ndft_implicit1(kspace, shape):
 @parametrize_with_cases(
     "kspace_grid, shape",
     cases=[
-        CasesTrajectories.case_grid1D,
+        case_grid1D,
         CasesTrajectories.case_grid2D,
         CasesTrajectories.case_grid3D,
     ],

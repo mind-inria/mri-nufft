@@ -45,7 +45,7 @@ class RawCufinufftPlan:
         **kwargs,
     ):
         self.shape = shape
-        self.samples = cp.array(samples, order="F")
+        self.samples = samples
         self.ndim = len(shape)
         self.eps = float(eps)
         self.n_trans = n_trans
@@ -91,9 +91,9 @@ class RawCufinufftPlan:
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
-            p = self.plan[typ]
+            p = self.plans[typ]
             del p
-            self.plan[typ] = None
+            self.plans[typ] = None
 
     def type1(self, coeff_data_ptr, grid_data_ptr):
         """Type 1 transform. Non Uniform to Uniform."""
@@ -193,10 +193,10 @@ class MRICufiNUFFT(FourierOperatorBase):
         # For now only single precision is supported
         self.dtype = self.samples.dtype
         self.n_streams = n_streams
-        if is_host_array(samples):
-            samples_d = cp.asarray(samples.copy(order="F"))
-        elif is_cuda_array(samples):
-            samples_d = samples
+        if is_host_array(self.samples):
+            samples_d = cp.asarray(self.samples, order="F")
+        elif is_cuda_array(self.samples):
+            samples_d = self.samples
         else:
             raise ValueError(
                 "Samples should be either a C-ordered ndarray, " "or a GPUArray."
@@ -204,8 +204,9 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # density compensation support
         if density is True:
-            self.density_d = MRICufiNUFFT.estimate_density(samples_d, shape)
-            self.uses_density = True
+            # TODO estimate the density using pipe method.
+            # self.density = (samples_d, shape)
+            self.uses_density = False
         elif is_host_array(density) or is_cuda_array(density):
             self.density = density
             if len(density) != len(samples):
@@ -237,7 +238,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 # allocate device memory
                 self._smap_d = cp.empty((self.n_streams, *shape), dtype=np.complex64)
                 self._smaps_pinned = pin_memory(smaps)
-                self.smaps = smaps
+                self.smaps = self._smaps_pinned
         # Initialise NUFFT plans
         self.persist_plan = persist_plan
         self.raw_op = RawCufinufftPlan(
