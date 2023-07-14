@@ -37,18 +37,16 @@ class RawPyNFFT:
         self.plan.precompute()
         self.shape = shape
 
-    def op(self, image, coeffs):
+    def op(self, coeffs, image):
         """Compute the forward NUDFT."""
         self.plan.f_hat = image
         np.copyto(coeffs, self.plan.trafo())
-        coeffs /= np.sqrt(self.n_samples)
         return coeffs
 
     def adj_op(self, coeffs, image):
         """Compute the adjoint NUDFT."""
         self.plan.f = coeffs
         np.copyto(image, self.plan.adjoint())
-        image /= np.sqrt(self.n_samples)
         return image
 
 
@@ -58,11 +56,12 @@ class MRInfft(FourierOperatorCPU):
     For testing purposes only, as it is very slow.
     """
 
-    def __init_(self, samples, shape, n_coils=1, smaps=None):
+    def __init__(self, samples, shape, n_coils=1, smaps=None):
+        r = RawPyNFFT(samples, shape)
         super().__init__(
             samples,
             shape,
             n_coils=n_coils,
             smaps=smaps,
-            raw_op=RawPyNFFT(samples, shape),
+            raw_op=r,
         )
