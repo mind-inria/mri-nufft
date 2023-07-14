@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .base import FourierOperatorCPU, proper_trajectory
+from .base import FourierOperatorCPU
 
 PYNFFT_AVAILABLE = True
 try:

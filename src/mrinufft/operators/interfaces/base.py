@@ -23,8 +23,8 @@ def proper_trajectory(trajectory, normalize="pi"):
         The trajectory to normalize, it might be of shape (Nc, Ns, dim) of (Ns, dim)
 
     normalize: str
-        if "pi" the trajectory will be rescaled in [-pi, pi], if it was in [-0.5, 0.5]
-        if "unit" the trajectory will be rescaled in [-0.5, 0.5] if it was in [-pi, pi]
+        if "pi" trajectory will be rescaled in [-pi, pi], if it was in [-0.5, 0.5]
+        if "unit" trajectory will be rescaled in [-0.5, 0.5] if it was not [-0.5, 0.5]
 
     Returns
     -------
@@ -211,7 +211,6 @@ class FourierOperatorBase(ABC):
 
 class FourierOperatorCPU(FourierOperatorBase):
     """Base class for CPU-based NUFFT operator.
-
 
     Parameters
     ----------
