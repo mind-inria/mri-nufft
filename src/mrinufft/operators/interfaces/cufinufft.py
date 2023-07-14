@@ -15,16 +15,26 @@ from .utils import (
     pin_memory,
     sizeof_fmt,
 )
-from ._cupy_kernels import sense_adj_mono
+from ._cupy_kernels import sense_adj_mono, update_density
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
     from cufinufft._plan import Plan
-    from cufinufft._cufinufft import _spread_interpf, NufftOpts
+    from cufinufft._cufinufft import _spread_interpf, NufftOpts, _default_opts
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
+
+OPTS_FIELD_DECODE = {
+    "gpu_method": {1: "nonuniform pts driven", 2: "shared memory"},
+    "gpu_sort": {0: "no sort (GM)", 1: "sort (GM-sort)"},
+    "kerevalmeth": {0: "direct eval exp(sqrt())", 1: "Horner ppval"},
+    "gpu_spreadinterponly": {
+        0: "NUFFT",
+        1: "spread or interpolate only",
+    },
+}
 
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
@@ -58,6 +68,29 @@ def str_opts(self):
 
 NufftOpts.__repr__ = lambda self: repr_opts(self)
 NufftOpts.__str__ = lambda self: str_opts(self)
+
+
+def get_default_opts(nufft_type, dim):
+    """
+    Generate a cufinufft opt struct of the dtype coresponding to plan.
+
+    Parameters
+    ----------
+    finufft_type: int
+        Finufft Type (`1` or `2`)
+    dim: int
+        Number of dimension (1, 2, 3)
+
+    Returns
+    -------
+    nufft_opts structure.
+    """
+    nufft_opts = NufftOpts()
+
+    ier = _default_opts(nufft_type, dim, nufft_opts)
+    _error_check(ier, "Configuration not yet implemented.")
+
+    return nufft_opts
 
 
 class RawCufinufftPlan:
@@ -722,7 +755,7 @@ def _get_samples_ptr(samples):
     x = cp.ascontiguousarray(samples[:, 0])
     y = cp.ascontiguousarray(samples[:, 1])
     fpts_axes = [get_ptr(y), get_ptr(x), None]
-    if self.ndim == 3:
+    if samples.shape[1] == 3:
         z = cp.ascontiguousarray(samples[:, 2])
         fpts_axes.insert(0, get_ptr(z))
     return fpts_axes[:3], x.size
@@ -779,7 +812,7 @@ def pipe(kspace, grid_shape, num_iter=10):
     density = cp.ones(kspace.shape[0], dtype=np.complex64)
     update = cp.empty_like(density)
     for _ in range(num_iter):
-        do_spread_interp(kspace, density, image, type=1)
-        do_spread_interp(kspace, update, image, type=2)
+        _do_spread_interp(kspace, density, image, type=1)
+        _do_spread_interp(kspace, update, image, type=2)
         update_density(density, update)
     return density.real

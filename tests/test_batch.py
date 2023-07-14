@@ -31,12 +31,13 @@ from case_trajectories import CasesTrajectories
 def operator(
     request, kspace_locs, shape, n_coils=1, n_batch=1, n_trans=1, backend="finufft"
 ):
+    """Generate a batch operator."""
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
 @fixture(scope="module")
 def flat_operator(operator):
-    """Generate a batch operator."""
+    """Generate a batch operator with n_batch=1."""
     return get_operator(operator.backend)(
         operator.samples, operator.shape, n_coils=operator.n_coils
     )
@@ -91,4 +92,4 @@ def test_batch_type1(operator, flat_operator, kspace_data):
         (operator.n_batchs, operator.n_coils, *operator.shape),
     )
 
-    assert np.allclose(kspace_data, kspace_flat)
+    assert np.allclose(image_data, image_flat)
