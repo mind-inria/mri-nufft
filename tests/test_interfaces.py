@@ -14,7 +14,19 @@ from case_trajectories import CasesTrajectories
 
 
 @fixture(scope="module")
-@parametrize("backend", ["pynfft", "finufft", "cufinufft"])
+@parametrize(
+    "backend",
+    [
+        "pynfft",
+        "finufft",
+        pytest.param(
+            "cufinufft",
+            marks=pytest.mark.xfail(
+                not CUFINUFFT_AVAILABLE, reason="cufinufft not yet implemented"
+            ),
+        ),
+    ],
+)
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(
     request,
