@@ -21,7 +21,7 @@ CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
     from cufinufft._plan import Plan
-    from cufinufft._cufinufft import _spread_interpf
+    from cufinufft._cufinufft import _spread_interpf, NufftOpts
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
@@ -32,6 +32,32 @@ DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 def _error_check(ier, msg):
     if ier != 0:
         raise RuntimeError(msg)
+
+
+def repr_opts(self):
+    """Get the value of the struct, like a dict."""
+    ret = "Struct(\n"
+    for fieldname, _ in self._fields_:
+        ret += f"{fieldname}: {getattr(self, fieldname)},\n"
+    ret += ")"
+    return ret
+
+
+def str_opts(self):
+    """Get the value of the struct, with their meaning."""
+    ret = "Struct(\n"
+    for fieldname, _ in self._fields_:
+        ret += f"{fieldname}: {getattr(self, fieldname)}"
+        decode = OPTS_FIELD_DECODE.get(fieldname)
+        if decode:
+            ret += f" [{decode[getattr(self, fieldname)]}]"
+        ret += "\n"
+    ret += ")"
+    return ret
+
+
+NufftOpts.__repr__ = lambda self: repr_opts(self)
+NufftOpts.__str__ = lambda self: str_opts(self)
 
 
 class RawCufinufftPlan:
@@ -707,8 +733,8 @@ def _convert_shape_to_3D(shape, dim):
 
 
 def _do_spread_interp(samples, c, f, tol=1e-4, type=1):
-    fpts_axes, n_samples = get_kx_ky_kz_pointers(samples)
-    shape = convert_shape_to_3D(f.shape, samples.shape[-1])
+    fpts_axes, n_samples = _get_samples_ptr(samples)
+    shape = _convert_shape_to_3D(f.shape, samples.shape[-1])
     opts = get_default_opts(type, samples.shape[-1])
     _spread_interpf(
         type,
@@ -750,6 +776,7 @@ def pipe(kspace, grid_shape, num_iter=10):
     if is_host_array(kspace):
         kspace = cp.array(kspace.copy(order="F"))
     image = cp.empty(grid_shape, dtype=np.complex64)
+    density = cp.ones(kspace.shape[0], dtype=np.complex64)
     update = cp.empty_like(density)
     for _ in range(num_iter):
         do_spread_interp(kspace, density, image, type=1)
