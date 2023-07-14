@@ -14,7 +14,7 @@ import numpy as np
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
-def proper_trajectory(trajectory, normalize=True):
+def proper_trajectory(trajectory, normalize="pi"):
     """Normalize the trajectory to be used by NUFFT operators.
 
     Parameters
@@ -22,9 +22,9 @@ def proper_trajectory(trajectory, normalize=True):
     trajectory: np.ndarray
         The trajectory to normalize, it might be of shape (Nc, Ns, dim) of (Ns, dim)
 
-    normalize: bool
-        If True and if the trajectory is in [-0.5,0.5] the trajectory is
-        multiplied by 2pi to lie in [-pi, pi]
+    normalize: str
+        if "pi" the trajectory will be rescaled in [-pi, pi], if it was in [-0.5, 0.5]
+        if "unit" the trajectory will be rescaled in [-0.5, 0.5] if it was in [-pi, pi]
 
     Returns
     -------
@@ -40,10 +40,12 @@ def proper_trajectory(trajectory, normalize=True):
         ) from e
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
-    # normalize the trajectory to -pi, pi if i
-    if normalize and np.isclose(np.max(abs(new_traj)), 0.5):
+    if normalize == "pi" and np.max(abs(new_traj)) - 1e-4 < 0.5:
         warnings.warn("samples will be rescaled in [-pi, pi]")
         new_traj *= 2 * np.pi
+    elif normalize == "unit" and np.max(abs(new_traj)) - 1e-4 > 0.5:
+        warnings.warn("samples will be rescaled in [-0.5, 0.5]")
+        new_traj /= 2 * np.pi
     return new_traj
 
 
@@ -238,11 +240,10 @@ class FourierOperatorCPU(FourierOperatorBase):
         n_coils=1,
         smaps=None,
         raw_op=None,
-        normalize_samples=False,
     ):
         super().__init__()
         self.shape = shape
-        self.samples = proper_trajectory(samples, normalize=normalize_samples)
+        self.samples = proper_trajectory(samples, normalize="unit")
         self._dtype = self.samples.dtype
         self._uses_sense = False
 

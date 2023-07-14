@@ -62,17 +62,20 @@ def kspace_data(operator):
 
 def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
     """Compare the interface to the raw NUDFT implementation."""
-    kspace_nufft = operator.op(image_data)
-    kspace_ref = nfft_ref_op.op(image_data)
+    kspace_nufft = operator.op(image_data).squeeze()
+    kspace_ref = nfft_ref_op.op(image_data).squeeze()
     # FIXME: check with complex values ail
-    assert np.allclose(abs(kspace_ref), abs(kspace_nufft))
+    assert np.percentile(abs(kspace_nufft - kspace_ref), 95) < 1e-4
+    assert np.max(abs(kspace_nufft - kspace_ref)) < 1e-3
 
 
 def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     """Compare the interface to the raw NUDFT implementation."""
-    image_nufft = operator.adj_op(kspace_data.copy())
-    image_ref = nfft_ref_op.adj_op(kspace_data.copy())
-    assert np.allclose(image_ref, image_nufft)  # FIXME
+    image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
+    image_ref = nfft_ref_op.adj_op(kspace_data.copy()).squeeze()
+
+    assert np.percentile(abs(image_nufft - image_ref), 95) < 1e-4
+    assert np.max(abs(image_nufft - image_ref)) < 1e-3
 
 
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):

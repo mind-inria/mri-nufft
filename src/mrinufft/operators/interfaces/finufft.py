@@ -96,7 +96,7 @@ class MRIfinufft(FourierOperatorBase):
         n_batchs=1,
         n_trans=1,
         smaps=None,
-        keep_dims=False,
+        squeeze_dims=False,
     ):
         super().__init__()
 
@@ -105,7 +105,7 @@ class MRIfinufft(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = proper_trajectory(np.asfortranarray(samples), normalize=True)
+        self.samples = proper_trajectory(np.asfortranarray(samples), normalize="pi")
         self.dtype = self.samples.dtype
 
         # Density Compensation Setup
@@ -126,7 +126,7 @@ class MRIfinufft(FourierOperatorBase):
         self.smaps = smaps
         self.n_batchs = n_batchs
         self.n_trans = n_trans
-        self.keep_dims = keep_dims
+        self.squeeze_dims = squeeze_dims
         # Initialise NUFFT plans
         self.raw_op = RawFinufftPlan(
             self.samples,
@@ -163,7 +163,7 @@ class MRIfinufft(FourierOperatorBase):
         else:
             ret = self._op_calibless(data, ksp)
         ret /= self.norm_factor
-        if self.keep_dims:
+        if not self.squeeze_dims:
             return ret
         else:  # squeeze the batch and coil dimensions.
             return ret.squeeze(axis=(0, 1))
@@ -182,8 +182,15 @@ class MRIfinufft(FourierOperatorBase):
             (self.n_batchs * self.n_coils, self.n_samples), dtype=data.dtype
         )
         dataf = np.reshape(data, (self.n_batchs * self.n_coils, *self.shape))
-        for i in range((self.n_coils * self.n_batchs) // self.n_trans):
-            self._op(dataf[i], ksp[i])
+        if self.n_trans == 1:
+            for i in range(self.n_coils * self.n_batchs):
+                self._op(dataf[i], ksp[i])
+        else:
+            for i in range((self.n_coils * self.n_batchs) // self.n_trans):
+                self._op(
+                    dataf[i * self.n_trans : (i + 1) * self.n_trans],
+                    ksp[i * self.n_trans : (i + 1) * self.n_trans],
+                )
         ksp = ksp.reshape((self.n_batchs, self.n_coils, self.n_samples))
         return ksp
 
@@ -212,7 +219,7 @@ class MRIfinufft(FourierOperatorBase):
         else:
             ret = self._adj_op_calibless(coeffs, img)
         ret /= self.norm_factor
-        if self.keep_dims:
+        if not self.squeeze_dims:
             return ret
         else:
             return ret.squeeze(axis=(0, 1))

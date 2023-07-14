@@ -62,6 +62,5 @@ class MRInfft(FourierOperatorCPU):
             n_coils=n_coils,
             smaps=smaps,
             raw_op=None,  # is set later, after normalizing samples.
-            normalize_samples=False,
         )
         self.raw_op = RawPyNFFT(self.samples, shape)

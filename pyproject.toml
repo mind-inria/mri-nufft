@@ -27,7 +27,7 @@ version_scheme = "python-simplified-semver"
 local_scheme="no-local-version"
 
 [tool.coverage.run]
-omit = ["*tests*"]
+omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
 
 [tool.coverage.report]
 precision = 2
