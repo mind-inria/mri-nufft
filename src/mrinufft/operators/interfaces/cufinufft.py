@@ -89,6 +89,12 @@ class RawCufinufftPlan:
             self.plans[typ]._plan, M, *fpts_axes[:3], 0, None, None, None
         )
 
+    def _destroy_plan(self, typ):
+        if self.plans[typ] is not None:
+            p = self.plan[typ]
+            del p
+            self.plan[typ] = None
+
     def type1(self, coeff_data_ptr, grid_data_ptr):
         """Type 1 transform. Non Uniform to Uniform."""
         ier = self.plans[1]._exec_plan(
@@ -183,9 +189,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dim = squeeze_dim
-        samples = proper_trajectory(samples, normalize=True).astype(np.float32)
-        self.samples = samples
-        self.n_samples = len(samples)
+        self.samples = proper_trajectory(samples, normalize="pi").astype(np.float32)
+        # For now only single precision is supported
+        self.dtype = self.samples.dtype
         self.n_streams = n_streams
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
@@ -201,6 +207,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.density_d = MRICufiNUFFT.estimate_density(samples_d, shape)
             self.uses_density = True
         elif is_host_array(density) or is_cuda_array(density):
+            self.density = density
             if len(density) != len(samples):
                 raise ValueError(
                     "Density array and samples array should " "have the same length."
@@ -210,14 +217,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             self.density_d = None
             self.uses_density = False
-        self._uses_sense = False
         self.smaps_cached = False
         # Smaps support
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
+        self.smaps = smaps
         if smaps is not None:
-            self._uses_sense = True
             if not (is_host_array(smaps) or is_cuda_array(smaps)):
                 raise ValueError(
                     "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
@@ -231,9 +237,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 # allocate device memory
                 self._smap_d = cp.empty((self.n_streams, *shape), dtype=np.complex64)
                 self._smaps_pinned = pin_memory(smaps)
-                self._smaps = smaps
-        else:
-            self._uses_sense = False
+                self.smaps = smaps
         # Initialise NUFFT plans
         self.persist_plan = persist_plan
         self.raw_op = RawCufinufftPlan(
@@ -673,7 +677,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             f"  uses_density: {self.uses_density}\n"
             f"  uses_sense: {self._uses_sense}\n"
             f"  smaps_cached: {self.smaps_cached}\n"
-            f"  plan_setup: {self.plan_setup}\n"
             f"  eps:{self.raw_op.eps:.0e}\n"
             ")"
         )

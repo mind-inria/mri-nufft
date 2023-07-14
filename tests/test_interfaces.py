@@ -14,7 +14,7 @@ from case_trajectories import CasesTrajectories
 
 
 @fixture(scope="module")
-@parametrize("backend", ["pynfft", "finufft"])
+@parametrize("backend", ["pynfft", "finufft", "cufinufft"])
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(
     request,
