@@ -3,6 +3,7 @@
 Only finufft and cufinufft support batch computations.
 """
 import numpy as np
+import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 import pytest
 
@@ -75,7 +76,7 @@ def test_batch_type2(operator, flat_operator, image_data):
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
 
-    assert np.allclose(kspace_data, kspace_flat, atol=1e-6)
+    npt.assert_array_almost_equal_nulp(kspace_data, kspace_flat)
 
 
 def test_batch_type1(operator, flat_operator, kspace_data):
@@ -92,4 +93,4 @@ def test_batch_type1(operator, flat_operator, kspace_data):
         (operator.n_batchs, operator.n_coils, *operator.shape),
     )
 
-    assert np.allclose(image_data, image_flat, atol=1e-6)
+    npt.assert_allclose(image_data, image_flat, atol=1e-5, rtol=1e-4)

@@ -782,7 +782,7 @@ def _do_spread_interp(samples, c, f, tol=1e-4, type=1):
     )
 
 
-def pipe(kspace, grid_shape, num_iter=10):
+def pipe(kspace, grid_shape, num_iter=10, tol=1e-8):
     """Estimate density compensation weight using the Pipe method.
 
     Parameters
@@ -793,7 +793,8 @@ def pipe(kspace, grid_shape, num_iter=10):
         shape of the image grid.
     num_iter: int, optional
         number of iterations.
-
+    tol: float, optional
+        tolerance of the density estimation.
     Returns
     -------
     density: array_like
@@ -812,7 +813,7 @@ def pipe(kspace, grid_shape, num_iter=10):
     density = cp.ones(kspace.shape[0], dtype=np.complex64)
     update = cp.empty_like(density)
     for _ in range(num_iter):
-        _do_spread_interp(kspace, density, image, type=1)
-        _do_spread_interp(kspace, update, image, type=2)
+        _do_spread_interp(kspace, density, image, type=1, tol=tol)
+        _do_spread_interp(kspace, update, image, type=2, tol=tol)
         update_density(density, update)
     return density.real

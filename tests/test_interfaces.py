@@ -1,5 +1,6 @@
 """Test the interfaces module."""
 import numpy as np
+import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 import pytest
 
@@ -88,8 +89,7 @@ def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
     image_ref = nfft_ref_op.adj_op(kspace_data.copy()).squeeze()
 
-    assert np.percentile(abs(image_nufft - image_ref), 95) < 1e-4
-    assert np.max(abs(image_nufft - image_ref)) < 1e-3
+    npt.assert_allclose(image_nufft, image_ref, atol=1e-5, rtol=5e-4)
 
 
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):
@@ -99,4 +99,4 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    assert np.isclose(abs(leftadjoint.conj() - rightadjoint), 0, atol=1e-3)
+    npt.assert_array_almost_equal_nulp(leftadjoint.conj(), rightadjoint)
