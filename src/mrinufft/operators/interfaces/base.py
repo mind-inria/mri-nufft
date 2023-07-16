@@ -75,6 +75,7 @@ class FourierOperatorBase(ABC):
 
     def __init__(self):
         self._smaps = None
+        self._density = None
         self._n_coils = 1
 
     @abstractmethod
@@ -121,6 +122,11 @@ class FourierOperatorBase(ABC):
         return self._smaps is not None
 
     @property
+    def uses_density(self):
+        """Return True if the operator uses density compensation."""
+        return getattr(self, "density", None) is not None
+
+    @property
     def shape(self):
         """Shape of the image space of the operator."""
         return self._shape
@@ -153,16 +159,28 @@ class FourierOperatorBase(ABC):
     @smaps.setter
     def smaps(self, smaps):
         if smaps is None:
-            self._uses_sense = False
             self._smaps = None
         elif len(smaps) != self.n_coils:
             raise ValueError(
                 f"Number of sensitivity maps ({len(smaps)})"
-                "should be equal to n_coils ({self.n_coils})"
+                f"should be equal to n_coils ({self.n_coils})"
             )
         else:
-            self._uses_sense = True
-            self._smaps = np.asarray(smaps)
+            self._smaps = smaps
+
+    @property
+    def density(self):
+        """Density compensation of the operator."""
+        return self._density
+
+    @density.setter
+    def density(self, density):
+        if density is None:
+            self._density = None
+        elif len(density) != self.n_samples:
+            raise ValueError("Density and samples should have the same length")
+        else:
+            self._density = density
 
     @property
     def dtype(self):
