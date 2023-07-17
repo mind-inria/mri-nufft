@@ -260,3 +260,51 @@ class MRIfinufft(FourierOperatorBase):
     def norm_factor(self):
         """Norm factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+
+    def data_consistency(self, image_data, obs_data):
+        """Compute the gradient estimation directly on gpu.
+
+        This mixes the op and adj_op method to perform F_adj(F(x-y))
+        on a per coil basis. By doing the computation coil wise,
+        it uses less memory than the naive call to adj_op(op(x)-y)
+
+        Parameters
+        ----------
+        image: array
+            Image on which the gradient operation will be evaluated.
+            N_coil x Image shape is not using sense.
+        obs_data: array
+            Observed data.
+        """
+        if self.uses_sense:
+            return self._data_consistency_sense(image_data, obs_data)
+        return self._data_consistency_calibless(image_data, obs_data)
+
+    def _data_consistency_sense(self, image_data, obs_data):
+        img = np.empty_like(image_data)
+        coil_img = np.empty(self.shape, dtype=image_data.dtype)
+        coil_ksp = np.empty(self.n_samples, dtype=obs_data.dtype)
+        for i in range(self.n_coils):
+            np.copyto(coil_img, img)
+            coil_img *= self._smap
+            self._op(coil_img, coil_ksp)
+            coil_ksp /= self.norm_factor
+            coil_ksp -= obs_data[i]
+            if self.uses_density:
+                coil_ksp *= self.density_d
+            self._adj_op(coil_ksp, coil_img)
+            coil_img /= self.norm_factor
+            img += coil_img * self._smaps[i].conjugate()
+        return img
+
+    def _data_consistency_calibless(self, image_data, obs_data):
+        img = np.empty((self.n_coils, *self.shape), dtype=image_data.dtype)
+        ksp = np.empty(self.n_samples, dtype=obs_data.dtype)
+        for i in range(self.n_coils):
+            self._op(image_data[i], ksp)
+            ksp /= self.norm_factor
+            ksp -= obs_data[i]
+            if self.uses_density:
+                ksp *= self.density_d
+            self._adj_op(ksp, img[i])
+        return img / self.norm_factor

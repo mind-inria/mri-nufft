@@ -93,3 +93,36 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     rightadjoint = np.vdot(kspace, kspace_data)
 
     npt.assert_array_almost_equal(leftadjoint.conj(), rightadjoint)
+
+
+def test_data_consistency_readonly(operator, image_data, kspace_data):
+    """Test that the data consistency does not modify the input parameters data."""
+    kspace_tmp = kspace_data.copy().setflags(write=False)
+    image_tmp = image_data.copy().setflags(write=False)
+    operator.data_consistency(image_data, kspace_tmp)
+    npt.assert_equal(kspace_tmp, kspace_data)
+    npt.assert_equal(image_tmp, image_data)
+
+
+def test_data_consistency(operator, image_data, kspace_data):
+    """Test the data consistency operation."""
+    res = operator.data_consistency(image_data, kspace_data)
+
+    res2 = operator.adj_op(operator.op(image_data) - kspace_data)
+
+    assert np.allclose(res, res2)
+
+
+def test_gradient_lipschitz(operator, image_data, kspace_data):
+    """Test the gradient lipschitz constant."""
+    img = image_data.copy()
+    for _ in range(10):
+        grad = operator.data_consistency(img, kspace_data)
+        norm = np.linalg.norm(grad)
+        grad /= norm
+        np.copyto(img, grad)
+        norm_prev = norm
+
+    # TODO: check that the value is "not too far" from 1
+    # TODO: to do the same with density compensation
+    assert (norm - norm_prev) / norm_prev < 1e-3
