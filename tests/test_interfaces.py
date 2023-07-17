@@ -5,7 +5,6 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 import pytest
 
 from mrinufft import get_operator
-from mrinufft.operators.interfaces import CUFINUFFT_AVAILABLE
 from case_trajectories import CasesTrajectories
 
 # #########################
@@ -22,12 +21,7 @@ from case_trajectories import CasesTrajectories
     [
         "pynfft",
         "finufft",
-        pytest.param(
-            "cufinufft",
-            marks=pytest.mark.skipif(
-                not CUFINUFFT_AVAILABLE, reason="cufinufft not yet implemented"
-            ),
-        ),
+        "cufinufft",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
