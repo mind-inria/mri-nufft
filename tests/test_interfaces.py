@@ -2,7 +2,6 @@
 import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
-import pytest
 
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories

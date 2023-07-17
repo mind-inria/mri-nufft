@@ -122,7 +122,7 @@ def voronoi(kspace):
 
 
 def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
-    """compute the density compensation weights using the pipe method with a selected backend.
+    """Compute the density compensation weights using the pipe method with a selected backend.
 
     Parameters
     ----------
@@ -133,7 +133,6 @@ def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
     backend: str
         backend to use for the computation. Either "cufinufft" or "tensorflow-nufft".
     """
-
     if backend == "cufinufft":
         return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
     elif backend == "tensorflow-nufft":
