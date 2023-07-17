@@ -266,7 +266,6 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # density compensation support
         if density is True:
-            # TODO estimate the density using pipe method.
             self.density = pipe(self.samples, shape)
         elif is_host_array(density) or is_cuda_array(density):
             self.density = cp.array(density)

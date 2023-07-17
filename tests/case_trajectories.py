@@ -50,6 +50,8 @@ class CasesTrajectories:
         return freq_3d.reshape(-1, 3), (N, N, N)
 
 
+# 1D grid is only use once, so we don't want to include systematically
+#  fsin the cases collection.
 def case_grid1D(N=256):
     """Create a 1D cartesian grid of frequencies locations."""
     freq_1d = sp.fft.fftfreq(N)
