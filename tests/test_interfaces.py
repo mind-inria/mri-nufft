@@ -97,8 +97,10 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):
     """Test that the data consistency does not modify the input parameters data."""
-    kspace_tmp = kspace_data.copy().setflags(write=False)
-    image_tmp = image_data.copy().setflags(write=False)
+    kspace_tmp = kspace_data.copy()
+    image_tmp = image_data.copy()
+    kspace_tmp.setflags(write=False)
+    image_tmp.setflags(write=False)
     operator.data_consistency(image_data, kspace_tmp)
     npt.assert_equal(kspace_tmp, kspace_data)
     npt.assert_equal(image_tmp, image_data)
