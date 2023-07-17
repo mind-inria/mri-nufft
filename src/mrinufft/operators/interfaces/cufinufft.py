@@ -66,8 +66,9 @@ def str_opts(self):
     return ret
 
 
-NufftOpts.__repr__ = lambda self: repr_opts(self)
-NufftOpts.__str__ = lambda self: str_opts(self)
+if CUFINUFFT_AVAILABLE:
+    NufftOpts.__repr__ = lambda self: repr_opts(self)
+    NufftOpts.__str__ = lambda self: str_opts(self)
 
 
 def get_default_opts(nufft_type, dim):

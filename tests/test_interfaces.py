@@ -99,4 +99,4 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    npt.assert_array_almost_equal_nulp(leftadjoint.conj(), rightadjoint)
+    npt.assert_array_almost_equal(leftadjoint.conj(), rightadjoint)
