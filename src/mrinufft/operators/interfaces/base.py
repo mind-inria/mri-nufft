@@ -222,7 +222,7 @@ class FourierOperatorBase(ABC):
             f"  shape: {self.shape}\n"
             f"  n_coils: {self.n_coils}\n"
             f"  n_samples: {self.n_samples}\n"
-            f"  uses_sense: {self._uses_sense}\n"
+            f"  uses_sense: {self.uses_sense}\n"
             ")"
         )
 
