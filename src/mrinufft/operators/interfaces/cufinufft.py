@@ -4,27 +4,104 @@ import warnings
 
 import numpy as np
 
-from ..base import FourierOperatorBase, proper_trajectory
-from ._cufinufft import RawCufinufft, CUFI_LIB
+from .base import FourierOperatorBase, proper_trajectory
 from .utils import (
-    is_host_array,
-    is_cuda_array,
-    sizeof_fmt,
-    pin_memory,
-    nvtx_mark,
-    get_ptr,
+    CUPY_AVAILABLE,
     check_size,
+    get_ptr,
+    is_cuda_array,
+    is_host_array,
+    nvtx_mark,
+    pin_memory,
+    sizeof_fmt,
 )
-from .cupy_kernels import sense_adj_mono, update_density
+from ._cupy_kernels import sense_adj_mono
 
-CUPY_AVAILABLE = True
+CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
+    from cufinufft._plan import Plan
 except ImportError:
-    CUPY_AVAILABLE = False
+    CUFINUFFT_AVAILABLE = False
 
 
-CUFINUFFT_AVAILABLE = CUPY_AVAILABLE and CUFI_LIB is not None
+DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
+
+
+def _error_check(ier, msg):
+    if ier != 0:
+        raise RuntimeError(msg)
+
+
+class RawCufinufftPlan:
+    """Light wrapper around the guru interface of finufft."""
+
+    def __init__(
+        self,
+        samples,
+        shape,
+        n_trans=1,
+        eps=1e-6,
+        **kwargs,
+    ):
+        self.shape = shape
+        self.samples = cp.array(samples, order="F")
+        self.ndim = len(shape)
+        self.eps = float(eps)
+        self.n_trans = n_trans
+
+        # the first element is dummy to index type 1 with 1
+        # and type 2 with 2.
+        self.plans = [None, None, None]
+
+        for i in [1, 2]:
+            self._make_plan(i, **kwargs)
+            self._set_pts(i)
+
+    @property
+    def dtype(self):
+        """Return the dtype (precision) of the transform."""
+        try:
+            return self.plans[1].dtype
+        except AttributeError:
+            return DTYPE_R2C[str(self.samples.dtype)]
+
+    def _make_plan(self, typ, **kwargs):
+        self.plans[typ] = Plan(
+            typ,
+            self.shape,
+            self.n_trans,
+            self.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            **kwargs,
+        )
+
+    def _set_pts(self, typ):
+        x, y, z = None, None, None
+        x = cp.ascontiguousarray(self.samples[:, 0])
+        y = cp.ascontiguousarray(self.samples[:, 1])
+        fpts_axes = [get_ptr(y), get_ptr(x), None]
+        if self.ndim == 3:
+            z = cp.ascontiguousarray(self.samples[:, 2])
+            fpts_axes.insert(0, get_ptr(z))
+        M = x.size
+        self.plans[typ]._setpts(
+            self.plans[typ]._plan, M, *fpts_axes[:3], 0, None, None, None
+        )
+
+    def type1(self, coeff_data_ptr, grid_data_ptr):
+        """Type 1 transform. Non Uniform to Uniform."""
+        ier = self.plans[1]._exec_plan(
+            self.plans[1]._plan, coeff_data_ptr, grid_data_ptr
+        )
+        _error_check(ier, "Error in type 1 transform")
+
+    def type2(self, coeff_data_ptr, grid_data_ptr):
+        """Type 2 transform. Uniform to non-uniform."""
+        ier = self.plans[2]._exec_plan(
+            self.plans[2]._plan, coeff_data_ptr, grid_data_ptr
+        )
+        _error_check(ier, "Error in type 2 transform")
 
 
 class MRICufiNUFFT(FourierOperatorBase):
@@ -57,9 +134,8 @@ class MRICufiNUFFT(FourierOperatorBase):
     smaps_cached: bool, default False
         - If False the smaps are copied on device and free at each iterations.
         - If True, the smaps are copied on device and stay on it.
-    keep_dims: bool, default False
-        If True, the output will have dimension (n_batchs, n_coils, *shappe), even if
-        n_coils or n_batchs is 1.
+    squeeze_dims: bool, default False
+        If True, will try to remove the singleton dimension for batch and coils.
     n_trans: int, default 1
         Number of transform to perform in parallel by cufinufft.
     kwargs :
@@ -90,13 +166,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         smaps_cached=False,
         verbose=False,
         persist_plan=True,
-        keep_dims=False,
+        squeeze_dim=False,
         n_trans=1,
+        n_streams=1,
         **kwargs,
     ):
         if not CUPY_AVAILABLE:
             raise RuntimeError("cupy is not installed")
-        if CUFI_LIB is None:
+        if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
 
         if (n_batchs * n_coils) % n_trans != 0:
@@ -104,9 +181,12 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         self.shape = shape
         self.n_batchs = n_batchs
-
-        self.n_samples = len(samples)
+        self.n_trans = n_trans
+        self.squeeze_dim = squeeze_dim
         samples = proper_trajectory(samples, normalize=True).astype(np.float32)
+        self.samples = samples
+        self.n_samples = len(samples)
+        self.n_streams = n_streams
         if is_host_array(samples):
             samples_d = cp.asarray(samples.copy(order="F"))
         elif is_cuda_array(samples):
@@ -149,18 +229,17 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.smaps_cached = True
             else:
                 # allocate device memory
-                self._smap_d = cp.empty(shape, dtype=np.complex64)
+                self._smap_d = cp.empty((self.n_streams, *shape), dtype=np.complex64)
                 self._smaps_pinned = pin_memory(smaps)
                 self._smaps = smaps
         else:
             self._uses_sense = False
         # Initialise NUFFT plans
         self.persist_plan = persist_plan
-        self.raw_op = RawCufinufft(
+        self.raw_op = RawCufinufftPlan(
             samples_d,
             tuple(shape),
             n_trans=n_trans,
-            init_plans=self.persist_plan,
             **kwargs,
         )
 
@@ -183,7 +262,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
         # monocoil
-        check_size(data, (self.n_batchs, self.n_coils, *self.shape))
+        if self.uses_sense:
+            check_size(data, (self.n_batchs, *self.shape))
+        else:
+            check_size(data, (self.n_batchs, self.n_coils, *self.shape))
+        data = data.astype(np.complex64)
         if not self.persist_plan:
             self.raw_op._make_plan(2)
             self.raw_op._set_pts(2)
@@ -196,39 +279,52 @@ class MRICufiNUFFT(FourierOperatorBase):
         if not self.persist_plan:
             self.raw_op._destroy_plan(2)
 
-        if self.keep_dims:
-            return ret / self.norm_factor
-        else:
-            return ret.squeeze(axis=(0, 1))
+        ret /= self.norm_factor
+        return self._safe_squeeze(ret)
 
     def _op_sense(self, data, ksp_d=None):
-        img_d = cp.asarray(data)
+        img_d = cp.asarray(data, dtype=np.complex64)
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        if self.n_streams == 1:
+            streams = [cp.cuda.Stream(null=True)]
+        else:
+            streams = [cp.cuda.Stream(non_blocking=True) for _ in range(self.n_streams)]
+        for cur_stream_id in range(self.n_streams - 1):
+            self._smap_d[cur_stream_id].set(
+                self._smaps[cur_stream_id], streams[cur_stream_id]
+            )
+        if self.n_streams == 1:
+            cur_stream_id = 0
         if is_host_array(data):
-            ksp_d = cp.empty(self.n_batchs, self.n_samples, dtype=np.complex64)
+            ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=np.complex64)
             ksp = np.zeros(
                 (self.n_batchs, self.n_coils, self.n_samples), dtype=np.complex64
             )
             for i in range(self.n_coils):
-                cp.copyto(coil_img_d, img_d)
+                cp.copyto(coil_img_d, img_d[i])
                 if self.smaps_cached:
                     coil_img_d *= self._smaps_d[i]  # sense forward
                 else:
                     self._smap_d.set(self._smaps[i])
                     coil_img_d *= self._smap_d  # sense forward
                 self.__op(coil_img_d, ksp_d)
-                cp.asnumpy(ksp_d, out=ksp[i])
+                cp.asnumpy(ksp_d, out=ksp[:, i])
             return ksp
         # data is already on device
         ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=np.complex64)
         for i in range(self.n_coils):
-            cp.copyto(coil_img_d, img_d)
+            next_stream_id = (cur_stream_id + 1) % self.n_streams
             if self.smaps_cached:
-                coil_img_d *= self._smaps_d[i]  # sense forward
+                coil_img_d = img_d * self._smaps_d[i]  # sense forward
             else:
-                self._smap_d.set(self._smaps[i])
-                coil_img_d *= self._smap_d  # sense forward
+                if i < self.n_coils - self.n_streams + 1:
+                    self._smap_d[next_stream_id].set(
+                        self._smaps[i + self.n_streams - 1], streams[next_stream_id]
+                    )
+                streams[cur_stream_id].synchronize()
+                coil_img_d = img_d * self._smap_d[cur_stream_id]  # sense forward
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
+            cur_stream_id = next_stream_id
         return ksp_d
 
     def _op_calibless(self, data, ksp_d=None):
@@ -253,12 +349,12 @@ class MRICufiNUFFT(FourierOperatorBase):
         )
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
+        dataf = data.flatten()
+        size_batch = self.n_trans * np.prod(self.shape)
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
-            coil_img_d.set(
-                data.flatten()[i * self.bsize_img : (i + 1) * self.bsize_img]
-            )
+            coil_img_d.set(dataf[i * size_batch : (i + 1) * size_batch])
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_d))
-            cp.asnumpy(ksp_d, out=ksp[i])  # FIXME
+            ksp[i * self.n_trans : (i + 1) * self.n_trans] = ksp_d.get()
             ksp = ksp.reshape((self.n_batchs, self.n_coils, self.n_samples))
         return ksp
 
@@ -294,47 +390,86 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.persist_plan:
             self.raw_op._destroy_plan(1)
 
-        return ret / self.norm_factor
+        ret /= self.norm_factor
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img_d=None):
         coil_img_d = cp.empty(self.shape, dtype=np.complex64)
+        if self.n_streams == 1:
+            streams = [cp.cuda.Stream(null=True)]
+        else:
+            streams = [cp.cuda.Stream(non_blocking=True) for _ in range(self.n_streams)]
         if img_d is None:
             img_d = cp.zeros(self.shape, dtype=np.complex64)
-        if is_host_array(coeffs):
-            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
+        if not is_host_array(coeffs) and self.uses_density:
+            # If k-space is already on device, we can quickly do DC
+            coeffs *= self.density_d[None, :]
+        else:
+            # TODO: FIX streams here too
+            coil_ksp_d = cp.empty((self.n_streams, self.n_samples), dtype=np.complex64)
+            for cur_stream_id in range(self.n_streams - 1):
+                self._smap_d[cur_stream_id].set(
+                    self._smaps[cur_stream_id], streams[cur_stream_id]
+                )
+                coil_ksp_d[cur_stream_id].set(
+                    coeffs[cur_stream_id], streams[cur_stream_id]
+                )
+            if self.n_streams == 1:
+                cur_stream_id = 0
             for i in range(self.n_coils):
-                coil_ksp_d.set(coeffs[i])
-                if self.uses_density:
-                    coil_ksp_d *= self.density_d
-                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
+                next_stream_id = (cur_stream_id + 1) % self.n_streams
+                with streams[cur_stream_id]:
+                    if i < self.n_coils - self.n_streams + 1:
+                        coil_ksp_d[next_stream_id].set(
+                            coeffs[i + self.n_streams - 1], streams[next_stream_id]
+                        )
+                    streams[cur_stream_id].synchronize()
+                    if self.uses_density:
+                        coil_ksp_d[cur_stream_id] *= self.density_d
+                    self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
+                    if self.smaps_cached:
+                        sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
+                    else:
+                        if i < self.n_coils - self.n_streams + 1:
+                            self._smap_d[next_stream_id].set(
+                                self._smaps[i + self.n_streams - 1],
+                                streams[cur_stream_id],
+                            )
+                        sense_adj_mono(img_d, coil_img_d, self._smap_d)
+                    cur_stream_id = next_stream_id
+            return img_d.get()
+
+        for cur_stream_id in range(self.n_streams - 1):
+            self._smap_d[cur_stream_id].set(
+                self._smaps[cur_stream_id], streams[cur_stream_id]
+            )
+        if self.n_streams == 1:
+            cur_stream_id = 0
+        for i in range(self.n_coils):
+            next_stream_id = (cur_stream_id + 1) % self.n_streams
+            with streams[cur_stream_id]:
+                self.__adj_op(
+                    get_ptr(coeffs) + i * self.ksp_size,
+                    get_ptr(coil_img_d[cur_stream_id]),
+                )
                 if self.smaps_cached:
                     sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
                 else:
-                    self._smap_d.set(self._smaps[i])
+                    if i < self.n_coils - self.n_streams + 1:
+                        self._smap_d[next_stream_id].set(
+                            self._smaps[i + self.n_streams - 1], streams[next_stream_id]
+                        )
+                    streams[cur_stream_id].synchronize()
                     sense_adj_mono(img_d, coil_img_d, self._smap_d)
-            return img_d.get()
-        # coeff is on device.
-        if self.uses_density:
-            coil_ksp_d = cp.empty(self.n_samples, dtype=np.complex64)
-        for i in range(self.n_coils):
-            if self.uses_density:
-                cp.copyto(coil_ksp_d, coeffs[i])
-                coil_ksp_d *= self.density_d  # density preconditionning
-                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
-            else:
-                self.__adj_op(get_ptr(coeffs) + i * self.ksp_size, get_ptr(coil_img_d))
-            if self.smaps_cached:
-                sense_adj_mono(img_d, coil_img_d, self._smaps_d[i])
-            else:
-                self._smap_d.set(self._smaps[i])
-                sense_adj_mono(img_d, coil_img_d, self._smap_d)
+                cur_stream_id = next_stream_id
         if is_cuda_array(coeffs):
             return img_d
         return img_d.get()
 
     def _adj_op_calibless(self, coeffs, img_d=None):
         coeffs_f = coeffs.flatten()
-        ksp_batched = cp.empty((self.n_trans * self.n_samples), dtype=np.complex64)
+        n_trans_samples = self.n_trans * self.n_samples
+        ksp_batched = cp.empty(n_trans_samples, dtype=np.complex64)
         if self.uses_density:
             density_batched = cp.repeat(
                 self.density_d[None, :], self.n_trans, axis=0
@@ -361,17 +496,17 @@ class MRICufiNUFFT(FourierOperatorBase):
                     )
             return img_d
         # calibrationless, data on host
-        img = np.zeros((self.n_batches * self.n_coils, *self.shape), dtype=np.complex64)
-        img_batched = cp.empty(self.n_trans, self.shape, dtype=np.complex64)
+        img = np.zeros((self.n_batchs * self.n_coils, *self.shape), dtype=np.complex64)
+        img_batched = cp.empty((self.n_trans, *self.shape), dtype=np.complex64)
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
-        for i in range((self.n_batches * self.n_coils) // self.n_trans):
-            ksp_batched.set(coeffs_f[i * self.bsize_ksp : (i + 1) * self.bsize_ksp])
+        for i in range((self.n_batchs * self.n_coils) // self.n_trans):
+            ksp_batched.set(coeffs_f[i * n_trans_samples : (i + 1) * n_trans_samples])
             if self.uses_density:
                 ksp_batched *= density_batched
             self.__adj_op(get_ptr(ksp_batched), get_ptr(img_batched))
-            cp.asnumpy(img_batched, out=img[i])
-            img = img.reshape((self.n_batches, self.n_coils, *self.shape))
+            img[i * self.n_trans : (i + 1) * self.n_trans] = img_batched.get()
+            img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
         return img
 
     @nvtx_mark()
@@ -380,8 +515,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             ret = self.raw_op.type1(get_ptr(coeffs_d), get_ptr(image_d))
         else:
             ret = self.raw_op.type1(coeffs_d, image_d)
-        # Device synchronize is not done by cufinufft, we do it ourself.
-        cp.cuda.runtime.deviceSynchronize()
         return ret
 
     def data_consistency(self, image_data, obs_data):
@@ -487,20 +620,33 @@ class MRICufiNUFFT(FourierOperatorBase):
             cp.asnumpy(img_d, out=img[i])
         return img
 
+    def _safe_squeeze(self, arr):
+        """Squeeze the shape of the operator."""
+        if self.squeeze_dim:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
+
     @property
     def eps(self):
         """Return the underlying precision parameter."""
         return self.raw_op.eps
 
     @property
-    def bsize_samples(self):
+    def bsize_ksp(self):
         """Size in Bytes of the compute batch of samples."""
         return self.n_trans * self.ksp_size
 
     @property
     def bsize_img(self):
         """Size in Bytes of the compute batch of images."""
-        self.n_trans * self.img_size
+        return self.n_trans * self.img_size
 
     @property
     def img_size(self):
@@ -516,21 +662,6 @@ class MRICufiNUFFT(FourierOperatorBase):
     def norm_factor(self):
         """Norm factor of the operator."""
         return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
-
-    @classmethod
-    @nvtx_mark()
-    def estimate_density(cls, samples, shape, n_iter=10, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-
-        density = cp.ones(len(samples), dtype=np.complex64)
-        update = cp.empty_like(density)
-        img = cp.empty(shape, dtype=np.complex64)
-        for _ in range(n_iter):
-            oper.__adj_op(density, img)
-            oper.__op(img, update)
-            update_density(density, update)
-        return density.real
 
     def __repr__(self):
         """Return info about the MRICufiNUFFT Object."""

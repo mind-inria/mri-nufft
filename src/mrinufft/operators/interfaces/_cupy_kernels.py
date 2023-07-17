@@ -1,25 +1,13 @@
 """Kernel function for GPUArray data."""
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-# Kernels #
-
+from .utils.gpu_utils import get_maxThreadBlock, CUPY_AVAILABLE
 
 update_density_kernel = lambda *args, **kwargs: None  # noqa: E731
 sense_adj_mono = lambda *args, **kwargs: None  # noqa: E731
 
 
-def _get_block_size():
-    """Get the warp size of the current device."""
-    if CUPY_AVAILABLE:
-        device = cp.cuda.runtime.getDevice()
-        return cp.cuda.runtime.getDeviceProoperties(device)["MaxThreadsPerBlock"]
-    raise RuntimeError("Cupy is not available")
-
-
 if CUPY_AVAILABLE:
+    import cupy as cp
+
     update_density_kernel = cp.RawKernel(
         """
         extern "C" __global__
@@ -62,12 +50,11 @@ def update_density(density, update):
     -----
     ``density[i] /= sqrt(abs(update[i]))``
     """
-    block_size = _get_block_size()
+    block_size = get_maxThreadBlock()
     update_density_kernel(
         ((len(density) // block_size) + 1,),
         (block_size,),
-        (density, update),
-        len(density),
+        (density, update, len(density)),
     )
 
 
@@ -83,11 +70,10 @@ def sense_adj_mono(dest, coil, smap, **kwargs):
     smap: GPUArray
         The sensitivity profile of the coil.
     """
-    block_size = _get_block_size()
+    block_size = get_maxThreadBlock()
     sense_adj_mono_kernel(
-        (dest.size // block_size,),
+        (dest.size // block_size + 1,),
         (block_size,),
-        (dest, coil, smap),
-        dest.size,
+        (dest, coil, smap, dest.size),
         **kwargs,
     )

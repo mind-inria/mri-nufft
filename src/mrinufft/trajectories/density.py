@@ -6,6 +6,10 @@ Those methods are agnostic of the NUFFT operator.
 import numpy as np
 from scipy.spatial import Voronoi
 from mrinufft.operators.interfaces import proper_trajectory
+from ..operators.interfaces.gpu.cufinufft import CUFINUFFT_AVAILABLE
+from ..operators.interfaces.gpu._cufinufft import spreader, interpolator
+from ..operators.interfaces.gpu.utils import is_host_array
+from ..operators.interfaces.gpu.cupy_kernels import update_density
 
 
 def compute_tetrahedron_volume(A, B, C, D):
@@ -117,3 +121,42 @@ def voronoi(kspace):
         wi = _voronoi(kspace)
     wi /= np.sum(wi)
     return wi
+
+
+def pipe(kspace, grid_shape, num_iter=10):
+    """Estimate density compensation weight using the Pipe method.
+
+    Parameters
+    ----------
+    kspace: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    grid_shape: tuple
+        shape of the image grid.
+    num_iter: int, optional
+        number of iterations.
+
+    Returns
+    -------
+    density: array_like
+        array of shape (M,) containing the density compensation weights.
+    """
+    if not CUFINUFFT_AVAILABLE:
+        raise ImportError(
+            "cuFINUFFT library not available to do Pipe density estimation"
+        )
+    import cupy as cp
+
+    kspace = proper_trajectory(kspace)
+    if is_host_array(kspace):
+        kspace = cp.array(kspace.copy(order="F"))
+    if kspace.dtype == np.float32:
+        density = cp.ones(kspace.shape[0], dtype=np.complex64)
+    elif kspace.dtype == np.float64:
+        density = cp.ones(kspace.shape[0], dtype=np.complex128)
+    image = cp.empty(grid_shape, dtype=np.complex64)
+    update = cp.empty_like(density)
+    for _ in range(num_iter):
+        spreader(kspace, density, image)
+        interpolator(kspace, update, image)
+        update_density(density, update)
+    return density.real

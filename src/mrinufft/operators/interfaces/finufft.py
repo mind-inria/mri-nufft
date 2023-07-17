@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from ..base import FourierOperatorBase, proper_trajectory
+from .base import FourierOperatorBase, proper_trajectory
 
 FINUFFT_AVAILABLE = True
 try:
@@ -98,6 +98,8 @@ class MRIfinufft(FourierOperatorBase):
         smaps=None,
         keep_dims=False,
     ):
+        super().__init__()
+
         if not FINUFFT_AVAILABLE:
             raise RuntimeError("finufft is not available.")
         self.shape = shape

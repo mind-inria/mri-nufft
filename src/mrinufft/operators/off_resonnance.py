@@ -6,7 +6,7 @@ https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wr
 import numpy as np
 
 from .interfaces.base import FourierOperatorBase
-from .interfaces.gpu.utils import is_cuda_array
+from .interfaces.utils import is_cuda_array
 
 CUPY_AVAILABLE = True
 try:

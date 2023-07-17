@@ -1,16 +1,22 @@
-"""Utility functions for GPU Interface."""
-
-from functools import wraps
-from hashlib import md5
-
+"""Utils for GPU."""
 import numpy as np
-from .css_colors import CSS4_COLORS_CODE
+from pathlib import Path
+from hashlib import md5
+from functools import wraps
 
 CUPY_AVAILABLE = True
 try:
     import cupy as cp
 except ImportError:
     CUPY_AVAILABLE = False
+
+
+def get_maxThreadBlock():
+    """Get the warp size of the current device."""
+    if CUPY_AVAILABLE:
+        device = cp.cuda.runtime.getDevice()
+        return cp.cuda.runtime.getDeviceProperties(device)["maxThreadsPerBlock"]
+    raise RuntimeError("Cupy is not available")
 
 
 def is_cuda_array(var):
@@ -45,9 +51,10 @@ def pin_memory(array):
     return ret
 
 
-def check_error(ier, message):  # noqa: D103
-    if ier != 0:
-        raise RuntimeError(message)
+# Load CSS4 colors
+with open(str(Path(__file__).parent / "css_color.txt")) as f:
+    CSS4_COLORS_CODE = f.read().splitlines()[1:]
+CSS4_COLORS_CODE = [int(c) for c in CSS4_COLORS_CODE]
 
 
 def nvtx_mark(color=-1):
@@ -69,31 +76,3 @@ def nvtx_mark(color=-1):
         return new_func
 
     return decorator
-
-
-def sizeof_fmt(num, suffix="B"):
-    """
-    Return a number as a XiB format.
-
-    Parameters
-    ----------
-    num: int
-        The number to format
-    suffix: str, default "B"
-        The unit suffix
-
-    References
-    ----------
-    https://stackoverflow.com/a/1094933
-    """
-    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
-    return f"{num:.1f}Yi{suffix}"
-
-
-def check_size(array_like, shape):
-    """Check if array_like has a matching shape."""
-    if np.prod(array_like.shape) != np.prod(shape):
-        raise ValueError(f"Expected array with {shape}, got {array_like.shape}.")
