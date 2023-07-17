@@ -137,7 +137,7 @@ class FourierOperatorBase(ABC):
 
     @property
     def n_coils(self):
-        """Number of coil for the operator."""
+        """Number of coils for the operator."""
         return self._n_coils
 
     @property
