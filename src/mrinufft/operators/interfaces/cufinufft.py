@@ -566,7 +566,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         ksp_batched = cp.empty(n_trans_samples, dtype=self.cpx_dtype)
         if self.uses_density:
             density_batched = cp.repeat(
-                self.density_d[None, :], self.n_trans, axis=0
+                self.density[None, :], self.n_trans, axis=0
             ).flatten()
 
         if is_cuda_array(coeffs_f):
