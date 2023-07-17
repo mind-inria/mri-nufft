@@ -18,8 +18,6 @@ from ._cupy_kernels import sense_adj_mono, update_density
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
-    from pycuda import gpuarray
-    import pycuda.autoinit
     from cufinufft._plan import Plan
     from cufinufft._cufinufft import _spread_interpf, NufftOpts, _default_opts
 except ImportError:
@@ -293,7 +291,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.smaps_cached = False
             if smaps_cached:
                 warnings.warn(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).size)} will be on gpu for smaps."
+                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).size)}"
+                    "used on gpu for smaps."
                 )
                 self._smaps_d = cp.array(
                     smaps, order="C", copy=False, dtype=self.cpx_dtype
@@ -363,7 +362,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         # Copy the first smaps to the devices.
         for cur_stream_id in range(self.n_streams - 1):
             self._smap_d[cur_stream_id].set(
-                self._smaps[cur_stream_id], streams[cur_stream_id]
+                self._smaps[cur_stream_id], self.streams[cur_stream_id]
             )
         if is_host_array(data):
             ksp_d = cp.empty((self.n_batchs, self.n_samples), dtype=self.cpx_dtype)
@@ -383,7 +382,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _op_sense_device(self, data, ksp_d=None):
         ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=self.cpx_dtype)
-
+        img_d = cp.asarray(data, dtype=self.cpx_dtype)
         coil_img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
         cur_stream_id = 0
         for i in range(self.n_coils):
@@ -393,7 +392,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                     coil_img_d = img_d * self._smaps_d[i]  # sense forward
                 else:
                     self._smap_d[cur_stream_id].set(self._smaps[i], cur_stream)
-                    streams[cur_stream_id].synchronize()
+                    cur_stream.synchronize()
                     coil_img_d = img_d * self._smap_d[cur_stream_id]  # sense forward
                 self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
         return ksp_d
@@ -418,6 +417,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                     coil_img_d *= self._smap_d[cur_stream_id]  # sense forward
                 self.__op(coil_img_d, ksp_d)
                 cp.asnumpy(ksp_d, out=ksp[:, i])
+                cur_stream.synchronize()
             return ksp
 
     def _op_calibless(self, data, ksp_d=None):
@@ -820,6 +820,7 @@ def pipe(kspace, grid_shape, num_iter=10, tol=2e-7):
         number of iterations.
     tol: float, optional
         tolerance of the density estimation.
+
     Returns
     -------
     density: array_like
