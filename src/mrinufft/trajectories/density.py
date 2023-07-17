@@ -6,6 +6,8 @@ Those methods are agnostic of the NUFFT operator.
 import numpy as np
 from scipy.spatial import Voronoi
 from mrinufft.operators.interfaces import proper_trajectory
+from mrinufft.operators.interfaces.cufinufft import pipe as pipe_cufinufft
+from mrinufft.operators.interfaces.tfnufft import pipe as pipe_tfnufft
 
 
 def compute_tetrahedron_volume(A, B, C, D):
@@ -117,3 +119,24 @@ def voronoi(kspace):
         wi = _voronoi(kspace)
     wi /= np.sum(wi)
     return wi
+
+
+def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
+    """compute the density compensation weights using the pipe method with a selected backend.
+
+    Parameters
+    ----------
+    kspace_traj: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    grid_size: array_like
+        array of shape (2,) or (3,) containing the size of the grid.
+    backend: str
+        backend to use for the computation. Either "cufinufft" or "tensorflow-nufft".
+    """
+
+    if backend == "cufinufft":
+        return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
+    elif backend == "tensorflow-nufft":
+        return pipe_tfnufft(kspace_traj, grid_size, **kwargs)
+    else:
+        raise ValueError("backend not supported")

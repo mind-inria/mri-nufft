@@ -831,7 +831,7 @@ def pipe(kspace, grid_shape, num_iter=10, tol=2e-7):
         )
     import cupy as cp
 
-    kspace = proper_trajectory(kspace).astype(np.float32)
+    kspace = proper_trajectory(kspace, normalize="pi").astype(np.float32)
     if is_host_array(kspace):
         kspace = cp.array(kspace, order="F")
     image = cp.empty(grid_shape, dtype=np.complex64)
