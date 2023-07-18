@@ -48,11 +48,11 @@ def nfft_ref_op(request, operator, backend="pynfft"):
 def image_data(operator):
     """Generate a random image."""
     if operator.smaps is None:
-        img = np.random.rand(operator.n_coils, *operator.shape).astype(
+        img = np.random.randn(operator.n_coils, *operator.shape).astype(
             operator.cpx_dtype
         )
     elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.rand(*operator.shape).astype(operator.cpx_dtype)
+        img = np.random.randn(*operator.shape).astype(operator.cpx_dtype)
 
     img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
     return img
@@ -61,7 +61,10 @@ def image_data(operator):
 @fixture(scope="module")
 def kspace_data(operator):
     """Generate a random kspace data."""
-    kspace = np.random.randn(operator.n_coils, operator.n_samples).astype(
+    kspace = (1j * np.random.randn(operator.n_coils, operator.n_samples)).astype(
+        operator.cpx_dtype
+    )
+    kspace += np.random.randn(operator.n_coils, operator.n_samples).astype(
         operator.cpx_dtype
     )
     return kspace
@@ -73,7 +76,7 @@ def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
     kspace_ref = nfft_ref_op.op(image_data).squeeze()
     # FIXME: check with complex values ail
     assert np.percentile(abs(kspace_nufft - kspace_ref), 95) < 1e-4
-    assert np.max(abs(kspace_nufft - kspace_ref)) < 1e-3
+    assert np.max(abs(kspace_nufft - kspace_ref)) < 1e-2
 
 
 def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):

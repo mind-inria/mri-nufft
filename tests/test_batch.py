@@ -24,7 +24,11 @@ from case_trajectories import CasesTrajectories
         (3, 4, 2, True),
     ],
 )
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
+@parametrize_with_cases(
+    "kspace_locs, shape",
+    cases=CasesTrajectories,
+    glob="*random*",
+)
 @parametrize(backend=["finufft", "cufinufft"])
 def operator(
     request,

@@ -16,15 +16,15 @@ class CasesTrajectories:
         np.random.seed(seed)
         samples = np.random.rand(M, 2) - 0.5
         samples /= samples.max()
-        samples *= -0.5
+        samples -= 0.5
         return samples, (N, N)
 
     def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
         """Create a random 3D trajectory."""
         np.random.seed(seed)
-        samples = np.random.rand(M, 3) - 0.5
+        samples = np.random.randn(M, 3)
         samples /= samples.max()
-        samples *= -0.5
+        samples -= 0.5
         return samples, (N, N, N)
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):
