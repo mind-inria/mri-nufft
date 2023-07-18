@@ -42,7 +42,14 @@ def operator(
         smaps += np.random.rand(n_coils, *shape)
     else:
         smaps = None
-    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=smaps)
+    return get_operator(backend)(
+        kspace_locs,
+        shape,
+        n_coils=n_coils,
+        smaps=smaps,
+        n_batchs=n_batch,
+        n_trans=n_trans,
+    )
 
 
 @fixture(scope="module")
@@ -60,8 +67,8 @@ def image_data(operator):
         shape = (operator.n_batchs, *operator.shape)
     else:
         shape = (operator.n_batchs, operator.n_coils, *operator.shape)
-    img = np.random.rand(*shape).astype(operator.cpx_dtype)
-    img += 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
+    img = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
+    img += np.random.rand(*shape).astype(operator.cpx_dtype)
     return img
 
 
@@ -69,7 +76,7 @@ def image_data(operator):
 def kspace_data(operator):
     """Generate a random image."""
     shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
-    kspace = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
+    kspace = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
     kspace += np.random.rand(*shape).astype(operator.cpx_dtype)
     return kspace
 
@@ -96,8 +103,6 @@ def test_batch_type2(operator, flat_operator, image_data):
 
 def test_batch_type1(operator, flat_operator, kspace_data):
     """Test the batch type 1 (adjoint)."""
-    image_data = operator.adj_op(kspace_data)
-
     kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
     image_flat = [None] * operator.n_batchs
     for i in range(len(image_flat)):
@@ -113,4 +118,5 @@ def test_batch_type1(operator, flat_operator, kspace_data):
         shape,
     )
 
+    image_data = operator.adj_op(kspace_data)
     npt.assert_almost_equal(image_data, image_flat)

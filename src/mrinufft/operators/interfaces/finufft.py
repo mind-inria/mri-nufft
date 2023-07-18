@@ -235,14 +235,16 @@ class MRIfinufft(FourierOperatorBase):
             return ret.squeeze(axis=(0, 1))
 
     def _adj_op_sense(self, coeffs, img=None):
+        print("in adj op sense")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-        img = img or np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        img = img or np.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
-        img_batched = np.empty((T, *XYZ), dtype=self.cpx_dtype)
+        img_batched = np.zeros((T, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
+            print(i, idx_coils, idx_batch)
             self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
             img_batched *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):

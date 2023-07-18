@@ -475,7 +475,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         if self.uses_density:
             ksp_new = cp.empty((T, K), dtype=self.cpx_dtype)
-
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
