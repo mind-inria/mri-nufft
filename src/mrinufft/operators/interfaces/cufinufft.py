@@ -361,11 +361,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         return ksp_d
 
     def _op_sense_host(self, data, ksp=None):
-        """
-        data(B, XYZ)
-        smaps(C, XYZ)
-
-        """
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -392,7 +387,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _op_calibless_device(self, data, ksp_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
-        K, XYZ = self.n_samples, self.shape
+        K = self.n_samples
         bsize_samples2gpu = T * self.ksp_size
         bsize_img2gpu = T * self.img_size
         if is_cuda_array(data):
