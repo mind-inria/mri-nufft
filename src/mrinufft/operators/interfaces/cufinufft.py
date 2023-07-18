@@ -147,11 +147,9 @@ class RawCufinufftPlan:
             self.plans[typ]._references.append(z)
             fpts_axes.insert(0, get_ptr(z))
         M = x.size
-        print(M)
         self.plans[typ]._setpts(
             self.plans[typ]._plan, M, *fpts_axes[:3], 0, None, None, None
         )
-        print("done", flush=True)
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
