@@ -1,3 +1,4 @@
+"""Configuration for pytest."""
 import pytest
 
 from mrinufft.operators import check_backend
