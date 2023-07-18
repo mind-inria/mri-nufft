@@ -12,7 +12,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 
 gpu = ["cupy-wheel"]
-test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
+test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases", "pynfft2"]
 dev = ["black", "isort", "ruff"]
 
 doc = ["sphinx==4.5.0", "pydata-sphinx-theme", "sphinx-gallery", "matplotlib", "pooch"]
