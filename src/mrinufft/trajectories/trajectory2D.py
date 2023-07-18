@@ -2,12 +2,12 @@
 import numpy as np
 
 from .utils import (
-    KMAX,
     R2D,
     initialize_tilt,
     initialize_spiral,
     compute_coprime_factors,
 )
+from .io import KMAX
 
 
 ################################

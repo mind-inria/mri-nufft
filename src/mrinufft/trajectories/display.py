@@ -2,7 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .utils import KMAX, compute_gradients, DEFAULT_GMAX, DEFAULT_SMAX
+from .utils import get_grads_from_kspace_points, DEFAULT_GMAX, DEFAULT_SMAX
+from .io import KMAX
 
 
 COLOR_CYCLE = [
@@ -56,7 +57,8 @@ def setup_3D_ticks(size):
 
 
 def display_2D_trajectory(
-    trajectory, size=5, one_shot=False, constraints=False, subfigure=None
+    trajectory, size=5, one_shot=False, constraints=False, subfigure=None,
+    img_size=(384, 384), FOV=(0.24, 0.24)
 ):
     """Display of 2D trajectory.
 
@@ -96,7 +98,7 @@ def display_2D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(trajectory.reshape((-1, Ns, 2)))
+        gradients, slews = get_grads_from_kspace_points(trajectory.reshape((-1, Ns, 2)), img_size=img_size, FOV=FOV)
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 2))[
@@ -118,6 +120,8 @@ def display_3D_trajectory(
     per_plane=True,
     one_shot=False,
     constraints=False,
+    img_size=(384, 384, 208),
+    FOV=(0.24, 0.24, 0.1248),
 ):
     """Display of 3D trajectory.
 
@@ -140,6 +144,10 @@ def display_3D_trajectory(
     constraints : bool, optional
         If True, display the points where the gradients and slews are above the
         default limits.
+    img_size : tuple, optional
+        Image size. Default is (384, 384, 208).
+    FOV : tuple, optional
+        Field of view. Default is (0.24, 0.24, 0.1248).
 
     Returns
     -------
@@ -166,7 +174,7 @@ def display_3D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(trajectory.reshape((-1, Ns, 3)))
+        gradients, slews = get_grads_from_kspace_points(trajectory.reshape((-1, Ns, 3)), img_size=img_size, FOV=FOV)
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 3))[

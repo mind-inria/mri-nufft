@@ -5,11 +5,10 @@ import numpy as np
 from datetime import datetime
 from array import array
 
+KMAX = 0.5
 
 
-
-
-def create_gradient_file(gradients: np.ndarray, start_positions: np.ndarray, 
+def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray, 
                          grad_filename: str, img_size: Tuple[int, ...], 
                          FOV: Tuple[float, ...], in_out: bool = True,
                          min_osf: int = 5, gyromagnetic_constant: float = 42.576e3, 
@@ -154,7 +153,7 @@ def _pop_elements(array, num_elements=1, type='float'):
                    
 def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num_adc_samples: int=None, 
                                  gyromagnetic_constant: float=42.576e3, gradient_raster_time: float=0.010,
-                                 read_shots: bool=False):
+                                 read_shots: bool=False, normalize_factor: float=KMAX):
     """Get k-space locations from gradient file.
 
     Parameters
@@ -171,6 +170,9 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
         Gradient raster time, by default 0.010
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra point at end, by default False
+    normalize : float, optional
+        Whether to normalize the k-space locations, by default 0.5
+        When None, normalization is not done.
 
     Returns
     -------
@@ -277,8 +279,12 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
             params['min_osf'] = min_osf
             params['gamma'] = gyromagnetic_constant
             params['recon_tag'] = recon_tag
+            params['TE'] = TE
             if version >= 4.2:
                 params['timestamp'] = timestamp
+        if normalize_factor is not None:
+            Kmax = img_size / 2 / fov
+            kspace_loc = kspace_loc / Kmax * normalize_factor
         return kspace_loc, params
 
     

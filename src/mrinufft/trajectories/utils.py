@@ -3,20 +3,20 @@ from typing import Tuple
 import warnings
 import numpy as np
 
+from .io import write_gradient_file, KMAX
+
 #############
 # CONSTANTS #
 #############
 
-DEFAULT_TRAJECTORY_MAXNORM = 0.5
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
-DEFAULT_RESOLUTION = 6e-4  # m
-DEFAULT_RASTER_TIME = 10e-6  # s
-DEFAULT_GYROMAGNETIC_RATIO = 42.576e6  # Hz/T
+DEFAULT_RASTER_TIME = 10e-3  # ms
+DEFAULT_GYROMAGNETIC_RATIO = 42.576e3  # MHz/T
 
 DEFAULT_GMAX = 0.04  # T/m
-DEFAULT_SMAX = 100.0  # T/m/s
+DEFAULT_SMAX = 100.0e-3  # mT/m/s
 
 
 ###############
@@ -27,12 +27,14 @@ def get_grads_from_kspace_points(
     trajectory: np.ndarray,
     FOV: Tuple[float, ...],
     img_size: Tuple[int, ...],
-    trajectory_normalization_factor: float = DEFAULT_TRAJECTORY_MAXNORM,
+    trajectory_normalization_factor: float = KMAX,
     gyromagnetic_constant: float = DEFAULT_GYROMAGNETIC_RATIO,
     gradient_raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     gradient_mag_max: float = DEFAULT_GMAX,
     slew_rate_max: float = DEFAULT_SMAX,
+    grad_filename: str = None,
+    write_kwargs: dict = {},
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate gradients from k-space points. Also returns start positions, slew rates and 
     allows for checking of scanner constraints.
@@ -57,6 +59,10 @@ def get_grads_from_kspace_points(
         Maximum gradient magnitude, by default 40e-3
     slew_rate_max : float, optional
         Maximum slew rate, by default 100e-3
+    grad_filename : str, optional
+        Gradient filename, by default None. If none gradient file is not written
+    write_kwargs : dict, optional
+        Keyword arguments for writing gradients. See io.py for details.
         
     Returns
     -------
@@ -94,6 +100,15 @@ def get_grads_from_kspace_points(
                 "Max Value : "
                 + str(np.max(np.abs(slew_rate)))
             )
+    if grad_filename is not None:
+        write_gradient_file(
+            gradients=gradients,
+            start_positions=start_positions,
+            grad_filename=grad_filename,
+            img_size=img_size, 
+            FOV=FOV,
+            gyromagnetic_constant=gyromagnetic_constant,
+            **write_kwargs)
     return gradients, start_positions, slew_rate
 
 
