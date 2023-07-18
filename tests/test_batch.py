@@ -119,4 +119,5 @@ def test_batch_type1(operator, flat_operator, kspace_data):
     )
 
     image_data = operator.adj_op(kspace_data)
-    npt.assert_almost_equal(image_data, image_flat)
+    # Reduced accuracy for the GPU cases...
+    npt.assert_allclose(image_data, image_flat, atol=1e-3, rtol=1e-3)

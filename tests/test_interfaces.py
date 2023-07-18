@@ -91,7 +91,7 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    npt.assert_array_almost_equal(leftadjoint.conj(), rightadjoint)
+    npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
 
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):
@@ -111,7 +111,7 @@ def test_data_consistency(operator, image_data, kspace_data):
 
     res2 = operator.adj_op(operator.op(image_data) - kspace_data)
 
-    assert np.allclose(res, res2)
+    npt.assert_allclose(res.squeeze(), res2.squeeze(), atol=1e-5, rtol=1e-3)
 
 
 def test_gradient_lipschitz(operator, image_data, kspace_data):
