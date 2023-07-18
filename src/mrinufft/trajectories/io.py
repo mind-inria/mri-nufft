@@ -1,23 +1,3 @@
-"""Holds functions for reading and writing trajectories from and to binary files.
-These trajectories nees to follow the format specified as shown below:
-
-|Name          |Type |Size   |Unit   |Description                                                              |
-|--------------|-----|-------|-------|-------------------------------------------------------------------------|
-|Version       |FLOAT|1      |n.a.   |file version this new version would be “4.0”                             |
-|Dimension     |FLOAT|1      |n.a.   |2 -> 2D , 3 -> 3D                                                        |
-|FOV           |FLOAT|D      |m      |FOV size (x,y,z) : z absent if 2D dimension                              | 
-|Minimum OSF   |FLOAT|1      |n.a.   |Minimum OS for the trajectory                                            |
-|Gamma         |FLOAT|1      |Hz/T   |For Na / MRSI imaging                                                    |
-|Spokes        |FLOAT|1      |n.a.   |Number of spokes                                                         |
-|Samples       |FLOAT|1      |n.a.   |Number of samples per spoke                                              |
-|K-space center|FLOAT|1      |n.a.   |Relative value in the range [0-1] to define center of spokes             |
-|MaxGrad       |FLOAT|1      |mT/m   |Maximum absolute gradient in all 3 (or 2) directions                     |
-|recon_tag     |FLOAT|1      |n.a.   |Reconstruction tag                                    	               |
-|timestamp     |FLOAT|1      |n.a.   |Time stamp when the binary is created                                    |
-|Empty places  |FLOAT|9      |n.a.   |Yet unused : Default initialized with 0                                  |
-|kStarts       |FLOAT|D*Nc   |1/m    |K-space location start 	                                               |
-|Gradient array|FLOAT|D*Nc*Ns|unitary|Gradient trajectory expressed in the range [-1; 1] relative to MaxGrad   |
-"""
 import warnings
 import os
 from typing import Tuple, Optional
@@ -27,78 +7,6 @@ from array import array
 
 
 
-def get_grads_from_kspace_points(
-    trajectory: np.ndarray,
-    FOV: Tuple[float, ...],
-    img_size: Tuple[int, ...],
-    trajectory_normalization_factor: float = 0.5,
-    gyromagnetic_constant: float = 42.576e3,
-    gradient_raster_time: float = 0.01,
-    check_constraints: bool = True,
-    gradient_mag_max: float = 40e-3,
-    slew_rate_max: float = 100e-3,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Calculate gradients from k-space points. Also returns start positions, slew rates and 
-    allows for checking of scanner constraints.
-    
-    Parameters
-    ----------
-    trajectory : np.ndarray
-        Trajectory in k-space points. Shape (num_shots, num_samples_per_shot, dimension).
-    FOV : tuple
-        Field of view
-    img_size : tuple
-        Image size
-    trajectory_normalization_factor : float, optional
-        Trajectory normalization factor, by default 0.5
-    gyromagnetic_constant : float, optional
-        Gyromagnetic constant, by default 42.576e3
-    gradient_raster_time : float, optional
-        Gradient raster time, by default 0.01
-    check_constraints : bool, optional
-        Check scanner constraints, by default True
-    gradient_mag_max : float, optional
-        Maximum gradient magnitude, by default 40e-3
-    slew_rate_max : float, optional
-        Maximum slew rate, by default 100e-3
-        
-    Returns
-    -------
-    gradients : np.ndarray
-        Gradients. Shape (num_shots-1, num_samples_per_shot, dimension).
-    start_positions : np.ndarray
-        Start positions. Shape (num_shots, dimension).
-    slew_rate : np.ndarray
-        Slew rates. Shape (num_shots-2, num_samples_per_shot, dimension).
-    """
-    # normalize trajectory by image size
-    if trajectory_normalization_factor:
-        trajectory = trajectory * np.array(img_size) / (
-            2 * np.array(FOV)
-        ) / trajectory_normalization_factor
-
-    # calculate gradients and slew
-    gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
-    start_positions = trajectory[:, 0, :]
-    slew_rate = np.diff(gradients, axis=1) / gradient_raster_time
-
-    # check constraints
-    if check_constraints:
-        if np.max(gradients) > gradient_mag_max:
-            warnings.warn(
-                "Gradient Maximum Maginitude overflow from Machine capabilities"
-            )
-        if np.max(slew_rate) > slew_rate_max:
-            occurences = np.where(slew_rate > slew_rate_max)
-            warnings.warn(
-                "Slew Rate overflow from Machine capabilities!\n"
-                "Occurences per shot : "
-                + str(len(occurences[0]) / trajectory.shape[0])
-                + "\n"
-                "Max Value : "
-                + str(np.max(np.abs(slew_rate)))
-            )
-    return gradients, start_positions, slew_rate
 
 
 def create_gradient_file(gradients: np.ndarray, start_positions: np.ndarray, 

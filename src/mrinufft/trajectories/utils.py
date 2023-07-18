@@ -1,12 +1,13 @@
 """Utility functions for the trajectory design."""
+from typing import Tuple
+import warnings
 import numpy as np
-
 
 #############
 # CONSTANTS #
 #############
 
-KMAX = 0.5
+DEFAULT_TRAJECTORY_MAXNORM = 0.5
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
@@ -22,59 +23,78 @@ DEFAULT_SMAX = 100.0  # T/m/s
 # CONSTRAINTS #
 ###############
 
-
-def compute_gradients(
-    trajectory,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    g_ratio=DEFAULT_GYROMAGNETIC_RATIO,
-):
-    """Compute Gradient and Slew rate from a trajectory."""
-    trajectory = trajectory / KMAX / (2 * resolution * g_ratio)
-    gradients = np.diff(trajectory, axis=1) / raster_time
-    slews = np.diff(gradients, axis=1) / raster_time
-    return gradients, slews
-
-
-def check_gradient_constraints(
-    trajectory,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    g_ratio=DEFAULT_GYROMAGNETIC_RATIO,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-):
-    """Check if a trajectory satisfies the gradient constraints.
-
+def get_grads_from_kspace_points(
+    trajectory: np.ndarray,
+    FOV: Tuple[float, ...],
+    img_size: Tuple[int, ...],
+    trajectory_normalization_factor: float = DEFAULT_TRAJECTORY_MAXNORM,
+    gyromagnetic_constant: float = DEFAULT_GYROMAGNETIC_RATIO,
+    gradient_raster_time: float = DEFAULT_RASTER_TIME,
+    check_constraints: bool = True,
+    gradient_mag_max: float = DEFAULT_GMAX,
+    slew_rate_max: float = DEFAULT_SMAX,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calculate gradients from k-space points. Also returns start positions, slew rates and 
+    allows for checking of scanner constraints.
+    
     Parameters
     ----------
     trajectory : np.ndarray
-        Trajectory to check.
-    resolution : float, optional
-        Resolution of the trajectory in m. The default is DEFAULT_RESOLUTION.
-    raster_time : float, optional
-        Raster time of the trajectory in s. The default is DEFAULT_RASTER_TIME.
-    g_ratio : float, optional
-        Gyromagnetic ratio of the trajectory in Hz/T.
-        The default is DEFAULT_GYROMAGNETIC_RATIO.
-    gmax : float, optional
-        Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.
-    smax : float, optional
-        Maximum slew rate in T/m/s. The default is DEFAULT_SMAX.
-
+        Trajectory in k-space points. Shape (num_shots, num_samples_per_shot, dimension).
+    FOV : tuple
+        Field of view
+    img_size : tuple
+        Image size
+    trajectory_normalization_factor : float, optional
+        Trajectory normalization factor, by default 0.5
+    gyromagnetic_constant : float, optional
+        Gyromagnetic constant, by default 42.576e3
+    gradient_raster_time : float, optional
+        Gradient raster time, by default 0.01
+    check_constraints : bool, optional
+        Check scanner constraints, by default True
+    gradient_mag_max : float, optional
+        Maximum gradient magnitude, by default 40e-3
+    slew_rate_max : float, optional
+        Maximum slew rate, by default 100e-3
+        
     Returns
     -------
-    bool
-        True if the trajectory satisfies the constraints, False otherwise.
-    float
-        Maximum gradient amplitude in T/m.
-    float
-        Maximum slew rate in T/m/s.
+    gradients : np.ndarray
+        Gradients. Shape (num_shots-1, num_samples_per_shot, dimension).
+    start_positions : np.ndarray
+        Start positions. Shape (num_shots, dimension).
+    slew_rate : np.ndarray
+        Slew rates. Shape (num_shots-2, num_samples_per_shot, dimension).
     """
-    gradients, slews = compute_gradients(trajectory, resolution, raster_time, g_ratio)
-    max_grad = np.max(np.linalg.norm(gradients, axis=-1))
-    max_slew = np.max(np.linalg.norm(slews, axis=-1))
-    return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
+    # normalize trajectory by image size
+    if trajectory_normalization_factor:
+        trajectory = trajectory * np.array(img_size) / (
+            2 * np.array(FOV)
+        ) / trajectory_normalization_factor
+
+    # calculate gradients and slew
+    gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
+    start_positions = trajectory[:, 0, :]
+    slew_rate = np.diff(gradients, axis=1) / gradient_raster_time
+
+    # check constraints
+    if check_constraints:
+        if np.max(gradients) > gradient_mag_max:
+            warnings.warn(
+                "Gradient Maximum Maginitude overflow from Machine capabilities"
+            )
+        if np.max(slew_rate) > slew_rate_max:
+            occurences = np.where(slew_rate > slew_rate_max)
+            warnings.warn(
+                "Slew Rate overflow from Machine capabilities!\n"
+                "Occurences per shot : "
+                + str(len(occurences[0]) / trajectory.shape[0])
+                + "\n"
+                "Max Value : "
+                + str(np.max(np.abs(slew_rate)))
+            )
+    return gradients, start_positions, slew_rate
 
 
 ###############
