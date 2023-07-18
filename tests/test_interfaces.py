@@ -31,10 +31,9 @@ def operator(
     kspace_locs=None,
     shape=None,
     n_coils=1,
-    smaps=None,
 ):
-    """Generate a random image and smaps."""
-    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=smaps)
+    """Generate an operator."""
+    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
 @fixture(scope="module")

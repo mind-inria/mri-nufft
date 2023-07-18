@@ -39,7 +39,8 @@ def operator(
 ):
     """Generate a batch operator."""
     if sense:
-        smaps = np.random.rand(n_coils, *shape).astype(np.complex64)
+        smaps = 1j * np.random.rand(n_coils, *shape)
+        smaps += np.random.rand(n_coils, *shape)
     else:
         smaps = None
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=smaps)
@@ -61,7 +62,7 @@ def image_data(operator):
     else:
         shape = (operator.n_batchs, operator.n_coils, *operator.shape)
     img = np.random.rand(*shape).astype(operator.cpx_dtype)
-    img = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
+    img += 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
     return img
 
 
@@ -69,9 +70,9 @@ def image_data(operator):
 def kspace_data(operator):
     """Generate a random image."""
     shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
-    img = np.random.rand(*shape).astype(operator.cpx_dtype)
-    img = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
-    return img
+    kspace = 1j * np.random.rand(*shape).astype(operator.cpx_dtype)
+    kspace += np.random.rand(*shape).astype(operator.cpx_dtype)
+    return kspace
 
 
 def test_batch_type2(operator, flat_operator, image_data):
@@ -103,13 +104,14 @@ def test_batch_type1(operator, flat_operator, kspace_data):
     for i in range(len(image_flat)):
         image_flat[i] = flat_operator.adj_op(kspace_flat[i])
 
-    if not operator.uses_sense:
-        shape = (operator.n_batchs, operator.n_coils, *operator.shape)
+    if operator.uses_sense:
+        shape = (operator.n_batchs, 1, *operator.shape)
     else:
-        shape = (operator.n_batchs, *operator.shape)
+        shape = (operator.n_batchs, operator.n_coils, *operator.shape)
+
     image_flat = np.reshape(
         np.concatenate(image_flat, axis=0),
         shape,
     )
 
-    npt.assert_allclose(image_data, image_flat, atol=1e-5, rtol=1e-4)
+    npt.assert_almost_equal(image_data, image_flat)

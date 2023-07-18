@@ -348,6 +348,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         return self._safe_squeeze(ret)
 
     def _op_sense_device(self, data, ksp_d=None):
+        # FIXME: add batch support.
         ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=self.cpx_dtype)
         img_d = cp.asarray(data, dtype=self.cpx_dtype)
         coil_img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
@@ -356,7 +357,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 coil_img_d = img_d * self.smaps[i]  # sense forward
             else:
                 self._smap_d.set(self.smaps[i])
-                coil_img_d = img_d * self._smap_d[cur_stream_id]  # sense forward
+                coil_img_d = img_d * self._smap_d[i]  # sense forward
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
         return ksp_d
 
@@ -388,7 +389,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.__op(get_ptr(coil_img_d), get_ptr(ksp_batched))
 
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
-        ksp.reshape((B, C, K))
+        ksp = ksp.reshape((B, C, K))
         return ksp
 
     def _op_calibless_device(self, data, ksp_d=None):
@@ -490,6 +491,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.__adj_op(get_ptr(ksp_new), get_ptr(coil_img_d))
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
+        img_d = img_d.reshape((B, 1, *XYZ))
         return img_d
 
     def _adj_op_sense_host(self, coeffs, img_d=None):
@@ -529,7 +531,9 @@ class MRICufiNUFFT(FourierOperatorBase):
 
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
-        return img_d.get()
+        img = img_d.get()
+        img = img.reshape((B, 1, *XYZ))
+        return img
 
     def _adj_op_calibless(self, coeffs, img_d=None):
         coeffs_f = coeffs.flatten()
