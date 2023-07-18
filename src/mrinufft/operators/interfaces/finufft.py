@@ -170,18 +170,23 @@ class MRIfinufft(FourierOperatorBase):
         else:  # squeeze the batch and coil dimensions.
             return ret.squeeze(axis=(0, 1))
 
-    def _op_sense(self, data, ksp_d=None):
-        if self.n_batchs > 1:
-            raise ValueError("Sense cannot be used with batchs.")
-        coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
-        ksp = np.zeros((self.n_coils, self.n_samples), dtype=data.dtype)
-        coil_img = data * self.smaps
-        self._op(coil_img)
+    def _op_sense(self, data, ksp=None):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        dataf = data.reshape((B, *XYZ))
+        ksp = ksp or np.empty((B * C, K), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            coil_img *= dataf[idx_batch]
+            self._op(coil_img, ksp[i * T : (i + 1) * T])
+        ksp = ksp.reshape((B, C, K))
         return ksp
 
     def _op_calibless(self, data, ksp=None):
         ksp = ksp or np.empty(
-            (self.n_batchs * self.n_coils, self.n_samples), dtype=data.dtype
+            (self.n_batchs * self.n_coils, self.n_samples), dtype=self.cpx_dtype
         )
         dataf = np.reshape(data, (self.n_batchs * self.n_coils, *self.shape))
         if self.n_trans == 1:
@@ -197,7 +202,10 @@ class MRIfinufft(FourierOperatorBase):
         return ksp
 
     def _op(self, image, coeffs):
-        self.raw_op.op(coeffs, np.asfortranarray(image))
+        if self.n_trans == 1:
+            image = image.reshape(self.shape)
+            coeffs = coeffs.reshape(self.n_samples)
+        self.raw_op.op(coeffs, image)
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -227,24 +235,30 @@ class MRIfinufft(FourierOperatorBase):
             return ret.squeeze(axis=(0, 1))
 
     def _adj_op_sense(self, coeffs, img=None):
-        if self.n_batchs > 1:
-            raise ValueError("Sense cannot be used with batchs.")
-        coil_img = np.empty(self.shape, dtype=coeffs.dtype)
-        if img is None:
-            img = np.zeros(self.shape, dtype=coeffs.dtype)
-        self._adj_op(coeffs, coil_img)
-        img = np.sum(coil_img * self.smaps.conjugate(), axis=0)
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        img = img or np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        coeffs_flat = coeffs.reshape((B * C, K))
+        img_batched = np.empty((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
+            img_batched *= self.smaps[idx_coils].conj()
+            for t, b in enumerate(idx_batch):
+                img[b] += img_batched[t]
+        img = img.reshape((B, 1, *XYZ))
         return img
 
     def _adj_op_calibless(self, coeffs, img=None):
-        img = img or np.empty(
-            (self.n_batchs * self.n_coils, *self.shape), dtype=coeffs.dtype
-        )
-        coeffs_f = np.reshape(coeffs, (self.n_batchs * self.n_coils, self.n_samples))
-        for i in range((self.n_batchs * self.n_coils) // self.n_trans):
-            self._adj_op(coeffs_f[i], img[i])
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        img = img or np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        coeffs_f = np.reshape(coeffs, (B * C, K))
+        for i in range((B * C) // T):
+            self._adj_op(coeffs_f[i * T : (i + 1) * T], img[i * T : (i + 1) * T])
 
-        img = img.reshape((self.n_batchs, self.n_coils, *self.shape))
+        img = img.reshape((B, C, *XYZ))
         return img
 
     def _adj_op(self, coeffs, image):
@@ -254,6 +268,9 @@ class MRIfinufft(FourierOperatorBase):
                 coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
         else:
             coeffs2 = coeffs
+        if self.n_trans == 1:
+            image = image.reshape(self.shape)
+            coeffs2 = coeffs2.reshape(self.n_samples)
         self.raw_op.adj_op(coeffs2, image)
 
     @property
