@@ -37,13 +37,13 @@ def test_write_n_read():
             gyromagnetic_constant=gamma,
         )
         read_trajectory, params = get_kspace_loc_from_gradfile("test.bin", read_shots=True)
-        assert params['version'] == 4.2
-        assert params['num_shots'] == trajectory.shape[0]
-        assert params['num_samples_per_shot'] == trajectory.shape[1]-1
-        assert params['TE'] == (0.5 if in_out else 0)
-        assert params['gamma'] == gamma
-        assert params['recon_tag'] == recon_tag
-        assert params['min_osf'] == min_osf
-        np.testing.assert_equal(params['FOV'], FOV)
-        np.testing.assert_equal(params['img_size'], img_size)
+        assert params["version"] == 4.2
+        assert params["num_shots"] == trajectory.shape[0]
+        assert params["num_samples_per_shot"] == trajectory.shape[1]-1
+        assert params["TE"] == (0.5 if in_out else 0)
+        assert params["gamma"] == gamma
+        assert params["recon_tag"] == recon_tag
+        assert params["min_osf"] == min_osf
+        np.testing.assert_equal(params["FOV"], FOV)
+        np.testing.assert_equal(params["img_size"], img_size)
         np.testing.assert_almost_equal(read_trajectory, trajectory, decimal=6)

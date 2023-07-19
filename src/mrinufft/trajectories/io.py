@@ -53,11 +53,11 @@ def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
     # Convert gradients to mT/m
     gradients = gradients * 1e3
     max_grad = np.max(np.abs(gradients))
-    file = open(grad_filename + '.txt', 'w')
+    file = open(grad_filename + ".txt", "w")
     if version >= 4.1:
-        file.write(str(version) + '\n')
+        file.write(str(version) + "\n")
     # Write the dimension, num_samples_per_shot and num_shots
-    file.write(str(dimension) + '\n')
+    file.write(str(dimension) + "\n")
     if version >= 4.1:
         img_size = img_size
         FOV = FOV
@@ -66,67 +66,68 @@ def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
         if type(FOV) is float:
             FOV = (FOV,) * dimension
         for fov in FOV:
-            file.write(str(fov) + '\n')
+            file.write(str(fov) + "\n")
         for sz in img_size:
-            file.write(str(sz) + '\n')
-        file.write(str(min_osf) + '\n')
-        file.write(str(gyromagnetic_constant * 1000) + '\n')
-    file.write(str(num_shots) + '\n')
-    file.write(str(num_samples_per_shot) + '\n')
+            file.write(str(sz) + "\n")
+        file.write(str(min_osf) + "\n")
+        file.write(str(gyromagnetic_constant * 1000) + "\n")
+    file.write(str(num_shots) + "\n")
+    file.write(str(num_samples_per_shot) + "\n")
     if version >= 4.1:
         if not in_out:
             if np.sum(start_positions) != 0:
                 warnings.warn("The start positions are not all zero for center-out trajectory")
-            file.write('0\n')
+            file.write("0\n")
         else:
-            file.write('0.5\n')
+            file.write("0.5\n")
         # Write the maximum Gradient
-        file.write(str(max_grad) + '\n')
+        file.write(str(max_grad) + "\n")
         # Write recon Pipeline version tag
-        file.write(str(recon_tag) + '\n')
+        file.write(str(recon_tag) + "\n")
         left_over = 10
         if version >= 4.2:
             # Inset datetime tag
             if timestamp is None:
                 timestamp = float(datetime.now().timestamp())
-            file.write(str(timestamp) + '\n')
+            file.write(str(timestamp) + "\n")
             left_over -= 1
-        file.write(str('0\n'*left_over))
+        file.write(str("0\n"*left_over))
     # Write all the k0 values
-    file.write('\n'.join(
-        ' '.join(
-                ["{0:5.4f}".format(iter2) for iter2 in iter1]
+    file.write("\n".join(
+        " ".join(
+                [f"{iter2:5.4f}" for iter2 in iter1]
             )
-        for iter1 in start_positions) + '\n'
+        for iter1 in start_positions) + "\n"
     )
     if version < 4.1:
         # Write the maximum Gradient
-        file.write(str(max_grad) + '\n')
+        file.write(str(max_grad) + "\n")
     # Normalize gradients
     gradients = gradients / max_grad
-    file.write('\n'.join(
-        ' '.join(
-            ["{0:5.6f}".format(iter2) for iter2 in iter1]
+    file.write("\n".join(
+        " ".join(
+            [f"{iter2:5.6f}" for iter2 in iter1]
         )
-        for iter1 in gradients) + '\n'
+        for iter1 in gradients) + "\n"
     )
     file.close()
     y = []
-    with open(grad_filename + '.txt', 'r') as txtfile:
+    with open(grad_filename + ".txt") as txtfile:
         for line in txtfile:
-            x = line.split(' ')
+            x = line.split(" ")
             for val in x:
                 y.append(float(val))
-    float_array = array('f', y)
-    with open(grad_filename + '.bin', 'wb') as binfile:
+    float_array = array("f", y)
+    with open(grad_filename + ".bin", "wb") as binfile:
         float_array.tofile(binfile)
     if not keep_txt_file:
-        os.remove(grad_filename + '.txt')
+        os.remove(grad_filename + ".txt")
 
 
 
-def _pop_elements(array, num_elements=1, type='float'):
+def _pop_elements(array, num_elements=1, type="float"):
     """A function to pop elements from an array.
+
     Parameters
     ----------
     array : np.ndarray
@@ -134,8 +135,9 @@ def _pop_elements(array, num_elements=1, type='float'):
     num_elements : int, optional
         number of elements to pop, by default 1
     type : str, optional
-        Type of the element being popped, by default 'float'
+        Type of the element being popped, by default 'float'.
     
+
     Returns
     -------
     element_popped: 
@@ -143,7 +145,6 @@ def _pop_elements(array, num_elements=1, type='float'):
     array: np.ndarray
         Array with elements popped.
     """
-    
     if num_elements == 1:
         return array[0].astype(type), array[1:]
     else:
@@ -181,22 +182,22 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
     """    
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = gradient_raster_time * 1e6
-    with open(grad_filename, 'rb') as binfile:
+    with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
             version = np.around(version, 2)
         else:
             version = 1
-        dimension, data = _pop_elements(data, type='int')
+        dimension, data = _pop_elements(data, type="int")
         if version >= 4.1:
             fov, data = _pop_elements(data, dimension)
-            img_size, data = _pop_elements(data, dimension, type='int')
-            min_osf, data = _pop_elements(data, type='int')
+            img_size, data = _pop_elements(data, dimension, type="int")
+            min_osf, data = _pop_elements(data, type="int")
             gyromagnetic_constant, data = _pop_elements(data)
             gyromagnetic_constant = gyromagnetic_constant / 1000
         (num_shots,
-         num_samples_per_shot), data = _pop_elements(data, 2, type='int')
+         num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if num_adc_samples is None:
             if read_shots:
                 num_adc_samples = num_samples_per_shot + 1
@@ -234,7 +235,7 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
         kspace_loc[:, 0, :] = start_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
         Q, R = divmod(adc_times, gradient_raster_time_ns)
-        Q = Q.astype('int')
+        Q = Q.astype("int")
         if not np.all(
                 np.logical_or(Q < num_adc_samples,
                               np.logical_and(Q == num_adc_samples, R == 0))
@@ -268,20 +269,20 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
                             ) * gyromagnetic_constant * 1e-6
                         )
         params = {
-            'version': version,
-            'dimension': dimension,
-            'num_shots': num_shots,
-            'num_samples_per_shot': num_samples_per_shot,
+            "version": version,
+            "dimension": dimension,
+            "num_shots": num_shots,
+            "num_samples_per_shot": num_samples_per_shot,
         }
         if version >= 4.1:
-            params['FOV'] = fov
-            params['img_size'] = img_size
-            params['min_osf'] = min_osf
-            params['gamma'] = gyromagnetic_constant
-            params['recon_tag'] = recon_tag
-            params['TE'] = TE
+            params["FOV"] = fov
+            params["img_size"] = img_size
+            params["min_osf"] = min_osf
+            params["gamma"] = gyromagnetic_constant
+            params["recon_tag"] = recon_tag
+            params["TE"] = TE
             if version >= 4.2:
-                params['timestamp'] = timestamp
+                params["timestamp"] = timestamp
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor

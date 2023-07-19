@@ -36,9 +36,10 @@ def get_grads_from_kspace_points(
     grad_filename: str = None,
     write_kwargs: dict = {},
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Calculate gradients from k-space points. Also returns start positions, slew rates and 
+    """Calculate gradients from k-space points. Also returns start positions, slew rates and
     allows for checking of scanner constraints.
     
+
     Parameters
     ----------
     trajectory : np.ndarray
@@ -64,6 +65,7 @@ def get_grads_from_kspace_points(
     write_kwargs : dict, optional
         Keyword arguments for writing gradients. See io.py for details.
         
+
     Returns
     -------
     gradients : np.ndarray
