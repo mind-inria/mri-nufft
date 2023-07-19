@@ -2,7 +2,7 @@
  The trajectory binary file specification
 =========================================
 
-The k-space trajectories are transformed to a binary file which is processed by scanner.
+The k-space trajectories are transformed to a binary file which is processed by scanner through the arbitrary gradients sequences from NeuroSpin.
 This file mainly specifies an arbitrary gradient profile which is played on scanner at gradient raster time rate (10e-6 seconds).
 
 The binary file format is specified as follows:
@@ -25,5 +25,6 @@ The binary file format is specified as follows:
 |kStarts       |FLOAT|D*Nc   |1/m    |K-space location start 	                                               |
 |Gradient array|FLOAT|D*Nc*Ns|unitary|Gradient trajectory expressed in the range [-1; 1] relative to MaxGrad   |
 
-
 `mrinufft/trajectories/io.py` module helps to convert a trajectory as numpy array to a binary file and vice versa.
+
+Note that different versions of the binary file format may have different fields and `mri-nufft` supports IO for `version >= 4.1``

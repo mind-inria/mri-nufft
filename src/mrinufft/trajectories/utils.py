@@ -12,7 +12,7 @@ from .io import write_gradient_file, KMAX
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
-DEFAULT_RASTER_TIME = 10e-3  # ms
+DEFAULT_RASTER_TIME_MS = 10e-3  # ms
 DEFAULT_GYROMAGNETIC_RATIO = 42.576e3  # MHz/T
 
 DEFAULT_GMAX = 0.04  # T/m
@@ -29,7 +29,7 @@ def get_grads_from_kspace_points(
     img_size: Tuple[int, ...],
     trajectory_normalization_factor: float = KMAX,
     gyromagnetic_constant: float = DEFAULT_GYROMAGNETIC_RATIO,
-    gradient_raster_time: float = DEFAULT_RASTER_TIME,
+    gradient_raster_time: float = DEFAULT_RASTER_TIME_MS,
     check_constraints: bool = True,
     gradient_mag_max: float = DEFAULT_GMAX,
     slew_rate_max: float = DEFAULT_SMAX,
