@@ -5,6 +5,7 @@ from .cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
 from .finufft import MRIfinufft, FINUFFT_AVAILABLE
 from .pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
 from .nudft_numpy import MRInumpy
+from .nfft import MRInfft, PYNFFT_AVAILABLE
 
 from .base import proper_trajectory
 
@@ -24,6 +25,7 @@ _REGISTERED_BACKENDS = {
     "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
     "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
     "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
+    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
     "numpy": (True, MRInumpy),
 }
 

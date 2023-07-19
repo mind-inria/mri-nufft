@@ -46,10 +46,11 @@ jobs:
       - name: Install Dependencies
         shell: bash
         run: |
+          sudo apt install -y libnfft3-dev
           python --version
           python -m pip install --upgrade pip
           python -m pip install .[test]
-          python -m pip install finufft
+          python -m pip install finufft pynfft2
       - name: Run Tests
         shell: bash
         run: | 

@@ -43,13 +43,13 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
         self._fourier_op = fourier_op
 
-        self._uses_sense = fourier_op.uses_sense
-        if not self._uses_sense:
+        if not fourier_op.uses_sense:
             raise ValueError("please use smaps.")
 
         self.n_samples = fourier_op.n_samples
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
+        self.smaps = fourier_op.smaps
         self.n_interpolators = len(C)
         self.B = self.xp.array(B)
         self.B = self.xp.tile(self.B, (self._fourier_op.n_samples // len(B), 1))

@@ -34,6 +34,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     smaps: Tensor
     """
 
+    backend = "tensorflow"
+
     def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
         super().__init__()
         if not TENSORFLOW_AVAILABLE:
@@ -134,27 +136,23 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         """
         return self.adj_op(self.op(data) - obs_data)
 
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=10):
-        """Estimate the density compensation vector.
 
-        Parameters
-        ----------
-        samples: Tensor
-            The samples location of shape ``Nsamples x N_dimensions``.
-            It should be C-contiguous.
-        shape: tuple
-            Shape of the image space.
-        n_iter: int
-            Number of iterations.
+def pipe(samples, shape, n_iter=15):
+    """Estimate the density compensation using the pipe method.
 
-        Returns
-        -------
-        Tensor
-            The density compensation vector.
+    Parameters
+    ----------
+    samples: Tensor
+        The samples location of shape ``Nsamples x N_dimensions``.
+        It should be C-contiguous.
+    shape: tuple
+        Shape of the image space.
+    n_iter: int
+        Number of iterations.
 
-        Notes
-        -----
-        This method is based on the fixed point method of Pipe et al.
-        """
-        return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
+    Returns
+    -------
+    Tensor
+        The estimated density compensation.
+    """
+    return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
