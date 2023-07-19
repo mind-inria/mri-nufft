@@ -10,8 +10,11 @@ from abc import ABC, abstractmethod
 import warnings
 import numpy as np
 
+# Mapping between numpy float and complex types.
+DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
-def proper_trajectory(trajectory, normalize=True):
+
+def proper_trajectory(trajectory, normalize="pi"):
     """Normalize the trajectory to be used by NUFFT operators.
 
     Parameters
@@ -19,9 +22,9 @@ def proper_trajectory(trajectory, normalize=True):
     trajectory: np.ndarray
         The trajectory to normalize, it might be of shape (Nc, Ns, dim) of (Ns, dim)
 
-    normalize: bool
-        If True and if the trajectory is in [-0.5,0.5] the trajectory is
-        multiplied by 2pi to lie in [-pi, pi]
+    normalize: str
+        if "pi" trajectory will be rescaled in [-pi, pi], if it was in [-0.5, 0.5]
+        if "unit" trajectory will be rescaled in [-0.5, 0.5] if it was not [-0.5, 0.5]
 
     Returns
     -------
@@ -37,10 +40,12 @@ def proper_trajectory(trajectory, normalize=True):
         ) from e
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
-    # normalize the trajectory to -pi, pi if i
-    if normalize and np.isclose(np.max(abs(new_traj)), 0.5):
+    if normalize == "pi" and np.max(abs(new_traj)) - 1e-4 < 0.5:
         warnings.warn("samples will be rescaled in [-pi, pi]")
         new_traj *= 2 * np.pi
+    elif normalize == "unit" and np.max(abs(new_traj)) - 1e-4 > 0.5:
+        warnings.warn("samples will be rescaled in [-0.5, 0.5]")
+        new_traj /= 2 * np.pi
     return new_traj
 
 
@@ -69,7 +74,9 @@ class FourierOperatorBase(ABC):
     """
 
     def __init__(self):
-        self._uses_sense = False
+        self._smaps = None
+        self._density = None
+        self._n_coils = 1
 
     @abstractmethod
     def op(self, data):
@@ -103,10 +110,21 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    def with_off_resonnance_correction(self, B, C, indices):
+        """Return a new operator with Off Resonnance Correction."""
+        from ..off_resonnance import MRIFourierCorrected
+
+        return MRIFourierCorrected(self, B, C, indices)
+
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""
-        return self._uses_sense
+        return self._smaps is not None
+
+    @property
+    def uses_density(self):
+        """Return True if the operator uses density compensation."""
+        return getattr(self, "density", None) is not None
 
     @property
     def shape(self):
@@ -119,8 +137,13 @@ class FourierOperatorBase(ABC):
 
     @property
     def n_coils(self):
-        """Return number of coil of the image space of the operator."""
+        """Number of coils for the operator."""
         return self._n_coils
+
+    @property
+    def ndim(self):
+        """Number of dimensions in image space of the operator."""
+        return len(self._shape)
 
     @n_coils.setter
     def n_coils(self, n_coils):
@@ -128,15 +151,103 @@ class FourierOperatorBase(ABC):
             raise ValueError(f"n_coils should be a positive integer, {type(n_coils)}")
         self._n_coils = int(n_coils)
 
-    def with_off_resonnance_correction(self, B, C, indices):
-        """Return a new operator with Off Resonnance Correction."""
-        from ..off_resonnance import MRIFourierCorrected
+    @property
+    def smaps(self):
+        """Sensitivity maps of the operator."""
+        return self._smaps
 
-        return MRIFourierCorrected(self, B, C, indices)
+    @smaps.setter
+    def smaps(self, smaps):
+        if smaps is None:
+            self._smaps = None
+        elif len(smaps) != self.n_coils:
+            raise ValueError(
+                f"Number of sensitivity maps ({len(smaps)})"
+                f"should be equal to n_coils ({self.n_coils})"
+            )
+        else:
+            self._smaps = smaps
+
+    @property
+    def density(self):
+        """Density compensation of the operator."""
+        return self._density
+
+    @density.setter
+    def density(self, density):
+        if density is None:
+            self._density = None
+        elif len(density) != self.n_samples:
+            raise ValueError("Density and samples should have the same length")
+        else:
+            self._density = density
+
+    @property
+    def dtype(self):
+        """Return floating precision of the operator."""
+        return self._dtype
+
+    @property
+    def cpx_dtype(self):
+        """Return complex floating precision of the operator."""
+        return np.dtype(DTYPE_R2C[str(self._dtype)])
+
+    @dtype.setter
+    def dtype(self, dtype):
+        self._dtype = np.dtype(dtype)
+
+    @property
+    def samples(self):
+        """Return the samples used by the operator."""
+        return self._samples
+
+    @samples.setter
+    def samples(self, samples):
+        self._samples = samples
+
+    @property
+    def n_samples(self):
+        """Return the number of samples used by the operator."""
+        return self._samples.shape[0]
+
+    @property
+    def norm_factor(self):
+        """Normalization factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+
+    def __repr__(self):
+        """Return info about the Fourier operator."""
+        return (
+            f"{self.__class__.__name__}(\n"
+            f"  shape: {self.shape}\n"
+            f"  n_coils: {self.n_coils}\n"
+            f"  n_samples: {self.n_samples}\n"
+            f"  uses_sense: {self.uses_sense}\n"
+            ")"
+        )
 
 
 class FourierOperatorCPU(FourierOperatorBase):
-    """Base class for CPU-based NUFFT operator."""
+    """Base class for CPU-based NUFFT operator.
+
+    Parameters
+    ----------
+    samples: np.ndarray
+        The samples used by the operator.
+    shape: tuple
+        The shape of the image space (in 2D or 3D)
+    density: bool or np.ndarray
+        If True, the density compensation is estimated from the samples.
+        If False, no density compensation is applied.
+        If np.ndarray, the density compensation is applied from the array.
+    n_coils: int
+        The number of coils.
+    smaps: np.ndarray
+        The sensitivity maps.
+    raw_op: object
+        An object implementing the NUFFT API. Ut should be responsible to compute a
+        single type 1 /type 2 NUFFT.
+    """
 
     def __init__(
         self,
@@ -145,18 +256,12 @@ class FourierOperatorCPU(FourierOperatorBase):
         density=False,
         n_coils=1,
         smaps=None,
+        raw_op=None,
     ):
         super().__init__()
         self.shape = shape
-        self.n_samples = len(samples)
-        if samples.max() > np.pi:
-            warnings.warn("samples will be normalized in [-pi, pi]")
-            samples *= np.pi / samples.max()
-        # we will access the samples by their coordinate first.
-        self.samples = np.asfortranarray(samples)
-
+        self.samples = proper_trajectory(samples, normalize="unit")
         self._dtype = self.samples.dtype
-        self._cpx_dtype = np.complex128 if self._dtype == "float64" else np.complex64
         self._uses_sense = False
 
         # Density Compensation Setup
@@ -183,7 +288,8 @@ class FourierOperatorCPU(FourierOperatorBase):
             self._uses_sense = False
 
         # Raw_op should be instantiated by subclasses.
-        self.raw_op = None
+
+        self.raw_op = raw_op
 
     def op(self, data, ksp=None):
         r"""Non Cartesian MRI forward operator.
@@ -202,16 +308,18 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        if data.dtype != self._cpx_dtype:
+        if data.dtype != self.cpx_dtype:
             warnings.warn(
-                f"Data should be of dtype {self._cpx_dtype}. Casting it for you."
+                f"Data should be of dtype {self.cpx_dtype}. Casting it for you."
             )
-            data = data.astype(self._cpx_dtype)
+            data = data.astype(self.cpx_dtype)
         # sense
         if self.uses_sense:
             ret = self._op_sense(data, ksp)
         # calibrationless or monocoil.
         else:
+            if data.ndim == self.ndim:
+                data = np.expand_dims(data, axis=0)  # add coil dimension
             ret = self._op_calibless(data, ksp)
         return ret
 
@@ -230,7 +338,9 @@ class FourierOperatorCPU(FourierOperatorBase):
         return ksp
 
     def _op(self, image, coeffs):
-        return self.raw_op.op(coeffs, image)
+        self.raw_op.op(coeffs, image)
+        coeffs /= self.norm_factor
+        return coeffs
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -243,11 +353,11 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if coeffs.dtype != self._cpx_dtype:
+        if coeffs.dtype != self.cpx_dtype:
             warnings.warn(
-                f"coeffs should be of dtype {self._cpx_dtype}. Casting it for you."
+                f"coeffs should be of dtype {self.cpx_dtype}. Casting it for you."
             )
-            coeffs = coeffs.astype(self._cpx_dtype)
+            coeffs = coeffs.astype(self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
         # calibrationless or monocoil.
@@ -265,7 +375,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
     def _adj_op_calibless(self, coeffs, img=None):
         if img is None:
-            img = np.empty((self.n_coils, *self.shape), dtype=coeffs.dtype)
+            img = np.zeros((self.n_coils, *self.shape), dtype=coeffs.dtype)
         self._adj_op(coeffs, img)
         return img
 
@@ -275,7 +385,9 @@ class FourierOperatorCPU(FourierOperatorBase):
         return coeffs
 
     def _adj_op(self, coeffs, image):
-        return self.raw_op.adj_op(self._apply_dc(coeffs), image) / self.norm_factor
+        self.raw_op.adj_op(self._apply_dc(coeffs), image)
+        image /= self.norm_factor
+        return image
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
@@ -321,36 +433,3 @@ class FourierOperatorCPU(FourierOperatorBase):
                 ksp *= self.density_d
             self._adj_op(ksp, img[i])
         return img
-
-    @property
-    def eps(self):
-        """Return the underlying precision parameter."""
-        return self.raw_op.eps
-
-    @classmethod
-    def estimate_density(cls, samples, shape, n_iter=1, **kwargs):
-        """Estimate the density compensation array."""
-        oper = cls(samples, shape, density=False, **kwargs)
-        density = np.ones(len(samples), dtype=oper._cpx_dtype)
-        update = np.empty_like(density, dtype=oper._cpx_dtype)
-        img = np.empty(shape, dtype=oper._cpx_dtype)
-        for _ in range(n_iter):
-            oper._adj_op(density, img)
-            oper._op(img, update)
-            density /= np.abs(update)
-        return density.real
-
-    def __repr__(self):
-        """Return info about the MRICufiNUFFT Object."""
-        return (
-            "MRICufiNUFFT(\n"
-            f"  shape: {self.shape}\n"
-            f"  n_coils: {self.n_coils}\n"
-            f"  n_samples: {self.n_samples}\n"
-            f"  uses_density: {self.uses_density}\n"
-            f"  uses_sense: {self._uses_sense}\n"
-            f"  smaps_cached: {self.smaps_cached}\n"
-            f"  plan_setup: {self.plan_setup}\n"
-            f"  eps:{self.raw_op.eps:.0e}\n"
-            ")"
-        )

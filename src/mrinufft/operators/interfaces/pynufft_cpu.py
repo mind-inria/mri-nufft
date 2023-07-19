@@ -36,6 +36,8 @@ class RawPyNUFFT:
 class MRIPynufft(FourierOperatorCPU):
     """PyNUFFT implementation of MRI NUFFT transform."""
 
+    backend = "pynufft-cpu"
+
     def __init__(
         self,
         samples,
