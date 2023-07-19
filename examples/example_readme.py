@@ -25,7 +25,9 @@ NufftOperator = mrinufft.get_operator("finufft")
 density = voronoi(samples_loc)
 
 # And create the associated operator.
-nufft = NufftOperator(samples_loc, shape=image.shape, density=density, n_coils=1)
+nufft = NufftOperator(
+    samples_loc, shape=image.shape, density=density, n_coils=1, squeeze_dim=True
+)
 
 kspace_data = nufft.op(image)  # Image -> Kspace
 image2 = nufft.adj_op(kspace_data)  # Kspace -> Image
