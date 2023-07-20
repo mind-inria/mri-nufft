@@ -280,7 +280,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.smaps_cached = False
             if smaps_cached:
                 warnings.warn(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).size)}"
+                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )
                 self.smaps = cp.array(
@@ -510,7 +510,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         coeffs_f = coeffs.flatten()
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0).flatten()
+            density_batched = cp.repeat(self.density[None, :], T, axis=0)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
