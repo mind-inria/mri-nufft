@@ -6,8 +6,10 @@ from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 from pytest_cases import parametrize_with_cases
 
 
-class CasesTrajectory:
-    def trajectory_2D(self):
+class CasesIO:
+    """Cases 2 for IO tests, each has different parameters."""
+
+    def case_trajectory_2D(self):
         """Test the 2D trajectory."""
         trajectory = initialize_2D_radial(
             Nc=32,
@@ -17,8 +19,9 @@ class CasesTrajectory:
         ).astype(np.float32)
         return "2D", trajectory, (0.23, 0.23), \
             (256, 256), False, 2, 42.576e3, 1.1
-    def trajectory_3D(self):
-        "Test the 3D Trajectory"
+    
+    def case_trajectory_3D(self):
+        """Test the 3D Trajectory."""
         trajectory = initialize_3D_cones(
             Nc=32,
             Ns=256,
@@ -29,11 +32,12 @@ class CasesTrajectory:
             (256, 256, 128), True, 5, 10e3, 1.2
 
 @parametrize_with_cases(
-    argnames="name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag", 
-    cases=CasesTrajectory
+    "name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag", 
+    cases=CasesIO,
 )
 def test_write_n_read(name, trajectory, FOV, img_size,
                       in_out, min_osf, gamma, recon_tag):
+    """Test function which writes the trajectory and reads it back."""
     write_trajectory(
         trajectory=trajectory,
         FOV=FOV,
@@ -46,7 +50,7 @@ def test_write_n_read(name, trajectory, FOV, img_size,
         recon_tag=recon_tag,
         gamma=gamma,
     )
-    read_trajectory, params = read_trajectory(
+    read_traj, params = read_trajectory(
         "test.bin",
         read_shots=True
     )
@@ -59,4 +63,4 @@ def test_write_n_read(name, trajectory, FOV, img_size,
     assert params["min_osf"] == min_osf
     np.testing.assert_equal(params["FOV"], FOV)
     np.testing.assert_equal(params["img_size"], img_size)
-    np.testing.assert_almost_equal(read_trajectory, trajectory, decimal=6)
+    np.testing.assert_almost_equal(read_traj, trajectory, decimal=6)
