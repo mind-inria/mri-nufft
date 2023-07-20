@@ -7,9 +7,20 @@ from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 
 
 def test_write_n_read():
+    """Test the write and read functions."""
     trajectories = [
-        initialize_2D_radial(Nc=32, Ns=256, tilt="uniform", in_out=False).astype(np.float32),
-        initialize_3D_cones(Nc=32, Ns=256, tilt="uniform", in_out=True).astype(np.float32),
+        initialize_2D_radial(
+            Nc=32,
+            Ns=256,
+            tilt="uniform",
+            in_out=False
+        ).astype(np.float32),
+        initialize_3D_cones(
+            Nc=32,
+            Ns=256,
+            tilt="uniform",
+            in_out=True
+        ).astype(np.float32),
     ]
     FOVs = [(0.23, 0.23), (0.23, 0.23, 0.1248)]
     img_sizes = [(256, 256), (256, 256, 128)]
@@ -36,7 +47,10 @@ def test_write_n_read():
             },
             gyromagnetic_constant=gamma,
         )
-        read_trajectory, params = get_kspace_loc_from_gradfile("test.bin", read_shots=True)
+        read_trajectory, params = get_kspace_loc_from_gradfile(
+            "test.bin",
+            read_shots=True
+        )
         assert params["version"] == 4.2
         assert params["num_shots"] == trajectory.shape[0]
         assert params["num_samples_per_shot"] == trajectory.shape[1]-1

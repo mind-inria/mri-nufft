@@ -98,7 +98,11 @@ def display_2D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = get_grads_from_kspace_points(trajectory.reshape((-1, Ns, 2)), img_size=img_size, FOV=FOV)
+        gradients, slews = get_grads_from_kspace_points(
+            trajectory.reshape((-1, Ns, 2)),
+            img_size=img_size,
+            FOV=FOV
+        )
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 2))[
@@ -174,7 +178,11 @@ def display_3D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = get_grads_from_kspace_points(trajectory.reshape((-1, Ns, 3)), img_size=img_size, FOV=FOV)
+        gradients, slews = get_grads_from_kspace_points(
+            trajectory.reshape((-1, Ns, 3)),
+            img_size=img_size,
+            FOV=FOV
+        )
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 3))[

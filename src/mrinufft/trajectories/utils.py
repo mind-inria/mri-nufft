@@ -34,16 +34,15 @@ def get_grads_from_kspace_points(
     gradient_mag_max: float = DEFAULT_GMAX,
     slew_rate_max: float = DEFAULT_SMAX,
     grad_filename: str = None,
-    write_kwargs: dict = {},
+    write_kwargs: dict = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Calculate gradients from k-space points. Also returns start positions, slew rates and
-    allows for checking of scanner constraints.
-    
+    """Calculate gradients from k-space points.
 
     Parameters
     ----------
     trajectory : np.ndarray
-        Trajectory in k-space points. Shape (num_shots, num_samples_per_shot, dimension).
+        Trajectory in k-space points. 
+        Shape (num_shots, num_samples_per_shot, dimension).
     FOV : tuple
         Field of view
     img_size : tuple
@@ -82,7 +81,9 @@ def get_grads_from_kspace_points(
         ) / trajectory_normalization_factor
 
     # calculate gradients and slew
-    gradients = np.diff(trajectory, axis=1) / gyromagnetic_constant / gradient_raster_time
+    gradients = np.diff(trajectory, axis=1) / (
+        gyromagnetic_constant * gradient_raster_time
+    )
     start_positions = trajectory[:, 0, :]
     slew_rate = np.diff(gradients, axis=1) / gradient_raster_time
 
@@ -110,7 +111,8 @@ def get_grads_from_kspace_points(
             img_size=img_size, 
             FOV=FOV,
             gyromagnetic_constant=gyromagnetic_constant,
-            **write_kwargs)
+            **write_kwargs if write_kwargs is not None else {},
+        )
     return gradients, start_positions, slew_rate
 
 

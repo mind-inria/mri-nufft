@@ -1,3 +1,4 @@
+"""Basic codes for IO for trajectories."""
 import warnings
 import os
 from typing import Tuple, Optional
@@ -12,8 +13,9 @@ def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
                          grad_filename: str, img_size: Tuple[int, ...], 
                          FOV: Tuple[float, ...], in_out: bool = True,
                          min_osf: int = 5, gyromagnetic_constant: float = 42.576e3, 
-                         version: float = 4.2, recon_tag: float = 1.1, 
-                         timestamp: Optional[float] = None, keep_txt_file: bool = False):
+                         version: float = 4.2, recon_tag: float = 1.1,
+                         timestamp: Optional[float] = None, 
+                         keep_txt_file: bool = False):
     """Create gradient file from gradients and start positions.
 
     Parameters
@@ -76,7 +78,9 @@ def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
     if version >= 4.1:
         if not in_out:
             if np.sum(start_positions) != 0:
-                warnings.warn("The start positions are not all zero for center-out trajectory")
+                warnings.warn(
+                    "The start positions are not all zero for center-out trajectory"
+                )
             file.write("0\n")
         else:
             file.write("0.5\n")
@@ -126,7 +130,7 @@ def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray,
 
 
 def _pop_elements(array, num_elements=1, type="float"):
-    """A function to pop elements from an array.
+    """Pop elements from an array.
 
     Parameters
     ----------
@@ -152,9 +156,15 @@ def _pop_elements(array, num_elements=1, type="float"):
                array[num_elements:]
                    
                    
-def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num_adc_samples: int=None, 
-                                 gyromagnetic_constant: float=42.576e3, gradient_raster_time: float=0.010,
-                                 read_shots: bool=False, normalize_factor: float=KMAX):
+def get_kspace_loc_from_gradfile(
+    grad_filename: str,
+    dwell_time: float=0.01, 
+    num_adc_samples: int=None,
+    gyromagnetic_constant: float=42.576e3,
+    gradient_raster_time: float=0.010,
+    read_shots: bool=False,
+    normalize_factor: float=KMAX
+):
     """Get k-space locations from gradient file.
 
     Parameters
@@ -170,7 +180,8 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
     gradient_raster_time : float, optional
         Gradient raster time, by default 0.010
     read_shots : bool, optional
-        Whether in read shots configuration which accepts an extra point at end, by default False
+        Whether in read shots configuration which accepts an extra
+        point at end, by default False
     normalize : float, optional
         Whether to normalize the k-space locations, by default 0.5
         When None, normalization is not done.
@@ -259,8 +270,8 @@ def get_kspace_loc_from_gradfile(grad_filename: str, dwell_time: float=0.01, num
             else:
                 if q == 0:
                     kspace_loc[:, i+1, :] = (
-                            start_positions + gradients[:, q, :] * r * gyromagnetic_constant * 1e-6
-                    )
+                            start_positions + gradients[:, q, :] * r 
+                    ) * gyromagnetic_constant * 1e-6
                 else:
                     kspace_loc[:, i+1, :] = (
                             start_positions + (
