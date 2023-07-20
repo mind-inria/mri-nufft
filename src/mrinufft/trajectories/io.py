@@ -6,16 +6,24 @@ import numpy as np
 from datetime import datetime
 from array import array
 
-KMAX = 0.5
+from .utils import KMAX, DEFAULT_RASTER_TIME_MS, \
+    DEFAULT_GYROMAGNETIC_RATIO, DEFAULT_GMAX, DEFAULT_SMAX, compute_gradients
 
 
-def write_gradient_file(gradients: np.ndarray, start_positions: np.ndarray, 
-                         grad_filename: str, img_size: Tuple[int, ...], 
-                         FOV: Tuple[float, ...], in_out: bool = True,
-                         min_osf: int = 5, gyromagnetic_constant: float = 42.576e3, 
-                         version: float = 4.2, recon_tag: float = 1.1,
-                         timestamp: Optional[float] = None, 
-                         keep_txt_file: bool = False):
+def write_gradients(
+    gradients: np.ndarray,
+    start_positions: np.ndarray, 
+    grad_filename: str,
+    img_size: Tuple[int, ...], 
+    FOV: Tuple[float, ...],
+    in_out: bool = True,
+    min_osf: int = 5,
+    gyromagnetic_constant: float = 42.576e3, 
+    version: float = 4.2,
+    recon_tag: float = 1.1,
+    timestamp: Optional[float] = None, 
+    keep_txt_file: bool = False
+):
     """Create gradient file from gradients and start positions.
 
     Parameters
@@ -154,14 +162,76 @@ def _pop_elements(array, num_elements=1, type="float"):
     else:
         return array[0:num_elements].astype(type), \
                array[num_elements:]
+
                    
-                   
-def get_kspace_loc_from_gradfile(
+def write_trajectory(
+    trajectory: np.ndarray,
+    FOV: Tuple[float, ...],
+    img_size: Tuple[int, ...],
     grad_filename: str,
-    dwell_time: float=0.01, 
+    traj_norm_factor: float = KMAX,
+    gamma: float = DEFAULT_GYROMAGNETIC_RATIO,
+    raster_time: float = DEFAULT_RASTER_TIME_MS,
+    check_constraints: bool = True,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    **kwargs
+):
+    """Calculate gradients from k-space points and write to file.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Trajectory in k-space points. 
+        Shape (num_shots, num_samples_per_shot, dimension).
+    FOV : tuple
+        Field of view
+    img_size : tuple
+        Image size
+    grad_filename : str
+        Gradient filename
+    traj_norm_factor : float, optional
+        Trajectory normalization factor, by default 0.5
+    gamma : float, optional
+        Gyromagnetic constant in MHz, by default 42.576e3
+    raster_time : float, optional
+        Gradient raster time in ms, by default 0.01
+    check_constraints : bool, optional
+        Check scanner constraints, by default True
+    gmax : float, optional
+        Maximum gradient magnitude in T/m, by default 40e-3
+    smax : float, optional
+        Maximum slew rate in mT/m/s, by default 100e-3
+    kwargs : dict, optional
+        Additional arguments for writing the gradient file.
+        These are arguments passed to write_gradients function above.
+    """
+    gradients, start_positions, _ = compute_gradients(
+        trajectory,
+        traj_norm_factor=traj_norm_factor,
+        resolution=np.asarray(FOV)/np.asarray(img_size),
+        raster_time=raster_time,
+        gamma=gamma,
+        check_constraints=check_constraints,
+        gmax=gmax,
+        smax=smax,
+    )
+    write_gradients(
+        gradients=gradients,
+        start_positions=start_positions,
+        grad_filename=grad_filename,
+        img_size=img_size,
+        FOV=FOV,
+        **kwargs,
+    )
+    
+                   
+def read_trajectory(
+    grad_filename: str,
+    dwell_time: float=DEFAULT_RASTER_TIME_MS, 
     num_adc_samples: int=None,
-    gyromagnetic_constant: float=42.576e3,
-    gradient_raster_time: float=0.010,
+    gamma: float=DEFAULT_GYROMAGNETIC_RATIO,
+    raster_time: float=DEFAULT_RASTER_TIME_MS,
     read_shots: bool=False,
     normalize_factor: float=KMAX
 ):
@@ -192,7 +262,7 @@ def get_kspace_loc_from_gradfile(
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """    
     dwell_time_ns = dwell_time * 1e6
-    gradient_raster_time_ns = gradient_raster_time * 1e6
+    gradient_raster_time_ns = raster_time * 1e6
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
@@ -205,8 +275,8 @@ def get_kspace_loc_from_gradfile(
             fov, data = _pop_elements(data, dimension)
             img_size, data = _pop_elements(data, dimension, type="int")
             min_osf, data = _pop_elements(data, type="int")
-            gyromagnetic_constant, data = _pop_elements(data)
-            gyromagnetic_constant = gyromagnetic_constant / 1000
+            gamma, data = _pop_elements(data)
+            gamma = gamma / 1000
         (num_shots,
          num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if num_adc_samples is None:
@@ -214,7 +284,7 @@ def get_kspace_loc_from_gradfile(
                 num_adc_samples = num_samples_per_shot + 1
             else:
                 num_adc_samples = int(
-                    num_samples_per_shot * (gradient_raster_time / dwell_time)
+                    num_samples_per_shot * (raster_time / dwell_time)
                 )
         if version >= 4.1:
             TE, data = _pop_elements(data)
@@ -265,19 +335,19 @@ def get_kspace_loc_from_gradfile(
                         start_positions + (
                             grad_accumulated[:, gradients.shape[1]-1, :] +
                             gradients[:, gradients.shape[1]-1, :] * r
-                        ) * gyromagnetic_constant * 1e-6
+                        ) * gamma * 1e-6
                     )
             else:
                 if q == 0:
                     kspace_loc[:, i+1, :] = (
                             start_positions + gradients[:, q, :] * r 
-                    ) * gyromagnetic_constant * 1e-6
+                    ) * gamma * 1e-6
                 else:
                     kspace_loc[:, i+1, :] = (
                             start_positions + (
                                 grad_accumulated[:, q-1, :] +
                                 gradients[:, q, :] * r
-                            ) * gyromagnetic_constant * 1e-6
+                            ) * gamma * 1e-6
                         )
         params = {
             "version": version,
@@ -289,7 +359,7 @@ def get_kspace_loc_from_gradfile(
             params["FOV"] = fov
             params["img_size"] = img_size
             params["min_osf"] = min_osf
-            params["gamma"] = gyromagnetic_constant
+            params["gamma"] = gamma
             params["recon_tag"] = recon_tag
             params["TE"] = TE
             if version >= 4.2:
