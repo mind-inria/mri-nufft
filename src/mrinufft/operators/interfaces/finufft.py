@@ -85,6 +85,9 @@ class MRIfinufft(FourierOperatorBase):
           using the fixed point method.
         - If False, density compensation will not be used.
     smaps: array
+        Sensitivity maps of shape ``N_coils x *shape``.
+    squeeze_dims: bool
+        If True, the dimensions of size 1 for the coil and batch dimension will be squeezed.
     """
 
     backend = "finufft"
