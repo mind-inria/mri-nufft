@@ -122,9 +122,9 @@ def compute_gradients(
         )
         if violation:
             warnings.warn(
-                "Hard constraints violated! " + 
-                "Max Gradient magnitude: " + str(maxG) +
-                "Max Slew rate: " + str(maxS)
+                "Hard constraints violated! " 
+                f"Max Gradient magnitude: {maxG:.2f} > {gmax:.2f}"
+                f"Max Slew rate: {maxS:.2f} > {smax:.2f}" 
             )
     return gradients, start_positions, slews
 
