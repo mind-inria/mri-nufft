@@ -77,9 +77,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      - uses: actions/checkout@v3
+
       - name: Install Dependencies
         shell: bash
         run: |
+          pwd
           python --version
           python -m venv venv
           source venv/bin/activate
@@ -89,6 +92,7 @@ jobs:
       - name: Install cufinufft
         shell: bash
         run: |
+           cd ..
            git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
            cd finufft && mkdir build && cd build
            cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
@@ -96,9 +100,8 @@ jobs:
            # FIXME: This is hardcoded
            cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
            python -m pip install git+https://github.com/mind-inria/mri-nufft
-           cd ..
+           cd ../../mrinufft
 
-      - uses: actions/checkout@v3
       - name: Run Tests
         shell: bash
         run: |
