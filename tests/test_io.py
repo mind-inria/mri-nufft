@@ -36,7 +36,7 @@ class CasesIO:
     cases=CasesIO,
 )
 def test_write_n_read(name, trajectory, FOV, img_size,
-                      in_out, min_osf, gamma, recon_tag):
+                      in_out, min_osf, gamma, recon_tag, tmp_path):
     """Test function which writes the trajectory and reads it back."""
     write_trajectory(
         trajectory=trajectory,
