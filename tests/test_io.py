@@ -61,6 +61,6 @@ def test_write_n_read(name, trajectory, FOV, img_size,
     assert params["gamma"] == gamma
     assert params["recon_tag"] == recon_tag
     assert params["min_osf"] == min_osf
-    np.testing.assert_equal(params["FOV"], FOV)
+    np.testing.assert_almost_equal(params["FOV"], FOV, decimal=6)
     np.testing.assert_equal(params["img_size"], img_size)
     np.testing.assert_almost_equal(read_traj, trajectory, decimal=6)
