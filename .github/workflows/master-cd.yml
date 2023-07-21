@@ -1,9 +1,11 @@
 name: CD
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI-CPU, CI-GPU]
+    types:
+      [completed, completed]
     branches:
-      - main
       - master
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -23,9 +25,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -35,11 +34,57 @@ jobs:
         shell: bash -l {0}
         run: |
           python -m pip install .[test,optional]
-          python -m pip install finufft
-      - name: Run Tests
-        shell: bash -l {0}
+      - name: Get data from cpu coverage
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: context.payload.workflow_run.id,
+            });
+            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "coverage-cpu"
+            })[0];
+            let download = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/coverage-cpu.zip`, Buffer.from(download.data));
+
+      - name: Get data from gpu coverage
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: context.payload.workflow_run.id,
+            });
+            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "coverage-gpu"
+            })[0];
+            let download = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/coverage-gpu.zip`, Buffer.from(download.data));
+
+      - name: Unzip download
         run: |
-          pytest -n auto --cov=mrinufft --cov-report xml:coverage.xml
+          unzip coverage-cpu.zip
+          unzip coverage-gpu.zip
+
+      - name: Merge coverage
+        run: |
+          coverage combine
+          coverage xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

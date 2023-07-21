@@ -54,4 +54,16 @@ jobs:
       - name: Run Tests
         shell: bash
         run: | 
-          pytest -n auto -x
+          pytest -n auto  --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
+
+
+      - name: Rename Coverage
+        shell: bash
+        run: |
+          mv coverage.xml coverage-gpu.xml
+          mv .coverage coverage-cpu
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-cpu
