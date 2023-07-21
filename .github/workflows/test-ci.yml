@@ -60,7 +60,7 @@ jobs:
       - name: Install cufinufft
         if: matrix.os == 'gpu'
         shell: bash
-         run: |
+        run: |
            pushd
            git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
            cd finufft && mkdir build && cd build
