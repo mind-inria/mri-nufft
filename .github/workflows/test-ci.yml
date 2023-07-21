@@ -91,9 +91,11 @@ jobs:
           python -m pip install .[test]
 
       - name: Install cufinufft
+        # This custom installation will ideally be replaced by a pip install.
         shell: bash
         run: |
            cd ..
+           rm -rf finufft
            git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
            cd finufft && mkdir build && cd build
            cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
