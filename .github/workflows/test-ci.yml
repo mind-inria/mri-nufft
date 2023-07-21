@@ -105,7 +105,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          pytest -n auto  --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
+          python -m pytest -n auto  --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
 
       - name: Upload coverage
         uses: actions/upload-artifact@v3
