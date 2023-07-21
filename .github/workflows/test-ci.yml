@@ -29,12 +29,11 @@ jobs:
         run: ruff src
         
   test-cpu:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     needs: linter-check
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, GPU]
         python-version: ["3.10", "3.8"]
 
     steps:
@@ -92,7 +91,6 @@ jobs:
            git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
            cd finufft && mkdir build && cd build
            cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
-           conda activate gadgetron && cd ../python/cufinufft
            LD_LIBRARY_PATH="../../build" LIBRARY_PATH="../../build" python -m pip install -e .
            # FIXME: This is hardcoded
            cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
