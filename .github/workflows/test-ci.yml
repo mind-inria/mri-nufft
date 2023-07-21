@@ -72,7 +72,6 @@ jobs:
     strategy:
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
@@ -82,6 +81,8 @@ jobs:
         shell: bash
         run: |
           python --version
+          python -m virtualenv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           python -m pip install .[test]
 
@@ -95,7 +96,9 @@ jobs:
            # FIXME: This is hardcoded
            cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
            python -m pip install git+https://github.com/mind-inria/mri-nufft
+           cd ..
 
+      - uses: actions/checkout@v3
       - name: Run Tests
         shell: bash
         run: |
@@ -106,6 +109,16 @@ jobs:
         with:
           name: coverage.$$matrix.os.$$matrix.python-version
           path: .coverage
+
+      - name: Cleanup
+        shell: bash
+        run: |
+          cd ..
+          ls -al
+          deactivate
+          rm -rf venv
+          rm -rf finufft
+          rm -rf mrinufft
 
   coverage:
     runs-on: ubuntu-latest
