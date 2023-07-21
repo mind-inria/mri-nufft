@@ -18,7 +18,7 @@ def write_gradients(
     FOV: Tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
-    gyromagnetic_constant: float = 42.576e3, 
+    gamma: float = 42.576e3, 
     version: float = 4.2,
     recon_tag: float = 1.1,
     timestamp: Optional[float] = None, 
@@ -42,7 +42,7 @@ def write_gradients(
         Whether it is In-Out trajectory?, by default True
     min_osf : int, optional
         Minimum oversampling factor needed at ADC, by default 5
-    gyromagnetic_constant : float, optional
+    gamma : float, optional
         Gyromagnetic Constant, by default 42.576e3
     version : float, optional
         Trajectory versioning, by default 4.2
@@ -80,7 +80,7 @@ def write_gradients(
         for sz in img_size:
             file.write(str(sz) + "\n")
         file.write(str(min_osf) + "\n")
-        file.write(str(gyromagnetic_constant * 1000) + "\n")
+        file.write(str(gamma * 1000) + "\n")
     file.write(str(num_shots) + "\n")
     file.write(str(num_samples_per_shot) + "\n")
     if version >= 4.1:
@@ -222,6 +222,7 @@ def write_trajectory(
         grad_filename=grad_filename,
         img_size=img_size,
         FOV=FOV,
+        gamma=gamma,
         **kwargs,
     )
     

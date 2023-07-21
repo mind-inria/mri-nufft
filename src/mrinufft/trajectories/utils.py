@@ -105,10 +105,10 @@ def compute_gradients(
         array of start positions (x,y,z) in a 3D space
     """
     # normalize the trajectory
-    trajectory = trajectory / traj_norm_factor / (2 * resolution * gamma)
+    trajectory = trajectory / traj_norm_factor / (2 * resolution)
     
     # compute gradients and slew rates
-    gradients = np.diff(trajectory, axis=1) / raster_time
+    gradients = np.diff(trajectory, axis=1) / raster_time / gamma
     slews = np.diff(gradients, axis=1) / raster_time
     
     # compute the start position
