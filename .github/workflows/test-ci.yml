@@ -83,6 +83,7 @@ jobs:
         shell: bash
         run: |
           pwd
+          env
           python --version
           python -m venv venv
           source venv/bin/activate
