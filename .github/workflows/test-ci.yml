@@ -111,7 +111,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
-    needs: test-cpu, test-gpu
+    needs: [test-cpu, test-gpu]
     steps:
       - name: Download coverage CPU
         uses: actions/download-artifact@v2
