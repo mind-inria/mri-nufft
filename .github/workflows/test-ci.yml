@@ -63,7 +63,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.$$matrix.os.$$matrix.python-version
+          name: coverage.${{ matrix.os }}.${{ matrix.python-version}}
           path: .coverage
 
   test-gpu:
@@ -113,7 +113,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.$$matrix.os.$$matrix.python-version
+          name: coverage.${{ matrix.os }}.${{ matrix.python-version}}
           path: .coverage
 
       - name: Cleanup
