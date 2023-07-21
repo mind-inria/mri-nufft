@@ -120,8 +120,6 @@ jobs:
         run: |
           cd ..
           ls -al
-          deactivate
-          rm -rf venv
           rm -rf finufft
           rm -rf mrinufft
 
