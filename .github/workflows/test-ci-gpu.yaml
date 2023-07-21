@@ -50,7 +50,20 @@ jobs:
           python --version
           python -m pip install --upgrade pip
           python -m pip install .[test]
-          python -m pip install finufft pynfft2
+          # python -m pip install finufft pynfft2
+      - name: Install cufinufft 
+        shell: bash
+        run: |
+          pushd
+          git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
+          cd finufft && mkdir build && cd build
+          cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
+          conda activate gadgetron && cd ../python/cufinufft 
+          LD_LIBRARY_PATH="../../build" LIBRARY_PATH="../../build" python -m pip install -e .
+          # FIXME: This is hardcoded
+          cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
+          python -m pip install git+https://github.com/mind-inria/mri-nufft
+          popd
       - name: Run Tests
         shell: bash
         run: | 
