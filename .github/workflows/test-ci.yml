@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, gpu]
+        os: [ubuntu-latest, GPU]
         python-version: ["3.10", "3.8"]
 
     steps:
@@ -58,7 +58,7 @@ jobs:
           python -m pip install finufft pynfft2
 
       - name: Install cufinufft
-        if: matrix.os == 'gpu'
+        if: matrix.os == 'GPU'
         shell: bash
         run: |
            pushd
