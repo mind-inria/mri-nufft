@@ -12,4 +12,5 @@
 
    api
    nufft
+   trajectory_gradspec
    auto_examples/index
