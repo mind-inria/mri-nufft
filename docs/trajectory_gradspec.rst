@@ -27,4 +27,6 @@ The binary file format is specified as follows:
 
 :mod:`mrinufft.trajectories.io` module helps to convert a trajectory as numpy array to a binary file and vice versa.
 
+All the trajectory FLOAT's are specified with `float32` always.
+
 Note that different versions of the binary file format may have different fields and `mri-nufft` supports IO for `version >= 4.1``
