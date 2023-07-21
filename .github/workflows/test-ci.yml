@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           python --version
-          python -m virtualenv venv
+          python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
           python -m pip install .[test]
