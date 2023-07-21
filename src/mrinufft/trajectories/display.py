@@ -2,7 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .utils import KMAX, compute_gradients, DEFAULT_GMAX, DEFAULT_SMAX
+from .utils import compute_gradients, DEFAULT_GMAX, DEFAULT_SMAX
+from .utils import KMAX, DEFAULT_RESOLUTION
 
 
 COLOR_CYCLE = [
@@ -56,7 +57,8 @@ def setup_3D_ticks(size):
 
 
 def display_2D_trajectory(
-    trajectory, size=5, one_shot=False, constraints=False, subfigure=None
+    trajectory, size=5, one_shot=False, constraints=False, subfigure=None,
+    resolution=DEFAULT_RESOLUTION,
 ):
     """Display of 2D trajectory.
 
@@ -72,6 +74,9 @@ def display_2D_trajectory(
         If True, display the points where the gradients and slews are above the
         default limits.
     subfigure: plt.Axes or None, optional
+    resolution: Union[float, Tuple[float, ...]], optional
+        Resolution of MR image in m.
+        The default is DEFAULT_RESOLUTION.
 
     Returns
     -------
@@ -96,7 +101,10 @@ def display_2D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(trajectory.reshape((-1, Ns, 2)))
+        gradients, slews = compute_gradients(
+            trajectory.reshape((-1, Ns, 2)),
+            resolution=resolution,
+        )
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 2))[
@@ -118,6 +126,7 @@ def display_3D_trajectory(
     per_plane=True,
     one_shot=False,
     constraints=False,
+    resolution=DEFAULT_RESOLUTION,
 ):
     """Display of 3D trajectory.
 
@@ -140,6 +149,10 @@ def display_3D_trajectory(
     constraints : bool, optional
         If True, display the points where the gradients and slews are above the
         default limits.
+    resolution: Union[float, Tuple[float, ...]], optional
+        Resolution of MR image in m.
+        The default is DEFAULT_RESOLUTION.
+
 
     Returns
     -------
@@ -166,7 +179,10 @@ def display_3D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(trajectory.reshape((-1, Ns, 3)))
+        gradients, slews = compute_gradients(
+            trajectory.reshape((-1, Ns, 3)),
+            resolution=resolution,
+        )
         gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
         slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
         gradients = trajectory.reshape((-1, 3))[

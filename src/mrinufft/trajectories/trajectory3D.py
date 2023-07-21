@@ -13,8 +13,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import KMAX, Rv, initialize_tilt
-
+from .utils import Rv, initialize_tilt, KMAX
 
 ################################
 # 3D TRAJECTORY INITIALIZATION #
