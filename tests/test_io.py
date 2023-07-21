@@ -51,7 +51,7 @@ def test_write_n_read(name, trajectory, FOV, img_size,
         gamma=gamma,
     )
     read_traj, params = read_trajectory(
-        str((tmp_path / name).with_suffix("bin")),
+        str((tmp_path / name).with_suffix(".bin")),
         read_shots=True
     )
     assert params["version"] == 4.2
