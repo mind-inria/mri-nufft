@@ -63,7 +63,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.${{ matrix.os }}.${{ matrix.python-version}}
+          name: coverage.cpu.${{ matrix.python-version}}
           path: .coverage
 
   test-gpu:
@@ -105,6 +105,12 @@ jobs:
            # FIXME: This is hardcoded
            cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
 
+      - name: Verify that cufinufft is installed
+        shell: bash
+        run: |
+          python -c "import cufinufft; print(cufinufft.__version__)"
+          python -c "import cupy; print(cupy.__version__)"
+
       - name: Run Tests
         shell: bash
         run: |
@@ -113,7 +119,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.${{ matrix.os }}.${{ matrix.python-version}}
+          name: coverage.gpu.${{ matrix.python-version}}
           path: .coverage
 
       - name: Cleanup
@@ -131,8 +137,8 @@ jobs:
       - name: Download coverage CPU
         uses: actions/download-artifact@v2
         with:
-          name: coverage.ubuntu-latest.3.10
-          path: .coverage.ubuntu-latest.3.10
+          name: coverage.cpu.3.10
+          path: .coverage.cpu.3.10
       - name: Download coverage GPU
         uses: actions/download-artifact@v2
         with:
