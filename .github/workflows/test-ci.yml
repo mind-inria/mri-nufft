@@ -164,7 +164,7 @@ jobs:
       - name: Combine coverage
         shell: bash
         run: |
-          ls -al
+          tree -a
           coverage combine cov-cpu/.coverage cov-gpu/.coverage
           coverage xml
           coverage report
