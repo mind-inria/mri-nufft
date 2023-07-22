@@ -8,6 +8,7 @@ from scipy.spatial import Voronoi
 from mrinufft.operators.interfaces import proper_trajectory
 from mrinufft.operators.interfaces.cufinufft import pipe as pipe_cufinufft
 from mrinufft.operators.interfaces.tfnufft import pipe as pipe_tfnufft
+from mrinufft.operators.interfaces.gpunufft import pipe as pipe_gpunufft
 
 
 def compute_tetrahedron_volume(A, B, C, D):
@@ -137,5 +138,7 @@ def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
         return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
     elif backend == "tensorflow":
         return pipe_tfnufft(kspace_traj, grid_size, **kwargs)
+    elif backend == "gpunufft":
+        return pipe_gpunufft(kspace_traj, grid_size, **kwargs)
     else:
         raise ValueError("backend not supported")
