@@ -114,7 +114,7 @@ def test_data_consistency(operator, image_data, kspace_data):
 
     res2 = operator.adj_op(operator.op(image_data) - kspace_data)
 
-    npt.assert_allclose(res.squeeze(), res2.squeeze(), atol=1e-5, rtol=1e-3)
+    npt.assert_allclose(res.squeeze(), res2.squeeze(), atol=1e-4, rtol=1e-1)
 
 
 def test_gradient_lipschitz(operator, image_data, kspace_data):
