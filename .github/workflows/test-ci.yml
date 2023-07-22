@@ -161,6 +161,7 @@ jobs:
       - name: add the coverage tool
         shell: bash
         run: |
+          python -m pip install --upgrade pip
           python -m pip install coverage
           python -m pip install .
       - name: Combine coverage
