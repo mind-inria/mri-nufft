@@ -91,8 +91,8 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install cupy-cuda11x
           python -m pip install .[test]
+          python -m pip install cupy-cuda11x
 
       - name: Install cufinufft
         # This custom installation will ideally be replaced by a pip install.
@@ -111,6 +111,7 @@ jobs:
       - name: Verify that cufinufft is installed
         shell: bash
         run: |
+          python -m pip freeze
           python -c "import cufinufft; print(cufinufft.__version__)"
           python -c "import cupy; print(cupy.__version__)"
 
