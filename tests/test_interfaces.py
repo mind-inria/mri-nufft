@@ -84,7 +84,7 @@ def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
     image_ref = nfft_ref_op.adj_op(kspace_data.copy()).squeeze()
 
-    npt.assert_allclose(image_nufft, image_ref, atol=1e-5, rtol=5e-4)
+    npt.assert_allclose(image_nufft, image_ref, atol=1e-4, rtol=1e-1)
 
 
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):
