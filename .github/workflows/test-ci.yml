@@ -117,12 +117,14 @@ jobs:
           python -m pytest -v --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
 
       - name: Upload coverage
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: coverage.gpu.${{ matrix.python-version}}
           path: .coverage
 
       - name: Cleanup
+        if: always()
         shell: bash
         run: |
           cd ..
