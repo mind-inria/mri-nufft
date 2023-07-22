@@ -101,9 +101,9 @@ jobs:
            cd finufft && mkdir build && cd build
            cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
            cd ../python/cufinufft
-           LD_LIBRARY_PATH="../../build" LIBRARY_PATH="../../build" python -m pip install -e .
+           python setup.py install
            # FIXME: This is hardcoded
-           cp ../../build/libcufinufft.so  cufinufftc.cpython-39-x86_64-linux-gnu.so
+           cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
       - name: Verify that cufinufft is installed
         shell: bash
