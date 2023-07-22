@@ -162,6 +162,7 @@ jobs:
       - name: Combine coverage
         shell: bash
         run: |
+          tree 
           coverage combine coverage.gpu.3.10 coverage.cpu.3.10
           coverage xml
           coverage report
