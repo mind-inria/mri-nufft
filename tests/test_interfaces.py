@@ -21,6 +21,7 @@ from case_trajectories import CasesTrajectories
         "pynfft",
         "finufft",
         "cufinufft",
+        "gpuNUFFT",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
