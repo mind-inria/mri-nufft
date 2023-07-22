@@ -145,10 +145,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: coverage.cpu.3.10
+          path: cov-cpu/.coverage
       - name: Download coverage GPU
         uses: actions/download-artifact@v2
         with:
           name: coverage.gpu.3.10
+          path: cov-gpu/.coverage
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -163,6 +165,6 @@ jobs:
         shell: bash
         run: |
           ls -al
-          coverage combine coverage.gpu.3.10 coverage.cpu.3.10
+          coverage combine cov-cpu/.coverage cov-gpu/.coverage
           coverage xml
           coverage report
