@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: | 
           pytest -n auto  --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
-
+          ls -al
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
@@ -120,7 +120,7 @@ jobs:
         shell: bash
         run: |
           python -m pytest -v --cov=mrinufft --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
-
+          ls -al
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v3
@@ -162,6 +162,7 @@ jobs:
       - name: Combine coverage
         shell: bash
         run: |
+          ls -al
           coverage combine coverage.gpu.3.10 coverage.cpu.3.10
           coverage xml
           coverage report
