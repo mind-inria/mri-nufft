@@ -28,7 +28,7 @@ local_scheme="no-local-version"
 
 [tool.coverage.run]
 omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
-relative_files = True
+relative_files = true
 source = "mrinufft"
 
 [tool.coverage.report]
