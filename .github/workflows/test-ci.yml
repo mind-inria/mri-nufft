@@ -58,7 +58,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: | 
-          pytest -n auto -v --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
+          python -m pytest -n auto -v --cov --cov-report term-missing:skip-covered
           ls -al
       - name: Upload coverage
         uses: actions/upload-artifact@v3
@@ -119,7 +119,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          python -m pytest -v --cov-report xml:coverage.xml --cov-report term-missing:skip-covered
+          python -m pytest -n auto -v --cov --cov-report term-missing:skip-covered
           ls -al
       - name: Upload coverage
         if: always()
@@ -167,7 +167,7 @@ jobs:
       - name: Combine coverage
         shell: bash
         run: |
-          tree -a
           coverage combine cov-cpu/.coverage cov-gpu/.coverage
-          coverage xml
+          coverage xml -i
           coverage report
+          ls -al
