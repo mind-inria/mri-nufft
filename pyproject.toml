@@ -29,7 +29,6 @@ local_scheme="no-local-version"
 [tool.coverage.run]
 omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
 relative_files = true
-source = ["src/mrinufft"]
 
 [tool.coverage.report]
 precision = 2
@@ -56,8 +55,3 @@ profile="black"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = [
-    "--cov=mrinufft",
-    "--cov-report=term-missing",
-    "--cov-report=xml"
-]
