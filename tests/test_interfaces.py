@@ -94,8 +94,7 @@ def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     leftadjoint = np.vdot(image_data, image)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    npt.assert_allclose(leftadjoin
-t, rightadjoint, atol=1e-4, rtol=1e-4)
+    npt.assert_allclose(leftadjoint, rightadjoint, atol=1e-4, rtol=1e-4)
 
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):

@@ -132,8 +132,9 @@ class RawGpuNUFFT:
             input coefficients.
         """
         image = self.operator.adj_op(coeff, grid_data)
+        print("raw_shape", image.shape)
 
-        return np.transpose(image, axes=(0, *range(1, image.ndim)[::-1]))
+        return np.transpose(image, axes=(0, 1, *range(2, len(self.shape) + 2)[::-1]))
 
 
 class MRIGpuNUFFT(FourierOperatorBase):
