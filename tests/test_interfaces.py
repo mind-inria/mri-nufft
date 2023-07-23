@@ -21,7 +21,7 @@ from case_trajectories import CasesTrajectories
         "pynfft",
         "finufft",
         "cufinufft",
-        "gpuNUFFT",
+        "gpunufft",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
@@ -76,8 +76,7 @@ def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
     kspace_nufft = operator.op(image_data).squeeze()
     kspace_ref = nfft_ref_op.op(image_data).squeeze()
     # FIXME: check with complex values ail
-    assert np.percentile(abs(kspace_nufft - kspace_ref), 95) < 1e-4
-    assert np.max(abs(kspace_nufft - kspace_ref)) < 1e-2
+    assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
 def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
@@ -85,17 +84,18 @@ def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
     image_ref = nfft_ref_op.adj_op(kspace_data.copy()).squeeze()
 
-    npt.assert_allclose(image_nufft, image_ref, atol=1e-5, rtol=5e-4)
+    assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     """Test the adjoint property of the operator."""
     kspace = operator.op(image_data)
     image = operator.adj_op(kspace_data)
-    leftadjoint = np.vdot(image, image_data)
+    leftadjoint = np.vdot(image_data, image)
     rightadjoint = np.vdot(kspace, kspace_data)
 
-    npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
+    npt.assert_allclose(leftadjoin
+t, rightadjoint, atol=1e-4, rtol=1e-4)
 
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):

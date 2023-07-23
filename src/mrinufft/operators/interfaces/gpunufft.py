@@ -3,7 +3,7 @@
 import numpy as np
 from .base import FourierOperatorBase, proper_trajectory
 
-GPUNUFFT_AVAILABLE = False
+GPUNUFFT_AVAILABLE = True
 try:
     from gpuNUFFT import NUFFTOp
 except ImportError:
@@ -177,12 +177,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.n_batch = n_batch
         self.smaps = smaps
         self.squeeze_dims = squeeze_dims
-
+        self.dtype = self.samples.dtype
         # density compensation support
         if density is True:
             self.density = pipe(self.samples, shape)
 
-        elif isinstance(density, np.array):
+        elif isinstance(density, np.ndarray):
             self.density = density
         else:
             self.density = None
@@ -226,11 +226,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        return self.safe_squeeze(self.plan.adj_op(x))
+        return self._safe_squeeze(self.plan.adj_op(x))
 
     def _safe_squeeze(self, arr):
         """Squeeze the shape of the operator."""
-        if self.squeeze_dim:
+        if self.squeeze_dims:
             try:
                 arr = arr.squeeze(axis=1)
             except ValueError:
