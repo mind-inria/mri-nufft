@@ -134,7 +134,9 @@ class RawGpuNUFFT:
         image = self.operator.adj_op(coeff, grid_data)
         print("raw_shape", image.shape)
 
-        return np.transpose(image, axes=(0, 1, *range(2, len(self.shape) + 2)[::-1]))
+        trans_image = np.transpose(image, axes=(0, *range(1, 3 + 1)[::-1]))
+        dimension = self.samples.shape[-1]
+        return trans_image if dimension == 3 else trans_image[..., 0]
 
 
 class MRIGpuNUFFT(FourierOperatorBase):
@@ -228,6 +230,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         return self._safe_squeeze(self.plan.adj_op(x))
+
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
 
     def _safe_squeeze(self, arr):
         """Squeeze the shape of the operator."""
