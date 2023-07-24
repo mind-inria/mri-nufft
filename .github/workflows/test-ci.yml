@@ -119,7 +119,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          coverage run -m pytest -n auto -v
+          python -m coverage run -m pytest -n auto -v
           ls -al
       - name: Upload coverage
         if: always()
