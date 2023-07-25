@@ -41,11 +41,17 @@ def proper_trajectory(trajectory, normalize="pi"):
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
     if normalize == "pi" and np.max(abs(new_traj)) - 1e-4 < 0.5:
-        warnings.warn("samples will be rescaled in [-pi, pi]")
+        warnings.warn(
+            "samples will be rescaled in [-pi, pi[ , assuming they were in [-0.5, 0.5["
+        )
         new_traj *= 2 * np.pi
     elif normalize == "unit" and np.max(abs(new_traj)) - 1e-4 > 0.5:
-        warnings.warn("samples will be rescaled in [-0.5, 0.5]")
+        warnings.warn(
+            "samples will be rescaled in [-0.5, 0.5[ , assuming they were in [-pi, pi["
+        )
         new_traj /= 2 * np.pi
+    if normalize == "unit" and np.max(new_traj) >= 0.5:
+        new_traj = (new_traj + 0.5) % 1 - 0.5
     return new_traj
 
 
