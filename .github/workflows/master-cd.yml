@@ -1,9 +1,11 @@
 name: CD
 
 on:
-  push:
+  workflow_run:
+    workflows: CI
+    types:
+      - completed
     branches:
-      - main
       - master
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -18,38 +20,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  coverage:
-    name: Deploy Coverage Results
+  gather-coverage:
+    name: Gather Coverage Results
     runs-on: ubuntu-latest
+    matrix:
+      os: [ubuntu-latest, self-hosted]
+      python-version: ["3.10", "3.8"]
+
+    outputs:
+      coverage-cpu: ${{ steps.unzip.outputs.ubuntu-latest-3.10 }}
+      coverage-gpu: ${{ steps.unzip.outputs.self-hosted-3.10 }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Get data from cpu coverage
+        uses: actions/github-script@v6
         with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        shell: bash -l {0}
+          script: |
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: context.payload.workflow_run.id,
+            });
+            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "coverage-cpu"
+            })[0];
+            let download = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/coverage-$${matrix.os}-3.10.zip`, Buffer.from(download.data));
+      - name: Unzip download
+        id: unzip
         run: |
-          python -m pip install .[test,optional]
-          python -m pip install finufft
-      - name: Run Tests
-        shell: bash -l {0}
-        run: |
-          pytest -n auto --cov=mrinufft --cov-report xml:coverage.xml
+          unzip coverage-$${matrix.os}-3.10.zip >> "$GITHUB_OUTPUT"
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: unittests # optional
-          file: coverage.xml
-          name: codecov-umbrella # optional
-          fail_ci_if_error: false # optional (default = false)
-          verbose: true # optional (default = false)
-          
   makedocs:
     name: Deploy API Documentation
     runs-on: ubuntu-latest
