@@ -90,10 +90,10 @@ def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
 def test_interfaces_autoadjoint(operator, kspace_data, image_data):
     """Test the adjoint property of the operator."""
     kspace = operator.op(image_data)
-    image = operator.adj_op(kspace_data)
-    leftadjoint = np.vdot(image_data, image)
     rightadjoint = np.vdot(kspace, kspace_data)
 
+    image = operator.adj_op(kspace_data)
+    leftadjoint = np.vdot(image_data, image)
     npt.assert_allclose(leftadjoint, rightadjoint, atol=1e-4, rtol=1e-4)
 
 
