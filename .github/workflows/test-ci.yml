@@ -128,16 +128,6 @@ jobs:
           python setup.py install
           cd ../mri-nufft
 
-      - name: Verify that installation went well
-        shell: bash
-        run: |
-          python -m pip install cupy-cuda11x
-          python -m pip freeze
-          env
-          python -c "import cufinufft; print(cufinufft.__version__)"
-          python -c "import cupy; print(cupy.__version__)"
-          python -c "import gpuNUFFT; print(gpuNUFFT.__version__)"
-
       - name: Run Tests
         shell: bash
         run: |
