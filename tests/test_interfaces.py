@@ -6,6 +6,8 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
+from helpers import kspace_from_op, image_from_op
+
 # #########################
 # # Main Operator Fixture #
 # #########################
@@ -47,28 +49,14 @@ def nfft_ref_op(request, operator, backend="pynfft"):
 
 @fixture(scope="module")
 def image_data(operator):
-    """Generate a random image."""
-    if operator.smaps is None:
-        img = np.random.randn(operator.n_coils, *operator.shape).astype(
-            operator.cpx_dtype
-        )
-    elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.randn(*operator.shape).astype(operator.cpx_dtype)
-
-    img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
-    return img
+    """Generate a random image. Remains constant for the module."""
+    return image_from_op(operator)
 
 
 @fixture(scope="module")
 def kspace_data(operator):
-    """Generate a random kspace data."""
-    kspace = (1j * np.random.randn(operator.n_coils, operator.n_samples)).astype(
-        operator.cpx_dtype
-    )
-    kspace += np.random.randn(operator.n_coils, operator.n_samples).astype(
-        operator.cpx_dtype
-    )
-    return kspace
+    """Generate a random kspace. Remains constant for the module."""
+    return kspace_from_op(operator)
 
 
 def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
@@ -87,14 +75,21 @@ def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
-def test_interfaces_autoadjoint(operator, kspace_data, image_data):
+def test_interfaces_autoadjoint(operator):
     """Test the adjoint property of the operator."""
-    kspace = operator.op(image_data)
-    rightadjoint = np.vdot(kspace, kspace_data)
+    reldiff = np.zeros(10)
+    for i in range(10):
+        img_data = image_from_op(operator)
+        ksp_data = kspace_from_op(operator)
+        kspace = operator.op(img_data)
 
-    image = operator.adj_op(kspace_data)
-    leftadjoint = np.vdot(image_data, image)
-    npt.assert_allclose(leftadjoint, rightadjoint, atol=1e-4, rtol=1e-4)
+        rightadjoint = np.vdot(kspace, ksp_data)
+
+        image = operator.adj_op(ksp_data)
+        leftadjoint = np.vdot(img_data, image)
+        reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
+    print(reldiff)
+    assert np.mean(reldiff) < 1e-5
 
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):
