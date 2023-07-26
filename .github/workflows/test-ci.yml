@@ -98,20 +98,29 @@ jobs:
         # This custom installation will ideally be replaced by a pip install.
         shell: bash
         run: |
-           cd ..
-           rm -rf finufft
-           git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
-           cd finufft && mkdir build && cd build
-           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
-           cd ../python/cufinufft
-           python setup.py install
-           # FIXME: This is hardcoded
-           cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
-           cd ../../
+          # Ensure we are using cuda 11.8
+          export CUDA_PATH=/usr/local/cuda-11.8
+          export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
+          export CUDA_BIN_PATH=$CUDA_PATH
+          export PATH=$CUDA_BIN_PATH/bin:$PATH
+          cd ..
+          rm -rf finufft
+          git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
+          cd finufft && mkdir build && cd build
+          cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
+          cd ../python/cufinufft
+          python setup.py install
+          # FIXME: This is hardcoded
+          cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
+          cd ../../
 
       - name: Install gpuNUFFT
         shell: bash
         run: |
+          export CUDA_PATH=/usr/local/cuda-11.8
+          export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
+          export CUDA_BIN_PATH=$CUDA_PATH
+          export PATH=$CUDA_BIN_PATH/bin:$PATH
           cd ..
           rm -rf gpuNUFFT
           git clone https://github.com/chaithyagr/gpuNUFFT
