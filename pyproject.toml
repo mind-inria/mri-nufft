@@ -56,3 +56,4 @@ profile="black"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+norecursedirs = ["tests/helpers"]
