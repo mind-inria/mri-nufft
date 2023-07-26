@@ -101,13 +101,24 @@ jobs:
            rm -rf finufft
            git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
            cd finufft && mkdir build && cd build
-           cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
+           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
            cd ../python/cufinufft
            python setup.py install
            # FIXME: This is hardcoded
            cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
+           cd ../../mri-nufft
 
-      - name: Verify that cufinufft is installed
+      - name: Install gpuNUFFT
+        shell: bash
+        run: |
+          cd ..
+          rm -rf gpuNUFFT
+          git clone https://github.com/chaithyagr/gpuNUFFT
+          cd gpuNUFFT
+          python setup.py install
+          cd ../mri-nufft
+
+      - name: Verify that installation went well
         shell: bash
         run: |
           python -m pip install cupy-cuda11x
@@ -115,6 +126,7 @@ jobs:
           env
           python -c "import cufinufft; print(cufinufft.__version__)"
           python -c "import cupy; print(cupy.__version__)"
+          python -c "import gpuNUFFT; print(gpuNUFFT.__version__)"
 
       - name: Run Tests
         shell: bash
