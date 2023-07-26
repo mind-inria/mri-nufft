@@ -73,10 +73,7 @@ class gpuNUFFT:
             raise ValueError("The number of coils should be an integer >= 1")
         self.n_coils = n_coils
         self.shape = shape
-        if samples.min() < -0.5 or samples.max() >= 0.5:
-            warnings.warn("Samples will be normalized between [-0.5; 0.5[")
-            samples = normalize_frequency_locations(samples)
-            self.samples = samples
+        self.samples = proper_trajectory(samples, normalize="unit")
         if density_comp is None:
             density_comp = np.ones(samples.shape[0])
         if smaps is None:
@@ -99,8 +96,7 @@ class gpuNUFFT:
         )
 
     def op(self, image, interpolate_data=False):
-        """This method calculates the masked non-cartesian Fourier transform
-        of a 2D / 3D image.
+        """Compute the masked non-cartesian Fourier transform.
 
         Parameters
         ----------
@@ -134,8 +130,7 @@ class gpuNUFFT:
         return coeff
 
     def adj_op(self, coeff, grid_data=False):
-        """This method calculates adjoint of non-uniform Fourier
-        transform of a 1-D coefficients array.
+        """Compute adjoint  of non-uniform Fourier Transform.
 
         Parameters
         ----------
@@ -144,6 +139,7 @@ class gpuNUFFT:
         grid_data: bool, default False
             if True, the kspace data is gridded and returned,
             this is used for density compensation
+
         Returns
         -------
         np.ndarray
@@ -161,31 +157,30 @@ class gpuNUFFT:
 
 
 class MRIGpuNUFFT(FourierOperatorBase):
-    """This class wraps around different implementation algorithms for NFFT"""
+    """Interface for the gpuNUFFT backend.
+
+    Parameters
+    ----------
+    samples: np.ndarray (Mxd)
+        the samples locations in the Fourier domain where M is the number
+        of samples and d is the dimensionnality of the output data
+        (2D for an image, 3D for a volume).
+    shape: tuple of int
+        shape of the image (not necessarly a square matrix).
+    implementation: str 'cpu' | 'gpuNUFFT',
+    default 'cpu'
+        which implementation of NFFT to use.
+    n_coils: int default 1
+        Number of coils used to acquire the signal in case of multiarray
+        receiver coils acquisition
+    kwargs: extra keyword args
+        these arguments are passed to gpuNUFFT operator. This is used
+        only in gpuNUFFT
+    """
 
     backend = "gpunufft"
 
     def __init__(self, samples, shape, n_coils=1, density=None, smaps=None, **kwargs):
-        """Initialize the class.
-
-        Parameters
-        ----------
-        samples: np.ndarray (Mxd)
-            the samples locations in the Fourier domain where M is the number
-            of samples and d is the dimensionnality of the output data
-            (2D for an image, 3D for a volume).
-        shape: tuple of int
-            shape of the image (not necessarly a square matrix).
-        implementation: str 'cpu' | 'gpuNUFFT',
-        default 'cpu'
-            which implementation of NFFT to use.
-        n_coils: int default 1
-            Number of coils used to acquire the signal in case of multiarray
-            receiver coils acquisition
-        kwargs: extra keyword args
-            these arguments are passed to gpuNUFFT operator. This is used
-            only in gpuNUFFT
-        """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
                 "gpuNUFFT library is not installed, "
@@ -214,8 +209,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
 
     def op(self, data, *args):
-        """This method calculates the masked non-cartesian Fourier transform
-        of an image.
+        """Compute forward Non Uniform Fourier Transform.
 
         Parameters
         ----------
@@ -229,8 +223,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.op(data, *args)
 
     def adj_op(self, coeffs, *args):
-        """This method calculates inverse masked non-uniform Fourier
-        transform of a 1-D coefficients array.
+        """Compute adjoint Non Unform Fourier Transform.
 
         Parameters
         ----------
@@ -244,6 +237,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.adj_op(coeffs, *args)
 
     def data_consistency(self, data, obs_data):
+        """Compute the data consistency gradient direction."""
         return self.adj_op(self.op(data) - obs_data)
 
     @property
@@ -253,8 +247,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
 
 def pipe(kspace_loc, volume_shape, num_iterations=10):
-    """Utils function to obtain the density compensator for a
-    given set of kspace locations.
+    """Compute the density compensator for a given set of kspace locations.
 
     Parameters
     ----------
