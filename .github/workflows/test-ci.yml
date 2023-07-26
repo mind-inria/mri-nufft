@@ -106,7 +106,7 @@ jobs:
            python setup.py install
            # FIXME: This is hardcoded
            cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
-           cd ../../mri-nufft
+           cd ../../
 
       - name: Install gpuNUFFT
         shell: bash
