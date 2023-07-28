@@ -66,6 +66,23 @@ jobs:
           name: coverage.cpu.${{ matrix.python-version}}
           path: .coverage
 
+      #https://stackoverflow.com/a/74411469/16019838
+      - name: Abort other jobs
+        if: failure()
+        uses: actions/github-script@v6
+        env:
+          RUN_ID: ${{ github.run_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const runId = process.env.RUN_ID
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const resp = await github.rest.actions.cancelWorkflowRun({
+              owner,
+              repo,
+              runId
+            })
+
   test-gpu:
     runs-on: GPU
     needs: linter-check
@@ -135,8 +152,26 @@ jobs:
         run: |
           python -m coverage run -m pytest -n auto -v
           ls -al
+
+      #https://stackoverflow.com/a/74411469/16019838
+      - name: Abort other jobs
+        if: failure()
+        uses: actions/github-script@v6
+        env:
+          RUN_ID: ${{ github.run_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const runId = process.env.RUN_ID
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const resp = await github.rest.actions.cancelWorkflowRun({
+              owner,
+              repo,
+              runId
+            })
+
       - name: Upload coverage
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: coverage.gpu.3.10
@@ -150,6 +185,7 @@ jobs:
           ls -al
           rm -rf finufft
           rm -rf mrinufft
+
 
   coverage:
     runs-on: ubuntu-latest
