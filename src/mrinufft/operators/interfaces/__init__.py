@@ -23,13 +23,13 @@ __all__ = [
 ]
 
 _REGISTERED_BACKENDS = {
-    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
     "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
-    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
-    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
-    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
-    "numpy": (True, MRInumpy),
+    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
     "gpunufft": (GPUNUFFT_AVAILABLE, MRIGpuNUFFT),
+    "numpy": (True, MRInumpy),
+    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
+    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
+    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
 }
 
 
