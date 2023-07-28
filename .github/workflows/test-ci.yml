@@ -71,11 +71,10 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         env:
-          RUN_ID: ${{ github.run_id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            const runId = process.env.RUN_ID
+            const runId = process.env.GITHUB_RUN_ID
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
             const resp = await github.rest.actions.cancelWorkflowRun({
               owner,
@@ -154,15 +153,15 @@ jobs:
           ls -al
 
       #https://stackoverflow.com/a/74411469/16019838
+      #
       - name: Abort other jobs
         if: failure()
         uses: actions/github-script@v6
         env:
-          RUN_ID: ${{ github.run_id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            const runId = process.env.RUN_ID
+            const runId = process.env.GITHUB_RUN_ID
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
             const resp = await github.rest.actions.cancelWorkflowRun({
               owner,
