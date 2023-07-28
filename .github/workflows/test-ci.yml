@@ -53,7 +53,7 @@ jobs:
       - name: Install CPU Backends
         shell: bash
         run: |
-          python -m pip install finufft pynfft2
+          python -m pip install finufft pynfft2 "cython<3.0.0"
 
       - name: Run Tests
         shell: bash
@@ -105,6 +105,7 @@ jobs:
           export PATH=$CUDA_BIN_PATH/bin:$PATH
           cd ..
           rm -rf finufft
+          env
           git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
           cd finufft && mkdir build && cd build
           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
@@ -121,6 +122,7 @@ jobs:
           export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
           export CUDA_BIN_PATH=$CUDA_PATH
           export PATH=$CUDA_BIN_PATH/bin:$PATH
+          env
           cd ..
           rm -rf gpuNUFFT
           git clone https://github.com/chaithyagr/gpuNUFFT
