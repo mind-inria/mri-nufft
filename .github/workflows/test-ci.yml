@@ -88,11 +88,6 @@ jobs:
     needs: linter-check
     strategy:
       fail-fast: true
-    env:
-      CUDA_PATH: /usr/local/cuda-11.8
-      LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-      CUDA_BIN_PATH: /usr/local/cuda-11.8
-      PATH: /usr/local/cuda-11.8/bin:${{ env.PATH }}
     steps:
       - uses: actions/checkout@v3
 
@@ -113,6 +108,12 @@ jobs:
           rm -rf finufft
           git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
           cd finufft && mkdir build && cd build
+
+          export PATH=/usr/local/cuda-11.8/bin:$PATH
+          export CUDA_PATH=/usr/local/cuda-11.8
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          export CUDA_BIN_PATH=/usr/local/cuda-11.8
+
           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
           # enter venv
           source $RUNNER_WORKSPACE/venv/bin/activate
@@ -129,6 +130,12 @@ jobs:
           rm -rf gpuNUFFT
           git clone https://github.com/chaithyagr/gpuNUFFT
           cd gpuNUFFT
+
+          export PATH=/usr/local/cuda-11.8/bin:$PATH
+          export CUDA_PATH=/usr/local/cuda-11.8
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          export CUDA_BIN_PATH=/usr/local/cuda-11.8
+
           source $RUNNER_WORKSPACE/venv/bin/activate
           python setup.py install
 
@@ -173,7 +180,6 @@ jobs:
           ls -al
           rm -rf finufft
           rm -rf gpuNUFFT
-          rm -rf mri-nufft
           rm -rf venv
 
   coverage:
