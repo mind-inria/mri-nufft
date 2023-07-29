@@ -88,68 +88,55 @@ jobs:
     needs: linter-check
     strategy:
       fail-fast: true
+    env:
+      CUDA_PATH: /usr/local/cuda-11.8
+      LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+      CUDA_BIN_PATH: /usr/local/cuda-11.8
+      PATH: /usr/local/cuda-11.8/bin:$PATH
     steps:
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
       - uses: actions/checkout@v3
 
-      - name: Install Dependencies
+      - name: Install mri-nufft
         shell: bash
         run: |
-          pwd
-          # Ensure we are using cuda 11.8
-          export CUDA_PATH=/usr/local/cuda-11.8
-          export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
-          export CUDA_BIN_PATH=$CUDA_PATH
-          export PATH=$CUDA_BIN_PATH/bin:$PATH
+          cd $RUNNER_WORKSPACE
           python --version
           python -m venv venv
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install -e .[test]
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install --upgrade pip
+          pip install -e mri-nufft[test]
 
-      - name: Install cufinufft
-        # This custom installation will ideally be replaced by a pip install.
+      - name: Install Cufinufft
         shell: bash
         run: |
-          # Ensure we are using cuda 11.8
-          export CUDA_PATH=/usr/local/cuda-11.8
-          export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
-          export CUDA_BIN_PATH=$CUDA_PATH
-          export PATH=$CUDA_BIN_PATH/bin:$PATH
-          cd ..
+          cd $RUNNER_WORKSPACE
           rm -rf finufft
-          env
           git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
           cd finufft && mkdir build && cd build
           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
-          cd ../python/cufinufft
-          python setup.py install
+          # enter venv
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          cd $RUNNER_WORKSPACE/finufft/python/cufinufft
+          python setup.py develop
           # FIXME: This is hardcoded
           cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
-          cd ../../../
+          cd $RUNNER_WORKSPACE
 
       - name: Install gpuNUFFT
         shell: bash
         run: |
-          export CUDA_PATH=/usr/local/cuda-11.8
-          export LD_LIBRARY_PATH=$CUDA_PATH/lib64:$LD_LIBRARY_PATH
-          export CUDA_BIN_PATH=$CUDA_PATH
-          export PATH=$CUDA_BIN_PATH/bin:$PATH
-          env
-          cd ..
+          cd $RUNNER_WORKSPACE
           rm -rf gpuNUFFT
           git clone https://github.com/chaithyagr/gpuNUFFT
           cd gpuNUFFT
+          source $RUNNER_WORKSPACE/venv/bin/activate
           python setup.py install
-          cd ../mri-nufft
 
       - name: Run Tests
         shell: bash
         run: |
+          cd $RUNNER_WORKSPACE/mri-nufft
+          source $RUNNER_WORKSPACE/venv/bin/activate
           python -m coverage run -m pytest -n auto -v
           ls -al
 
@@ -182,12 +169,12 @@ jobs:
         if: always()
         shell: bash
         run: |
-          cd ..
+          cd $RUNNER_WORKSPACE
           ls -al
           rm -rf finufft
           rm -rf gpuNUFFT
-          rm -rf mrinufft
-
+          rm -rf mri-nufft
+          rm -rf venv
 
   coverage:
     runs-on: ubuntu-latest
