@@ -59,7 +59,8 @@ jobs:
         shell: bash
         run: | 
           coverage run -m pytest -n auto -v
-          ls -al
+          coverage report
+
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
@@ -145,7 +146,7 @@ jobs:
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
           python -m coverage run -m pytest -n auto -v
-          ls -al
+          coverage report
 
       #https://stackoverflow.com/a/74411469/16019838
       #
