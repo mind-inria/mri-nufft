@@ -105,7 +105,8 @@ Then clone and install the package::
     $ pip install ./mri-nufft
 
 [Temporary] Custom Cufinufft installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 In order for the density compensation to work for cufinufft, we have to use the in-house fork enabling it ::
 
@@ -118,6 +119,22 @@ In order for the density compensation to work for cufinufft, we have to use the 
    cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
 Development of this feature happens `here <https://github.com/flatironinstitute/finufft/pull/308>`_
+
+[Temporary] Faster gpuNUFFT with concurency
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A faster version of gpuNUFFT is available `here <https://github.com/chaithyagr/gpuNUFFT>`_.
+
+.. warning::
+
+    This is compatible only up to CUDA 11.8 !
+
+To install it ::
+
+    git clone https://github.com/chaythiagr/gpuNUFFT
+    cd gpuNUFFT
+    python setup.py install
+
 
 Documentation
 -------------
