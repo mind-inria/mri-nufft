@@ -76,7 +76,6 @@ def _voronoi(kspace):
     if kspace.shape[1] == 2:
         vol = vol2d
     else:
-        print("using vol3d")
         vol = vol3d
     wi = np.zeros(M)
     v = Voronoi(kspace)

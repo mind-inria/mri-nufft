@@ -87,7 +87,7 @@ class MRIfinufft(FourierOperatorBase):
     smaps: array
         Sensitivity maps of shape ``N_coils x *shape``.
     squeeze_dims: bool
-        If True, the dimensions of size 1 for the coil 
+        If True, the dimensions of size 1 for the coil
         and batch dimension will be squeezed.
     """
 
@@ -239,7 +239,6 @@ class MRIfinufft(FourierOperatorBase):
             return ret.squeeze(axis=(0, 1))
 
     def _adj_op_sense(self, coeffs, img=None):
-        print("in adj op sense")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         img = img or np.zeros((B, *XYZ), dtype=self.cpx_dtype)
@@ -248,7 +247,6 @@ class MRIfinufft(FourierOperatorBase):
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
-            print(i, idx_coils, idx_batch)
             self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
             img_batched *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):
