@@ -8,9 +8,10 @@ from .nudft_numpy import MRInumpy
 from .nfft import MRInfft, PYNFFT_AVAILABLE
 from .gpunufft import MRIGpuNUFFT, GPUNUFFT_AVAILABLE
 
-from .base import proper_trajectory
+from .base import proper_trajectory, FourierOperatorBase
 
 __all__ = [
+    "FourierOperatorBase",
     "MRICufiNUFFT",
     "MRIGpuNUFFT",
     "MRIPynufft",
