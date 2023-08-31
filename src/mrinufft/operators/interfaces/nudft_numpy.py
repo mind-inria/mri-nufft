@@ -25,7 +25,7 @@ def implicit_type2_ndft(ktraj, image, shape):
     r = [np.arange(s) for s in shape]
     grid_r = np.reshape(
         np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(image.shape))
-    )
+    ).astype(ktraj.dtype)
     res = np.zeros(len(ktraj), dtype=image.dtype)
     for j in range(np.prod(image.shape)):
         res += image[j] * np.exp(-2j * np.pi * ktraj @ grid_r[:, j])
@@ -35,7 +35,9 @@ def implicit_type2_ndft(ktraj, image, shape):
 def implicit_type1_ndft(ktraj, coeffs, shape):
     """Compute the NDFT using the implicit type 1 (kspace -> image) algorithm."""
     r = [np.arange(s) for s in shape]
-    grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(shape)))
+    grid_r = np.reshape(
+        np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(shape))
+    ).astype(ktraj.dtype)
     res = np.zeros(np.prod(shape), dtype=coeffs.dtype)
     for i in range(len(ktraj)):
         res += coeffs[i] * np.exp(2j * np.pi * ktraj[i] @ grid_r)
@@ -96,12 +98,12 @@ class MRInumpy(FourierOperatorCPU):
 
     backend = "numpy"
 
-    def __init__(self, samples, shape, n_coils=1, smaps=None):
+    def __init__(self, samples, shape, n_coils=1, smaps=None, **kwargs):
         super().__init__(
             samples,
             shape,
             density=False,
             n_coils=n_coils,
             smaps=smaps,
-            raw_op=RawNDFT(samples, shape),
+            raw_op=RawNDFT(samples, shape, **kwargs),
         )
