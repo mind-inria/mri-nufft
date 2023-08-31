@@ -42,7 +42,7 @@ def pytest_generate_tests(metafunc):
     """Generate the tests."""
     if "ref_backend" in metafunc.fixturenames:
         metafunc.parametrize(
-            "ref_backend", metafunc.config.getoption("ref") or ["numpy"]
+            "ref_backend", metafunc.config.getoption("ref") or ["finufft"]
         )
 
     if "operator" in metafunc.fixturenames:

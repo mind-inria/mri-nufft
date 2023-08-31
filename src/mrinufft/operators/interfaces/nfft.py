@@ -55,6 +55,8 @@ class MRInfft(FourierOperatorCPU):
     For testing purposes only, as it is very slow.
     """
 
+    backend = "pynfft"
+
     def __init__(self, samples, shape, n_coils=1, smaps=None):
         super().__init__(
             samples,
