@@ -10,6 +10,7 @@ from mrinufft.operators.interfaces.nudft_numpy import (
     implicit_type2_ndft,
     RawNDFT,
 )
+from mrinufft.operators.interfaces.pykeops import KeopsRawNDFT
 
 from case_trajectories import CasesTrajectories, case_grid1D
 

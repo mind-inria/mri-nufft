@@ -26,7 +26,7 @@ if PYTORCH_AVAILABLE:
     from pykeops.torch import Genred as TorchGenred
 
 
-class KeopsNDFT:
+class KeopsRawNDFT:
     """Non Uniform Fourier transform with PyKeOps and torch.
 
     Parameters
@@ -116,5 +116,6 @@ class MRIKeops(FourierOperatorCPU):
             density=False,
             n_coils=n_coils,
             smaps=smaps,
-            raw_op=KeopsNDFT(samples, shape, **kwargs),
         )
+
+        self.raw_op = KeopsRawNDFT(self.samples, self.shape, **kwargs)
