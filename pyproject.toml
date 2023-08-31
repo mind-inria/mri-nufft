@@ -56,3 +56,6 @@ profile="black"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+
+[tool.mypy]
+ignore_missing_imports = true
