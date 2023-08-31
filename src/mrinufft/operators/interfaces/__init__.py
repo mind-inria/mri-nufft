@@ -6,7 +6,7 @@ from .finufft import MRIfinufft, FINUFFT_AVAILABLE
 from .pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
 from .nudft_numpy import MRInumpy
 from .nfft import MRInfft, PYNFFT_AVAILABLE
-from .pykeops import MRIKeops, PYKEOPS_AVAILABLE
+from .pykeops import MRIKeops, PYKEOPS_AVAILABLE, MRIKeopsGPU, PYKEOPS_GPU_AVAILABLE
 
 from .base import proper_trajectory
 
@@ -27,6 +27,7 @@ _REGISTERED_BACKENDS = {
     "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
     "numpy": (True, MRInumpy),
     "pykeops": (PYKEOPS_AVAILABLE, MRIKeops),
+    "pykeops-gpu": (PYKEOPS_GPU_AVAILABLE, MRIKeopsGPU),
     "pynfft": (PYNFFT_AVAILABLE, MRInfft),
     "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
     "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),

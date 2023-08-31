@@ -8,9 +8,6 @@ from .base import FourierOperatorCPU, proper_trajectory
 
 PYKEOPS_AVAILABLE = True
 try:
-    import pykeops
-    from pykeops.numpy import ComplexLazyTensor as NumpyComplexLazyTensor
-    from pykeops.numpy import LazyTensor as NumpyLazyTensor
     from pykeops.numpy import Genred as NumpyGenred
 except ImportError:
     PYKEOPS_AVAILABLE = False
@@ -22,9 +19,9 @@ except ImportError:
     PYTORCH_AVAILABLE = False
 
 if PYTORCH_AVAILABLE:
-    from pykeops.torch import ComplexLazyTensor as TorchComplexLazyTensor
-    from pykeops.torch import LazyTensor as TorchLazyTensor
     from pykeops.torch import Genred as TorchGenred
+
+PYKEOPS_GPU_AVAILABLE = PYTORCH_AVAILABLE and torch.cuda.is_available()
 
 
 class KeopsRawNDFT:
@@ -121,7 +118,7 @@ class KeopsRawNDFT:
 class MRIKeops(FourierOperatorCPU):
     """MRI Fourier operator using Keops."""
 
-    backend = "keops"
+    backend = "pykeops"
 
     def __init__(self, samples, shape, n_coils, smaps=None, **kwargs):
         super().__init__(
@@ -133,3 +130,22 @@ class MRIKeops(FourierOperatorCPU):
         )
 
         self.raw_op = KeopsRawNDFT(self.samples, self.shape, **kwargs)
+
+
+class MRIKeopsGPU(FourierOperatorCPU):
+    """MRI Fourier operator using Keops."""
+
+    backend = "pykeops-gpu"
+
+    def __init__(self, samples, shape, n_coils, smaps=None, **kwargs):
+        super().__init__(
+            samples,
+            shape,
+            density=False,
+            n_coils=n_coils,
+            smaps=smaps,
+        )
+
+        self.raw_op = KeopsRawNDFT(
+            self.samples, self.shape, keops_backend="GPU", **kwargs
+        )
