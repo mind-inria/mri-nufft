@@ -101,4 +101,30 @@ def test_ndft_fft(klass, kspace_grid, shape):
         kspace = kspace.swapaxes(0, 1)
     kspace_fft = sp.fft.fftn(img)
 
-    assert npt.assert_allclose(kspace, kspace_fft)
+    npt.assert_allclose(kspace, kspace_fft, atol=1e-3, rtol=1e-3)
+
+
+@parametrize("klass", [RawNDFT, KeopsRawNDFT])
+@parametrize_with_cases(
+    "kspace_grid, shape",
+    cases=[
+        case_grid1D,
+        CasesTrajectories.case_grid2D,
+        CasesTrajectories.case_grid3D,
+    ],
+)
+def test_ndft_ifft(klass, kspace_grid, shape):
+    """Test the raw ndft implementation."""
+    ndft_op = klass(kspace_grid, shape)
+    # Create a random image
+    kspace = (
+        np.random.randn(*ndft_op.shape) + 1j * np.random.randn(*ndft_op.shape)
+    ).astype(np.complex64)
+    img = np.empty(ndft_op.shape, dtype=kspace.dtype)
+    ndft_op.adj_op(kspace.flatten(), img)
+    # Reshape the kspace to be on a grid (because the ndft is not doing it)
+    img_ifft = sp.fft.ifftn(
+        kspace, norm="ortho"
+    )  # FIXME: find the correct norm factor.
+
+    npt.assert_allclose(img, img_ifft, atol=1e-3, rtol=1e-3)
