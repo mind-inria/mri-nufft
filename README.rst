@@ -73,17 +73,17 @@ Supported Libraries
 These libraries needs to be installed seperately from this package.
 
 .. Don't touch the spacing ! ..
-
-==================== ============ =================== =============== ============== ===============
-Backend              Hardward     Batch computation   Precision       Auto Density   Array Interface
-==================== ============ =================== =============== ============== ===============
-cufinufft_           GPU (CUDA)   ✔                   single          ✔ *             cupy/torch
-finufft_             CPU          ✔                   single/double   TBA            numpy
-tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
-pynufft_             CPU          ✘                   single/double   ✘              numpy
-pynufft_             GPU          ✘                   ✘               ✘              Not Supported
-pynfft_              CPU          ✘                   singles/double   ✘             Not Supported
-==================== ============ =================== =============== ============== ===============
+================== ========= ====== =============== ============== ===============
+Backend            Hardward  Batch  Precision       Auto Density   Array Interface
+================== ========= ====== =============== ============== ===============
+cufinufft_         CUDA      ✔      single/double   ✔  (1_)        cupy/torch
+finufft_           CPU       ✔      single/double   TBA            numpy
+tensorflow-nufft_  CUDA      ✘      single          ✔              tensorflow
+pynufft_           CPU       ✘      single/double   ✘              numpy
+pynfft_            CPU       ✘      single/double    ✘             Not Supported
+pykeops_ (2_)      CPU/CUDA  ✘      single/double    ✘             numpy/torch
+numpy    (2_)      CPU       ✘      single/double    ✘             numpy
+================== ========= ====== =============== ============== ===============
 
 
 .. _cufinufft: https://github.com/flatironinstitute/finufft
@@ -91,6 +91,15 @@ pynfft_              CPU          ✘                   singles/double   ✘    
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
 .. _pynufft: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
+.. _pykeops: https://github.com/getkeops/pykeops
+
+.. _1:
+
+1. See `[Temporary] Custom Cufinufft installation`_
+
+.. _2:
+
+2. Only NUDFT (For reference and precision checking)
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.  It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
