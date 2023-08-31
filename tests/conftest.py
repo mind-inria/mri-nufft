@@ -12,12 +12,18 @@ def pytest_addoption(parser):
         default=[],
         help="list of backend to test. Unavailable backend will be skipped.",
     )
+    parser.addoption(
+        "--ref",
+        action="append",
+        default=[],
+        help="reference backend for comparison",
+    )
 
 
 def isrunnable(backend, context):
     """Check if test is runnable with the backend and its context."""
     backend_args = context.config.getoption("backend")
-    return check_backend(backend) and (backend_args and backend in backend_args)
+    return check_backend(backend) and (not backend_args or backend in backend_args)
 
 
 # # for test directly parametrized by a backend
@@ -34,11 +40,16 @@ def pytest_runtest_setup(item):
 # This is more tricky.
 def pytest_generate_tests(metafunc):
     """Generate the tests."""
+    if "ref_backend" in metafunc.fixturenames:
+        metafunc.parametrize(
+            "ref_backend", metafunc.config.getoption("ref") or ["numpy"]
+        )
+
     if "operator" in metafunc.fixturenames:
         for callspec in metafunc._calls:
             op_call = callspec.params["operator"]
-            # Complicated datastructure
-            # Acces the value for the backend parameter.
+            # Complicated datastructure, but we get the
+            # value for the backend parameter.
             backend = op_call.argvalues[
                 [
                     i

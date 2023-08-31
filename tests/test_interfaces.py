@@ -36,12 +36,21 @@ def operator(
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
-@fixture(scope="module")
-@parametrize("backend", ["pynfft"])
-def nfft_ref_op(request, operator, backend="pynfft"):
+# ref_backend is parametrized in conftest.py
+# @fixture(scope="module")
+# @parametrize("backend", )
+@fixture()
+def nfft_ref_op(operator, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
-    return get_operator(backend)(
-        operator.samples, operator.shape, n_coils=operator.n_coils, smaps=operator.smaps
+    kwargs = {}
+    if ref_backend == "numpy":
+        kwargs["explicit_matrix"] = False
+    return get_operator(ref_backend)(
+        operator.samples,
+        operator.shape,
+        n_coils=operator.n_coils,
+        smaps=operator.smaps,
+        **kwargs,
     )
 
 
