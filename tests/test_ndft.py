@@ -1,7 +1,8 @@
 """Test for the NDFT implementations."""
 import numpy as np
+import numpy.testing as npt
 import scipy as sp
-from pytest_cases import parametrize_with_cases
+from pytest_cases import parametrize_with_cases, parametrize
 
 from mrinufft.operators.interfaces.nudft_numpy import (
     get_fourier_matrix,
@@ -35,7 +36,7 @@ def test_ndft_grid_matrix(kspace_grid, shape):
             .transpose(2, 0, 1, 3)
             .reshape((np.prod(shape),) * 2)
         )
-    assert np.allclose(ndft_matrix, fft_mat)
+    npt.assert_allclose(ndft_matrix, fft_mat)
 
 
 @parametrize_with_cases(
@@ -54,7 +55,7 @@ def test_ndft_implicit2(kspace, shape):
     linop_coef = implicit_type2_ndft(kspace, random_image.flatten(), shape)
     matrix_coef = matrix @ random_image.flatten()
 
-    assert np.allclose(linop_coef, matrix_coef)
+    npt.assert_allclose(linop_coef, matrix_coef)
 
 
 @parametrize_with_cases(
@@ -74,9 +75,10 @@ def test_ndft_implicit1(kspace, shape):
     linop_coef = implicit_type1_ndft(kspace, random_kspace.flatten(), shape)
     matrix_coef = matrix.conj().T @ random_kspace.flatten()
 
-    assert np.allclose(linop_coef, matrix_coef)
+    npt.assert_allclose(linop_coef, matrix_coef)
 
 
+@parametrize("klass", [RawNDFT, KeopsRawNDFT])
 @parametrize_with_cases(
     "kspace_grid, shape",
     cases=[
@@ -98,4 +100,4 @@ def test_ndft_fft(kspace_grid, shape):
         kspace = kspace.swapaxes(0, 1)
     kspace_fft = sp.fft.fftn(img)
 
-    assert np.allclose(kspace, kspace_fft)
+    assert npt.assert_allclose(kspace, kspace_fft)
