@@ -88,9 +88,9 @@ def test_ndft_implicit1(kspace, shape):
         CasesTrajectories.case_grid3D,
     ],
 )
-def test_ndft_fft(kspace_grid, shape):
+def test_ndft_fft(klass, kspace_grid, shape):
     """Test the raw ndft implementation."""
-    ndft_op = RawNDFT(kspace_grid, shape)
+    ndft_op = klass(kspace_grid, shape)
     # Create a random image
     img = (np.random.randn(*shape) + 1j * np.random.randn(*shape)).astype(np.complex64)
     kspace = np.empty(ndft_op.n_samples, dtype=img.dtype)
