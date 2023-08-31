@@ -11,7 +11,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpu = ["cupy-wheel"]
+gpu = ["cupy-wheel", "pykeops"]
 test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases", "pynfft2"]
 dev = ["black", "isort", "ruff"]
 
