@@ -55,13 +55,14 @@ class KeopsNDFT:
         else:
             raise ValueError("Samples must be a numpy or torch array")
 
+        self._keops_backend = keops_backend
         # location in the image domain.
         self._locs = (
             np.array(np.meshgrid(*[np.arange(s) for s in self.shape], indexing="ij"))
             .reshape(self.dim, -1)
             .T.astype(np.float32)
         )
-
+        self._keops_backend = keops_backend
         # Fourier Transform image -> kspace
         variables = ["x_j = Vj(1,{dim})", "nu_i = Vi(0,{dim})", "b_j = Vi(2,2)"]
         aliases = [s.format(dim=self.dim) for s in variables]
@@ -70,7 +71,6 @@ class KeopsNDFT:
             aliases,
             reduction_op="Sum",
             axis=1,
-            backend=keops_backend,
         )
 
         # Adjoint Fourier Transform kspace -> image
@@ -81,14 +81,15 @@ class KeopsNDFT:
             aliases,
             reduction_op="Sum",
             axis=1,
-            backend=keops_backend,
         )
 
     def op(self, coeffs, image):
         """Apply the Fourier transform."""
         image_ = image.astype(np.complex64).reshape(-1, 1)
         # Compute the Fourier transform
-        coeffs = self._op(self.samples, self._locs, image_).view(np.complex64)
+        coeffs = self._op(
+            self.samples, self._locs, image_, backend=self._keops_backend
+        ).view(np.complex64)
         return coeffs
 
     def adj_op(self, coeffs, image):
@@ -96,7 +97,9 @@ class KeopsNDFT:
         coeffs_ = coeffs.astype(np.complex64).reshape(-1, 1)
 
         # Compute the adjoint Fourier transform
-        image = self._adj_op(self._locs, self.samples, coeffs_).view(np.complex64)
+        image = self._adj_op(
+            self._locs, self.samples, coeffs_, backend=self._keops_backend
+        ).view(np.complex64)
 
         return image.reshape(self.shape)
 
