@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from .base import FourierOperatorCPU
+from .base import FourierOperatorCPU, get_pair_type
 
 
 def get_fourier_matrix(ktraj, shape):
@@ -51,6 +51,7 @@ def get_implicit_matrix(ktraj, shape):
         (len(ktraj), np.prod(shape)),
         matvec=lambda x: implicit_type2_ndft(ktraj, x, shape),
         rmatvec=lambda x: implicit_type1_ndft(ktraj, x, shape),
+        dtype=get_pair_type(ktraj.dtype),
     )
 
 

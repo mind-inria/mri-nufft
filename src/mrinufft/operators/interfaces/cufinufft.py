@@ -2,7 +2,7 @@
 
 import warnings
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory
+from .base import FourierOperatorBase, proper_trajectory, get_pair_dtype
 from .utils import (
     CUPY_AVAILABLE,
     check_size,
@@ -123,7 +123,7 @@ class RawCufinufftPlan:
         try:
             return self.plans[1].dtype
         except AttributeError:
-            return DTYPE_R2C[str(self.samples.dtype)]
+            return get_pair_dtype(self.samples.dtype)
 
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(

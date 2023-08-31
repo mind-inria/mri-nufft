@@ -10,8 +10,16 @@ from abc import ABC, abstractmethod
 import warnings
 import numpy as np
 
-# Mapping between numpy float and complex types.
-DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
+
+def get_pair_type(dtype):
+    """Return the complex/float dtype corresponding to the input float/complex dtype."""
+    DTYPE_R2C = {
+        "float32": "complex64",
+        "float64": "complex128",
+        "complex64": "float32",
+        "complex128": "float64",
+    }
+    return np.dtype(DTYPE_R2C[str(dtype)])
 
 
 def proper_trajectory(trajectory, normalize="pi"):
