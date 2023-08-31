@@ -8,6 +8,7 @@ from .base import FourierOperatorCPU, proper_trajectory
 
 PYKEOPS_AVAILABLE = True
 try:
+    import pykeops
     from pykeops.numpy import ComplexLazyTensor as NumpyComplexLazyTensor
     from pykeops.numpy import LazyTensor as NumpyLazyTensor
     from pykeops.numpy import Genred as NumpyGenred
@@ -41,31 +42,29 @@ class KeopsRawNDFT:
     def __init__(self, samples, shape, keops_backend="auto"):
         self.samples = proper_trajectory(samples, "pi").astype(np.float32)
         self.shape = shape
-        self.dim = samples.shape[-1]
+        self.n_samples = len(samples)
+        self.ndim = len(shape)
         self.dtype = samples.dtype
 
         if isinstance(samples, np.ndarray):
-            self._LazyTensor = NumpyLazyTensor
-            self._cLazyTensor = NumpyComplexLazyTensor
             self._Genred = NumpyGenred
         elif PYTORCH_AVAILABLE and isinstance(samples, torch.Tensor):
-            self._LazyTensor = TorchLazyTensor
-            self._cLazyTensor = TorchComplexLazyTensor
             self._Genred = TorchGenred
         else:
             raise ValueError("Samples must be a numpy or torch array")
 
         self._keops_backend = keops_backend
         # location in the image domain.
-        self._locs = (
-            np.array(np.meshgrid(*[np.arange(s) for s in self.shape], indexing="ij"))
-            .reshape(self.dim, -1)
-            .T.astype(np.float32)
+        self._locs = np.ascontiguousarray(
+            np.reshape(
+                np.meshgrid(*[np.arange(s) for s in self.shape], indexing="ij"),
+                (self.ndim, -1),
+            ).T.astype(np.float32)
         )
         self._keops_backend = keops_backend
         # Fourier Transform image -> kspace
-        variables = ["x_j = Vj(1,{dim})", "nu_i = Vi(0,{dim})", "b_j = Vi(2,2)"]
-        aliases = [s.format(dim=self.dim) for s in variables]
+        variables = ["x_j = Vj(1,{dim})", "nu_i = Vi(0,{dim})", "b_j = Vj(2,2)"]
+        aliases = [s.format(dim=self.ndim) for s in variables]
         self._op = self._Genred(
             "ComplexMult(ComplexExp1j( - nu_i | x_j),  b_j)",
             aliases,
@@ -74,22 +73,30 @@ class KeopsRawNDFT:
         )
 
         # Adjoint Fourier Transform kspace -> image
-        variables = ["x_i = Vi(0,{dim})", "nu_j = Vj(1,{dim})", "c_j = Vj(2,2)"]
-        aliases = [s.format(dim=self.dim) for s in variables]
+        variables = ["x_j = Vj(1,{dim})", "nu_i = Vi(0,{dim})", "c_i = Vi(2,2)"]
+        aliases = [s.format(dim=self.ndim) for s in variables]
         self._adj_op = self._Genred(
-            "ComplexMult(ComplexExp1j(nu_j | x_i), c_j)",
+            "ComplexMult(c_i, ComplexExp1j(nu_i | x_j))",
             aliases,
             reduction_op="Sum",
-            axis=1,
+            axis=0,
         )
 
     def op(self, coeffs, image):
         """Apply the Fourier transform."""
         image_ = image.astype(np.complex64).reshape(-1, 1)
         # Compute the Fourier transform
-        coeffs = self._op(
-            self.samples, self._locs, image_, backend=self._keops_backend
-        ).view(np.complex64)
+        np.copyto(
+            coeffs,
+            self._op(
+                self.samples,
+                self._locs,
+                image_,
+                backend=self._keops_backend,
+            )
+            .view(np.complex64)
+            .reshape(-1),
+        )
         return coeffs
 
     def adj_op(self, coeffs, image):
@@ -97,11 +104,18 @@ class KeopsRawNDFT:
         coeffs_ = coeffs.astype(np.complex64).reshape(-1, 1)
 
         # Compute the adjoint Fourier transform
-        image = self._adj_op(
-            self._locs, self.samples, coeffs_, backend=self._keops_backend
-        ).view(np.complex64)
-
-        return image.reshape(self.shape)
+        np.copyto(
+            image,
+            self._adj_op(
+                self.samples,
+                self._locs,
+                coeffs_,
+                backend=self._keops_backend,
+            )
+            .view(np.complex64)
+            .reshape(self.shape),
+        )
+        return image
 
 
 class MRIKeops(FourierOperatorCPU):
