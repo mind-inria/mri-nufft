@@ -1,6 +1,7 @@
 """Test the interfaces module."""
 import numpy as np
 import numpy.testing as npt
+import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 
 from mrinufft import get_operator
@@ -22,18 +23,19 @@ from case_trajectories import CasesTrajectories
         "finufft",
         "cufinufft",
         "pykeops",
+        "pykeops-gpu",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(
-    request,
-    backend="pynfft",
-    kspace_locs=None,
-    shape=None,
-    n_coils=1,
+    backend,
+    kspace_locs,
+    shape,
 ):
     """Generate an operator."""
-    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
+    if backend == "pykeops" and len(shape) > 2:
+        pytest.skip("PyKeOps is too expensive for 3D")
+    return get_operator(backend)(kspace_locs, shape, n_coils=1, smaps=None)
 
 
 # ref_backend is parametrized in conftest.py
