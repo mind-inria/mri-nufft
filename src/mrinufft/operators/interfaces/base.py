@@ -148,16 +148,16 @@ class FourierOperatorBase(ABC):
         """Number of coils for the operator."""
         return self._n_coils
 
-    @property
-    def ndim(self):
-        """Number of dimensions in image space of the operator."""
-        return len(self._shape)
-
     @n_coils.setter
     def n_coils(self, n_coils):
         if n_coils < 1 or not int(n_coils) == n_coils:
             raise ValueError(f"n_coils should be a positive integer, {type(n_coils)}")
         self._n_coils = int(n_coils)
+
+    @property
+    def ndim(self):
+        """Number of dimensions in image space of the operator."""
+        return len(self._shape)
 
     @property
     def smaps(self):
@@ -195,14 +195,14 @@ class FourierOperatorBase(ABC):
         """Return floating precision of the operator."""
         return self._dtype
 
-    @property
-    def cpx_dtype(self):
-        """Return complex floating precision of the operator."""
-        return np.dtype(DTYPE_R2C[str(self._dtype)])
-
     @dtype.setter
     def dtype(self, dtype):
         self._dtype = np.dtype(dtype)
+
+    @property
+    def cpx_dtype(self):
+        """Return complex floating precision of the operator."""
+        return get_pair_type(self._dtype)
 
     @property
     def samples(self):

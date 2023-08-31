@@ -2,7 +2,7 @@
 
 import warnings
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory, get_pair_dtype
+from .base import FourierOperatorBase, proper_trajectory, get_pair_type
 from .utils import (
     CUPY_AVAILABLE,
     check_size,
@@ -33,8 +33,6 @@ OPTS_FIELD_DECODE = {
         1: "spread or interpolate only",
     },
 }
-
-DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
 def _error_check(ier, msg):
@@ -123,7 +121,7 @@ class RawCufinufftPlan:
         try:
             return self.plans[1].dtype
         except AttributeError:
-            return get_pair_dtype(self.samples.dtype)
+            return get_pair_type(self.samples.dtype)
 
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
@@ -131,7 +129,7 @@ class RawCufinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            dtype=get_pair_type(self.samples.dtype),
             **kwargs,
         )
 
