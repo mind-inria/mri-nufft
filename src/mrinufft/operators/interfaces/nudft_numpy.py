@@ -105,5 +105,6 @@ class MRInumpy(FourierOperatorCPU):
             density=False,
             n_coils=n_coils,
             smaps=smaps,
-            raw_op=RawNDFT(samples, shape, **kwargs),
         )
+
+        self.raw_op = RawNDFT(self.samples, self.shape, **kwargs)
