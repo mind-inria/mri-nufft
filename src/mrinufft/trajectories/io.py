@@ -6,23 +6,29 @@ import numpy as np
 from datetime import datetime
 from array import array
 
-from .utils import KMAX, DEFAULT_RASTER_TIME_MS, \
-    DEFAULT_GYROMAGNETIC_RATIO, DEFAULT_GMAX, DEFAULT_SMAX, compute_gradients
+from .utils import (
+    KMAX,
+    DEFAULT_RASTER_TIME_MS,
+    DEFAULT_GYROMAGNETIC_RATIO,
+    DEFAULT_GMAX,
+    DEFAULT_SMAX,
+    compute_gradients,
+)
 
 
 def write_gradients(
     gradients: np.ndarray,
-    start_positions: np.ndarray, 
+    start_positions: np.ndarray,
     grad_filename: str,
-    img_size: Tuple[int, ...], 
+    img_size: Tuple[int, ...],
     FOV: Tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
-    gamma: float = 42.576e3, 
+    gamma: float = 42.576e3,
     version: float = 4.2,
     recon_tag: float = 1.1,
-    timestamp: Optional[float] = None, 
-    keep_txt_file: bool = False
+    timestamp: Optional[float] = None,
+    keep_txt_file: bool = False,
 ):
     """Create gradient file from gradients and start positions.
 
@@ -51,9 +57,9 @@ def write_gradients(
     timestamp : Optional[float], optional
         Timestamp of trajectory, by default None
     keep_txt_file : bool, optional
-        Whether to keep the text file used temporarily which holds data pushed to 
+        Whether to keep the text file used temporarily which holds data pushed to
         binary file, by default False
-    
+
     """
     num_shots = gradients.shape[0]
     num_samples_per_shot = gradients.shape[1]
@@ -71,9 +77,9 @@ def write_gradients(
     if version >= 4.1:
         img_size = img_size
         FOV = FOV
-        if type(img_size) is int:
+        if isinstance(img_size, int):
             img_size = (img_size,) * dimension
-        if type(FOV) is float:
+        if isinstance(FOV, float):
             FOV = (FOV,) * dimension
         for fov in FOV:
             file.write(str(fov) + "\n")
@@ -103,24 +109,22 @@ def write_gradients(
                 timestamp = float(datetime.now().timestamp())
             file.write(str(timestamp) + "\n")
             left_over -= 1
-        file.write(str("0\n"*left_over))
+        file.write(str("0\n" * left_over))
     # Write all the k0 values
-    file.write("\n".join(
-        " ".join(
-                [f"{iter2:5.4f}" for iter2 in iter1]
-            )
-        for iter1 in start_positions) + "\n"
+    file.write(
+        "\n".join(
+            " ".join([f"{iter2:5.4f}" for iter2 in iter1]) for iter1 in start_positions
+        )
+        + "\n"
     )
     if version < 4.1:
         # Write the maximum Gradient
         file.write(str(max_grad) + "\n")
     # Normalize gradients
     gradients = gradients / max_grad
-    file.write("\n".join(
-        " ".join(
-            [f"{iter2:5.6f}" for iter2 in iter1]
-        )
-        for iter1 in gradients) + "\n"
+    file.write(
+        "\n".join(" ".join([f"{iter2:5.6f}" for iter2 in iter1]) for iter1 in gradients)
+        + "\n"
     )
     file.close()
     y = []
@@ -136,7 +140,6 @@ def write_gradients(
         os.remove(grad_filename + ".txt")
 
 
-
 def _pop_elements(array, num_elements=1, type="float"):
     """Pop elements from an array.
 
@@ -148,11 +151,11 @@ def _pop_elements(array, num_elements=1, type="float"):
         number of elements to pop, by default 1
     type : str, optional
         Type of the element being popped, by default 'float'.
-    
+
 
     Returns
     -------
-    element_popped: 
+    element_popped:
         Element popped from array with type as specified.
     array: np.ndarray
         Array with elements popped.
@@ -160,10 +163,9 @@ def _pop_elements(array, num_elements=1, type="float"):
     if num_elements == 1:
         return array[0].astype(type), array[1:]
     else:
-        return array[0:num_elements].astype(type), \
-               array[num_elements:]
+        return array[0:num_elements].astype(type), array[num_elements:]
 
-                   
+
 def write_trajectory(
     trajectory: np.ndarray,
     FOV: Tuple[float, ...],
@@ -175,14 +177,14 @@ def write_trajectory(
     check_constraints: bool = True,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    **kwargs
+    **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
 
     Parameters
     ----------
     trajectory : np.ndarray
-        Trajectory in k-space points. 
+        Trajectory in k-space points.
         Shape (num_shots, num_samples_per_shot, dimension).
     FOV : tuple
         Field of view
@@ -209,7 +211,7 @@ def write_trajectory(
     gradients, start_positions, _ = compute_gradients(
         trajectory,
         traj_norm_factor=traj_norm_factor,
-        resolution=np.asarray(FOV)/np.asarray(img_size),
+        resolution=np.asarray(FOV) / np.asarray(img_size),
         raster_time=raster_time,
         gamma=gamma,
         check_constraints=check_constraints,
@@ -225,16 +227,16 @@ def write_trajectory(
         gamma=gamma,
         **kwargs,
     )
-    
-                   
+
+
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float=DEFAULT_RASTER_TIME_MS, 
-    num_adc_samples: int=None,
-    gamma: float=DEFAULT_GYROMAGNETIC_RATIO,
-    raster_time: float=DEFAULT_RASTER_TIME_MS,
-    read_shots: bool=False,
-    normalize_factor: float=KMAX
+    dwell_time: float = DEFAULT_RASTER_TIME_MS,
+    num_adc_samples: int = None,
+    gamma: float = DEFAULT_GYROMAGNETIC_RATIO,
+    raster_time: float = DEFAULT_RASTER_TIME_MS,
+    read_shots: bool = False,
+    normalize_factor: float = KMAX,
 ):
     """Get k-space locations from gradient file.
 
@@ -261,7 +263,7 @@ def read_trajectory(
     -------
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
-    """    
+    """
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = raster_time * 1e6
     with open(grad_filename, "rb") as binfile:
@@ -278,15 +280,12 @@ def read_trajectory(
             min_osf, data = _pop_elements(data, type="int")
             gamma, data = _pop_elements(data)
             gamma = gamma / 1000
-        (num_shots,
-         num_samples_per_shot), data = _pop_elements(data, 2, type="int")
+        (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if num_adc_samples is None:
             if read_shots:
                 num_adc_samples = num_samples_per_shot + 1
             else:
-                num_adc_samples = int(
-                    num_samples_per_shot * (raster_time / dwell_time)
-                )
+                num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
         if version >= 4.1:
             TE, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
@@ -298,7 +297,7 @@ def read_trajectory(
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
             _, data = _pop_elements(data, left_over)
-        start_positions, data = _pop_elements(data, dimension*num_shots)
+        start_positions, data = _pop_elements(data, dimension * num_shots)
         start_positions = np.reshape(start_positions, (num_shots, dimension))
         if version < 4.1:
             grad_max, data = _pop_elements(data)
@@ -306,50 +305,52 @@ def read_trajectory(
             data,
             dimension * num_samples_per_shot * num_shots,
         )
-        gradients = np.reshape(grad_max * gradients,
-                               (num_shots * num_samples_per_shot, dimension))
-        # Convert gradients from mT/m to T/m
         gradients = np.reshape(
-            gradients * 1e-3,
-            (-1, num_samples_per_shot, dimension)
+            grad_max * gradients, (num_shots * num_samples_per_shot, dimension)
         )
+        # Convert gradients from mT/m to T/m
+        gradients = np.reshape(gradients * 1e-3, (-1, num_samples_per_shot, dimension))
         kspace_loc = np.zeros((num_shots, num_adc_samples, dimension))
         kspace_loc[:, 0, :] = start_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
         Q, R = divmod(adc_times, gradient_raster_time_ns)
         Q = Q.astype("int")
         if not np.all(
-                np.logical_or(Q < num_adc_samples,
-                              np.logical_and(Q == num_adc_samples, R == 0))
+            np.logical_or(
+                Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
+            )
         ):
-            warnings.warn("Binary file doesnt seem right! "
-                          "Proceeding anyway")
-        grad_accumulated = (np.cumsum(gradients, axis=1) *
-                            gradient_raster_time_ns)
+            warnings.warn("Binary file doesnt seem right! " "Proceeding anyway")
+        grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:
                 if q > gradients.shape[1]:
-                    warnings.warn("Number of samples is more than what was "
-                                  "obtained in binary file!\n"
-                                  "Data will be extended")
-                kspace_loc[:, i+1, :] = (
-                        start_positions + (
-                            grad_accumulated[:, gradients.shape[1]-1, :] +
-                            gradients[:, gradients.shape[1]-1, :] * r
-                        ) * gamma * 1e-6
+                    warnings.warn(
+                        "Number of samples is more than what was "
+                        "obtained in binary file!\n"
+                        "Data will be extended"
                     )
+                kspace_loc[:, i + 1, :] = (
+                    start_positions
+                    + (
+                        grad_accumulated[:, gradients.shape[1] - 1, :]
+                        + gradients[:, gradients.shape[1] - 1, :] * r
+                    )
+                    * gamma
+                    * 1e-6
+                )
             else:
                 if q == 0:
-                    kspace_loc[:, i+1, :] = (
-                            start_positions + gradients[:, q, :] * r 
-                    ) * gamma * 1e-6
+                    kspace_loc[:, i + 1, :] = (
+                        (start_positions + gradients[:, q, :] * r) * gamma * 1e-6
+                    )
                 else:
-                    kspace_loc[:, i+1, :] = (
-                            start_positions + (
-                                grad_accumulated[:, q-1, :] +
-                                gradients[:, q, :] * r
-                            ) * gamma * 1e-6
-                        )
+                    kspace_loc[:, i + 1, :] = (
+                        start_positions
+                        + (grad_accumulated[:, q - 1, :] + gradients[:, q, :] * r)
+                        * gamma
+                        * 1e-6
+                    )
         params = {
             "version": version,
             "dimension": dimension,
@@ -369,6 +370,3 @@ def read_trajectory(
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
         return kspace_loc, params
-
-    
-    
