@@ -68,21 +68,21 @@ def compute_gradients(
     gmax=DEFAULT_GMAX,
 ):
     """Compute Gradient and Slew rate from a trajectory.
-    
+
     Also check for constraints violations if check_constraints is True.
-    
+
 
     Parameters
     ----------
     trajectory : np.ndarray
-        array of trajectory points 
+        array of trajectory points
     traj_norm_factor : float, optional
         Normalization factor for trajectory points.
         The default is KMAX.
     resolution : float, optional
         Resolution of the trajectory in mm. The default is DEFAULT_RESOLUTION.
     raster_time : float, optional
-        Duration of each point in the trajectory in ms. 
+        Duration of each point in the trajectory in ms.
         The default is DEFAULT_RASTER_TIME_MS.
     gamma : float, optional
         Gyromagnetic ratio of the particle. The default is DEFAULT_GYROMAGNETIC_RATIO.
@@ -93,7 +93,7 @@ def compute_gradients(
         Maximum Slew rate. The default is DEFAULT_SMAX.
     gmax : float, optional
         Maximum Gradient magnitude. The default is DEFAULT_GMAX.
-    
+
 
     Returns
     -------
@@ -106,11 +106,11 @@ def compute_gradients(
     """
     # normalize the trajectory
     trajectory = trajectory / traj_norm_factor / (2 * resolution)
-    
+
     # compute gradients and slew rates
     gradients = np.diff(trajectory, axis=1) / raster_time / gamma
     slews = np.diff(gradients, axis=1) / raster_time
-    
+
     # compute the start position
     start_positions = trajectory[:, 0, :]
     if check_constraints:
@@ -122,9 +122,9 @@ def compute_gradients(
         )
         if violation:
             warnings.warn(
-                "Hard constraints violated! " 
+                "Hard constraints violated! "
                 f"Max Gradient magnitude: {maxG:.2f} > {gmax:.2f}"
-                f"Max Slew rate: {maxS:.2f} > {smax:.2f}" 
+                f"Max Slew rate: {maxS:.2f} > {smax:.2f}"
             )
     return gradients, start_positions, slews
 

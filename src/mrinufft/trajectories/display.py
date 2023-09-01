@@ -57,7 +57,11 @@ def setup_3D_ticks(size):
 
 
 def display_2D_trajectory(
-    trajectory, size=5, one_shot=False, constraints=False, subfigure=None,
+    trajectory,
+    size=5,
+    one_shot=False,
+    constraints=False,
+    subfigure=None,
     resolution=DEFAULT_RESOLUTION,
 ):
     """Display of 2D trajectory.
