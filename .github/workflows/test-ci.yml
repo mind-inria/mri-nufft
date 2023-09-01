@@ -23,7 +23,7 @@ jobs:
         run: pip install black ruff
       - name: Black Check
         shell: bash
-        run: black . --diff --color
+        run: black . --diff --color --check
       - name: ruff Check
         shell: bash
         run: ruff src
