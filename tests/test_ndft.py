@@ -123,8 +123,8 @@ def test_ndft_ifft(klass, kspace_grid, shape):
     img = np.empty(ndft_op.shape, dtype=kspace.dtype)
     ndft_op.adj_op(kspace.flatten(), img)
     # Reshape the kspace to be on a grid (because the ndft is not doing it)
-    img_ifft = sp.fft.ifftn(
-        kspace, norm="ortho"
-    )  # FIXME: find the correct norm factor.
-
+    if len(shape) >= 2:
+        img = img.swapaxes(0, 1)
+    img_ifft = sp.fft.ifftn(kspace)  # FIXME: find the correct norm factor.
+    img_ifft *= np.prod(shape)
     npt.assert_allclose(img, img_ifft, atol=1e-3, rtol=1e-3)
