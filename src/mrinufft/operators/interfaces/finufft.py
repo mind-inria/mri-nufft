@@ -103,6 +103,7 @@ class MRIfinufft(FourierOperatorBase):
         n_trans=1,
         smaps=None,
         squeeze_dims=False,
+        **kwargs,
     ):
         super().__init__()
 
@@ -138,6 +139,7 @@ class MRIfinufft(FourierOperatorBase):
             self.samples,
             tuple(shape),
             n_trans=n_trans,
+            **kwargs,
         )
 
     def op(self, data, ksp=None):
