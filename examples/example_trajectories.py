@@ -253,7 +253,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # center then outside or not (center-out). ``(default False)``. See radial
 # - ``nb_zigzags (float)``: number of times a cone border will be reached
 # from the center. ``(default 5)``
-# - ``width (float)``: cone width, normalized by the default uniform width. 
+# - ``width (float)``: cone width, normalized by the default uniform width.
 # ``(default 1)``
 #
 
@@ -311,7 +311,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # Another radial-like trajectory zigzaging similarly to cones, but over a
 # whole band rather than cones reducing around the center.
 #
-# Arguments: 
+# Arguments:
 # - ``Nc (int)``: number of individual shots. See radial
 # - ``Ns (int)``: number of samples per shot. See radial
 # - ``tilt (str, float)``: angle between each consecutive shot (in radians).
