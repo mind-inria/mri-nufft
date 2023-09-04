@@ -205,7 +205,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             n_coils=self.n_coils,
             density_comp=self.density,
             smaps=smaps,
-            **self.kwargs
+            **self.kwargs,
         )
 
     def op(self, data, *args):
