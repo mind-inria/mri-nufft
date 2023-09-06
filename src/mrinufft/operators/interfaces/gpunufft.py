@@ -69,7 +69,7 @@ class gpuNUFFT:
             raise ValueError(
                 "gpuNUFFT library is not installed, " "please refer to README"
             )
-        if (n_coils < 1) or (type(n_coils) is not int):
+        if (n_coils < 1) or not isinstance(n_coils, int):
             raise ValueError("The number of coils should be an integer >= 1")
         self.n_coils = n_coils
         self.shape = shape
