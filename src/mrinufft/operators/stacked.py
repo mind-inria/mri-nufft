@@ -75,13 +75,13 @@ class MRIStackedNUFFT(FourierOperatorBase):
         """Return number of samples."""
         return len(self.samples) * len(self.z_index)
 
-    def _fftz(data):
+    def _fftz(self, data):
         """Apply FFT on z-axis."""
         return np.fft.fftshift(
             np.fft.fft(np.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         )
 
-    def _ifftz(data):
+    def _ifftz(self, data):
         """Apply IFFT on z-axis."""
         return np.fft.fftshift(
             np.fft.ifft(np.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
@@ -121,8 +121,9 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 (self.n_coils, len(self.samples), len(self.z_index)),
                 dtype=self.cpx_dtype,
             )
+        data_ = data.reshape((self.n_batchs, self.n_coils, *self.shape))
         ksp_z = self._fftz(data_)
-        ksp_z = ksp_z.reshape(self.operator.n_coils, *self.shape)
+        ksp_z = ksp_z.reshape((self.operator.n_coils, *self.shape))
         for i, zidx in enumerate(self.z_index):
             self.operator.op(ksp_z[..., zidx], ksp[:, :, i])
         ksp = ksp.reshape(self.n_batchs, self.n_coils, self.n_samples)
@@ -134,10 +135,13 @@ class MRIStackedNUFFT(FourierOperatorBase):
         # Apply the FFT on z-axis
         # Do SENSE Stuff if needed.
 
+        coeffs_ = np.reshape(
+            coeffs, (self.n_batchs, self.n_coils, len(self.samples), len(self.z_index))
+        )
         if self.uses_sense:
-            return self._adj_op_sense(coeffs, img)
+            return self._adj_op_sense(coeffs_, img)
         else:
-            return self._adj_op_calibless(coeffs, img)
+            return self._adj_op_calibless(coeffs_, img)
 
     def _adj_op_sense(self, coeffs, img):
         imgz = np.zeros(
@@ -150,4 +154,14 @@ class MRIStackedNUFFT(FourierOperatorBase):
         img = img or np.empty(self.n_batchs, *self.shape, dtype=self.cpx_dtype)
         for b in self.n_batchs:
             img[b] = np.sum(imgc[b] * self.smaps.conj(), axis=0)
+        return img
+
+    def _adj_op_calibless(self, coeffs, img):
+        imgz = np.zeros(
+            (self.n_batchs * self.n_coils, *self.shape), dtype=self.cpx_dtype
+        )
+        for i, zidx in enumerate(self.z_index):
+            self.operator.adj_op(coeffs[..., i], imgz[..., zidx])
+        imgz = np.reshape(imgz, (self.n_batchs, self.n_coils, *self.shape))
+        img = self._ifftz(imgz)
         return img
