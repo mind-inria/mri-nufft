@@ -1,9 +1,8 @@
 """Stacked Operator for NUFFT."""
 
 import numpy as np
-import scipy as sp
 
-from .interfaces.base import FourierOperatorBase, proper_trajectory
+from .interfaces.base import FourierOperatorBase
 from .interfaces import get_operator
 
 
@@ -31,11 +30,13 @@ class MRIStackedNUFFT(FourierOperatorBase):
     """
 
     # Developer Notes:
-    # Internally the stacked Nufft operator (self) uses a backend MRI aware NUFFT operator(op), configured as such:
+    # Internally the stacked Nufft operator (self) uses a backend MRI aware NUFFT
+    # operator(op), configured as such:
     # - op.smaps=None
     # - op.n_coils = len(self.z_index) ; op.n_batchs = self.n_coils * self.n_batchs.
     # The kspace is organized as a 2D array of shape
-    # (self.n_batchs, self.n_coils, self.n_samples) Note that the stack dimension is fused with the samples
+    # (self.n_batchs, self.n_coils, self.n_samples) Note that the stack dimension is
+    # fused with the samples
     #
 
     def __init__(

@@ -7,12 +7,11 @@ Example of Stacked NUFFT trajectory operator.
 
 This examples show how to use the Stacked NUFFT operator to acquire and reconstruct data
 in kspace where the sampling of pattern is a stack of non cartesian trajectory.
-Here a stack of spiral with a gaussian density in the z direction is used.
+Here a stack of spiral is used as a demonstration.
 
 """
 
 import matplotlib.pyplot as plt
-from scipy.stats import norm
 import numpy as np
 from mrinufft import display_2D_trajectory
 
@@ -42,7 +41,7 @@ samples = initialize_2D_spiral(Nc=16, Ns=500, nb_revolutions=10)
 density = voronoi(samples)
 
 display_2D_trajectory(samples)
-
+# specify locations for the stack of trajectories.
 kz_slices = np.arange(mri_data.shape[-1])
 
 # %%
