@@ -190,7 +190,7 @@ class FourierOperatorBase(ABC):
     @property
     def cpx_dtype(self):
         """Return complex floating precision of the operator."""
-        return np.dtype(DTYPE_R2C[str(self._dtype)])
+        return np.dtype(DTYPE_R2C[str(self.dtype)])
 
     @dtype.setter
     def dtype(self, dtype):

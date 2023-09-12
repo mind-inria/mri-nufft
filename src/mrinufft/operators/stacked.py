@@ -66,6 +66,11 @@ class MRIStackedNUFFT(FourierOperatorBase):
         )
 
     @property
+    def dtype(self):
+        """Return dtype."""
+        return self.operator.dtype
+
+    @property
     def n_samples(self):
         """Return number of samples."""
         return len(self.samples) * len(self.z_index)
