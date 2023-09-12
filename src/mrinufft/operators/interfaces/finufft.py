@@ -178,7 +178,8 @@ class MRIfinufft(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         dataf = data.reshape((B, *XYZ))
-        ksp = ksp or np.empty((B * C, K), dtype=self.cpx_dtype)
+        if ksp is None:
+            ksp = np.empty((B * C, K), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -189,9 +190,10 @@ class MRIfinufft(FourierOperatorBase):
         return ksp
 
     def _op_calibless(self, data, ksp=None):
-        ksp = ksp or np.empty(
-            (self.n_batchs * self.n_coils, self.n_samples), dtype=self.cpx_dtype
-        )
+        if ksp is None:
+            ksp = np.empty(
+                (self.n_batchs * self.n_coils, self.n_samples), dtype=self.cpx_dtype
+            )
         dataf = np.reshape(data, (self.n_batchs * self.n_coils, *self.shape))
         if self.n_trans == 1:
             for i in range(self.n_coils * self.n_batchs):
@@ -241,7 +243,8 @@ class MRIfinufft(FourierOperatorBase):
     def _adj_op_sense(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-        img = img or np.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        if img is None:
+            img = np.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
         img_batched = np.zeros((T, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
@@ -257,7 +260,8 @@ class MRIfinufft(FourierOperatorBase):
     def _adj_op_calibless(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-        img = img or np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        if img is None:
+            img = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
         coeffs_f = np.reshape(coeffs, (B * C, K))
         for i in range((B * C) // T):
             self._adj_op(coeffs_f[i * T : (i + 1) * T], img[i * T : (i + 1) * T])

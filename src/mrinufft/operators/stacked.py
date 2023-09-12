@@ -43,8 +43,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
     ):
         self.samples = samples.reshape(-1, samples.shape[-1])
         self.shape = shape
-
-        z_index = z_index or np.ones(shape[-1], dtype=bool)
+        if z_index is None:
+            z_index = np.ones(shape[-1], dtype=bool)
         try:
             self.z_index = np.arange(shape[-1])[z_index]
         except IndexError as e:
@@ -116,11 +116,11 @@ class MRIStackedNUFFT(FourierOperatorBase):
         return ksp
 
     def _op_calibless(self, data, ksp=None):
-        ksp = ksp or np.empty(
-            (self.n_coils, len(self.samples) * len(self.z_index)),
-            dtype=self.cpx_dtype,
-        )
-        data_ = np.reshape(self.n_batchs, self.n_coils, *self.shape)
+        if ksp is None:
+            ksp = np.empty(
+                (self.n_coils, len(self.samples), len(self.z_index)),
+                dtype=self.cpx_dtype,
+            )
         ksp_z = self._fftz(data_)
         ksp_z = ksp_z.reshape(self.operator.n_coils, *self.shape)
         for i, zidx in enumerate(self.z_index):
