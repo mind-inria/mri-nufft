@@ -26,7 +26,7 @@ density = voronoi(samples_loc)
 
 # And create the associated operator.
 nufft = NufftOperator(
-    samples_loc, shape=image.shape, density=density, n_coils=1, squeeze_dim=True
+    samples_loc, shape=image.shape, density=density, n_coils=1, squeeze_dims=True
 )
 
 kspace_data = nufft.op(image)  # Image -> Kspace
