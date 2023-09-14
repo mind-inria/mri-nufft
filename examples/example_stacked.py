@@ -15,16 +15,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mrinufft import display_2D_trajectory
 
+plt.rcParams["image.cmap"] = "gray"
 
 # %%
 # Data Generation
 # ===============
 # For realistic 3D images we will use the brainweb dataset.
-# installable using ``pip install brainweb``
+# installable using ``pip install brainweb-dl``
 
 from brainweb_dl import get_mri
 
-mri_data = get_mri(0, "T1").T
+mri_data = get_mri(0, "T1")
+mri_data = mri_data[::-1, ...]
 fig, ax = plt.subplots(1, 3)
 ax[0].imshow(mri_data[90, :, :])
 ax[1].imshow(mri_data[:, 108, :])
