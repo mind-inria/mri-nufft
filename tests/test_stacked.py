@@ -107,7 +107,7 @@ def kspace_data(operator):
 
 
 def test_stack_forward(operator, ref_op, image_data):
-    """Compare Stacked and 3D nufft ."""
+    """Compare Stacked and 3D NUFFT ."""
     kspace_nufft = operator.op(image_data).squeeze()
     kspace_ref = ref_op.op(image_data).squeeze()
     assert np.percentile(abs(kspace_nufft - kspace_ref), 95) < 1e-4

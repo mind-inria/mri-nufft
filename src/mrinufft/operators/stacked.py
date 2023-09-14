@@ -15,6 +15,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
     ----------
     samples : array-like
         Sample locations in a 2D kspace
+    shape: tuple
+        Shape of the image.
     z_index: array-like
         Cartesian z index of masked plan.
     backend: str
@@ -30,7 +32,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
     """
 
     # Developer Notes:
-    # Internally the stacked Nufft operator (self) uses a backend MRI aware NUFFT
+    # Internally the stacked NUFFT operator (self) uses a backend MRI aware NUFFT
     # operator(op), configured as such:
     # - op.smaps=None
     # - op.n_coils = len(self.z_index) ; op.n_batchs = self.n_coils * self.n_batchs.
@@ -51,7 +53,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
         except IndexError as e:
             raise ValueError(
                 "z-index should be a boolean array of length shape[-1], "
-                "or  an array of integer."
+                "or an array of integer."
             ) from e
 
         self.n_coils = n_coils
@@ -85,6 +87,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _ifftz(self, data):
         """Apply IFFT on z-axis."""
+        # sqrt(2) required for normalization
         return np.fft.fftshift(
             np.fft.ifft(np.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
