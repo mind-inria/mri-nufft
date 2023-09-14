@@ -70,7 +70,7 @@ Want to see more ?
 Supported Libraries
 -------------------
 
-These libraries needs to be installed seperately from this package.
+These libraries needs to be installed separately from this package.
 
 .. Don't touch the spacing ! ..
 
@@ -79,6 +79,7 @@ Backend              Hardward     Batch computation   Precision       Auto Densi
 ==================== ============ =================== =============== ============== ===============
 cufinufft_           GPU (CUDA)   ✔                   single          ✔ *             cupy/torch
 finufft_             CPU          ✔                   single/double   TBA            numpy
+gpunufft_            GPU          ✔                   single/double   ✔              numpy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
 pynufft_             CPU          ✘                   single/double   ✘              numpy
 pynufft_             GPU          ✘                   ✘               ✘              Not Supported
@@ -89,6 +90,7 @@ pynfft_              CPU          ✘                   singles/double   ✘    
 .. _cufinufft: https://github.com/flatironinstitute/finufft
 .. _finufft: https://github.com/flatironinstitute/finufft
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
+.. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
 .. _pynufft: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
 
