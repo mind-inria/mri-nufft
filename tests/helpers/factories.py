@@ -1,4 +1,4 @@
-"""Usefull factories to create matching data for an operator."""
+"""Useful factories to create matching data for an operator."""
 import numpy as np
 
 

@@ -11,7 +11,7 @@ except ImportError:
 
 
 class gpuNUFFT:
-    """GPU implementation of N-D non uniform Fast Fourrier Transform class.
+    """GPU implementation of N-D non-uniform fast Fourier Transform class.
 
     Attributes
     ----------
@@ -39,7 +39,7 @@ class gpuNUFFT:
         balance_workload=True,
         smaps=None,
     ):
-        """Initilize the 'NUFFT' class.
+        """Initialize the 'NUFFT' class.
 
         Parameters
         ----------
@@ -67,7 +67,7 @@ class gpuNUFFT:
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
-                "gpuNUFFT library is not installed, " "please refer to README"
+                "gpuNUFFT library is not installed, please refer to README"
             )
         if (n_coils < 1) or not isinstance(n_coils, int):
             raise ValueError("The number of coils should be an integer >= 1")
@@ -96,12 +96,12 @@ class gpuNUFFT:
         )
 
     def op(self, image, interpolate_data=False):
-        """Compute the masked non-cartesian Fourier transform.
+        """Compute the masked non-Cartesian Fourier transform.
 
         Parameters
         ----------
         image: np.ndarray
-            input array with the same shape as shape.
+            input array with the same shape as self.shape.
         interpolate_data: bool, default False
             if set to True, the image is just apodized and interpolated to
             kspace locations. This is used for density estimation.
@@ -109,7 +109,7 @@ class gpuNUFFT:
         Returns
         -------
         np.ndarray
-            Non Uniform Fourier transform of the input image.
+            Non-uniform Fourier transform of the input image.
         """
         # Base gpuNUFFT Operator is written in CUDA and C++, we need to
         # reorganize data to follow a different memory hierarchy
@@ -130,7 +130,7 @@ class gpuNUFFT:
         return coeff
 
     def adj_op(self, coeff, grid_data=False):
-        """Compute adjoint  of non-uniform Fourier Transform.
+        """Compute adjoint of non-uniform Fourier transform.
 
         Parameters
         ----------
@@ -167,12 +167,15 @@ class MRIGpuNUFFT(FourierOperatorBase):
         (2D for an image, 3D for a volume).
     shape: tuple of int
         shape of the image (not necessarly a square matrix).
-    implementation: str 'cpu' | 'gpuNUFFT',
-    default 'cpu'
-        which implementation of NFFT to use.
     n_coils: int default 1
         Number of coils used to acquire the signal in case of multiarray
         receiver coils acquisition
+    density: bool or np.ndarray default None
+        if True, the density compensation is estimated from the samples
+        locations. If an array is passed, it is used as the density
+        compensation.
+    smaps: np.ndarray default None
+        Holds the sensitivity maps for SENSE reconstruction.
     kwargs: extra keyword args
         these arguments are passed to gpuNUFFT operator. This is used
         only in gpuNUFFT
@@ -209,16 +212,17 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
 
     def op(self, data, *args):
-        """Compute forward Non Uniform Fourier Transform.
+        """Compute forward non-uniform Fourier Transform.
 
         Parameters
         ----------
         img: np.ndarray
-            input N-D array with the same shape as shape.
+            input N-D array with the same shape as self.shape.
 
         Returns
         -------
-            masked Fourier transform of the input image.
+        np.ndarray
+            Masked Fourier transform of the input image.
         """
         return self.impl.op(data, *args)
 
@@ -232,7 +236,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
         Returns
         -------
-            inverse discrete Fourier transform of the input coefficients.
+        np.ndarray
+            Inverse discrete Fourier transform of the input coefficients.
         """
         return self.impl.adj_op(coeffs, *args)
 
@@ -247,7 +252,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
 
 def pipe(kspace_loc, volume_shape, num_iterations=10):
-    """Compute the density compensator for a given set of kspace locations.
+    """Compute the density compensation weights for a given set of kspace locations.
 
     Parameters
     ----------
