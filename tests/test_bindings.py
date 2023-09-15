@@ -9,6 +9,12 @@ import pytest
     "backend,name",
     [
         ("finufft", "MRIfinufft"),
+        ("cufinufft", "MRICufiNUFFT"),
+        ("tensorflow", "MRITensorflowNUFFT"),
+        ("pynufft-cpu", "MRIPynufft"),
+        ("pynfft", "MRInfft"),
+        ("numpy", "MRInumpy"),
+        ("gpunufft", "MRIGpuNUFFT"),
     ],
 )
 def test_get_operator(backend, name):

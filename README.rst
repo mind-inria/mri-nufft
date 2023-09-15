@@ -70,7 +70,7 @@ Want to see more ?
 Supported Libraries
 -------------------
 
-These libraries needs to be installed seperately from this package.
+These libraries needs to be installed separately from this package.
 
 .. Don't touch the spacing ! ..
 
@@ -79,6 +79,7 @@ Backend              Hardward     Batch computation   Precision       Auto Densi
 ==================== ============ =================== =============== ============== ===============
 cufinufft_           GPU (CUDA)   ✔                   single          ✔ *             cupy/torch
 finufft_             CPU          ✔                   single/double   TBA            numpy
+gpunufft_            GPU          ✔                   single/double   ✔              numpy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
 pynufft_             CPU          ✘                   single/double   ✘              numpy
 pynufft_             GPU          ✘                   ✘               ✘              Not Supported
@@ -89,6 +90,7 @@ pynfft_              CPU          ✘                   singles/double   ✘    
 .. _cufinufft: https://github.com/flatironinstitute/finufft
 .. _finufft: https://github.com/flatironinstitute/finufft
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
+.. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
 .. _pynufft: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
 
@@ -105,7 +107,8 @@ Then clone and install the package::
     $ pip install ./mri-nufft
 
 [Temporary] Custom Cufinufft installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 In order for the density compensation to work for cufinufft, we have to use the in-house fork enabling it ::
 
@@ -118,6 +121,22 @@ In order for the density compensation to work for cufinufft, we have to use the 
    cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
 Development of this feature happens `here <https://github.com/flatironinstitute/finufft/pull/308>`_
+
+[Temporary] Faster gpuNUFFT with concurency
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A faster version of gpuNUFFT is available `here <https://github.com/chaithyagr/gpuNUFFT>`_.
+
+.. warning::
+
+    This is compatible only up to CUDA 11.8 !
+
+To install it ::
+
+    git clone https://github.com/chaythiagr/gpuNUFFT
+    cd gpuNUFFT
+    python setup.py install
+
 
 Documentation
 -------------

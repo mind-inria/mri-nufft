@@ -237,7 +237,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         smaps_cached=False,
         verbose=False,
         persist_plan=True,
-        squeeze_dim=False,
+        squeeze_dims=False,
         n_trans=1,
         **kwargs,
     ):
@@ -253,7 +253,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.shape = shape
         self.n_batchs = n_batchs
         self.n_trans = n_trans
-        self.squeeze_dim = squeeze_dim
+        self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
         # For now only single precision is supported
         self.samples = np.asfortranarray(

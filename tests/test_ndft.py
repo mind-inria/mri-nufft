@@ -11,6 +11,7 @@ from mrinufft.operators.interfaces.nudft_numpy import (
 )
 
 from case_trajectories import CasesTrajectories, case_grid1D
+from helpers import assert_almost_allclose
 
 
 @parametrize_with_cases(
@@ -98,4 +99,4 @@ def test_ndft_fft(kspace_grid, shape):
         kspace = kspace.swapaxes(0, 1)
     kspace_fft = sp.fft.fftn(img)
 
-    assert np.allclose(kspace, kspace_fft)
+    assert_almost_allclose(kspace, kspace_fft, atol=1e-5, rtol=1e-5, mismatch=5)

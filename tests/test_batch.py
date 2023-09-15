@@ -44,6 +44,7 @@ def operator(
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)
+        smaps /= np.linalg.norm(smaps, axis=0)
     else:
         smaps = None
     return get_operator(backend)(

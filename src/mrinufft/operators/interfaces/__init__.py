@@ -6,27 +6,31 @@ from .finufft import MRIfinufft, FINUFFT_AVAILABLE
 from .pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
 from .nudft_numpy import MRInumpy
 from .nfft import MRInfft, PYNFFT_AVAILABLE
+from .gpunufft import MRIGpuNUFFT, GPUNUFFT_AVAILABLE
 
-from .base import proper_trajectory
+from .base import proper_trajectory, FourierOperatorBase
 
 __all__ = [
+    "FourierOperatorBase",
     "MRICufiNUFFT",
+    "MRIGpuNUFFT",
+    "MRIPynufft",
     "MRITensorflowNUFFT",
     "MRIfinufft",
     "MRInumpy",
-    "MRIPynufft",
     "check_backend",
     "get_operator",
     "proper_trajectory",
 ]
 
 _REGISTERED_BACKENDS = {
-    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
     "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
-    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
-    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
-    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
+    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
+    "gpunufft": (GPUNUFFT_AVAILABLE, MRIGpuNUFFT),
     "numpy": (True, MRInumpy),
+    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
+    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
+    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
 }
 
 

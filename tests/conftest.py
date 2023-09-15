@@ -2,6 +2,14 @@
 import pytest
 
 from mrinufft.operators import check_backend
+from mrinufft.operators.interfaces import _REGISTERED_BACKENDS
+
+
+def pytest_configure(config):
+    """Configuration hook for pytest."""
+    print("Available backends:")
+    for backend in _REGISTERED_BACKENDS:
+        print(f"{backend:<14}: {_REGISTERED_BACKENDS[backend][0]}")
 
 
 # # for test directly parametrized by a backend
