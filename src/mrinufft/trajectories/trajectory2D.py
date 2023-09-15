@@ -93,9 +93,9 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags, by default 5
-    width : int, optional
+    width : float, optional
         Width of the cone, by default 1
 
     Returns
@@ -133,9 +133,9 @@ def initialize_2D_sinusoide(
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags, by default 5
-    width : int, optional
+    width : float, optional
         Width of the sinusoide, by default 1
 
     Returns
@@ -290,7 +290,7 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
 # NON-CIRCULAR PATTERNS #
 #########################
 
-def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
+def initialize_2D_lissajous(Nc, Ns, density=1):
     """Initialize a 2D Lissajous trajectory.
 
     Parameters
@@ -299,10 +299,8 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
         Number of shots
     Ns : int
         Number of samples per shot
-    density : int, optional
+    density : float, optional
         Density of the trajectory, by default 1
-    spread : int, optional
-        Spread of the trajectory, by default 1
 
     Returns
     -------
@@ -311,7 +309,7 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
     """
     # Define the whole curve in Cartesian coordinates
     segment = np.linspace(-1, 1, Ns)
-    angles = np.pi / 2 * np.sign(segment) * np.abs(segment) ** spread
+    angles = np.pi / 2 * np.sign(segment) * np.abs(segment)
 
     # Define each shot independenty
     trajectory2D = np.zeros((Nc, Ns, 2))
@@ -322,7 +320,7 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
     return trajectory2D
 
 
-def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
+def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
     """Initialize a 2D waves trajectory.
 
     Parameters
@@ -331,12 +329,10 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
         Number of shots
     Ns : int
         Number of samples per shot
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags, by default 1
-    width : int, optional
+    width : float, optional
         Width of the trajectory, by default 1
-    spread : int, optional
-        Spread of the trajectory, by default 1
 
     Returns
     -------
@@ -345,7 +341,7 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
     """
     # Initialize a first shot
     segment = np.linspace(-1, 1, Ns)
-    segment = np.sign(segment) * np.abs(segment) ** spread
+    segment = np.sign(segment) * np.abs(segment)
     curl = KMAX * width / Nc * np.cos(nb_zigzags * np.pi * segment)
     line = KMAX * segment
 
