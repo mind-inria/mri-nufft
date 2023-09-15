@@ -22,7 +22,7 @@ from case_trajectories import CasesTrajectories
 @parametrize("z_index", ["full", "random_mask"])
 @parametrize("backend", ["finufft"])
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories, glob="*2D")
-def operators(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
+def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
     """Initialize the stacked and non-stacked operators."""
     shape3d = (*shape, shape[-1])  # add a 3rd dimension
 
@@ -73,58 +73,60 @@ def operators(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, 
 
 
 @fixture(scope="module")
-def operator(operators):
+def stacked_op(operator):
     """Return operator."""
-    return operators[0]
+    return operator[0]
 
 
 @fixture(scope="module")
-def ref_op(operators):
+def ref_op(operator):
     """Return ref operator."""
-    return operators[1]
+    return operator[1]
 
 
 @fixture(scope="module")
-def image_data(operator):
+def image_data(stacked_op):
     """Generate a random image."""
-    B, C = operator.n_batchs, operator.n_coils
-    if operator.smaps is None:
-        img = np.random.randn(B, C, *operator.shape).astype(operator.cpx_dtype)
-    elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.randn(B, *operator.shape).astype(operator.cpx_dtype)
+    B, C = stacked_op.n_batchs, stacked_op.n_coils
+    if stacked_op.smaps is None:
+        img = np.random.randn(B, C, *stacked_op.shape).astype(stacked_op.cpx_dtype)
+    elif stacked_op.smaps is not None and stacked_op.n_coils > 1:
+        img = np.random.randn(B, *stacked_op.shape).astype(stacked_op.cpx_dtype)
 
-    img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
+    img += 1j * np.random.randn(*img.shape).astype(stacked_op.cpx_dtype)
     return img
 
 
 @fixture(scope="module")
-def kspace_data(operator):
+def kspace_data(stacked_op):
     """Generate a random kspace data."""
-    B, C = operator.n_batchs, operator.n_coils
-    kspace = (1j * np.random.randn(B, C, operator.n_samples)).astype(operator.cpx_dtype)
-    kspace += np.random.randn(B, C, operator.n_samples).astype(operator.cpx_dtype)
+    B, C = stacked_op.n_batchs, stacked_op.n_coils
+    kspace = (1j * np.random.randn(B, C, stacked_op.n_samples)).astype(
+        stacked_op.cpx_dtype
+    )
+    kspace += np.random.randn(B, C, stacked_op.n_samples).astype(stacked_op.cpx_dtype)
     return kspace
 
 
-def test_stack_forward(operator, ref_op, image_data):
-    """Compare Stacked and 3D NUFFT ."""
-    kspace_nufft = operator.op(image_data).squeeze()
+def test_stack_forward(operator, stacked_op, ref_op, image_data):
+    """Compare the stack interface to the 3D NUFFT implementation."""
+    kspace_nufft = stacked_op.op(image_data).squeeze()
     kspace_ref = ref_op.op(image_data).squeeze()
-    assert np.percentile(abs(kspace_nufft - kspace_ref), 95) < 1e-4
-    assert np.max(abs(kspace_nufft - kspace_ref)) < 1e-2
+    npt.assert_allclose(kspace_nufft, kspace_ref, atol=1e-4, rtol=1e-1)
 
 
-def test_stack_backward(operator, kspace_data, ref_op):
-    """Compare the interface to the raw NUDFT implementation."""
-    image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
+def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
+    """Compare the stack interface to the 3D NUFFT implementation."""
+    image_nufft = stacked_op.adj_op(kspace_data.copy()).squeeze()
     image_ref = ref_op.adj_op(kspace_data.copy()).squeeze()
 
     npt.assert_allclose(image_nufft, image_ref, atol=1e-4, rtol=1e-1)
 
 
-def test_stack_auto_adjoint(operator, kspace_data, image_data):
-    kspace = operator.op(image_data)
-    image = operator.adj_op(kspace_data)
+def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
+    """Test the adjoint property of the stacked NUFFT operator,"""
+    kspace = stacked_op.op(image_data)
+    image = stacked_op.adj_op(kspace_data)
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
