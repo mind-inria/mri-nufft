@@ -7,6 +7,16 @@ A collection of 2D non-Cartesian trajectories with analytical definitions.
 
 """
 
+# %%
+# Hereafter we detail and illustrate the different arguments used in the
+# parameterization of 2D non-Cartesian trajectories. Since most arguments
+# are redundant across the different patterns, some of the documentation
+# will refer to previous patterns for explanation.
+#
+# Note that most sources have not been added yet, but will be in the near
+# future.
+#
+
 # External
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,7 +50,6 @@ def show_argument(function, arguments, one_shot, subfigure_size):
 # Script options
 # ==============
 # These options are used in the examples below as default values for all trajectories.
-
 # Trajectory parameters
 Nc = 24  # Number of shots
 Ns = 256  # Number of samples per shot
@@ -54,16 +63,8 @@ one_shot = True  # Highlight one shot in particular
 
 
 # %%
-# Trajectory patterns
-# ===================
-#
-# Hereafter we detail and illustrate the different arguments used in the
-# parameterization of 2D non-Cartesian trajectories. Since most arguments
-# are redundant across the different patterns, some of the documentation
-# will refer to previous patterns for explanation.
-#
-# Note that most sources have not been added yet, but will be in the near
-# future.
+# Circular patterns
+# ==================
 #
 # Radial
 # ------
@@ -237,7 +238,6 @@ plt.show()
 # ``nb_zigzags (float)``
 # ~~~~~~~~~~~~~~~~~~~~~~
 #
-#
 # The number of “zigzags”, aka the number of times the shot will touch a
 # same side of the cone, from the center (i.e twice as much overall for
 # in-out trajectories)
@@ -319,7 +319,7 @@ plt.show()
 # ~~~~~~~~~~~~~~~~~~
 #
 # The number of rings used to partition the k-space. It should always be lower
-# than or equal to :math:`Nc` as the implementation does not permit shots to cover
+# than or equal to :math:`N_c` as the implementation does not permit shots to cover
 # several rings. Note that to fully sample a k-space circle, it should be
 # set around :math:`FOV / (2 * resolution)`.
 #
@@ -428,7 +428,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 # The number of Lissajous curves and segmented regions of the k-space. The
 # polar Lissajous curve natively puts emphasis on the center and along the
-# ``ky`` axis, but can be parameterized to rather emphasize
+# :math:`k_y` axis, but can be parameterized to rather emphasize
 # ``nb_segments`` axes by reducing the coverage and duplicating a shorter
 # curve.
 #
@@ -469,3 +469,94 @@ for io in [True, False]:
         show_argument(
             function, arguments, one_shot=one_shot, subfigure_size=subfigure_size
         )
+
+
+# %%
+# Non-circular patterns
+# =====================
+#
+# Waves
+# ---------
+#
+# An extension of the Cartesian line-by-line pattern that simply adds sinusoidal
+# variations along the :math:`k_y` axis.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``nb_zigzags (float)``: number of sinusoide patterns along a line. ``(default 5)``
+# - ``width (float)``: line width normalized such that a width of 1 corresponds
+#   to covering the full band without overlapping other bands. ``(default 1)``
+#
+
+trajectory = mn.initialize_2D_waves(Nc, Ns, nb_zigzags=5)
+display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
+plt.show()
+
+
+# %%
+# ``nb_zigzags (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# The number of sinusoidal patterns along a line, similar to cones and sinusoidal trajectories.
+#
+
+arguments = [1, 2.5, 5, 10]
+function = lambda x: mn.initialize_2D_waves(Nc, Ns, nb_zigzags=x)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+
+# %%
+# ``width (float)``
+# ~~~~~~~~~~~~~~~~~
+#
+# The line width normalized such that ``width = 1`` corresponds to
+# non-overlapping lines covering (almost) uniformly the whole k-space, and
+# therefore ``width > 1`` creates overlap between regions and
+# ``width < 1`` tends to Cartesian patterns.
+# Also notes that increasing width squeezes the lines together
+# such that shots at the top and bottom borders don't spread ouf of the k-space,
+# resulting in non-covered areas with large widths. This behavior might be subject to
+# changes in future versions.
+#
+
+arguments = [0, 1, 1.5, 3]
+function = lambda x: mn.initialize_2D_waves(Nc, Ns, width=x)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+
+# %%
+# Lissajous
+# ---------
+#
+# The classic Lissajous patterns composed of a long single curve split into shots
+# with different curve profiles and covering the whole k-space square.
+# This pattern tends to be more dense on the edges, as opposed to most others.
+# Note that the original pattern is much more complex but has been simplified
+# to match MR purposes, with a balanced distribution and minimal overlapping.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots
+# - ``Ns (int)``: number of samples per shot
+# - ``density (float)``: controls the pseudo-grid density and shot curvatures.
+#   ``(default "1")``
+#
+
+trajectory = mn.initialize_2D_lissajous(Nc, Ns, density=1)
+display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
+plt.show()
+
+
+# %%
+# ``density (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# It relates to both the curve length and curvature, normalized such that
+# ``density = 1`` corresponds to pseudo-diagonal curves for any given :math:`N_c`.
+#
+
+arguments = [1, 1.5, 2, 3]
+function = lambda x: mn.initialize_2D_lissajous(Nc, Ns, density=x)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)

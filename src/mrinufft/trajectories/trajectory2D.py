@@ -330,7 +330,7 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
     Ns : int
         Number of samples per shot
     nb_zigzags : float, optional
-        Number of zigzags, by default 1
+        Number of zigzags, by default 5
     width : float, optional
         Width of the trajectory, by default 1
 
