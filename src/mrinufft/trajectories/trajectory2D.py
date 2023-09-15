@@ -14,6 +14,7 @@ from .utils import (
 # CIRCULAR PATTERNS #
 #####################
 
+
 def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     """Initialize a 2D radial trajectory.
 
@@ -289,6 +290,7 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
 #########################
 # NON-CIRCULAR PATTERNS #
 #########################
+
 
 def initialize_2D_lissajous(Nc, Ns, density=1):
     """Initialize a 2D Lissajous trajectory.
