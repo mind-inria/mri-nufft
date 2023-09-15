@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .interfaces.base import FourierOperatorBase
+from .interfaces.base import FourierOperatorBase, proper_trajectory
 from .interfaces import get_operator
 
 
@@ -165,3 +165,69 @@ class MRIStackedNUFFT(FourierOperatorBase):
         imgz = np.reshape(imgz, (self.n_batchs, self.n_coils, *self.shape))
         img = self._ifftz(imgz)
         return img
+
+
+def traj3d2stacked(samples, dim_z, n_samples=0):
+    """Convert a 3D trajectory into a trajectory and the z-stack index.
+
+    Parameters
+    ----------
+    samples: array-like
+        3D trajectory
+    dim_z: int
+        Size of the z dimension
+    n_samples: int, default=0
+        Number of samples per shot. If 0, the shot length is determined by counting the
+        unique z values.
+
+    Returns
+    -------
+    tuple
+        2D trajectory, z_index
+
+    """
+    samples = np.asarray(samples).reshape(-1, 3)
+    z_kspace = np.unique(samples[:, 2])
+
+    if n_samples == 0:
+        n_samples = np.prod(samples.shape[:-1]) // len(z_kspace)
+
+    traj2D = samples[:n_samples]
+
+    z_kspace = proper_trajectory(z_kspace, "unit").flatten()
+    z_index = z_kspace * dim_z + dim_z // 2
+
+    return traj2D, z_index
+
+
+def stacked2traj3d(samples2d, z_indexes, dim_z):
+    """Convert a 2D trajectory and list of z_index into a 3D trajectory.
+
+    Note that the trajectory is flatten in the process.
+
+    Parameters
+    ----------
+    samples2d: array-like
+        2D trajectory
+    z_indexes: array-like
+        List of z_index
+    dim_z: int
+        Size of the z dimension
+
+    Returns
+    -------
+    samples3d: array-like
+        3D trajectory
+    """
+    z_kspace = (z_indexes - dim_z // 2) / dim_z
+    # create the equivalent 3d trajectory
+    kspace_locs_proper = proper_trajectory(samples2d, normalize="unit")
+    nsamples = len(kspace_locs_proper)
+    nz = len(z_kspace)
+    kspace_locs3d = np.zeros((nsamples * nz, 3))
+    # TODO use numpy api for this ?
+    for i in range(nsamples):
+        kspace_locs3d[i * nz : (i + 1) * nz, :2] = kspace_locs_proper[i]
+        kspace_locs3d[i * nz : (i + 1) * nz, 2] = z_kspace
+
+    return kspace_locs3d

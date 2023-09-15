@@ -8,9 +8,8 @@ import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 
-from mrinufft.operators.stacked import MRIStackedNUFFT
+from mrinufft.operators.stacked import MRIStackedNUFFT, stacked2traj3d, traj3d2stacked
 from mrinufft import get_operator
-from mrinufft.operators.interfaces import proper_trajectory
 from case_trajectories import CasesTrajectories
 
 
@@ -33,17 +32,7 @@ def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, s
         z_index = np.random.rand(shape3d[-1]) > 0.5
         z_index_ = np.arange(shape3d[-1])[z_index]
 
-    z_kspace = (z_index_ - shape3d[-1] // 2) / shape3d[-1]
-    # create the equivalent 3d trajectory
-    kspace_locs_proper = proper_trajectory(kspace_locs, normalize="unit")
-    nsamples = len(kspace_locs_proper)
-    nz = len(z_kspace)
-    kspace_locs3d = np.zeros((nsamples * nz, 3))
-    # TODO use numpy api for this ?
-    for i in range(nsamples):
-        kspace_locs3d[i * nz : (i + 1) * nz, :2] = kspace_locs_proper[i]
-        kspace_locs3d[i * nz : (i + 1) * nz, 2] = z_kspace
-
+    kspace_locs3d = stacked2traj3d(kspace_locs, z_index_, shape[-1])
     # smaps support
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape3d)
@@ -124,10 +113,24 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
 
 
 def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
-    """Test the adjoint property of the stacked NUFFT operator,"""
+    """Test the adjoint property of the stacked NUFFT operator."""
     kspace = stacked_op.op(image_data)
     image = stacked_op.adj_op(kspace_data)
     leftadjoint = np.vdot(image, image_data)
     rightadjoint = np.vdot(kspace, kspace_data)
 
     npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
+
+
+def test_stacked2traj3d():
+    """Test the conversion from stacked to 3d trajectory."""
+    dimz = 64
+    traj2d = np.random.randn(100, 2)
+    z_index = np.unique(np.random.randint(0, dimz, 20))
+
+    traj3d = stacked2traj3d(traj2d, z_index, dimz)
+
+    traj2d, z_index2 = traj3d2stacked(traj3d, dimz)
+
+    npt.assert_allclose(traj2d, traj2d)
+    npt.assert_allclose(z_index, z_index2)
