@@ -10,9 +10,9 @@ from .utils import (
 )
 
 
-################################
-# 2D TRAJECTORY INITIALIZATION #
-################################
+#####################
+# CIRCULAR PATTERNS #
+#####################
 
 
 def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
@@ -94,9 +94,9 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags, by default 5
-    width : int, optional
+    width : float, optional
         Width of the cone, by default 1
 
     Returns
@@ -134,9 +134,9 @@ def initialize_2D_sinusoide(
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags, by default 5
-    width : int, optional
+    width : float, optional
         Width of the sinusoide, by default 1
 
     Returns
@@ -157,6 +157,45 @@ def initialize_2D_sinusoide(
     for i in range(1, Nc):
         trajectory2D[i] = trajectory2D[i - 1] @ rotation
     return trajectory2D
+
+
+def initialize_2D_rings(Nc, Ns, nb_rings):
+    """Initialize a 2D ring trajectory.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_rings : int
+        Number of rings partitioning the k-space.
+
+    Returns
+    -------
+    array_like
+        2D ring trajectory
+    """
+    if Nc < nb_rings:
+        raise ValueError("Argument nb_rings should not be higher than Nc.")
+
+    # Choose number of shots per rings
+    nb_shots_per_rings = np.ones(nb_rings).astype(int)
+    rings_radius = np.linspace(0, 1, nb_rings)  # related to ring perimeter
+    for _ in range(nb_rings, Nc):
+        longest_shot = np.argmax(rings_radius / nb_shots_per_rings)
+        nb_shots_per_rings[longest_shot] += 1
+
+    # Decompose each ring into shots
+    trajectory = []
+    for rid in range(nb_rings):
+        ring = np.zeros(((nb_shots_per_rings[rid]) * Ns, 2))
+        angles = np.linspace(0, 2 * np.pi, Ns * nb_shots_per_rings[rid])
+        ring[:, 0] = rings_radius[rid] * np.cos(angles)
+        ring[:, 1] = rings_radius[rid] * np.sin(angles)
+        for i in range(nb_shots_per_rings[rid]):
+            trajectory.append(ring[i * Ns : (i + 1) * Ns])
+    return KMAX * np.array(trajectory)
 
 
 def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
@@ -248,7 +287,12 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
     return trajectory2D
 
 
-def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
+#########################
+# NON-CIRCULAR PATTERNS #
+#########################
+
+
+def initialize_2D_lissajous(Nc, Ns, density=1):
     """Initialize a 2D Lissajous trajectory.
 
     Parameters
@@ -257,10 +301,8 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
         Number of shots
     Ns : int
         Number of samples per shot
-    density : int, optional
+    density : float, optional
         Density of the trajectory, by default 1
-    spread : int, optional
-        Spread of the trajectory, by default 1
 
     Returns
     -------
@@ -269,7 +311,7 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
     """
     # Define the whole curve in Cartesian coordinates
     segment = np.linspace(-1, 1, Ns)
-    angles = np.pi / 2 * np.sign(segment) * np.abs(segment) ** spread
+    angles = np.pi / 2 * np.sign(segment) * np.abs(segment)
 
     # Define each shot independenty
     trajectory2D = np.zeros((Nc, Ns, 2))
@@ -280,7 +322,7 @@ def initialize_2D_lissajous(Nc, Ns, density=1, spread=1):
     return trajectory2D
 
 
-def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
+def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
     """Initialize a 2D waves trajectory.
 
     Parameters
@@ -289,12 +331,10 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
         Number of shots
     Ns : int
         Number of samples per shot
-    nb_zigzags : int, optional
-        Number of zigzags, by default 1
-    width : int, optional
+    nb_zigzags : float, optional
+        Number of zigzags, by default 5
+    width : float, optional
         Width of the trajectory, by default 1
-    spread : int, optional
-        Spread of the trajectory, by default 1
 
     Returns
     -------
@@ -303,7 +343,7 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=1, width=1, spread=1):
     """
     # Initialize a first shot
     segment = np.linspace(-1, 1, Ns)
-    segment = np.sign(segment) * np.abs(segment) ** spread
+    segment = np.sign(segment) * np.abs(segment)
     curl = KMAX * width / Nc * np.cos(nb_zigzags * np.pi * segment)
     line = KMAX * segment
 
