@@ -28,7 +28,6 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
     AssertionError
         If the arrays are not equal up to specified tolerance.
     """
-
     val = np.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
 
     if mismatch < 1:
@@ -41,5 +40,6 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
         try:
             npt.assert_allclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
         except AssertionError as e:
-            e.message += f"\nMismatched elements: {np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
+            e.message += "\nMismatched elements: "
+            e.message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
             raise e
