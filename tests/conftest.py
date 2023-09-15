@@ -28,7 +28,10 @@ def pytest_generate_tests(metafunc):
     """Generate the tests."""
     if "operator" in metafunc.fixturenames:
         for callspec in metafunc._calls:
-            op_call = callspec.params["operator"]
+            try:
+                op_call = callspec.params["operator"]
+            except KeyError:
+                continue
             # Complicated datastructure
             # Acces the value for the backend parameter.
             backend = op_call.argvalues[
