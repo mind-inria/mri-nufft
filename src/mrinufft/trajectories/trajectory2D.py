@@ -216,7 +216,7 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
     array_like
         2D ring trajectory
     """
-    if (Nc < nb_rings):
+    if Nc < nb_rings:
         raise ValueError("Argument nb_rings should not be higher than Nc.")
 
     # Choose number of shots per rings
@@ -234,7 +234,7 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
         ring[:, 0] = rings_radius[rid] * np.cos(angles)
         ring[:, 1] = rings_radius[rid] * np.sin(angles)
         for i in range(nb_shots_per_rings[rid]):
-            trajectory.append(ring[i * Ns: (i + 1) * Ns])
+            trajectory.append(ring[i * Ns : (i + 1) * Ns])
     return KMAX * np.array(trajectory)
 
 
