@@ -6,7 +6,7 @@ import numpy.testing as npt
 
 
 def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
-    """Assert allclose with a tolerance on the number of mismatched elements
+    """Assert allclose with a tolerance on the number of mismatched elements.
 
     Parameters
     ----------

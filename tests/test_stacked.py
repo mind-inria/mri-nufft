@@ -113,7 +113,7 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
 
 
 def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
-    """Test the adjoint property of the stacked NUFFT operator,"""
+    """Test the adjoint property of the stacked NUFFT operator."""
     kspace = stacked_op.op(image_data)
     image = stacked_op.adj_op(kspace_data)
     leftadjoint = np.vdot(image, image_data)
@@ -124,7 +124,6 @@ def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
 
 def test_stacked2traj3d():
     """Test the conversion from stacked to 3d trajectory."""
-
     dimz = 64
     traj2d = np.random.randn(100, 2)
     z_index = np.unique(np.random.randint(0, dimz, 20))

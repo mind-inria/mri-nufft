@@ -177,8 +177,8 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
     dim_z: int
         Size of the z dimension
     n_samples: int, default=0
-        Number of samples per shot. If 0, the shot length is determined by counting the unique z values.
-
+        Number of samples per shot. If 0, the shot length is determined by counting the
+        unique z values.
 
     Returns
     -------
@@ -186,7 +186,6 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
         2D trajectory, z_index
 
     """
-
     samples = np.asarray(samples).reshape(-1, 3)
     z_kspace = np.unique(samples[:, 2])
 
@@ -202,7 +201,7 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
 
 
 def stacked2traj3d(samples2d, z_indexes, dim_z):
-    """Convert a 2D trajectory and list of z_index into a 3D trajectory.#
+    """Convert a 2D trajectory and list of z_index into a 3D trajectory.
 
     Note that the trajectory is flatten in the process.
 
