@@ -57,3 +57,7 @@ profile="black"
 [tool.pytest.ini_options]
 minversion = "6.0"
 norecursedirs = ["tests/helpers"]
+
+[tool.pylsp-mypy]
+enabled = false
+live_mode = false
