@@ -52,7 +52,14 @@ def get_operator(backend_name: str, *args, **kwargs):
 
 
 def list_backends(available_only=False):
-    """Return a list of backend."""
+    """Return a list of backend.
+
+    Parameters
+    ----------
+    available_only: bool, optional
+        If True, only return backends that are available. If False, return all
+        backends, regardless of whether they are available or not.
+    """
     return [
         name
         for name, (available, _) in FOURIER_OPERATORS.items()
