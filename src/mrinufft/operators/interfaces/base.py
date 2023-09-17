@@ -82,7 +82,6 @@ class FourierOperatorBase(ABC):
         The adjoint operation (kspace -> image)
     """
 
-
     def __init__(self):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
