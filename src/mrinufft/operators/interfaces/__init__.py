@@ -1,43 +1,21 @@
 """Interface for the NUFFT operator of each backend."""
 
-from .tfnufft import MRITensorflowNUFFT, TENSORFLOW_AVAILABLE
-from .cufinufft import MRICufiNUFFT, CUFINUFFT_AVAILABLE
-from .finufft import MRIfinufft, FINUFFT_AVAILABLE
-from .pynufft_cpu import MRIPynufft, PYNUFFT_CPU_AVAILABLE
-from .nudft_numpy import MRInumpy
-from .nfft import MRInfft, PYNFFT_AVAILABLE
-from .gpunufft import MRIGpuNUFFT, GPUNUFFT_AVAILABLE
-
-from .base import proper_trajectory, FourierOperatorBase
+from .base import proper_trajectory, FourierOperatorBase, FOURIER_OPERATORS
 
 __all__ = [
     "FourierOperatorBase",
-    "MRICufiNUFFT",
-    "MRIGpuNUFFT",
-    "MRIPynufft",
-    "MRITensorflowNUFFT",
-    "MRIfinufft",
-    "MRInumpy",
     "check_backend",
     "get_operator",
     "proper_trajectory",
 ]
 
-_REGISTERED_BACKENDS = {
-    "cufinufft": (CUFINUFFT_AVAILABLE, MRICufiNUFFT),
-    "finufft": (FINUFFT_AVAILABLE, MRIfinufft),
-    "gpunufft": (GPUNUFFT_AVAILABLE, MRIGpuNUFFT),
-    "numpy": (True, MRInumpy),
-    "pynfft": (PYNFFT_AVAILABLE, MRInfft),
-    "pynufft-cpu": (PYNUFFT_CPU_AVAILABLE, MRIPynufft),
-    "tensorflow": (TENSORFLOW_AVAILABLE, MRITensorflowNUFFT),
-}
+__all__.extend([cls for (_, cls) in FOURIER_OPERATORS.values()])
 
 
 def check_backend(backend_name: str):
     """Check if a specific backend is available."""
     try:
-        return _REGISTERED_BACKENDS[backend_name][0]
+        return FOURIER_OPERATORS[backend_name][0]
     except KeyError as e:
         raise ValueError(f"unknown backend: '{backend_name}'") from e
 
@@ -59,9 +37,18 @@ def get_operator(backend_name: str):
     ValueError if the backend is not available.
     """
     try:
-        available, operator = _REGISTERED_BACKENDS[backend_name]
+        available, operator = FOURIER_OPERATORS[backend_name]
     except KeyError as exc:
         raise ValueError("backend is not available") from exc
     if not available:
         raise ValueError("backend is registered, but dependencies are not met.")
     return operator
+
+
+def list_backends(available_only=False):
+    """Return a list of backend."""
+    return [
+        name
+        for name, (available, _) in FOURIER_OPERATORS.items()
+        if available or not available_only
+    ]
