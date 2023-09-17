@@ -7,6 +7,7 @@ __all__ = [
     "check_backend",
     "get_operator",
     "proper_trajectory",
+    "list_backends",
 ]
 
 __all__.extend([cls for (_, cls) in FOURIER_OPERATORS.values()])
