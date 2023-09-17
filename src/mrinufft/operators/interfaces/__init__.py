@@ -10,8 +10,6 @@ __all__ = [
     "list_backends",
 ]
 
-__all__.extend([cls for (_, cls) in FOURIER_OPERATORS.values()])
-
 
 def check_backend(backend_name: str):
     """Check if a specific backend is available."""

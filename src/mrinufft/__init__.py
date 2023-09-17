@@ -7,12 +7,10 @@ Doing non-Cartesian MRI has never been so easy.
 """
 
 from .operators import (
-    MRICufiNUFFT,
-    MRITensorflowNUFFT,
-    MRIFourierCorrected,
-    MRIfinufft,
     get_operator,
     check_backend,
+    list_backends,
+    FOURIER_OPERATORS,
 )
 
 from .trajectories import (
@@ -33,10 +31,8 @@ from .trajectories import (
 __all__ = [
     "get_operator",
     "check_backend",
-    "MRICufiNUFFT",
-    "MRITensorflowNUFFT",
-    "MRIFourierCorrected",
-    "MRIfinufft",
+    "list_backends",
+    "FOURIER_OPERATORS",
     "initialize_2D_radial",
     "initialize_2D_spiral",
     "initialize_2D_cones",
