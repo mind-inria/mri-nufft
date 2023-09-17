@@ -225,6 +225,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     """
 
     backend = "cufinufft"
+    available = CUFINUFFT_AVAILABLE
 
     def __init__(
         self,

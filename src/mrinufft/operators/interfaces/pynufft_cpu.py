@@ -37,6 +37,7 @@ class MRIPynufft(FourierOperatorCPU):
     """PyNUFFT implementation of MRI NUFFT transform."""
 
     backend = "pynufft-cpu"
+    available = PYNUFFT_CPU_AVAILABLE
 
     def __init__(
         self,

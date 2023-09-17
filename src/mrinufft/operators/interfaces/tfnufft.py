@@ -35,6 +35,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     """
 
     backend = "tensorflow"
+    available = TENSORFLOW_AVAILABLE
 
     def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
         super().__init__()

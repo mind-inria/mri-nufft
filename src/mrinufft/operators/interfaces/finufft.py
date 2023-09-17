@@ -92,6 +92,7 @@ class MRIfinufft(FourierOperatorBase):
     """
 
     backend = "finufft"
+    available = FINUFFT_AVAILABLE
 
     def __init__(
         self,

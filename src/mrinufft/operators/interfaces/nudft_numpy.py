@@ -94,6 +94,7 @@ class MRInumpy(FourierOperatorCPU):
     """
 
     backend = "numpy"
+    available = True
 
     def __init__(self, samples, shape, n_coils=1, smaps=None):
         super().__init__(
