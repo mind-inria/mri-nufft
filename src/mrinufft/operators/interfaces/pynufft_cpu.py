@@ -49,8 +49,6 @@ class MRIPynufft(FourierOperatorCPU):
         osf=2,
         **kwargs,
     ):
-        if not PYNUFFT_CPU_AVAILABLE:
-            raise RuntimeError("Pynufft is not available.")
         super().__init__(samples, shape, density, n_coils, smaps)
 
         self.raw_op = RawPyNUFFT(samples, shape, osf, **kwargs)

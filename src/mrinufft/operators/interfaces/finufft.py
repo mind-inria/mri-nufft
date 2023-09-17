@@ -107,8 +107,6 @@ class MRIfinufft(FourierOperatorBase):
     ):
         super().__init__()
 
-        if not FINUFFT_AVAILABLE:
-            raise RuntimeError("finufft is not available.")
         self.shape = shape
 
         # we will access the samples by their coordinate first.
