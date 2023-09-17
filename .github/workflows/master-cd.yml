@@ -23,9 +23,9 @@ jobs:
   gather-coverage:
     name: Gather Coverage Results
     runs-on: ubuntu-latest
-    matrix:
-      os: [ubuntu-latest, self-hosted]
-      python-version: ["3.10", "3.8"]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, self-hosted]
 
     outputs:
       coverage-cpu: ${{ steps.unzip.outputs.ubuntu-latest-3.10 }}
