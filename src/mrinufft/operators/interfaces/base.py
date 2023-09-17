@@ -55,6 +55,9 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
+FOURIER_OPERATORS = {}
+
+
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
@@ -83,6 +86,15 @@ class FourierOperatorBase(ABC):
         self._smaps = None
         self._density = None
         self._n_coils = 1
+
+    def __init_subclass__(cls):
+        """Register the class in the list of available operators."""
+        super().__init_subclass__()
+        available = getattr(cls, "available", True)
+        if callable(available):
+            available = available()
+
+        FOURIER_OPERATORS[cls.backend] = (available, cls)
 
     @abstractmethod
     def op(self, data):
