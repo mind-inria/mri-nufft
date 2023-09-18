@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from .base import FourierOperatorBase, proper_trajectory
+from ..base import FourierOperatorBase, proper_trajectory
 
 FINUFFT_AVAILABLE = True
 try:

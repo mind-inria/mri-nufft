@@ -1,6 +1,6 @@
 """Tensorflow MRI Nufft Operators."""
 
-from .base import FourierOperatorBase
+from ..base import FourierOperatorBase
 
 TENSORFLOW_AVAILABLE = True
 

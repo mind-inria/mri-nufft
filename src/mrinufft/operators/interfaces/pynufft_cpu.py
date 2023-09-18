@@ -1,6 +1,6 @@
 """PyNUFFT CPU Interface."""
 
-from .base import FourierOperatorCPU
+from ..base import FourierOperatorCPU
 
 
 PYNUFFT_CPU_AVAILABLE = True

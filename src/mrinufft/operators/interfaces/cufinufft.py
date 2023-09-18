@@ -2,7 +2,7 @@
 
 import warnings
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory
+from ..base import FourierOperatorBase, proper_trajectory
 from .utils import (
     CUPY_AVAILABLE,
     check_size,

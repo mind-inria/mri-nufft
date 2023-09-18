@@ -1,7 +1,7 @@
 """Interface to the GPU NUFFT library."""
 
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory
+from ..base import FourierOperatorBase, proper_trajectory
 
 GPUNUFFT_AVAILABLE = True
 try:

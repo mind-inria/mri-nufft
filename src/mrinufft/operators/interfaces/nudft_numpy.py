@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from .base import FourierOperatorCPU
+from ..base import FourierOperatorCPU
 
 
 def get_fourier_matrix(ktraj, shape):
