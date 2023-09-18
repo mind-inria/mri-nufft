@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from .interfaces.base import FourierOperatorBase, proper_trajectory
-from .interfaces import get_operator
+from .base import FourierOperatorBase, proper_trajectory
+from . import get_operator
 
 
 class MRIStackedNUFFT(FourierOperatorBase):
