@@ -1,19 +1,82 @@
 """Collection of operators applying the NUFFT used in a MRI context."""
-from .interfaces import (
-    FourierOperatorBase,
-    FOURIER_OPERATORS,
-    get_operator,
-    check_backend,
-    list_backends,
-)
 
 from .off_resonnance import MRIFourierCorrected
 
+
+from .base import proper_trajectory, FourierOperatorBase
+
+import pkgutil
+import importlib
+from pathlib import Path
+import os
+
+# load all the interfaces modules
+for _, name, _ in pkgutil.iter_modules([str(Path(__file__).parent / "interfaces")]):
+    if name.startswith("_"):
+        continue
+    importlib.import_module(".interfaces." + name, __name__)
+
+
 __all__ = [
-    "get_operator",
-    "check_backend",
     "FourierOperatorBase",
-    "FOURIER_OPERATORS",
-    "list_backends",
     "MRIFourierCorrected",
+    "check_backend",
+    "get_operator",
+    "list_backends",
+    "proper_trajectory",
 ]
+
+
+def check_backend(backend_name: str):
+    """Check if a specific backend is available."""
+    try:
+        return FourierOperatorBase.interfaces[backend_name][0]
+    except KeyError as e:
+        raise ValueError(f"unknown backend: '{backend_name}'") from e
+
+
+def get_operator(backend_name: str, *args, **kwargs):
+    """Return an MRI Fourier operator interface using the correct backend.
+
+    Parameters
+    ----------
+    backend_name: str
+        Backend name
+    *args, **kwargs:
+        Arguments to pass to the operator constructor.
+
+    Returns
+    -------
+    FourierOperator
+        class or instance of class if args or kwargs are given.
+
+    Raises
+    ------
+    ValueError if the backend is not available.
+    """
+    try:
+        available, operator = FourierOperatorBase.interfaces[backend_name]
+    except KeyError as exc:
+        raise ValueError("backend is not available") from exc
+    if not available:
+        raise ValueError("backend is registered, but dependencies are not met.")
+
+    if args or kwargs:
+        operator = operator(*args, **kwargs)
+    return operator
+
+
+def list_backends(available_only=False):
+    """Return a list of backend.
+
+    Parameters
+    ----------
+    available_only: bool, optional
+        If True, only return backends that are available. If False, return all
+        backends, regardless of whether they are available or not.
+    """
+    return [
+        name
+        for name, (available, _) in FourierOperatorBase.interfaces.items()
+        if available or not available_only
+    ]
