@@ -5,7 +5,7 @@ Those methods are agnostic of the NUFFT operator.
 """
 import numpy as np
 from scipy.spatial import Voronoi
-from mrinufft.operators.interfaces import proper_trajectory
+from mrinufft.operators import proper_trajectory
 from mrinufft.operators.interfaces.cufinufft import pipe as pipe_cufinufft
 from mrinufft.operators.interfaces.tfnufft import pipe as pipe_tfnufft
 from mrinufft.operators.interfaces.gpunufft import pipe as pipe_gpunufft
