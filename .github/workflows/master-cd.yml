@@ -9,7 +9,7 @@ on:
       - master
 
 env:
-  PYTHON_VERSION: 3.10
+  PYTHON_VERSION: "3.10"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
