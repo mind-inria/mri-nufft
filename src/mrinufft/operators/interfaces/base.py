@@ -95,8 +95,8 @@ class FourierOperatorBase(ABC):
         available = getattr(cls, "available", True)
         if callable(available):
             available = available()
-
-        FOURIER_OPERATORS[cls.backend] = (available, cls)
+        if backend := getattr(cls, "backend", None):
+            FOURIER_OPERATORS[cls.backend] = (available, cls)
 
     @abstractmethod
     def op(self, data):
