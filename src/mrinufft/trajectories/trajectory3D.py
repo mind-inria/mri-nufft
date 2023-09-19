@@ -14,7 +14,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import Rx, Ry, Rz, Rv, initialize_tilt, KMAX
+from .utils import R2D, Ry, Rz, Rv, initialize_tilt, KMAX
 
 ################################
 # 3D TRAJECTORY INITIALIZATION #
@@ -171,7 +171,6 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
     array_like
         3D helical shell trajectory
     """
-
     # Check arguments validity
     if Nc < nb_shells:
         raise ValueError("Argument nb_shells should not be higher than Nc.")
@@ -240,7 +239,6 @@ def initialize_3D_annular_shells(
     array_like
         3D annular shell trajectory
     """
-
     # Check arguments validity
     if Nc < nb_shells:
         raise ValueError("Argument nb_shells should not be higher than Nc.")
