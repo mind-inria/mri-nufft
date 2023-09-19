@@ -178,8 +178,12 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
 
     # Attribute shots to shells following a prescribed density
     Nc_per_shell = np.ones(nb_shells).astype(int)
-    density = np.array([int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
-                        for i in range(nb_shells)])
+    density = np.array(
+        [
+            int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
+            for i in range(nb_shells)
+        ]
+    )
     for _ in range(Nc - nb_shells):
         idx = np.argmax(density / Nc_per_shell)
         Nc_per_shell[idx] += 1
@@ -195,12 +199,14 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
 
         # Initialize first shot cylindrical coordinates
         magnitudes = k0 * np.sqrt(1 - (kz / k0) ** 2)
-        angles = np.sqrt(Ns * np.pi / Ms) * np.arcsin(kz / k0) + 2 * np.pi * (i + 1) / Ms
+        angles = (
+            np.sqrt(Ns * np.pi / Ms) * np.arcsin(kz / k0) + 2 * np.pi * (i + 1) / Ms
+        )
 
         # Format first shot into trajectory
         trajectory[count, :, 0] = magnitudes * np.cos(angles)
         trajectory[count, :, 1] = magnitudes * np.sin(angles)
-        trajectory[count: count + Ms, :, 2] = kz[None]
+        trajectory[count : count + Ms, :, 2] = kz[None]
 
         # Rotate shots to create the shell
         rotation = R2D(initialize_tilt(tilt, Ms))
@@ -210,7 +216,9 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
     return KMAX * trajectory
 
 
-def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=np.pi / 2):
+def initialize_3D_annular_shells(
+    Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=np.pi / 2
+):
     """Initialize 3D trajectories with annular shells.
 
     Parameters
@@ -239,8 +247,12 @@ def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=
 
     # Attribute shots to shells following a prescribed density
     Nc_per_shell = np.ones(nb_shells).astype(int)
-    density = np.array([int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
-                        for i in range(nb_shells)])
+    density = np.array(
+        [
+            int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
+            for i in range(nb_shells)
+        ]
+    )
     for _ in range(Nc - nb_shells):
         idx = np.argmax(density / Nc_per_shell)
         Nc_per_shell[idx] += 1
@@ -269,7 +281,7 @@ def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=
         rotation = Ry(initialize_tilt("uniform", Ms * 2))
         ring_tilt = initialize_tilt(ring_tilt, Ms)
         power = int(np.around(ring_tilt / np.pi * Ms))
-        shell[:, Ns // 2:] = shell[:, Ns // 2:] @ nl.matrix_power(rotation, power)
+        shell[:, Ns // 2 :] = shell[:, Ns // 2 :] @ nl.matrix_power(rotation, power)
 
         # Brute force re-ordering and reversing
         shell = shell.reshape((Ms * 2, Ns // 2, 3))
@@ -284,16 +296,16 @@ def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=
 
             # Check if closest shot is reversed
             reverse_flag = False
-            if (np.min(dist_forward) < np.min(dist_backward)):
+            if np.min(dist_forward) < np.min(dist_backward):
                 j_next = np.argmin(dist_forward)
             else:
                 j_next = np.argmin(dist_backward)
                 reverse_flag = True
 
             # If closest shot is already known, move on to the next continuous curve
-            if (j_next <= j):
+            if j_next <= j:
                 continue
-            if (reverse_flag):
+            if reverse_flag:
                 shell[j_next, :] = shell[j_next, ::-1]
 
             # Swap shots to place the closest in direct continuity
@@ -307,7 +319,7 @@ def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=
         shell = shell @ rotation
 
         # Reformat shots to trajectory and iterate
-        trajectory[count: count + Ms] = shell
+        trajectory[count : count + Ms] = shell
         count += Ms
 
     return KMAX * trajectory
