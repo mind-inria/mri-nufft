@@ -54,7 +54,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
             # we  convert it to a 2D + index.
             samples2d, z_index_ = traj3d2stacked(samples, shape[-1])
 
-        elif samples_dim == len(shape) - 1 and z_index != "auto":
+        elif samples_dim == (len(shape) - 1) and z_index != "auto":
             # samples describes a 2D trajectory
             samples2d = samples
             if z_index is None:
