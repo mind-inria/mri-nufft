@@ -1,6 +1,7 @@
 """Stacked Operator for NUFFT."""
 
 import numpy as np
+import scipy as sp
 
 from .base import FourierOperatorBase, proper_trajectory
 from . import get_operator
@@ -80,18 +81,20 @@ class MRIStackedNUFFT(FourierOperatorBase):
         """Return number of samples."""
         return len(self.samples) * len(self.z_index)
 
-    def _fftz(self, data):
+    @staticmethod
+    def _fftz(data):
         """Apply FFT on z-axis."""
         # sqrt(2) required for normalization
-        return np.fft.fftshift(
-            np.fft.fft(np.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
+        return sp.fft.fftshift(
+            sp.fft.fft(sp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
 
-    def _ifftz(self, data):
+    @staticmethod
+    def _ifftz(data):
         """Apply IFFT on z-axis."""
         # sqrt(2) required for normalization
-        return np.fft.fftshift(
-            np.fft.ifft(np.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
+        return sp.fft.fftshift(
+            sp.fft.ifft(sp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
 
     def op(self, data, ksp=None):

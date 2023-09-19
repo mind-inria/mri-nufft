@@ -105,7 +105,7 @@ def display_2D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(
+        gradients, _, slews = compute_gradients(
             trajectory.reshape((-1, Ns, 2)),
             resolution=resolution,
         )

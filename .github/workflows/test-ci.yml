@@ -8,16 +8,19 @@ on:
 
   workflow_dispatch:
 
+env:
+  PYTHON_VERSION: "3.10"
+
 jobs:
   linter-check:
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout 
         uses: actions/checkout@v3
-      - name: Set up Python "3.10"
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Black setup
         shell: bash
         run: pip install black ruff
@@ -31,17 +34,13 @@ jobs:
   test-cpu:
     runs-on: ubuntu-latest
     needs: linter-check
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.10", "3.8"]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Dependencies
         shell: bash
         run: |
@@ -64,7 +63,7 @@ jobs:
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.cpu.${{ matrix.python-version}}
+          name: coverage-cpu-${{ github.sha }}
           path: .coverage
 
       #https://stackoverflow.com/a/74411469/16019838
@@ -155,7 +154,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v3
         with:
-          name: coverage.gpu.3.10
+          name: coverage-gpu-${{ github.sha }}
           path: .coverage
 
       #https://stackoverflow.com/a/74411469/16019838
@@ -195,18 +194,18 @@ jobs:
       - name: Download coverage CPU
         uses: actions/download-artifact@v3
         with:
-          name: coverage.cpu.3.10
+          name: coverage-cpu-${{ github.sha }}
           path: cov-cpu
       - name: Download coverage GPU
         uses: actions/download-artifact@v3
         with:
-          name: coverage.gpu.3.10
+          name: coverage-gpu-${{ github.sha }}
           path: cov-gpu
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: add the coverage tool
         shell: bash
         run: |
@@ -220,3 +219,10 @@ jobs:
           coverage xml -i
           coverage report
           ls -al
+
+      - name: Upload Join
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-full-${{ github.sha}}
+          path: .coverage
