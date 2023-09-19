@@ -81,8 +81,7 @@ cufinufft_           GPU (CUDA)   ✔                   single          ✔ *   
 finufft_             CPU          ✔                   single/double   TBA            numpy
 gpunufft_            GPU          ✔                   single/double   ✔              numpy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
-pynufft_             CPU          ✘                   single/double   ✘              numpy
-pynufft_             GPU          ✘                   ✘               ✘              Not Supported
+pynufft-cpu_         CPU          ✘                   single/double   ✘              numpy
 pynfft_ (*)          CPU          ✘                   singles/double   ✘             numpy
 stacked (**)         CPU/GPU      ✔                   single/double   ✔              numpy
 ==================== ============ =================== =============== ============== ===============
@@ -92,7 +91,7 @@ stacked (**)         CPU/GPU      ✔                   single/double   ✔     
 .. _finufft: https://github.com/flatironinstitute/finufft
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
 .. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
-.. _pynufft: https://github.com/jyhmiinlin/pynufft
+.. _pynufft-cpu: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
 
 - (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
