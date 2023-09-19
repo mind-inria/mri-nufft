@@ -192,10 +192,10 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
     if n_samples == 0:
         n_samples = np.prod(samples.shape[:-1]) // len(z_kspace)
 
-    traj2D = samples[:n_samples]
+    traj2D = samples[:n_samples, :2]
 
     z_kspace = proper_trajectory(z_kspace, "unit").flatten()
-    z_index = z_kspace * dim_z + dim_z // 2
+    z_index = np.int32(z_kspace * dim_z + dim_z // 2)
 
     return traj2D, z_index
 
