@@ -83,7 +83,8 @@ gpunufft_            GPU          ✔                   single/double   ✔     
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
 pynufft_             CPU          ✘                   single/double   ✘              numpy
 pynufft_             GPU          ✘                   ✘               ✘              Not Supported
-pynfft_              CPU          ✘                   singles/double   ✘             Not Supported
+pynfft_ (*)          CPU          ✘                   singles/double   ✘             numpy
+stacked (**)         CPU/GPU      ✔                   single/double   ✔              numpy
 ==================== ============ =================== =============== ============== ===============
 
 
@@ -93,6 +94,10 @@ pynfft_              CPU          ✘                   singles/double   ✘    
 .. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
 .. _pynufft: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
+
+- (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
+- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy)
+
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.  It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
