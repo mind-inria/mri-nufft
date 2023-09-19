@@ -159,7 +159,8 @@ class MRIfinufft(FourierOperatorBase):
         """
         if data.dtype != self.cpx_dtype:
             warnings.warn(
-                f"Data should be of dtype {self.cpx_dtype}. Casting it for you."
+                f"Data should be of dtype {self.cpx_dtype} (is {data.dtype}). "
+                "Casting it for you."
             )
             data = data.astype(self.cpx_dtype)
         # sense
