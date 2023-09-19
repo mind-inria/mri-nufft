@@ -13,7 +13,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import Rv, initialize_tilt, KMAX
+from .utils import Rx, Ry, Rz, Rv, initialize_tilt, KMAX
 
 ################################
 # 3D TRAJECTORY INITIALIZATION #
@@ -28,15 +28,15 @@ def initialize_3D_from_2D_expansion(
     Parameters
     ----------
     basis : str or array_like
-        2D trajectory basis.
+        2D trajectory basis
     expansion : str
-        3D trajectory expansion.
+        3D trajectory expansion
     Nc : int
         Number of shots
-    Ns: int
-        Number of samples per shot.
+    Ns : int
+        Number of samples per shot
     nb_repetitions : int
-        Number of repetitions of the 2D trajectory.
+        Number of repetitions of the 2D trajectory
     basis_kwargs : dict, optional
         Keyword arguments for the 2D trajectory basis, by default {}
     expansion_kwargs : dict, optional
@@ -90,9 +90,9 @@ def initialize_3D_cones(
     ----------
     Nc : int
         Number of shots
-    Ns: int
-        Number of samples per shot.
-    tilt : str, optional
+    Ns : int
+        Number of samples per shot
+    tilt : str, float, optional
         Tilt of the cones, by default "golden"
     in_out : bool, optional
         Whether the cones are going in and out, by default False
@@ -147,6 +147,170 @@ def initialize_3D_cones(
         rotation = Rv(v1, v2, normalize=False)
         trajectory[i] = (rotation @ trajectory[0].T).T
     return trajectory.reshape((Nc, Ns, 3))
+
+
+def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="uniform"):
+    """Initialize 3D trajectories with helical shells.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_shells : int
+        Number of concentric shells/spheres
+    oversampling : int
+        Multiplicative factor for Ns without changing the curves, by default 1
+    tilt : str, float, optional
+        Angle between shots over a shell surface, by default "uniform"
+
+    Returns
+    -------
+    array_like
+        3D helical shell trajectory
+    """
+
+    # Check arguments validity
+    if Nc < nb_shells:
+        raise ValueError("Argument nb_shells should not be higher than Nc.")
+    trajectory = np.zeros((Nc, Ns * oversampling, 3))
+
+    # Attribute shots to shells following a prescribed density
+    Nc_per_shell = np.ones(nb_shells).astype(int)
+    density = np.array([int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
+                        for i in range(nb_shells)])
+    for _ in range(Nc - nb_shells):
+        idx = np.argmax(density / Nc_per_shell)
+        Nc_per_shell[idx] += 1
+
+    # Create shells one by one
+    count = 0
+    radii = (0.5 + np.arange(nb_shells)) / nb_shells
+    for i in range(nb_shells):
+        # Prepare shell parameters
+        Ms = Nc_per_shell[i]
+        k0 = radii[i]
+        kz = k0 * np.linspace(-1, 1, Ns * oversampling)
+
+        # Initialize first shot cylindrical coordinates
+        magnitudes = k0 * np.sqrt(1 - (kz / k0) ** 2)
+        angles = np.sqrt(Ns * np.pi / Ms) * np.arcsin(kz / k0) + 2 * np.pi * (i + 1) / Ms
+
+        # Format first shot into trajectory
+        trajectory[count, :, 0] = magnitudes * np.cos(angles)
+        trajectory[count, :, 1] = magnitudes * np.sin(angles)
+        trajectory[count: count + Ms, :, 2] = kz[None]
+
+        # Rotate shots to create the shell
+        rotation = R2D(initialize_tilt(tilt, Ms))
+        for j in range(1, Ms):
+            trajectory[count + j, :, :2] = trajectory[count + j - 1, :, :2] @ rotation
+        count += Ms
+    return KMAX * trajectory
+
+
+def initialize_3D_annular_shells(Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=np.pi / 2):
+    """Initialize 3D trajectories with annular shells.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_shells : int
+        Number of concentric shells/spheres
+    shell_tilt : str, float, optional
+        Angle between consecutive shells, by default pi
+    ring_tilt :
+        Angle controlling approximately the shell halves rotation, by default pi / 2
+
+    Returns
+    -------
+    array_like
+        3D annular shell trajectory
+    """
+
+    # Check arguments validity
+    if Nc < nb_shells:
+        raise ValueError("Argument nb_shells should not be higher than Nc.")
+    trajectory = np.zeros((Nc, Ns, 3))
+
+    # Attribute shots to shells following a prescribed density
+    Nc_per_shell = np.ones(nb_shells).astype(int)
+    density = np.array([int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
+                        for i in range(nb_shells)])
+    for _ in range(Nc - nb_shells):
+        idx = np.argmax(density / Nc_per_shell)
+        Nc_per_shell[idx] += 1
+
+    # Create shells one by one
+    count = 0
+    shell_radii = (0.5 + np.arange(nb_shells)) / nb_shells
+    for i in range(nb_shells):
+        # Prepare shell parameters
+        Ms = Nc_per_shell[i]
+        k0 = shell_radii[i]
+        segment = (0.5 + np.arange(Ms)) / Ms - 0.5
+        ring_radii = np.cos(np.pi * segment)
+        kz = np.sin(np.pi * segment)
+
+        # Create rings
+        shell = np.zeros((Ms, Ns, 3))
+        for j in range(Ms):
+            radius = ring_radii[j]
+            angles = 2 * np.pi * (np.arange(Ns) - Ns / 2) / Ns
+            shell[j, :, 0] = k0 * radius * np.cos(angles)
+            shell[j, :, 1] = k0 * radius * np.sin(angles)
+            shell[j, :, 2] = k0 * kz[j]
+
+        # Rotate rings halves
+        rotation = Ry(initialize_tilt("uniform", Ms * 2))
+        ring_tilt = initialize_tilt(ring_tilt, Ms)
+        power = int(np.around(ring_tilt / np.pi * Ms))
+        shell[:, Ns // 2:] = shell[:, Ns // 2:] @ nl.matrix_power(rotation, power)
+
+        # Brute force re-ordering and reversing
+        shell = shell.reshape((Ms * 2, Ns // 2, 3))
+        for j in range(2 * Ms - 1):
+            traj_end = shell[j, -1]
+
+            # Select closest half-shot excluding itself
+            self_exclusion = np.zeros((2 * Ms, 1))
+            self_exclusion[j] = np.inf
+            dist_forward = nl.norm(shell[:, 0] - traj_end + self_exclusion, axis=-1)
+            dist_backward = nl.norm(shell[:, -1] - traj_end + self_exclusion, axis=-1)
+
+            # Check if closest shot is reversed
+            reverse_flag = False
+            if (np.min(dist_forward) < np.min(dist_backward)):
+                j_next = np.argmin(dist_forward)
+            else:
+                j_next = np.argmin(dist_backward)
+                reverse_flag = True
+
+            # If closest shot is already known, move on to the next continuous curve
+            if (j_next <= j):
+                continue
+            if (reverse_flag):
+                shell[j_next, :] = shell[j_next, ::-1]
+
+            # Swap shots to place the closest in direct continuity
+            shell_inter = np.copy(shell[j + 1])
+            shell[j + 1] = shell[j_next]
+            shell[j_next] = shell_inter
+
+        # Apply shell tilt
+        rotation = Rz(i * initialize_tilt(shell_tilt, nb_shells))
+        shell = shell.reshape((Ms, Ns, 3))
+        shell = shell @ rotation
+
+        # Reformat shots to trajectory and iterate
+        trajectory[count: count + Ms] = shell
+        count += Ms
+
+    return KMAX * trajectory
 
 
 def duplicate_per_axes(trajectory, axes=(0, 1, 2)):

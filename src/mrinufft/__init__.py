@@ -27,6 +27,8 @@ from .trajectories import (
     initialize_2D_waves,
     initialize_3D_from_2D_expansion,
     initialize_3D_cones,
+    initialize_3D_helical_shells,
+    initialize_3D_annular_shells,
     display_2D_trajectory,
 )
 
@@ -48,6 +50,8 @@ __all__ = [
     "initialize_2D_waves",
     "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
+    "initialize_3D_helical_shells",
+    "initialize_3D_annular_shells",
     "display_2D_trajectory",
 ]
 
