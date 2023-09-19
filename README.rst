@@ -103,8 +103,8 @@ Install the required backend (e.g. `pip install finufft`) you want to use.
 
 Then clone and install the package::
 
-    $ git clone https://github.com:mind-inria/mri-nufft
-    $ pip install ./mri-nufft
+    git clone https://github.com:mind-inria/mri-nufft
+    pip install ./mri-nufft
 
 [Temporary] Custom Cufinufft installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,13 +112,13 @@ Then clone and install the package::
 
 In order for the density compensation to work for cufinufft, we have to use the in-house fork enabling it ::
 
-   git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
-   cd finufft && mkdir build && cd build
-   cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
-   cd ../python/cufinufft
-   python setup.py install
-   # Adapt to the name you have in python/cufinufft 
-   cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
+    git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
+    cd finufft && mkdir build && cd build
+    cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
+    cd ../python/cufinufft
+    python setup.py install
+    # Adapt to the name you have in python/cufinufft
+    cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
 Development of this feature happens `here <https://github.com/flatironinstitute/finufft/pull/308>`_
 
@@ -145,13 +145,13 @@ Documentation is available online at https://mind-inria.github.io/mri-nufft
 
 It can also be built locally ::
 
-  $ cd mri-nufft
-  $ pip install -e .[doc]
-  $ python -m sphinx docs docs_build
+    cd mri-nufft
+    pip install -e .[doc]
+    python -m sphinx docs docs_build
 
 To view the html doc locally you can use ::
 
-  $ python -m http.server --directory docs_build 8000
+    python -m http.server --directory docs_build 8000
 
 And visit `localhost:8000` on your web browser.
 
