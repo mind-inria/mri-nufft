@@ -1,5 +1,6 @@
 """3D Trajectory initialization functions."""
 import numpy as np
+import numpy.linalg as nl
 
 from .expansions import (
     stack_2D_to_3D_expansion,
