@@ -47,18 +47,33 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def __init__(
         self, samples, shape, z_index, backend, smaps, n_coils=1, n_batchs=1, **kwargs
     ):
-        self.samples = samples.reshape(-1, samples.shape[-1])
-        self.shape = shape
-        if z_index is None:
-            z_index = np.ones(shape[-1], dtype=bool)
-        try:
-            self.z_index = np.arange(shape[-1])[z_index]
-        except IndexError as e:
-            raise ValueError(
-                "z-index should be a boolean array of length shape[-1], "
-                "or an array of integer."
-            ) from e
+        super().__init__()
 
+        self.shape = shape
+        samples_dim = samples.shape[-1]
+        auto_z = isinstance(z_index, str) and z_index == "auto"
+        if samples_dim == len(shape) and auto_z:
+            # samples describes a 3D trajectory,
+            # we  convert it to a 2D + index.
+            samples2d, z_index_ = traj3d2stacked(samples, shape[-1])
+
+        elif samples_dim == (len(shape) - 1) and not auto_z:
+            # samples describes a 2D trajectory
+            samples2d = samples
+            if z_index is None:
+                z_index_ = np.ones(shape[-1], dtype=bool)
+            try:
+                z_index_ = np.arange(shape[-1])[z_index]
+            except IndexError as e:
+                raise ValueError(
+                    "z-index should be a boolean array of length shape[-1], "
+                    "or an array of integer."
+                ) from e
+        else:
+            raise ValueError("Invalid samples or z-index")
+
+        self.samples = samples2d.reshape(-1, 2)
+        self.z_index = z_index_
         self.n_coils = n_coils
         self.n_batchs = n_batchs
 
@@ -197,10 +212,10 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
     if n_samples == 0:
         n_samples = np.prod(samples.shape[:-1]) // len(z_kspace)
 
-    traj2D = samples[:n_samples]
+    traj2D = samples[:n_samples, :2]
 
     z_kspace = proper_trajectory(z_kspace, "unit").flatten()
-    z_index = z_kspace * dim_z + dim_z // 2
+    z_index = np.int32(z_kspace * dim_z + dim_z // 2)
 
     return traj2D, z_index
 

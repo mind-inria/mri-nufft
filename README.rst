@@ -81,9 +81,9 @@ cufinufft_           GPU (CUDA)   ✔                   single          ✔ *   
 finufft_             CPU          ✔                   single/double   TBA            numpy
 gpunufft_            GPU          ✔                   single/double   ✔              numpy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
-pynufft_             CPU          ✘                   single/double   ✘              numpy
-pynufft_             GPU          ✘                   ✘               ✘              Not Supported
-pynfft_              CPU          ✘                   singles/double   ✘             Not Supported
+pynufft-cpu_         CPU          ✘                   single/double   ✘              numpy
+pynfft_ (*)          CPU          ✘                   singles/double   ✘             numpy
+stacked (**)         CPU/GPU      ✔                   single/double   ✔              numpy
 ==================== ============ =================== =============== ============== ===============
 
 
@@ -91,8 +91,12 @@ pynfft_              CPU          ✘                   singles/double   ✘    
 .. _finufft: https://github.com/flatironinstitute/finufft
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
 .. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
-.. _pynufft: https://github.com/jyhmiinlin/pynufft
+.. _pynufft-cpu: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
+
+- (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
+- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy)
+
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.  It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
@@ -103,8 +107,8 @@ Install the required backend (e.g. `pip install finufft`) you want to use.
 
 Then clone and install the package::
 
-    $ git clone https://github.com:mind-inria/mri-nufft
-    $ pip install ./mri-nufft
+    git clone https://github.com:mind-inria/mri-nufft
+    pip install ./mri-nufft
 
 [Temporary] Custom Cufinufft installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,13 +116,13 @@ Then clone and install the package::
 
 In order for the density compensation to work for cufinufft, we have to use the in-house fork enabling it ::
 
-   git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
-   cd finufft && mkdir build && cd build
-   cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
-   cd ../python/cufinufft
-   python setup.py install
-   # Adapt to the name you have in python/cufinufft 
-   cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
+    git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
+    cd finufft && mkdir build && cd build
+    cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
+    cd ../python/cufinufft
+    python setup.py install
+    # Adapt to the name you have in python/cufinufft
+    cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
 Development of this feature happens `here <https://github.com/flatironinstitute/finufft/pull/308>`_
 
@@ -145,13 +149,13 @@ Documentation is available online at https://mind-inria.github.io/mri-nufft
 
 It can also be built locally ::
 
-  $ cd mri-nufft
-  $ pip install -e .[doc]
-  $ python -m sphinx docs docs_build
+    cd mri-nufft
+    pip install -e .[doc]
+    python -m sphinx docs docs_build
 
 To view the html doc locally you can use ::
 
-  $ python -m http.server --directory docs_build 8000
+    python -m http.server --directory docs_build 8000
 
 And visit `localhost:8000` on your web browser.
 
