@@ -181,7 +181,7 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
 
     # Choose number of shots per rings
     nb_shots_per_rings = np.ones(nb_rings).astype(int)
-    rings_radius = np.linspace(0, 1, nb_rings)  # related to ring perimeter
+    rings_radius = (0.5 + np.arange(nb_rings)) / nb_rings
     for _ in range(nb_rings, Nc):
         longest_shot = np.argmax(rings_radius / nb_shots_per_rings)
         nb_shots_per_rings[longest_shot] += 1
