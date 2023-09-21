@@ -120,24 +120,30 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
         ksp = ksp or np.zeros(
-            (self.n_batchs, self.n_coils, len(self.samples), len(self.z_index)),
+            (
+                self.n_batchs,
+                self.n_coils,
+                len(self.z_index),
+                len(self.samples),
+            ),
             dtype=self.cpx_dtype,
         )
         data_ = data.reshape(self.n_batchs, *self.shape)
-        # TODO Add  batch support
         for b in range(self.n_batchs):
             data_c = data_[b] * self.smaps
             ksp_z = self._fftz(data_c)
             ksp_z = ksp_z.reshape(self.n_coils, *self.shape)
             for i, zidx in enumerate(self.z_index):
-                self.operator.op(ksp_z[..., zidx], ksp[b, ..., i])
+                # TODO Both array slices yields non continuous views.
+                t = np.ascontiguousarray(ksp_z[..., zidx])
+                ksp[b, ..., i, :] = self.operator.op(t)
         ksp = ksp.reshape(self.n_batchs, self.n_coils, self.n_samples)
         return ksp
 
     def _op_calibless(self, data, ksp=None):
         if ksp is None:
             ksp = np.empty(
-                (self.n_batchs, self.n_coils, len(self.samples), len(self.z_index)),
+                (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
                 dtype=self.cpx_dtype,
             )
         data_ = data.reshape((self.n_batchs, self.n_coils, *self.shape))
@@ -145,7 +151,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
         ksp_z = ksp_z.reshape((self.n_batchs, self.n_coils, *self.shape))
         for b in range(self.n_batchs):
             for i, zidx in enumerate(self.z_index):
-                self.operator.op(ksp_z[b, ..., zidx], ksp[b, ..., i])
+                t = np.ascontiguousarray(ksp_z[b, ..., zidx])
+                ksp[b, ..., i, :] = self.operator.op(t)
         ksp = ksp.reshape(self.n_batchs, self.n_coils, self.n_samples)
         return ksp
 
@@ -163,10 +170,14 @@ class MRIStackedNUFFT(FourierOperatorBase):
         imgz = np.zeros(
             (self.n_batchs, self.n_coils, *self.shape), dtype=self.cpx_dtype
         )
+        coeffs_ = coeffs.reshape(
+            (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
+        )
         for b in range(self.n_batchs):
             for i, zidx in enumerate(self.z_index):
-                self.operator.adj_op(coeffs[b, ..., i], imgz[b, ..., zidx])
-        imgz = imgz.reshape(self.n_batchs, self.n_coils, *self.shape)
+                # TODO Both array slices yields non continuous views.
+                t = np.ascontiguousarray(coeffs_[b, ..., i, :])
+                imgz[b, ..., zidx] = self.operator.adj_op(t)
         imgc = self._ifftz(imgz)
         img = img or np.empty((self.n_batchs, *self.shape), dtype=self.cpx_dtype)
         for b in range(self.n_batchs):
@@ -177,9 +188,13 @@ class MRIStackedNUFFT(FourierOperatorBase):
         imgz = np.zeros(
             (self.n_batchs, self.n_coils, *self.shape), dtype=self.cpx_dtype
         )
+        coeffs_ = coeffs.reshape(
+            (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
+        )
         for b in range(self.n_batchs):
             for i, zidx in enumerate(self.z_index):
-                self.operator.adj_op(coeffs[b, ..., i], imgz[b, ..., zidx])
+                t = np.ascontiguousarray(coeffs_[b, ..., i, :])
+                imgz[b, ..., zidx] = self.operator.adj_op(t)
         imgz = np.reshape(imgz, (self.n_batchs, self.n_coils, *self.shape))
         img = self._ifftz(imgz)
         return img
@@ -242,10 +257,10 @@ def stacked2traj3d(samples2d, z_indexes, dim_z):
     kspace_locs_proper = proper_trajectory(samples2d, normalize="unit")
     nsamples = len(kspace_locs_proper)
     nz = len(z_kspace)
-    kspace_locs3d = np.zeros((nsamples * nz, 3))
+    kspace_locs3d = np.zeros((nz, nsamples, 3), dtype=samples2d.dtype)
     # TODO use numpy api for this ?
-    for i in range(nsamples):
-        kspace_locs3d[i * nz : (i + 1) * nz, :2] = kspace_locs_proper[i]
-        kspace_locs3d[i * nz : (i + 1) * nz, 2] = z_kspace
+    for i in range(nz):
+        kspace_locs3d[i, :, :2] = kspace_locs_proper
+        kspace_locs3d[i, :, 2] = z_kspace[i]
 
     return kspace_locs3d
