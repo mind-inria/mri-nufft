@@ -77,7 +77,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
         self.smaps = smaps
         self.operator = get_operator(backend)(
-            samples,
+            self.samples,
             shape[:-1],
             n_coils=self.n_coils,
             smaps=None,
