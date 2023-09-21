@@ -220,11 +220,10 @@ def traj3d2stacked(samples, dim_z, n_samples=0):
 
     """
     samples = np.asarray(samples).reshape(-1, 3)
-    z_kspace = np.unique(samples[:, 2])
-
+    z_kspace, idx = np.unique(samples[:, 2], return_index=True)
+    z_kspace = z_kspace[np.argsort(idx)]
     if n_samples == 0:
         n_samples = np.prod(samples.shape[:-1]) // len(z_kspace)
-
     traj2D = samples[:n_samples, :2]
 
     z_kspace = proper_trajectory(z_kspace, "unit").flatten()

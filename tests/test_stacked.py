@@ -126,7 +126,7 @@ def test_stacked2traj3d():
     """Test the conversion from stacked to 3d trajectory."""
     dimz = 64
     traj2d = np.random.randn(100, 2)
-    z_index = np.unique(np.random.randint(0, dimz, 20))
+    z_index = np.random.choice(dimz, 20, replace=False)
 
     traj3d = stacked2traj3d(traj2d, z_index, dimz)
 
