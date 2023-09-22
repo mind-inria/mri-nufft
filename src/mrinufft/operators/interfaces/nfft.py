@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .base import FourierOperatorCPU
+from ..base import FourierOperatorCPU
 
 PYNFFT_AVAILABLE = True
 try:
@@ -54,6 +54,9 @@ class MRInfft(FourierOperatorCPU):
 
     For testing purposes only, as it is very slow.
     """
+
+    backend = "pynfft"
+    available = PYNFFT_AVAILABLE
 
     def __init__(self, samples, shape, n_coils=1, smaps=None):
         super().__init__(

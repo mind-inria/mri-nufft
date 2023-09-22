@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from .base import FourierOperatorCPU
+from ..base import FourierOperatorCPU
 
 
 def get_fourier_matrix(ktraj, shape):
@@ -94,6 +94,7 @@ class MRInumpy(FourierOperatorCPU):
     """
 
     backend = "numpy"
+    available = True
 
     def __init__(self, samples, shape, n_coils=1, smaps=None):
         super().__init__(

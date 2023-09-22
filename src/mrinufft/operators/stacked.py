@@ -3,8 +3,8 @@
 import numpy as np
 import scipy as sp
 
-from .interfaces.base import FourierOperatorBase, proper_trajectory
-from .interfaces import get_operator
+from .base import FourierOperatorBase, proper_trajectory
+from . import get_operator
 
 
 class MRIStackedNUFFT(FourierOperatorBase):
@@ -40,7 +40,9 @@ class MRIStackedNUFFT(FourierOperatorBase):
     # The kspace is organized as a 2D array of shape
     # (self.n_batchs, self.n_coils, self.n_samples) Note that the stack dimension is
     # fused with the samples
-    #
+
+    backend = "stacked"
+    available = True  # the true availabily will be check at runtime.
 
     def __init__(
         self, samples, shape, z_index, backend, smaps, n_coils=1, n_batchs=1, **kwargs

@@ -1,15 +1,32 @@
 """Configuration for pytest."""
 import pytest
 
-from mrinufft.operators import check_backend
-from mrinufft.operators.interfaces import _REGISTERED_BACKENDS
+from mrinufft.operators import FourierOperatorBase, check_backend, list_backends
+
+
+def pytest_addoption(parser):
+    """Add options to pytest."""
+    parser.addoption(
+        "--backend",
+        action="append",
+        default=[],
+        help="NUFFT backend on which the tests are performed.",
+    )
 
 
 def pytest_configure(config):
     """Configuration hook for pytest."""
     print("Available backends:")
-    for backend in _REGISTERED_BACKENDS:
-        print(f"{backend:<14}: {_REGISTERED_BACKENDS[backend][0]}")
+    for backend in list_backends():
+        print(f"{backend:<14}: {FourierOperatorBase.interfaces[backend][0]}")
+
+    if selected := config.getoption("backend"):
+        # hijacks the availability of interfaces:
+        for backend in list_backends():
+            FourierOperatorBase.interfaces[backend] = (
+                backend in selected,
+                FourierOperatorBase.interfaces[backend][1],
+            )
 
 
 # # for test directly parametrized by a backend

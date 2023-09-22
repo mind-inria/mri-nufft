@@ -1,6 +1,6 @@
 """Tensorflow MRI Nufft Operators."""
 
-from .base import FourierOperatorBase
+from ..base import FourierOperatorBase
 
 TENSORFLOW_AVAILABLE = True
 
@@ -35,11 +35,10 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     """
 
     backend = "tensorflow"
+    available = TENSORFLOW_AVAILABLE
 
     def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
         super().__init__()
-        if not TENSORFLOW_AVAILABLE:
-            raise RuntimeError("TensorFlow NUFFT is not available.")
 
         self.samples = samples
         self.shape = shape

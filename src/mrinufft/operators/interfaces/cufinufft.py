@@ -2,7 +2,7 @@
 
 import warnings
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory
+from ..base import FourierOperatorBase, proper_trajectory
 from .utils import (
     CUPY_AVAILABLE,
     check_size,
@@ -225,6 +225,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     """
 
     backend = "cufinufft"
+    available = CUFINUFFT_AVAILABLE and CUPY_AVAILABLE
 
     def __init__(
         self,
@@ -241,12 +242,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         n_trans=1,
         **kwargs,
     ):
-        super().__init__()
+        # run the availaility check here to get detailled output.
         if not CUPY_AVAILABLE:
             raise RuntimeError("cupy is not installed")
         if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
 
+        super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
 

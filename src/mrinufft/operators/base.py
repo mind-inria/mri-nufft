@@ -55,6 +55,61 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
+def check_backend(backend_name: str):
+    """Check if a specific backend is available."""
+    try:
+        return FourierOperatorBase.interfaces[backend_name][0]
+    except KeyError as e:
+        raise ValueError(f"unknown backend: '{backend_name}'") from e
+
+
+def list_backends(available_only=False):
+    """Return a list of backend.
+
+    Parameters
+    ----------
+    available_only: bool, optional
+        If True, only return backends that are available. If False, return all
+        backends, regardless of whether they are available or not.
+    """
+    return [
+        name
+        for name, (available, _) in FourierOperatorBase.interfaces.items()
+        if available or not available_only
+    ]
+
+
+def get_operator(backend_name: str, *args, **kwargs):
+    """Return an MRI Fourier operator interface using the correct backend.
+
+    Parameters
+    ----------
+    backend_name: str
+        Backend name
+    *args, **kwargs:
+        Arguments to pass to the operator constructor.
+
+    Returns
+    -------
+    FourierOperator
+        class or instance of class if args or kwargs are given.
+
+    Raises
+    ------
+    ValueError if the backend is not available.
+    """
+    try:
+        available, operator = FourierOperatorBase.interfaces[backend_name]
+    except KeyError as exc:
+        raise ValueError("backend is not available") from exc
+    if not available:
+        raise ValueError("backend is registered, but dependencies are not met.")
+
+    if args or kwargs:
+        operator = operator(*args, **kwargs)
+    return operator
+
+
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
@@ -79,10 +134,23 @@ class FourierOperatorBase(ABC):
         The adjoint operation (kspace -> image)
     """
 
+    interfaces = {}
+
     def __init__(self):
+        if not self.available:
+            raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
         self._density = None
         self._n_coils = 1
+
+    def __init_subclass__(cls):
+        """Register the class in the list of available operators."""
+        super().__init_subclass__()
+        available = getattr(cls, "available", True)
+        if callable(available):
+            available = available()
+        if backend := getattr(cls, "backend", None):
+            cls.interfaces[backend] = (available, cls)
 
     @abstractmethod
     def op(self, data):

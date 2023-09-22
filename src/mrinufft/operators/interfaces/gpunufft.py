@@ -1,7 +1,7 @@
 """Interface to the GPU NUFFT library."""
 
 import numpy as np
-from .base import FourierOperatorBase, proper_trajectory
+from ..base import FourierOperatorBase, proper_trajectory
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -182,6 +182,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     """
 
     backend = "gpunufft"
+    available = GPUNUFFT_AVAILABLE
 
     def __init__(self, samples, shape, n_coils=1, density=None, smaps=None, **kwargs):
         if GPUNUFFT_AVAILABLE is False:

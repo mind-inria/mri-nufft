@@ -1,6 +1,6 @@
 """PyNUFFT CPU Interface."""
 
-from .base import FourierOperatorCPU
+from ..base import FourierOperatorCPU
 
 
 PYNUFFT_CPU_AVAILABLE = True
@@ -37,6 +37,7 @@ class MRIPynufft(FourierOperatorCPU):
     """PyNUFFT implementation of MRI NUFFT transform."""
 
     backend = "pynufft-cpu"
+    available = PYNUFFT_CPU_AVAILABLE
 
     def __init__(
         self,
@@ -48,8 +49,6 @@ class MRIPynufft(FourierOperatorCPU):
         osf=2,
         **kwargs,
     ):
-        if not PYNUFFT_CPU_AVAILABLE:
-            raise RuntimeError("Pynufft is not available.")
         super().__init__(samples, shape, density, n_coils, smaps)
 
         self.raw_op = RawPyNUFFT(samples, shape, osf, **kwargs)
