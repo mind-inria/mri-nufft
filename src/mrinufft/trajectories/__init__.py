@@ -18,7 +18,10 @@ from .trajectory3D import (
     initialize_3D_annular_shells,
 )
 
-from .display import display_2D_trajectory
+from .display import (
+    display_2D_trajectory,
+    display_3D_trajectory,
+)
 
 __all__ = [
     "initialize_2D_radial",
@@ -35,4 +38,5 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "display_2D_trajectory",
+    "display_3D_trajectory",
 ]
