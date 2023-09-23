@@ -16,6 +16,7 @@ from .trajectory2D import (
 )
 from .utils import R2D, Ry, Rz, Rv, initialize_tilt, KMAX
 
+
 ################################
 # 3D TRAJECTORY INITIALIZATION #
 ################################
@@ -82,9 +83,7 @@ def initialize_3D_from_2D_expansion(
     return trajectory3D.reshape((nb_repetitions * Nc, Ns, 3))
 
 
-def initialize_3D_cones(
-    Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, nb_overlaps=0
-):
+def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width=1):
     """Initialize 3D trajectories with cones.
 
     Parameters
@@ -97,10 +96,10 @@ def initialize_3D_cones(
         Tilt of the cones, by default "golden"
     in_out : bool, optional
         Whether the cones are going in and out, by default False
-    nb_zigzags : int, optional
+    nb_zigzags : float, optional
         Number of zigzags of the cones, by default 5
-    nb_overlaps : int, optional
-        Number of overlaps of the cones, by default 0
+    width : float, optional
+        Width of a cone such that 1 has no redundacy and full coverage, by default 1
 
     Returns
     -------
@@ -115,22 +114,10 @@ def initialize_3D_cones(
     trajectory = np.zeros((Nc, Ns, 3))
     trajectory[:, :, 0] = radius
     trajectory[:, :, 1] = (
-        radius
-        * np.cos(angles)
-        * (np.abs(nb_overlaps) + 1)
-        * 2
-        * np.pi
-        / Nc ** (2 / 3)
-        / (1 + in_out)
+        radius * np.cos(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
     trajectory[:, :, 2] = (
-        radius
-        * np.sin(angles)
-        * (np.abs(nb_overlaps) + 1)
-        * 2
-        * np.pi
-        / Nc ** (2 / 3)
-        / (1 + in_out)
+        radius * np.sin(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
 
     # Determine mostly evenly distributed points on sphere
@@ -150,7 +137,9 @@ def initialize_3D_cones(
     return trajectory.reshape((Nc, Ns, 3))
 
 
-def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="uniform"):
+def initialize_3D_helical_shells(
+    Nc, Ns, nb_shells, spiral_reduction=1, shell_tilt="intergaps", shot_tilt="uniform"
+):
     """Initialize 3D trajectories with helical shells.
 
     Parameters
@@ -161,10 +150,12 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
         Number of samples per shot
     nb_shells : int
         Number of concentric shells/spheres
-    oversampling : int
-        Multiplicative factor for Ns without changing the curves, by default 1
-    tilt : str, float, optional
-        Angle between shots over a shell surface, by default "uniform"
+    spiral_reduction : int
+        Factor used to reduce the automatic spiral curvature, by default 1
+    shell_tilt : str, float, optional
+        Angle between consecutive shells along z-axis, by default "intergaps"
+    shot_tilt : str, float, optional
+        Angle between shots over a shell surface along z-axis, by default "uniform"
 
     Returns
     -------
@@ -174,16 +165,11 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
     # Check arguments validity
     if Nc < nb_shells:
         raise ValueError("Argument nb_shells should not be higher than Nc.")
-    trajectory = np.zeros((Nc, Ns * oversampling, 3))
+    trajectory = np.zeros((Nc, Ns, 3))
 
     # Attribute shots to shells following a prescribed density
     Nc_per_shell = np.ones(nb_shells).astype(int)
-    density = np.array(
-        [
-            int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
-            for i in range(nb_shells)
-        ]
-    )
+    density = np.arange(1, nb_shells + 1) ** 2  # simplified version
     for _ in range(Nc - nb_shells):
         idx = np.argmax(density / Nc_per_shell)
         Nc_per_shell[idx] += 1
@@ -195,12 +181,13 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
         # Prepare shell parameters
         Ms = Nc_per_shell[i]
         k0 = radii[i]
-        kz = k0 * np.linspace(-1, 1, Ns * oversampling)
 
         # Initialize first shot cylindrical coordinates
+        kz = k0 * np.linspace(-1, 1, Ns)
         magnitudes = k0 * np.sqrt(1 - (kz / k0) ** 2)
         angles = (
-            np.sqrt(Ns * np.pi / Ms) * np.arcsin(kz / k0) + 2 * np.pi * (i + 1) / Ms
+            np.sqrt(Ns / spiral_reduction * np.pi / Ms) * np.arcsin(kz / k0)
+            + 2 * np.pi * (i + 1) / Ms
         )
 
         # Format first shot into trajectory
@@ -208,10 +195,14 @@ def initialize_3D_helical_shells(Nc, Ns, nb_shells, oversampling=1, tilt="unifor
         trajectory[count, :, 1] = magnitudes * np.sin(angles)
         trajectory[count : count + Ms, :, 2] = kz[None]
 
-        # Rotate shots to create the shell
-        rotation = R2D(initialize_tilt(tilt, Ms))
+        # Rotate first shot Ms times to create the shell
+        rotation = Rz(initialize_tilt(shot_tilt, Ms))
         for j in range(1, Ms):
-            trajectory[count + j, :, :2] = trajectory[count + j - 1, :, :2] @ rotation
+            trajectory[count + j] = trajectory[count + j - 1] @ rotation
+
+        # Apply shell tilt
+        rotation = Rz(i * initialize_tilt(shell_tilt, nb_shells))
+        trajectory[count : count + Ms] = trajectory[count : count + Ms] @ rotation
         count += Ms
     return KMAX * trajectory
 
@@ -230,9 +221,9 @@ def initialize_3D_annular_shells(
     nb_shells : int
         Number of concentric shells/spheres
     shell_tilt : str, float, optional
-        Angle between consecutive shells, by default pi
-    ring_tilt :
-        Angle controlling approximately the shell halves rotation, by default pi / 2
+        Angle between consecutive shells along z-axis, by default pi
+    ring_tilt : str, float, optional
+        Angle controlling approximately the ring halves rotation, by default pi / 2
 
     Returns
     -------
@@ -246,12 +237,8 @@ def initialize_3D_annular_shells(
 
     # Attribute shots to shells following a prescribed density
     Nc_per_shell = np.ones(nb_shells).astype(int)
-    density = np.array(
-        [
-            int(np.ceil(8 * np.pi / np.sqrt(3) * (i + 1) ** 2 / Ns))
-            for i in range(nb_shells)
-        ]
-    )
+    shell_radii = (0.5 + np.arange(nb_shells)) / nb_shells
+    density = np.arange(1, nb_shells + 1) ** 2  # simplified version
     for _ in range(Nc - nb_shells):
         idx = np.argmax(density / Nc_per_shell)
         Nc_per_shell[idx] += 1
