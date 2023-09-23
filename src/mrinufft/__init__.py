@@ -54,6 +54,7 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "display_2D_trajectory",
+    "display_3D_trajectory",
 ]
 
 

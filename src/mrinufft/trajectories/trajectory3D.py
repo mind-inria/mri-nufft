@@ -14,7 +14,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import R2D, Ry, Rz, Rv, initialize_tilt, KMAX
+from .utils import Ry, Rz, Rv, initialize_tilt, KMAX
 
 
 ################################
