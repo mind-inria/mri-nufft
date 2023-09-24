@@ -101,8 +101,9 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
 
     Returns
     -------
-     array_like
-         2D cone trajectory
+    array_like
+        2D cone trajectory
+
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
@@ -141,8 +142,9 @@ def initialize_2D_sinusoide(
 
     Returns
     -------
-     array_like
-         2D sinusoide trajectory
+    array_like
+        2D sinusoide trajectory
+
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
@@ -178,7 +180,6 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
 
     References
     ----------
-
     .. [HHN08] Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
        "MRI using a concentric rings trajectory." Magnetic Resonance
        in Medicine 59, no. 1 (2008): 102-112.
@@ -224,6 +225,7 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
     -------
     array_like
         2D rosette trajectory
+
     """
     # Prepare to parametrize with coprime factor according to Nc parity
     odd = Nc % 2

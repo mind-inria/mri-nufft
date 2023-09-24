@@ -140,8 +140,9 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
 def initialize_3D_helical_shells(
     Nc, Ns, nb_shells, spiral_reduction=1, shell_tilt="intergaps", shot_tilt="uniform"
 ):
-    """Initialize 3D trajectories with helical shells,
-    following the proposition from [YRB06]_
+    """Initialize 3D trajectories with helical shells.
+
+    The implementation follows the proposition from [YRB06]_
     but the idea can be traced back much further [PN95]_.
 
     Parameters
@@ -166,13 +167,13 @@ def initialize_3D_helical_shells(
 
     References
     ----------
-
     .. [YRB06] Shu, Yunhong, Stephen J. Riederer, and Matt A. Bernstein.
        "Three‐dimensional MRI with an undersampled spherical shells trajectory."
        Magnetic Resonance in Medicine 56, no. 3 (2006): 553-562.
     .. [PN95] Irarrazabal, Pablo, and Dwight G. Nishimura.
        "Fast three dimensional magnetic resonance imaging."
        Magnetic Resonance in Medicine 33, no. 5 (1995): 656-662
+
     """
     # Check arguments validity
     if Nc < nb_shells:
@@ -222,8 +223,9 @@ def initialize_3D_helical_shells(
 def initialize_3D_annular_shells(
     Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=np.pi / 2
 ):
-    """Initialize 3D trajectories with annular shells,
-    inspired from the work proposed in [HM11]_.
+    """Initialize 3D trajectories with annular shells.
+
+    An exclusive trajectory inspired from the work proposed in [HM11]_.
 
     Parameters
     ----------
@@ -248,6 +250,7 @@ def initialize_3D_annular_shells(
     .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
        "On sphere-filling ropes."
        The American Mathematical Monthly 118, no. 10 (2011): 863-876
+
     """
     # Check arguments validity
     if Nc < nb_shells:
