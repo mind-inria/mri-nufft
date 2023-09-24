@@ -160,7 +160,7 @@ def initialize_2D_sinusoide(
 
 
 def initialize_2D_rings(Nc, Ns, nb_rings):
-    """Initialize a 2D ring trajectory.
+    """Initialize a 2D ring trajectory, as proposed in [HHN08]_.
 
     Parameters
     ----------
@@ -175,6 +175,14 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
     -------
     array_like
         2D ring trajectory
+
+    References
+    ----------
+
+    .. [HHN08] Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
+       "MRI using a concentric rings trajectory." Magnetic Resonance
+       in Medicine 59, no. 1 (2008): 102-112.
+
     """
     if Nc < nb_rings:
         raise ValueError("Argument nb_rings should not be higher than Nc.")
