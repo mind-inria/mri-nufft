@@ -66,9 +66,9 @@ def show_argument(function, arguments, one_shot, subfigure_size):
 # These options are used in the examples below as default values for all trajectories.
 
 # Trajectory parameters
-Nc = 72  # Number of shots
-Ns = 512  # Number of samples per shot
-in_out = True  # Choose between in-out or center-out trajectories
+Nc = 100  # Number of shots
+Ns = 500  # Number of samples per shot
+in_out = False  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Choose the angular distance between shots
 nb_shells = 8  # Number of concentric shells for shell-type trajectories
 
@@ -86,7 +86,7 @@ one_shot = True  # Highlight one shot in particular
 # and relying on different principles.
 #
 # 3D Cones
-# ------
+# --------
 #
 # A common pattern composed of 3D cones oriented all over within a sphere.
 #
@@ -94,10 +94,12 @@ one_shot = True  # Highlight one shot in particular
 #
 # - ``Nc (int)``: number of individual shots
 # - ``Ns (int)``: number of samples per shot
-# - ``tilt (str, float)``: angle between each consecutive shot (in radians). ``(default "uniform")``
-# - ``in_out (bool)``: define whether the shots should travel toward the center then outside
-#   (in-out) or not (center-out). ``(default False)``
-# - ``nb_zigzags (float)``: number of revolutions over a center-out shot. ``(default 5)``
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+#   ``(default "uniform")``
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out). ``(default False)``
+# - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
+#   ``(default 5)``
 # - ``width (float)``: cone width factor, normalized to cover the k-space by default.
 #   ``(default 1)``
 #
@@ -137,7 +139,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # is lengthened or the sampling rate is increased.
 #
 
-arguments = [20, 50, 80, 200]
+arguments = [10, 25, 40, 100]
 function = lambda x: mn.initialize_3D_cones(Nc, x, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
@@ -169,8 +171,8 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #   then going back to outer regions, often on the opposite side (radial, cones)
 # - center-out or center-center: when ``in_out=False`` the trajectory will start
 #   at the center, but depending on the specific trajectory formula the path might
-#   end up in the outer regions (radial, spiral, cones, etc) or back to the center (rosette,
-#   lissajous).
+#   end up in the outer regions (radial, spiral, cones, etc)
+#   or back to the center (rosette, lissajous).
 #
 # Note that the behavior of both ``tilt`` and ``width`` are automatically adapted
 # to the changes to avoid having to update them too when switching ``in_out``.
@@ -210,6 +212,82 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 
 # %%
+# Seiffert spirals / Yarnball
+# ---------------------------
+#
+# A recent pattern with tightly controlled gradient norms using radially
+# modulated Seiffert spirals, based on Jacobi elliptic functions.
+# Note that Seiffert spirals more commonly refer to a curve evolving
+# over a sphere surface rather than a volume, with the advantage of
+# having a constant speed and angular velocity. The MR trajectory
+# is obtained by increasing progressively the radius of the sphere.
+#
+# This implementation follows the proposition from [SMR18]_ based on
+# works from [Er00]_ and [Br09]_. The pattern is also referred to as
+# Yarnball by a different team [SB21]_, as a nod to the Yarn trajectory
+# pictured in [IN95]_, even though both admittedly share little in common.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D cones
+# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``curve_index (float)``: Index controlling curvature from 0 (flat) to 1 (curvy).
+#   ``(default 0.3)``
+# - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
+#   ``(default 1)``
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+#   ``(default "uniform")``. See 3D cones
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``. See 3D cones
+#
+
+trajectory = mn.initialize_3D_seiffert_spiral(Nc, Ns, in_out=in_out)
+display_3D_trajectory(
+    trajectory,
+    nb_repetitions=1,
+    Nc=Nc,
+    Ns=Ns,
+    size=figure_size,
+    one_shot=one_shot,
+    per_plane=False,
+)
+plt.show()
+
+
+# %%
+# ``curve_index (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~
+#
+# An index defined over :math:`[0, 1)` controling the curvature, with :math:`0`
+# corresponding to a planar spiral, and increasing the length and exploration of
+# the curve while asymptotically approaching :math:`1`.
+#
+
+arguments = [0, 0.3, 0.9, 0.99]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc, Ns, in_out=in_out, curve_index=x
+)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+
+# %%
+# ``nb_revolutions (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of revolutions, or simply the number of times a curve reaches its
+# original orientation. For regular Seiffert spirals, it corresponds to the
+# number of times the shot reaches the starting pole of the sphere. It
+# subsequently defines the length of the curve.
+#
+
+arguments = [0.5, 1, 1.5, 2]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc, Ns, in_out=in_out, nb_revolutions=x
+)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+
+# %%
 # Shell trajectories
 # ==================
 #
@@ -224,7 +302,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # other trajectories sharing this principle.
 #
 # This implementation follows the proposition from [YRB06]_ but the idea
-# is much older and can be traced back at least to [PN95]_.
+# is much older and can be traced back at least to [IN95]_.
 #
 # Arguments:
 #
@@ -367,7 +445,7 @@ plt.show()
 # shells.
 #
 # An angle of :math:`\pi / 2` allows reaching the best shot length homogeneity,
-# and partition the spheres into several connex curves composed of exactly
+# and it partitions the spheres into several connex curves composed of exactly
 # two shots.
 #
 
@@ -379,15 +457,66 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 
 # %%
+# Seiffert shells
+# ---------------
+#
+# An exclusive trajectory composed of re-arranged Seiffert spirals
+# covering concentric shells. All curves have a constant speed and
+# angular velocity, depending on the size of the sphere they belong to.
+#
+# This implementation is inspired by the propositions from [YRB06]_ and [SMR18]_,
+# and also based on works from [Er00]_ and [Br09]_.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D cones
+# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``curve_index (float)``: Index controlling curvature from 0 (flat) to 1 (curvy).
+#   ``(default 0.3)``. See Seiffert spirals
+# - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
+#   ``(default 1)``.  See Seiffert spirals
+# - ``shell_tilt (str, float)``: angle between each consecutive shell (in radians).
+#   ``(default "intergaps")``. See helical shells
+# - ``shot_tilt (str, float)``: angle between each consecutive shot
+#   over a sphere (in radians). ``(default "uniform")``. See helical shells
+#
+
+trajectory = mn.initialize_3D_seiffert_shells(Nc, Ns, nb_shells)
+display_3D_trajectory(
+    trajectory,
+    nb_repetitions=1,
+    Nc=Nc,
+    Ns=Ns,
+    size=figure_size,
+    one_shot=one_shot,
+    per_plane=False,
+)
+plt.show()
+
+
+# %%
 # References
 # ==========
 #
-# .. [PN95] Irarrazabal, Pablo, and Dwight G. Nishimura.
+# .. [IN95] Irarrazabal, Pablo, and Dwight G. Nishimura.
 #    "Fast three dimensional magnetic resonance imaging."
-#    Magnetic Resonance in Medicine 33, no. 5 (1995): 656-662
+#    Magnetic Resonance in Medicine 33, no. 5 (1995): 656-662.
+# .. [Er00] Erdös, Paul.
+#    "Spiraling the earth with C. G. J. Jacobi."
+#    American Journal of Physics 68, no. 10 (2000): 888-895.
 # .. [YRB06] Shu, Yunhong, Stephen J. Riederer, and Matt A. Bernstein.
 #    "Three‐dimensional MRI with an undersampled spherical shells trajectory."
 #    Magnetic Resonance in Medicine 56, no. 3 (2006): 553-562.
+# .. [Br09] Brizard, Alain J.
+#    "A primer on elliptic functions with applications in classical mechanics."
+#    European journal of physics 30, no. 4 (2009): 729.
 # .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
 #    "On sphere-filling ropes."
 #    The American Mathematical Monthly 118, no. 10 (2011): 863-876
+# .. [SMR18] Speidel, Tobias, Patrick Metze, and Volker Rasche.
+#    "Efficient 3D Low-Discrepancy k-Space Sampling
+#    Using Highly Adaptable Seiffert Spirals."
+#    IEEE Transactions on Medical Imaging 38, no. 8 (2018): 1833-1840.
+# .. [SB21] Stobbe, Robert W., and Christian Beaulieu.
+#    "Three‐dimensional Yarnball k‐space acquisition for accelerated MRI."
+#    Magnetic Resonance in Medicine 85, no. 4 (2021): 1840-1854.
