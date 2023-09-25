@@ -101,8 +101,9 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
 
     Returns
     -------
-     array_like
-         2D cone trajectory
+    array_like
+        2D cone trajectory
+
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
@@ -141,8 +142,9 @@ def initialize_2D_sinusoide(
 
     Returns
     -------
-     array_like
-         2D sinusoide trajectory
+    array_like
+        2D sinusoide trajectory
+
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
@@ -160,7 +162,7 @@ def initialize_2D_sinusoide(
 
 
 def initialize_2D_rings(Nc, Ns, nb_rings):
-    """Initialize a 2D ring trajectory.
+    """Initialize a 2D ring trajectory, as proposed in [HHN08]_.
 
     Parameters
     ----------
@@ -175,13 +177,20 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
     -------
     array_like
         2D ring trajectory
+
+    References
+    ----------
+    .. [HHN08] Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
+       "MRI using a concentric rings trajectory." Magnetic Resonance
+       in Medicine 59, no. 1 (2008): 102-112.
+
     """
     if Nc < nb_rings:
         raise ValueError("Argument nb_rings should not be higher than Nc.")
 
     # Choose number of shots per rings
     nb_shots_per_rings = np.ones(nb_rings).astype(int)
-    rings_radius = np.linspace(0, 1, nb_rings)  # related to ring perimeter
+    rings_radius = (0.5 + np.arange(nb_rings)) / nb_rings
     for _ in range(nb_rings, Nc):
         longest_shot = np.argmax(rings_radius / nb_shots_per_rings)
         nb_shots_per_rings[longest_shot] += 1
@@ -216,6 +225,7 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
     -------
     array_like
         2D rosette trajectory
+
     """
     # Prepare to parametrize with coprime factor according to Nc parity
     odd = Nc % 2

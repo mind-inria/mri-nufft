@@ -50,6 +50,7 @@ def show_argument(function, arguments, one_shot, subfigure_size):
 # Script options
 # ==============
 # These options are used in the examples below as default values for all trajectories.
+
 # Trajectory parameters
 Nc = 24  # Number of shots
 Ns = 256  # Number of samples per shot
@@ -77,8 +78,8 @@ one_shot = True  # Highlight one shot in particular
 # - ``Nc (int)``: number of individual shots
 # - ``Ns (int)``: number of samples per shot
 # - ``tilt (str, float)``: angle between each consecutive shot (in radians) ``(default "uniform")``
-# - ``in_out (bool)``: define whether the shots should travel toward the center then outside
-#   or not (center-out). ``(default False)``
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``
 #
 
 trajectory = mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=in_out)
@@ -90,8 +91,8 @@ plt.show()
 # ``Nc (int)``
 # ~~~~~~~~~~~~
 #
-# The number of individual shots, here straight lines, to cover the
-# k-space. More lines means better coverage but also longer acquisitions.
+# The number of individual shots, here straight lines, used to cover the
+# k-space. More shots means better coverage but also longer acquisitions.
 #
 
 arguments = [8, 16, 32, 64]
@@ -104,7 +105,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # ~~~~~~~~~~~~
 #
 # The number of samples per shot. More samples means the lines are split
-# into more smaller segments and therefore either the acquisition window
+# into more smaller segments, and therefore either the acquisition window
 # is lengthened or the sampling rate is increased.
 #
 
@@ -119,7 +120,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 # The angle between each consecutive shots, either in radians or as a
 # string defining some default mods such as “uniform” for
-# :math:`2 \pi / N_c`, or “golden” or “mri golden” for the different
+# :math:`2 \pi / N_c`, or “golden” and “mri golden” for the different
 # common definitions of golden angles. The angle is automatically adapted
 # when the ``in_out`` argument is switched to keep the same behavior.
 #
@@ -143,6 +144,9 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #   end up in the outer regions (radial, spiral, cones, etc) or back to the center (rosette,
 #   lissajous).
 #
+# Note that the behavior of ``tilt`` is automatically adapted to the changes to avoid having
+# to update it too when switching ``in_out``.
+#
 
 arguments = [True, False]
 function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=x)
@@ -165,7 +169,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # - ``tilt (str, float)``: angle between each consecutive shot (in radians).
 #   ``(default "uniform")``. See radial
 # - ``in_out (bool)``: define whether the shots should travel toward the center
-#   then outside or not (center-out). ``(default False)``. See radial
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial
 # - ``nb_revolutions (float)``: number of revolutions performed from the
 #   center. ``(default 1)``
 # - ``spiral (str, float)``: type of spiral defined through the above-mentionned equation.
@@ -213,7 +217,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # -----
 #
 # A radial-like trajectory zigzaging within cones over the k-space to
-# offer a better coverage with more customization parameters.
+# offer a better coverage than radial with more customization parameters.
 #
 # Arguments:
 #
@@ -221,11 +225,11 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # - ``Ns (int)``: number of samples per shot. See radial
 # - ``tilt (str, float)``: angle between each consecutive shot (in radians).
 #   ``(default "uniform")``. See radial
-# - ``in_out (bool)``: define whether the shots should travel toward the
-#   center then outside or not (center-out). ``(default False)``. See radial
-# - ``nb_zigzags (float)``: number of times a cone border will be reached
-#   from the center. ``(default 5)``
-# - ``width (float)``: cone width, normalized by the default uniform width.
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial
+# - ``nb_zigzags (float)``: number of sinusoidal patterns over a center-out shot.
+#   ``(default 5)``
+# - ``width (float)``: cone width factor, normalized to cover the k-space by default.
 #   ``(default 1)``
 #
 
@@ -238,9 +242,8 @@ plt.show()
 # ``nb_zigzags (float)``
 # ~~~~~~~~~~~~~~~~~~~~~~
 #
-# The number of “zigzags”, aka the number of times the shot will touch a
-# same side of the cone, from the center (i.e twice as much overall for
-# in-out trajectories)
+# The number of “zigzags”, or sinusoidal patterns present over a center-out shot
+# (doubled overall for in-out trajectories)
 #
 
 arguments = [0.5, 2, 5, 10]
@@ -255,9 +258,9 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # ~~~~~~~~~~~~~~~~~
 #
 # The cone width normalized such that ``width = 1`` corresponds to
-# non-overlapping cones covering uniformly the whole k-space, and
+# non-overlapping cones covering the whole k-space circle, and
 # therefore ``width > 1`` creates overlap between cone regions and
-# ``width < 1`` tends to radial patterns.
+# ``width < 1`` tends to more radial patterns.
 #
 
 arguments = [0.2, 1, 2, 3]
@@ -270,7 +273,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # ---------
 #
 # Another radial-like trajectory zigzaging similarly to cones, but over a
-# whole band rather than cones reducing around the center.
+# whole band rather than cones reduced towards the center.
 #
 # Arguments:
 #
@@ -279,10 +282,10 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # - ``tilt (str, float)``: angle between each consecutive shot (in radians).
 # - ``(default "uniform")``. See radial
 # - ``in_out (bool)``: define whether the shots should travel toward the center
-#   then outside or not (center-out). ``(default False)``. See radial
-# - ``nb_zigzags (float)``: number of times a cone border will be reached
-#   from the center. ``(default 5)``. See cones
-# - ``width (float)``: band width, normalized by the default uniform width.
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial
+# - ``nb_zigzags (float)``: number of sinusoidal patterns over a center-out shot.
+#   ``(default 5)``. See cones
+# - ``width (float)``: shot width factor, normalized to cover the k-space by default.
 #   ``(default 1)``. See cones
 #
 
@@ -296,7 +299,7 @@ plt.show()
 # -------
 #
 # A pattern composed of concentric circles like a target, with each
-# ring composed of one or more shots. This trajectory was initially
+# ring composed of one or more shots . This trajectory was initially
 # proposed by Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
 # "MRI using a concentric rings trajectory." Magnetic Resonance in Medicine
 # 59, no. 1 (2008): 102-112.
@@ -351,8 +354,8 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 # - ``Nc (int)``: number of individual shots. See radial
 # - ``Ns (int)``: number of samples per shot. See radial
-# - ``in_out (bool)``: define whether the shots should travel toward the
-#   center then outside or not (center-center). ``(default False)``. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial
 # - ``coprime_index (int)``: the index of the coprime factor used
 #   to define the shot curvature. ``(default 0)``
 #
@@ -393,8 +396,8 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 # - ``Nc (int)``: number of individual shots. See radial
 # - ``Ns (int)``: number of samples per shot. See radial
-# - ``in_out (bool)``: define whether the shots should travel toward the
-#   center then outside or not (center-center). ``(default False)``. See radial
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial
 # - ``coprime_index (int)``: the index of the coprime factor used # to define
 #   the shot curvature. ``(default 0)``
 # - ``nb_segments (int)``: number of indepedent Lissajous curves covering
