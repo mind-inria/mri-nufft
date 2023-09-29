@@ -39,10 +39,11 @@ def setup_2D_ticks(size, ax=None):
     return ax
 
 
-def setup_3D_ticks(size):
+def setup_3D_ticks(size, ax=None):
     """Add ticks to 3D plot."""
-    fig = plt.figure(figsize=(size, size))
-    ax = fig.add_subplot(projection="3d")
+    if ax is None:
+        fig = plt.figure(figsize=(size, size))
+        ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -130,6 +131,7 @@ def display_3D_trajectory(
     per_plane=True,
     one_shot=False,
     constraints=False,
+    subfigure=None,
     resolution=DEFAULT_RESOLUTION,
 ):
     """Display of 3D trajectory.
@@ -153,6 +155,7 @@ def display_3D_trajectory(
     constraints : bool, optional
         If True, display the points where the gradients and slews are above the
         default limits.
+    subfigure: plt.Axes or None, optional
     resolution: Union[float, Tuple[float, ...]], optional
         Resolution of MR image in m.
         The default is DEFAULT_RESOLUTION.
@@ -163,7 +166,7 @@ def display_3D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
-    ax = setup_3D_ticks(size)
+    ax = setup_3D_ticks(size, subfigure)
     trajectory = trajectory.reshape((nb_repetitions, Nc, Ns, 3))
     for i in range(nb_repetitions):
         for j in range(Nc):
