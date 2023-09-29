@@ -392,15 +392,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         K = self.n_samples
         bsize_samples2gpu = T * self.ksp_size
         bsize_img2gpu = T * self.img_size
-        if is_cuda_array(data):
-            if ksp_d is None:
-                ksp_d = cp.empty((B, C, K), dtype=self.cpx_dtype)
-            for i in range((B * C) // T):
-                self.__op(
-                    get_ptr(data) + i * bsize_img2gpu,
-                    get_ptr(ksp_d) + i * bsize_samples2gpu,
-                )
-            return ksp_d
+        if ksp_d is None:
+            ksp_d = cp.empty((B, C, K), dtype=self.cpx_dtype)
+        for i in range((B * C) // T):
+            self.__op(
+                get_ptr(data) + i * bsize_img2gpu,
+                get_ptr(ksp_d) + i * bsize_samples2gpu,
+            )
+        return ksp_d
 
     def _op_calibless_host(self, data, ksp=None):
         # calibrationless, data on host
@@ -451,8 +450,10 @@ class MRICufiNUFFT(FourierOperatorBase):
             adj_op_func = self._adj_op_sense_device
         elif self.uses_sense:
             adj_op_func = self._adj_op_sense_host
+        elif is_cuda_array(coeffs):
+            adj_op_func = self._adj_op_calibless_device
         else:
-            adj_op_func = self._adj_op_calibless
+            adj_op_func = self._adj_op_calibless_host
 
         ret = adj_op_func(coeffs, img_d)
         ret /= self.norm_factor
@@ -531,7 +532,34 @@ class MRICufiNUFFT(FourierOperatorBase):
         img = img.reshape((B, 1, *XYZ))
         return img
 
-    def _adj_op_calibless(self, coeffs, img_d=None):
+    def _adj_op_calibless_device(self, coeffs, img_d=None):
+        coeffs_f = coeffs.flatten()
+        n_trans_samples = self.n_trans * self.n_samples
+        ksp_batched = cp.empty(n_trans_samples, dtype=self.cpx_dtype)
+        if self.uses_density:
+            density_batched = cp.repeat(
+                self.density[None, :], self.n_trans, axis=0
+            ).flatten()
+        img_d = img_d or cp.empty(
+            (self.n_batchs, self.n_coils, *self.shape),
+            dtype=self.cpx_dtype,
+        )
+        for i in range((self.n_coils * self.n_batchs) // self.n_trans):
+            if self.uses_density:
+                cp.copyto(
+                    ksp_batched,
+                    coeffs_f[i * n_trans_samples : (i + 1) * n_trans_samples],
+                )
+                ksp_batched *= density_batched
+                self.__adj_op(get_ptr(ksp_batched), get_ptr(img_d) + i * self.bsize_img)
+            else:
+                self.__adj_op(
+                    get_ptr(coeffs_f) + i * self.bsize_ksp,
+                    get_ptr(img_d) + i * self.bsize_img,
+                )
+        return img_d
+
+    def _adj_op_calibless_host(self, coeffs, img_batched=None):
         coeffs_f = coeffs.flatten()
         n_trans_samples = self.n_trans * self.n_samples
         ksp_batched = cp.empty(n_trans_samples, dtype=self.cpx_dtype)
@@ -540,31 +568,11 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.density[None, :], self.n_trans, axis=0
             ).flatten()
 
-        if is_cuda_array(coeffs_f):
-            img_d = img_d or cp.empty(
-                (self.n_batchs, self.n_coils, *self.shape), dtype=self.cpx_dtype
-            )
-            for i in range((self.n_coils * self.n_batchs) // self.n_trans):
-                if self.uses_density:
-                    cp.copyto(
-                        ksp_batched,
-                        coeffs_f[i * n_trans_samples : (i + 1) * n_trans_samples],
-                    )
-                    ksp_batched *= density_batched
-                    self.__adj_op(
-                        get_ptr(ksp_batched), get_ptr(img_d) + i * self.bsize_img
-                    )
-                else:
-                    self.__adj_op(
-                        get_ptr(coeffs_f) + i * self.bsize_ksp,
-                        get_ptr(img_d) + i * self.bsize_img,
-                    )
-            return img_d
-        # calibrationless, data on host
         img = np.zeros(
             (self.n_batchs * self.n_coils, *self.shape), dtype=self.cpx_dtype
         )
-        img_batched = cp.empty((self.n_trans, *self.shape), dtype=self.cpx_dtype)
+        if img_batched is None:
+            img_batched = cp.empty((self.n_trans, *self.shape), dtype=self.cpx_dtype)
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
         # and batch n-1 to host
         for i in range((self.n_batchs * self.n_coils) // self.n_trans):
