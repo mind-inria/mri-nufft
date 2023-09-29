@@ -45,7 +45,16 @@ class MRIStackedNUFFT(FourierOperatorBase):
     available = True  # the true availabily will be check at runtime.
 
     def __init__(
-        self, samples, shape, z_index, backend, smaps, n_coils=1, n_batchs=1, **kwargs
+        self,
+        samples,
+        shape,
+        z_index,
+        backend,
+        smaps,
+        n_coils=1,
+        n_batchs=1,
+        squeeze_dims=False,
+        **kwargs,
     ):
         super().__init__()
 
@@ -76,13 +85,14 @@ class MRIStackedNUFFT(FourierOperatorBase):
         self.z_index = z_index_
         self.n_coils = n_coils
         self.n_batchs = n_batchs
-
+        self.squeeze_dims = squeeze_dims
         self.smaps = smaps
         self.operator = get_operator(backend)(
             self.samples,
             shape[:-1],
             n_coils=self.n_coils,
             smaps=None,
+            squeeze_dims=squeeze_dims,
             **kwargs,
         )
 
@@ -115,9 +125,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def op(self, data, ksp=None):
         """Forward operator."""
         if self.uses_sense:
-            return self._op_sense(data, ksp)
-        else:
-            return self._op_calibless(data, ksp)
+            return self._safe_squeeze(self._op_sense(data, ksp))
+        return self.safe_squeeze(self._op_calibless(data, ksp))
 
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
@@ -164,9 +173,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
             coeffs, (self.n_batchs, self.n_coils, len(self.samples), len(self.z_index))
         )
         if self.uses_sense:
-            return self._adj_op_sense(coeffs_, img)
-        else:
-            return self._adj_op_calibless(coeffs_, img)
+            return self._safe_squeeze(self._adj_op_sense(coeffs_, img))
+        return self._safe_squeeze(self._adj_op_calibless(coeffs_, img))
 
     def _adj_op_sense(self, coeffs, img):
         imgz = np.zeros(
@@ -200,6 +208,19 @@ class MRIStackedNUFFT(FourierOperatorBase):
         imgz = np.reshape(imgz, (self.n_batchs, self.n_coils, *self.shape))
         img = self._ifftz(imgz)
         return img
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
 
 
 def traj3d2stacked(samples, dim_z, n_samples=0):
