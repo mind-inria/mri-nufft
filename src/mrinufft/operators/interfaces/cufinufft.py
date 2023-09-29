@@ -694,7 +694,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dim:
+        if self.squeeze_dims:
             try:
                 arr = arr.squeeze(axis=1)
             except ValueError:

@@ -169,10 +169,7 @@ class MRIfinufft(FourierOperatorBase):
         else:
             ret = self._op_calibless(data, ksp)
         ret /= self.norm_factor
-        if not self.squeeze_dims:
-            return ret
-        else:  # squeeze the batch and coil dimensions.
-            return ret.squeeze(axis=(0, 1))
+        return self._safe_squeeze(ret)
 
     def _op_sense(self, data, ksp=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -235,10 +232,7 @@ class MRIfinufft(FourierOperatorBase):
         else:
             ret = self._adj_op_calibless(coeffs, img)
         ret /= self.norm_factor
-        if not self.squeeze_dims:
-            return ret
-        else:
-            return ret.squeeze(axis=(0, 1))
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -333,3 +327,16 @@ class MRIfinufft(FourierOperatorBase):
                 ksp *= self.density_d
             self._adj_op(ksp, img[i])
         return img / self.norm_factor
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
