@@ -126,7 +126,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
         """Forward operator."""
         if self.uses_sense:
             return self._safe_squeeze(self._op_sense(data, ksp))
-        return self.safe_squeeze(self._op_calibless(data, ksp))
+        return self._safe_squeeze(self._op_calibless(data, ksp))
 
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
