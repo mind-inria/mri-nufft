@@ -8,36 +8,38 @@ from array import array
 
 from .utils import (
     KMAX,
-    DEFAULT_RASTER_TIME_MS,
+    DEFAULT_RASTER_TIME,
     DEFAULT_GYROMAGNETIC_RATIO,
     DEFAULT_GMAX,
     DEFAULT_SMAX,
-    compute_gradients,
+    convert_trajectory_to_gradients,
+    compute_gradients_and_slew_rates,
+    check_hardware_constraints,
 )
 
 
 def write_gradients(
     gradients: np.ndarray,
-    start_positions: np.ndarray,
+    initial_positions: np.ndarray,
     grad_filename: str,
     img_size: Tuple[int, ...],
     FOV: Tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
-    gamma: float = 42.576e3,
+    gamma: float = DEFAULT_GYROMAGNETIC_RATIO,
     version: float = 4.2,
     recon_tag: float = 1.1,
     timestamp: Optional[float] = None,
     keep_txt_file: bool = False,
 ):
-    """Create gradient file from gradients and start positions.
+    """Create gradient file from gradients and initial positions.
 
     Parameters
     ----------
     gradients : np.ndarray
         Gradients. Shape (num_shots, num_samples_per_shot, dimension).
-    start_positions : np.ndarray
-        Start positions. Shape (num_shots, dimension).
+    initial_positions : np.ndarray
+        Initial positions. Shape (num_shots, dimension).
     grad_filename : str
         Gradient filename.
     img_size : Tuple[int, ...]
@@ -63,7 +65,7 @@ def write_gradients(
     """
     num_shots = gradients.shape[0]
     num_samples_per_shot = gradients.shape[1]
-    dimension = start_positions.shape[-1]
+    dimension = initial_positions.shape[-1]
     if len(gradients.shape) == 3:
         gradients = gradients.reshape(-1, gradients.shape[-1])
     # Convert gradients to mT/m
@@ -91,9 +93,9 @@ def write_gradients(
     file.write(str(num_samples_per_shot) + "\n")
     if version >= 4.1:
         if not in_out:
-            if np.sum(start_positions) != 0:
+            if np.sum(initial_positions) != 0:
                 warnings.warn(
-                    "The start positions are not all zero for center-out trajectory"
+                    "The initial positions are not all zero for center-out trajectory"
                 )
             file.write("0\n")
         else:
@@ -113,7 +115,7 @@ def write_gradients(
     # Write all the k0 values
     file.write(
         "\n".join(
-            " ".join([f"{iter2:5.4f}" for iter2 in iter1]) for iter1 in start_positions
+            " ".join([f"{iter2:5.4f}" for iter2 in iter1]) for iter1 in initial_positions
         )
         + "\n"
     )
@@ -171,9 +173,9 @@ def write_trajectory(
     FOV: Tuple[float, ...],
     img_size: Tuple[int, ...],
     grad_filename: str,
-    traj_norm_factor: float = KMAX,
+    norm_factor: float = KMAX,
     gamma: float = DEFAULT_GYROMAGNETIC_RATIO,
-    raster_time: float = DEFAULT_RASTER_TIME_MS,
+    raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
@@ -192,10 +194,10 @@ def write_trajectory(
         Image size
     grad_filename : str
         Gradient filename
-    traj_norm_factor : float, optional
+    norm_factor : float, optional
         Trajectory normalization factor, by default 0.5
     gamma : float, optional
-        Gyromagnetic constant in MHz, by default 42.576e3
+        Gyromagnetic constant in kHz, by default 42.576e3
     raster_time : float, optional
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
@@ -203,24 +205,41 @@ def write_trajectory(
     gmax : float, optional
         Maximum gradient magnitude in T/m, by default 40e-3
     smax : float, optional
-        Maximum slew rate in mT/m/s, by default 100e-3
+        Maximum slew rate in T/m/ms, by default 100e-3
     kwargs : dict, optional
         Additional arguments for writing the gradient file.
         These are arguments passed to write_gradients function above.
     """
-    gradients, start_positions, _ = compute_gradients(
+    # Convert normalized trajectory to gradients
+    gradients, initial_positions = convert_trajectory_to_gradients(
         trajectory,
-        traj_norm_factor=traj_norm_factor,
+        norm_factor=norm_factor,
         resolution=np.asarray(FOV) / np.asarray(img_size),
         raster_time=raster_time,
         gamma=gamma,
-        check_constraints=check_constraints,
-        gmax=gmax,
-        smax=smax,
     )
+
+    # Check constraints if requested
+    if (check_constraints):
+        slewrates, _ = convert_gradients_to_slew_rates(
+            gradients, raster_time)
+        violation, maxG, maxS = check_hardware_constraints(
+            gradients=gradients,
+            slewrates=slewrates,
+            gmax=gmax,
+            smax=smax,
+        )
+        if violation:
+            warnings.warn(
+                "Hard constraints violated! "
+                f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
+                f"Maximum slew rate: {maxS:.3f} > {smax:.3f}"
+            )
+
+    # Write gradients in file
     write_gradients(
         gradients=gradients,
-        start_positions=start_positions,
+        initial_positions=initial_positions,
         grad_filename=grad_filename,
         img_size=img_size,
         FOV=FOV,
@@ -231,10 +250,10 @@ def write_trajectory(
 
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float = DEFAULT_RASTER_TIME_MS,
+    dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
     gamma: float = DEFAULT_GYROMAGNETIC_RATIO,
-    raster_time: float = DEFAULT_RASTER_TIME_MS,
+    raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
 ):
@@ -245,13 +264,13 @@ def read_trajectory(
     grad_filename : str
         Gradient filename.
     dwell_time : float, optional
-        Dwell time of ADC, by default 0.01
+        Dwell time of ADC, by default 0.1
     num_adc_samples : int, optional
         Number of ADC samples, by default None
     gyromagnetic_constant : float, optional
         Gyromagnetic Constant, by default 42.576e3
     gradient_raster_time : float, optional
-        Gradient raster time, by default 0.010
+        Gradient raster time, by default 0.1
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
@@ -297,8 +316,8 @@ def read_trajectory(
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
             _, data = _pop_elements(data, left_over)
-        start_positions, data = _pop_elements(data, dimension * num_shots)
-        start_positions = np.reshape(start_positions, (num_shots, dimension))
+        initial_positions, data = _pop_elements(data, dimension * num_shots)
+        initial_positions = np.reshape(initial_positions, (num_shots, dimension))
         if version < 4.1:
             grad_max, data = _pop_elements(data)
         gradients, data = _pop_elements(
@@ -311,7 +330,7 @@ def read_trajectory(
         # Convert gradients from mT/m to T/m
         gradients = np.reshape(gradients * 1e-3, (-1, num_samples_per_shot, dimension))
         kspace_loc = np.zeros((num_shots, num_adc_samples, dimension))
-        kspace_loc[:, 0, :] = start_positions
+        kspace_loc[:, 0, :] = initial_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
         Q, R = divmod(adc_times, gradient_raster_time_ns)
         Q = Q.astype("int")
@@ -320,7 +339,7 @@ def read_trajectory(
                 Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
             )
         ):
-            warnings.warn("Binary file doesnt seem right! " "Proceeding anyway")
+            warnings.warn("Binary file doesn't seem right! " "Proceeding anyway")
         grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:
@@ -331,7 +350,7 @@ def read_trajectory(
                         "Data will be extended"
                     )
                 kspace_loc[:, i + 1, :] = (
-                    start_positions
+                    initial_positions
                     + (
                         grad_accumulated[:, gradients.shape[1] - 1, :]
                         + gradients[:, gradients.shape[1] - 1, :] * r
@@ -342,11 +361,11 @@ def read_trajectory(
             else:
                 if q == 0:
                     kspace_loc[:, i + 1, :] = (
-                        (start_positions + gradients[:, q, :] * r) * gamma * 1e-6
+                        (initial_positions + gradients[:, q, :] * r) * gamma * 1e-6
                     )
                 else:
                     kspace_loc[:, i + 1, :] = (
-                        start_positions
+                        initial_positions
                         + (grad_accumulated[:, q - 1, :] + gradients[:, q, :] * r)
                         * gamma
                         * 1e-6

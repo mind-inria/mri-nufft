@@ -1,6 +1,6 @@
 """Utility functions for the trajectory design."""
-import warnings
 import numpy as np
+
 
 #############
 # CONSTANTS #
@@ -12,36 +12,141 @@ DEFAULT_RESOLUTION = 6e-4  # 0.6 mm isotropic
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
-DEFAULT_RASTER_TIME_MS = 10e-3  # ms
-DEFAULT_GYROMAGNETIC_RATIO = 42.576e3  # MHz/T
+DEFAULT_RASTER_TIME = 10e-3  # ms
+DEFAULT_GYROMAGNETIC_RATIO = 42.576e3  # kHz/T
 
 DEFAULT_GMAX = 0.04  # T/m
-DEFAULT_SMAX = 100.0e-3  # mT/m/s
+DEFAULT_SMAX = 0.1  # T/m/ms
 
 
 ###############
-# CONSTRAINTS #
+# CONSTRAINTS #
 ###############
 
+def normalize_trajectory(
+    trajectory,
+    norm_factor=KMAX,
+    resolution=DEFAULT_RESOLUTION,
+):
+    return trajectory * norm_factor * (2 * resolution)
 
-def _check_gradient_constraints(
+
+def unnormalize_trajectory(
+    trajectory,
+    norm_factor=KMAX,
+    resolution=DEFAULT_RESOLUTION,
+):
+    return trajectory / norm_factor / (2 * resolution)
+
+
+def convert_trajectory_to_gradients(
+    trajectory,
+    norm_factor=KMAX,
+    resolution=DEFAULT_RESOLUTION,
+    raster_time=DEFAULT_RASTER_TIME,
+    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+):
+    # Un-normalize the trajectory from NUFFT usage
+    trajectory = unnormalize_trajectory(trajectory, norm_factor, resolution)
+
+    # Compute gradients and starting positions
+    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
+    initial_positions = trajectory[:, 0, :]
+    return gradients, initial_positions
+
+
+def convert_gradients_to_trajectory(
     gradients,
-    slews,
+    initial_positions=None,
+    norm_factor=KMAX,
+    resolution=DEFAULT_RESOLUTION,
+    raster_time=DEFAULT_RASTER_TIME,
+    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+):
+    # Handle no initial positions
+    if (initial_positions is None):
+        initial_positions = np.zeros((gradients.shape[0], 1, gradients.shape[-1]))
+
+    # Prepare and integrate gradients
+    trajectory = gradients * gamma * raster_time
+    trajectory = np.concatenate([initial_positions, trajectory])
+    trajectory = np.cumsum(trajectory, axis=1)
+
+    # Normalize the trajectory for NUFFT usage
+    trajectory = normalize_trajectory(trajectory, norm_factor, resolution)
+    return trajectory
+
+
+def convert_gradients_to_slew_rates(
+    gradients,
+    raster_time=DEFAULT_RASTER_TIME,
+):
+    # Compute slew rates and starting gradients
+    slewrates = np.diff(gradients, axis=1) / raster_time
+    initial_gradients = gradients[:, 0, :]
+    return slewrates, initial_gradients
+
+
+def convert_slew_rates_to_gradients(
+    slewrates,
+    initial_gradients=None,
+    raster_time=DEFAULT_RASTER_TIME,
+):
+    # Handle no initial gradients
+    if (initial_gradients is None):
+        initial_gradients = np.zeros((slewrates.shape[0], 1, slewrates.shape[-1]))
+
+    # Prepare and integrate slew rates
+    gradients = slewrates * raster_time
+    gradients = np.concatenate([initial_gradients, gradients])
+    gradients = np.cumsum(gradients, axis=1)
+    return gradients
+
+
+def compute_gradients_and_slew_rates(
+    trajectory,
+    norm_factor=KMAX,
+    resolution=DEFAULT_RESOLUTION,
+    raster_time=DEFAULT_RASTER_TIME,
+    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+):
+    # Convert normalized trajectory to gradients
+    gradients, _ = convert_trajectory_to_gradients(
+        trajectory,
+        norm_factor=norm_factor,
+        resolution=np.asarray(FOV) / np.asarray(img_size),
+        raster_time=raster_time,
+        gamma=gamma,
+    )
+
+    # Convert gradients to slew rates
+        slewrates, _ = convert_gradients_to_slew_rates(
+            gradients, raster_time)
+    return gradients, slewrates
+
+
+def check_hardware_constraints(
+    gradients,
+    slewrates,
     gmax=DEFAULT_GMAX,
     smax=DEFAULT_SMAX,
+    ord=None
 ):
     """Check if a trajectory satisfies the gradient constraints.
 
     Parameters
     ----------
     gradients : np.ndarray
-        Gradients to check.
-    slews: np.ndarray
-        Slews to check
+        Gradients to check
+    slewrates: np.ndarray
+        Slewrates to check
     gmax : float, optional
         Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.
     smax : float, optional
-        Maximum slew rate in mT/m/s. The default is DEFAULT_SMAX.
+        Maximum slew rate in T/m/ms. The default is DEFAULT_SMAX.
+    ord : int or str, optional
+        Norm order, following the numpy.linalg.norm convention.
+        The default is None.
 
     Returns
     -------
@@ -50,89 +155,16 @@ def _check_gradient_constraints(
     float
         Maximum gradient amplitude in T/m.
     float
-        Maximum slew rate in mT/m/s.
+        Maximum slew rate in T/m/ms.
     """
-    max_grad = np.max(np.linalg.norm(gradients, axis=-1))
-    max_slew = np.max(np.linalg.norm(slews, axis=-1))
+    max_grad = np.max(np.linalg.norm(gradients, axis=-1, ord=ord))
+    max_slew = np.max(np.linalg.norm(slewrates, axis=-1, ord=ord))
     return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
-
-
-def compute_gradients(
-    trajectory,
-    traj_norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME_MS,
-    gamma=DEFAULT_GYROMAGNETIC_RATIO,
-    check_constraints=False,
-    smax=DEFAULT_SMAX,
-    gmax=DEFAULT_GMAX,
-):
-    """Compute Gradient and Slew rate from a trajectory.
-
-    Also check for constraints violations if check_constraints is True.
-
-
-    Parameters
-    ----------
-    trajectory : np.ndarray
-        array of trajectory points
-    traj_norm_factor : float, optional
-        Normalization factor for trajectory points.
-        The default is KMAX.
-    resolution : float, optional
-        Resolution of the trajectory in mm. The default is DEFAULT_RESOLUTION.
-    raster_time : float, optional
-        Duration of each point in the trajectory in ms.
-        The default is DEFAULT_RASTER_TIME_MS.
-    gamma : float, optional
-        Gyromagnetic ratio of the particle. The default is DEFAULT_GYROMAGNETIC_RATIO.
-    check_constraints : bool, optional
-        If True, also check for constraints violations.
-        The default is False.
-    smax : float, optional
-        Maximum Slew rate. The default is DEFAULT_SMAX.
-    gmax : float, optional
-        Maximum Gradient magnitude. The default is DEFAULT_GMAX.
-
-
-    Returns
-    -------
-    gradients : np.ndarray
-        array of gradients (x,y,z) in a 3D space
-    slews : np.ndarray
-        array of slew rates (x,y,z) in a 3D space
-    start_positions : np.ndarray
-        array of start positions (x,y,z) in a 3D space
-    """
-    # normalize the trajectory
-    trajectory = trajectory / traj_norm_factor / (2 * resolution)
-
-    # compute gradients and slew rates
-    gradients = np.diff(trajectory, axis=1) / raster_time / gamma
-    slews = np.diff(gradients, axis=1) / raster_time
-
-    # compute the start position
-    start_positions = trajectory[:, 0, :]
-    if check_constraints:
-        violation, maxG, maxS = _check_gradient_constraints(
-            gradients=gradients,
-            slews=slews,
-            gmax=gmax,
-            smax=smax,
-        )
-        if violation:
-            warnings.warn(
-                "Hard constraints violated! "
-                f"Max Gradient magnitude: {maxG:.2f} > {gmax:.2f}"
-                f"Max Slew rate: {maxS:.2f} > {smax:.2f}"
-            )
-    return gradients, start_positions, slews
 
 
 ###############
 # MATHEMATICS #
 ###############
-
 
 def compute_greatest_common_divider(p, q):
     """Compute the greatest common divider of two integers p and q.
@@ -185,7 +217,6 @@ def compute_coprime_factors(Nc, length, start=1, update=1):
 #############
 # ROTATIONS #
 #############
-
 
 def R2D(theta):
     """Initialize 2D rotation matrix.
@@ -297,7 +328,6 @@ def Rv(v1, v2, normalize=True):
 ###########
 # OPTIONS #
 ###########
-
 
 def initialize_tilt(tilt, nb_partitions=1):
     r"""Initialize the tilt angle.

@@ -2,8 +2,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .utils import compute_gradients, DEFAULT_GMAX, DEFAULT_SMAX
-from .utils import KMAX, DEFAULT_RESOLUTION
+from .utils import (
+    compute_gradients_and_slew_rates,
+    KMAX,
+    DEFAULT_GMAX,
+    DEFAULT_SMAX,
+    DEFAULT_RESOLUTION,
+)
 
 
 COLOR_CYCLE = [
@@ -24,7 +29,7 @@ POINTSIZE = 10
 FONTSIZE = 18
 
 
-def setup_2D_ticks(size, ax=None):
+def _setup_2D_ticks(size, ax=None):
     """Add ticks to 2D plot."""
     if ax is None:
         plt.figure(figsize=(size, size))
@@ -39,10 +44,10 @@ def setup_2D_ticks(size, ax=None):
     return ax
 
 
-def setup_3D_ticks(size, ax=None):
+def _setup_3D_ticks(size, ax=None):
     """Add ticks to 3D plot."""
     if ax is None:
-        fig = plt.figure(figsize=(size, size))
+        plt.figure(figsize=(size, size))
         ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -89,7 +94,7 @@ def display_2D_trajectory(
         Axes of the figure.
     """
     Nc, Ns = trajectory.shape[:2]
-    ax = setup_2D_ticks(size, subfigure)
+    ax = _setup_2D_ticks(size, subfigure)
     trajectory = trajectory.reshape((Nc, -1, 2))
     for i in range(Nc):
         ax.plot(
@@ -166,7 +171,7 @@ def display_3D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
-    ax = setup_3D_ticks(size, subfigure)
+    ax = _setup_3D_ticks(size, subfigure)
     trajectory = trajectory.reshape((nb_repetitions, Nc, Ns, 3))
     for i in range(nb_repetitions):
         for j in range(Nc):
@@ -186,7 +191,7 @@ def display_3D_trajectory(
             linewidth=2 * LINEWIDTH,
         )
     if constraints:
-        gradients, slews = compute_gradients(
+        gradients, _, slews = compute_gradients(
             trajectory.reshape((-1, Ns, 3)),
             resolution=resolution,
         )
