@@ -7,7 +7,6 @@ from .utils import (
     KMAX,
     DEFAULT_GMAX,
     DEFAULT_SMAX,
-    DEFAULT_RESOLUTION,
 )
 
 
@@ -23,16 +22,19 @@ COLOR_CYCLE = [
 ]
 NB_COLORS = len(COLOR_CYCLE)
 
-
 LINEWIDTH = 2
 POINTSIZE = 10
 FONTSIZE = 18
 
 
-def _setup_2D_ticks(size, ax=None):
+##############
+# TICK UTILS #
+##############
+
+def _setup_2D_ticks(figsize, ax=None):
     """Add ticks to 2D plot."""
     if ax is None:
-        plt.figure(figsize=(size, size))
+        plt.figure(figsize=(figsize, figsize))
         ax = plt.gca()
     ax.grid(True)
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -44,10 +46,10 @@ def _setup_2D_ticks(size, ax=None):
     return ax
 
 
-def _setup_3D_ticks(size, ax=None):
+def _setup_3D_ticks(figsize, ax=None):
     """Add ticks to 3D plot."""
     if ax is None:
-        plt.figure(figsize=(size, size))
+        fig = plt.figure(figsize=(figsize, figsize))
         ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -62,21 +64,29 @@ def _setup_3D_ticks(size, ax=None):
     return ax
 
 
+######################
+# TRAJECTORY DISPLAY #
+######################
+
 def display_2D_trajectory(
     trajectory,
-    size=5,
+    figsize=5,
     one_shot=False,
-    constraints=False,
     subfigure=None,
-    resolution=DEFAULT_RESOLUTION,
+    show_constraints=False,
+    gmax=DEFAULT_GMAX,
+    smax=DEFAULT_SMAX,
+    constraints_order=None,
+    **constraints_kwargs,
 ):
+    # TODO: UPDATE DOCSTRING
     """Display of 2D trajectory.
 
     Parameters
     ----------
     trajectory : array_like
         Trajectory to display.
-    size : float, optional
+    figsize : float, optional
         Size of the figure.
     one_shot : bool, optional
         If True, highlight the trajectory of the middle repetition.
@@ -93,9 +103,11 @@ def display_2D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
+    # Setup figure and ticks
     Nc, Ns = trajectory.shape[:2]
-    ax = _setup_2D_ticks(size, subfigure)
-    trajectory = trajectory.reshape((Nc, -1, 2))
+    ax = _setup_2D_ticks(figsize, subfigure)
+
+    # Display every shot
     for i in range(Nc):
         ax.plot(
             trajectory[i, :, 0],
@@ -103,24 +115,39 @@ def display_2D_trajectory(
             color=COLOR_CYCLE[i % NB_COLORS],
             linewidth=LINEWIDTH,
         )
-    if one_shot:
+
+    # Display one shot in particular if requested
+    if one_shot or type(one_shot) == int:
+        # Select shot
+        shot_id = Nc // 2
+        if type(one_shot) == int:
+            shot_id = one_shot
+
+        # Highlight the shot in black
         ax.plot(
-            trajectory[Nc // 2, :, 0],
-            trajectory[Nc // 2, :, 1],
+            trajectory[shot_id, :, 0],
+            trajectory[shot_id, :, 1],
             color="k",
             linewidth=2 * LINEWIDTH,
         )
-    if constraints:
-        gradients, _, slews = compute_gradients(
-            trajectory.reshape((-1, Ns, 2)),
-            resolution=resolution,
-        )
-        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
-        slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
-        gradients = trajectory.reshape((-1, 2))[
-            np.where(gradients.flatten() > DEFAULT_GMAX)
-        ]
-        slews = trajectory.reshape((-1, 2))[np.where(slews.flatten() > DEFAULT_SMAX)]
+
+    # Point out violated constraints if requested
+    if show_constraints:
+        gradients, slews = compute_gradients_and_slew_rates(
+            trajectory, **constraints_kwargs)
+
+        # Pad and compute norms
+        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))),
+                                   axis=-1, ord=constraints_order)
+        slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))),
+                               axis=-1, ord=constraints_order)
+
+        # Check constraints
+        trajectory = trajectory.reshape((-1, 2))
+        gradients = trajectory[np.where(gradients.flatten() > gmax)]
+        slews = trajectory[np.where(slews.flatten() > smax)]
+
+        # Scatter points with vivid colors
         ax.scatter(gradients[:, 0], gradients[:, 1], color="r", s=POINTSIZE)
         ax.scatter(slews[:, 0], slews[:, 1], color="b", s=POINTSIZE)
     plt.tight_layout()
@@ -130,15 +157,17 @@ def display_2D_trajectory(
 def display_3D_trajectory(
     trajectory,
     nb_repetitions,
-    Nc,
-    Ns,
-    size=5,
+    figsize=5,
     per_plane=True,
     one_shot=False,
-    constraints=False,
     subfigure=None,
-    resolution=DEFAULT_RESOLUTION,
+    show_constraints=False,
+    gmax=DEFAULT_GMAX,
+    smax=DEFAULT_SMAX,
+    constraints_order=None,
+    **constraints_kwargs,
 ):
+    # TODO: UPDATE DOCSTRING
     """Display of 3D trajectory.
 
     Parameters
@@ -147,11 +176,7 @@ def display_3D_trajectory(
         Trajectory to display.
     nb_repetitions : int
         Number of repetitions.
-    Nc : int
-        Number of shots
-    Ns : int
-        Number of samples per shots.
-    size : float, optional
+    figsize : float, optional
         Size of the figure.
     per_plane : bool, optional
         If True, display the trajectory for each plane.
@@ -165,14 +190,20 @@ def display_3D_trajectory(
         Resolution of MR image in m.
         The default is DEFAULT_RESOLUTION.
 
-
     Returns
     -------
     ax : plt.Axes
         Axes of the figure.
     """
-    ax = _setup_3D_ticks(size, subfigure)
-    trajectory = trajectory.reshape((nb_repetitions, Nc, Ns, 3))
+    # Setup figure and ticks, and handle 2D trajectories
+    ax = _setup_3D_ticks(figsize, subfigure)
+    if (trajectory.shape[-1] == 2):
+        trajectory = np.concatenate([trajectory,
+            np.zeros((*(trajectory.shape[:2]), 1))], axis=-1)
+    trajectory = trajectory.reshape((nb_repetitions, -1, trajectory.shape[-2], 3))
+    Nc, Ns = trajectory.shape[1:3]
+
+    # Display every shot
     for i in range(nb_repetitions):
         for j in range(Nc):
             ax.plot(
@@ -182,28 +213,43 @@ def display_3D_trajectory(
                 color=COLOR_CYCLE[(i + j * (not per_plane)) % NB_COLORS],
                 linewidth=LINEWIDTH,
             )
-    if one_shot:
+
+    # Display one shot in particular if requested
+    if one_shot or type(one_shot) == int:
+        trajectory = trajectory.reshape((-1, Ns, 3))
+
+        # Select shot
+        shot_id = Nc // 2
+        if type(one_shot) == int:
+            shot_id = one_shot
+
+        # Highlight the shot in black
         ax.plot(
-            trajectory[nb_repetitions // 2, Nc // 2, :, 0],
-            trajectory[nb_repetitions // 2, Nc // 2, :, 1],
-            trajectory[nb_repetitions // 2, Nc // 2, :, 2],
+            trajectory[shot_id, :, 0],
+            trajectory[shot_id, :, 1],
+            trajectory[shot_id, :, 2],
             color="k",
             linewidth=2 * LINEWIDTH,
         )
-    if constraints:
-        gradients, _, slews = compute_gradients(
-            trajectory.reshape((-1, Ns, 3)),
-            resolution=resolution,
-        )
-        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1)
-        slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1)
-        gradients = trajectory.reshape((-1, 3))[
-            np.where(gradients.flatten() > DEFAULT_GMAX)
-        ]
-        slews = trajectory.reshape((-1, 3))[np.where(slews.flatten() > DEFAULT_SMAX)]
-        ax.scatter(
-            gradients[:, 0], gradients[:, 1], gradients[:, 2], color="r", s=POINTSIZE
-        )
-        ax.scatter(slews[:, 0], slews[:, 1], slews[:, 2], color="b", s=POINTSIZE)
+        trajectory = trajectory.reshape((-1, Nc, Ns, 3))
+
+    # Point out violated constraints if requested
+    if show_constraints:
+        gradients, slewrates = compute_gradients_and_slew_rates(
+            trajectory.reshape((-1, Ns, 3)), **constraints_kwargs)
+
+        # Pad and compute norms
+        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))),
+                                   axis=-1, ord=constraints_order)
+        slewrates = np.linalg.norm(np.pad(slewrates, ((0, 0), (2, 0), (0, 0))),
+                                   axis=-1, ord=constraints_order)
+
+        # Check constraints
+        gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > gmax)]
+        slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
+
+        # Scatter points with vivid colors
+        ax.scatter(*(gradients.T), color="r", s=POINTSIZE)
+        ax.scatter(*(slewrates.T), color="b", s=POINTSIZE)
     plt.tight_layout()
     return ax

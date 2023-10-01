@@ -8,12 +8,16 @@ import numpy as np
 
 KMAX = 0.5
 
-DEFAULT_RESOLUTION = 6e-4  # 0.6 mm isotropic
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
+CARBON_GYROMAGNETIC_RATIO = 10708.4  # kHz/T
+HYDROGEN_GYROMAGNETIC_RATIO = 42576.384  # kHz/T
+PHOSPHOROUS_GYROMAGNETIC_RATIO = 17235  # kHz/T
+SODIUM_GYROMAGNETIC_RATIO = 11262  # kHz/T
+
+DEFAULT_RESOLUTION = 6e-4  # m, i.e. 0.6 mm isotropic
 DEFAULT_RASTER_TIME = 10e-3  # ms
-DEFAULT_GYROMAGNETIC_RATIO = 42.576e3  # kHz/T
 
 DEFAULT_GMAX = 0.04  # T/m
 DEFAULT_SMAX = 0.1  # T/m/ms
@@ -44,7 +48,7 @@ def convert_trajectory_to_gradients(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
 ):
     # Un-normalize the trajectory from NUFFT usage
     trajectory = unnormalize_trajectory(trajectory, norm_factor, resolution)
@@ -61,7 +65,7 @@ def convert_gradients_to_trajectory(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
 ):
     # Handle no initial positions
     if (initial_positions is None):
@@ -108,20 +112,20 @@ def compute_gradients_and_slew_rates(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=DEFAULT_GYROMAGNETIC_RATIO,
+    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
 ):
     # Convert normalized trajectory to gradients
     gradients, _ = convert_trajectory_to_gradients(
         trajectory,
         norm_factor=norm_factor,
-        resolution=np.asarray(FOV) / np.asarray(img_size),
+        resolution=resolution,
         raster_time=raster_time,
         gamma=gamma,
     )
 
     # Convert gradients to slew rates
-        slewrates, _ = convert_gradients_to_slew_rates(
-            gradients, raster_time)
+    slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
+
     return gradients, slewrates
 
 
@@ -130,7 +134,7 @@ def check_hardware_constraints(
     slewrates,
     gmax=DEFAULT_GMAX,
     smax=DEFAULT_SMAX,
-    ord=None
+    order=None
 ):
     """Check if a trajectory satisfies the gradient constraints.
 
@@ -144,8 +148,8 @@ def check_hardware_constraints(
         Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.
     smax : float, optional
         Maximum slew rate in T/m/ms. The default is DEFAULT_SMAX.
-    ord : int or str, optional
-        Norm order, following the numpy.linalg.norm convention.
+    order : int or str, optional
+        Norm order, following the numpy.linalg.norm `ord` convention.
         The default is None.
 
     Returns
@@ -157,8 +161,8 @@ def check_hardware_constraints(
     float
         Maximum slew rate in T/m/ms.
     """
-    max_grad = np.max(np.linalg.norm(gradients, axis=-1, ord=ord))
-    max_slew = np.max(np.linalg.norm(slewrates, axis=-1, ord=ord))
+    max_grad = np.max(np.linalg.norm(gradients, axis=-1, ord=order))
+    max_slew = np.max(np.linalg.norm(slewrates, axis=-1, ord=order))
     return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
 
 
