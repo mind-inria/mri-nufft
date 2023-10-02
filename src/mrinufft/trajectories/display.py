@@ -1,9 +1,11 @@
 """Display function for trajectories."""
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 
 from .utils import (
     compute_gradients_and_slew_rates,
+    convert_trajectory_to_gradients,
     KMAX,
     DEFAULT_GMAX,
     DEFAULT_SMAX,
@@ -22,20 +24,22 @@ COLOR_CYCLE = [
 ]
 NB_COLORS = len(COLOR_CYCLE)
 
+ALPHA = 0.2
 LINEWIDTH = 2
 POINTSIZE = 10
 FONTSIZE = 18
+SMALL_FONTSIZE = 14
 
 
 ##############
 # TICK UTILS #
 ##############
 
-def _setup_2D_ticks(figsize, ax=None):
+def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
-    if ax is None:
-        plt.figure(figsize=(figsize, figsize))
-        ax = plt.gca()
+    if fig is None:
+        fig = plt.figure(figsize=(figsize, figsize))
+    ax = fig.subplots()
     ax.grid(True)
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -46,11 +50,11 @@ def _setup_2D_ticks(figsize, ax=None):
     return ax
 
 
-def _setup_3D_ticks(figsize, ax=None):
+def _setup_3D_ticks(figsize, fig=None):
     """Add ticks to 3D plot."""
-    if ax is None:
+    if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-        ax = fig.add_subplot(projection="3d")
+    ax = fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -156,7 +160,7 @@ def display_2D_trajectory(
 
 def display_3D_trajectory(
     trajectory,
-    nb_repetitions,
+    nb_repetitions=None,
     figsize=5,
     per_plane=True,
     one_shot=False,
@@ -197,6 +201,8 @@ def display_3D_trajectory(
     """
     # Setup figure and ticks, and handle 2D trajectories
     ax = _setup_3D_ticks(figsize, subfigure)
+    if (nb_repetitions is None):
+        nb_repetitions = trajectory.shape[0]
     if (trajectory.shape[-1] == 2):
         trajectory = np.concatenate([trajectory,
             np.zeros((*(trajectory.shape[:2]), 1))], axis=-1)
@@ -253,3 +259,137 @@ def display_3D_trajectory(
         ax.scatter(*(slewrates.T), color="b", s=POINTSIZE)
     plt.tight_layout()
     return ax
+
+
+####################
+# GRADIENT DISPLAY #
+####################
+
+def display_gradients_simply(
+    trajectory,
+    shot_ids=[0],
+    figsize=5,
+    fill_area=True,
+    show_signal=True,
+    uni_signal="gray",
+    uni_gradient=None,
+    subfigure=None,
+):
+    # Setup figure and labels
+    Nd = trajectory.shape[-1]
+    if (subfigure is None):
+        fig = plt.figure(figsize=(figsize, figsize * (Nd + show_signal) / Nd))
+    else:
+        fig = subfigure
+    axes = fig.subplots(Nd + show_signal, 1)
+    for i, ax in enumerate(axes[:Nd]):
+        ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=FONTSIZE)
+    axes[-1].set_xlabel("Time", fontsize=FONTSIZE)
+
+    # Setup axes ticks
+    for ax in axes:
+        ax.grid(True)
+        ax.xaxis.set_tick_params(labelbottom=False)
+        ax.yaxis.set_tick_params(labelleft=False)
+
+    # Plot the curves for each axis
+    gradients = np.diff(trajectory, axis=1)
+    vmax = 1.1 * np.max(np.abs(gradients[shot_ids, ...]))
+    x_axis = np.arange(gradients.shape[1])
+    for j, s_id in enumerate(shot_ids):
+        for i, ax in enumerate(axes[:Nd]):
+            ax.set_ylim((-vmax, vmax))
+            color = uni_gradient if uni_gradient is not None else COLOR_CYCLE[j % NB_COLORS]
+            ax.plot(x_axis, gradients[s_id, ..., i], color=color)
+            if (fill_area):
+                ax.fill_between(x_axis, gradients[s_id, ..., i], alpha=ALPHA, color=color)
+
+    # Return axes alone
+    if (not show_signal):
+        return axes
+
+    # Show signal as modulated distance to center
+    distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
+    distances = np.tile(distances.reshape((len(shot_ids), -1, 1)), (1, 1, 10))
+    signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
+    signal = (signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))).real
+    signal = signal * np.abs(signal) ** 3
+
+    # Show signal for each requested shot
+    axes[-1].set_ylabel("Signal", fontsize=FONTSIZE)
+    for j, s_id in enumerate(shot_ids):
+        color = uni_signal if (uni_signal is not None) else COLOR_CYCLE[j % NB_COLORS]
+        axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
+    return axes
+
+
+def display_gradients(
+    trajectory,
+    shot_ids=[0],
+    figsize=5,
+    fill_area=True,
+    show_signal=True,
+    uni_signal="gray",
+    uni_gradient=None,
+    subfigure=None,
+    show_constraints=False,
+    gmax=DEFAULT_GMAX,
+    smax=DEFAULT_SMAX,
+    constraints_order=None,
+    **constraints_kwargs
+):
+    # Initialize figure with a simpler version
+    axes = display_gradients_simply(trajectory, shot_ids, figsize, fill_area,
+                                    show_signal, uni_signal, uni_gradient, subfigure)
+
+    # Setup figure and labels
+    Nd = trajectory.shape[-1]
+    for i, ax in enumerate(axes[:Nd]):
+        ax.set_ylabel("G{} (mT/m)".format(["x", "y", "z"][i]), fontsize=SMALL_FONTSIZE)
+    axes[-1].set_xlabel("Time (ms)", fontsize=SMALL_FONTSIZE)
+    if (show_signal):
+        axes[-1].set_ylabel("Signal (a.u.)", fontsize=SMALL_FONTSIZE)
+
+    # Update axis ticks with rescaled values
+    for i, ax in enumerate(axes):
+        # Update xtick labels with time values
+        if (ax == axes[-1]):
+            ax.xaxis.set_tick_params(labelbottom=True)
+            ticks = ax.get_xticks()
+            scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * raster_time
+            locator = mticker.FixedLocator(ticks)
+            formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
+            ax.xaxis.set_major_locator(locator)
+            ax.xaxis.set_major_formatter(formatter)
+
+        # Update ytick labels with gradient values
+        ax.yaxis.set_tick_params(labelleft=True)
+        ticks = ax.get_yticks()
+        idx = min(i, Nd - 1)
+        norms = np.diff(trajectory[:1, :2, idx]).squeeze()
+        norms = np.where(norms != 0, norms, 1)
+        scale = convert_trajectory_to_gradients(trajectory[:1, :2], **constraints_kwargs)[0][0, 0, idx] / norms
+        scale = 1e3 * scale  # Convert from T/m to mT/m
+        locator = mticker.FixedLocator(ticks)
+        formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
+        if (not show_signal or ax != axes[-1]):
+            ax.yaxis.set_major_locator(locator)
+            ax.yaxis.set_major_formatter(formatter)
+
+    # Move on with constraints if requested
+    if (not show_constraints):
+        return axes
+
+    # Compute true gradients and slew rates
+    gradients, slewrates = compute_gradients_and_slew_rates(trajectory[shot_ids, :], **constraints_kwargs)
+    gradients = np.linalg.norm(gradients, axis=-1, ord=constraints_order)
+    slewrates = np.linalg.norm(slewrates, axis=-1, ord=constraints_order)
+    slewrates = np.pad(slewrates, ((0,0), (0,1)))
+
+    # Point out hardware constraints violations
+    for ax in axes[:Nd]:
+        pts = np.where(gradients > gmax)
+        ax.scatter(pts, np.zeros_like(pts), color="r", s=POINTSIZE)
+        pts = np.where(slewrates > smax)
+        ax.scatter(pts, np.zeros_like(pts), color="b", s=POINTSIZE)
+    return axes
