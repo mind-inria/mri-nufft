@@ -114,6 +114,12 @@ def compute_gradients_and_slew_rates(
     raster_time=DEFAULT_RASTER_TIME,
     gamma=HYDROGEN_GYROMAGNETIC_RATIO,
 ):
+    """
+    resolution: float or numpy.array, optional
+        Resolution of MR image in meters, isotropic as `int`
+        or anisotropic as `numpy.array`.
+        The default is DEFAULT_RESOLUTION.
+    """
     # Convert normalized trajectory to gradients
     gradients, _ = convert_trajectory_to_gradients(
         trajectory,

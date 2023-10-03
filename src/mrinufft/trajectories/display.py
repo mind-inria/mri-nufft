@@ -83,8 +83,7 @@ def display_2D_trajectory(
     constraints_order=None,
     **constraints_kwargs,
 ):
-    # TODO: UPDATE DOCSTRING
-    """Display of 2D trajectory.
+    """Display 2D trajectories.
 
     Parameters
     ----------
@@ -92,15 +91,33 @@ def display_2D_trajectory(
         Trajectory to display.
     figsize : float, optional
         Size of the figure.
-    one_shot : bool, optional
-        If True, highlight the trajectory of the middle repetition.
-    constraints : bool, optional
-        If True, display the points where the gradients and slews are above the
-        default limits.
-    subfigure: plt.Axes or None, optional
-    resolution: Union[float, Tuple[float, ...]], optional
-        Resolution of MR image in m.
-        The default is DEFAULT_RESOLUTION.
+    one_shot : bool or int, optional
+        State if a specific shot should be highlighted in bold black.
+        If `True`, highlight the middle shot.
+        If `int`, highlight the shot at that index.
+        The default is `False`.
+    subfigure: plt.Figure or plt.SubFigure, optional
+        The figure where the trajectory should be displayed.
+        The default is `None`.
+    show_constraints : bool, optional
+        Display the points where the gradients and slew rates
+        are above the `gmax` and `smax` limits, respectively.
+        The default is `False`.
+    gmax: float, optional
+        The maximum constraint on the gradients in T/m.
+        The default is `DEFAULT_GMAX`.
+    smax: float, optional
+        The maximum constraint on the slew rates in T/m/ms.
+        The default is `DEFAULT_SMAX`.
+    constraint_order: int, str, optional
+        The norm order defining how the constraints are checked,
+        typically 2 or 1, following the `numpy.linalg.norm`
+        conventions on argument `ord`.
+        The default is None.
+    **kwargs
+        Acquisition parameters used to check on hardware constraints,
+        following the argument convention from
+        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
     -------
@@ -171,28 +188,47 @@ def display_3D_trajectory(
     constraints_order=None,
     **constraints_kwargs,
 ):
-    # TODO: UPDATE DOCSTRING
-    """Display of 3D trajectory.
+    """Display 3D trajectories.
 
     Parameters
     ----------
     trajectory : array_like
         Trajectory to display.
     nb_repetitions : int
-        Number of repetitions.
+        Number of repetitions (planes, cones, shells, etc).
+        The default is `None`.
     figsize : float, optional
         Size of the figure.
     per_plane : bool, optional
-        If True, display the trajectory for each plane.
-    one_shot : bool, optional
-        If True, highlight the trajectory of the middle repetition.
-    constraints : bool, optional
-        If True, display the points where the gradients and slews are above the
-        default limits.
-    subfigure: plt.Axes or None, optional
-    resolution: Union[float, Tuple[float, ...]], optional
-        Resolution of MR image in m.
-        The default is DEFAULT_RESOLUTION.
+        If True, display the trajectory with a different color
+        for each plane.
+    one_shot : bool or int, optional
+        State if a specific shot should be highlighted in bold black.
+        If `True`, highlight the middle shot.
+        If `int`, highlight the shot at that index.
+        The default is `False`.
+    subfigure: plt.Figure or plt.SubFigure, optional
+        The figure where the trajectory should be displayed.
+        The default is `None`.
+    show_constraints : bool, optional
+        Display the points where the gradients and slew rates
+        are above the `gmax` and `smax` limits, respectively.
+        The default is `False`.
+    gmax: float, optional
+        The maximum constraint on the gradients in T/m.
+        The default is `DEFAULT_GMAX`.
+    smax: float, optional
+        The maximum constraint on the slew rates in T/m/ms.
+        The default is `DEFAULT_SMAX`.
+    constraint_order: int, str, optional
+        The norm order defining how the constraints are checked,
+        typically 2 or 1, following the `numpy.linalg.norm`
+        conventions on argument `ord`.
+        The default is None.
+    **kwargs
+        Acquisition parameters used to check on hardware constraints,
+        following the argument convention from
+        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
     -------
@@ -275,6 +311,44 @@ def display_gradients_simply(
     uni_gradient=None,
     subfigure=None,
 ):
+    """Display gradients based on trajectory of any dimension.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to display.
+    shot_ids : list of int
+        Indices of the shots to display.
+        The default is `[0]`.
+    figsize : float, optional
+        Size of the figure.
+    fill_area : bool, optional
+        Fills the area under the curve for improved visibility and
+        representation of the integral, aka trajectory.
+        The default is `True`.
+    show_signal : bool, optional
+        Show an additional illustration of the signal as
+        the modulated distance to the center.
+        The default is `True`.
+    uni_signal : str or None, optional
+        Define whether the signal should be represented by a
+        unique color given as argument or just by the default
+        color cycle when `None`.
+        The default is `"gray"`.
+    uni_signal : str or None, optional
+        Define whether the gradients should be represented by a
+        unique color given as argument or just by the default
+        color cycle when `None`.
+        The default is `None`.
+    subfigure: plt.Figure or plt.SubFigure, optional
+        The figure where the trajectory should be displayed.
+        The default is `None`.
+
+    Returns
+    -------
+    axes : plt.Axes
+        Axes of the figure.
+    """
     # Setup figure and labels
     Nd = trajectory.shape[-1]
     if (subfigure is None):
@@ -338,6 +412,63 @@ def display_gradients(
     constraints_order=None,
     **constraints_kwargs
 ):
+    """Display gradients based on trajectory of any dimension.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to display.
+    shot_ids : list of int
+        Indices of the shots to display.
+        The default is `[0]`.
+    figsize : float, optional
+        Size of the figure.
+    fill_area : bool, optional
+        Fills the area under the curve for improved visibility and
+        representation of the integral, aka trajectory.
+        The default is `True`.
+    show_signal : bool, optional
+        Show an additional illustration of the signal as
+        the modulated distance to the center.
+        The default is `True`.
+    uni_signal : str or None, optional
+        Define whether the signal should be represented by a
+        unique color given as argument or just by the default
+        color cycle when `None`.
+        The default is `"gray"`.
+    uni_signal : str or None, optional
+        Define whether the gradients should be represented by a
+        unique color given as argument or just by the default
+        color cycle when `None`.
+        The default is `None`.
+    subfigure: plt.Figure or plt.SubFigure, optional
+        The figure where the trajectory should be displayed.
+        The default is `None`.
+    show_constraints : bool, optional
+        Display the points where the gradients and slew rates
+        are above the `gmax` and `smax` limits, respectively.
+        The default is `False`.
+    gmax: float, optional
+        The maximum constraint on the gradients in T/m.
+        The default is `DEFAULT_GMAX`.
+    smax: float, optional
+        The maximum constraint on the slew rates in T/m/ms.
+        The default is `DEFAULT_SMAX`.
+    constraint_order: int, str, optional
+        The norm order defining how the constraints are checked,
+        typically 2 or 1, following the `numpy.linalg.norm`
+        conventions on argument `ord`.
+        The default is None.
+    **kwargs
+        Acquisition parameters used to check on hardware constraints,
+        following the argument convention from
+        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
+
+    Returns
+    -------
+    axes : plt.Axes
+        Axes of the figure.
+    """
     # Initialize figure with a simpler version
     axes = display_gradients_simply(trajectory, shot_ids, figsize, fill_area,
                                     show_signal, uni_signal, uni_gradient, subfigure)
