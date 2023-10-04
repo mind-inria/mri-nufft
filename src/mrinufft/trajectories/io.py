@@ -198,7 +198,7 @@ def write_trajectory(
     norm_factor : float, optional
         Trajectory normalization factor, by default 0.5
     gamma : float, optional
-        Gyromagnetic ratio in kHz, by default 42.576e3
+        Gyromagnetic ratio in kHz/T, by default 42.576e3
     raster_time : float, optional
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional

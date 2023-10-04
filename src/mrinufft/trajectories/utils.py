@@ -13,9 +13,16 @@ KMAX = 0.5
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
+DEFAULT_RESOLUTION = 6e-4  # m, i.e. 0.6 mm isotropic
+DEFAULT_RASTER_TIME = 10e-3  # ms
 
-# Gyromagnetic ratios
+DEFAULT_GMAX = 0.04  # T/m
+DEFAULT_SMAX = 0.1  # T/m/ms
+
+
 class Gammas(float, Enum):
+    """Enumerate gyromagnetic ratios for common nuclei in MR."""
+
     # Values in kHz/T
     HYDROGEN = 42576
     HELIUM = 32434
@@ -30,18 +37,11 @@ class Gammas(float, Enum):
     H = H1 = PROTON = HYDROGEN
     He = He3 = HELIUM
     C = C13 = CARBON
-    O = O17 = OXYGEN
+    O = O17 = OXYGEN  # noqa: E741
     F = F19 = FLUORINE
     Na = Na23 = SODIUM
     P = P31 = PHOSPHOROUS
     X = X129 = XENON
-
-
-DEFAULT_RESOLUTION = 6e-4  # m, i.e. 0.6 mm isotropic
-DEFAULT_RASTER_TIME = 10e-3  # ms
-
-DEFAULT_GMAX = 0.04  # T/m
-DEFAULT_SMAX = 0.1  # T/m/ms
 
 
 ###############
@@ -54,6 +54,24 @@ def normalize_trajectory(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
 ):
+    """Normalize an un-normalized/natural trajectory for NUFFT use.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Un-normalized trajectory consisting of k-space coordinates in 2D or 3D.
+    norm_factor : float, optional
+        Trajectory normalization factor, by default KMAX.
+    resolution : float, np.array, optional
+        Resolution of MR image in meters, isotropic as `int`
+        or anisotropic as `np.array`.
+        The default is DEFAULT_RESOLUTION.
+
+    Returns
+    -------
+    trajectory : np.ndarray
+        Normalized trajectory corresponding to `trajectory` input.
+    """
     return trajectory * norm_factor * (2 * resolution)
 
 
@@ -62,6 +80,24 @@ def unnormalize_trajectory(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
 ):
+    """Un-normalize a NUFFT-normalized trajectory.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Normalized trajectory consisting of k-space coordinates in 2D or 3D.
+    norm_factor : float, optional
+        Trajectory normalization factor, by default KMAX.
+    resolution : float, np.array, optional
+        Resolution of MR image in meters, isotropic as `int`
+        or anisotropic as `np.array`.
+        The default is DEFAULT_RESOLUTION.
+
+    Returns
+    -------
+    trajectory : np.ndarray
+        Un-normalized trajectory corresponding to `trajectory` input.
+    """
     return trajectory / norm_factor / (2 * resolution)
 
 
@@ -72,6 +108,31 @@ def convert_trajectory_to_gradients(
     raster_time=DEFAULT_RASTER_TIME,
     gamma=Gammas.HYDROGEN,
 ):
+    """Derive a normalized trajectory over time to provide gradients.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Normalized trajectory consisting of k-space coordinates in 2D or 3D.
+    norm_factor : float, optional
+        Trajectory normalization factor, by default KMAX.
+    resolution : float, np.array, optional
+        Resolution of MR image in meters, isotropic as `int`
+        or anisotropic as `np.array`.
+        The default is DEFAULT_RESOLUTION.
+    raster_time : float, optional
+        Amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
+    gamma : float, optional
+        Gyromagnetic ratio of the selected nucleus in kHz/T
+        The default is Gammas.HYDROGEN.
+
+    Returns
+    -------
+    gradients : np.ndarray
+        Gradients corresponding to `trajectory`.
+    """
     # Un-normalize the trajectory from NUFFT usage
     trajectory = unnormalize_trajectory(trajectory, norm_factor, resolution)
 
@@ -89,6 +150,34 @@ def convert_gradients_to_trajectory(
     raster_time=DEFAULT_RASTER_TIME,
     gamma=Gammas.HYDROGEN,
 ):
+    """Integrate gradients over time to provide a normalized trajectory.
+
+    Parameters
+    ----------
+    gradients : np.ndarray
+        Gradients over 2 or 3 directions.
+    initial_positions: np.ndarray, optional
+        Positions in k-space at the beginning of the readout window.
+        The default is `None`.
+    norm_factor : float, optional
+        Trajectory normalization factor, by default KMAX.
+    resolution : float, np.array, optional
+        Resolution of MR image in meters, isotropic as `int`
+        or anisotropic as `np.array`.
+        The default is DEFAULT_RESOLUTION.
+    raster_time : float, optional
+        Amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
+    gamma : float, optional
+        Gyromagnetic ratio of the selected nucleus in kHz/T
+        The default is Gammas.HYDROGEN.
+
+    Returns
+    -------
+    trajectory : np.ndarray
+        Normalized trajectory corresponding to `gradients`.
+    """
     # Handle no initial positions
     if initial_positions is None:
         initial_positions = np.zeros((gradients.shape[0], 1, gradients.shape[-1]))
@@ -107,6 +196,24 @@ def convert_gradients_to_slew_rates(
     gradients,
     raster_time=DEFAULT_RASTER_TIME,
 ):
+    """Derive the gradients over time to provide slew rates.
+
+    Parameters
+    ----------
+    gradients : np.ndarray
+        Gradients over 2 or 3 directions.
+    raster_time : float, optional
+        Amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
+
+    Returns
+    -------
+    slewrates : np.ndarray
+        Slew rates corresponding to `gradients`.
+    initial_gradients : np.ndarray
+        Gradients at the beginning of the readout window.
+    """
     # Compute slew rates and starting gradients
     slewrates = np.diff(gradients, axis=1) / raster_time
     initial_gradients = gradients[:, 0, :]
@@ -118,6 +225,25 @@ def convert_slew_rates_to_gradients(
     initial_gradients=None,
     raster_time=DEFAULT_RASTER_TIME,
 ):
+    """Integrate slew rates over time to provide gradients.
+
+    Parameters
+    ----------
+    slewrates : np.ndarray
+        Slew rates over 2 or 3 directions.
+    initial_gradients: np.ndarray, optional
+        Gradients at the beginning of the readout window.
+        The default is `None`.
+    raster_time : float, optional
+        Amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
+
+    Returns
+    -------
+    gradients : np.ndarray
+        Gradients corresponding to `slewrates`.
+    """
     # Handle no initial gradients
     if initial_gradients is None:
         initial_gradients = np.zeros((slewrates.shape[0], 1, slewrates.shape[-1]))
@@ -136,12 +262,32 @@ def compute_gradients_and_slew_rates(
     raster_time=DEFAULT_RASTER_TIME,
     gamma=Gammas.HYDROGEN,
 ):
-    """.
+    """Compute the gradients and slew rates from a normalized trajectory.
 
-    resolution: float or numpy.array, optional
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Normalized trajectory consisting of k-space coordinates in 2D or 3D.
+    norm_factor : float, optional
+        Trajectory normalization factor, by default KMAX.
+    resolution : float, np.array, optional
         Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `numpy.array`.
+        or anisotropic as `np.array`.
         The default is DEFAULT_RESOLUTION.
+    raster_time : float, optional
+        Amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
+    gamma : float, optional
+        Gyromagnetic ratio of the selected nucleus in kHz/T
+        The default is Gammas.HYDROGEN.
+
+    Returns
+    -------
+    gradients : np.ndarray
+        Gradients corresponding to `trajectory`.
+    slewrates : np.ndarray
+        Slew rates corresponding to `trajectory` gradients.
     """
     # Convert normalized trajectory to gradients
     gradients, _ = convert_trajectory_to_gradients(
@@ -161,7 +307,7 @@ def compute_gradients_and_slew_rates(
 def check_hardware_constraints(
     gradients, slewrates, gmax=DEFAULT_GMAX, smax=DEFAULT_SMAX, order=None
 ):
-    """Check if a trajectory satisfies the gradient constraints.
+    """Check if a trajectory satisfies the gradient hardware constraints.
 
     Parameters
     ----------

@@ -478,7 +478,7 @@ def display_gradients(
         conventions on argument `ord`.
         The default is None.
     raster_time: float, optional
-        The amount of time between the acquisition of two
+        Amount of time between the acquisition of two
         consecutive samples in ms.
         The default is `DEFAULT_RASTER_TIME`.
     **kwargs
