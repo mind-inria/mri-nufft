@@ -13,7 +13,7 @@ from .utils import (
     DEFAULT_SMAX,
     Gammas,
     convert_trajectory_to_gradients,
-    compute_gradients_and_slew_rates,
+    convert_gradients_to_slew_rates,
     check_hardware_constraints,
 )
 
@@ -115,7 +115,8 @@ def write_gradients(
     # Write all the k0 values
     file.write(
         "\n".join(
-            " ".join([f"{iter2:5.4f}" for iter2 in iter1]) for iter1 in initial_positions
+            " ".join([f"{iter2:5.4f}" for iter2 in iter1])
+            for iter1 in initial_positions
         )
         + "\n"
     )
@@ -220,9 +221,8 @@ def write_trajectory(
     )
 
     # Check constraints if requested
-    if (check_constraints):
-        slewrates, _ = convert_gradients_to_slew_rates(
-            gradients, raster_time)
+    if check_constraints:
+        slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
         violation, maxG, maxS = check_hardware_constraints(
             gradients=gradients,
             slewrates=slewrates,

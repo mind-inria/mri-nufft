@@ -13,6 +13,7 @@ KMAX = 0.5
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
+
 # Gyromagnetic ratios
 class Gammas(float, Enum):
     # Values in kHz/T
@@ -46,6 +47,7 @@ DEFAULT_SMAX = 0.1  # T/m/ms
 ###############
 # CONSTRAINTS #
 ###############
+
 
 def normalize_trajectory(
     trajectory,
@@ -88,7 +90,7 @@ def convert_gradients_to_trajectory(
     gamma=Gammas.HYDROGEN,
 ):
     # Handle no initial positions
-    if (initial_positions is None):
+    if initial_positions is None:
         initial_positions = np.zeros((gradients.shape[0], 1, gradients.shape[-1]))
 
     # Prepare and integrate gradients
@@ -117,7 +119,7 @@ def convert_slew_rates_to_gradients(
     raster_time=DEFAULT_RASTER_TIME,
 ):
     # Handle no initial gradients
-    if (initial_gradients is None):
+    if initial_gradients is None:
         initial_gradients = np.zeros((slewrates.shape[0], 1, slewrates.shape[-1]))
 
     # Prepare and integrate slew rates
@@ -134,7 +136,8 @@ def compute_gradients_and_slew_rates(
     raster_time=DEFAULT_RASTER_TIME,
     gamma=Gammas.HYDROGEN,
 ):
-    """
+    """.
+
     resolution: float or numpy.array, optional
         Resolution of MR image in meters, isotropic as `int`
         or anisotropic as `numpy.array`.
@@ -156,11 +159,7 @@ def compute_gradients_and_slew_rates(
 
 
 def check_hardware_constraints(
-    gradients,
-    slewrates,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    order=None
+    gradients, slewrates, gmax=DEFAULT_GMAX, smax=DEFAULT_SMAX, order=None
 ):
     """Check if a trajectory satisfies the gradient constraints.
 
@@ -195,6 +194,7 @@ def check_hardware_constraints(
 ###############
 # MATHEMATICS #
 ###############
+
 
 def compute_greatest_common_divider(p, q):
     """Compute the greatest common divider of two integers p and q.
@@ -247,6 +247,7 @@ def compute_coprime_factors(Nc, length, start=1, update=1):
 #############
 # ROTATIONS #
 #############
+
 
 def R2D(theta):
     """Initialize 2D rotation matrix.
@@ -358,6 +359,7 @@ def Rv(v1, v2, normalize=True):
 ###########
 # OPTIONS #
 ###########
+
 
 def initialize_tilt(tilt, nb_partitions=1):
     r"""Initialize the tilt angle.

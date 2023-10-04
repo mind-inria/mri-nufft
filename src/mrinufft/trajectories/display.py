@@ -9,6 +9,7 @@ from .utils import (
     KMAX,
     DEFAULT_GMAX,
     DEFAULT_SMAX,
+    DEFAULT_RASTER_TIME,
 )
 
 
@@ -34,6 +35,7 @@ SMALL_FONTSIZE = 14
 ##############
 # TICK UTILS #
 ##############
+
 
 def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
@@ -71,6 +73,7 @@ def _setup_3D_ticks(figsize, fig=None):
 ######################
 # TRAJECTORY DISPLAY #
 ######################
+
 
 def display_2D_trajectory(
     trajectory,
@@ -138,10 +141,10 @@ def display_2D_trajectory(
         )
 
     # Display one shot in particular if requested
-    if one_shot or type(one_shot) == int:
+    if one_shot is not False:  # If True or int
         # Select shot
         shot_id = Nc // 2
-        if type(one_shot) == int:
+        if one_shot is not True:  # If int
             shot_id = one_shot
 
         # Highlight the shot in black
@@ -155,13 +158,16 @@ def display_2D_trajectory(
     # Point out violated constraints if requested
     if show_constraints:
         gradients, slews = compute_gradients_and_slew_rates(
-            trajectory, **constraints_kwargs)
+            trajectory, **constraints_kwargs
+        )
 
         # Pad and compute norms
-        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))),
-                                   axis=-1, ord=constraints_order)
-        slews = np.linalg.norm(np.pad(slews, ((0, 0), (2, 0), (0, 0))),
-                               axis=-1, ord=constraints_order)
+        gradients = np.linalg.norm(
+            np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1, ord=constraints_order
+        )
+        slews = np.linalg.norm(
+            np.pad(slews, ((0, 0), (2, 0), (0, 0))), axis=-1, ord=constraints_order
+        )
 
         # Check constraints
         trajectory = trajectory.reshape((-1, 2))
@@ -237,11 +243,12 @@ def display_3D_trajectory(
     """
     # Setup figure and ticks, and handle 2D trajectories
     ax = _setup_3D_ticks(figsize, subfigure)
-    if (nb_repetitions is None):
+    if nb_repetitions is None:
         nb_repetitions = trajectory.shape[0]
-    if (trajectory.shape[-1] == 2):
-        trajectory = np.concatenate([trajectory,
-            np.zeros((*(trajectory.shape[:2]), 1))], axis=-1)
+    if trajectory.shape[-1] == 2:
+        trajectory = np.concatenate(
+            [trajectory, np.zeros((*(trajectory.shape[:2]), 1))], axis=-1
+        )
     trajectory = trajectory.reshape((nb_repetitions, -1, trajectory.shape[-2], 3))
     Nc, Ns = trajectory.shape[1:3]
 
@@ -257,12 +264,12 @@ def display_3D_trajectory(
             )
 
     # Display one shot in particular if requested
-    if one_shot or type(one_shot) == int:
+    if one_shot is not False:  # If True or int
         trajectory = trajectory.reshape((-1, Ns, 3))
 
         # Select shot
         shot_id = Nc // 2
-        if type(one_shot) == int:
+        if one_shot is not True:  # If int
             shot_id = one_shot
 
         # Highlight the shot in black
@@ -278,13 +285,16 @@ def display_3D_trajectory(
     # Point out violated constraints if requested
     if show_constraints:
         gradients, slewrates = compute_gradients_and_slew_rates(
-            trajectory.reshape((-1, Ns, 3)), **constraints_kwargs)
+            trajectory.reshape((-1, Ns, 3)), **constraints_kwargs
+        )
 
         # Pad and compute norms
-        gradients = np.linalg.norm(np.pad(gradients, ((0, 0), (1, 0), (0, 0))),
-                                   axis=-1, ord=constraints_order)
-        slewrates = np.linalg.norm(np.pad(slewrates, ((0, 0), (2, 0), (0, 0))),
-                                   axis=-1, ord=constraints_order)
+        gradients = np.linalg.norm(
+            np.pad(gradients, ((0, 0), (1, 0), (0, 0))), axis=-1, ord=constraints_order
+        )
+        slewrates = np.linalg.norm(
+            np.pad(slewrates, ((0, 0), (2, 0), (0, 0))), axis=-1, ord=constraints_order
+        )
 
         # Check constraints
         gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > gmax)]
@@ -301,9 +311,10 @@ def display_3D_trajectory(
 # GRADIENT DISPLAY #
 ####################
 
+
 def display_gradients_simply(
     trajectory,
-    shot_ids=[0],
+    shot_ids=(0,),
     figsize=5,
     fill_area=True,
     show_signal=True,
@@ -351,7 +362,7 @@ def display_gradients_simply(
     """
     # Setup figure and labels
     Nd = trajectory.shape[-1]
-    if (subfigure is None):
+    if subfigure is None:
         fig = plt.figure(figsize=(figsize, figsize * (Nd + show_signal) / Nd))
     else:
         fig = subfigure
@@ -373,25 +384,31 @@ def display_gradients_simply(
     for j, s_id in enumerate(shot_ids):
         for i, ax in enumerate(axes[:Nd]):
             ax.set_ylim((-vmax, vmax))
-            color = uni_gradient if uni_gradient is not None else COLOR_CYCLE[j % NB_COLORS]
+            color = (
+                uni_gradient if uni_gradient is not None else COLOR_CYCLE[j % NB_COLORS]
+            )
             ax.plot(x_axis, gradients[s_id, ..., i], color=color)
-            if (fill_area):
-                ax.fill_between(x_axis, gradients[s_id, ..., i], alpha=ALPHA, color=color)
+            if fill_area:
+                ax.fill_between(
+                    x_axis, gradients[s_id, ..., i], alpha=ALPHA, color=color
+                )
 
     # Return axes alone
-    if (not show_signal):
+    if not show_signal:
         return axes
 
     # Show signal as modulated distance to center
     distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
     distances = np.tile(distances.reshape((len(shot_ids), -1, 1)), (1, 1, 10))
     signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
-    signal = (signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))).real
+    signal = (
+        signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))
+    ).real
     signal = signal * np.abs(signal) ** 3
 
     # Show signal for each requested shot
     axes[-1].set_ylabel("Signal", fontsize=FONTSIZE)
-    for j, s_id in enumerate(shot_ids):
+    for j in range(len(shot_ids)):
         color = uni_signal if (uni_signal is not None) else COLOR_CYCLE[j % NB_COLORS]
         axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
     return axes
@@ -399,7 +416,7 @@ def display_gradients_simply(
 
 def display_gradients(
     trajectory,
-    shot_ids=[0],
+    shot_ids=(0,),
     figsize=5,
     fill_area=True,
     show_signal=True,
@@ -410,7 +427,8 @@ def display_gradients(
     gmax=DEFAULT_GMAX,
     smax=DEFAULT_SMAX,
     constraints_order=None,
-    **constraints_kwargs
+    raster_time=DEFAULT_RASTER_TIME,
+    **constraints_kwargs,
 ):
     """Display gradients based on trajectory of any dimension.
 
@@ -420,7 +438,7 @@ def display_gradients(
         Trajectory to display.
     shot_ids : list of int
         Indices of the shots to display.
-        The default is `[0]`.
+        The default is `(0,)`.
     figsize : float, optional
         Size of the figure.
     fill_area : bool, optional
@@ -459,6 +477,10 @@ def display_gradients(
         typically 2 or 1, following the `numpy.linalg.norm`
         conventions on argument `ord`.
         The default is None.
+    raster_time: float, optional
+        The amount of time between the acquisition of two
+        consecutive samples in ms.
+        The default is `DEFAULT_RASTER_TIME`.
     **kwargs
         Acquisition parameters used to check on hardware constraints,
         following the argument convention from
@@ -470,21 +492,29 @@ def display_gradients(
         Axes of the figure.
     """
     # Initialize figure with a simpler version
-    axes = display_gradients_simply(trajectory, shot_ids, figsize, fill_area,
-                                    show_signal, uni_signal, uni_gradient, subfigure)
+    axes = display_gradients_simply(
+        trajectory,
+        shot_ids,
+        figsize,
+        fill_area,
+        show_signal,
+        uni_signal,
+        uni_gradient,
+        subfigure,
+    )
 
     # Setup figure and labels
     Nd = trajectory.shape[-1]
     for i, ax in enumerate(axes[:Nd]):
         ax.set_ylabel("G{} (mT/m)".format(["x", "y", "z"][i]), fontsize=SMALL_FONTSIZE)
     axes[-1].set_xlabel("Time (ms)", fontsize=SMALL_FONTSIZE)
-    if (show_signal):
+    if show_signal:
         axes[-1].set_ylabel("Signal (a.u.)", fontsize=SMALL_FONTSIZE)
 
     # Update axis ticks with rescaled values
     for i, ax in enumerate(axes):
         # Update xtick labels with time values
-        if (ax == axes[-1]):
+        if ax == axes[-1]:
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
             scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * raster_time
@@ -499,23 +529,30 @@ def display_gradients(
         idx = min(i, Nd - 1)
         norms = np.diff(trajectory[:1, :2, idx]).squeeze()
         norms = np.where(norms != 0, norms, 1)
-        scale = convert_trajectory_to_gradients(trajectory[:1, :2], **constraints_kwargs)[0][0, 0, idx] / norms
+        scale = (
+            convert_trajectory_to_gradients(
+                trajectory[:1, :2], raster_time=raster_time, **constraints_kwargs
+            )[0][0, 0, idx]
+            / norms
+        )
         scale = 1e3 * scale  # Convert from T/m to mT/m
         locator = mticker.FixedLocator(ticks)
         formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
-        if (not show_signal or ax != axes[-1]):
+        if not show_signal or ax != axes[-1]:
             ax.yaxis.set_major_locator(locator)
             ax.yaxis.set_major_formatter(formatter)
 
     # Move on with constraints if requested
-    if (not show_constraints):
+    if not show_constraints:
         return axes
 
     # Compute true gradients and slew rates
-    gradients, slewrates = compute_gradients_and_slew_rates(trajectory[shot_ids, :], **constraints_kwargs)
+    gradients, slewrates = compute_gradients_and_slew_rates(
+        trajectory[shot_ids, :], **constraints_kwargs
+    )
     gradients = np.linalg.norm(gradients, axis=-1, ord=constraints_order)
     slewrates = np.linalg.norm(slewrates, axis=-1, ord=constraints_order)
-    slewrates = np.pad(slewrates, ((0,0), (0,1)))
+    slewrates = np.pad(slewrates, ((0, 0), (0, 1)))
 
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
