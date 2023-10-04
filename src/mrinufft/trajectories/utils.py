@@ -1,6 +1,8 @@
 """Utility functions for the trajectory design."""
 import numpy as np
 
+from enum import Enum
+
 
 #############
 # CONSTANTS #
@@ -11,10 +13,28 @@ KMAX = 0.5
 DEFAULT_CONE_ANGLE = np.pi / 2  # rad
 DEFAULT_HELIX_ANGLE = np.pi  # rad
 
-CARBON_GYROMAGNETIC_RATIO = 10708.4  # kHz/T
-HYDROGEN_GYROMAGNETIC_RATIO = 42576.384  # kHz/T
-PHOSPHOROUS_GYROMAGNETIC_RATIO = 17235  # kHz/T
-SODIUM_GYROMAGNETIC_RATIO = 11262  # kHz/T
+# Gyromagnetic ratios
+class Gammas(float, Enum):
+    # Values in kHz/T
+    HYDROGEN = 42576
+    HELIUM = 32434
+    CARBON = 10708
+    OXYGEN = 5772
+    FLUORINE = 40078
+    SODIUM = 11262
+    PHOSPHOROUS = 17235
+    XENON = 11777
+
+    # Aliases
+    H = H1 = PROTON = HYDROGEN
+    He = He3 = HELIUM
+    C = C13 = CARBON
+    O = O17 = OXYGEN
+    F = F19 = FLUORINE
+    Na = Na23 = SODIUM
+    P = P31 = PHOSPHOROUS
+    X = X129 = XENON
+
 
 DEFAULT_RESOLUTION = 6e-4  # m, i.e. 0.6 mm isotropic
 DEFAULT_RASTER_TIME = 10e-3  # ms
@@ -48,7 +68,7 @@ def convert_trajectory_to_gradients(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma=Gammas.HYDROGEN,
 ):
     # Un-normalize the trajectory from NUFFT usage
     trajectory = unnormalize_trajectory(trajectory, norm_factor, resolution)
@@ -65,7 +85,7 @@ def convert_gradients_to_trajectory(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma=Gammas.HYDROGEN,
 ):
     # Handle no initial positions
     if (initial_positions is None):
@@ -112,7 +132,7 @@ def compute_gradients_and_slew_rates(
     norm_factor=KMAX,
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
-    gamma=HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma=Gammas.HYDROGEN,
 ):
     """
     resolution: float or numpy.array, optional

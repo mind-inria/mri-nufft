@@ -517,7 +517,7 @@ def display_gradients(
     slewrates = np.linalg.norm(slewrates, axis=-1, ord=constraints_order)
     slewrates = np.pad(slewrates, ((0,0), (0,1)))
 
-    # Point out hardware constraints violations
+    # Point out hardware constraint violations
     for ax in axes[:Nd]:
         pts = np.where(gradients > gmax)
         ax.scatter(pts, np.zeros_like(pts), color="r", s=POINTSIZE)

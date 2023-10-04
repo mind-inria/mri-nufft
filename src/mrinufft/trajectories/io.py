@@ -9,9 +9,9 @@ from array import array
 from .utils import (
     KMAX,
     DEFAULT_RASTER_TIME,
-    HYDROGEN_GYROMAGNETIC_RATIO,
     DEFAULT_GMAX,
     DEFAULT_SMAX,
+    Gammas,
     convert_trajectory_to_gradients,
     compute_gradients_and_slew_rates,
     check_hardware_constraints,
@@ -26,7 +26,7 @@ def write_gradients(
     FOV: Tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
-    gamma: float = HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma: float = Gammas.HYDROGEN,
     version: float = 4.2,
     recon_tag: float = 1.1,
     timestamp: Optional[float] = None,
@@ -51,7 +51,7 @@ def write_gradients(
     min_osf : int, optional
         Minimum oversampling factor needed at ADC, by default 5
     gamma : float, optional
-        Gyromagnetic Constant, by default 42.576e3
+        Gyromagnetic ratio in kHz/T, by default 42.576e3
     version : float, optional
         Trajectory versioning, by default 4.2
     recon_tag : float, optional
@@ -174,7 +174,7 @@ def write_trajectory(
     img_size: Tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
-    gamma: float = HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma: float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     gmax: float = DEFAULT_GMAX,
@@ -197,15 +197,15 @@ def write_trajectory(
     norm_factor : float, optional
         Trajectory normalization factor, by default 0.5
     gamma : float, optional
-        Gyromagnetic constant in kHz, by default 42.576e3
+        Gyromagnetic ratio in kHz, by default 42.576e3
     raster_time : float, optional
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
         Check scanner constraints, by default True
     gmax : float, optional
-        Maximum gradient magnitude in T/m, by default 40e-3
+        Maximum gradient magnitude in T/m, by default 0.04
     smax : float, optional
-        Maximum slew rate in T/m/ms, by default 100e-3
+        Maximum slew rate in T/m/ms, by default 0.1
     kwargs : dict, optional
         Additional arguments for writing the gradient file.
         These are arguments passed to write_gradients function above.
@@ -252,7 +252,7 @@ def read_trajectory(
     grad_filename: str,
     dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
-    gamma: float = HYDROGEN_GYROMAGNETIC_RATIO,
+    gamma: float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
@@ -264,13 +264,13 @@ def read_trajectory(
     grad_filename : str
         Gradient filename.
     dwell_time : float, optional
-        Dwell time of ADC, by default 0.1
+        Dwell time of ADC in ms, by default 0.01
     num_adc_samples : int, optional
         Number of ADC samples, by default None
-    gyromagnetic_constant : float, optional
-        Gyromagnetic Constant, by default 42.576e3
+    gamma : float, optional
+        Gyromagnetic ratio in kHz/T, by default 42.576e3
     gradient_raster_time : float, optional
-        Gradient raster time, by default 0.1
+        Gradient raster time in ms, by default 0.01
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
