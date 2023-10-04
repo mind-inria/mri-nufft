@@ -25,11 +25,27 @@ COLOR_CYCLE = [
 ]
 NB_COLORS = len(COLOR_CYCLE)
 
-ALPHA = 0.2
-LINEWIDTH = 2
-POINTSIZE = 10
-FONTSIZE = 18
-SMALL_FONTSIZE = 14
+
+class DisplayConfig:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.initialize_config()
+        return cls._instance
+
+    def initialize_config(self):
+        # Default display values
+        self.alpha = 0.2
+        self.linewidth = 2
+        self.pointsize = 10
+        self.fontsize = 18
+        self.small_fontsize = 14
+
+
+# Initialize DisplayConfig singleton for user convenience
+displayConfig = DisplayConfig()
 
 
 ##############
@@ -39,6 +55,7 @@ SMALL_FONTSIZE = 14
 
 def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
+    displayConfig = DisplayConfig()
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig.subplots()
@@ -47,13 +64,14 @@ def _setup_2D_ticks(figsize, fig=None):
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_xlim((-KMAX, KMAX))
     ax.set_ylim((-KMAX, KMAX))
-    ax.set_xlabel("kx", fontsize=FONTSIZE)
-    ax.set_ylabel("ky", fontsize=FONTSIZE)
+    ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
+    ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
     return ax
 
 
 def _setup_3D_ticks(figsize, fig=None):
     """Add ticks to 3D plot."""
+    displayConfig = DisplayConfig()
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig.add_subplot(projection="3d")
@@ -64,9 +82,9 @@ def _setup_3D_ticks(figsize, fig=None):
     ax.axes.set_ylim3d(bottom=-KMAX, top=KMAX)
     ax.axes.set_zlim3d(bottom=-KMAX, top=KMAX)
     ax.set_box_aspect((2 * KMAX, 2 * KMAX, 2 * KMAX))
-    ax.set_xlabel("kx", fontsize=FONTSIZE)
-    ax.set_ylabel("ky", fontsize=FONTSIZE)
-    ax.set_zlabel("kz", fontsize=FONTSIZE)
+    ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
+    ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
+    ax.set_zlabel("kz", fontsize=displayConfig.fontsize)
     return ax
 
 
@@ -127,6 +145,8 @@ def display_2D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
+    displayConfig = DisplayConfig()
+
     # Setup figure and ticks
     Nc, Ns = trajectory.shape[:2]
     ax = _setup_2D_ticks(figsize, subfigure)
@@ -137,7 +157,7 @@ def display_2D_trajectory(
             trajectory[i, :, 0],
             trajectory[i, :, 1],
             color=COLOR_CYCLE[i % NB_COLORS],
-            linewidth=LINEWIDTH,
+            linewidth=displayConfig.linewidth,
         )
 
     # Display one shot in particular if requested
@@ -152,7 +172,7 @@ def display_2D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             color="k",
-            linewidth=2 * LINEWIDTH,
+            linewidth=2 * displayConfig.linewidth,
         )
 
     # Point out violated constraints if requested
@@ -175,8 +195,10 @@ def display_2D_trajectory(
         slews = trajectory[np.where(slews.flatten() > smax)]
 
         # Scatter points with vivid colors
-        ax.scatter(gradients[:, 0], gradients[:, 1], color="r", s=POINTSIZE)
-        ax.scatter(slews[:, 0], slews[:, 1], color="b", s=POINTSIZE)
+        ax.scatter(
+            gradients[:, 0], gradients[:, 1], color="r", s=displayConfig.pointsize
+        )
+        ax.scatter(slews[:, 0], slews[:, 1], color="b", s=displayConfig.pointsize)
     plt.tight_layout()
     return ax
 
@@ -241,6 +263,8 @@ def display_3D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
+    displayConfig = DisplayConfig()
+
     # Setup figure and ticks, and handle 2D trajectories
     ax = _setup_3D_ticks(figsize, subfigure)
     if nb_repetitions is None:
@@ -260,7 +284,7 @@ def display_3D_trajectory(
                 trajectory[i, j, :, 1],
                 trajectory[i, j, :, 2],
                 color=COLOR_CYCLE[(i + j * (not per_plane)) % NB_COLORS],
-                linewidth=LINEWIDTH,
+                linewidth=displayConfig.linewidth,
             )
 
     # Display one shot in particular if requested
@@ -278,7 +302,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
             color="k",
-            linewidth=2 * LINEWIDTH,
+            linewidth=2 * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
 
@@ -301,8 +325,8 @@ def display_3D_trajectory(
         slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
 
         # Scatter points with vivid colors
-        ax.scatter(*(gradients.T), color="r", s=POINTSIZE)
-        ax.scatter(*(slewrates.T), color="b", s=POINTSIZE)
+        ax.scatter(*(gradients.T), color="r", s=displayConfig.pointsize)
+        ax.scatter(*(slewrates.T), color="b", s=displayConfig.pointsize)
     plt.tight_layout()
     return ax
 
@@ -360,6 +384,8 @@ def display_gradients_simply(
     axes : plt.Axes
         Axes of the figure.
     """
+    displayConfig = DisplayConfig()
+
     # Setup figure and labels
     Nd = trajectory.shape[-1]
     if subfigure is None:
@@ -368,8 +394,8 @@ def display_gradients_simply(
         fig = subfigure
     axes = fig.subplots(Nd + show_signal, 1)
     for i, ax in enumerate(axes[:Nd]):
-        ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=FONTSIZE)
-    axes[-1].set_xlabel("Time", fontsize=FONTSIZE)
+        ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
+    axes[-1].set_xlabel("Time", fontsize=displayConfig.fontsize)
 
     # Setup axes ticks
     for ax in axes:
@@ -390,7 +416,10 @@ def display_gradients_simply(
             ax.plot(x_axis, gradients[s_id, ..., i], color=color)
             if fill_area:
                 ax.fill_between(
-                    x_axis, gradients[s_id, ..., i], alpha=ALPHA, color=color
+                    x_axis,
+                    gradients[s_id, ..., i],
+                    alpha=displayConfig.alpha,
+                    color=color,
                 )
 
     # Return axes alone
@@ -407,7 +436,7 @@ def display_gradients_simply(
     signal = signal * np.abs(signal) ** 3
 
     # Show signal for each requested shot
-    axes[-1].set_ylabel("Signal", fontsize=FONTSIZE)
+    axes[-1].set_ylabel("Signal", fontsize=displayConfig.fontsize)
     for j in range(len(shot_ids)):
         color = uni_signal if (uni_signal is not None) else COLOR_CYCLE[j % NB_COLORS]
         axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
@@ -491,6 +520,8 @@ def display_gradients(
     axes : plt.Axes
         Axes of the figure.
     """
+    displayConfig = DisplayConfig()
+
     # Initialize figure with a simpler version
     axes = display_gradients_simply(
         trajectory,
@@ -506,10 +537,13 @@ def display_gradients(
     # Setup figure and labels
     Nd = trajectory.shape[-1]
     for i, ax in enumerate(axes[:Nd]):
-        ax.set_ylabel("G{} (mT/m)".format(["x", "y", "z"][i]), fontsize=SMALL_FONTSIZE)
-    axes[-1].set_xlabel("Time (ms)", fontsize=SMALL_FONTSIZE)
+        ax.set_ylabel(
+            "G{} (mT/m)".format(["x", "y", "z"][i]),
+            fontsize=displayConfig.small_fontsize,
+        )
+    axes[-1].set_xlabel("Time (ms)", fontsize=displayConfig.small_fontsize)
     if show_signal:
-        axes[-1].set_ylabel("Signal (a.u.)", fontsize=SMALL_FONTSIZE)
+        axes[-1].set_ylabel("Signal (a.u.)", fontsize=displayConfig.small_fontsize)
 
     # Update axis ticks with rescaled values
     for i, ax in enumerate(axes):
@@ -557,7 +591,7 @@ def display_gradients(
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
         pts = np.where(gradients > gmax)
-        ax.scatter(pts, np.zeros_like(pts), color="r", s=POINTSIZE)
+        ax.scatter(pts, np.zeros_like(pts), color="r", s=displayConfig.pointsize)
         pts = np.where(slewrates > smax)
-        ax.scatter(pts, np.zeros_like(pts), color="b", s=POINTSIZE)
+        ax.scatter(pts, np.zeros_like(pts), color="b", s=displayConfig.pointsize)
     return axes
