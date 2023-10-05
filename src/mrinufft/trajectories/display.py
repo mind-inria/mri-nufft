@@ -27,16 +27,34 @@ NB_COLORS = len(COLOR_CYCLE)
 
 
 class DisplayConfig:
+    """
+    A singleton used to share parameters related to display.
+
+    Attributes
+    ----------
+    alpha : float
+        Transparency used for area plots, by default 0.2.
+    linewidth : float
+        Width for lines or curves, by default 2.
+    pointsize : float
+        Size for points used to show constraints, by default 10.
+    fontsize : float
+        Font size for most labels and texts, by default 18.
+    small_fontsize : float
+        Font size for smaller texts, by default 14.
+    """
+
     _instance = None
 
     def __new__(cls):
+        """Rerouting new instances to the singleton."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.initialize_config()
         return cls._instance
 
     def initialize_config(self):
-        # Default display values
+        """Initialize the display configuration with default values."""
         self.alpha = 0.2
         self.linewidth = 2
         self.pointsize = 10
