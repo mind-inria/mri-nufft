@@ -33,16 +33,27 @@ def show_argument(function, arguments, one_shot, subfigure_size):
     trajectories = [function(arg) for arg in arguments]
 
     # Plot the trajectories side by side
-    _, axes = plt.subplots(
-        1,
-        len(trajectories),
+    fig = plt.figure(
         figsize=(len(trajectories) * subfigure_size, subfigure_size),
+        constrained_layout=True,
     )
-    for axi, arg, traj in zip(axes, arguments, trajectories):
-        display_2D_trajectory(
-            traj, size=subfigure_size, one_shot=one_shot, subfigure=axi
+    subfigs = fig.subfigures(1, len(trajectories))
+    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
+        ax = display_2D_trajectory(
+            traj,
+            size=subfigure_size,
+            one_shot=one_shot,
+            subfigure=subfig,
         )
-        axi.set_title(str(arg))
+        ax.set_aspect("equal")
+        ax.set_title(str(arg), fontsize=4 * subfigure_size)
+    plt.show()
+
+
+def show_trajectory(trajectory, one_shot, figure_size):
+    ax = display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
+    ax.set_aspect("equal")
+    plt.tight_layout()
     plt.show()
 
 
@@ -58,7 +69,7 @@ in_out = True  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Choose the angular distance between shots
 
 # Display parameters
-figure_size = 5  # Figure size for trajectory plots
+figure_size = 6  # Figure size for trajectory plots
 subfigure_size = 3  # Figure size for subplots
 one_shot = True  # Highlight one shot in particular
 
@@ -83,8 +94,7 @@ one_shot = True  # Highlight one shot in particular
 #
 
 trajectory = mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -177,8 +187,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -234,8 +243,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -290,8 +298,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_sinusoide(Nc, Ns, tilt=tilt, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -313,8 +320,7 @@ plt.show()
 #
 
 trajectory = mn.initialize_2D_rings(Nc, Ns, nb_rings=Nc)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -361,8 +367,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_rosette(Nc, Ns, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -405,8 +410,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_polar_lissajous(Nc, Ns, in_out=in_out)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -494,8 +498,7 @@ for io in [True, False]:
 #
 
 trajectory = mn.initialize_2D_waves(Nc, Ns, nb_zigzags=5)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -548,8 +551,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_2D_lissajous(Nc, Ns, density=1)
-display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%

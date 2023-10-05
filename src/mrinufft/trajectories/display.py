@@ -199,7 +199,6 @@ def display_2D_trajectory(
             gradients[:, 0], gradients[:, 1], color="r", s=displayConfig.pointsize
         )
         ax.scatter(slews[:, 0], slews[:, 1], color="b", s=displayConfig.pointsize)
-    plt.tight_layout()
     return ax
 
 
@@ -327,7 +326,6 @@ def display_3D_trajectory(
         # Scatter points with vivid colors
         ax.scatter(*(gradients.T), color="r", s=displayConfig.pointsize)
         ax.scatter(*(slewrates.T), color="b", s=displayConfig.pointsize)
-    plt.tight_layout()
     return ax
 
 
