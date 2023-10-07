@@ -28,7 +28,7 @@ NB_COLORS = len(COLOR_CYCLE)
 
 class displayConfig:
     """
-    A container class used to share parameters related to display.
+    A container class used to share arguments related to display.
 
     Attributes
     ----------
@@ -126,19 +126,19 @@ def display_2D_trajectory(
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
     gmax: float, optional
-        The maximum constraint on the gradients in T/m.
+        Maximum constraint on the gradients in T/m.
         The default is `DEFAULT_GMAX`.
     smax: float, optional
-        The maximum constraint on the slew rates in T/m/ms.
+        Maximum constraint on the slew rates in T/m/ms.
         The default is `DEFAULT_SMAX`.
     constraint_order: int, str, optional
-        The norm order defining how the constraints are checked,
-        typically 2 or 1, following the `numpy.linalg.norm`
-        conventions on argument `ord`.
+        Norm order defining how the constraints are checked,
+        typically 2 or `np.inf`, following the `numpy.linalg.norm`
+        conventions on parameter `ord`.
         The default is None.
     **kwargs
         Acquisition parameters used to check on hardware constraints,
-        following the argument convention from
+        following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
@@ -241,19 +241,19 @@ def display_3D_trajectory(
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
     gmax: float, optional
-        The maximum constraint on the gradients in T/m.
+        Maximum constraint on the gradients in T/m.
         The default is `DEFAULT_GMAX`.
     smax: float, optional
-        The maximum constraint on the slew rates in T/m/ms.
+        Maximum constraint on the slew rates in T/m/ms.
         The default is `DEFAULT_SMAX`.
     constraint_order: int, str, optional
-        The norm order defining how the constraints are checked,
-        typically 2 or 1, following the `numpy.linalg.norm`
-        conventions on argument `ord`.
+        Norm order defining how the constraints are checked,
+        typically 2 or `np.inf`, following the `numpy.linalg.norm`
+        conventions on parameter `ord`.
         The default is None.
     **kwargs
         Acquisition parameters used to check on hardware constraints,
-        following the argument convention from
+        following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
@@ -489,15 +489,15 @@ def display_gradients(
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
     gmax: float, optional
-        The maximum constraint on the gradients in T/m.
+        Maximum constraint on the gradients in T/m.
         The default is `DEFAULT_GMAX`.
     smax: float, optional
-        The maximum constraint on the slew rates in T/m/ms.
+        Maximum constraint on the slew rates in T/m/ms.
         The default is `DEFAULT_SMAX`.
     constraint_order: int, str, optional
-        The norm order defining how the constraints are checked,
-        typically 2 or 1, following the `numpy.linalg.norm`
-        conventions on argument `ord`.
+        Norm order defining how the constraints are checked,
+        typically 2 or `np.inf`, following the `numpy.linalg.norm`
+        conventions on parameter `ord`.
         The default is None.
     raster_time: float, optional
         Amount of time between the acquisition of two
@@ -505,7 +505,7 @@ def display_gradients(
         The default is `DEFAULT_RASTER_TIME`.
     **kwargs
         Acquisition parameters used to check on hardware constraints,
-        following the argument convention from
+        following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns

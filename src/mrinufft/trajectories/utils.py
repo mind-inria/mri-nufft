@@ -320,7 +320,9 @@ def check_hardware_constraints(
     smax : float, optional
         Maximum slew rate in T/m/ms. The default is DEFAULT_SMAX.
     order : int or str, optional
-        Norm order, following the numpy.linalg.norm `ord` convention.
+        Norm order defining how the constraints are checked,
+        typically 2 or `np.inf`, following the `numpy.linalg.norm`
+        conventions on parameter `ord`.
         The default is None.
 
     Returns
