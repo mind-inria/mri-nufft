@@ -43,6 +43,7 @@ class displayConfig:
     small_fontsize : float
         Font size for smaller texts, by default 14.
     """
+
     alpha = 0.2
     linewidth = 2
     pointsize = 10
