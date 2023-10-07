@@ -39,24 +39,30 @@ def show_argument(function, arguments, one_shot, subfigure_size):
     trajectories = [function(arg) for arg in arguments]
 
     # Plot the trajectories side by side
-    _, axes = plt.subplots(
-        1,
-        len(trajectories),
+    fig = plt.figure(
         figsize=(len(trajectories) * subfigure_size, subfigure_size),
-        subplot_kw=dict(projection="3d"),
+        constrained_layout=True,
     )
-    for axi, arg, traj in zip(axes, arguments, trajectories):
-        display_3D_trajectory(
+    subfigs = fig.subfigures(1, len(trajectories), wspace=0)
+    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
+        ax = display_3D_trajectory(
             traj,
-            nb_repetitions=1,
-            Nc=traj.shape[0],
-            Ns=traj.shape[1],
             size=subfigure_size,
             one_shot=one_shot,
+            subfigure=subfig,
             per_plane=False,
-            subfigure=axi,
         )
-        axi.set_title(str(arg))
+        ax.set_aspect("equal")
+        ax.set_title(str(arg), fontsize=4 * subfigure_size)
+    plt.show()
+
+
+def show_trajectory(trajectory, one_shot, figure_size):
+    ax = display_3D_trajectory(
+        trajectory, size=figure_size, one_shot=one_shot, per_plane=False
+    )
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.1)
     plt.show()
 
 
@@ -73,9 +79,9 @@ tilt = "uniform"  # Choose the angular distance between shots
 nb_shells = 8  # Number of concentric shells for shell-type trajectories
 
 # Display parameters
-figure_size = 5  # Figure size for trajectory plots
-subfigure_size = 3  # Figure size for subplots
-one_shot = True  # Highlight one shot in particular
+figure_size = 10  # Figure size for trajectory plots
+subfigure_size = 6  # Figure size for subplots
+one_shot = -5  # Highlight one shot in particular
 
 
 # %%
@@ -105,16 +111,7 @@ one_shot = True  # Highlight one shot in particular
 #
 
 trajectory = mn.initialize_3D_cones(Nc, Ns, in_out=in_out)
-display_3D_trajectory(
-    trajectory,
-    nb_repetitions=1,
-    Nc=Nc,
-    Ns=Ns,
-    size=figure_size,
-    one_shot=one_shot,
-    per_plane=False,
-)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -242,16 +239,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_3D_seiffert_spiral(Nc, Ns, in_out=in_out)
-display_3D_trajectory(
-    trajectory,
-    nb_repetitions=1,
-    Nc=Nc,
-    Ns=Ns,
-    size=figure_size,
-    one_shot=one_shot,
-    per_plane=False,
-)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -319,16 +307,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_3D_helical_shells(Nc, Ns, nb_shells=nb_shells)
-display_3D_trajectory(
-    trajectory,
-    nb_repetitions=1,
-    Nc=Nc,
-    Ns=Ns,
-    size=figure_size,
-    one_shot=one_shot,
-    per_plane=False,
-)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -418,16 +397,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_3D_annular_shells(Nc, Ns, nb_shells)
-display_3D_trajectory(
-    trajectory,
-    nb_repetitions=1,
-    Nc=Nc,
-    Ns=Ns,
-    size=figure_size,
-    one_shot=one_shot,
-    per_plane=False,
-)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
@@ -482,16 +452,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 #
 
 trajectory = mn.initialize_3D_seiffert_shells(Nc, Ns, nb_shells)
-display_3D_trajectory(
-    trajectory,
-    nb_repetitions=1,
-    Nc=Nc,
-    Ns=Ns,
-    size=figure_size,
-    one_shot=one_shot,
-    per_plane=False,
-)
-plt.show()
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
