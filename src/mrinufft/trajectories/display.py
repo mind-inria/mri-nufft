@@ -26,9 +26,9 @@ COLOR_CYCLE = [
 NB_COLORS = len(COLOR_CYCLE)
 
 
-class DisplayConfig:
+class displayConfig:
     """
-    A singleton used to share parameters related to display.
+    A container class used to share parameters related to display.
 
     Attributes
     ----------
@@ -43,27 +43,11 @@ class DisplayConfig:
     small_fontsize : float
         Font size for smaller texts, by default 14.
     """
-
-    _instance = None
-
-    def __new__(cls):
-        """Rerouting new instances to the singleton."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.initialize_config()
-        return cls._instance
-
-    def initialize_config(self):
-        """Initialize the display configuration with default values."""
-        self.alpha = 0.2
-        self.linewidth = 2
-        self.pointsize = 10
-        self.fontsize = 18
-        self.small_fontsize = 14
-
-
-# Initialize DisplayConfig singleton for user convenience
-displayConfig = DisplayConfig()
+    alpha = 0.2
+    linewidth = 2
+    pointsize = 10
+    fontsize = 18
+    small_fontsize = 14
 
 
 ##############
@@ -73,7 +57,6 @@ displayConfig = DisplayConfig()
 
 def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
-    displayConfig = DisplayConfig()
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig.subplots()
@@ -89,7 +72,6 @@ def _setup_2D_ticks(figsize, fig=None):
 
 def _setup_3D_ticks(figsize, fig=None):
     """Add ticks to 3D plot."""
-    displayConfig = DisplayConfig()
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig.add_subplot(projection="3d")
@@ -163,8 +145,6 @@ def display_2D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
-    displayConfig = DisplayConfig()
-
     # Setup figure and ticks
     Nc, Ns = trajectory.shape[:2]
     ax = _setup_2D_ticks(figsize, subfigure)
@@ -280,8 +260,6 @@ def display_3D_trajectory(
     ax : plt.Axes
         Axes of the figure.
     """
-    displayConfig = DisplayConfig()
-
     # Setup figure and ticks, and handle 2D trajectories
     ax = _setup_3D_ticks(figsize, subfigure)
     if nb_repetitions is None:
@@ -400,8 +378,6 @@ def display_gradients_simply(
     axes : plt.Axes
         Axes of the figure.
     """
-    displayConfig = DisplayConfig()
-
     # Setup figure and labels
     Nd = trajectory.shape[-1]
     if subfigure is None:
@@ -536,8 +512,6 @@ def display_gradients(
     axes : plt.Axes
         Axes of the figure.
     """
-    displayConfig = DisplayConfig()
-
     # Initialize figure with a simpler version
     axes = display_gradients_simply(
         trajectory,
