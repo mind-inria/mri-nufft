@@ -16,7 +16,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import Ry, Rz, Rv, initialize_tilt, KMAX
+from .utils import Ry, Rz, Rv, initialize_tilt, initialize_shape_norm, KMAX
 
 
 ############################
@@ -138,6 +138,72 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
         rotation = Rv(v1, v2, normalize=False)
         trajectory[i] = (rotation @ trajectory[0].T).T
     return trajectory.reshape((Nc, Ns, 3))
+
+
+def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangular",
+                             shape="square", spacing=np.array([1, 1])):
+    trajectory = np.zeros((Nc, Ns, 3))
+
+    # Initialize first shot
+    angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
+    trajectory[0, :, 0] = width * np.cos(angles)
+    trajectory[0, :, 1] = width * np.sin(angles)
+    trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
+
+    # Packing
+    side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
+    if packing in ["random", "uniform"]:
+        positions = side * (np.random.random((side * side, 2)) - 0.5)
+    elif packing in ["circle", "circular"]:
+        # Circle packing
+        positions = [[0, 0]]
+        counter = 0
+        while (len(positions) < side ** 2):
+            counter += 1
+            perimeter = 2 * np.pi * counter
+            nb_shots = int(np.trunc(perimeter))
+
+            # Add the full circle
+            radius = 2 * counter
+            angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
+            circle = radius * np.exp(1j * angles)
+            positions = np.concatenate([positions,
+                                        np.array([circle.real, circle.imag]).T], axis=0)
+    elif packing in ["square", "triangle", "triangular", "hexagon", "hexagonal"]:
+        # Square packing or initialize hexagonal/triangular packing
+        px, py = np.meshgrid(np.arange(-side + 1, side, 2),
+                             np.arange(-side + 1, side, 2))
+        positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
+
+    if packing in ["triangle", "triangular", "hexagon", "hexagonal"]:
+        # Hexagonal/triangular packing based on square packing
+        positions[::2, 1] += 1 / 2
+        positions[1::2, 1] -= 1 / 2
+        ratio = nl.norm(np.diff(positions[:2], axis=-1))
+        positions[:, 0] /= ratio / 2
+
+    # Remove points by distance to fit both shape and Nc
+    order = initialize_shape_norm(shape)
+    tie_order = 2 if (order != 2) else np.inf  # breaking ties
+
+    # Ruff doesn't like lambdas
+    def _sort_main(x):
+        return nl.norm(x, ord=order)
+    def _sort_tie(x):
+        return nl.norm(x, ord=tie_order)
+    positions = np.array(positions) * (2 * spacing - 1)
+    positions = sorted(positions, key=_sort_tie)
+    positions = sorted(positions, key=_sort_main)
+    positions = positions[:Nc]
+
+    # Shifting copies of the initial shot to all positions
+    initial_shot = np.copy(trajectory[0])
+    positions = np.concatenate([positions, np.zeros((Nc, 1))], axis=-1)
+    for i, pos in enumerate(positions):
+        trajectory[i] = initial_shot + positions[i]
+
+    trajectory[..., :2] /= np.max(np.abs(trajectory))
+    return KMAX * trajectory
 
 
 def initialize_3D_seiffert_spiral(

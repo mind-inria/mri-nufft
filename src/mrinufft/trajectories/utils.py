@@ -581,3 +581,16 @@ def initialize_spiral(spiral):
         return 2
     else:
         raise NotImplementedError(f"Unknown spiral name: {spiral}")
+
+
+def initialize_shape_norm(shape):
+    if not isinstance(shape, str):
+        return shape
+    elif shape in ["square"]:
+        return np.inf
+    elif shape in ["circle", "circular"]:
+        return 2
+    elif shape in ["rhombus", "diamond"]:
+        return 1
+    else:
+        raise NotImplementedError(f"Unknown shape name: {shape}")
