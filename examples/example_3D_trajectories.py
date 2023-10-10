@@ -30,11 +30,11 @@ import numpy as np
 # Internal
 import mrinufft as mn
 
-from mrinufft import display_3D_trajectory
+from mrinufft import display_2D_trajectory, display_3D_trajectory
 
 
 # Util function to display varying arguments
-def show_argument(function, arguments, one_shot, subfigure_size):
+def show_argument(function, arguments, one_shot, subfig_size, dim="3D"):
     # Initialize trajectories with varying option
     trajectories = [function(arg) for arg in arguments]
 
@@ -45,13 +45,21 @@ def show_argument(function, arguments, one_shot, subfigure_size):
     )
     subfigs = fig.subfigures(1, len(trajectories), wspace=0)
     for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        ax = display_3D_trajectory(
-            traj,
-            size=subfigure_size,
-            one_shot=one_shot,
-            subfigure=subfig,
-            per_plane=False,
-        )
+        if (dim == "3D"):
+            ax = display_3D_trajectory(
+                traj,
+                size=subfigure_size,
+                one_shot=one_shot,
+                subfigure=subfig,
+                per_plane=False,
+            )
+        else:
+            ax = display_2D_trajectory(
+                traj[..., :2],
+                size=subfigure_size,
+                one_shot=one_shot,
+                subfigure=subfig,
+            )
         ax.set_aspect("equal")
         ax.set_title(str(arg), fontsize=4 * subfigure_size)
     plt.show()
@@ -106,8 +114,8 @@ one_shot = -5  # Highlight one shot in particular
 #   the center then outside (in-out) or not (center-out). ``(default False)``
 # - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
 #   ``(default 5)``
-# - ``width (float)``: cone width factor, normalized to cover the k-space by default.
-#   ``(default 1)``
+# - ``width (float)``: cone width factor, normalized to densely cover the k-space
+#   by default. ``(default 1)``
 #
 
 trajectory = mn.initialize_3D_cones(Nc, Ns, in_out=in_out)
@@ -124,7 +132,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [Nc // 4, Nc // 2, Nc, Nc * 2]
 function = lambda x: mn.initialize_3D_cones(x, Ns, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -138,7 +146,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [10, 25, 40, 100]
 function = lambda x: mn.initialize_3D_cones(Nc, x, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -154,7 +162,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = ["uniform", "golden", "mri golden", np.pi / 17]
 function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -177,7 +185,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [True, False]
 function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -190,7 +198,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [0.5, 2, 5, 10]
 function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -205,7 +213,84 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [0.2, 1, 2, 3]
 function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, width=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# Wave-CAIPI
+# --------
+#
+# A common pattern composed of 3D cones oriented all over within a sphere.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots
+# - ``Ns (int)``: number of samples per shot
+# - ``nb_revolutions (str, float)``: number of revolution of the helices.
+#   ``(default 5)``
+# - ``width (float)``: helix width factor, normalized to densely
+#   cover the k-space by default. ``(default 1)``
+# - ``packing (str)``: packing method used to position the helices.
+#   ``(default "triangular")``
+# - ``shape (str, float)``: shape over the 2D kx-ky plane to pack with shots.
+#   ``(default "circle")``
+# - ``spacing (tuple(int, int))``: Spacing between helices over the
+#   2D kx-ky plane normalized similarly to `width`. ``(default (1, 1))``
+
+trajectory = mn.initialize_3D_wave_caipi(Nc, Ns)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``nb_revolutions (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+arguments = [0.5, 2.5, 5, 10]
+function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``width (float)``
+# ~~~~~~~~~~~~~~~~~
+
+arguments = [0.2, 1, 2, 3]
+function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, width=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``packing (str)``
+# ~~~~~~~~~~~~~~~~~
+
+arguments = ["triangular", "square", "circular", "random"]
+function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
+
+# %%
+# ``shape (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+arguments = ["circle", "square", "diamond", 0.5]
+function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, shape=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
+
+# %%
+# ``spacing (tuple(int, int))``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+arguments = [(1, 1), (2, 1), (1, 2), (2.3, 1.8)]
+function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing="square", spacing=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
 
 
 # %%
@@ -255,7 +340,7 @@ arguments = [0, 0.3, 0.9, 0.99]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
     Nc, Ns, in_out=in_out, curve_index=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -272,7 +357,7 @@ arguments = [0.5, 1, 1.5, 2]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
     Nc, Ns, in_out=in_out, nb_revolutions=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -321,7 +406,7 @@ arguments = [1, 2, nb_shells // 2, nb_shells]
 function = lambda x: mn.initialize_3D_helical_shells(
     Nc=x, Ns=Ns, nb_shells=x, spiral_reduction=2
 )
-show_argument(function, arguments, one_shot=False, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=False, subfig_size=subfigure_size)
 
 
 # %%
@@ -340,7 +425,7 @@ arguments = [0.5, 1, 2, 4]
 function = lambda x: mn.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -354,7 +439,7 @@ arguments = ["uniform", "intergaps", "golden", 3.1415]
 function = lambda x: mn.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=2, shell_tilt=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -371,7 +456,7 @@ arguments = ["uniform", "intergaps", "golden", 0.1]
 function = lambda x: mn.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=2, shot_tilt=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -423,7 +508,7 @@ arguments = [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]
 function = lambda x: mn.initialize_3D_annular_shells(
     Nc, Ns, nb_shells=nb_shells, ring_tilt=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%

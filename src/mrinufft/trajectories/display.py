@@ -60,7 +60,7 @@ def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-    ax = fig.subplots()
+    ax = fig if (isinstance(fig, plt.Axes)) else fig.subplot()
     ax.grid(True)
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -75,7 +75,7 @@ def _setup_3D_ticks(figsize, fig=None):
     """Add ticks to 3D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-    ax = fig.add_subplot(projection="3d")
+    ax = fig if (isinstance(fig, plt.Axes)) else fig.add_subplot(projection="3d")
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
@@ -118,7 +118,7 @@ def display_2D_trajectory(
         If `True`, highlight the middle shot.
         If `int`, highlight the shot at that index.
         The default is `False`.
-    subfigure: plt.Figure or plt.SubFigure, optional
+    subfigure: plt.Figure, plt.SubFigure or plt.Axes, optional
         The figure where the trajectory should be displayed.
         The default is `None`.
     show_constraints : bool, optional
@@ -233,7 +233,7 @@ def display_3D_trajectory(
         If `True`, highlight the middle shot.
         If `int`, highlight the shot at that index.
         The default is `False`.
-    subfigure: plt.Figure or plt.SubFigure, optional
+    subfigure: plt.Figure, plt.SubFigure or plt.Axes, optional
         The figure where the trajectory should be displayed.
         The default is `None`.
     show_constraints : bool, optional

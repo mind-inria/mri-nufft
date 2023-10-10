@@ -162,20 +162,21 @@ def initialize_3D_wave_caipi(
     width : float, optional
         Diameter of the helices normalized such that `width=1`
         densely covers the k-space without overlap for square packing,
-        by default 1
+        by default 1.
     packing : str, optional
         Packing method used to position the helices:
         "triangular"/"hexagonal", "square", "circular"
-        or "random"/"uniform".
+        or "random"/"uniform", by default "triangular".
     shape : str or float, optional
         Shape over the 2D kx-ky plane to pack with shots,
         either defined as `str` ("circle", "square", "diamond")
         or as `float` through p-norms following the conventions
-        of the `ord` parameter from `numpy.linalg.norm`.
+        of the `ord` parameter from `numpy.linalg.norm`,
+        by default "circle".
     spacing : tuple(int, int)
         Spacing between helices over the 2D kx-ky plane
         normalized similarly to `width` to correspond to
-        helix diameters.
+        helix diameters, by default (1, 1).
 
     Returns
     -------
@@ -194,7 +195,7 @@ def initialize_3D_wave_caipi(
     # Packing
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
     if packing in ["random", "uniform"]:
-        positions = side * (np.random.random((side * side, 2)) - 0.5)
+        positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
     elif packing in ["circle", "circular"]:
         # Circle packing
         positions = [[0, 0]]
@@ -236,7 +237,7 @@ def initialize_3D_wave_caipi(
     def _sort_tie(x):
         return nl.norm(x, ord=tie_order)
 
-    positions = np.array(positions) * (2 * spacing - 1)
+    positions = np.array(positions) * spacing
     positions = sorted(positions, key=_sort_tie)
     positions = sorted(positions, key=_sort_main)
     positions = positions[:Nc]
