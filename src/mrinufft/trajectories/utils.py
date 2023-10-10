@@ -565,13 +565,13 @@ def initialize_spiral(spiral):
 
     Parameters
     ----------
-    spiral : str or int
-        Spiral type or number of interleaves.
+    spiral : str or float
+        Spiral type or spiral power value.
 
     Returns
     -------
-    int
-        Spiral type.
+    float
+        Spiral power value.
     """
     if not isinstance(spiral, str):
         return spiral
@@ -584,6 +584,18 @@ def initialize_spiral(spiral):
 
 
 def initialize_shape_norm(shape):
+    """Initialize the norm for a given shape.
+
+    Parameters
+    ----------
+    shape : str or float
+        Shape name or p-norm value.
+
+    Returns
+    -------
+    float
+        Shape p-norm value.
+    """
     if not isinstance(shape, str):
         return shape
     elif shape in ["square"]:

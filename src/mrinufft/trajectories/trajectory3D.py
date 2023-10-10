@@ -140,9 +140,50 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     return trajectory.reshape((Nc, Ns, 3))
 
 
-def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangular",
-                             shape="square", spacing=np.array([1, 1])):
+def initialize_3D_wave_caipi(
+    Nc,
+    Ns,
+    nb_revolutions=5,
+    width=1,
+    packing="triangular",
+    shape="square",
+    spacing=(1, 1),
+):
+    """Initialize 3D trajectories with wave-CAIPI.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_revolutions : float, optional
+        Number of revolutions, by default 5
+    width : float, optional
+        Diameter of the helices normalized such that `width=1`
+        densely covers the k-space without overlap for square packing,
+        by default 1
+    packing : str, optional
+        Packing method used to position the helices:
+        "triangular"/"hexagonal", "square", "circular"
+        or "random"/"uniform".
+    shape : str or float, optional
+        Shape over the 2D kx-ky plane to pack with shots,
+        either defined as `str` ("circle", "square", "diamond")
+        or as `float` through p-norms following the conventions
+        of the `ord` parameter from `numpy.linalg.norm`.
+    spacing : tuple(int, int)
+        Spacing between helices over the 2D kx-ky plane
+        normalized similarly to `width` to correspond to
+        helix diameters.
+
+    Returns
+    -------
+    array_like
+        3D wave-CAIPI trajectory
+    """
     trajectory = np.zeros((Nc, Ns, 3))
+    spacing = np.array(spacing)
 
     # Initialize first shot
     angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
@@ -158,7 +199,7 @@ def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangu
         # Circle packing
         positions = [[0, 0]]
         counter = 0
-        while (len(positions) < side ** 2):
+        while len(positions) < side**2:
             counter += 1
             perimeter = 2 * np.pi * counter
             nb_shots = int(np.trunc(perimeter))
@@ -167,12 +208,14 @@ def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangu
             radius = 2 * counter
             angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
             circle = radius * np.exp(1j * angles)
-            positions = np.concatenate([positions,
-                                        np.array([circle.real, circle.imag]).T], axis=0)
+            positions = np.concatenate(
+                [positions, np.array([circle.real, circle.imag]).T], axis=0
+            )
     elif packing in ["square", "triangle", "triangular", "hexagon", "hexagonal"]:
         # Square packing or initialize hexagonal/triangular packing
-        px, py = np.meshgrid(np.arange(-side + 1, side, 2),
-                             np.arange(-side + 1, side, 2))
+        px, py = np.meshgrid(
+            np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
+        )
         positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
 
     if packing in ["triangle", "triangular", "hexagon", "hexagonal"]:
@@ -189,8 +232,10 @@ def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangu
     # Ruff doesn't like lambdas
     def _sort_main(x):
         return nl.norm(x, ord=order)
+
     def _sort_tie(x):
         return nl.norm(x, ord=tie_order)
+
     positions = np.array(positions) * (2 * spacing - 1)
     positions = sorted(positions, key=_sort_tie)
     positions = sorted(positions, key=_sort_main)
@@ -199,7 +244,7 @@ def initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=5, width=1, packing="triangu
     # Shifting copies of the initial shot to all positions
     initial_shot = np.copy(trajectory[0])
     positions = np.concatenate([positions, np.zeros((Nc, 1))], axis=-1)
-    for i, pos in enumerate(positions):
+    for i in range(len(positions)):
         trajectory[i] = initial_shot + positions[i]
 
     trajectory[..., :2] /= np.max(np.abs(trajectory))
