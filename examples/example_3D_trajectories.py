@@ -45,7 +45,7 @@ def show_argument(function, arguments, one_shot, subfig_size, dim="3D"):
     )
     subfigs = fig.subfigures(1, len(trajectories), wspace=0)
     for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        if (dim == "3D"):
+        if dim == "3D":
             ax = display_3D_trajectory(
                 traj,
                 size=subfigure_size,
@@ -289,7 +289,9 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 # %%
 
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
 
 # %%
 # ``shape (str, float)``
@@ -313,7 +315,9 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 # %%
 
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
 
 # %%
 # ``spacing (tuple(int, int))``
@@ -332,7 +336,9 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 # %%
 
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D")
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
 
 
 # %%
