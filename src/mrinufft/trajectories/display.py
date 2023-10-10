@@ -60,7 +60,7 @@ def _setup_2D_ticks(figsize, fig=None):
     """Add ticks to 2D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-    ax = fig if (isinstance(fig, plt.Axes)) else fig.subplot()
+    ax = fig if (isinstance(fig, plt.Axes)) else fig.subplots()
     ax.grid(True)
     ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
     ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])

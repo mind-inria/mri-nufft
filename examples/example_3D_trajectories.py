@@ -224,18 +224,18 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots
-# - ``Ns (int)``: number of samples per shot
+# - ``Nc (int)``: number of individual shots. See 3D cones
+# - ``Ns (int)``: number of samples per shot. See 3D cones
 # - ``nb_revolutions (str, float)``: number of revolution of the helices.
 #   ``(default 5)``
 # - ``width (float)``: helix width factor, normalized to densely
-#   cover the k-space by default. ``(default 1)``
+#   cover the k-space by default. ``(default 1)``.
 # - ``packing (str)``: packing method used to position the helices.
 #   ``(default "triangular")``
 # - ``shape (str, float)``: shape over the 2D kx-ky plane to pack with shots.
 #   ``(default "circle")``
 # - ``spacing (tuple(int, int))``: Spacing between helices over the
-#   2D kx-ky plane normalized similarly to `width`. ``(default (1, 1))``
+#   2D :math:`k_x`-:math:`k_y` plane normalized similarly to `width`. ``(default (1, 1))``
 
 trajectory = mn.initialize_3D_wave_caipi(Nc, Ns)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -243,6 +243,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # %%
 # ``nb_revolutions (float)``
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The number of revolutions of the helices from bottom to top.
+#
 
 arguments = [0.5, 2.5, 5, 10]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=x)
@@ -251,6 +254,14 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # %%
 # ``width (float)``
 # ~~~~~~~~~~~~~~~~~
+#
+# The helix diameter normalized such that ``width = 1`` corresponds to
+# non-overlapping shots densely covering the k-space shape (for square packing),
+# and therefore ``width > 1`` creates overlap between cone regions and
+# ``width < 1`` tends to more radial patterns.
+#
+# See ``packing`` for more details about coverage.
+#
 
 arguments = [0.2, 1, 2, 3]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, width=x)
@@ -259,6 +270,18 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # %%
 # ``packing (str)``
 # ~~~~~~~~~~~~~~~~~
+#
+# The method used to pack circles of same size within an arbitrary ``shape``.
+# The available methods are ``"triangular"`` and ``"square"`` for regular tiling
+# over dense grids, and ``"circular"`` and ``"random"`` for irregular packing.
+# Different aliases are available, such as ``"triangle"``, ``"hexagon"`` instead
+# of ``"triangular``".
+#
+# Note that ``"triangular"`` packing has slightly overlapping helices,
+# as it corresponds to a triangular/hexagonal grid.
+# The ``"random"`` packing also naturally overlaps as the positions are determined
+# following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
+#
 
 arguments = ["triangular", "square", "circular", "random"]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
@@ -271,6 +294,18 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # %%
 # ``shape (str, float)``
 # ~~~~~~~~~~~~~~~~~~~~~~
+#
+# The 2D shape defined over the :math:`k_x`-:math:`k_y` plane
+# and where the helices should be packed. Aliases are available for convenience,
+# namely ``"circle"``, ``"square"``, ``"diamond"``, but shapes are primarily
+# defined through the p-norm of the 2D coordinates following the convention
+# of the ``ord`` parameter from ``numpy.linalg.norm``.
+#
+# The shapes are approximately respected depending on the available ``Nc``
+# parameter, and extra shots on the edges will be placed in priority to have
+# a minimal 2-norm (eliminating the diagonals) except for circles with infinity-norm
+# (accumulating over the diagonals).
+#
 
 arguments = ["circle", "square", "diamond", 0.5]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, shape=x)
@@ -283,6 +318,13 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # %%
 # ``spacing (tuple(int, int))``
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The spacing between helices over the :math:`k_x`-:math:`k_y` plane, mostly
+# defined for ``"square"`` packing. It is defined to match the ``width`` unit
+# automatically matching the helix diameters, which can cause more complex
+# behaviors for other packing methods as the diameters are normalized to fit
+# within the cubic k-space.
+#
 
 arguments = [(1, 1), (2, 1), (1, 2), (2.3, 1.8)]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing="square", spacing=x)
