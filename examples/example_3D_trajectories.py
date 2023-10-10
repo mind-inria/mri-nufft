@@ -220,7 +220,13 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # Wave-CAIPI
 # --------
 #
-# A common pattern composed of 3D cones oriented all over within a sphere.
+# A pattern introduced in [Bil+15]_ composed of helices evolving
+# in the same direction and packed together,
+# inherited from trajectories such as CAIPIRINHA and
+# Bunched Phase-Encoding (BPE) designed to better spread aliasing
+# and facilitate reconstruction.
+#
+# This implementation is based on the work from [Bil+15]_.
 #
 # Arguments:
 #
@@ -607,6 +613,10 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
 #    "On sphere-filling ropes."
 #    The American Mathematical Monthly 118, no. 10 (2011): 863-876
+# .. [Bil+15] Bilgic, Berkin, Borjan A. Gagoski, Stephen F. Cauley, Audrey P. Fan,
+#    Jonathan R. Polimeni, P. Ellen Grant, Lawrence L. Wald, and Kawin Setsompop.
+#    "Wave‐CAIPI for highly accelerated 3D imaging."
+#    Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
 # .. [SMR18] Speidel, Tobias, Patrick Metze, and Volker Rasche.
 #    "Efficient 3D Low-Discrepancy k-Space Sampling
 #    Using Highly Adaptable Seiffert Spirals."

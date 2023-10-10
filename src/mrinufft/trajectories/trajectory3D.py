@@ -149,7 +149,9 @@ def initialize_3D_wave_caipi(
     shape="square",
     spacing=(1, 1),
 ):
-    """Initialize 3D trajectories with wave-CAIPI.
+    """Initialize 3D trajectories with Wave-CAIPI.
+
+    This implementation is based on the work from [Bil+15]_.
 
     Parameters
     ----------
@@ -182,6 +184,13 @@ def initialize_3D_wave_caipi(
     -------
     array_like
         3D wave-CAIPI trajectory
+
+    References
+    ----------
+    .. [Bil+15] Bilgic, Berkin, Borjan A. Gagoski, Stephen F. Cauley, Audrey P. Fan,
+       Jonathan R. Polimeni, P. Ellen Grant, Lawrence L. Wald, and Kawin Setsompop.
+       "Wave‐CAIPI for highly accelerated 3D imaging."
+       Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
     trajectory = np.zeros((Nc, Ns, 3))
     spacing = np.array(spacing)
