@@ -2,6 +2,7 @@
 import numpy as np
 import numpy.linalg as nl
 
+from functools import partial
 from scipy.special import ellipj, ellipk
 
 from .expansions import (
@@ -236,19 +237,11 @@ def initialize_3D_wave_caipi(
         positions[:, 0] /= ratio / 2
 
     # Remove points by distance to fit both shape and Nc
-    order = initialize_shape_norm(shape)
-    tie_order = 2 if (order != 2) else np.inf  # breaking ties
-
-    # Ruff doesn't like lambdas
-    def _sort_main(x):
-        return nl.norm(x, ord=order)
-
-    def _sort_tie(x):
-        return nl.norm(x, ord=tie_order)
-
+    main_order = initialize_shape_norm(shape)
+    tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
     positions = np.array(positions) * spacing
-    positions = sorted(positions, key=_sort_tie)
-    positions = sorted(positions, key=_sort_main)
+    positions = sorted(positions, key=partial(nl.norm, ord=tie_order))
+    positions = sorted(positions, key=partial(nl.norm, ord=main_order))
     positions = positions[:Nc]
 
     # Shifting copies of the initial shot to all positions

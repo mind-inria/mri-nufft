@@ -330,10 +330,10 @@ show_argument(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # The spacing between helices over the :math:`k_x`-:math:`k_y` plane, mostly
-# defined for ``"square"`` packing. It is defined to match the ``width`` unit
-# automatically matching the helix diameters, which can cause more complex
-# behaviors for other packing methods as the diameters are normalized to fit
-# within the cubic k-space.
+# defined for ``"square"`` packing. It is defined to correspond to the ``width``
+# unit, itself automatically matching the helix diameters, which can cause more
+# complex behaviors for other packing methods as the diameters are normalized to
+# fit within the cubic k-space.
 #
 
 arguments = [(1, 1), (2, 1), (1, 2), (2.3, 1.8)]

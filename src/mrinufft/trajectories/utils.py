@@ -596,13 +596,12 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
+    NORMS = {"square": np.inf, "circle": 2, "diamond": 1}
+
     if not isinstance(shape, str):
+        # If directly a p-norm value
         return shape
-    elif shape in ["square"]:
-        return np.inf
-    elif shape in ["circle", "circular"]:
-        return 2
-    elif shape in ["rhombus", "diamond"]:
-        return 1
-    else:
-        raise NotImplementedError(f"Unknown shape name: {shape}")
+    try:
+        return NORMS[shape]
+    except KeyError as e:
+        raise ValueError("Unknown shape name: {shape}") from e
