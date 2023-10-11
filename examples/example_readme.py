@@ -50,6 +50,7 @@ ax[3].imshow(
 )
 ax[3].axis("off")
 ax[3].set_title("Rescaled Error")
+plt.tight_layout()
 plt.show()
 
 

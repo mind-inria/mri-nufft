@@ -565,13 +565,13 @@ def initialize_spiral(spiral):
 
     Parameters
     ----------
-    spiral : str or int
-        Spiral type or number of interleaves.
+    spiral : str or float
+        Spiral type or spiral power value.
 
     Returns
     -------
-    int
-        Spiral type.
+    float
+        Spiral power value.
     """
     if not isinstance(spiral, str):
         return spiral
@@ -581,3 +581,27 @@ def initialize_spiral(spiral):
         return 2
     else:
         raise NotImplementedError(f"Unknown spiral name: {spiral}")
+
+
+def initialize_shape_norm(shape):
+    """Initialize the norm for a given shape.
+
+    Parameters
+    ----------
+    shape : str or float
+        Shape name or p-norm value.
+
+    Returns
+    -------
+    float
+        Shape p-norm value.
+    """
+    NORMS = {"square": np.inf, "circle": 2, "diamond": 1}
+
+    if not isinstance(shape, str):
+        # If directly a p-norm value
+        return shape
+    try:
+        return NORMS[shape]
+    except KeyError as e:
+        raise ValueError("Unknown shape name: {shape}") from e

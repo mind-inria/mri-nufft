@@ -2,6 +2,7 @@
 import numpy as np
 import numpy.linalg as nl
 
+from functools import partial
 from scipy.special import ellipj, ellipk
 
 from .expansions import (
@@ -16,7 +17,7 @@ from .trajectory2D import (
     initialize_2D_rosette,
     initialize_2D_cones,
 )
-from .utils import Ry, Rz, Rv, initialize_tilt, KMAX
+from .utils import Ry, Rz, Rv, initialize_tilt, initialize_shape_norm, KMAX
 
 
 ############################
@@ -138,6 +139,119 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
         rotation = Rv(v1, v2, normalize=False)
         trajectory[i] = (rotation @ trajectory[0].T).T
     return trajectory.reshape((Nc, Ns, 3))
+
+
+def initialize_3D_wave_caipi(
+    Nc,
+    Ns,
+    nb_revolutions=5,
+    width=1,
+    packing="triangular",
+    shape="square",
+    spacing=(1, 1),
+):
+    """Initialize 3D trajectories with Wave-CAIPI.
+
+    This implementation is based on the work from [Bil+15]_.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_revolutions : float, optional
+        Number of revolutions, by default 5
+    width : float, optional
+        Diameter of the helices normalized such that `width=1`
+        densely covers the k-space without overlap for square packing,
+        by default 1.
+    packing : str, optional
+        Packing method used to position the helices:
+        "triangular"/"hexagonal", "square", "circular"
+        or "random"/"uniform", by default "triangular".
+    shape : str or float, optional
+        Shape over the 2D kx-ky plane to pack with shots,
+        either defined as `str` ("circle", "square", "diamond")
+        or as `float` through p-norms following the conventions
+        of the `ord` parameter from `numpy.linalg.norm`,
+        by default "circle".
+    spacing : tuple(int, int)
+        Spacing between helices over the 2D kx-ky plane
+        normalized similarly to `width` to correspond to
+        helix diameters, by default (1, 1).
+
+    Returns
+    -------
+    array_like
+        3D wave-CAIPI trajectory
+
+    References
+    ----------
+    .. [Bil+15] Bilgic, Berkin, Borjan A. Gagoski, Stephen F. Cauley, Audrey P. Fan,
+       Jonathan R. Polimeni, P. Ellen Grant, Lawrence L. Wald, and Kawin Setsompop.
+       "Wave‐CAIPI for highly accelerated 3D imaging."
+       Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
+    """
+    trajectory = np.zeros((Nc, Ns, 3))
+    spacing = np.array(spacing)
+
+    # Initialize first shot
+    angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
+    trajectory[0, :, 0] = width * np.cos(angles)
+    trajectory[0, :, 1] = width * np.sin(angles)
+    trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
+
+    # Packing
+    side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
+    if packing in ["random", "uniform"]:
+        positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
+    elif packing in ["circle", "circular"]:
+        # Circle packing
+        positions = [[0, 0]]
+        counter = 0
+        while len(positions) < side**2:
+            counter += 1
+            perimeter = 2 * np.pi * counter
+            nb_shots = int(np.trunc(perimeter))
+
+            # Add the full circle
+            radius = 2 * counter
+            angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
+            circle = radius * np.exp(1j * angles)
+            positions = np.concatenate(
+                [positions, np.array([circle.real, circle.imag]).T], axis=0
+            )
+    elif packing in ["square", "triangle", "triangular", "hexagon", "hexagonal"]:
+        # Square packing or initialize hexagonal/triangular packing
+        px, py = np.meshgrid(
+            np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
+        )
+        positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
+
+    if packing in ["triangle", "triangular", "hexagon", "hexagonal"]:
+        # Hexagonal/triangular packing based on square packing
+        positions[::2, 1] += 1 / 2
+        positions[1::2, 1] -= 1 / 2
+        ratio = nl.norm(np.diff(positions[:2], axis=-1))
+        positions[:, 0] /= ratio / 2
+
+    # Remove points by distance to fit both shape and Nc
+    main_order = initialize_shape_norm(shape)
+    tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
+    positions = np.array(positions) * spacing
+    positions = sorted(positions, key=partial(nl.norm, ord=tie_order))
+    positions = sorted(positions, key=partial(nl.norm, ord=main_order))
+    positions = positions[:Nc]
+
+    # Shifting copies of the initial shot to all positions
+    initial_shot = np.copy(trajectory[0])
+    positions = np.concatenate([positions, np.zeros((Nc, 1))], axis=-1)
+    for i in range(len(positions)):
+        trajectory[i] = initial_shot + positions[i]
+
+    trajectory[..., :2] /= np.max(np.abs(trajectory))
+    return KMAX * trajectory
 
 
 def initialize_3D_seiffert_spiral(
