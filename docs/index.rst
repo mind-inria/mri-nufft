@@ -7,10 +7,19 @@
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents
+   :caption: User Guides
 
-   api
+   getting_started
+   auto_examples/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Explanations
+
    nufft
    trajectory_gradspec
-   auto_examples/index
+
+.. toctree::
+   :caption: API References
+
+   api
