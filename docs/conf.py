@@ -14,19 +14,15 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
-from importlib.metadata import version
 
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
 
 project = "mri-nufft"
-copyright = "2022, Pierre-Antoine Comby"
-author = "Pierre-Antoine Comby"
+copyright = "2022, MRI-NUFFT Contributors"
+author = "MRI-NUFFT Contributors"
 
-release = version("mri-nufft")
-# for example take major/minor
-version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 
@@ -80,10 +76,16 @@ sphinx_gallery_conf = {
 # a list of builtin themes.
 #
 
-html_theme = "pydata_sphinx_theme"
+html_theme = "sphinx_book_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_context = {"default_mode": "light"}
+html_theme_options = {
+    "repository_url": "https://github.com/mind-inria/mri-nufft/",
+    "use_repository_button": True,
+}
+
+html_logo = "_static/logos/mri-nufft.png"
+html_title = "MRI-nufft Documentation"
