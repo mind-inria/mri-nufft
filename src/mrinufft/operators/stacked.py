@@ -36,7 +36,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
     # Internally the stacked NUFFT operator (self) uses a backend MRI aware NUFFT
     # operator(op), configured as such:
     # - op.smaps=None
-    # - op.n_coils = len(self.z_index) ; op.n_batchs = self.n_coils * self.n_batchs.
+    # - op.n_coils self.n_coils * len(self.z_index) ; op.n_batch= 1.
     # The kspace is organized as a 2D array of shape
     # (self.n_batchs, self.n_coils, self.n_samples) Note that the stack dimension is
     # fused with the samples
@@ -90,9 +90,9 @@ class MRIStackedNUFFT(FourierOperatorBase):
         self.operator = get_operator(backend)(
             self.samples,
             shape[:-1],
-            n_coils=self.n_coils,
+            n_coils=self.n_coils * len(self.z_index),
             smaps=None,
-            squeeze_dims=squeeze_dims,
+            squeeze_dims=True,
             **kwargs,
         )
 
@@ -130,82 +130,82 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
-        ksp = ksp or np.zeros(
-            (
-                self.n_batchs,
-                self.n_coils,
-                len(self.z_index),
-                len(self.samples),
-            ),
-            dtype=self.cpx_dtype,
-        )
-        data_ = data.reshape(self.n_batchs, *self.shape)
-        for b in range(self.n_batchs):
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        NS, NZ = len(self.samples), len(self.z_index)
+
+        if ksp is None:
+            ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
+        ksp = ksp.reshape((B, C * NZ, NS))
+        data_ = data.reshape(B, *XYZ)
+        for b in range(B):
             data_c = data_[b] * self.smaps
             ksp_z = self._fftz(data_c)
-            ksp_z = ksp_z.reshape(self.n_coils, *self.shape)
-            for i, zidx in enumerate(self.z_index):
-                # TODO Both array slices yields non continuous views.
-                t = np.ascontiguousarray(ksp_z[..., zidx])
-                ksp[b, ..., i, :] = self.operator.op(t)
-        ksp = ksp.reshape(self.n_batchs, self.n_coils, self.n_samples)
+            ksp_z = ksp_z.reshape(C, *XYZ)
+            tmp = np.ascontiguousarray(ksp_z[..., self.z_index])
+            tmp = np.moveaxis(tmp, -1, 1)
+            tmp = tmp.reshape(C * NZ, *XYZ[:2])
+            ksp[b, ...] = self.operator.op(np.ascontiguousarray(tmp))
+        ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
     def _op_calibless(self, data, ksp=None):
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        NS, NZ = len(self.samples), len(self.z_index)
         if ksp is None:
-            ksp = np.empty(
-                (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
-                dtype=self.cpx_dtype,
-            )
-        data_ = data.reshape((self.n_batchs, self.n_coils, *self.shape))
+            ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
+        ksp = ksp.reshape((B, C * NZ, NS))
+        data_ = data.reshape(B, C, *XYZ)
         ksp_z = self._fftz(data_)
-        ksp_z = ksp_z.reshape((self.n_batchs, self.n_coils, *self.shape))
-        for b in range(self.n_batchs):
-            for i, zidx in enumerate(self.z_index):
-                t = np.ascontiguousarray(ksp_z[b, ..., zidx])
-                ksp[b, ..., i, :] = self.operator.op(t)
-        ksp = ksp.reshape(self.n_batchs, self.n_coils, self.n_samples)
+        ksp_z = ksp_z.reshape((B, C, *XYZ))
+        for b in range(B):
+            tmp = ksp_z[b][..., self.z_index]
+            tmp = np.moveaxis(tmp, -1, 1)
+            tmp = tmp.reshape(C * NZ, *XYZ[:2])
+            ksp[b, ...] = self.operator.op(np.ascontiguousarray(tmp))
+        ksp = ksp.reshape((B, C, NZ, NS))
+        ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
-        coeffs_ = np.reshape(
-            coeffs, (self.n_batchs, self.n_coils, len(self.samples), len(self.z_index))
-        )
         if self.uses_sense:
-            return self._safe_squeeze(self._adj_op_sense(coeffs_, img))
-        return self._safe_squeeze(self._adj_op_calibless(coeffs_, img))
+            return self._safe_squeeze(self._adj_op_sense(coeffs, img))
+        return self._safe_squeeze(self._adj_op_calibless(coeffs, img))
 
     def _adj_op_sense(self, coeffs, img):
-        imgz = np.zeros(
-            (self.n_batchs, self.n_coils, *self.shape), dtype=self.cpx_dtype
-        )
-        coeffs_ = coeffs.reshape(
-            (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
-        )
-        for b in range(self.n_batchs):
-            for i, zidx in enumerate(self.z_index):
-                # TODO Both array slices yields non continuous views.
-                t = np.ascontiguousarray(coeffs_[b, ..., i, :])
-                imgz[b, ..., zidx] = self.operator.adj_op(t)
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        NS, NZ = len(self.samples), len(self.z_index)
+
+        imgz = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        coeffs_ = coeffs.reshape((B, C * NZ, NS))
+        for b in range(B):
+            tmp = np.ascontiguousarray(coeffs_[b, ...])
+            tmp_adj = self.operator.adj_op(tmp)
+            # move the z axis back
+            tmp_adj = tmp_adj.reshape(C, NZ, *XYZ[:2])
+            tmp_adj = np.moveaxis(tmp_adj, 1, -1)
+            imgz[b][..., self.z_index] = tmp_adj
         imgc = self._ifftz(imgz)
-        img = img or np.empty((self.n_batchs, *self.shape), dtype=self.cpx_dtype)
-        for b in range(self.n_batchs):
+        img = img or np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        for b in range(B):
             img[b] = np.sum(imgc[b] * self.smaps.conj(), axis=0)
         return img
 
     def _adj_op_calibless(self, coeffs, img):
-        imgz = np.zeros(
-            (self.n_batchs, self.n_coils, *self.shape), dtype=self.cpx_dtype
-        )
-        coeffs_ = coeffs.reshape(
-            (self.n_batchs, self.n_coils, len(self.z_index), len(self.samples)),
-        )
-        for b in range(self.n_batchs):
-            for i, zidx in enumerate(self.z_index):
-                t = np.ascontiguousarray(coeffs_[b, ..., i, :])
-                imgz[b, ..., zidx] = self.operator.adj_op(t)
-        imgz = np.reshape(imgz, (self.n_batchs, self.n_coils, *self.shape))
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        NS, NZ = len(self.samples), len(self.z_index)
+
+        imgz = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        coeffs_ = coeffs.reshape((B, C, NZ, NS))
+        coeffs_ = coeffs.reshape((B, C * NZ, NS))
+        for b in range(B):
+            t = np.ascontiguousarray(coeffs_[b, ...])
+            adj = self.operator.adj_op(t)
+            # move the z axis back
+            adj = adj.reshape(C, NZ, *XYZ[:2])
+            adj = np.moveaxis(adj, 1, -1)
+            imgz[b][..., self.z_index] = np.ascontiguousarray(adj)
+        imgz = np.reshape(imgz, (B, C, *XYZ))
         img = self._ifftz(imgz)
         return img
 
