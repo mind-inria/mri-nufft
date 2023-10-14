@@ -56,6 +56,8 @@ autosummary_generate = True
 autodoc_inherit_docstrings = True
 
 napoleon_include_private_with_doc = True
+napolon_numpy_docstring = True
+napoleon_use_admonition_for_references = True
 
 # -- Options for Sphinx Gallery ----------------------------------------------
 
@@ -85,6 +87,10 @@ html_static_path = ["_static"]
 html_theme_options = {
     "repository_url": "https://github.com/mind-inria/mri-nufft/",
     "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+    "use_download_button": True,
+    "home_page_in_toc": True,
 }
 
 html_logo = "_static/logos/mri-nufft.png"
