@@ -75,4 +75,4 @@ MRI-nufft is available on Pypi and can be installed with::
 
   pip install mri-nufft
 
-You will also need to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend` for more guidance.
+You will also need to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend`_ for more guidance.
