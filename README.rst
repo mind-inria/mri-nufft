@@ -107,7 +107,7 @@ Install the required backend (e.g. `pip install finufft`) you want to use.
 
 Then clone and install the package::
 
-    git clone https://github.com:mind-inria/mri-nufft
+    git clone https://github.com/mind-inria/mri-nufft
     pip install ./mri-nufft
 
 [Temporary] Custom Cufinufft installation
