@@ -31,5 +31,8 @@
    :hidden:
    :caption: Miscellanneous
 
-   misc
-   related
+   misc/contributors
+   misc/code_of_conduct
+   misc/license
+   misc/development
+   misc/related
