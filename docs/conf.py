@@ -88,4 +88,5 @@ html_theme_options = {
 }
 
 html_logo = "_static/logos/mri-nufft.png"
+html_favicon = "_static/logos/mri-nufft-icon.png"
 html_title = "MRI-nufft Documentation"
