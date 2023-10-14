@@ -116,22 +116,6 @@ class FourierOperatorBase(ABC):
     Every (Linear) Fourier operator inherits from this class,
     to ensure that we have all the functions rightly implemented
     as required by ModOpt.
-
-    Attributes
-    ----------
-    shape: tuple
-        The shape of the image space (in 2D or 3D)
-    n_coils: int
-        The number of coils.
-    uses_sense: bool
-        True if the operator uses sensibility maps.
-
-    Methods
-    -------
-    op(data)
-        The forward operation (image -> kspace)
-    adj_op(coeffs)
-        The adjoint operation (kspace -> image)
     """
 
     interfaces = {}

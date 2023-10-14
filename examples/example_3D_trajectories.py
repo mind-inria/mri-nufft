@@ -218,7 +218,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 # %%
 # Wave-CAIPI
-# --------
+# ----------
 #
 # A pattern introduced in [Bil+15]_ composed of helices evolving
 # in the same direction and packed together,

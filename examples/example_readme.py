@@ -56,7 +56,7 @@ plt.show()
 
 # %%
 # .. note::
-# This image is not the same as the original one because the NUFFT operator
-# is not a perfect adjoint, and we undersampled by a factor of 5.
-# The artefact of reconstruction can be remove by using an iterative reconstruction method.
-# Check PySAP-mri documentation for examples.
+#    This image is not the same as the original one because the NUFFT operator
+#    is not a perfect adjoint, and we undersampled by a factor of 5.
+#    The artefact of reconstruction can be remove by using an iterative reconstruction method.
+#    Check PySAP-mri documentation for examples.

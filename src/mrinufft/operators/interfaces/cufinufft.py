@@ -495,9 +495,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         """Perform sense reconstruction when data is on host.
 
         On device the following array are involved:
-        - coil_img(S, T, 1, *XYZ)
-        - ksp_batch(B, 1, *XYZ)
-        - smaps_batched(S, T, *XYZ)
+        - coil_img(S, T, 1, X,Y,Z)
+        - ksp_batch(B, 1, X,Y,Z)
+        - smaps_batched(S, T, X,Y,Z)
         - density_batched(T, K)
 
         """
