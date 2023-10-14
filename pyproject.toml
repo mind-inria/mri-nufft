@@ -15,7 +15,7 @@ gpu = ["cupy-wheel"]
 test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases", "pynfft2"]
 dev = ["black", "isort", "ruff"]
 
-doc = ["sphinx-book-theme", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
+doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
 # pooch is for scipy.datasets
 
 [build-system]
