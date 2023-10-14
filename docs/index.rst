@@ -7,12 +7,14 @@
 
 
 .. toctree::
+   :hidden:
    :caption: User Guides
 
    getting_started
    auto_examples/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Explanations
 
@@ -20,6 +22,14 @@
    trajectory_gradspec
 
 .. toctree::
+   :hidden:
    :caption: API References
 
    api
+
+.. toctree::
+   :hidden:
+   :caption: Miscellanneous
+
+   misc
+   related
