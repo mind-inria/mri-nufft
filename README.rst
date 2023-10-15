@@ -21,7 +21,7 @@ Doing non-Cartesian MR Imaging has never been so easy.
 
 This python package extends various NUFFT (Non-Uniform Fast Fourier Transform) python bindings used for MRI reconstruction.
 
-In particular, it provides a unified interface for all the methods, with extra features such as coil sensitivity, density compensated adjoint and off-resonance corrections (for B0 inhomogeneities).
+In particular, it provides a unified interface for all the methods, with extra features such as coil sensitivity, density compensated adjoint and off-resonance corrections (for static B0 inhomogeneities).
 
 
 Usage
