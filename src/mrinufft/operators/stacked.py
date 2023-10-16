@@ -57,8 +57,25 @@ class MRIStackedNUFFT(FourierOperatorBase):
         **kwargs,
     ):
         super().__init__()
-
+        samples2d, z_index_ = self._init_samples(samples, z_index, shape)
         self.shape = shape
+        self.samples = samples2d.reshape(-1, 2)
+        self.z_index = z_index_
+        self.n_coils = n_coils
+        self.n_batchs = n_batchs
+        self.squeeze_dims = squeeze_dims
+        self.smaps = smaps
+        self.operator = get_operator(backend)(
+            self.samples,
+            shape[:-1],
+            n_coils=self.n_coils * len(self.z_index),
+            smaps=None,
+            squeeze_dims=True,
+            **kwargs,
+        )
+
+    @staticmethod
+    def _init_samples(samples, z_index, shape):
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
         if samples_dim == len(shape) and auto_z:
@@ -80,21 +97,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 ) from e
         else:
             raise ValueError("Invalid samples or z-index")
-
-        self.samples = samples2d.reshape(-1, 2)
-        self.z_index = z_index_
-        self.n_coils = n_coils
-        self.n_batchs = n_batchs
-        self.squeeze_dims = squeeze_dims
-        self.smaps = smaps
-        self.operator = get_operator(backend)(
-            self.samples,
-            shape[:-1],
-            n_coils=self.n_coils * len(self.z_index),
-            smaps=None,
-            squeeze_dims=True,
-            **kwargs,
-        )
+        return samples2d, z_index_
 
     @property
     def dtype(self):
