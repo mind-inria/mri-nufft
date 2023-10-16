@@ -370,9 +370,9 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
 
         if ksp is None:
-            ksp = np.empty((B, C, NZ * NS), dtype=self.cpx_dtype)
-        ksp = ksp.reshape((B * C, NZ * NS))
-        ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
+            ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
+        ksp = ksp.reshape((B * C, NZ, NS))
+        ksp_batched = cp.empty((T, NZ, NS), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -393,7 +393,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             # After reordering, apply 2D NUFFT
             ksp_batched = self.operator._op_calibless_device(cp.ascontiguousarray(tmp))
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
-        ksp = ksp.reshape((B, C, NZ * NS))
         ksp = ksp.reshape((B, C, NZ, NS))
         return ksp
 
