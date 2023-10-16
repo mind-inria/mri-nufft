@@ -385,7 +385,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 cp.copyto(coil_img_d, self.smaps[idx_coils])
             coil_img_d *= data_batched
             # FFT along Z axis (last)
-            coil_img_d = self.fftz(coil_img_d)
+            coil_img_d = self._fftz(coil_img_d)
             coil_img_d = coil_img_d.reshape((T, *XYZ))
             tmp = coil_img_d[..., self.z_index]
             tmp = cp.moveaxis(tmp, -1, 1)
@@ -414,7 +414,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
         for i in range((B * C) // T):
             coil_img_d.set(dataf[i * T : (i + 1) * T])
-            coil_img_d = self.fftz(coil_img_d)
+            coil_img_d = self._fftz(coil_img_d)
             coil_img_d = coil_img_d.reshape((T, *XYZ))
             tmp = coil_img_d[..., self.z_index]
             tmp = cp.moveaxis(tmp, -1, 1)
@@ -472,7 +472,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
             coil_img_d = cp.zeros_like(coil_img_d)
             coil_img_d[..., self.z_index] = tmp_adj
-            coil_img_d = self.ifftz(coil_img_d)
+            coil_img_d = self._ifftz(coil_img_d)
 
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
@@ -500,7 +500,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
             coil_img_d = cp.zeros_like(coil_img_d)
             coil_img_d[..., self.z_index] = tmp_adj
-            coil_img_d = self.ifftz(coil_img_d)
+            coil_img_d = self._ifftz(coil_img_d)
             img[i * T : (i + 1) * T] = coil_img_d.get()
         img = img.reshape(B, C, *XYZ)
         return img
