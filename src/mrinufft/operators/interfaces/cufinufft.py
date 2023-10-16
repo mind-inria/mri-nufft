@@ -562,7 +562,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.uses_density:
             density_batched = cp.repeat(self.density[None, :], T, axis=0).flatten()
 
-        img = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
         if img_batched is None:
             img_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         # TODO: Add concurrency compute batch n while copying batch n+1 to device
