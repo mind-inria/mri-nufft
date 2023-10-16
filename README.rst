@@ -28,7 +28,7 @@ Usage
 =====
 
 .. TODO use a include file directive.
-.. code:: python
+.. code-block:: python
 
       from scipy.datasets import face # For demo
       import numpy as np
