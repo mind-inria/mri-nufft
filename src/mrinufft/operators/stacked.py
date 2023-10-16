@@ -273,11 +273,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         n_trans=1,
         squeeze_dims=False,
         smaps_cached=False,
-        cufi_kwargs=None,
+        density=False,
+        **kwargs,
     ):
         if not (CUPY_AVAILABLE and check_backend("cufinufft")):
             raise RuntimeError("Cupy and cufinufft are required for this backend.")
-        super().__init__()
 
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
@@ -318,9 +318,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             self.samples,
             shape[:-1],
             n_coils=n_trans * len(self.z_index),
+            n_trans=len(self.z_index),
             smaps=None,
             squeeze_dims=True,
-            **cufi_kwargs,
+            density=density,
+            **kwargs,
         )
 
     @staticmethod
