@@ -16,7 +16,6 @@ try:
         is_host_array,
         pin_memory,
         sizeof_fmt,
-        get_ptr,
     )
 except ImportError:
     CUPY_AVAILABLE = False
@@ -331,6 +330,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     @property
     def norm_factor(self):
+        """Norm factor of the operator."""
         return self.operator.norm_factor * np.sqrt(2)
 
     @staticmethod
@@ -506,17 +506,13 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     def _adj_op_calibless_host(self, coeffs, img=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
-        print(B, C, T, XYZ, NS, NZ)
-        print("coeffs", coeffs.shape)
         coeffs_f = coeffs.reshape(B, C, NZ * NS)
         coeffs_f = coeffs_f.reshape(B * C, NZ * NS)
-        print("coeffs_f", coeffs_f.shape)
         # Allocate Memory
         ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
         img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
-            print(i)
             ksp_batched = ksp_batched.reshape(T, NZ * NS)
             ksp_batched.set(coeffs_f[i * T : (i + 1) * T])
             ksp_batched = ksp_batched.reshape(T, NZ, NS)
@@ -524,14 +520,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
             tmp_adj /= self.norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
-            print(tmp_adj.shape)
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
-            print(tmp_adj.shape)
             coil_img_d[:] = 0j
             coil_img_d[..., self.z_index] = tmp_adj
             coil_img_d = self._ifftz(coil_img_d)
             img[i * T : (i + 1) * T, ...] = coil_img_d.get()
-            print(img[i * T : (i + 1) * T, ...].shape)
         img = img.reshape(B, C, *XYZ)
         return img
 
