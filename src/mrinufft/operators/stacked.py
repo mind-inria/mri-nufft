@@ -290,6 +290,18 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+
+        self.operator = get_operator("cufinufft")(
+            self.samples,
+            shape[:-1],
+            n_coils=n_trans * len(self.z_index),
+            n_trans=len(self.z_index),
+            smaps=None,
+            squeeze_dims=True,
+            density=density,
+            **kwargs,
+        )
+
         # Smaps support
         self.smaps = smaps
         self.smaps_cached = False
@@ -311,19 +323,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             else:
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-
-        if cufi_kwargs is None:
-            cufi_kwargs = {}
-        self.operator = get_operator("cufinufft")(
-            self.samples,
-            shape[:-1],
-            n_coils=n_trans * len(self.z_index),
-            n_trans=len(self.z_index),
-            smaps=None,
-            squeeze_dims=True,
-            density=density,
-            **kwargs,
-        )
 
     @staticmethod
     def _fftz(data):
