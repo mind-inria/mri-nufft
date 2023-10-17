@@ -10,9 +10,6 @@ from enum import Enum
 
 KMAX = 0.5
 
-DEFAULT_CONE_ANGLE = np.pi / 2  # rad
-DEFAULT_HELIX_ANGLE = np.pi  # rad
-
 DEFAULT_RESOLUTION = 6e-4  # m, i.e. 0.6 mm isotropic
 DEFAULT_RASTER_TIME = 10e-3  # ms
 
@@ -544,7 +541,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     """
     if not isinstance(tilt, str):
         return tilt
-    elif tilt == "none":
+    elif tilt is None or tilt == "none":
         return 0
     elif tilt == "uniform":
         return 2 * np.pi / nb_partitions
