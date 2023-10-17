@@ -4,19 +4,19 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from .base import FourierOperatorBase, proper_trajectory, check_backend
-from . import get_operator
+from .base import FourierOperatorBase, check_backend, get_operator, proper_trajectory
+from .interfaces.utils import (
+    is_cuda_array,
+    is_host_array,
+    pin_memory,
+    sizeof_fmt,
+)
 
 CUPY_AVAILABLE = True
 try:
     import cupy as cp
     from cupyx.scipy import fft as cpfft
-    from .interfaces.utils import (
-        is_cuda_array,
-        is_host_array,
-        pin_memory,
-        sizeof_fmt,
-    )
+
 except ImportError:
     CUPY_AVAILABLE = False
 
