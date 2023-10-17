@@ -11,7 +11,7 @@
    :caption: User Guides
 
    getting_started
-   auto_examples/index
+   generated/auto_examples/index
 
 .. toctree::
    :hidden:

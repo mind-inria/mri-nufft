@@ -1,5 +1,5 @@
 .. autosummary::
-   :toctree: _autosummary
+   :toctree: generated/_autosummary
    :recursive:
 
     mrinufft.operators

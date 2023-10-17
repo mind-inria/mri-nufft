@@ -60,18 +60,30 @@ napoleon_include_private_with_doc = True
 napolon_numpy_docstring = True
 napoleon_use_admonition_for_references = True
 
+
+pygments_style = "sphinx"
+highlight_language = "python"
+
 # -- Options for Sphinx Gallery ----------------------------------------------
 
 sphinx_gallery_conf = {
+    "doc_module": "mrinufft",
+    "backreferences_dir": "generated/gallery_backreferences",
+    "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
+    "gallery_dirs": ["generated/auto_examples"],
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest)\.py",
-    "reference_url": {
-        "numpy": "http://docs.scipy.org/doc/numpy-1.9.1",
-        "scipy": "http://docs.scipy.org/doc/scipy-0.17.0/reference",
-    },
+    "nested_sections": True,
 }
 
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "cupy": ("https://docs.cupy.dev/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 

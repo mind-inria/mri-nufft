@@ -15,8 +15,7 @@ tmp/
 *.py[cod]
 *.egg
 
-docs/_autosummary
-docs/auto_examples/
+docs/generated/
 docs_build/
 
 src/mrinufft/_version.py
