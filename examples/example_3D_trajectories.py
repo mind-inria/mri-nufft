@@ -281,7 +281,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # The available methods are ``"triangular"`` and ``"square"`` for regular tiling
 # over dense grids, and ``"circular"`` and ``"random"`` for irregular packing.
 # Different aliases are available, such as ``"triangle"``, ``"hexagon"`` instead
-# of ``"triangular``".
+# of ``"triangular"``.
 #
 # Note that ``"triangular"`` packing has slightly overlapping helices,
 # as it corresponds to a triangular/hexagonal grid.

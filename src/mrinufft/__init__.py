@@ -22,7 +22,6 @@ from .trajectories import (
     initialize_2D_polar_lissajous,
     initialize_2D_lissajous,
     initialize_2D_waves,
-    initialize_3D_from_2D_expansion,
     initialize_3D_cones,
     initialize_3D_wave_caipi,
     initialize_3D_seiffert_spiral,
