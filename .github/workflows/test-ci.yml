@@ -119,6 +119,7 @@ jobs:
           cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
           # enter venv
           source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install cupy-cuda11x
           cd $RUNNER_WORKSPACE/finufft/python/cufinufft
           python setup.py develop
           # FIXME: This is hardcoded
