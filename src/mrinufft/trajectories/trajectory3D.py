@@ -6,7 +6,8 @@ from functools import partial
 from scipy.special import ellipj, ellipk
 
 from .tools import precess, conify, duplicate_along_axes
-from .utils import Ry, Rz, Rv, initialize_tilt, initialize_shape_norm, KMAX
+from .trajectory2D import initialize_2D_spiral
+from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX
 
 
 ############################
@@ -58,8 +59,18 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     return trajectory
 
 
-def initialize_3D_floret(Nc, Ns, nb_revolutions=1, nb_cones=None, spiral_tilt="uniform", cone_tilt="golden",
-                         in_out=False, spiral="fermat", max_angle=np.pi / 4, axes=(0, 1, 2)):
+def initialize_3D_floret(
+    Nc,
+    Ns,
+    nb_revolutions=1,
+    nb_cones=None,
+    spiral_tilt="uniform",
+    cone_tilt="golden",
+    in_out=False,
+    spiral="fermat",
+    max_angle=np.pi / 4,
+    axes=(0, 1, 2),
+):
     # Define variables for convenience
     nb_cones = Nc if (nb_cones is None) else nb_cones
     Nd = len(axes)
@@ -67,17 +78,29 @@ def initialize_3D_floret(Nc, Ns, nb_revolutions=1, nb_cones=None, spiral_tilt="u
     nb_cones_per_axis = nb_cones // Nd
 
     # Check argument errors
-    if (Nc % nb_cones != 0):
+    if Nc % nb_cones != 0:
         raise ValueError("Nc should be divisible by nb_cones.")
-    if (nb_cones % Nd != 0):
+    if nb_cones % Nd != 0:
         raise ValueError("nb_cones should be divisible by len(axes).")
 
     # Initialize first spiral
-    spiral = initialize_2D_spiral(Nc=Nc_per_spiral, Ns=Ns, spiral=spiral, in_out=in_out,
-                                  tilt=spiral_tilt, nb_revolutions=nb_revolutions)
+    spiral = initialize_2D_spiral(
+        Nc=Nc_per_spiral,
+        Ns=Ns,
+        spiral=spiral,
+        in_out=in_out,
+        tilt=spiral_tilt,
+        nb_revolutions=nb_revolutions,
+    )
 
     # Initialize first cone
-    cone = conify(spiral, nb_repetitions=nb_cones_per_axis, z_tilt=cone_tilt, in_out=in_out, max_angle=max_angle)
+    cone = conify(
+        spiral,
+        nb_repetitions=nb_cones_per_axis,
+        z_tilt=cone_tilt,
+        in_out=in_out,
+        max_angle=max_angle,
+    )
 
     # Duplicate cone along axes
     trajectory = duplicate_along_axes(cone, axes=axes)
@@ -251,11 +274,11 @@ def initialize_3D_seiffert_spiral(
     """
     # Normalize ellipses integrations by the requested period
     spiral = np.zeros((1, Ns // (1 + in_out), 3))
-    period = 4 * ellipk(curve_index ** 2)
+    period = 4 * ellipk(curve_index**2)
     times = np.linspace(0, nb_revolutions * period, Ns // (1 + in_out), endpoint=False)
 
     # Initialize first shot
-    jacobi = ellipj(times, curve_index ** 2)
+    jacobi = ellipj(times, curve_index**2)
     spiral[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
     spiral[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
     spiral[0, :, 2] = jacobi[1]
@@ -268,7 +291,7 @@ def initialize_3D_seiffert_spiral(
     trajectory = precess(spiral, nb_repetitions=Nc, z_tilt=tilt, mode="polar")
 
     # Handle in_out case
-    if (in_out):
+    if in_out:
         first_half_traj = np.copy(trajectory)
         first_half_traj = -first_half_traj[:, ::-1]
         trajectory = np.concatenate([first_half_traj, trajectory], axis=1)

@@ -1,6 +1,5 @@
 """Functions to manipulate trajectories."""
 import numpy as np
-import numpy.linalg as nl
 
 from .utils import (
     KMAX,
@@ -15,17 +14,18 @@ from .utils import (
 # IMPERATIVE TOOLS #
 ####################
 
+
 def stack(trajectory, nb_repetitions, z_tilt="intergaps", hard_bounded=True):
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
-    if (trajectory.shape[-1] == 2):
+    if trajectory.shape[-1] == 2:
         trajectory = np.concatenate([trajectory, np.zeros((Nc, Ns, 1))], axis=-1)
     trajectory = trajectory.reshape((Nc * Ns, 3))
     new_trajectory = np.zeros((nb_repetitions, Nc * Ns, 3))
 
     # Initialize z-axis with boundaries, and z-rotation
     ub, lb = KMAX / nb_repetitions, -KMAX / nb_repetitions
-    if (hard_bounded):
+    if hard_bounded:
         ub = max(np.max(trajectory[..., 2]), ub)
         lb = min(np.min(trajectory[..., 2]), lb)
     z_axis = np.linspace(-KMAX - lb, KMAX - ub, nb_repetitions)
@@ -44,7 +44,7 @@ def stack(trajectory, nb_repetitions, z_tilt="intergaps", hard_bounded=True):
 def rotate(trajectory, nb_repetitions, x_tilt=0, y_tilt=0, z_tilt=0):
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
-    if (trajectory.shape[-1] == 2):
+    if trajectory.shape[-1] == 2:
         trajectory = np.concatenate([trajectory, np.zeros((Nc, Ns, 1))], axis=-1)
     trajectory = trajectory.reshape((Nc * Ns, 3))
     new_trajectory = np.zeros((nb_repetitions, Nc * Ns, 3))
@@ -61,14 +61,16 @@ def rotate(trajectory, nb_repetitions, x_tilt=0, y_tilt=0, z_tilt=0):
     return new_trajectory.reshape(nb_repetitions * Nc, Ns, 3)
 
 
-def precess(trajectory, nb_repetitions, z_tilt="golden", mode="polar", half_sphere=False):
+def precess(
+    trajectory, nb_repetitions, z_tilt="golden", mode="polar", half_sphere=False
+):
     # Check for requested mode
-    if (mode.lower() not in ["axial", "polar"]):
-        raise NotImplementedError("Unknown mode name: `{}`.".format(mode))
+    if mode.lower() not in ["axial", "polar"]:
+        raise ValueError(f"Unknown mode name: `{mode}`.")
 
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
-    if (trajectory.shape[-1] == 2):
+    if trajectory.shape[-1] == 2:
         trajectory = np.concatenate([trajectory, np.zeros((Nc, Ns, 1))], axis=-1)
     trajectory = trajectory.reshape((Nc * Ns, 3))
     new_trajectory = np.zeros((nb_repetitions, Nc * Ns, 3))
@@ -76,10 +78,12 @@ def precess(trajectory, nb_repetitions, z_tilt="golden", mode="polar", half_sphe
     # Determine direction vectors on a sphere
     vectors = np.zeros((nb_repetitions, 3))
     phi = initialize_tilt(z_tilt, nb_repetitions) * np.arange(nb_repetitions)
-    if (mode.lower() == "axial"):
+    if mode.lower() == "axial":
         vectors[:, 2] = np.linspace(-1 + half_sphere, 1, nb_repetitions)
     else:
-        vectors[:, 2] = np.sin(np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_repetitions))
+        vectors[:, 2] = np.sin(
+            np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_repetitions)
+        )
     radius = np.sqrt(1 - vectors[:, 2] ** 2)
     vectors[:, 0] = np.cos(phi) * radius
     vectors[:, 1] = np.sin(phi) * radius
@@ -92,38 +96,54 @@ def precess(trajectory, nb_repetitions, z_tilt="golden", mode="polar", half_sphe
     return new_trajectory.reshape((nb_repetitions * Nc, Ns, 3))
 
 
-def conify(trajectory, nb_repetitions, z_tilt="intergaps", in_out=False, max_angle=np.pi / 2):
+def conify(
+    trajectory, nb_repetitions, z_tilt="intergaps", in_out=False, max_angle=np.pi / 2
+):
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
-    if (trajectory.shape[-1] == 2):
+    if trajectory.shape[-1] == 2:
         trajectory = np.concatenate([trajectory, np.zeros((Nc, Ns, 1))], axis=-1)
     trajectory = trajectory.reshape((Nc * Ns, 3))
     new_trajectory = np.zeros((nb_repetitions, Nc * Ns, 3))
 
     # Initialize angles
     z_tilt = initialize_tilt(z_tilt, nb_repetitions)
-    alphas = np.linspace(-max_angle, +max_angle, nb_repetitions + 2)[1:-1]  # Borderless partition
+    alphas = np.linspace(-max_angle, +max_angle, nb_repetitions + 2)[
+        1:-1
+    ]  # Borderless partition
 
     # Start processing the trajectory
     new_trajectory[:] = trajectory
     for i, alpha in enumerate(alphas):
         # Apply tilt
-        rotation = Rz(np.abs((i - nb_repetitions // 2)) * z_tilt).T  # Symmetrical for in-out
+        rotation = Rz(
+            np.abs(i - nb_repetitions // 2) * z_tilt
+        ).T  # Symmetrical for in-out
         new_trajectory[i] = new_trajectory[i] @ rotation
 
         # Convert to spherical coordinates
         norms = np.linalg.norm(new_trajectory[i], axis=-1)
-        polar_angles = np.arccos(new_trajectory[i, ..., 2] / np.where(norms == 0, 1, norms))
+        polar_angles = np.arccos(
+            new_trajectory[i, ..., 2] / np.where(norms == 0, 1, norms)
+        )
 
         # Conify by changing polar angle
-        new_trajectory[i, :, 0] = new_trajectory[i, :, 0] / np.sin(polar_angles) * np.sin(polar_angles + alpha)
-        new_trajectory[i, :, 1] = new_trajectory[i, :, 1] / np.sin(polar_angles) * np.sin(polar_angles + alpha)
+        new_trajectory[i, :, 0] = (
+            new_trajectory[i, :, 0]
+            / np.sin(polar_angles)
+            * np.sin(polar_angles + alpha)
+        )
+        new_trajectory[i, :, 1] = (
+            new_trajectory[i, :, 1]
+            / np.sin(polar_angles)
+            * np.sin(polar_angles + alpha)
+        )
         new_trajectory[i, :, 2] = norms * np.cos(polar_angles + alpha)
     new_trajectory = new_trajectory.reshape(nb_repetitions * Nc, Ns, 3)
 
     # Handle in-out trajectories to avoid hard transition at the center
     if in_out:
-        new_trajectory[:, Ns // 2:, 2] = -new_trajectory[:, Ns // 2:, 2]
+        new_trajectory[:, Ns // 2 :, 2] = -new_trajectory[:, Ns // 2 :, 2]
 
     return new_trajectory
 
@@ -132,28 +152,32 @@ def conify(trajectory, nb_repetitions, z_tilt="intergaps", in_out=False, max_ang
 # FUNCTIONAL TOOLS #
 ####################
 
-def stack_spherically(trajectory_func, Nc, nb_stacks, z_tilt="golden", hard_bounded=True, **traj_kwargs):
+
+def stack_spherically(
+    trajectory_func, Nc, nb_stacks, z_tilt="golden", hard_bounded=True, **traj_kwargs
+):
     # Handle argument errors
     if Nc < nb_stacks:
         raise ValueError("Nc should be higher than nb_stacks.")
 
     # Initialize a plane to estimate potential thickness
     trajectory = trajectory_func(Nc=Nc // nb_stacks, **traj_kwargs)
-    if (trajectory.shape[-1] == 2):
-        trajectory = np.concatenate([trajectory, np.zeros((*(trajectory.shape[:2]), 1))], axis=-1)
+    if trajectory.shape[-1] == 2:
+        trajectory = np.concatenate(
+            [trajectory, np.zeros((*(trajectory.shape[:2]), 1))], axis=-1
+        )
 
     # Initialize z-axis with boundaries, and z-rotation
     ub, lb = KMAX / nb_stacks, -KMAX / nb_stacks
-    if (hard_bounded):
+    if hard_bounded:
         ub = max(np.max(trajectory[..., 2]), ub)
         lb = min(np.min(trajectory[..., 2]), lb)
     z_axis = np.linspace(-KMAX - lb, KMAX - ub, nb_stacks)
-    z_rotation = Rz(initialize_tilt(z_tilt, nb_stacks)).T
     radii = np.cos(np.arcsin(z_axis / KMAX))
 
     # Attribute shots to stacks following density proportional to surface
     Nc_per_stack = np.ones(nb_stacks).astype(int)
-    density = radii ** 2  # simplified version
+    density = radii**2  # simplified version
     for _ in range(Nc - nb_stacks):
         idx = np.argmax(density / Nc_per_stack)
         Nc_per_stack[idx] += 1
@@ -163,13 +187,13 @@ def stack_spherically(trajectory_func, Nc, nb_stacks, z_tilt="golden", hard_boun
     for i in range(nb_stacks):
         # Initialize a single stack
         stack = trajectory_func(Nc=Nc_per_stack[i], **traj_kwargs)
-        if (stack.shape[-1] == 2):
+        if stack.shape[-1] == 2:
             stack = np.concatenate([stack, np.zeros((*(stack.shape[:2]), 1))], axis=-1)
         stack[..., :2] = radii[i] * stack[..., :2]
         stack[..., 2] = z_axis[i] + stack[..., 2]
 
         # Apply z tilt
-        rotation = Rz(i * initialize_tilt(z_tilt, nb_stacks))
+        rotation = Rz(i * initialize_tilt(z_tilt, nb_stacks)).T
         stack = stack @ rotation
         new_trajectory.append(stack)
 
@@ -179,16 +203,24 @@ def stack_spherically(trajectory_func, Nc, nb_stacks, z_tilt="golden", hard_boun
         new_trajectory = np.concatenate(new_trajectory, axis=0)
         new_trajectory = new_trajectory.reshape(Nc, Ns_values[0], 3)
     else:
-        new_trajectory = np.concatenate([stk.reshape((-1, 3))
-                                         for stk in new_trajectory], axis=0)
+        new_trajectory = np.concatenate(
+            [stk.reshape((-1, 3)) for stk in new_trajectory], axis=0
+        )
 
     return new_trajectory
 
 
-def shellify(trajectory_func, Nc, nb_shells, shell_tilt="golden", hemisphere_mode="symmetric", **traj_kwargs):
+def shellify(
+    trajectory_func,
+    Nc,
+    nb_shells,
+    shell_tilt="golden",
+    hemisphere_mode="symmetric",
+    **traj_kwargs,
+):
     # Handle argument errors
     if hemisphere_mode not in ["symmetric", "reversed"]:
-        raise ValueError("Unknown hemisphere_mode: `{}`.".format(hemisphere_mode))
+        raise ValueError(f"Unknown hemisphere_mode: `{hemisphere_mode}`.")
     if Nc < 2 * nb_shells:
         raise ValueError("Nc should be at least twice higher than nb_shells.")
 
@@ -205,10 +237,12 @@ def shellify(trajectory_func, Nc, nb_shells, shell_tilt="golden", hemisphere_mod
     for i in range(nb_shells):
         # Initialize northern hemisphere
         shell_north = trajectory_func(Nc=Nc_per_shell[i], **traj_kwargs)
-        z_coords = KMAX ** 2 - shell_north[..., 0] ** 2 - shell_north[..., 1] ** 2
+        z_coords = KMAX**2 - shell_north[..., 0] ** 2 - shell_north[..., 1] ** 2
         z_signs = np.sign(z_coords)
-        if (shell_north.shape[-1] < 3):
-            shell_north = np.concatenate([shell_north, np.zeros((*(shell_north.shape[:-1]), 1))], axis=-1)
+        if shell_north.shape[-1] < 3:
+            shell_north = np.concatenate(
+                [shell_north, np.zeros((*(shell_north.shape[:-1]), 1))], axis=-1
+            )
         shell_north[..., 2] += z_signs * np.sqrt(np.abs(z_coords))
 
         # Initialize southern hemisphere from northern
@@ -219,7 +253,7 @@ def shellify(trajectory_func, Nc, nb_shells, shell_tilt="golden", hemisphere_mod
             shell_south[..., 1] = -shell_south[..., :, 1]  # Inverse azimuthal angle
 
         # Apply shell tilt
-        rotation = Rz(i * initialize_tilt(shell_tilt, nb_shells))
+        rotation = Rz(i * initialize_tilt(shell_tilt, nb_shells)).T
         shell_north = shell_north @ rotation
         shell_south = shell_south @ rotation
 
@@ -233,8 +267,9 @@ def shellify(trajectory_func, Nc, nb_shells, shell_tilt="golden", hemisphere_mod
         new_trajectory = np.concatenate(new_trajectory, axis=0)
         new_trajectory = new_trajectory.reshape(Nc, Ns_values[0], 3)
     else:
-        new_trajectory = np.concatenate([hem.reshape((-1, 3))
-                                         for hem in new_trajectory], axis=0)
+        new_trajectory = np.concatenate(
+            [hem.reshape((-1, 3)) for hem in new_trajectory], axis=0
+        )
 
     return new_trajectory
 
@@ -242,6 +277,7 @@ def shellify(trajectory_func, Nc, nb_shells, shell_tilt="golden", hemisphere_mod
 #########
 # UTILS #
 #########
+
 
 def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
     """
