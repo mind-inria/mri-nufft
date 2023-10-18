@@ -5,7 +5,7 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .tools import conify, duplicate_along_axes
+from .tools import precess, conify, duplicate_along_axes
 from .utils import Ry, Rz, Rv, initialize_tilt, initialize_shape_norm, KMAX
 
 
@@ -38,35 +38,24 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     array_like
         3D cones trajectory
     """
-    # Initialize first cone characteristics
+    # Initialize first cone
     radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
     angles = np.linspace(
         -2 * np.pi * nb_zigzags if (in_out) else 0, 2 * np.pi * nb_zigzags, Ns
     )
-    trajectory = np.zeros((Nc, Ns, 3))
-    trajectory[:, :, 0] = radius
-    trajectory[:, :, 1] = (
+    cone = np.zeros((1, Ns, 3))
+    cone[:, :, 0] = radius
+    cone[:, :, 1] = (
         radius * np.cos(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
-    trajectory[:, :, 2] = (
+    cone[:, :, 2] = (
         radius * np.sin(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
 
-    # Determine mostly evenly distributed points on sphere
-    points = np.zeros((Nc, 3))
-    phi = initialize_tilt(tilt) * np.arange(Nc) / (1 + in_out)
-    points[:, 0] = np.linspace(-1, 1, Nc)
-    radius = np.sqrt(1 - points[:, 0] ** 2)
-    points[:, 1] = np.cos(phi) * radius
-    points[:, 2] = np.sin(phi) * radius
+    # Apply precession to the first cone
+    trajectory = precess(cone, nb_repetitions=Nc, z_tilt=tilt, mode="polar")
 
-    # Rotate initial cone Nc times
-    for i in np.arange(1, Nc)[::-1]:
-        v1 = np.array((1, 0, 0))
-        v2 = points[i]
-        rotation = Rv(v1, v2, normalize=False)
-        trajectory[i] = (rotation @ trajectory[0].T).T
-    return trajectory.reshape((Nc, Ns, 3))
+    return trajectory
 
 
 def initialize_3D_floret(Nc, Ns, nb_revolutions=1, nb_cones=None, spiral_tilt="uniform", cone_tilt="golden",
@@ -261,37 +250,25 @@ def initialize_3D_seiffert_spiral(
 
     """
     # Normalize ellipses integrations by the requested period
-    trajectory = np.zeros((Nc, Ns // (1 + in_out), 3))
-    period = 4 * ellipk(curve_index**2)
+    spiral = np.zeros((1, Ns // (1 + in_out), 3))
+    period = 4 * ellipk(curve_index ** 2)
     times = np.linspace(0, nb_revolutions * period, Ns // (1 + in_out), endpoint=False)
 
     # Initialize first shot
-    jacobi = ellipj(times, curve_index**2)
-    trajectory[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
-    trajectory[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
-    trajectory[0, :, 2] = jacobi[1]
+    jacobi = ellipj(times, curve_index ** 2)
+    spiral[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
+    spiral[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
+    spiral[0, :, 2] = jacobi[1]
 
     # Make it volumetric instead of just a sphere surface
     magnitudes = np.sqrt(np.linspace(0, 1, Ns // (1 + in_out)))
-    trajectory = magnitudes.reshape((1, -1, 1)) * trajectory
+    spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
-    # Determine mostly evenly distributed points on sphere
-    points = np.zeros((Nc, 3))
-    phi = initialize_tilt(tilt) * np.arange(Nc)
-    points[:, 0] = np.linspace(-1, 1, Nc)
-    radius = np.sqrt(1 - points[:, 0] ** 2)
-    points[:, 1] = np.cos(phi) * radius
-    points[:, 2] = np.sin(phi) * radius
-
-    # Rotate initial shot Nc times
-    for i in np.arange(1, Nc)[::-1]:
-        v1 = np.array((1, 0, 0))
-        v2 = points[i]
-        rotation = Rv(v1, v2, normalize=False)
-        trajectory[i] = (rotation @ trajectory[0].T).T
+    # Apply precession to the first spiral
+    trajectory = precess(spiral, nb_repetitions=Nc, z_tilt=tilt, mode="polar")
 
     # Handle in_out case
-    if in_out:
+    if (in_out):
         first_half_traj = np.copy(trajectory)
         first_half_traj = -first_half_traj[:, ::-1]
         trajectory = np.concatenate([first_half_traj, trajectory], axis=1)

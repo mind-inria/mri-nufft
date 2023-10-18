@@ -4,6 +4,7 @@ import numpy.linalg as nl
 
 from .utils import (
     KMAX,
+    Rv,
     Rx,
     Ry,
     Rz,
@@ -131,35 +132,35 @@ def conify(trajectory, nb_repetitions, z_tilt="intergaps", in_out=False, max_ang
 # FUNCTIONAL TOOLS #
 ####################
 
-def stack_spherically(trajectory_func, Nc, nb_repetitions, z_tilt="golden", hard_bounded=True, **traj_kwargs):
+def stack_spherically(trajectory_func, Nc, nb_stacks, z_tilt="golden", hard_bounded=True, **traj_kwargs):
     # Handle argument errors
-    if Nc < nb_repetitions:
-        raise ValueError("Nc should be higher than nb_repetitions.")
+    if Nc < nb_stacks:
+        raise ValueError("Nc should be higher than nb_stacks.")
 
     # Initialize a plane to estimate potential thickness
-    trajectory = trajectory_func(Nc=Nc // nb_repetitions, **traj_kwargs)
+    trajectory = trajectory_func(Nc=Nc // nb_stacks, **traj_kwargs)
     if (trajectory.shape[-1] == 2):
         trajectory = np.concatenate([trajectory, np.zeros((*(trajectory.shape[:2]), 1))], axis=-1)
 
     # Initialize z-axis with boundaries, and z-rotation
-    ub, lb = KMAX / nb_repetitions, -KMAX / nb_repetitions
+    ub, lb = KMAX / nb_stacks, -KMAX / nb_stacks
     if (hard_bounded):
         ub = max(np.max(trajectory[..., 2]), ub)
         lb = min(np.min(trajectory[..., 2]), lb)
-    z_axis = np.linspace(-KMAX - lb, KMAX - ub, nb_repetitions)
-    z_rotation = Rz(initialize_tilt(z_tilt, nb_repetitions)).T
+    z_axis = np.linspace(-KMAX - lb, KMAX - ub, nb_stacks)
+    z_rotation = Rz(initialize_tilt(z_tilt, nb_stacks)).T
     radii = np.cos(np.arcsin(z_axis / KMAX))
 
     # Attribute shots to stacks following density proportional to surface
-    Nc_per_stack = np.ones(nb_repetitions).astype(int)
+    Nc_per_stack = np.ones(nb_stacks).astype(int)
     density = radii ** 2  # simplified version
-    for _ in range(Nc - nb_repetitions):
+    for _ in range(Nc - nb_stacks):
         idx = np.argmax(density / Nc_per_stack)
         Nc_per_stack[idx] += 1
 
     # Start stacking the trajectories
     new_trajectory = []
-    for i in range(nb_repetitions):
+    for i in range(nb_stacks):
         # Initialize a single stack
         stack = trajectory_func(Nc=Nc_per_stack[i], **traj_kwargs)
         if (stack.shape[-1] == 2):
@@ -168,7 +169,7 @@ def stack_spherically(trajectory_func, Nc, nb_repetitions, z_tilt="golden", hard
         stack[..., 2] = z_axis[i] + stack[..., 2]
 
         # Apply z tilt
-        rotation = Rz(i * initialize_tilt(z_tilt, nb_repetitions))
+        rotation = Rz(i * initialize_tilt(z_tilt, nb_stacks))
         stack = stack @ rotation
         new_trajectory.append(stack)
 
