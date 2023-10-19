@@ -429,6 +429,7 @@ def display_gradients_simply(
     signal = signal * np.abs(signal) ** 3
 
     # Show signal for each requested shot
+    axes[-1].set_ylim((-1, 1))
     axes[-1].set_ylabel("Signal", fontsize=displayConfig.fontsize)
     for j in range(len(shot_ids)):
         color = uni_signal if (uni_signal is not None) else COLOR_CYCLE[j % NB_COLORS]
