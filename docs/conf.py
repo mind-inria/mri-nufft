@@ -55,6 +55,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autosummary_generate = True
 # autosummary_imported_members = True
 autodoc_inherit_docstrings = True
+autodoc_member_order = "bysource"
+autodoc_typehints = "description"
 
 napoleon_include_private_with_doc = True
 napolon_numpy_docstring = True
