@@ -10,6 +10,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
+  BART_VERSION: "0.8.00"
 
 jobs:
   linter-check:
@@ -53,7 +54,15 @@ jobs:
         shell: bash
         run: |
           python -m pip install finufft pynfft2 "cython<3.0.0"
-
+      - name: Install BART
+        shell: bash
+        run: |
+          cd $RUNNER_WORKSPACE
+          sudo apt-get install make gcc libfftw3-dev liblapacke-dev libpng-dev libopenblas-dev
+          wget https://github.com/mrirecon/bart/archive/vX.Y.ZZ.tar.gz
+          tar xzvf v{{env.BART_VERSION}.tar.gz
+          cd bart-{{env.BART_VERSION}}
+          make
       - name: Run Tests
         shell: bash
         run: | 
