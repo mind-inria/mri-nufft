@@ -112,16 +112,6 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
     image_nufft = stacked_op.adj_op(kspace_data.copy()).squeeze()
     image_ref = ref_op.adj_op(kspace_data.copy()).squeeze()
-    if stacked_op.n_coils > 1:
-        print(
-            np.max(
-                np.abs(image_nufft - image_ref).reshape(
-                    stacked_op.n_batchs, stacked_op.n_coils, -1
-                ),
-                axis=-1,
-            )
-        )
-        print(image_nufft.shape, image_ref.shape)
     npt.assert_allclose(image_nufft, image_ref, atol=1e-4, rtol=1e-1)
 
 
