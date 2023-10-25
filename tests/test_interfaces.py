@@ -24,6 +24,7 @@ from helpers import kspace_from_op, image_from_op
         "finufft",
         "cufinufft",
         "gpunufft",
+        "sigpy",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
@@ -40,7 +41,7 @@ def operator(
 
 @fixture(scope="session", autouse=True)
 def ref_backend(request):
-    """get the reference backend from the CLI"""
+    """Get the reference backend from the CLI."""
     return request.config.getoption("ref")
 
 
