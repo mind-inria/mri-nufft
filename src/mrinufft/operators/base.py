@@ -344,7 +344,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         if density is True:
             self.density = self.estimate_density(samples, shape)
         elif isinstance(density, np.ndarray):
-            if len(density) != len(samples):
+            if len(density) != len(self.samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
@@ -404,7 +404,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
         ksp = np.zeros((self.n_coils, self.n_samples), dtype=data.dtype)
         coil_img = data * self._smaps
-        self._op(coil_img)
+        for i in range(self.n_coils):
+            self._op(coil_img[i], ksp[i])
         return ksp
 
     def _op_calibless(self, data, ksp=None):
