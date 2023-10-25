@@ -28,13 +28,24 @@ class RawSigpyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        ret = sgf.nufft(grid_data, self.samples, self._oversamp, self._width)
+        ret = sgf.nufft(
+            grid_data,
+            self.samples,
+            oversamp=self._oversamp,
+            width=self._width,
+        )
         np.copyto(coeffs_data, ret)
         return coeffs_data
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
-        ret = sgf.nufft_adjoint(coeffs_data, self.samples, self._oversamp, self._width)
+        ret = sgf.nufft_adjoint(
+            coeffs_data,
+            self.samples,
+            oshape=self.shape,
+            oversamp=self._oversamp,
+            width=self._width,
+        )
         np.copyto(grid_data, ret)
         return grid_data
 
@@ -55,13 +66,14 @@ class MRISigpyNUFFT(FourierOperatorCPU):
         density=False,
         n_coils=1,
         smaps=None,
-        squeeze_dims=True,
         **kwargs,
     ):
         samples_ = proper_trajectory(samples, normalize="unit")
 
-        super().__init__(
-            samples_, shape, density, n_coils, smaps=smaps, squeeze_dims=squeeze_dims
-        )
+        super().__init__(samples_, shape, density, n_coils, smaps=smaps)
 
         self.raw_op = RawSigpyNUFFT(samples_, shape, **kwargs)
+
+    @property
+    def norm_factor(self):
+        return np.sqrt(2 ** len(self.shape))
