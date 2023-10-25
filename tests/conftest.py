@@ -12,10 +12,15 @@ def pytest_addoption(parser):
         default=[],
         help="NUFFT backend on which the tests are performed.",
     )
+    parser.addoption(
+        "--ref",
+        default="pynfft",
+        help="Reference backend on which the tests are performed.",
+    )
 
 
 def pytest_configure(config):
-    """Configuration hook for pytest."""
+    """Configure hook for pytest."""
     print("Available backends:")
     for backend in list_backends():
         print(f"{backend:<14}: {FourierOperatorBase.interfaces[backend][0]}")
@@ -27,6 +32,15 @@ def pytest_configure(config):
                 backend in selected,
                 FourierOperatorBase.interfaces[backend][1],
             )
+    # ensure the ref backend is available
+    ref_backend = config.getoption("ref")
+    FourierOperatorBase.interfaces[ref_backend] = (
+        True,
+        FourierOperatorBase.interfaces[ref_backend][1],
+    )
+    print("Selected backends:")
+    for backend in list_backends():
+        print(f"{backend:<14}: {FourierOperatorBase.interfaces[backend][0]}")
 
 
 # # for test directly parametrized by a backend
@@ -58,8 +72,13 @@ def pytest_generate_tests(metafunc):
                     if v.argnames[0] == "backend"
                 ][0]
             ]
+            print("backend detected", backend)
             # Only keep the callspec if the backend is available.
             if not check_backend(backend):
                 callspec.marks.append(
                     pytest.mark.skip(f"Backend {backend} not available.")
+                )
+            if backend == metafunc.config.getoption("ref"):
+                callspec.marks.append(
+                    pytest.mark.skip("Not testing ref backend with self.")
                 )

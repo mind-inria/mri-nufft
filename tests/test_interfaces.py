@@ -38,11 +38,16 @@ def operator(
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
+@fixture(scope="session", autouse=True)
+def ref_backend(request):
+    """get the reference backend from the CLI"""
+    return request.config.getoption("ref")
+
+
 @fixture(scope="module")
-@parametrize("backend", ["pynfft"])
-def nfft_ref_op(request, operator, backend="pynfft"):
+def ref_operator(request, operator, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
-    return get_operator(backend)(
+    return get_operator(ref_backend)(
         operator.samples, operator.shape, n_coils=operator.n_coils, smaps=operator.smaps
     )
 
@@ -59,18 +64,18 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
-def test_interfaces_accuracy_forward(operator, image_data, nfft_ref_op):
+def test_interfaces_accuracy_forward(operator, image_data, ref_operator):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_nufft = operator.op(image_data).squeeze()
-    kspace_ref = nfft_ref_op.op(image_data).squeeze()
     # FIXME: check with complex values ail
+    kspace_ref = ref_operator.op(image_data).squeeze()
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
-def test_interfaces_accuracy_backward(operator, kspace_data, nfft_ref_op):
+def test_interfaces_accuracy_backward(operator, kspace_data, ref_operator):
     """Compare the interface to the raw NUDFT implementation."""
     image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
-    image_ref = nfft_ref_op.adj_op(kspace_data.copy()).squeeze()
+    image_ref = ref_operator.adj_op(kspace_data.copy()).squeeze()
 
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
