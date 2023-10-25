@@ -76,4 +76,5 @@ class MRISigpyNUFFT(FourierOperatorCPU):
 
     @property
     def norm_factor(self):
+        """Normalization factor of the operator."""
         return np.sqrt(2 ** len(self.shape))
