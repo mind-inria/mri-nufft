@@ -101,9 +101,11 @@ def get_operator(backend_name: str, *args, **kwargs):
     try:
         available, operator = FourierOperatorBase.interfaces[backend_name]
     except KeyError as exc:
-        raise ValueError("backend is not available") from exc
+        raise ValueError(f"backend {backend_name} is not available") from exc
     if not available:
-        raise ValueError("backend is registered, but dependencies are not met.")
+        raise ValueError(
+            f"backend {backend_name} is registered, but dependencies are not met."
+        )
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
