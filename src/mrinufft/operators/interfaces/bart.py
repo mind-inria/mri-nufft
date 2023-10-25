@@ -10,15 +10,15 @@ import warnings
 import os
 import numpy as np
 import mmap
-import subprocess
+import subprocess as subp
 import tempfile
 from pathlib import Path
 
 from ..base import FourierOperatorCPU, proper_trajectory
 
 # available if return code is 0
-BART_AVAILABLE = not subprocess.call(
-    ["which", "bart"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+BART_AVAILABLE = not subp.call(
+    ["which", "bart"], stdout=subp.DEVNULL, stderr=subp.DEVNULL
 )
 
 
@@ -35,11 +35,12 @@ class RawBartNUFFT:
         self._temp_dir = tempfile.TemporaryDirectory()
 
         # Write trajectory to temp file
-        self._traj_file = self._tmp_file()
-        traj2cfl(self.samples, shape, self._traj_file)
+        tmp_path = Path(self._temp_dir.name)
+        self._traj_file = tmp_path / "traj"
+        self._ksp_file = tmp_path / "ksp"
+        self._grid_file = tmp_path / "grid"
 
-        self._ksp_file = self._tmp_file()
-        self._grid_file = self._tmp_file()
+        traj2cfl(self.samples, shape, self._traj_file)
 
     def _tmp_file(self):
         """Return a temporary file name."""
@@ -48,12 +49,9 @@ class RawBartNUFFT:
     def __del__(self):
         """Delete also the temporary files."""
         self._temp_dir.cleanup()
-        super().__del__()
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        print("op_bart")
-        print(grid_data.shape)
         _writecfl(grid_data, self._grid_file)
         cmd = [
             "bart",
@@ -61,59 +59,95 @@ class RawBartNUFFT:
             "-d",
             self.shape_str,
             *self._op_args,
-            self._traj_file,
-            self._grid_file,
-            self._ksp_file,
+            str(self._traj_file),
+            str(self._grid_file),
+            str(self._ksp_file),
         ]
-        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            subp.run(cmd, check=True, capture_output=True)
+        except subp.CalledProcessError as exc:
+            msg = "Failed to run BART NUFFT\n"
+            msg += f"error code: {exc.returncode}\n"
+            msg += "cmd: " + " ".join(cmd) + "\n"
+            msg += f"stdout: {exc.output}\n"
+            msg += f"stderr: {exc.stderr}"
+            raise RuntimeError(msg) from exc
 
         ksp_raw = _readcfl(self._ksp_file)
-        print(ksp_raw.shape)
         np.copyto(coeffs_data, ksp_raw)
-        print(coeffs_data.shape)
         return coeffs_data
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
         # Format grid data to cfl format, and write to file
         # Run bart nufft with argument in subprocess
-        print("adj_op_bart")
-        print(coeffs_data.shape)
-        _writecfl(coeffs_data, self._ksp_file)
+
+        coeffs_ = coeffs_data.flatten()
+        _writecfl(coeffs_[None, ..., None, None, None], self._ksp_file)
 
         cmd = [
             "bart",
             "nufft",
             "-d",
             self.shape_str,
-            "-a",
+            "-a" if "-i" not in self._adj_op_args else "",
             *self._adj_op_args,
-            self._traj_file,
-            self._ksp_file,
-            self._grid_file,
+            str(self._traj_file),
+            str(self._ksp_file),
+            str(self._grid_file),
         ]
-        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            subp.run(cmd, check=True, capture_output=True)
+        except subp.CalledProcessError as exc:
+            msg = "Failed to run BART NUFFT\n"
+            msg += f"error code: {exc.returncode}\n"
+            msg += "cmd: " + " ".join(cmd) + "\n"
+            msg += f"stdout: {exc.output}\n"
+            msg += f"stderr: {exc.stderr}"
+            raise RuntimeError(msg) from exc
+
         grid_raw = _readcfl(self._grid_file)
-        print(grid_raw.shape)
         np.copyto(grid_data, grid_raw)
-        print(grid_data.shape)
         return grid_data
 
 
 class MRIBartNUFFT(FourierOperatorCPU):
     """BART implementation of MRI NUFFT transform."""
 
-    # TODO Use a n_jobs parameter to run multiple instances of BART ?
-    # TODO Data consistency function: use toepliz
-    #
+    # TODO override Data consistency function: use toepliz
+
     backend = "bart"
     available = BART_AVAILABLE
 
-    def __init__(self, samples, shape, density=False, n_coils=1, smaps=None, **kwargs):
+    def __init__(
+        self,
+        samples,
+        shape,
+        density=False,
+        n_coils=1,
+        smaps=None,
+        squeeze_dims=True,
+        **kwargs,
+    ):
         samples_ = proper_trajectory(samples, normalize="unit")
-        super().__init__(samples_, shape, density, n_coils, smaps)
+        if density is True:
+            density = False
+            if getattr(kwargs, "extra_adj_op_args", None):
+                kwargs["extra_adj_op_args"] += ["-i"]
+            else:
+                kwargs["extra_adj_op_args"] = ["-i"]
+
+        super().__init__(
+            samples_, shape, density, n_coils, smaps, squeeze_dims=squeeze_dims
+        )
 
         self.raw_op = RawBartNUFFT(samples_, shape, **kwargs)
+
+    @property
+    def norm_factor(self):
+        """Normalization factor of the operator."""
+        # return 1.0
+        return np.sqrt(2 ** len(self.shape))
 
 
 def _readcfl(cfl_file, hdr_file=None):
@@ -179,7 +213,7 @@ def _writecfl(array, cfl_file, hdr_file=None):
 
     size = np.prod(array.shape) * np.dtype(np.complex64).itemsize
 
-    with open(cfl_file, "a+b") as d:
+    with open(cfl_file, "w+b") as d:
         os.ftruncate(d.fileno(), size)
         mm = mmap.mmap(d.fileno(), size, flags=mmap.MAP_SHARED, prot=mmap.PROT_WRITE)
         if array.dtype != np.complex64:
