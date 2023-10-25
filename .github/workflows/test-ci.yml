@@ -52,7 +52,7 @@ jobs:
       - name: Install CPU Backends
         shell: bash
         run: |
-          python -m pip install finufft pynfft2 "cython<3.0.0"
+          python -m pip install finufft pynfft2 "cython<3.0.0" sigpy
 
       - name: Run Tests
         shell: bash
