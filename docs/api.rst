@@ -1,9 +1,6 @@
-API Reference
-=============
-
 .. autosummary::
-   :toctree: _autosummary
-   :template: custom-module-template.rst
+   :toctree: generated/_autosummary
    :recursive:
 
-    mrinufft
+    mrinufft.operators
+    mrinufft.trajectories

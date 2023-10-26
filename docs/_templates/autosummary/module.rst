@@ -1,4 +1,4 @@
-{{ fullname | escape | underline}}
+{{ "``{}.{}``".format(module.split(".")[-1], objname) | underline}}
 
 .. automodule:: {{ fullname }}
 
@@ -33,7 +33,6 @@
 
    .. autosummary::
       :toctree:
-      :template: custom-class-template.rst
       :nosignatures:
    {% for item in classes %}
       {{ item }}
@@ -57,7 +56,6 @@
 {% if modules %}
 .. autosummary::
    :toctree:
-   :template: custom-module-template.rst
    :recursive:
 {% for item in modules %}
    {{ item }}

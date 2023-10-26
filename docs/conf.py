@@ -14,19 +14,15 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
-from importlib.metadata import version
 
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
 
 project = "mri-nufft"
-copyright = "2022, Pierre-Antoine Comby"
-author = "Pierre-Antoine Comby"
+copyright = "2022, MRI-NUFFT Contributors"
+author = "MRI-NUFFT Contributors"
 
-release = version("mri-nufft")
-# for example take major/minor
-version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 
@@ -34,6 +30,7 @@ version = ".".join(release.split(".")[:2])
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_copybutton",
     "sphinx.ext.duration",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -58,21 +55,37 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autosummary_generate = True
 # autosummary_imported_members = True
 autodoc_inherit_docstrings = True
+autodoc_member_order = "bysource"
+autodoc_typehints = "description"
 
 napoleon_include_private_with_doc = True
+napolon_numpy_docstring = True
+napoleon_use_admonition_for_references = True
+
+
+pygments_style = "sphinx"
+highlight_language = "python"
 
 # -- Options for Sphinx Gallery ----------------------------------------------
 
 sphinx_gallery_conf = {
+    "doc_module": "mrinufft",
+    "backreferences_dir": "generated/gallery_backreferences",
+    "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
+    "gallery_dirs": ["generated/auto_examples"],
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest)\.py",
-    "reference_url": {
-        "numpy": "http://docs.scipy.org/doc/numpy-1.9.1",
-        "scipy": "http://docs.scipy.org/doc/scipy-0.17.0/reference",
-    },
+    "nested_sections": True,
 }
 
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "cupy": ("https://docs.cupy.dev/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -80,10 +93,21 @@ sphinx_gallery_conf = {
 # a list of builtin themes.
 #
 
-html_theme = "pydata_sphinx_theme"
+html_theme = "sphinx_book_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_context = {"default_mode": "light"}
+html_theme_options = {
+    "repository_url": "https://github.com/mind-inria/mri-nufft/",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+    "use_download_button": True,
+    "home_page_in_toc": True,
+}
+
+html_logo = "_static/logos/mri-nufft.png"
+html_favicon = "_static/logos/mri-nufft-icon.png"
+html_title = "MRI-nufft Documentation"

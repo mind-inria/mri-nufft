@@ -7,10 +7,32 @@
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents
+   :hidden:
+   :caption: User Guides
 
-   api
+   getting_started
+   generated/auto_examples/index
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Explanations
+
    nufft
    trajectory_gradspec
-   auto_examples/index
+
+.. toctree::
+   :hidden:
+   :caption: API References
+
+   api
+
+.. toctree::
+   :hidden:
+   :caption: Miscellanneous
+
+   misc/contributors
+   misc/code_of_conduct
+   misc/license
+   misc/development
+   misc/related
