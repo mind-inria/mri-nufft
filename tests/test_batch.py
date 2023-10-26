@@ -29,7 +29,7 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*random*",
 )
-@parametrize(backend=["finufft", "cufinufft"])
+@parametrize(backend=["finufft", "cufinufft", "sigpy"])
 def operator(
     request,
     kspace_locs,

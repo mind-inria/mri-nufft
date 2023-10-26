@@ -20,7 +20,7 @@ from case_trajectories import CasesTrajectories
     [(1, 1, False), (1, 4, False), (1, 4, True), (2, 4, False), (2, 4, True)],
 )
 @parametrize("z_index", ["full", "random_mask"])
-@parametrize("backend", ["finufft"])
+@parametrize("backend", ["finufft", "sigpy"])
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories, glob="*2D")
 def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
     """Initialize the stacked and non-stacked operators."""
