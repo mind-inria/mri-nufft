@@ -20,6 +20,7 @@ from helpers import kspace_from_op, image_from_op
 @parametrize(
     "backend",
     [
+        "bart",
         "pynfft",
         "finufft",
         "cufinufft",

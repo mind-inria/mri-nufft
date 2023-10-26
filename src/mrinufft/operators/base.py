@@ -317,10 +317,12 @@ class FourierOperatorCPU(FourierOperatorBase):
         n_coils=1,
         smaps=None,
         raw_op=None,
+        squeeze_dims=True,
     ):
         super().__init__()
         self.shape = shape
         self.samples = proper_trajectory(samples, normalize="unit")
+        self.squeeze_dims = squeeze_dims
         self._dtype = self.samples.dtype
         self._uses_sense = False
 
@@ -328,7 +330,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         if density is True:
             self.density = self.estimate_density(samples, shape)
         elif isinstance(density, np.ndarray):
-            if len(density) != len(samples):
+            if len(density) != len(self.samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
@@ -382,13 +384,14 @@ class FourierOperatorCPU(FourierOperatorBase):
             if data.ndim == self.ndim:
                 data = np.expand_dims(data, axis=0)  # add coil dimension
             ret = self._op_calibless(data, ksp)
-        return ret
+        return self._safe_squeeze(ret)
 
     def _op_sense(self, data, ksp_d=None):
         coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
         ksp = np.zeros((self.n_coils, self.n_samples), dtype=data.dtype)
         coil_img = data * self._smaps
-        self._op(coil_img)
+        for i in range(self.n_coils):
+            self._op(coil_img[i], ksp[i])
         return ksp
 
     def _op_calibless(self, data, ksp=None):
@@ -424,7 +427,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        return ret
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
         coil_img = np.empty(self.shape, dtype=coeffs.dtype)
@@ -494,3 +497,16 @@ class FourierOperatorCPU(FourierOperatorBase):
                 ksp *= self.density_d
             self._adj_op(ksp, img[i])
         return img
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
