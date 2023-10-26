@@ -125,6 +125,7 @@ class MRIBartNUFFT(FourierOperatorCPU):
         shape,
         density=False,
         n_coils=1,
+        n_batchs=1,
         smaps=None,
         squeeze_dims=True,
         **kwargs,
@@ -138,7 +139,13 @@ class MRIBartNUFFT(FourierOperatorCPU):
                 kwargs["extra_adj_op_args"] = ["-i"]
 
         super().__init__(
-            samples_, shape, density, n_coils, smaps, squeeze_dims=squeeze_dims
+            samples_,
+            shape,
+            density,
+            n_coils=n_coils,
+            n_batchs=n_batchs,
+            smaps=smaps,
+            squeeze_dims=squeeze_dims,
         )
 
         self.raw_op = RawBartNUFFT(samples_, shape, **kwargs)
@@ -233,7 +240,8 @@ def traj2cfl(traj, shape, basename):
     shape: tuple
         volume shape (FOV)
 
-    The trajectory will be normalized to -(FOV-1)/2 +(FOV-1)/2, and reshape to BART format
+    The trajectory will be normalized to -(FOV-1)/2 +(FOV-1)/2,
+    and reshape to BART format.
     """
     traj_ = traj * (np.array(shape) - 1)
     if traj.shape[-1] == 2:

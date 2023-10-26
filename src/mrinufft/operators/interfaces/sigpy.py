@@ -65,12 +65,21 @@ class MRISigpyNUFFT(FourierOperatorCPU):
         shape,
         density=False,
         n_coils=1,
+        n_batchs=1,
         smaps=None,
         **kwargs,
     ):
         samples_ = proper_trajectory(samples, normalize="unit")
 
-        super().__init__(samples_, shape, density, n_coils, smaps=smaps)
+        super().__init__(
+            samples_,
+            shape,
+            density=density,
+            n_coils=n_coils,
+            n_batchs=n_batchs,
+            n_trans=1,
+            smaps=smaps,
+        )
 
         self.raw_op = RawSigpyNUFFT(samples_, shape, **kwargs)
 
