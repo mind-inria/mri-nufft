@@ -27,12 +27,10 @@ def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, s
 
     if z_index == "full":
         z_index = np.arange(shape3d[-1])
-        z_index_ = z_index
     elif z_index == "random_mask":
-        z_index = np.random.rand(shape3d[-1]) > 0.5
-        z_index_ = np.arange(shape3d[-1])[z_index]
+        z_index = np.random.choice(shape3d[-1], shape3d[-1] // 2, replace=False)
 
-    kspace_locs3d = stacked2traj3d(kspace_locs, z_index_, shape[-1])
+    kspace_locs3d = stacked2traj3d(kspace_locs, z_index, shape[-1])
     # smaps support
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape3d)
