@@ -17,7 +17,7 @@ except ImportError:
 class RawSigpyNUFFT:
     """Raw interface to SigPy NUFFT."""
 
-    def __init__(self, samples, shape, oversamp=1.25, width=4):
+    def __init__(self, samples, shape, oversamp=1.25, width=4, **kwargs):
         shape = np.array(shape)
         # scale in FOV/2 units
         self.samples = samples * shape
