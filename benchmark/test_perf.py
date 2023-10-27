@@ -16,13 +16,15 @@ N_COILS_BIG = 32
 N_COILS_SMALL = 4
 
 BACKENDS = [(b, None) for b in list_backends(True) if "stacked" not in b]
+BACKENDS.remove("numpy")  # remove ndft
 SHAPE = (384, 384, 208)
-STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b] + [("stacked", f"{{'backend':{b}}}" for b in BACKENDS)]
+STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b]
+STACKED_BACKENDS += [("stacked", f"{{'backend':'{b}'}}") for b in BACKENDS]
 
 
 @fixture(scope="module")
 @parametrize_with_cases("kspace_locs", cases=".", prefix="traj_")
-@parametrize("backend, backend_kwargs", BACKENDS+STACKED_BACKENDS)
+@parametrize("backend, backend_kwargs", BACKENDS + STACKED_BACKENDS)
 @parametrize("z_index", ["full", "random_mask"])
 @parametrize(
     "n_coils, sense",
@@ -79,9 +81,7 @@ def operator(
         **backend_kwargs,
     )
 
-
     return img
-
 
 
 def test_forward_perf(benchmark, operator):
