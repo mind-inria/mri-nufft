@@ -52,7 +52,8 @@ class RawBartNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        _writecfl(grid_data, self._grid_file)
+        grid_data_ = grid_data.reshape(self.shape)
+        _writecfl(grid_data_, self._grid_file)
         cmd = [
             "bart",
             "nufft",
@@ -82,7 +83,7 @@ class RawBartNUFFT:
         # Format grid data to cfl format, and write to file
         # Run bart nufft with argument in subprocess
 
-        coeffs_ = coeffs_data.flatten()
+        coeffs_ = coeffs_data.reshape(len(self.samples))
         _writecfl(coeffs_[None, ..., None, None, None], self._ksp_file)
 
         cmd = [
@@ -144,6 +145,7 @@ class MRIBartNUFFT(FourierOperatorCPU):
             density,
             n_coils=n_coils,
             n_batchs=n_batchs,
+            n_trans=1,
             smaps=smaps,
             squeeze_dims=squeeze_dims,
         )

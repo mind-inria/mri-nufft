@@ -16,7 +16,9 @@ N_COILS_BIG = 32
 N_COILS_SMALL = 4
 
 BACKENDS = [
-    (b, None) for b in list_backends(True) if "stacked" not in b or b in ["numpy"]
+    (b, None)
+    for b in list_backends(True)
+    if ("stacked" not in b) or (b not in ["numpy"])
 ]
 SHAPE = (384, 384, 208)
 STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b]
