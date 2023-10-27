@@ -27,7 +27,7 @@ class RawBartNUFFT:
 
     def __init__(self, samples, shape, extra_op_args=None, extra_adj_op_args=None):
         self.samples = samples  # To normalize and send to file
-        #
+        self.shape = shape
         self.shape_str = ":".join([str(s) for s in shape])
         self.shape_str += ":1" if len(shape) == 2 else ""
         self._op_args = extra_op_args or []
@@ -40,7 +40,7 @@ class RawBartNUFFT:
         self._ksp_file = tmp_path / "ksp"
         self._grid_file = tmp_path / "grid"
 
-        traj2cfl(self.samples, shape, self._traj_file)
+        traj2cfl(self.samples, self.shape, self._traj_file)
 
     def _tmp_file(self):
         """Return a temporary file name."""
