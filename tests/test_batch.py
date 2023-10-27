@@ -45,9 +45,11 @@ def operator(
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)
+        smaps = smaps.astype(np.complex64)
         smaps /= np.linalg.norm(smaps, axis=0)
     else:
         smaps = None
+    kspace_locs = kspace_locs.astype(np.float32)
     return get_operator(backend)(
         kspace_locs,
         shape,
@@ -55,6 +57,7 @@ def operator(
         smaps=smaps,
         n_batchs=n_batch,
         n_trans=n_trans,
+        squeeze_dims=False,
     )
 
 
