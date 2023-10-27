@@ -4,8 +4,9 @@ Only finufft and cufinufft support batch computations.
 """
 import numpy as np
 import numpy.testing as npt
+import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
-
+from helpers import assert_correlate
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
@@ -126,3 +127,49 @@ def test_batch_type1(operator, flat_operator, kspace_data):
     image_data = operator.adj_op(kspace_data)
     # Reduced accuracy for the GPU cases...
     npt.assert_allclose(image_data, image_flat, atol=1e-3, rtol=1e-3)
+
+
+def test_data_consistency(operator, image_data, kspace_data):
+    """Test the data consistency operation."""
+    # image_data = np.zeros_like(image_data)
+    res = operator.data_consistency(image_data, kspace_data)
+    tmp = operator.op(image_data)
+    res2 = operator.adj_op(tmp - kspace_data)
+
+    #    npt.assert_allclose(res.squeeze(), res2.squeeze(), atol=1e-4, rtol=1e-1)
+    res = res.reshape(-1, *operator.shape)
+    res2 = res2.reshape(-1, *operator.shape)
+
+    slope_err = 1e-3
+    # FIXME 2D Sense is not very accurate...
+    if len(operator.shape) == 2 and operator.uses_sense:
+        slope_err = 1e-1
+
+    for i in range(len(res)):
+        assert_correlate(res[i], res2[i], slope_err=slope_err)
+
+
+def test_data_consistency_readonly(operator, image_data, kspace_data):
+    """Test that the data consistency does not modify the input parameters data."""
+    kspace_tmp = kspace_data.copy()
+    image_tmp = image_data.copy()
+    kspace_tmp.setflags(write=False)
+    image_tmp.setflags(write=False)
+    operator.data_consistency(image_data, kspace_tmp)
+    npt.assert_equal(kspace_tmp, kspace_data)
+    npt.assert_equal(image_tmp, image_data)
+
+
+def test_gradient_lipschitz(operator, image_data, kspace_data):
+    """Test the gradient lipschitz constant."""
+    img = image_data.copy()
+    for _ in range(10):
+        grad = operator.data_consistency(img, kspace_data)
+        norm = np.linalg.norm(grad)
+        grad /= norm
+        np.copyto(img, grad)
+        norm_prev = norm
+
+    # TODO: check that the value is "not too far" from 1
+    # TODO: to do the same with density compensation
+    assert (norm - norm_prev) / norm_prev < 1e-3
