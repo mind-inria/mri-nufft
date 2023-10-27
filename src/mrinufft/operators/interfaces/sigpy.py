@@ -2,6 +2,7 @@
 
 The SigPy NUFFT is fully implemented in Python.
 """
+import warnings
 
 import numpy as np
 from ..base import FourierOperatorCPU, proper_trajectory
@@ -9,7 +10,9 @@ from ..base import FourierOperatorCPU, proper_trajectory
 
 SIGPY_AVAILABLE = True
 try:
-    import sigpy.fourier as sgf
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        import sigpy.fourier as sgf
 except ImportError:
     SIGPY_AVAILABLE = False
 
