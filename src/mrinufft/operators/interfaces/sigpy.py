@@ -15,37 +15,41 @@ except ImportError:
 
 
 class RawSigpyNUFFT:
-    """Raw interface to SigPy NUFFT."""
+    """Raw interface to SigPy output /= width**ndim NUFFT."""
 
-    def __init__(self, samples, shape, oversamp=1.25, width=4, **kwargs):
+    def __init__(self, samples, shape, oversamp=1.25, width=4, n_trans=1, **kwargs):
+        self.shape = shape
         shape = np.array(shape)
         # scale in FOV/2 units
         self.samples = samples * shape
-
-        self.shape = shape
+        self.n_trans = n_trans
         self._oversamp = oversamp
         self._width = width
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
+        grid_data_ = grid_data.reshape(self.n_trans, *self.shape)
         ret = sgf.nufft(
-            grid_data,
+            grid_data_,
             self.samples,
             oversamp=self._oversamp,
             width=self._width,
         )
+        ret = ret.reshape(self.n_trans, len(self.samples))
         np.copyto(coeffs_data, ret)
         return coeffs_data
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
+        coeffs_data_ = coeffs_data.reshape(self.n_trans, len(self.samples))
         ret = sgf.nufft_adjoint(
-            coeffs_data,
+            coeffs_data_,
             self.samples,
-            oshape=self.shape,
+            oshape=(self.n_trans, *self.shape),
             oversamp=self._oversamp,
             width=self._width,
         )
+        ret = ret.reshape(self.n_trans, *self.shape)
         np.copyto(grid_data, ret)
         return grid_data
 
@@ -66,7 +70,9 @@ class MRISigpyNUFFT(FourierOperatorCPU):
         density=False,
         n_coils=1,
         n_batchs=1,
+        n_trans=1,
         smaps=None,
+        squeeze_dims=True,
         **kwargs,
     ):
         samples_ = proper_trajectory(samples, normalize="unit")
@@ -77,11 +83,12 @@ class MRISigpyNUFFT(FourierOperatorCPU):
             density=density,
             n_coils=n_coils,
             n_batchs=n_batchs,
-            n_trans=1,
+            n_trans=n_trans,
             smaps=smaps,
+            squeeze_dims=squeeze_dims,
         )
 
-        self.raw_op = RawSigpyNUFFT(samples_, shape, **kwargs)
+        self.raw_op = RawSigpyNUFFT(samples_, shape, n_trans=n_trans, **kwargs)
 
     @property
     def norm_factor(self):

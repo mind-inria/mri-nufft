@@ -33,18 +33,22 @@ These libraries needs to be installed separately from this package.
 
 .. Don't touch the spacing ! ..
 
-==================== ============ =================== =============== ============== ===============
-Backend              Hardward     Batch computation   Precision       Auto Density   Array Interface
-==================== ============ =================== =============== ============== ===============
-cufinufft_           GPU (CUDA)   ✔                   single          ✔ *             cupy/torch
-finufft_             CPU          ✔                   single/double   TBA            numpy
-gpunufft_            GPU          ✔                   single/double   ✔              numpy
-tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
-pynufft-cpu_         CPU          ✘                   single/double   ✘              numpy
-pynfft_ (*)          CPU          ✘                   singles/double   ✘             numpy
-stacked (**)         CPU/GPU      ✔                   single/double   ✔              numpy
-==================== ============ =================== =============== ============== ===============
+==================== ================ ===================  ================== ===================
+Backend              Hardward Support Batch computation    Density Estimation MRI-NUFFT Interface
+==================== ================ ===================  ================== ===================
+cufinufft_           GPU (CUDA)       |yes|                |yes|:sup:`(3)`    cupy/torch
+finufft_             CPU              |yes|                TBA                numpy
+gpunufft_            GPU              |yes|                |yes|              numpy
+tensorflow-nufft_    GPU (CUDA)       |no|                 |yes|              tensorflow
+pynufft-cpu_         CPU              |no|                 |no|               numpy
+sigpy_               CPU              |yes|                TBA                numpy
+bart_                CPU              |yes|                |no|:sup:`(4)`     numpy
+pynfft_ :sup:`(1)`   CPU              |no|                 |no|               numpy
+stacked :sup:`(2)`   CPU/GPU          |yes|                N/A                numpy
+==================== ================ ===================  ================== ===================
 
+.. |yes| replace:: ✅
+.. |no| replace:: ❌
 
 .. _cufinufft: https://github.com/flatironinstitute/finufft
 .. _finufft: https://github.com/flatironinstitute/finufft
@@ -52,10 +56,13 @@ stacked (**)         CPU/GPU      ✔                   single/double   ✔     
 .. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
 .. _pynufft-cpu: https://github.com/jyhmiinlin/pynufft
 .. _pynfft: https://github.com/ghisvail/pynfft
+.. _sigpy: https://github.com/mikgroup/sigpy
+.. _bart: https://github.com/mrirecon/bart
 
-- (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
-- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy)
-
+- (1) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
+- (2) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy)
+- (3) Density estimation with Cufinufft requires a custom installation see below.
+- (4) BART has a ``inverse`` transform that perform the density compensation internally.
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.
 It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
@@ -84,7 +91,7 @@ In order for the density compensation to work for cufinufft, we have to use the 
     # Adapt to the name you have in python/cufinufft
     cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
 
-Development of this feature happens on this `pull request <https://github.com/flatironinstitute/finufft/pull/308>`_
+Development of this feature happens on this ``pull request <https://github.com/flatironinstitute/finufft/pull/308>`_
 
 [Temporary] Faster gpuNUFFT with concurency
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

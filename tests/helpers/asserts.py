@@ -51,5 +51,10 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
     slope_reg, intercept, rvalue, stderr, intercept_stderr = sp.stats.linregress(
         a.flatten(), b.flatten()
     )
-
-    assert abs(slope_reg - slope) < slope_err
+    abs_slope_reg = abs(slope_reg)
+    if abs(abs_slope_reg - slope) > slope_err:
+        raise AssertionError(
+            f"Slope {abs_slope_reg} != {slope} +- {slope_err}\n r={rvalue},"
+            f"intercept={intercept}, stderr={stderr}, "
+            f"intercept_stderr={intercept_stderr}"
+        )

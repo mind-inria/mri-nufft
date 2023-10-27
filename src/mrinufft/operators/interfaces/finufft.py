@@ -52,13 +52,19 @@ class RawFinufftPlan:
             fpts_axes[i] = np.array(self.samples[:, i], dtype=self.samples.dtype)
         self.plans[typ].setpts(*fpts_axes)
 
-    def adj_op(self, coeff_data, grid_data):
+    def adj_op(self, coeffs_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
-        return self.plans[1].execute(coeff_data, grid_data)
+        if self.n_trans == 1:
+            grid_data = grid_data.reshape(self.shape)
+            coeffs_data = coeffs_data.reshape(len(self.samples))
+        return self.plans[1].execute(coeffs_data, grid_data)
 
-    def op(self, coeff_data, grid_data):
+    def op(self, coeffs_data, grid_data):
         """Type 2 transform. Uniform to non-uniform."""
-        return self.plans[2].execute(grid_data, coeff_data)
+        if self.n_trans == 1:
+            grid_data = grid_data.reshape(self.shape)
+            coeffs_data = coeffs_data.reshape(len(self.samples))
+        return self.plans[2].execute(grid_data, coeffs_data)
 
 
 class MRIfinufft(FourierOperatorCPU):
@@ -102,7 +108,7 @@ class MRIfinufft(FourierOperatorCPU):
         n_batchs=1,
         n_trans=1,
         smaps=None,
-        squeeze_dims=False,
+        squeeze_dims=True,
     ):
         super().__init__(
             samples,
