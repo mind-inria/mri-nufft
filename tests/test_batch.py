@@ -87,7 +87,7 @@ def kspace_data(operator):
     return kspace
 
 
-def test_batch_type2(operator, flat_operator, image_data):
+def test_batch_op(operator, flat_operator, image_data):
     """Test the batch type 2 (forward)."""
     kspace_data = operator.op(image_data)
 
@@ -107,7 +107,7 @@ def test_batch_type2(operator, flat_operator, image_data):
     npt.assert_array_almost_equal_nulp(kspace_data, kspace_flat)
 
 
-def test_batch_type1(operator, flat_operator, kspace_data):
+def test_batch_adj_op(operator, flat_operator, kspace_data):
     """Test the batch type 1 (adjoint)."""
     kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
     image_flat = [None] * operator.n_batchs
