@@ -107,6 +107,17 @@ def test_adjoint_perf(benchmark, operator):
     benchmark(operator.adj_op, kspace_data)
 
 
-def test_dataconsistency_perf(benchmark, operator, image_data, kspace_data):
+def test_dataconsistency_perf(benchmark, operator):
     """Benchmark data consistency operation."""
+    if operator.uses_sense:
+        shape = operator.shape
+    else:
+        shape = (operator.n_coils, *operator.shape)
+    image_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
+    image_data += np.random.rand(*shape).astype(operator.cpx_dtype)
+
+    shape = (operator.n_coils, operator.n_samples)
+    kspace_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
+    kspace_data += np.random.rand(*shape).astype(operator.cpx_dtype)
+
     benchmark(operator.data_consistency(image_data, kspace_data))
