@@ -15,17 +15,14 @@ def traj_radial2D(Nc=16, Ns=512):
 N_COILS_BIG = 32
 N_COILS_SMALL = 4
 
-BACKENDS = [s for s in list_backends(True) if "stacked" not in s]
-SHAPE = ()
+BACKENDS = [(b, None) for b in list_backends(True) if "stacked" not in b]
+SHAPE = (384, 384, 208)
+STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b] + [("stacked", f"{{'backend':{b}}}" for b in BACKENDS)]
 
 
 @fixture(scope="module")
 @parametrize_with_cases("kspace_locs", cases=".", prefix="traj_")
-@parametrize(
-    "backend, backend_kwargs",
-    [(b, None) for b in BACKENDS]
-    + [("stacked", "{'backend':'finufft'}"), "stacke-cufinufft"],
-)
+@parametrize("backend, backend_kwargs", BACKENDS+STACKED_BACKENDS)
 @parametrize("z_index", ["full", "random_mask"])
 @parametrize(
     "n_coils, sense",
@@ -83,34 +80,27 @@ def operator(
     )
 
 
-@fixture(scope="module")
-def image_data(request, operator):
+    return img
+
+
+
+def test_forward_perf(benchmark, operator):
     """Generate a random image."""
     if operator.uses_sense:
         shape = operator.shape
     else:
         shape = (operator.n_coils, *operator.shape)
-    img = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    img += np.random.rand(*shape).astype(operator.cpx_dtype)
-    return img
-
-
-@fixture(scope="module")
-def kspace_data(request, operator):
-    """Generate a random image."""
-    shape = (operator.n_coils, operator.n_samples)
-    kspace = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    kspace += np.random.rand(*shape).astype(operator.cpx_dtype)
-    return kspace
-
-
-def test_forward_perf(benchmark, operator, image_data):
+    image_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
+    image_data += np.random.rand(*shape).astype(operator.cpx_dtype)
     """Benchmark forward operation."""
     benchmark(operator.op, image_data)
 
 
-def test_adjoint_perf(benchmark, operator, kspace_data):
+def test_adjoint_perf(benchmark, operator):
     """Benchmark adjoint operation."""
+    shape = (operator.n_coils, operator.n_samples)
+    kspace_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
+    kspace_data += np.random.rand(*shape).astype(operator.cpx_dtype)
     benchmark(operator.adj_op, kspace_data)
 
 
