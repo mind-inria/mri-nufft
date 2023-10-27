@@ -107,3 +107,8 @@ def test_forward_perf(benchmark, operator, image_data):
 def test_adjoint_perf(benchmark, operator, kspace_data):
     """Benchmark adjoint operation."""
     benchmark(operator.adj_op, kspace_data)
+
+
+def test_dataconsistency_perf(benchmark, operator, image_data, kspace_data):
+    """Benchmark data consistency operation."""
+    benchmark(operator.data_consistency(image_data, kspace_data))
