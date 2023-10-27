@@ -120,4 +120,4 @@ def test_dataconsistency_perf(benchmark, operator):
     kspace_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
     kspace_data += np.random.rand(*shape).astype(operator.cpx_dtype)
 
-    benchmark(operator.data_consistency(image_data, kspace_data))
+    benchmark(operator.data_consistency, image_data, kspace_data)
