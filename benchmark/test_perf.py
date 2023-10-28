@@ -15,14 +15,17 @@ def traj_radial2D(Nc=16, Ns=512):
 N_COILS_BIG = 32
 N_COILS_SMALL = 4
 
-BACKENDS = [
-    (b, None)
-    for b in list_backends(True)
-    if ("stacked" not in b) and (b not in ["numpy", "pynfft"])
+SELECT_BACKENDS = [
+    "cufinufft",
+    "finufft",
+    "gpunufft",
+    "bart",
+    "sigpy",
 ]
 SHAPE = (384, 384, 208)
 STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b]
-STACKED_BACKENDS += [("stacked", f"{{'backend':'{b}'}}") for b in BACKENDS]
+STACKED_BACKENDS += [("stacked", f"{{'backend':'{b}'}}") for b in SELECT_BACKENDS]
+BACKENDS = [(b, None) for b in SELECT_BACKENDS]
 
 
 @fixture(scope="module")
