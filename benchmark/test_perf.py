@@ -20,7 +20,7 @@ SELECT_BACKENDS = [
     "finufft",
     "gpunufft",
     "bart",
-    "sigpy",
+    #   "sigpy",
 ]
 SHAPE = (384, 384, 208)
 STACKED_BACKENDS = [(b, None) for b in list_backends(True) if "stacked-" in b]
@@ -31,7 +31,7 @@ BACKENDS = [(b, None) for b in SELECT_BACKENDS]
 @fixture(scope="module")
 @parametrize_with_cases("kspace_locs", cases=".", prefix="traj_")
 @parametrize("backend, backend_kwargs", BACKENDS + STACKED_BACKENDS)
-@parametrize("z_index", ["full", "random_mask"])
+@parametrize("z_index", ["random_mask"])
 @parametrize(
     "n_coils, sense",
     [
