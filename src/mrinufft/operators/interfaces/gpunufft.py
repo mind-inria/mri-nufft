@@ -174,6 +174,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         if True, the density compensation is estimated from the samples
         locations. If an array is passed, it is used as the density
         compensation.
+    squeeze_dims: bool default True
+        This has no effect, gpuNUFFT always squeeze the data.
     smaps: np.ndarray default None
         Holds the sensitivity maps for SENSE reconstruction.
     kwargs: extra keyword args
@@ -184,7 +186,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
     backend = "gpunufft"
     available = GPUNUFFT_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, density=None, smaps=None, **kwargs):
+    def __init__(
+        self,
+        samples,
+        shape,
+        n_coils=1,
+        density=None,
+        smaps=None,
+        squeeze_dims=False,
+        **kwargs,
+    ):
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
                 "gpuNUFFT library is not installed, "
