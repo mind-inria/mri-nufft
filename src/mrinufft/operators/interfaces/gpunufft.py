@@ -253,10 +253,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """
         return self.impl.adj_op(coeffs, *args)
 
-    def data_consistency(self, data, obs_data):
-        """Compute the data consistency gradient direction."""
-        return self.adj_op(self.op(data) - obs_data)
-
     @property
     def uses_sense(self):
         """Return True if the Fourier Operator uses the SENSE method."""

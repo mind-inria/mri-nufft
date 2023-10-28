@@ -584,7 +584,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             ret = self.raw_op.type1(coeffs_d, image_d)
         return ret
 
-    def data_consistency(self, image_data, obs_data):
+    def get_grad(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
@@ -610,15 +610,15 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._set_pts(1)
 
         if self.uses_sense:
-            dc_func = self._data_consistency_sense
+            dc_func = self._grad_sense
         else:
-            dc_func = self._data_consistency_calibless
+            dc_func = self._grad_calibless
         ret = dc_func(image_data, obs_data)
         if not self.persist_plan:
             self.raw_op._destroy_plan(1)
         return self._safe_squeeze(ret)
 
-    def _data_consistency_sense(self, image_data, obs_data):
+    def _grad_sense(self, image_data, obs_data):
         img_d = cp.array(image_data, copy=True)
         coil_img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
         coil_ksp_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)
@@ -663,7 +663,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 sense_adj_mono(img_d, coil_img_d, self._smap_d)
         return img_d
 
-    def _data_consistency_calibless(self, image_data, obs_data):
+    def _grad_calibless(self, image_data, obs_data):
         if is_cuda_array(image_data):
             img_d = cp.empty((self.n_coils, *self.shape), dtype=self.cpx_dtype)
             ksp_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)

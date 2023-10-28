@@ -170,6 +170,14 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    def get_grad(self, image, obs_data):
+        """Compute the gradient data consistency.
+
+        This is the naive implementation using adj_op(op(x)-y).
+        Specific backend can (and should!) implement a more efficient version.
+        """
+        return self.adj_op(self.op(image) - obs_data)
+
     def with_off_resonnance_correction(self, B, C, indices):
         """Return a new operator with Off Resonnance Correction."""
         from ..off_resonnance import MRIFourierCorrected
@@ -479,8 +487,8 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
-    def data_consistency(self, image_data, obs_data):
-        """Compute the gradient estimation directly on gpu.
+    def get_grad(self, image_data, obs_data):
+        """Compute the gradient data consistency.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
         on a per coil basis. By doing the computation coil wise,

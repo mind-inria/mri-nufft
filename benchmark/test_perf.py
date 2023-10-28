@@ -87,8 +87,6 @@ def operator(
         **backend_kwargs,
     )
 
-    return img
-
 
 def test_forward_perf(benchmark, operator):
     """Generate a random image."""
@@ -110,7 +108,7 @@ def test_adjoint_perf(benchmark, operator):
     benchmark(operator.adj_op, kspace_data)
 
 
-def test_dataconsistency_perf(benchmark, operator):
+def test_grad_perf(benchmark, operator):
     """Benchmark data consistency operation."""
     if operator.uses_sense:
         shape = operator.shape
@@ -123,4 +121,4 @@ def test_dataconsistency_perf(benchmark, operator):
     kspace_data = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
     kspace_data += np.random.rand(*shape).astype(operator.cpx_dtype)
 
-    benchmark(operator.data_consistency, image_data, kspace_data)
+    benchmark(operator.get_grad, image_data, kspace_data)
