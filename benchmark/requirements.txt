@@ -1,0 +1,6 @@
+pandas
+seaborn
+matplotlib
+numpy
+hydra-core
+hydra-callbacks
