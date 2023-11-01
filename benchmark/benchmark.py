@@ -112,6 +112,11 @@ def main_app(cfg: DictConfig) -> None:
         monit_values = {
             "backend": cfg.backend,
             "task": task,
+            "n_coils": nufft.n_coils,
+            "shape": nufft.shape,
+            "n_samples": nufft.n_samples,
+            "dim": len(nufft.shape),
+            "sense": nufft.uses_sense,
             "run": i,
             "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
             "mem_avg": np.mean(values["rss_GiB"]),
