@@ -1,0 +1,21 @@
+n_runs: 5
+
+data:
+  n_coils: 4
+  smaps: true
+  dtype: "complex64"
+
+trajectory: "trajs/stacked_radial3d.bin"
+task:
+  - forward
+  - adjoint
+  - grad
+backend: "finufft"
+
+monitor:
+  interval: 0.5
+  gpu: true
+
+hydra:
+  job:
+    chdir: true
