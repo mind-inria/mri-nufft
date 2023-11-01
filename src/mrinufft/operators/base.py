@@ -6,7 +6,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 :author: Pierre-Antoine Comby
 """
 from abc import ABC, abstractmethod
-
+from functools import partial
 import warnings
 import numpy as np
 
@@ -101,7 +101,15 @@ def get_operator(backend_name: str, *args, **kwargs):
     try:
         available, operator = FourierOperatorBase.interfaces[backend_name]
     except KeyError as exc:
-        raise ValueError(f"backend {backend_name} is not available") from exc
+        if not backend_name.startswith("stacked-"):
+            raise ValueError(f"backend {backend_name} is not available") from exc
+        # try to get the backend with stacked
+        # Dedicated registered stacked backend (like stacked-cufinufft)
+        # have be found earlier.
+        backend = backend_name.split("-")[1]
+        available, operator = get_operator("stacked")
+        operator = partial(operator, backend=backend)
+
     if not available:
         raise ValueError(
             f"backend {backend_name} is registered, but dependencies are not met."
