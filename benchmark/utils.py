@@ -32,6 +32,7 @@ def get_smaps(
         except FileNotFoundError:
             smaps = _birdcage_maps((n_coils, *shape), nzz=n_coils, dtype=dtype)
             np.save(f"{cachedir}/smaps_{n_coils}_{shape}.npy", smaps)
+        return smaps
     else:
         raise NotImplementedError
 

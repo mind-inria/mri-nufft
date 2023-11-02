@@ -1,3 +1,9 @@
+"""
+Benchmark script using hydra.
+
+Run it with python benchmark.py --config-name ismrm2024 to reproduce results of abstract.
+
+"""
 import warnings
 import csv
 import hydra
@@ -59,7 +65,7 @@ def get_data(cfg):
     smaps = None
     if cfg.data.n_coils > 1:
         smaps_true = get_smaps(XYZ, C)
-        if cfg.data.smaps and cfg.data.n_coils > 1:
+        if cfg.data.smaps:
             smaps = smaps_true
         else:
             # expand the data to multicoil
@@ -80,7 +86,9 @@ def main_app(cfg: DictConfig) -> None:
     nufft = None
 
     data, ksp_data, trajectory, smaps, shape, n_coils = get_data(cfg)
-    print(data.shape, ksp_data.shape, trajectory.shape, n_coils, shape)
+    logger.debug(
+        f"{data.shape}, {ksp_data.shape}, {trajectory.shape}, {n_coils}, {shape}"
+    )
     monit = ResourceMonitorService(
         os.getpid(),
         interval=cfg.monitor.interval,
