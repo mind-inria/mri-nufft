@@ -8,6 +8,7 @@ import warnings
 import csv
 import hydra
 import logging
+import time
 import os
 import numpy as np
 from itertools import product
@@ -95,56 +96,64 @@ def main_app(cfg: DictConfig) -> None:
         gpu_monit=cfg.monitor.gpu,
     )
 
-    for task, i in product(cfg.task, range(cfg.n_runs)):
-        nufft = nufftKlass(
-            trajectory,
-            shape,
-            n_coils=n_coils,
-            smaps=smaps,
-            **getattr(cfg.backend, "kwargs", {}),
-        )
-        with (
-            monit,
-            PerfLogger(logger, name=f"{cfg.backend}_{task}, #{i}") as perflog,
-        ):
-            if task == "forward":
-                nufft.op(data)
-            elif task == "adjoint":
-                nufft.adj_op(ksp_data)
-            elif task == "grad":
-                nufft.get_grad(data, ksp_data)
-            else:
-                raise ValueError(f"Unknown task {task}")
-
-        values = monit.get_values()
-        monit_values = {
+    for task in product(cfg.task):
+        tic = time.perf_counter()
+        toc = tic
+        i = 0
+        run_config = {
             "backend": cfg.backend,
-            "task": task,
             "n_coils": nufft.n_coils,
             "shape": nufft.shape,
             "n_samples": nufft.n_samples,
             "dim": len(nufft.shape),
             "sense": nufft.uses_sense,
-            "run": i,
-            "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
-            "mem_avg": np.mean(values["rss_GiB"]),
-            "mem_peak": np.max(values["rss_GiB"]),
-            "cpu_avg": np.mean(values["cpus"]),
-            "cpu_peak": np.max(values["cpus"]),
+            "task": task,
         }
-        if cfg.monitor.gpu:
-            gpu_keys = [k for k in values.keys() if "gpu" in k]
-            for k in gpu_keys:
-                monit_values[f"{k}_avg"] = np.mean(values[k])
-                monit_values[f"{k}_peak"] = np.max(values[k])
+        while tic - toc < cfg.max_time:
+            nufft = nufftKlass(
+                trajectory,
+                shape,
+                n_coils=n_coils,
+                smaps=smaps,
+                **getattr(cfg.backend, "kwargs", {}),
+            )
+            with (
+                monit,
+                PerfLogger(logger, name=f"{cfg.backend}_{task}, #{i}") as perflog,
+            ):
+                if task == "forward":
+                    nufft.op(data)
+                elif task == "adjoint":
+                    nufft.adj_op(ksp_data)
+                elif task == "grad":
+                    nufft.get_grad(data, ksp_data)
+                else:
+                    raise ValueError(f"Unknown task {task}")
+            toc = time.perf_counter()
+            i += 1
+            values = monit.get_values()
+            monit_values = {
+                "run": i,
+                "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
+                "mem_avg": np.mean(values["rss_GiB"]),
+                "mem_peak": np.max(values["rss_GiB"]),
+                "cpu_avg": np.mean(values["cpus"]),
+                "cpu_peak": np.max(values["cpus"]),
+            }
+            if cfg.monitor.gpu:
+                gpu_keys = [k for k in values.keys() if "gpu" in k]
+                for k in gpu_keys:
+                    monit_values[f"{k}_avg"] = np.mean(values[k])
+                    monit_values[f"{k}_peak"] = np.max(values[k])
 
-            del nufft
-        with open("results.csv", "a") as f:
-            writer = csv.DictWriter(f, fieldnames=monit_values.keys())
-            f.seek(0, os.SEEK_END)
-            if not f.tell():
-                writer.writeheader()
-            writer.writerow(monit_values)
+                del nufft
+            with open("results.csv", "a") as f:
+                row_dict = run_config | monit_values
+                writer = csv.DictWriter(f, fieldnames=row_dict.keys())
+                f.seek(0, os.SEEK_END)
+                if not f.tell():
+                    writer.writeheader()
+                writer.writerow(row_dict)
 
 
 if __name__ == "__main__":
