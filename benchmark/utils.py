@@ -1,5 +1,6 @@
 """Utility for the benchmark."""
 import numpy as np
+import os
 
 AnyShape = tuple[int, ...]
 
@@ -9,6 +10,7 @@ def get_smaps(
     n_coils: int,
     antenna: str = "birdcage",
     dtype: np.dtype = np.complex64,
+    cachedir="/tmp/smaps",
 ) -> np.ndarray:
     """Get sensitivity maps for a specific antenna.
 
@@ -24,7 +26,12 @@ def get_smaps(
         return datatype for the sensitivity maps.
     """
     if antenna == "birdcage":
-        return _birdcage_maps((n_coils, *shape), nzz=n_coils, dtype=dtype)
+        try:
+            os.makedirs(cachedir, exist_ok=True)
+            smaps = np.load(f"{cachedir}/smaps_{n_coils}_{shape}.npy")
+        except FileNotFoundError:
+            smaps = _birdcage_maps((n_coils, *shape), nzz=n_coils, dtype=dtype)
+            np.save(f"{cachedir}/smaps_{n_coils}_{shape}.npy", smaps)
     else:
         raise NotImplementedError
 
