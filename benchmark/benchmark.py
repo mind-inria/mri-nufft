@@ -97,7 +97,7 @@ def main_app(cfg: DictConfig) -> None:
         )
         with (
             monit,
-            PerfLogger(logger, name=f"{nufft.backend}_{task}, #{i}") as perflog,
+            PerfLogger(logger, name=f"{cfg.backend}_{task}, #{i}") as perflog,
         ):
             if task == "forward":
                 nufft.op(data)
