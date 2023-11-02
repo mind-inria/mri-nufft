@@ -56,14 +56,14 @@ def get_data(cfg):
     ksp_data = 1j * np.random.randn(C, K).astype(cpx_type)
     ksp_data += np.random.randn(C, K).astype(cpx_type)
 
-    # smaps
-    smaps_true = get_smaps(XYZ, C)
-    if cfg.data.smaps:
-        smaps = smaps_true
-    else:
-        # expand the data to multicoil
-        data = data[None, ...] * smaps_true
-        smaps = None
+    smaps = None
+    if cfg.data.n_coils > 1:
+        smaps_true = get_smaps(XYZ, C)
+        if cfg.data.smaps and cfg.data.n_coils > 1:
+            smaps = smaps_true
+        else:
+            # expand the data to multicoil
+            data = data[None, ...] * smaps_true
 
     return (data, ksp_data, trajectory, smaps, XYZ, C)
 
