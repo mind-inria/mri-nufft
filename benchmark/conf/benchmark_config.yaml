@@ -1,11 +1,15 @@
-n_runs: 5
+defaults:
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+max_time: 10.0
 
 data:
-  n_coils: 4
-  smaps: true
+  n_coils: 1
+  smaps: false
   dtype: "complex64"
 
-trajectory: "trajs/stacked_radial3d.bin"
+trajectory: "trajs/trajectory_floret.bin"
 task:
   - forward
   - adjoint

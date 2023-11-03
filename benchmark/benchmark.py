@@ -84,39 +84,36 @@ def main_app(cfg: DictConfig) -> None:
     """Run the benchmark."""
     # TODO Add a DSL like bart::extra_args:value::extra_arg2:value2 etc
     nufftKlass = get_operator(cfg.backend)
-    nufft = None
 
     data, ksp_data, trajectory, smaps, shape, n_coils = get_data(cfg)
     logger.debug(
         f"{data.shape}, {ksp_data.shape}, {trajectory.shape}, {n_coils}, {shape}"
     )
     monit = ResourceMonitorService(
-        os.getpid(),
-        interval=cfg.monitor.interval,
-        gpu_monit=cfg.monitor.gpu,
+        interval=cfg.monitor.interval, gpu_monit=cfg.monitor.gpu
     )
 
-    for task in product(cfg.task):
+    nufft = nufftKlass(
+        trajectory,
+        shape,
+        n_coils=n_coils,
+        smaps=smaps,
+        **getattr(cfg.backend, "kwargs", {}),
+    )
+    run_config = {
+        "backend": cfg.backend,
+        "n_coils": nufft.n_coils,
+        "shape": nufft.shape,
+        "n_samples": nufft.n_samples,
+        "dim": len(nufft.shape),
+        "sense": nufft.uses_sense,
+    }
+    for task in cfg.task:
         tic = time.perf_counter()
         toc = tic
-        i = 0
-        run_config = {
-            "backend": cfg.backend,
-            "n_coils": nufft.n_coils,
-            "shape": nufft.shape,
-            "n_samples": nufft.n_samples,
-            "dim": len(nufft.shape),
-            "sense": nufft.uses_sense,
-            "task": task,
-        }
-        while tic - toc < cfg.max_time:
-            nufft = nufftKlass(
-                trajectory,
-                shape,
-                n_coils=n_coils,
-                smaps=smaps,
-                **getattr(cfg.backend, "kwargs", {}),
-            )
+        i = -1
+        while toc - tic < cfg.max_time:
+            i += 1
             with (
                 monit,
                 PerfLogger(logger, name=f"{cfg.backend}_{task}, #{i}") as perflog,
@@ -130,9 +127,9 @@ def main_app(cfg: DictConfig) -> None:
                 else:
                     raise ValueError(f"Unknown task {task}")
             toc = time.perf_counter()
-            i += 1
             values = monit.get_values()
             monit_values = {
+                "task": task,
                 "run": i,
                 "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
                 "mem_avg": np.mean(values["rss_GiB"]),
