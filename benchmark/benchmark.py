@@ -24,6 +24,12 @@ from hydra_callbacks.logger import PerfLogger
 from utils import get_smaps
 
 
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 warnings.filterwarnings(
@@ -143,7 +149,6 @@ def main_app(cfg: DictConfig) -> None:
                     monit_values[f"{k}_avg"] = np.mean(values[k])
                     monit_values[f"{k}_peak"] = np.max(values[k])
 
-                del nufft
             with open("results.csv", "a") as f:
                 row_dict = run_config | monit_values
                 writer = csv.DictWriter(f, fieldnames=row_dict.keys())
@@ -151,6 +156,9 @@ def main_app(cfg: DictConfig) -> None:
                 if not f.tell():
                     writer.writeheader()
                 writer.writerow(row_dict)
+    del nufft
+    if CUPY_AVAILABLE:
+        cp.get_default_memory_pool().free_all_blocks()
 
 
 if __name__ == "__main__":
