@@ -98,22 +98,21 @@ def get_operator(backend_name: str, *args, **kwargs):
     ------
     ValueError if the backend is not available.
     """
+    available = True
     try:
         available, operator = FourierOperatorBase.interfaces[backend_name]
     except KeyError as exc:
         if not backend_name.startswith("stacked-"):
-            raise ValueError(f"backend {backend_name} is not available") from exc
+            raise ValueError(f"backend {backend_name} does not exist") from exc
         # try to get the backend with stacked
         # Dedicated registered stacked backend (like stacked-cufinufft)
         # have be found earlier.
         backend = backend_name.split("-")[1]
-        available, operator = get_operator("stacked")
+        operator = get_operator("stacked")
         operator = partial(operator, backend=backend)
 
     if not available:
-        raise ValueError(
-            f"backend {backend_name} is registered, but dependencies are not met."
-        )
+        raise ValueError(f"backend {backend_name} found, but dependencies are not met.")
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
