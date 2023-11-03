@@ -98,13 +98,15 @@ def main_app(cfg: DictConfig) -> None:
     monit = ResourceMonitorService(
         interval=cfg.monitor.interval, gpu_monit=cfg.monitor.gpu
     )
-
+    kwargs = {}
+    if "stacked" in cfg.backend:
+        kwargs["z_index"] = "auto"
     nufft = nufftKlass(
         trajectory,
         shape,
         n_coils=n_coils,
         smaps=smaps,
-        **getattr(cfg.backend, "kwargs", {}),
+        **kwargs,
     )
     run_config = {
         "backend": cfg.backend,
@@ -137,7 +139,7 @@ def main_app(cfg: DictConfig) -> None:
             monit_values = {
                 "task": task,
                 "run": i,
-                "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
+                "run_time": perflog.get_timer(f"{cfg.backend}_{task}, #{i}"),
                 "mem_avg": np.mean(values["rss_GiB"]),
                 "mem_peak": np.max(values["rss_GiB"]),
                 "cpu_avg": np.mean(values["cpus"]),
