@@ -54,7 +54,7 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     )
 
     # Apply precession to the first cone
-    trajectory = precess(cone, nb_repetitions=Nc, z_tilt=tilt, mode="polar")
+    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt, mode="polar")
 
     return trajectory
 
@@ -141,7 +141,7 @@ def initialize_3D_floret(
     # Initialize first cone
     cone = conify(
         spiral,
-        nb_repetitions=nb_cones_per_axis,
+        nb_cones=nb_cones_per_axis,
         z_tilt=cone_tilt,
         in_out=in_out,
         max_angle=max_angle,
@@ -334,7 +334,7 @@ def initialize_3D_seiffert_spiral(
     spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
     # Apply precession to the first spiral
-    trajectory = precess(spiral, nb_repetitions=Nc, z_tilt=tilt, mode="polar")
+    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt, mode="polar")
 
     # Handle in_out case
     if in_out:
