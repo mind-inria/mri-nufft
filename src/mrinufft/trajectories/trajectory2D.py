@@ -24,7 +24,7 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -53,13 +53,13 @@ def initialize_2D_spiral(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
     nb_revolutions : int, optional
         Number of revolutions, by default 1
-    spiral : str, optional
+    spiral : str, float, optional
         Spiral type, by default "archimedes"
 
     Returns
@@ -134,7 +134,7 @@ def initialize_2D_sinusoide(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
