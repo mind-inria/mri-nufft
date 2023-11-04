@@ -539,7 +539,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     - "mri golden": tilt of the golden angle used in MRI :math:`\pi(\sqrt{5}-1)/2`
 
     """
-    if not isinstance(tilt, str):
+    if not (isinstance(tilt, str) or tilt is None):
         return tilt
     elif tilt is None or tilt == "none":
         return 0

@@ -62,15 +62,60 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
 def initialize_3D_floret(
     Nc,
     Ns,
-    nb_revolutions=1,
-    nb_cones=None,
-    spiral_tilt="uniform",
-    cone_tilt="golden",
     in_out=False,
+    nb_revolutions=1,
+    spiral_tilt="uniform",
     spiral="fermat",
+    nb_cones=None,
+    cone_tilt="golden",
     max_angle=np.pi / 4,
-    axes=(0, 1, 2),
+    axes=(2,),
 ):
+    """Initialize 3D trajectories with FLORET.
+
+    This implementation is based on the work from [Pip+11]_.
+    The acronym FLORET stands for Fermat Looped, Orthogonally
+    Encoded Trajectories. It consists of Fermat spirals
+    projected onto 3D cones along the kz-axis.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_revolutions : float, optional
+        Number of revolutions of the spirals, by default 1
+    spiral_tilt : str, float, optional
+        Tilt of the spirals around the kz-axis, by default "uniform"
+    spiral : str, float, optional
+        Spiral type, by default "fermat"
+    nb_cones : int, optional
+        Number of cones used to partition the k-space sphere,
+        with `None` making one cone per shot, by default `None`.
+    cone_tilt : str, float, optional
+        Tilt of the cones around the kz-axis, by default "golden"
+    max_angle : float, optional
+        Maximum polar angle starting from the kx-ky plane,
+        by default pi / 4
+    axes : tuple, optional
+        Axes over which cones are created, by default (2,)
+
+    Returns
+    -------
+    array_like
+        3D FLORET trajectory
+
+    References
+    ----------
+    .. [Pip+11] Pipe, James G., Nicholas R. Zwart, Eric A. Aboussouan,
+       Ryan K. Robison, Ajit Devaraj, and Kenneth O. Johnson.
+       "A new design and rationale for 3D orthogonally
+       oversampled k‐space trajectories."
+       Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.
+    """
     # Define variables for convenience
     nb_cones = Nc if (nb_cones is None) else nb_cones
     Nd = len(axes)
@@ -103,6 +148,7 @@ def initialize_3D_floret(
     )
 
     # Duplicate cone along axes
+    axes = [2 - ax for ax in axes]  # Default axis is kz, not kx
     trajectory = duplicate_along_axes(cone, axes=axes)
     return trajectory
 
