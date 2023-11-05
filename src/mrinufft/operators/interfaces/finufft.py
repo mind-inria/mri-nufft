@@ -109,6 +109,7 @@ class MRIfinufft(FourierOperatorCPU):
         n_trans=1,
         smaps=None,
         squeeze_dims=True,
+        **kwargs,
     ):
         super().__init__(
             samples,
@@ -125,4 +126,5 @@ class MRIfinufft(FourierOperatorCPU):
             samples,
             shape,
             n_trans=n_trans,
+            **kwargs,
         )
