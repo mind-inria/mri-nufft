@@ -88,7 +88,7 @@ def get_data(cfg):
 def main_app(cfg: DictConfig) -> None:
     """Run the benchmark."""
     # TODO Add a DSL like bart::extra_args:value::extra_arg2:value2 etc
-    nufftKlass = get_operator(cfg.backend)
+    nufftKlass = get_operator(cfg.backend.name)
 
     data, ksp_data, trajectory, smaps, shape, n_coils = get_data(cfg)
     logger.debug(
@@ -98,7 +98,7 @@ def main_app(cfg: DictConfig) -> None:
         interval=cfg.monitor.interval, gpu_monit=cfg.monitor.gpu
     )
     kwargs = {}
-    if "stacked" in cfg.backend:
+    if "stacked" in cfg.backend.name:
         kwargs["z_index"] = "auto"
     nufft = nufftKlass(
         trajectory,
@@ -108,7 +108,9 @@ def main_app(cfg: DictConfig) -> None:
         **kwargs,
     )
     run_config = {
-        "backend": cfg.backend,
+        "backend": cfg.backend.name,
+        "eps": cfg.backend.eps,
+        "upsampfac": cfg.backend.upsampfac,
         "n_coils": nufft.n_coils,
         "shape": nufft.shape,
         "n_samples": nufft.n_samples,
@@ -119,17 +121,6 @@ def main_app(cfg: DictConfig) -> None:
         tic = time.perf_counter()
         toc = tic
         i = -1
-        run_config = {
-            "backend": cfg.backend.name,
-            "eps": cfg.backend.eps,
-            "upsampfac": cfg.backend.upsampfac,
-            "n_coils": nufft.n_coils,
-            "shape": nufft.shape,
-            "n_samples": nufft.n_samples,
-            "dim": len(nufft.shape),
-            "sense": nufft.uses_sense,
-            "task": task,
-        }
         while tic - toc < cfg.max_time:
             nufft = nufftKlass(
                 trajectory,
