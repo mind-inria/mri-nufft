@@ -121,7 +121,8 @@ def main_app(cfg: DictConfig) -> None:
         tic = time.perf_counter()
         toc = tic
         i = -1
-        while tic - toc < cfg.max_time:
+        while toc - tic < cfg.max_time:
+            i += 1
             nufft = nufftKlass(
                 trajectory,
                 shape,
