@@ -14,7 +14,12 @@ task:
   - forward
   - adjoint
   - grad
-backend: "finufft"
+
+
+backend:
+  name: "finufft"
+  eps: 1e-3
+  upsampfac: 2.0
 
 monitor:
   interval: 0.5

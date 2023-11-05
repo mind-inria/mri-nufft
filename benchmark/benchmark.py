@@ -117,6 +117,7 @@ def main_app(cfg: DictConfig) -> None:
         "dim": len(nufft.shape),
         "sense": nufft.uses_sense,
     }
+    result_file = f"{cfg.backend.name}_{cfg.backend.upsampfac}_{cfg.backend.eps}_{cfg.data.n_coils}.csv"
     for task in cfg.task:
         tic = time.perf_counter()
         toc = tic
@@ -160,7 +161,7 @@ def main_app(cfg: DictConfig) -> None:
                     monit_values[f"{k}_avg"] = np.mean(values[k])
                     monit_values[f"{k}_peak"] = np.max(values[k])
 
-            with open("results.csv", "a") as f:
+            with open(result_file, "a") as f:
                 row_dict = run_config | monit_values
                 writer = csv.DictWriter(f, fieldnames=row_dict.keys())
                 f.seek(0, os.SEEK_END)
