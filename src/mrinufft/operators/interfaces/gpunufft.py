@@ -228,7 +228,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             n_coils=self.n_coils,
             density_comp=self.density,
             smaps=smaps,
-            kernel_width=kwargs.get("kernel_width", -int(np.log(eps))),
+            kernel_width=kwargs.get("kernel_width", -int(np.log10(eps))),
             **self.kwargs,
         )
 

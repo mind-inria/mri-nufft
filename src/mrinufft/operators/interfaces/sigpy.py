@@ -18,9 +18,41 @@ except ImportError:
 
 
 class RawSigpyNUFFT:
-    """Raw interface to SigPy output /= width**ndim NUFFT."""
+    """Raw interface to SigPy output /= width**ndim NUFFT.
 
-    def __init__(self, samples, shape, oversamp=1.25, width=4, n_trans=1, **kwargs):
+    Parameters
+    ----------
+    samples: np.ndarray
+        the kspace sample locations in the Fourier domain,
+        normalized between -0.5 and 0.5
+    shape: tuple of int
+        shape of the image
+    oversamp: float default 1.25
+        oversampling factor
+    width: int default 4
+        interpolation kernel width (usually 3 to 7)
+    upsampfac: float, default 1.25
+        Same as oversamp
+    eps: float, default 1e-4
+        Other way of specifiying width.
+    """
+
+    def __init__(
+        self,
+        samples,
+        shape,
+        oversamp=1.25,
+        width=4,
+        eps=None,
+        upsampfac=None,
+        n_trans=1,
+        **kwargs,
+    ):
+        if upsampfac is not None:
+            oversamp = upsampfac
+        if eps is not None:
+            width = -int(np.log10(eps))
+
         self.shape = shape
         shape = np.array(shape)
         # scale in FOV/2 units
