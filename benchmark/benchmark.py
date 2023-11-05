@@ -13,7 +13,6 @@ import os
 import numpy as np
 from itertools import product
 from omegaconf import DictConfig
-from time import perf_counter
 from pathlib import Path
 
 from mrinufft import get_operator
@@ -101,7 +100,9 @@ def main_app(cfg: DictConfig) -> None:
         toc = tic
         i = 0
         run_config = {
-            "backend": cfg.backend,
+            "backend": cfg.backend.name,
+            "eps": cfg.backend.eps,
+            "upsampfac": cfg.backend.upsampfac,
             "n_coils": nufft.n_coils,
             "shape": nufft.shape,
             "n_samples": nufft.n_samples,
@@ -115,11 +116,12 @@ def main_app(cfg: DictConfig) -> None:
                 shape,
                 n_coils=n_coils,
                 smaps=smaps,
-                **getattr(cfg.backend, "kwargs", {}),
+                eps=cfg.backend.eps,
+                upsampfac=cfg.backend.upsampfac,
             )
             with (
                 monit,
-                PerfLogger(logger, name=f"{cfg.backend}_{task}, #{i}") as perflog,
+                PerfLogger(logger, name=f"{cfg.backend.name}_{task}, #{i}") as perflog,
             ):
                 if task == "forward":
                     nufft.op(data)
@@ -134,7 +136,7 @@ def main_app(cfg: DictConfig) -> None:
             values = monit.get_values()
             monit_values = {
                 "run": i,
-                "run_time": perflog.get_timer(f"{nufft.backend}_{task}, #{i}"),
+                "run_time": perflog.get_timer(f"{cfg.backend.name}_{task}, #{i}"),
                 "mem_avg": np.mean(values["rss_GiB"]),
                 "mem_peak": np.max(values["rss_GiB"]),
                 "cpu_avg": np.mean(values["cpus"]),

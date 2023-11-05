@@ -14,7 +14,11 @@ task:
   - forward
   - adjoint
   - grad
-backend: "finufft"
+
+backend:
+  name: "finufft"
+  eps: 1e-3
+  upsampfac: 2
 
 monitor:
   interval: 0.5
@@ -26,9 +30,12 @@ hydra:
   mode: MULTIRUN
   sweeper:
     params:
-      trajectory: trajs/trajectory_floret.bin, trajs/trajectory_seiffert_spirals.bin
-      backend: finufft, cufinufft, gpunufft, bart
+      trajectory: trajs/trajectory_floret.bin
       data: "{n_coils: 1, smaps:false},{n_coils: 8, smaps:true},{n_coils:32, smaps: true}"
+      backend.name: finufft, gpunufft, cufinufft
+      backend.upsampfac: 1.25, 2.0
+      backend.eps: 1e-3, 1e-4, 1e-5
+
   sweep:
     dir: /volatile/pierre-antoine/mri-nufft/benchmark/3d-results/${now:%Y-%m-%d_%H-%M-%S}/
     subdir: ${hydra.job.num}
