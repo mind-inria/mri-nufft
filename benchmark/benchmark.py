@@ -23,6 +23,12 @@ from hydra_callbacks.logger import PerfLogger
 from utils import get_smaps
 
 
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 warnings.filterwarnings(
@@ -83,22 +89,36 @@ def main_app(cfg: DictConfig) -> None:
     """Run the benchmark."""
     # TODO Add a DSL like bart::extra_args:value::extra_arg2:value2 etc
     nufftKlass = get_operator(cfg.backend)
-    nufft = None
 
     data, ksp_data, trajectory, smaps, shape, n_coils = get_data(cfg)
     logger.debug(
         f"{data.shape}, {ksp_data.shape}, {trajectory.shape}, {n_coils}, {shape}"
     )
     monit = ResourceMonitorService(
-        os.getpid(),
-        interval=cfg.monitor.interval,
-        gpu_monit=cfg.monitor.gpu,
+        interval=cfg.monitor.interval, gpu_monit=cfg.monitor.gpu
     )
-
-    for task in product(cfg.task):
+    kwargs = {}
+    if "stacked" in cfg.backend:
+        kwargs["z_index"] = "auto"
+    nufft = nufftKlass(
+        trajectory,
+        shape,
+        n_coils=n_coils,
+        smaps=smaps,
+        **kwargs,
+    )
+    run_config = {
+        "backend": cfg.backend,
+        "n_coils": nufft.n_coils,
+        "shape": nufft.shape,
+        "n_samples": nufft.n_samples,
+        "dim": len(nufft.shape),
+        "sense": nufft.uses_sense,
+    }
+    for task in cfg.task:
         tic = time.perf_counter()
         toc = tic
-        i = 0
+        i = -1
         run_config = {
             "backend": cfg.backend.name,
             "eps": cfg.backend.eps,
@@ -132,9 +152,9 @@ def main_app(cfg: DictConfig) -> None:
                 else:
                     raise ValueError(f"Unknown task {task}")
             toc = time.perf_counter()
-            i += 1
             values = monit.get_values()
             monit_values = {
+                "task": task,
                 "run": i,
                 "run_time": perflog.get_timer(f"{cfg.backend.name}_{task}, #{i}"),
                 "mem_avg": np.mean(values["rss_GiB"]),
@@ -148,7 +168,6 @@ def main_app(cfg: DictConfig) -> None:
                     monit_values[f"{k}_avg"] = np.mean(values[k])
                     monit_values[f"{k}_peak"] = np.max(values[k])
 
-                del nufft
             with open("results.csv", "a") as f:
                 row_dict = run_config | monit_values
                 writer = csv.DictWriter(f, fieldnames=row_dict.keys())
@@ -156,6 +175,9 @@ def main_app(cfg: DictConfig) -> None:
                 if not f.tell():
                     writer.writeheader()
                 writer.writerow(row_dict)
+    del nufft
+    if CUPY_AVAILABLE:
+        cp.get_default_memory_pool().free_all_blocks()
 
 
 if __name__ == "__main__":
