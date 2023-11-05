@@ -36,6 +36,7 @@ class gpuNUFFT:
         kernel_width=3,
         sector_width=8,
         osf=2,
+        upsampfac=None,
         balance_workload=True,
         smaps=None,
     ):
@@ -60,6 +61,8 @@ class gpuNUFFT:
             sector width to use
         osf: int default 2
             oversampling factor (usually between 1 and 2)
+        upsampfac: int default 2
+            Same as osf.
         balance_workload: bool default True
             whether the workloads need to be balanced
         smaps: np.ndarray default None
@@ -83,6 +86,10 @@ class gpuNUFFT:
                 [np.reshape(smap_ch.T, smap_ch.size) for smap_ch in smaps]
             ).T
             self.uses_sense = True
+
+        if upsampfac is not None:
+            osf = upsampfac
+
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
             shape,
@@ -194,6 +201,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density=None,
         smaps=None,
         squeeze_dims=False,
+        eps=1e-3,
         **kwargs,
     ):
         if GPUNUFFT_AVAILABLE is False:
@@ -220,6 +228,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             n_coils=self.n_coils,
             density_comp=self.density,
             smaps=smaps,
+            kernel_width=kwargs.get("kernel_width", -int(np.log(eps))),
             **self.kwargs,
         )
 
