@@ -68,7 +68,7 @@ def initialize_3D_floret(
     spiral="fermat",
     nb_cones=None,
     cone_tilt="golden",
-    max_angle=np.pi / 4,
+    max_angle=np.pi / 2,
     axes=(2,),
 ):
     """Initialize 3D trajectories with FLORET.
@@ -99,7 +99,7 @@ def initialize_3D_floret(
         Tilt of the cones around the :math:`k_z`-axis, by default "golden"
     max_angle : float, optional
         Maximum polar angle starting from the :math:`k_x-k_y` plane,
-        by default pi / 4
+        by default pi / 2
     axes : tuple, optional
         Axes over which cones are created, by default (2,)
 

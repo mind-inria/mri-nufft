@@ -388,8 +388,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   size :math:`(N_c, N_s, N_d)`
 # - ``nb_cones (int)``: number of cones repeating ``trajectory``
 #   with conical distortion over the :math:`k_z`-axis.
-# - ``z_tilt (float)``: angle tilt between consecutive stacks
-#   over the :math:`k_z`-axis. ``(default "golden")``
+# - ``z_tilt (float)``: angle tilt between consecutive cones
+#   around the :math:`k_z`-axis. ``(default "golden")``
 # - ``in_out (bool)``: whether to account for the in-out
 #   nature of some trajectories to avoid hard angles
 #   around the center, ``(default False)``
