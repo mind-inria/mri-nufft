@@ -13,6 +13,7 @@ from .trajectory2D import (
 
 from .trajectory3D import (
     initialize_3D_cones,
+    initialize_3D_floret,
     initialize_3D_wave_caipi,
     initialize_3D_seiffert_spiral,
     initialize_3D_helical_shells,
@@ -38,6 +39,7 @@ __all__ = [
     "initialize_2D_waves",
     "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
+    "initialize_3D_floret",
     "initialize_3D_wave_caipi",
     "initialize_3D_seiffert_spiral",
     "initialize_3D_helical_shells",

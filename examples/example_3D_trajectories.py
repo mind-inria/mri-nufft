@@ -80,11 +80,12 @@ def show_trajectory(trajectory, one_shot, figure_size):
 # These options are used in the examples below as default values for all trajectories.
 
 # Trajectory parameters
-Nc = 100  # Number of shots
+Nc = 120  # Number of shots
 Ns = 500  # Number of samples per shot
 in_out = False  # Choose between in-out or center-out trajectories
-tilt = "uniform"  # Choose the angular distance between shots
-nb_shells = 8  # Number of concentric shells for shell-type trajectories
+tilt = "uniform"  # Angular distance between shots
+nb_repetitions = 6  # Number of stacks, rotations, cones, shells etc.
+nb_revolutions = 1  # Number of revolutions for base trajectories
 
 # Display parameters
 figure_size = 10  # Figure size for trajectory plots
@@ -217,6 +218,76 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 
 # %%
+# FLORET
+# ------
+#
+# A pattern introduced in [Pip+11]_ composed of Fermat spirals
+# folded into cones. The acronym stands for Fermat Looped, Orthogonally
+# Encoded Trajectories. Most arguments are related either to
+# ``initialize_2D_spiral`` or to ``tools.conify``.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D cones
+# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out).
+#   ``(default False)``. See 3D cones or 2D spiral
+# - ``nb_revolutions (float)``: number of revolutions performed from the
+#   center. ``(default 1)``. See 2D spiral
+# - ``spiral_tilt (str, float)``: angle between each spiral within a plane
+#   (in radians). ``(default "uniform")``. See 2D spiral
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "fermat")``. See 2D spiral
+# - ``nb_cones (int)``: number of cones around the :math:`k_z`-axis.
+#   See ``tools.conify``
+# - ``cone_tilt (float)``: angle tilt between consecutive cones
+#   around the :math:`k_z`-axis. ``(default "golden")``. See ``tools.conify``
+# - ``max_angle (float)``: maximum angle of the cones. ``(default pi / 2)``.
+#   See ``tools.conify``
+# - ``axes (tuple)``: axes over which cones are created, by default (2,)
+#
+
+trajectory = mn.initialize_3D_floret(
+    Nc,
+    Ns,
+    in_out=in_out,
+    nb_revolutions=nb_revolutions,
+    nb_cones=nb_repetitions,
+    max_angle=np.pi / 2,
+)[::-1]
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+#
+# ``axes (tuple)``
+# ~~~~~~~~~~~~~~~~
+#
+# Indices of the different axes over which cones are created,
+# with 0, 1, 2 corresponding to :math:`k_x, k_y, k_z` respectively.
+# The ``Nc`` shots and ``nb_cones`` are distributed
+# over all axes, and therefore should be divisible by ``len(axes)``.
+#
+# The point is to provide an efficient coverage by reducing ``max_angle``
+# to avoid redundancy around one axis, but still cover the whole
+# k-space sphere by duplicating cones along several axes, as initially
+# proposed by [Pip+11]_.
+#
+
+arguments = [(2,), (0,), (0, 2), (0, 1, 2)]
+function = lambda x: mn.initialize_3D_floret(
+    Nc,
+    Ns,
+    in_out=in_out,
+    nb_revolutions=nb_revolutions,
+    nb_cones=nb_repetitions,
+    max_angle=np.pi / 4,
+    axes=x,
+)[::-1]
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
 # Wave-CAIPI
 # ----------
 #
@@ -225,8 +296,6 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # inherited from trajectories such as CAIPIRINHA and
 # Bunched Phase-Encoding (BPE) designed to better spread aliasing
 # and facilitate reconstruction.
-#
-# This implementation is based on the work from [Bil+15]_.
 #
 # Arguments:
 #
@@ -445,7 +514,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   over a sphere (in radians). ``(default "uniform")``
 #
 
-trajectory = mn.initialize_3D_helical_shells(Nc, Ns, nb_shells=nb_shells)
+trajectory = mn.initialize_3D_helical_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -456,7 +525,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # Number of shells, i.e. concentric spheres, used to partition the k-space sphere.
 #
 
-arguments = [1, 2, nb_shells // 2, nb_shells]
+arguments = [1, 2, nb_repetitions // 2, nb_repetitions]
 function = lambda x: mn.initialize_3D_helical_shells(
     Nc=x, Ns=Ns, nb_shells=x, spiral_reduction=2
 )
@@ -477,7 +546,7 @@ show_argument(function, arguments, one_shot=False, subfig_size=subfigure_size)
 
 arguments = [0.5, 1, 2, 4]
 function = lambda x: mn.initialize_3D_helical_shells(
-    Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=x
+    Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=x
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -491,7 +560,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = ["uniform", "intergaps", "golden", 3.1415]
 function = lambda x: mn.initialize_3D_helical_shells(
-    Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=2, shell_tilt=x
+    Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shell_tilt=x
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -508,7 +577,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = ["uniform", "intergaps", "golden", 0.1]
 function = lambda x: mn.initialize_3D_helical_shells(
-    Nc=Nc, Ns=Ns, nb_shells=nb_shells, spiral_reduction=2, shot_tilt=x
+    Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shot_tilt=x
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -535,7 +604,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   (in radians). ``(default pi / 2)``
 #
 
-trajectory = mn.initialize_3D_annular_shells(Nc, Ns, nb_shells)
+trajectory = mn.initialize_3D_annular_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -560,7 +629,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]
 function = lambda x: mn.initialize_3D_annular_shells(
-    Nc, Ns, nb_shells=nb_shells, ring_tilt=x
+    Nc, Ns, nb_shells=nb_repetitions, ring_tilt=x
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -590,7 +659,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   over a sphere (in radians). ``(default "uniform")``. See helical shells
 #
 
-trajectory = mn.initialize_3D_seiffert_shells(Nc, Ns, nb_shells)
+trajectory = mn.initialize_3D_seiffert_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -613,6 +682,11 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
 #    "On sphere-filling ropes."
 #    The American Mathematical Monthly 118, no. 10 (2011): 863-876
+# .. [Pip+11] Pipe, James G., Nicholas R. Zwart, Eric A. Aboussouan,
+#    Ryan K. Robison, Ajit Devaraj, and Kenneth O. Johnson.
+#    "A new design and rationale for 3D orthogonally
+#    oversampled k‐space trajectories."
+#    Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.
 # .. [Bil+15] Bilgic, Berkin, Borjan A. Gagoski, Stephen F. Cauley, Audrey P. Fan,
 #    Jonathan R. Polimeni, P. Ellen Grant, Lawrence L. Wald, and Kawin Setsompop.
 #    "Wave‐CAIPI for highly accelerated 3D imaging."
