@@ -54,7 +54,7 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     )
 
     # Apply precession to the first cone
-    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt, mode="polar")
+    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt)
 
     return trajectory
 
@@ -76,7 +76,7 @@ def initialize_3D_floret(
     This implementation is based on the work from [Pip+11]_.
     The acronym FLORET stands for Fermat Looped, Orthogonally
     Encoded Trajectories. It consists of Fermat spirals
-    projected onto 3D cones along the kz-axis.
+    folded into 3D cones along the :math:`k_z`-axis.
 
     Parameters
     ----------
@@ -89,16 +89,16 @@ def initialize_3D_floret(
     nb_revolutions : float, optional
         Number of revolutions of the spirals, by default 1
     spiral_tilt : str, float, optional
-        Tilt of the spirals around the kz-axis, by default "uniform"
+        Tilt of the spirals around the :math:`k_z`-axis, by default "uniform"
     spiral : str, float, optional
         Spiral type, by default "fermat"
     nb_cones : int, optional
         Number of cones used to partition the k-space sphere,
         with `None` making one cone per shot, by default `None`.
     cone_tilt : str, float, optional
-        Tilt of the cones around the kz-axis, by default "golden"
+        Tilt of the cones around the :math:`k_z`-axis, by default "golden"
     max_angle : float, optional
-        Maximum polar angle starting from the kx-ky plane,
+        Maximum polar angle starting from the :math:`k_x-k_y` plane,
         by default pi / 4
     axes : tuple, optional
         Axes over which cones are created, by default (2,)
@@ -183,13 +183,13 @@ def initialize_3D_wave_caipi(
         "triangular"/"hexagonal", "square", "circular"
         or "random"/"uniform", by default "triangular".
     shape : str or float, optional
-        Shape over the 2D kx-ky plane to pack with shots,
+        Shape over the 2D :math:`k_x-k_y` plane to pack with shots,
         either defined as `str` ("circle", "square", "diamond")
         or as `float` through p-norms following the conventions
         of the `ord` parameter from `numpy.linalg.norm`,
         by default "circle".
     spacing : tuple(int, int)
-        Spacing between helices over the 2D kx-ky plane
+        Spacing between helices over the 2D :math:`k_x-k_y` plane
         normalized similarly to `width` to correspond to
         helix diameters, by default (1, 1).
 
@@ -334,7 +334,7 @@ def initialize_3D_seiffert_spiral(
     spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
     # Apply precession to the first spiral
-    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt, mode="polar")
+    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt)
 
     # Handle in_out case
     if in_out:

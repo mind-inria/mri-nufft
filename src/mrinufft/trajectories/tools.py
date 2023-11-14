@@ -16,7 +16,7 @@ from .utils import (
 
 
 def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
-    """Stack 2D or 3D trajectories over the kz-axis.
+    """Stack 2D or 3D trajectories over the :math:`k_z`-axis.
 
     Parameters
     ----------
@@ -60,7 +60,7 @@ def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
 
 
 def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
-    """Rotate 2D or 3D trajectories over the kx, ky and kz axes.
+    """Rotate 2D or 3D trajectories over the different axes.
 
     Parameters
     ----------
@@ -69,11 +69,11 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
     nb_rotations : int
         Number of rotations repeating the provided trajectory.
     x_tilt : str, optional
-        Tilt of the trajectory over the kx-axis, by default `None`.
+        Tilt of the trajectory over the :math:`k_x`-axis, by default `None`.
     y_tilt : str, optional
-        Tilt of the trajectory over the ky-axis, by default `None`.
+        Tilt of the trajectory over the :math:`k_y`-axis, by default `None`.
     z_tilt : str, optional
-        Tilt of the trajectory over the kz-axis, by default `None`.
+        Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
 
     Returns
     -------
@@ -99,8 +99,8 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
     return new_trajectory.reshape(nb_rotations * Nc, Ns, 3)
 
 
-def precess(trajectory, nb_rotations, z_tilt="golden", mode="polar", half_sphere=False):
-    """Rotate 2D or 3D trajectories as a precession around the kz-axis.
+def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
+    """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
 
     Parameters
     ----------
@@ -109,10 +109,7 @@ def precess(trajectory, nb_rotations, z_tilt="golden", mode="polar", half_sphere
     nb_rotations : int
         Number of rotations repeating the provided trajectory.
     z_tilt : str, optional
-        Tilt of the trajectory over the kz-axis, by default "golden".
-    mode : str, optional
-        Whether the precession should align over an "axial" or "polar"
-        partition of the kz-axis.
+        Tilt of the trajectory over the :math:`k_z`-axis, by default "golden".
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
         of the k-space sphere, typically for in-out trajectories or planes.
@@ -122,10 +119,6 @@ def precess(trajectory, nb_rotations, z_tilt="golden", mode="polar", half_sphere
     array_like
         Precessed trajectory.
     """
-    # Check for requested mode
-    if mode.lower() not in ["axial", "polar"]:
-        raise ValueError(f"Unknown mode name: `{mode}`.")
-
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
     if trajectory.shape[-1] == 2:
@@ -136,12 +129,7 @@ def precess(trajectory, nb_rotations, z_tilt="golden", mode="polar", half_sphere
     # Determine direction vectors on a sphere
     vectors = np.zeros((nb_rotations, 3))
     phi = initialize_tilt(z_tilt, nb_rotations) * np.arange(nb_rotations)
-    if mode.lower() == "axial":
-        vectors[:, 2] = np.linspace(-1 + half_sphere, 1, nb_rotations)
-    else:
-        vectors[:, 2] = np.sin(
-            np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_rotations)
-        )
+    vectors[:, 2] = np.sin(np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_rotations))
     radius = np.sqrt(1 - vectors[:, 2] ** 2)
     vectors[:, 0] = np.cos(phi) * radius
     vectors[:, 1] = np.sin(phi) * radius
@@ -155,7 +143,7 @@ def precess(trajectory, nb_rotations, z_tilt="golden", mode="polar", half_sphere
 
 
 def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2):
-    """Distort 2D or 3D trajectories into cones along the kz-axis.
+    """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
     ----------
@@ -164,7 +152,7 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
     nb_cones : int
         Number of cones repeating the provided trajectory.
     z_tilt : str, optional
-        Tilt of the trajectory over the kz-axis, by default `None`.
+        Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
     in_out : bool, optional
         Whether to account for the in-out nature of some trajectories
         to avoid hard angles around the center, by default False.
@@ -231,7 +219,7 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
 def stack_spherically(
     trajectory_func, Nc, nb_stacks, z_tilt=None, hard_bounded=True, **traj_kwargs
 ):
-    """Stack 2D or 3D trajectories over the kz-axis to make a sphere.
+    """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
@@ -319,7 +307,7 @@ def shellify(
     hemisphere_mode="symmetric",
     **traj_kwargs,
 ):
-    """Stack 2D or 3D trajectories over the kz-axis to make a sphere.
+    """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
@@ -336,7 +324,7 @@ def shellify(
     hemisphere_mode : str, optional
         Define how the lower hemisphere should be oriented
         relatively to the upper one, with "symmetric" providing
-        a kx-ky planar symmetry by changing the polar angle,
+        a :math:`k_x-k_y` planar symmetry by changing the polar angle,
         and with "reversed" promoting continuity (for example
         in spirals) by reversing the azimuth angle.
         The default is "symmetric".
@@ -366,22 +354,24 @@ def shellify(
     radii = (0.5 + np.arange(nb_shells)) / nb_shells
     new_trajectory = []
     for i in range(nb_shells):
-        # Initialize upper hemisphere
+        # Initialize trajectory
         shell_upper = trajectory_func(Nc=Nc_per_shell[i], **traj_kwargs)
-        z_coords = KMAX**2 - shell_upper[..., 0] ** 2 - shell_upper[..., 1] ** 2
-        z_signs = np.sign(z_coords)
         if shell_upper.shape[-1] < 3:
             shell_upper = np.concatenate(
                 [shell_upper, np.zeros((*(shell_upper.shape[:-1]), 1))], axis=-1
             )
+
+        # Carve upper hemisphere from trajectory
+        z_coords = KMAX**2 - shell_upper[..., 0] ** 2 - shell_upper[..., 1] ** 2
+        z_signs = np.sign(z_coords)
         shell_upper[..., 2] += z_signs * np.sqrt(np.abs(z_coords))
 
         # Initialize lower hemisphere from upper
         shell_lower = np.copy(shell_upper)
         if hemisphere_mode in ["symmetric", "reversed"]:
-            shell_lower[..., 2] = -shell_lower[..., :, 2]  # Inverse polar angle
+            shell_lower[..., 2] = -shell_lower[..., :, 2]  # Invert polar angle
         if hemisphere_mode in ["reversed"]:
-            shell_lower[..., 1] = -shell_lower[..., :, 1]  # Inverse azimuth angle
+            shell_lower[..., 1] = -shell_lower[..., :, 1]  # Invert azimuthal angle
 
         # Apply shell tilt
         rotation = Rz(i * initialize_tilt(z_tilt, nb_shells)).T
@@ -415,8 +405,8 @@ def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
     Duplicate a trajectory along the specified axes.
 
     The provided trajectories are replicated with different orientation,
-    with the kx-axis being considered as the default orientation of the
-    base trajectory.
+    with the :math:`k_x`-axis being considered as the default orientation
+    of the base trajectory.
 
     Parameters
     ----------
