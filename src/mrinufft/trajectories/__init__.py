@@ -21,6 +21,7 @@ from .trajectory3D import (
 )
 
 from .display import (
+    displayConfig,
     display_2D_trajectory,
     display_3D_trajectory,
 )
@@ -42,6 +43,7 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "initialize_3D_seiffert_shells",
+    "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
 ]

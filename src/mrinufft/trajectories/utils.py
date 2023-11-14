@@ -570,14 +570,22 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
+    SPIRALS = {
+        "archimedes": 1,
+        "arithmetic": 1,
+        "fermat": 2,
+        "parabolic": 2,
+        "hyperbolic": -1,
+        "lithuus": -2,
+    }
+
     if not isinstance(spiral, str):
+        # If directly a power value
         return spiral
-    elif spiral == "archimedes":
-        return 1
-    elif spiral == "fermat":
-        return 2
-    else:
-        raise NotImplementedError(f"Unknown spiral name: {spiral}")
+    try:
+        return SPIRALS[spiral.lower()]
+    except KeyError as e:
+        raise ValueError(f"Unknown spiral name: {spiral}") from e
 
 
 def initialize_shape_norm(shape):
@@ -593,12 +601,19 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    NORMS = {"square": np.inf, "circle": 2, "diamond": 1}
+    NORMS = {
+        "square": np.inf,
+        "cube": np.inf,
+        "circle": 2,
+        "sphere": 2,
+        "diamond": 1,
+        "octahedron": 1,
+    }
 
     if not isinstance(shape, str):
         # If directly a p-norm value
         return shape
     try:
-        return NORMS[shape]
+        return NORMS[shape.lower()]
     except KeyError as e:
         raise ValueError("Unknown shape name: {shape}") from e
