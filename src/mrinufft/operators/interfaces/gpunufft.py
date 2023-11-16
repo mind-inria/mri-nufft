@@ -10,7 +10,7 @@ except ImportError:
     GPUNUFFT_AVAILABLE = False
 
 
-class gpuNUFFT:
+class RawGpuNUFFT:
     """GPU implementation of N-D non-uniform fast Fourier Transform class.
 
     Attributes
@@ -39,6 +39,7 @@ class gpuNUFFT:
         upsampfac=None,
         balance_workload=True,
         smaps=None,
+        pinned_smaps=None,
     ):
         """Initialize the 'NUFFT' class.
 
@@ -67,6 +68,13 @@ class gpuNUFFT:
             whether the workloads need to be balanced
         smaps: np.ndarray default None
             Holds the sensitivity maps for SENSE reconstruction
+        pinned_smaps: np.ndarray default None
+            Pinned memory array for the smaps.
+
+        Notes
+        -----
+        pinned_smaps status (pinned or not) is not checked here, but in the C++ code.
+        If its not pinned, then an extra copy will be triggered.
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
@@ -79,13 +87,22 @@ class gpuNUFFT:
         self.samples = proper_trajectory(samples, normalize="unit")
         if density_comp is None:
             density_comp = np.ones(samples.shape[0])
-        if smaps is None:
-            self.uses_sense = False
+
+        self.uses_sense = True
+        if smaps is not None and pinned_smaps is None:
+            # no pinning provided, we will pin it in the C++ code
+            pinned_smaps = smaps.T.reshape(-1, n_coils)
+        elif smaps is None and pinned_smaps is not None:
+            # Smaps are provided in pinned memory format, use it
+            if pinned_smaps.shape != (n_coils, *shape):
+                raise ValueError("pinned smaps shape is not correct")
+            pinned_smaps = pinned_smaps.T.reshape(-1, n_coils)
+        elif smaps is not None and pinned_smaps is not None:
+            # Pinned memory space exists, we will overwrite it
+            np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
         else:
-            smaps = np.asarray(
-                [np.reshape(smap_ch.T, smap_ch.size) for smap_ch in smaps]
-            ).T
-            self.uses_sense = True
+            # No smaps provided, we will not use SENSE
+            self.uses_sense = False
 
         if upsampfac is not None:
             osf = upsampfac
@@ -94,7 +111,7 @@ class gpuNUFFT:
             np.reshape(samples, samples.shape[::-1], order="F"),
             shape,
             n_coils,
-            smaps,
+            pinned_smaps,
             density_comp,
             kernel_width,
             sector_width,
@@ -222,7 +239,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         else:
             self.density = None
         self.kwargs = kwargs
-        self.impl = gpuNUFFT(
+        self.impl = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
             n_coils=self.n_coils,
