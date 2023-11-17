@@ -92,11 +92,6 @@ class RawGpuNUFFT:
         if smaps is not None and pinned_smaps is None:
             # no pinning provided, we will pin it in the C++ code
             pinned_smaps = smaps.T.reshape(-1, n_coils)
-        elif smaps is None and pinned_smaps is not None:
-            # Smaps are provided in pinned memory format, use it
-            if pinned_smaps.shape != (n_coils, *shape):
-                raise ValueError("pinned smaps shape is not correct")
-            pinned_smaps = pinned_smaps.T.reshape(-1, n_coils)
         elif smaps is not None and pinned_smaps is not None:
             # Pinned memory space exists, we will overwrite it
             np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
