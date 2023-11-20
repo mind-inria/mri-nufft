@@ -32,6 +32,7 @@ author = "MRI-NUFFT Contributors"
 extensions = [
     "sphinx_copybutton",
     "sphinx.ext.duration",
+    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
