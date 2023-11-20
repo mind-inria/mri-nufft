@@ -1,7 +1,8 @@
 """
-Generate trajectories.
+Generate trajectories for the benchmarks.
 """
 
+import os
 
 import numpy as np
 from mrinufft.trajectories import (
