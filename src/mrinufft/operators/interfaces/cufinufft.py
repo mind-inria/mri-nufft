@@ -13,7 +13,7 @@ from .utils import (
     pin_memory,
     sizeof_fmt,
 )
-from ._cupy_kernels import sense_adj_mono, update_density
+from ._cupy_kernels import update_density
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
