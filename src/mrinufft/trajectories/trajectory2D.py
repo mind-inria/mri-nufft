@@ -24,7 +24,7 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -33,10 +33,10 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
     trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[0, :, 1] = radius
+    trajectory2D[0, :, 0] = radius
 
     # Rotate the first shot Nc times
-    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out))
+    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory2D[i] = trajectory2D[i - 1] @ rotation
     return trajectory2D
@@ -53,13 +53,13 @@ def initialize_2D_spiral(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
     nb_revolutions : int, optional
         Number of revolutions, by default 1
-    spiral : str, optional
+    spiral : str, float, optional
         Spiral type, by default "archimedes"
 
     Returns
@@ -72,12 +72,15 @@ def initialize_2D_spiral(
     radius = KMAX * segment
     angles = 2 * np.pi * nb_revolutions * (np.abs(segment) ** initialize_spiral(spiral))
 
-    # Convert to Cartesian coordinates and rotate Nc times
+    # Convert the first shot to Cartesian coordinates
     trajectory2D = np.zeros((Nc, Ns, 2))
-    delta_tilt = initialize_tilt(tilt, Nc) / (1 + in_out)
-    for i in range(Nc):
-        trajectory2D[i, :, 0] = radius * np.cos(angles + i * delta_tilt)
-        trajectory2D[i, :, 1] = radius * np.sin(angles + i * delta_tilt)
+    trajectory2D[0, :, 0] = radius * np.cos(angles)
+    trajectory2D[0, :, 1] = radius * np.sin(angles)
+
+    # Rotate the first shot Nc times
+    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
+    for i in range(1, Nc):
+        trajectory2D[i] = trajectory2D[i - 1] @ rotation
     return trajectory2D
 
 
@@ -114,7 +117,7 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
     trajectory2D[0, :, 1] = radius * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
-    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out))
+    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory2D[i] = trajectory2D[i - 1] @ rotation
     return trajectory2D
@@ -131,7 +134,7 @@ def initialize_2D_sinusoide(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -155,7 +158,7 @@ def initialize_2D_sinusoide(
     trajectory2D[0, :, 1] = KMAX * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
-    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out))
+    rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory2D[i] = trajectory2D[i - 1] @ rotation
     return trajectory2D

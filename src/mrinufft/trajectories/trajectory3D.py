@@ -5,85 +5,14 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .expansions import (
-    stack_2D_to_3D_expansion,
-    rotate_2D_to_3D_expansion,
-    cone_2D_to_3D_expansion,
-    helix_2D_to_3D_expansion,
-)
-from .trajectory2D import (
-    initialize_2D_radial,
-    initialize_2D_spiral,
-    initialize_2D_rosette,
-    initialize_2D_cones,
-)
-from .utils import Ry, Rz, Rv, initialize_tilt, initialize_shape_norm, KMAX
+from .tools import precess, conify, duplicate_along_axes
+from .trajectory2D import initialize_2D_spiral
+from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX
 
 
 ############################
 # FREEFORM 3D TRAJECTORIES #
 ############################
-
-
-def initialize_3D_from_2D_expansion(
-    basis, expansion, Nc, Ns, nb_repetitions, basis_kwargs=None, expansion_kwargs=None
-):
-    """Initialize 3D trajectories from 2D trajectories.
-
-    Parameters
-    ----------
-    basis : str or array_like
-        2D trajectory basis
-    expansion : str
-        3D trajectory expansion
-    Nc : int
-        Number of shots
-    Ns : int
-        Number of samples per shot
-    nb_repetitions : int
-        Number of repetitions of the 2D trajectory
-    basis_kwargs : dict, optional
-        Keyword arguments for the 2D trajectory basis, by default {}
-    expansion_kwargs : dict, optional
-        Keyword arguments for the 3D trajectory expansion, by default {}
-
-    Returns
-    -------
-    array_like
-        3D trajectory
-    """
-    # Initialization of the keyword arguments
-    if basis_kwargs is None:
-        basis_kwargs = {}
-    if expansion_kwargs is None:
-        expansion_kwargs = {}
-    # Initialization and warnings for 2D trajectory basis
-    bases = {
-        "radial": initialize_2D_radial,
-        "spiral": initialize_2D_spiral,
-        "rosette": initialize_2D_rosette,
-        "cones": initialize_2D_cones,
-    }
-    if isinstance(basis, np.ndarray):
-        trajectory2D = basis
-    elif basis not in bases.keys():
-        raise NotImplementedError(f"Unknown 2D trajectory basis: {basis}")
-    else:
-        basis_function = bases[basis]
-        trajectory2D = basis_function(Nc, Ns, **basis_kwargs)
-
-    # Initialization and warnings for 3D trajectory expansion
-    expansions = {
-        "stacks": stack_2D_to_3D_expansion,
-        "rotations": rotate_2D_to_3D_expansion,
-        "cones": cone_2D_to_3D_expansion,
-        "helices": helix_2D_to_3D_expansion,
-    }
-    if expansion not in expansions.keys():
-        raise NotImplementedError(f"Unknown 3D expansion: {expansion}")
-    expansion_function = expansions[expansion]
-    trajectory3D = expansion_function(trajectory2D, nb_repetitions, **expansion_kwargs)
-    return trajectory3D.reshape((nb_repetitions * Nc, Ns, 3))
 
 
 def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width=1):
@@ -110,35 +39,118 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
     array_like
         3D cones trajectory
     """
-    # Initialize first cone characteristics
+    # Initialize first cone
     radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
     angles = np.linspace(
         -2 * np.pi * nb_zigzags if (in_out) else 0, 2 * np.pi * nb_zigzags, Ns
     )
-    trajectory = np.zeros((Nc, Ns, 3))
-    trajectory[:, :, 0] = radius
-    trajectory[:, :, 1] = (
+    cone = np.zeros((1, Ns, 3))
+    cone[:, :, 0] = radius
+    cone[:, :, 1] = (
         radius * np.cos(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
-    trajectory[:, :, 2] = (
+    cone[:, :, 2] = (
         radius * np.sin(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
     )
 
-    # Determine mostly evenly distributed points on sphere
-    points = np.zeros((Nc, 3))
-    phi = initialize_tilt(tilt) * np.arange(Nc) / (1 + in_out)
-    points[:, 0] = np.linspace(-1, 1, Nc)
-    radius = np.sqrt(1 - points[:, 0] ** 2)
-    points[:, 1] = np.cos(phi) * radius
-    points[:, 2] = np.sin(phi) * radius
+    # Apply precession to the first cone
+    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt)
 
-    # Rotate initial cone Nc times
-    for i in np.arange(1, Nc)[::-1]:
-        v1 = np.array((1, 0, 0))
-        v2 = points[i]
-        rotation = Rv(v1, v2, normalize=False)
-        trajectory[i] = (rotation @ trajectory[0].T).T
-    return trajectory.reshape((Nc, Ns, 3))
+    return trajectory
+
+
+def initialize_3D_floret(
+    Nc,
+    Ns,
+    in_out=False,
+    nb_revolutions=1,
+    spiral_tilt="uniform",
+    spiral="fermat",
+    nb_cones=None,
+    cone_tilt="golden",
+    max_angle=np.pi / 2,
+    axes=(2,),
+):
+    """Initialize 3D trajectories with FLORET.
+
+    This implementation is based on the work from [Pip+11]_.
+    The acronym FLORET stands for Fermat Looped, Orthogonally
+    Encoded Trajectories. It consists of Fermat spirals
+    folded into 3D cones along the :math:`k_z`-axis.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
+    nb_revolutions : float, optional
+        Number of revolutions of the spirals, by default 1
+    spiral_tilt : str, float, optional
+        Tilt of the spirals around the :math:`k_z`-axis, by default "uniform"
+    spiral : str, float, optional
+        Spiral type, by default "fermat"
+    nb_cones : int, optional
+        Number of cones used to partition the k-space sphere,
+        with `None` making one cone per shot, by default `None`.
+    cone_tilt : str, float, optional
+        Tilt of the cones around the :math:`k_z`-axis, by default "golden"
+    max_angle : float, optional
+        Maximum polar angle starting from the :math:`k_x-k_y` plane,
+        by default pi / 2
+    axes : tuple, optional
+        Axes over which cones are created, by default (2,)
+
+    Returns
+    -------
+    array_like
+        3D FLORET trajectory
+
+    References
+    ----------
+    .. [Pip+11] Pipe, James G., Nicholas R. Zwart, Eric A. Aboussouan,
+       Ryan K. Robison, Ajit Devaraj, and Kenneth O. Johnson.
+       "A new design and rationale for 3D orthogonally
+       oversampled k‐space trajectories."
+       Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.
+    """
+    # Define variables for convenience
+    nb_cones = Nc if (nb_cones is None) else nb_cones
+    Nd = len(axes)
+    Nc_per_spiral = Nc // nb_cones
+    nb_cones_per_axis = nb_cones // Nd
+
+    # Check argument errors
+    if Nc % nb_cones != 0:
+        raise ValueError("Nc should be divisible by nb_cones.")
+    if nb_cones % Nd != 0:
+        raise ValueError("nb_cones should be divisible by len(axes).")
+
+    # Initialize first spiral
+    spiral = initialize_2D_spiral(
+        Nc=Nc_per_spiral,
+        Ns=Ns,
+        spiral=spiral,
+        in_out=in_out,
+        tilt=spiral_tilt,
+        nb_revolutions=nb_revolutions,
+    )
+
+    # Initialize first cone
+    cone = conify(
+        spiral,
+        nb_cones=nb_cones_per_axis,
+        z_tilt=cone_tilt,
+        in_out=in_out,
+        max_angle=max_angle,
+    )
+
+    # Duplicate cone along axes
+    axes = [2 - ax for ax in axes]  # Default axis is kz, not kx
+    trajectory = duplicate_along_axes(cone, axes=axes)
+    return trajectory
 
 
 def initialize_3D_wave_caipi(
@@ -171,13 +183,13 @@ def initialize_3D_wave_caipi(
         "triangular"/"hexagonal", "square", "circular"
         or "random"/"uniform", by default "triangular".
     shape : str or float, optional
-        Shape over the 2D kx-ky plane to pack with shots,
+        Shape over the 2D :math:`k_x-k_y` plane to pack with shots,
         either defined as `str` ("circle", "square", "diamond")
         or as `float` through p-norms following the conventions
         of the `ord` parameter from `numpy.linalg.norm`,
         by default "circle".
     spacing : tuple(int, int)
-        Spacing between helices over the 2D kx-ky plane
+        Spacing between helices over the 2D :math:`k_x-k_y` plane
         normalized similarly to `width` to correspond to
         helix diameters, by default (1, 1).
 
@@ -307,34 +319,22 @@ def initialize_3D_seiffert_spiral(
 
     """
     # Normalize ellipses integrations by the requested period
-    trajectory = np.zeros((Nc, Ns // (1 + in_out), 3))
+    spiral = np.zeros((1, Ns // (1 + in_out), 3))
     period = 4 * ellipk(curve_index**2)
     times = np.linspace(0, nb_revolutions * period, Ns // (1 + in_out), endpoint=False)
 
     # Initialize first shot
     jacobi = ellipj(times, curve_index**2)
-    trajectory[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
-    trajectory[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
-    trajectory[0, :, 2] = jacobi[1]
+    spiral[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
+    spiral[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
+    spiral[0, :, 2] = jacobi[1]
 
     # Make it volumetric instead of just a sphere surface
     magnitudes = np.sqrt(np.linspace(0, 1, Ns // (1 + in_out)))
-    trajectory = magnitudes.reshape((1, -1, 1)) * trajectory
+    spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
-    # Determine mostly evenly distributed points on sphere
-    points = np.zeros((Nc, 3))
-    phi = initialize_tilt(tilt) * np.arange(Nc)
-    points[:, 0] = np.linspace(-1, 1, Nc)
-    radius = np.sqrt(1 - points[:, 0] ** 2)
-    points[:, 1] = np.cos(phi) * radius
-    points[:, 2] = np.sin(phi) * radius
-
-    # Rotate initial shot Nc times
-    for i in np.arange(1, Nc)[::-1]:
-        v1 = np.array((1, 0, 0))
-        v2 = points[i]
-        rotation = Rv(v1, v2, normalize=False)
-        trajectory[i] = (rotation @ trajectory[0].T).T
+    # Apply precession to the first spiral
+    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt)
 
     # Handle in_out case
     if in_out:
@@ -574,7 +574,7 @@ def initialize_3D_seiffert_shells(
         Number of revolutions, i.e. times the curve passes through the upper-half
         of the z-axis, by default 1
     shell_tilt : str, float, optional
-        Angle between consecutive shells along z-axis, by default "intergaps"
+        Angle between consecutive shells along z-axis, by default "uniform"
     shot_tilt : str, float, optional
         Angle between shots over a shell surface along z-axis, by default "uniform"
 
@@ -636,88 +636,3 @@ def initialize_3D_seiffert_shells(
         trajectory[count : count + Ms] = trajectory[count : count + Ms] @ rotation
         count += Ms
     return KMAX * trajectory
-
-
-#########
-# UTILS #
-#########
-
-
-def duplicate_per_axes(trajectory, axes=(0, 1, 2)):
-    """
-    Duplicate a trajectory along the specified axes.
-
-    Parameters
-    ----------
-    trajectory : array_like
-        Trajectory to duplicate.
-    axes : tuple, optional
-        Axes along which to duplicate the trajectory, by default (0, 1, 2)
-
-    Returns
-    -------
-    array_like
-        Duplicated trajectory along the specified axes.
-    """
-    # Copy input trajectory along other axes
-    new_trajectory = []
-    if 0 in axes:
-        new_trajectory.append(trajectory)
-    if 1 in axes:
-        dp_trajectory = np.copy(trajectory)
-        dp_trajectory[..., [1, 2]] = dp_trajectory[..., [2, 1]]
-        new_trajectory.append(dp_trajectory)
-    if 2 in axes:
-        dp_trajectory = np.copy(trajectory)
-        dp_trajectory[..., [2, 0]] = dp_trajectory[..., [0, 2]]
-        new_trajectory.append(dp_trajectory)
-    new_trajectory = np.concatenate(new_trajectory, axis=0)
-    return new_trajectory
-
-
-def _radialize_center_out(trajectory, nb_samples):
-    """Radialize a trajectory from the center to the outside."""
-    Nc, Ns = trajectory.shape[:2]
-    new_trajectory = np.copy(trajectory)
-    for i in range(Nc):
-        point = trajectory[i, nb_samples]
-        new_trajectory[i, :nb_samples, 0] = np.linspace(0, point[0], nb_samples)
-        new_trajectory[i, :nb_samples, 1] = np.linspace(0, point[1], nb_samples)
-        new_trajectory[i, :nb_samples, 2] = np.linspace(0, point[2], nb_samples)
-    return new_trajectory
-
-
-def _radialize_in_out(trajectory, nb_samples):
-    """Radialize a trajectory from the inside to the outside."""
-    Nc, Ns = trajectory.shape[:2]
-    new_trajectory = np.copy(trajectory)
-    first, half, second = (Ns - nb_samples) // 2, Ns // 2, (Ns + nb_samples) // 2
-    for i in range(Nc):
-        p1 = trajectory[i, first]
-        new_trajectory[i, first:half, 0] = np.linspace(0, p1[0], nb_samples // 2)
-        new_trajectory[i, first:half, 1] = np.linspace(0, p1[1], nb_samples // 2)
-        new_trajectory[i, first:half, 2] = np.linspace(0, p1[2], nb_samples // 2)
-        p2 = trajectory[i, second]
-        new_trajectory[i, half:second, 0] = np.linspace(0, p2[0], nb_samples // 2)
-        new_trajectory[i, half:second, 1] = np.linspace(0, p2[1], nb_samples // 2)
-        new_trajectory[i, half:second, 2] = np.linspace(0, p2[2], nb_samples // 2)
-    return new_trajectory
-
-
-def radialize_center(trajectory, nb_samples, in_out=False):
-    """Radialize a trajectory.
-
-    Parameters
-    ----------
-    trajectory : array_like
-        Trajectory to radialize.
-    nb_samples : int
-        Number of samples to keep.
-    in_out : bool, optional
-        Whether the radialization is from the inside to the outside, by default False
-    """
-    # Make nb_samples into straight lines around the center
-    if in_out:
-        return _radialize_in_out(trajectory, nb_samples)
-    else:
-        return _radialize_center_out(trajectory, nb_samples)

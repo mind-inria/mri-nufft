@@ -340,8 +340,8 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # %%
 #
 # This implementation allows using more shots than rings, and it will automatically
-# attribute the additional shots to the longest rings to reduce the maximum gradient
-# and slew rate constraints.
+# attribute the additional shots to the longest rings to reduce the top gradient
+# amplitude and slew rate.
 #
 
 arguments = [Nc, int(4 * Nc / 3), 2 * Nc]

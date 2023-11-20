@@ -19,3 +19,7 @@ docs/generated/
 docs_build/
 
 src/mrinufft/_version.py
+
+benchmark/outputs
+benchmark/multirun
+benchmark/trajs
