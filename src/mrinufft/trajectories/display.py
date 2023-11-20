@@ -36,20 +36,22 @@ class displayConfig:
     """
 
     alpha: float = 0.2
-    """Transparency used for area plots, by default 0.2."""
+    """Transparency used for area plots, by default ``0.2``."""
     linewidth: float = 2
-    """Width for lines or curves, by default 2."""
+    """Width for lines or curves, by default ``2``."""
     pointsize: int = 10
-    """Size for points used to show constraints, by default 10."""
+    """Size for points used to show constraints, by default ``10``."""
     fontsize: int = 18
-    """Font size for most labels and texts, by default 18."""
+    """Font size for most labels and texts, by default ``18``."""
     small_fontsize: int = 14
-    """Font size for smaller texts, by default 14."""
+    """Font size for smaller texts, by default ``14``."""
     nb_colors = 10
-    """Number of colors to use in the color cycle, by default 10."""
+    """Number of colors to use in the color cycle, by default ``10``."""
     palette: str = "tab10"
-    """Name of the color palette to use, by default "tab10".
+    """Name of the color palette to use, by default ``"tab10"``.
     This can be any of the matplotlib colormaps, or a list of colors."""
+    one_shot_color: str = "k"
+    """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
 
     @classmethod
     def update(cls, **kwargs):
@@ -69,6 +71,7 @@ class displayConfig:
     @classmethod
     def get_colorlist(cls):
         """Extract a list of colors from a matplotlib palette.
+
         If the palette is continuous, the colors will be sampled from it.
         If its a categorical palette, the colors will be used in cycle.
 
@@ -232,7 +235,7 @@ def display_2D_trajectory(
         ax.plot(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
-            color="k",
+            color=displayConfig.one_shot_color,
             linewidth=2 * displayConfig.linewidth,
         )
 
@@ -360,7 +363,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
-            color="k",
+            color=displayConfig.one_shot_color,
             linewidth=2 * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
