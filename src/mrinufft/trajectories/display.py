@@ -53,20 +53,30 @@ class displayConfig:
     one_shot_color: str = "k"
     """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
 
-    @classmethod
-    def update(cls, **kwargs):
+    def __init__(self, **kwargs):
         """Update the display configuration."""
-        cls._old_values = {}
-        for key, value in kwargs.items():
-            cls._old_values[key] = getattr(cls, key)
-            setattr(cls, key, value)
+        self.update(**kwargs)
 
-    @classmethod
-    def reset(cls):
+    def update(self, **kwargs):
+        """Update the display configuration."""
+        self._old_values = {}
+        for key, value in kwargs.items():
+            self._old_values[key] = getattr(displayConfig, key)
+            setattr(displayConfig, key, value)
+
+    def reset(self):
         """Restore the display configuration."""
-        for key, value in cls._old_values.items():
-            setattr(cls, key, value)
-        delattr(cls, "_old_values")
+        for key, value in self._old_values.items():
+            setattr(displayConfig, key, value)
+        delattr(self, "_old_values")
+
+    def __enter__(self):
+        """Enter the context manager."""
+        return self
+
+    def __exit__(self, *args):
+        """Exit the context manager."""
+        self.reset()
 
     @classmethod
     def get_colorlist(cls):
@@ -102,18 +112,6 @@ class displayConfig:
         else:
             colorlist = cm(np.linspace(0, 1, cls.nb_colors))
         return colorlist
-
-    def __call__(self, **kwargs):
-        """Update the display configuration."""
-        self.update(**kwargs)
-
-    def __enter__(self):
-        """Enter the context manager."""
-        return self
-
-    def __exit__(self, *args):
-        """Exit the context manager."""
-        self.reset()
 
 
 ##############
