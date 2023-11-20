@@ -2,7 +2,8 @@
 import numpy as np
 import scipy as sp
 
-from mrinufft.trajectories import initialize_2D_radial, initialize_3D_from_2D_expansion
+from mrinufft.trajectories import initialize_2D_radial
+from mrinufft.trajectories.tools import stack
 
 
 class CasesTrajectories:
@@ -34,7 +35,8 @@ class CasesTrajectories:
 
     def case_radial3D(self, Nc=20, Ns=1000, Nr=20, N=64, expansion="rotations"):
         """Create a 3D radial trajectory."""
-        trajectory = initialize_3D_from_2D_expansion("radial", expansion, Nc, Ns, Nr)
+        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = stack(trajectory, nb_stacks=Nr)
         return trajectory, (N, N, N)
 
     def case_grid2D(self, N=16):
