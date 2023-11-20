@@ -345,10 +345,11 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         image_dataf = cp.reshape(data, (B, *XYZ))
         ksp_d = ksp_d or cp.empty((B * C, K), dtype=self.cpx_dtype)
-
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
+            data_batched = image_dataf[idx_batch].reshape((T, *XYZ))
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
@@ -589,7 +590,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
-        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        B, C = self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
         check_size(obs_data, (B, C, K))
@@ -604,7 +605,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             grad_func = self._grad_sense_device
         elif not self.uses_sense and is_host_array(image_data):
             grad_func = self._grad_calibless_host
-        elif not_self.uses_sense and is_cuda_array(image_data):
+        elif not self.uses_sense and is_cuda_array(image_data):
             grad_func = self._grad_calibless_device
         else:
             raise ValueError("No suitable gradient function found.")
@@ -658,7 +659,6 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _grad_sense_device(self, image_data, obs_data):
         """Gradient computation when all data is on device."""
-
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
@@ -710,7 +710,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         for i in range(B * C // T):
             data_batched.set(image_dataf[i * T : (i + 1) * T])
-            obs_batched.set(obs_data[i * T : (i + 1) * T])
+            obs_batched.set(obs_dataf[i * T : (i + 1) * T])
             self.__op(get_ptr(data_batched), get_ptr(ksp_batched))
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_batched
@@ -724,7 +724,6 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     def _grad_calibless_device(self, image_data, obs_data):
         """Calibrationless Gradient computation when all data is on device."""
-
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
