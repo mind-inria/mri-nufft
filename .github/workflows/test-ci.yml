@@ -100,7 +100,7 @@ jobs:
           python --version
           python -m venv venv
           source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install --upgrade pip wheel
+          pip install --upgrade pip wheel numpy
           pip install -e mri-nufft[test]
 
       - name: Install Cufinufft
