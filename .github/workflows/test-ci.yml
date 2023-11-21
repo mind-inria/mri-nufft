@@ -59,9 +59,9 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE
           sudo apt-get install make gcc libfftw3-dev liblapacke-dev libpng-dev libopenblas-dev
-          wget https://github.com/mrirecon/bart/archive/v{{env.BART_VERSION}}.tar.gz
-          tar xzvf v{{env.BART_VERSION}.tar.gz
-          cd bart-{{env.BART_VERSION}}
+          wget https://github.com/mrirecon/bart/archive/v${{ env.BART_VERSION }}.tar.gz
+          tar xzvf v${{ env.BART_VERSION }}.tar.gz
+          cd bart-${{ env.BART_VERSION }}
           make
       - name: Run Tests
         shell: bash
