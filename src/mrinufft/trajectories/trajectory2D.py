@@ -166,10 +166,10 @@ def initialize_2D_sinusoide(
 
 
 def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
-    """Initialize a 2D PROPELLER trajectory, as proposed in []_.
+    """Initialize a 2D PROPELLER trajectory, as proposed in [Pip99]_.
 
     The PROPELLER trajectory is generally used along a specific
-    reconstruction pipeline described in []_ to correct for
+    reconstruction pipeline described in [Pip99]_ to correct for
     motion artifacts.
 
     The acronym PROPELLER stands for Periodically Rotated
@@ -185,9 +185,15 @@ def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
     Ns : int
         Number of samples per shot
     nb_strips : int
-        Number of rotated strips, must divide ``Nc``.
+        Number of rotated strips, must divide ``Nc``
     tilt : str, float, optional
         Tilt of the strips, by default "uniform"
+
+    References
+    ----------
+    .. [Pip99] Pipe, James G. "Motion correction with PROPELLER MRI:
+       application to head motion and free‐breathing cardiac imaging."
+       Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.
     """
     # Check for value errors
     if Nc % nb_strips != 0:
