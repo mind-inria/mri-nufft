@@ -32,14 +32,14 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
-    trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[0, :, 0] = radius
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[0, :, 0] = radius
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
-        trajectory2D[i] = trajectory2D[i - 1] @ rotation
-    return trajectory2D
+        trajectory[i] = trajectory[i - 1] @ rotation
+    return trajectory
 
 
 def initialize_2D_spiral(
@@ -73,15 +73,15 @@ def initialize_2D_spiral(
     angles = 2 * np.pi * nb_revolutions * (np.abs(segment) ** initialize_spiral(spiral))
 
     # Convert the first shot to Cartesian coordinates
-    trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[0, :, 0] = radius * np.cos(angles)
-    trajectory2D[0, :, 1] = radius * np.sin(angles)
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[0, :, 0] = radius * np.cos(angles)
+    trajectory[0, :, 1] = radius * np.sin(angles)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
-        trajectory2D[i] = trajectory2D[i - 1] @ rotation
-    return trajectory2D
+        trajectory[i] = trajectory[i - 1] @ rotation
+    return trajectory
 
 
 def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1):
@@ -112,15 +112,15 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
     angles = 2 * np.pi * nb_zigzags * np.abs(segment)
-    trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[0, :, 0] = radius
-    trajectory2D[0, :, 1] = radius * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[0, :, 0] = radius
+    trajectory[0, :, 1] = radius * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
-        trajectory2D[i] = trajectory2D[i - 1] @ rotation
-    return trajectory2D
+        trajectory[i] = trajectory[i - 1] @ rotation
+    return trajectory
 
 
 def initialize_2D_sinusoide(
@@ -153,15 +153,36 @@ def initialize_2D_sinusoide(
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
     radius = KMAX * segment
     angles = 2 * np.pi * nb_zigzags * segment
-    trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[0, :, 0] = radius
-    trajectory2D[0, :, 1] = KMAX * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[0, :, 0] = radius
+    trajectory[0, :, 1] = KMAX * np.sin(angles) * width * np.pi / Nc / (1 + in_out)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
-        trajectory2D[i] = trajectory2D[i - 1] @ rotation
-    return trajectory2D
+        trajectory[i] = trajectory[i - 1] @ rotation
+    return trajectory
+
+
+def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
+    # Check for value errors
+    if (Nc % nb_strips != 0):
+        raise ValueError("Nc should be divisible by nb_strips.")
+
+    # Initialize single shot
+    Nc_per_band = Nc // nb_strips
+    trajectory = np.linspace(-1, 1, Ns).reshape((1, Ns, 1))
+
+    # Convert single shot to single strip
+    trajectory = np.tile(trajectory, reps=(Nc_per_band, 1, 2))
+    y_axes = np.pi / 2 / nb_strips * np.linspace(-1, 1, Nc_per_band)
+    trajectory[:, :, 1] = y_axes[:, None]
+
+    # Rotate single band into multiple strips
+    trajectory = rotate(trajectory, nb_rotations=nb_strips, z_tilt=np.pi / nb_strips)
+    trajectory = trajectory[..., :2]  # Remove dim added by rotate
+
+    return KMAX * trajectory
 
 
 def initialize_2D_rings(Nc, Ns, nb_rings):
@@ -245,10 +266,10 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
     radius = KMAX * np.sin(Nc / (2 - odd) * angles + shift)
 
     # Convert polar to Cartesian coordinates
-    trajectory2D = np.zeros((Nc, Ns, 2))
-    trajectory2D[:, :, 0] = (radius * np.cos(angles * coprime)).reshape((Nc, Ns))
-    trajectory2D[:, :, 1] = (radius * np.sin(angles * coprime)).reshape((Nc, Ns))
-    return trajectory2D
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[:, :, 0] = (radius * np.cos(angles * coprime)).reshape((Nc, Ns))
+    trajectory[:, :, 1] = (radius * np.sin(angles * coprime)).reshape((Nc, Ns))
+    return trajectory
 
 
 def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_index=0):
@@ -289,15 +310,15 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
     )
 
     # Convert polar to Cartesian coordinates for one segment
-    trajectory2D = np.zeros((Nc * nb_segments, Ns, 2))
-    trajectory2D[:Nc, :, 0] = (radius * np.cos(angles)).reshape((Nc, Ns))
-    trajectory2D[:Nc, :, 1] = (radius * np.sin(angles)).reshape((Nc, Ns))
+    trajectory = np.zeros((Nc * nb_segments, Ns, 2))
+    trajectory[:Nc, :, 0] = (radius * np.cos(angles)).reshape((Nc, Ns))
+    trajectory[:Nc, :, 1] = (radius * np.sin(angles)).reshape((Nc, Ns))
 
     # Duplicate and rotate each segment
     rotation = R2D(initialize_tilt("uniform", (1 + in_out) * nb_segments))
     for i in range(Nc, Nc * nb_segments):
-        trajectory2D[i] = trajectory2D[i - Nc] @ rotation
-    return trajectory2D
+        trajectory[i] = trajectory[i - Nc] @ rotation
+    return trajectory
 
 
 #########################
@@ -327,12 +348,12 @@ def initialize_2D_lissajous(Nc, Ns, density=1):
     angles = np.pi / 2 * np.sign(segment) * np.abs(segment)
 
     # Define each shot independenty
-    trajectory2D = np.zeros((Nc, Ns, 2))
+    trajectory = np.zeros((Nc, Ns, 2))
     tilt = initialize_tilt("uniform", Nc)
     for i in range(Nc):
-        trajectory2D[i, :, 0] = KMAX * np.sin(angles)
-        trajectory2D[i, :, 1] = KMAX * np.sin(angles * density + i * tilt)
-    return trajectory2D
+        trajectory[i, :, 0] = KMAX * np.sin(angles)
+        trajectory[i, :, 1] = KMAX * np.sin(angles * density + i * tilt)
+    return trajectory
 
 
 def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
@@ -361,9 +382,9 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
     line = KMAX * segment
 
     # Define each shot independently
-    trajectory2D = np.zeros((Nc, Ns, 2))
+    trajectory = np.zeros((Nc, Ns, 2))
     delta = 2 * KMAX / (Nc + width)
     for i in range(Nc):
-        trajectory2D[i, :, 0] = line
-        trajectory2D[i, :, 1] = curl + delta * (i + 0.5) - (KMAX - width / Nc / 2)
-    return trajectory2D
+        trajectory[i, :, 0] = line
+        trajectory[i, :, 1] = curl + delta * (i + 0.5) - (KMAX - width / Nc / 2)
+    return trajectory
