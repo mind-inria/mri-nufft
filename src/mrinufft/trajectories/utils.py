@@ -85,9 +85,7 @@ class NormShapes(FloatEnum):
 
 
 class Tilts(str, Enum):
-    """Enumerate available tilts
-
-
+    r"""Enumerate available tilts.
 
     Notes
     -----
@@ -596,6 +594,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     ------
     NotImplementedError
         If the tilt name is unknown.
+
     See Also
     --------
     Tilts
