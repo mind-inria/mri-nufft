@@ -74,7 +74,7 @@ sphinx_gallery_conf = {
     "backreferences_dir": "generated/gallery_backreferences",
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
-    "gallery_dirs": ["generated/auto_examples"],
+    "gallery_dirs": ["generated/autoexamples"],
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest)\.py",
     "nested_sections": True,

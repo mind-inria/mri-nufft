@@ -65,7 +65,7 @@ Want to see more ?
 
 - Check the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
 
-- Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/auto_examples/index.html>`_
+- Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/autoexamples/index.html>`_
 
 
 Installation

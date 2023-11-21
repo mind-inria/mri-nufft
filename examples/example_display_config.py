@@ -49,6 +49,7 @@ def show_traj(traj, name, values):
 # ====================
 # To show case the display parameters of trajectories, we will use the following trajectory
 # The effect of trajectory parameter are explained in the :ref:`sphinx_glr_example_3D_trajectories.py`
+# The effect of trajectory parameter are explained in the :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` Example.
 
 traj = initialize_3D_cones(Nc, Ns)
 
