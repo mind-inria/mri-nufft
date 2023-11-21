@@ -84,6 +84,34 @@ class NormShapes(FloatEnum):
     OCTAHEDRON = L1
 
 
+class Tilts(str, Enum):
+    """Enumerate available tilts
+
+
+
+    Notes
+    -----
+    The following values are accepted for the tilt name, with :math:`N` the number of
+    partitions:
+
+    - "none": no tilt
+    - "uniform": uniform tilt: 2:math:`\pi / N`
+    - "intergaps": :math:`\pi/2N`
+    - "inverted": inverted tilt :math:`\pi/N + \pi`
+    - "golden": tilt of the golden angle :math:`\pi(3-\sqrt{5})`
+    - "mri golden": tilt of the golden angle used in MRI :math:`\pi(\sqrt{5}-1)/2`
+
+    """
+
+    UNIFORM = "uniform"
+    NONE = "none"
+    INTERGAPS = "intergaps"
+    INVERTED = "inverted"
+    GOLDEN = "golden"
+    MRI_GOLDEN = "mri-golden"
+    MRI = MRI_GOLDEN
+
+
 ###############
 # CONSTRAINTS #
 ###############
@@ -568,33 +596,24 @@ def initialize_tilt(tilt, nb_partitions=1):
     ------
     NotImplementedError
         If the tilt name is unknown.
-
-    Notes
-    -----
-    The following values are accepted for the tilt name, with :math:`N` the number of
-    partitions:
-
-    - "none": no tilt
-    - "uniform": uniform tilt: 2:math:`\pi / N`
-    - "intergaps": :math:`\pi/2N`
-    - "inverted": inverted tilt :math:`\pi/N + \pi`
-    - "golden": tilt of the golden angle :math:`\pi(3-\sqrt{5})`
-    - "mri golden": tilt of the golden angle used in MRI :math:`\pi(\sqrt{5}-1)/2`
+    See Also
+    --------
+    Tilts
 
     """
     if not (isinstance(tilt, str) or tilt is None):
         return tilt
-    elif tilt is None or tilt == "none":
+    elif tilt is None or tilt == Tilts.NONE:
         return 0
-    elif tilt == "uniform":
+    elif tilt == Tilts.UNIFORM:
         return 2 * np.pi / nb_partitions
-    elif tilt == "intergaps":
+    elif tilt == Tilts.INTERGAPS:
         return np.pi / nb_partitions / 2
-    elif tilt == "inverted":
+    elif tilt == Tilts.INVERTED:
         return np.pi / nb_partitions + np.pi
-    elif tilt == "golden":
+    elif tilt == Tilts.GOLDEN:
         return np.pi * (3 - np.sqrt(5))
-    elif tilt == "mri golden":
+    elif tilt == Tilts.MRI_GOLDEN:
         return np.pi * (np.sqrt(5) - 1) / 2
     else:
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
