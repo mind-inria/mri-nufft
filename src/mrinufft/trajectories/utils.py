@@ -1,7 +1,7 @@
 """Utility functions for the trajectory design."""
 import numpy as np
 
-from enum import Enum
+from enum import Enum, EnumMeta
 
 
 #############
@@ -17,7 +17,25 @@ DEFAULT_GMAX = 0.04  # T/m
 DEFAULT_SMAX = 0.1  # T/m/ms
 
 
-class Gammas(float, Enum):
+class CaseInsensitiveEnumMeta(EnumMeta):
+    """A case-insensitive EnumMeta."""
+
+    def __getitem__(self, name):
+        """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
+        return super().__getitem__(name.upper())
+
+    def __getattr__(self, name):
+        """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
+        return super().__getattr__(name.upper())
+
+
+class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """An Enum for float that is case insensitive for ist attributes."""
+
+    pass
+
+
+class Gammas(FloatEnum):
     """Enumerate gyromagnetic ratios for common nuclei in MR."""
 
     # Values in kHz/T
@@ -39,6 +57,31 @@ class Gammas(float, Enum):
     Na = Na23 = SODIUM
     P = P31 = PHOSPHOROUS
     X = X129 = XENON
+
+
+class Spirals(FloatEnum):
+    """Enumerate spirals type."""
+
+    ARCHIMEDES = 1
+    ARITHMETIC = ARCHIMEDES
+    FERMAT = 2
+    PARABOLIC = FERMAT
+    HYPERBOLIC = -1
+    LITHUUS = -2
+
+
+class NormShapes(FloatEnum):
+    """Enumerate norms types."""
+
+    L1 = 1
+    L2 = 2
+    LINF = np.inf
+    SQUARE = LINF
+    CUBE = LINF
+    CIRCLE = L2
+    SPHERE = L2
+    DIAMOND = L1
+    OCTAHEDRON = L1
 
 
 ###############
@@ -570,22 +613,9 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
-    SPIRALS = {
-        "archimedes": 1,
-        "arithmetic": 1,
-        "fermat": 2,
-        "parabolic": 2,
-        "hyperbolic": -1,
-        "lithuus": -2,
-    }
-
-    if not isinstance(spiral, str):
-        # If directly a power value
+    if isinstance(spiral, float):
         return spiral
-    try:
-        return SPIRALS[spiral.lower()]
-    except KeyError as e:
-        raise ValueError(f"Unknown spiral name: {spiral}") from e
+    return Spirals[spiral]
 
 
 def initialize_shape_norm(shape):
@@ -601,19 +631,6 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    NORMS = {
-        "square": np.inf,
-        "cube": np.inf,
-        "circle": 2,
-        "sphere": 2,
-        "diamond": 1,
-        "octahedron": 1,
-    }
-
-    if not isinstance(shape, str):
-        # If directly a p-norm value
+    if isinstance(shape, float):
         return shape
-    try:
-        return NORMS[shape.lower()]
-    except KeyError as e:
-        raise ValueError("Unknown shape name: {shape}") from e
+    return Spirals[shape]
