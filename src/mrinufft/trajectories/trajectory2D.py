@@ -8,6 +8,7 @@ from .utils import (
     initialize_spiral,
     compute_coprime_factors,
 )
+from .tools import rotate
 
 
 #####################
@@ -166,7 +167,7 @@ def initialize_2D_sinusoide(
 
 def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
     # Check for value errors
-    if (Nc % nb_strips != 0):
+    if Nc % nb_strips != 0:
         raise ValueError("Nc should be divisible by nb_strips.")
 
     # Initialize single shot
