@@ -52,6 +52,10 @@ class displayConfig:
     This can be any of the matplotlib colormaps, or a list of colors."""
     one_shot_color: str = "k"
     """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
+    gradient_point_color: str = "r"
+    """Matplotlib color for gradient constraint points, by default ``"r"`` (red)."""
+    slewrate_point_color: str = "b"
+    """Matplotlib color for slew rate constraint points, by default ``"b"`` (blue)."""
 
     def __init__(self, **kwargs):
         """Update the display configuration."""
@@ -258,9 +262,17 @@ def display_2D_trajectory(
 
         # Scatter points with vivid colors
         ax.scatter(
-            gradients[:, 0], gradients[:, 1], color="r", s=displayConfig.pointsize
+            gradients[:, 0],
+            gradients[:, 1],
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
         )
-        ax.scatter(slews[:, 0], slews[:, 1], color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            slews[:, 0],
+            slews[:, 1],
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return ax
 
 
@@ -385,8 +397,16 @@ def display_3D_trajectory(
         slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
 
         # Scatter points with vivid colors
-        ax.scatter(*(gradients.T), color="r", s=displayConfig.pointsize)
-        ax.scatter(*(slewrates.T), color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            *(gradients.T),
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
+        )
+        ax.scatter(
+            *(slewrates.T),
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return ax
 
 
@@ -655,7 +675,17 @@ def display_gradients(
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
         pts = np.where(gradients > gmax)
-        ax.scatter(pts, np.zeros_like(pts), color="r", s=displayConfig.pointsize)
+        ax.scatter(
+            pts,
+            np.zeros_like(pts),
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
+        )
         pts = np.where(slewrates > smax)
-        ax.scatter(pts, np.zeros_like(pts), color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            pts,
+            np.zeros_like(pts),
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return axes
