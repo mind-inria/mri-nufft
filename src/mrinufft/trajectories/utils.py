@@ -110,6 +110,30 @@ class Tilts(str, Enum):
     MRI = MRI_GOLDEN
 
 
+class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Enumerate available packing method for shots.
+
+    This is mostly use for wave-CAIPI method
+
+    See Also
+    --------
+    mrinufft.trajectories.trajectories3D.initialize_3D_wave_caipi
+
+    """
+
+    RANDOM = "random"
+    CIRCLE = "circle"
+    TRIANGLE = "triangle"
+    HEXAGON = "hexagon"
+    SQUARE = "square"
+
+    # Aliases
+    CIRCULAR = CIRCLE
+    TRIANGULAR = TRIANGLE
+    HEXAGONAL = HEXAGON
+    UNIFORM = RANDOM
+
+
 ###############
 # CONSTRAINTS #
 ###############
