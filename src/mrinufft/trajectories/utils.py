@@ -651,4 +651,4 @@ def initialize_shape_norm(shape):
     """
     if isinstance(shape, float):
         return shape
-    return Spirals[shape]
+    return NormShapes[shape]
