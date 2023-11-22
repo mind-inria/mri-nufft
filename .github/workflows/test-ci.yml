@@ -118,10 +118,12 @@ jobs:
     needs: linter-check
     strategy:
       fail-fast: true
+      matrix:
+        backend: [gpunufft, cufinufft]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install mri-nufft
+      - name: Install mri-nufft and finufft
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
@@ -133,6 +135,7 @@ jobs:
           pip install finufft
 
       - name: Install Cufinufft
+        if: matrix.backend == cufinufft
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
@@ -156,6 +159,7 @@ jobs:
           cd $RUNNER_WORKSPACE
 
       - name: Install gpuNUFFT
+        if: matrix.backend == gpunufft
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
@@ -176,7 +180,7 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
-          python -m coverage run -m pytest -n auto -v --ref finufft
+          python -m coverage run -m pytest -n auto -v --ref finufft --backend ${{ matrix.backend }}
           coverage report
 
 
