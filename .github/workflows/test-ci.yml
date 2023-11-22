@@ -11,6 +11,7 @@ on:
 env:
   PYTHON_VERSION: "3.10"
   BART_VERSION: "0.8.00"
+  ref_backend: "finufft"
 
 jobs:
   linter-check:
@@ -84,7 +85,7 @@ jobs:
       - name: Run Tests
         shell: bash
         run: | 
-          coverage run -m pytest -n auto -v --backend ${{ matrix.backend }}
+          coverage run -m pytest -n auto -v --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }}
           coverage report
 
       - name: Upload coverage
@@ -178,7 +179,7 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
-          python -m coverage run -m pytest -n auto -v --ref finufft --backend ${{ matrix.backend }}
+          python -m coverage run -m pytest -n auto -v --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }}
           coverage report
 
 
