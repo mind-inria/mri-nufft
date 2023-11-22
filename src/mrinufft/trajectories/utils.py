@@ -17,6 +17,11 @@ DEFAULT_GMAX = 0.04  # T/m
 DEFAULT_SMAX = 0.1  # T/m/ms
 
 
+#########
+# ENUMS #
+#########
+
+
 class CaseInsensitiveEnumMeta(EnumMeta):
     """A case-insensitive EnumMeta."""
 
@@ -60,7 +65,7 @@ class Gammas(FloatEnum):
 
 
 class Spirals(FloatEnum):
-    """Enumerate spirals type."""
+    """Enumerate spiral types."""
 
     ARCHIMEDES = 1
     ARITHMETIC = ARCHIMEDES
@@ -71,7 +76,7 @@ class Spirals(FloatEnum):
 
 
 class NormShapes(FloatEnum):
-    """Enumerate norms types."""
+    """Enumerate shape norms."""
 
     L1 = 1
     L2 = 2
@@ -113,7 +118,7 @@ class Tilts(str, Enum):
 class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Enumerate available packing method for shots.
 
-    This is mostly use for wave-CAIPI method
+    It is mostly use for wave-CAIPI trajectory
 
     See Also
     --------
