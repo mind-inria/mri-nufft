@@ -321,11 +321,10 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # - ``Nc (int)``: number of individual shots. See radial
 # - ``Ns (int)``: number of samples per shot. See radial
 # - ``nb_strips (int)``: number of strips covering the k-space.
-# - ``tilt (str, float)``: angle between each strip (in radians)
 #   ``(default "uniform")``. See radial
 #
 
-trajectory = mn.initialize_2D_propeller(Nc, Ns, nb_strips=nb_repetitions, tilt=tilt)
+trajectory = mn.initialize_2D_propeller(Nc, Ns, nb_strips=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -339,7 +338,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [2, 3, 4, 6]
-function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x, tilt=tilt)
+function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x)
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
 

@@ -165,7 +165,7 @@ def initialize_2D_sinusoide(
     return trajectory
 
 
-def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
+def initialize_2D_propeller(Nc, Ns, nb_strips):
     """Initialize a 2D PROPELLER trajectory, as proposed in [Pip99]_.
 
     The PROPELLER trajectory is generally used along a specific
@@ -186,8 +186,6 @@ def initialize_2D_propeller(Nc, Ns, nb_strips, tilt="uniform"):
         Number of samples per shot
     nb_strips : int
         Number of rotated strips, must divide ``Nc``
-    tilt : str, float, optional
-        Tilt of the strips, by default "uniform"
 
     References
     ----------
