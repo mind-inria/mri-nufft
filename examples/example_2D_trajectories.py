@@ -67,6 +67,7 @@ Nc = 24  # Number of shots
 Ns = 256  # Number of samples per shot
 in_out = True  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Choose the angular distance between shots
+nb_repetitions = 6  # Number of strips when relevant
 
 # Display parameters
 figure_size = 6  # Figure size for trajectory plots
@@ -299,6 +300,46 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 trajectory = mn.initialize_2D_sinusoide(Nc, Ns, tilt=tilt, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# PROPELLER
+# ---------
+#
+# The PROPELLER trajectory is generally used along a specific
+# reconstruction pipeline described in [Pip99]_ to correct for
+# motion artifacts.
+#
+# The acronym PROPELLER stands for Periodically Rotated
+# Overlapping ParallEL Lines with Enhanced Reconstruction,
+# and the method is also commonly known under other aliases
+# depending on the vendor, with some variations: BLADE,
+# MulitVane, RADAR, JET.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``nb_strips (int)``: number of strips covering the k-space.
+#   ``(default "uniform")``. See radial
+#
+
+trajectory = mn.initialize_2D_propeller(Nc, Ns, nb_strips=nb_repetitions)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``nb_strips (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# The number of individual strips dividing the k-space circle. It must divide
+# the number of shots ``Nc``, and it is recommended to choose it such that the
+# ratio is even to cover the center.
+#
+
+arguments = [2, 3, 4, 6]
+function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x)
+show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
 
 # %%
@@ -565,3 +606,12 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 arguments = [1, 1.5, 2, 3]
 function = lambda x: mn.initialize_2D_lissajous(Nc, Ns, density=x)
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+
+
+# %%
+# References
+# ==========
+#
+# .. [Pip99] Pipe, James G. "Motion correction with PROPELLER MRI:
+#    application to head motion and free‐breathing cardiac imaging."
+#    Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.
