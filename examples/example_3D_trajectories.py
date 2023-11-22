@@ -161,7 +161,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # when the ``in_out`` argument is switched to keep the same behavior.
 #
 
-arguments = ["uniform", "golden", "mri golden", np.pi / 17]
+arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
 function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 

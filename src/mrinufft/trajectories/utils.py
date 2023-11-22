@@ -1,7 +1,7 @@
 """Utility functions for the trajectory design."""
 import numpy as np
 
-from enum import Enum
+from enum import Enum, EnumMeta
 
 
 #############
@@ -17,7 +17,30 @@ DEFAULT_GMAX = 0.04  # T/m
 DEFAULT_SMAX = 0.1  # T/m/ms
 
 
-class Gammas(float, Enum):
+#########
+# ENUMS #
+#########
+
+
+class CaseInsensitiveEnumMeta(EnumMeta):
+    """A case-insensitive EnumMeta."""
+
+    def __getitem__(self, name):
+        """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
+        return super().__getitem__(name.upper())
+
+    def __getattr__(self, name):
+        """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
+        return super().__getattr__(name.upper())
+
+
+class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """An Enum for float that is case insensitive for ist attributes."""
+
+    pass
+
+
+class Gammas(FloatEnum):
     """Enumerate gyromagnetic ratios for common nuclei in MR."""
 
     # Values in kHz/T
@@ -39,6 +62,81 @@ class Gammas(float, Enum):
     Na = Na23 = SODIUM
     P = P31 = PHOSPHOROUS
     X = X129 = XENON
+
+
+class Spirals(FloatEnum):
+    """Enumerate spiral types."""
+
+    ARCHIMEDES = 1
+    ARITHMETIC = ARCHIMEDES
+    FERMAT = 2
+    PARABOLIC = FERMAT
+    HYPERBOLIC = -1
+    LITHUUS = -2
+
+
+class NormShapes(FloatEnum):
+    """Enumerate shape norms."""
+
+    L1 = 1
+    L2 = 2
+    LINF = np.inf
+    SQUARE = LINF
+    CUBE = LINF
+    CIRCLE = L2
+    SPHERE = L2
+    DIAMOND = L1
+    OCTAHEDRON = L1
+
+
+class Tilts(str, Enum):
+    r"""Enumerate available tilts.
+
+    Notes
+    -----
+    The following values are accepted for the tilt name, with :math:`N` the number of
+    partitions:
+
+    - "none": no tilt
+    - "uniform": uniform tilt: 2:math:`\pi / N`
+    - "intergaps": :math:`\pi/2N`
+    - "inverted": inverted tilt :math:`\pi/N + \pi`
+    - "golden": tilt of the golden angle :math:`\pi(3-\sqrt{5})`
+    - "mri golden": tilt of the golden angle used in MRI :math:`\pi(\sqrt{5}-1)/2`
+
+    """
+
+    UNIFORM = "uniform"
+    NONE = "none"
+    INTERGAPS = "intergaps"
+    INVERTED = "inverted"
+    GOLDEN = "golden"
+    MRI_GOLDEN = "mri-golden"
+    MRI = MRI_GOLDEN
+
+
+class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Enumerate available packing method for shots.
+
+    It is mostly use for wave-CAIPI trajectory
+
+    See Also
+    --------
+    mrinufft.trajectories.trajectories3D.initialize_3D_wave_caipi
+
+    """
+
+    RANDOM = "random"
+    CIRCLE = "circle"
+    TRIANGLE = "triangle"
+    HEXAGON = "hexagon"
+    SQUARE = "square"
+
+    # Aliases
+    CIRCULAR = CIRCLE
+    TRIANGULAR = TRIANGLE
+    HEXAGONAL = HEXAGON
+    UNIFORM = RANDOM
 
 
 ###############
@@ -526,32 +624,24 @@ def initialize_tilt(tilt, nb_partitions=1):
     NotImplementedError
         If the tilt name is unknown.
 
-    Notes
-    -----
-    The following values are accepted for the tilt name, with :math:`N` the number of
-    partitions:
-
-    - "none": no tilt
-    - "uniform": uniform tilt: 2:math:`\pi / N`
-    - "intergaps": :math:`\pi/2N`
-    - "inverted": inverted tilt :math:`\pi/N + \pi`
-    - "golden": tilt of the golden angle :math:`\pi(3-\sqrt{5})`
-    - "mri golden": tilt of the golden angle used in MRI :math:`\pi(\sqrt{5}-1)/2`
+    See Also
+    --------
+    Tilts
 
     """
     if not (isinstance(tilt, str) or tilt is None):
         return tilt
-    elif tilt is None or tilt == "none":
+    elif tilt is None or tilt == Tilts.NONE:
         return 0
-    elif tilt == "uniform":
+    elif tilt == Tilts.UNIFORM:
         return 2 * np.pi / nb_partitions
-    elif tilt == "intergaps":
+    elif tilt == Tilts.INTERGAPS:
         return np.pi / nb_partitions / 2
-    elif tilt == "inverted":
+    elif tilt == Tilts.INVERTED:
         return np.pi / nb_partitions + np.pi
-    elif tilt == "golden":
+    elif tilt == Tilts.GOLDEN:
         return np.pi * (3 - np.sqrt(5))
-    elif tilt == "mri golden":
+    elif tilt == Tilts.MRI_GOLDEN:
         return np.pi * (np.sqrt(5) - 1) / 2
     else:
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
@@ -570,22 +660,9 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
-    SPIRALS = {
-        "archimedes": 1,
-        "arithmetic": 1,
-        "fermat": 2,
-        "parabolic": 2,
-        "hyperbolic": -1,
-        "lithuus": -2,
-    }
-
-    if not isinstance(spiral, str):
-        # If directly a power value
+    if isinstance(spiral, float):
         return spiral
-    try:
-        return SPIRALS[spiral.lower()]
-    except KeyError as e:
-        raise ValueError(f"Unknown spiral name: {spiral}") from e
+    return Spirals[spiral]
 
 
 def initialize_shape_norm(shape):
@@ -601,19 +678,6 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    NORMS = {
-        "square": np.inf,
-        "cube": np.inf,
-        "circle": 2,
-        "sphere": 2,
-        "diamond": 1,
-        "octahedron": 1,
-    }
-
-    if not isinstance(shape, str):
-        # If directly a p-norm value
+    if isinstance(shape, float):
         return shape
-    try:
-        return NORMS[shape.lower()]
-    except KeyError as e:
-        raise ValueError("Unknown shape name: {shape}") from e
+    return NormShapes[shape]

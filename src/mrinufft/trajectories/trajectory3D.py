@@ -7,7 +7,7 @@ from scipy.special import ellipj, ellipk
 
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
-from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX
+from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX, Packings
 
 
 ############################
@@ -214,19 +214,18 @@ def initialize_3D_wave_caipi(
     trajectory[0, :, 1] = width * np.sin(angles)
     trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
 
+    packing = Packings[packing]
     # Packing
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
-    if packing in ["random", "uniform"]:
+    if packing == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
-    elif packing in ["circle", "circular"]:
-        # Circle packing
+    elif packing == Packings.CIRCLE:
         positions = [[0, 0]]
         counter = 0
         while len(positions) < side**2:
             counter += 1
             perimeter = 2 * np.pi * counter
             nb_shots = int(np.trunc(perimeter))
-
             # Add the full circle
             radius = 2 * counter
             angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
@@ -234,14 +233,14 @@ def initialize_3D_wave_caipi(
             positions = np.concatenate(
                 [positions, np.array([circle.real, circle.imag]).T], axis=0
             )
-    elif packing in ["square", "triangle", "triangular", "hexagon", "hexagonal"]:
+    elif packing in [Packings.SQUARE, Packings.TRIANGLE, Packings.HEXAGONAL]:
         # Square packing or initialize hexagonal/triangular packing
         px, py = np.meshgrid(
             np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
         )
         positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
 
-    if packing in ["triangle", "triangular", "hexagon", "hexagonal"]:
+    if packing in [Packings.HEXAGON, Packings.TRIANGLE]:
         # Hexagonal/triangular packing based on square packing
         positions[::2, 1] += 1 / 2
         positions[1::2, 1] -= 1 / 2
