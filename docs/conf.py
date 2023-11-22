@@ -32,6 +32,7 @@ author = "MRI-NUFFT Contributors"
 extensions = [
     "sphinx_copybutton",
     "sphinx.ext.duration",
+    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
@@ -73,7 +74,7 @@ sphinx_gallery_conf = {
     "backreferences_dir": "generated/gallery_backreferences",
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
-    "gallery_dirs": ["generated/auto_examples"],
+    "gallery_dirs": ["generated/autoexamples"],
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest)\.py",
     "nested_sections": True,

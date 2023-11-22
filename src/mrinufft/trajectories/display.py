@@ -1,54 +1,121 @@
 """Display function for trajectories."""
+import itertools
+
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
 
 from .utils import (
+    DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
+    DEFAULT_SMAX,
+    KMAX,
     compute_gradients_and_slew_rates,
     convert_trajectory_to_gradients,
-    KMAX,
-    DEFAULT_GMAX,
-    DEFAULT_SMAX,
-    DEFAULT_RASTER_TIME,
 )
-
-
-COLOR_CYCLE = [
-    "tab:blue",
-    "tab:orange",
-    "tab:green",
-    "tab:red",
-    "tab:purple",
-    "tab:olive",
-    "tab:pink",
-    "tab:cyan",
-]
-NB_COLORS = len(COLOR_CYCLE)
 
 
 class displayConfig:
     """
     A container class used to share arguments related to display.
 
-    Attributes
-    ----------
-    alpha : float
-        Transparency used for area plots, by default 0.2.
-    linewidth : float
-        Width for lines or curves, by default 2.
-    pointsize : float
-        Size for points used to show constraints, by default 10.
-    fontsize : float
-        Font size for most labels and texts, by default 18.
-    small_fontsize : float
-        Font size for smaller texts, by default 14.
+    The values can be updated either directy (and permanently) or temporarily by using
+    a context manager.
+
+    Examples
+    --------
+    >>> from mrinufft.trajectories.display import displayConfig
+    >>> displayConfig.alpha
+    0.2
+    >>> with displayConfig(alpha=0.5):
+            print(displayConfig.alpha)
+    0.5
+    >>> displayConfig.alpha
+    0.2
     """
 
-    alpha = 0.2
-    linewidth = 2
-    pointsize = 10
-    fontsize = 18
-    small_fontsize = 14
+    alpha: float = 0.2
+    """Transparency used for area plots, by default ``0.2``."""
+    linewidth: float = 2
+    """Width for lines or curves, by default ``2``."""
+    pointsize: int = 10
+    """Size for points used to show constraints, by default ``10``."""
+    fontsize: int = 18
+    """Font size for most labels and texts, by default ``18``."""
+    small_fontsize: int = 14
+    """Font size for smaller texts, by default ``14``."""
+    nb_colors = 10
+    """Number of colors to use in the color cycle, by default ``10``."""
+    palette: str = "tab10"
+    """Name of the color palette to use, by default ``"tab10"``.
+    This can be any of the matplotlib colormaps, or a list of colors."""
+    one_shot_color: str = "k"
+    """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
+    gradient_point_color: str = "r"
+    """Matplotlib color for gradient constraint points, by default ``"r"`` (red)."""
+    slewrate_point_color: str = "b"
+    """Matplotlib color for slew rate constraint points, by default ``"b"`` (blue)."""
+
+    def __init__(self, **kwargs):
+        """Update the display configuration."""
+        self.update(**kwargs)
+
+    def update(self, **kwargs):
+        """Update the display configuration."""
+        self._old_values = {}
+        for key, value in kwargs.items():
+            self._old_values[key] = getattr(displayConfig, key)
+            setattr(displayConfig, key, value)
+
+    def reset(self):
+        """Restore the display configuration."""
+        for key, value in self._old_values.items():
+            setattr(displayConfig, key, value)
+        delattr(self, "_old_values")
+
+    def __enter__(self):
+        """Enter the context manager."""
+        return self
+
+    def __exit__(self, *args):
+        """Exit the context manager."""
+        self.reset()
+
+    @classmethod
+    def get_colorlist(cls):
+        """Extract a list of colors from a matplotlib palette.
+
+        If the palette is continuous, the colors will be sampled from it.
+        If its a categorical palette, the colors will be used in cycle.
+
+        Parameters
+        ----------
+        palette : str, or list of colors, or matplotlib colormap
+            Name of the palette to use, or list of colors, or matplotlib colormap.
+        nb_colors : int, optional
+            Number of colors to extract from the palette.
+            The default is -1, and the value will be read from displayConfig.nb_colors.
+
+        Returns
+        -------
+        colorlist : list of matplotlib colors.
+        """
+        if isinstance(cls.palette, str):
+            cm = mpl.colormaps[cls.palette]
+        elif isinstance(cls.palette, mpl.colors.Colormap):
+            cm = cls.palette
+        elif isinstance(cls.palette, list):
+            cm = mpl.cm.ListedColormap(cls.palette)
+        colorlist = []
+        colors = getattr(cm, "colors", [])
+        if 0 < len(colors) < cls.nb_colors:
+            colorlist = [
+                c for _, c in zip(range(cls.nb_colors), itertools.cycle(cm.colors))
+            ]
+        else:
+            colorlist = cm(np.linspace(0, 1, cls.nb_colors))
+        return colorlist
 
 
 ##############
@@ -149,13 +216,13 @@ def display_2D_trajectory(
     # Setup figure and ticks
     Nc, Ns = trajectory.shape[:2]
     ax = _setup_2D_ticks(figsize, subfigure)
-
+    colors = displayConfig.get_colorlist()
     # Display every shot
     for i in range(Nc):
         ax.plot(
             trajectory[i, :, 0],
             trajectory[i, :, 1],
-            color=COLOR_CYCLE[i % NB_COLORS],
+            color=colors[i % displayConfig.nb_colors],
             linewidth=displayConfig.linewidth,
         )
 
@@ -170,7 +237,7 @@ def display_2D_trajectory(
         ax.plot(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
-            color="k",
+            color=displayConfig.one_shot_color,
             linewidth=2 * displayConfig.linewidth,
         )
 
@@ -195,9 +262,17 @@ def display_2D_trajectory(
 
         # Scatter points with vivid colors
         ax.scatter(
-            gradients[:, 0], gradients[:, 1], color="r", s=displayConfig.pointsize
+            gradients[:, 0],
+            gradients[:, 1],
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
         )
-        ax.scatter(slews[:, 0], slews[:, 1], color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            slews[:, 0],
+            slews[:, 1],
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return ax
 
 
@@ -272,6 +347,7 @@ def display_3D_trajectory(
     trajectory = trajectory.reshape((nb_repetitions, -1, trajectory.shape[-2], 3))
     Nc, Ns = trajectory.shape[1:3]
 
+    colors = displayConfig.get_colorlist()
     # Display every shot
     for i in range(nb_repetitions):
         for j in range(Nc):
@@ -279,7 +355,7 @@ def display_3D_trajectory(
                 trajectory[i, j, :, 0],
                 trajectory[i, j, :, 1],
                 trajectory[i, j, :, 2],
-                color=COLOR_CYCLE[(i + j * (not per_plane)) % NB_COLORS],
+                color=colors[(i + j * (not per_plane)) % displayConfig.nb_colors],
                 linewidth=displayConfig.linewidth,
             )
 
@@ -297,7 +373,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
-            color="k",
+            color=displayConfig.one_shot_color,
             linewidth=2 * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
@@ -321,8 +397,16 @@ def display_3D_trajectory(
         slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
 
         # Scatter points with vivid colors
-        ax.scatter(*(gradients.T), color="r", s=displayConfig.pointsize)
-        ax.scatter(*(slewrates.T), color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            *(gradients.T),
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
+        )
+        ax.scatter(
+            *(slewrates.T),
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return ax
 
 
@@ -400,11 +484,14 @@ def display_gradients_simply(
     gradients = np.diff(trajectory, axis=1)
     vmax = 1.1 * np.max(np.abs(gradients[shot_ids, ...]))
     x_axis = np.arange(gradients.shape[1])
+    colors = displayConfig.get_colorlist()
     for j, s_id in enumerate(shot_ids):
         for i, ax in enumerate(axes[:Nd]):
             ax.set_ylim((-vmax, vmax))
             color = (
-                uni_gradient if uni_gradient is not None else COLOR_CYCLE[j % NB_COLORS]
+                uni_gradient
+                if uni_gradient is not None
+                else colors[j % displayConfig.nb_colors]
             )
             ax.plot(x_axis, gradients[s_id, ..., i], color=color)
             if fill_area:
@@ -428,11 +515,16 @@ def display_gradients_simply(
     ).real
     signal = signal * np.abs(signal) ** 3
 
+    colors = displayConfig.get_colorlist()
     # Show signal for each requested shot
     axes[-1].set_ylim((-1, 1))
     axes[-1].set_ylabel("Signal", fontsize=displayConfig.fontsize)
     for j in range(len(shot_ids)):
-        color = uni_signal if (uni_signal is not None) else COLOR_CYCLE[j % NB_COLORS]
+        color = (
+            uni_signal
+            if (uni_signal is not None)
+            else colors[j % displayConfig.nb_colors]
+        )
         axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
     return axes
 
@@ -583,7 +675,17 @@ def display_gradients(
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
         pts = np.where(gradients > gmax)
-        ax.scatter(pts, np.zeros_like(pts), color="r", s=displayConfig.pointsize)
+        ax.scatter(
+            pts,
+            np.zeros_like(pts),
+            color=displayConfig.gradient_point_color,
+            s=displayConfig.pointsize,
+        )
         pts = np.where(slewrates > smax)
-        ax.scatter(pts, np.zeros_like(pts), color="b", s=displayConfig.pointsize)
+        ax.scatter(
+            pts,
+            np.zeros_like(pts),
+            color=displayConfig.slewrate_point_color,
+            s=displayConfig.pointsize,
+        )
     return axes
