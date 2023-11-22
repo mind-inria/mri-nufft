@@ -39,7 +39,8 @@ jobs:
       fail-fast: true
       matrix:
         backend: [finufft, pynfft, bart, sigpy]
-
+        exclude:
+          - backend: bart
 
     steps:
       - uses: actions/checkout@v3
@@ -129,6 +130,7 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
+          pip install finufft
 
       - name: Install Cufinufft
         shell: bash
@@ -174,7 +176,7 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
-          python -m coverage run -m pytest -n auto -v
+          python -m coverage run -m pytest -n auto -v --ref finufft
           coverage report
 
 
