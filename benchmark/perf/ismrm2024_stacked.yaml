@@ -1,0 +1,33 @@
+defaults:
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+max_time: 10.0
+
+data:
+  n_coils: 4
+  smaps: true
+  dtype: "complex64"
+
+trajectory: "trajs/trajectory_stack_of_spirals.bin"
+task:
+  - forward
+  - adjoint
+  - grad
+backend: "finufft"
+
+monitor:
+  interval: 0.5
+  gpu: true
+
+hydra:
+  job:
+    chdir: true
+  mode: MULTIRUN
+  sweeper:
+    params:
+      backend: stacked-finufft, finufft, stacked-cufinufft, stacked-gpunufft, cufinufft, gpunufft
+      data: "{n_coils: 1, smaps:false},{n_coils: 8, smaps:true},{n_coils:32, smaps: true}"
+  sweep:
+    dir: /volatile/pierre-antoine/mri-nufft/benchmark/3d-results/${now:%Y-%m-%d_%H-%M-%S}/
+    subdir: ${hydra.job.num}

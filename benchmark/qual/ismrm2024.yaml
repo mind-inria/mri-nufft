@@ -1,0 +1,38 @@
+defaults:
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+
+cache_dir: cache-quality
+
+ref_data: "cpx_cartesian.npy"
+
+trajectory:
+  file: "../trajs/trajectory_floret.bin"
+  density: true
+
+
+backend:
+  name: "gpunufft"
+  eps: 1e-3
+  upsampfac: 2.0
+
+solver:
+  optimizer: "pogm"
+  wavelet:
+    base: "sym8"
+    nb_scale: 4
+  max_iter: 20
+  lmbd: 0.5
+
+monitor:
+  interval: 0.5
+  gpu: true
+
+
+hydra:
+  job:
+    chdir: true
+
+  run:
+    dir: outputs-qual/${now:%Y-%m-%d_%H-%M-%S}/
