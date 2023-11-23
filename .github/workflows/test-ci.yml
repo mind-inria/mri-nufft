@@ -10,6 +10,8 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
+  BART_VERSION: "0.8.00"
+  ref_backend: "finufft"
 
 jobs:
   linter-check:
@@ -34,6 +36,11 @@ jobs:
   test-cpu:
     runs-on: ubuntu-latest
     needs: linter-check
+    strategy:
+      matrix:
+        backend: [finufft, pynfft, bart, sigpy]
+        exclude:
+          - backend: bart
 
     steps:
       - uses: actions/checkout@v3
@@ -49,15 +56,36 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
-      - name: Install CPU Backends
+      - name: Install pynfft
+        run: python -m pip install pynfft2 "cython<3.0.0"
+
+      - name: Install finufft
+        if: ${{ matrix.backend == 'finufft' }}
+        shell: bash
+        run: python -m pip install finufft
+
+      - name: Install Sigpy
+        if: ${{ matrix.backend == 'sigpy' }}
+        shell: bash
+        run: python -m pip install sigpy
+
+
+      - name: Install BART
+        if: ${{ matrix.backend == 'bart' }}
         shell: bash
         run: |
-          python -m pip install finufft pynfft2 "cython<3.0.0"
+          cd $RUNNER_WORKSPACE
+          sudo apt-get install make gcc libfftw3-dev liblapacke-dev libpng-dev libopenblas-dev
+          wget https://github.com/mrirecon/bart/archive/v${{ env.BART_VERSION }}.tar.gz
+          tar xzvf v${{ env.BART_VERSION }}.tar.gz
+          cd bart-${{ env.BART_VERSION }}
+          make
+          echo $PWD >> $GITHUB_PATH
 
       - name: Run Tests
         shell: bash
         run: | 
-          coverage run -m pytest -n auto -v
+          coverage run -m pytest -n auto -v --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }}
           coverage report
 
       - name: Upload coverage
@@ -67,43 +95,46 @@ jobs:
           path: .coverage
 
       #https://stackoverflow.com/a/74411469/16019838
-      #
-      - name: Abort other jobs
-        if: failure()
-        uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-        with:
-          script: |
-            const RUN_ID = process.env.GITHUB_RUN_ID
-            const [OWNER, REPO] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel', {
-              owner: OWNER,
-              repo: REPO,
-              run_id: RUN_ID,
-              headers: {'X-GitHub-Api-Version': '2022-11-28'}})
+
+      # - name: Abort other jobs
+      #   if: failure()
+      #   uses: actions/github-script@v6
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_RUN_ID: ${{ github.run_id }}
+      #   with:
+      #     script: |
+      #       const RUN_ID = process.env.GITHUB_RUN_ID
+      #       const [OWNER, REPO] = process.env.GITHUB_REPOSITORY.split("/");
+      #       const resp = await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel', {
+      #         owner: OWNER,
+      #         repo: REPO,
+      #         run_id: RUN_ID,
+      #         headers: {'X-GitHub-Api-Version': '2022-11-28'}})
 
 
   test-gpu:
     runs-on: GPU
     needs: linter-check
     strategy:
-      fail-fast: true
+      matrix:
+        backend: [gpunufft, cufinufft]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install mri-nufft
+      - name: Install mri-nufft and finufft
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
           python --version
           python -m venv venv
           source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install --upgrade pip wheel numpy
+          pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
+          pip install finufft
 
       - name: Install Cufinufft
+        if: ${{ matrix.backend == 'cufinufft' }}
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
@@ -127,6 +158,7 @@ jobs:
           cd $RUNNER_WORKSPACE
 
       - name: Install gpuNUFFT
+        if: ${{ matrix.backend == 'gpunufft' }}
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
@@ -147,7 +179,7 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
-          python -m coverage run -m pytest -n auto -v
+          python -m coverage run -m pytest -n auto -v --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }}
           coverage report
 
 
@@ -159,22 +191,22 @@ jobs:
           path: .coverage
 
       #https://stackoverflow.com/a/74411469/16019838
-      #
-      - name: Abort other jobs
-        if: failure()
-        uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-        with:
-          script: |
-            const RUN_ID = process.env.GITHUB_RUN_ID
-            const [OWNER, REPO] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel', {
-              owner: OWNER,
-              repo: REPO,
-              run_id: RUN_ID,
-              headers: {'X-GitHub-Api-Version': '2022-11-28'}})
+      # #
+      # - name: Abort other jobs
+      #   if: failure()
+      #   uses: actions/github-script@v6
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_RUN_ID: ${{ github.run_id }}
+      #   with:
+      #     script: |
+      #       const RUN_ID = process.env.GITHUB_RUN_ID
+      #       const [OWNER, REPO] = process.env.GITHUB_REPOSITORY.split("/");
+      #       const resp = await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel', {
+      #         owner: OWNER,
+      #         repo: REPO,
+      #         run_id: RUN_ID,
+      #         headers: {'X-GitHub-Api-Version': '2022-11-28'}})
 
       - name: Cleanup
         if: always()
