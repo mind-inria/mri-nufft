@@ -13,7 +13,7 @@ from .utils import (
     pin_memory,
     sizeof_fmt,
 )
-from ._cupy_kernels import sense_adj_mono, update_density
+from ._cupy_kernels import update_density
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
@@ -237,7 +237,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         smaps=None,
         smaps_cached=False,
         verbose=False,
-        persist_plan=True,
         squeeze_dims=False,
         n_trans=1,
         **kwargs,
@@ -293,9 +292,6 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
-        # Initialise NUFFT plans
-        self.persist_plan = persist_plan
-
         self.raw_op = RawCufinufftPlan(
             self.samples,
             tuple(shape),
@@ -328,9 +324,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             check_size(data, (self.n_batchs, self.n_coils, *self.shape))
         data = data.astype(self.cpx_dtype)
-        if not self.persist_plan or self.raw_op.plans[2] is None:
-            self.raw_op._make_plan(2)
-            self.raw_op._set_pts(2)
 
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
@@ -342,25 +335,29 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             op_func = self._op_calibless_host
         ret = op_func(data, ksp_d)
-        if not self.persist_plan:
-            self.raw_op._destroy_plan(2)
 
         ret /= self.norm_factor
         return self._safe_squeeze(ret)
 
     def _op_sense_device(self, data, ksp_d=None):
-        # FIXME: add batch support.
-        ksp_d = ksp_d or cp.empty((self.n_coils, self.n_samples), dtype=self.cpx_dtype)
-        img_d = cp.asarray(data, dtype=self.cpx_dtype)
-        coil_img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-        for i in range(self.n_coils):
-            if self.smaps_cached:
-                coil_img_d = img_d * self.smaps[i]  # sense forward
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        image_dataf = cp.reshape(data, (B, *XYZ))
+        ksp_d = ksp_d or cp.empty((B * C, K), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            data_batched = image_dataf[idx_batch].reshape((T, *XYZ))
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
-                self._smap_d.set(self.smaps[i])
-                coil_img_d = img_d * self._smap_d[i]  # sense forward
-            self.__op(get_ptr(coil_img_d), get_ptr(ksp_d) + i * self.ksp_size)
-        return ksp_d
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            data_batched *= smaps_batched
+            self.__op(get_ptr(data_batched), get_ptr(ksp_d[i * T : (i + 1) * T]))
+
+        return ksp_d.reshape((B, C, K))
 
     def _op_sense_host(self, data, ksp=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -443,10 +440,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
-        if not self.persist_plan or self.raw_op.plans[1] is None:
-            self.raw_op._make_plan(1)
-            self.raw_op._set_pts(1)
-
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device
@@ -459,8 +452,6 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         ret = adj_op_func(coeffs, img_d)
         ret /= self.norm_factor
-        if not self.persist_plan:
-            self.raw_op._destroy_plan(1)
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
@@ -584,7 +575,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             ret = self.raw_op.type1(coeffs_d, image_d)
         return ret
 
-    def data_consistency(self, image_data, obs_data):
+    def get_grad(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
@@ -599,98 +590,157 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
-        check_size(obs_data, (self.n_batchs, self.n_coils, self.n_samples))
-        if self.uses_sense:
-            check_size(image_data, (self.n_batchs, *self.shape))
-        else:
-            check_size(image_data, (self.n_batchs, self.n_coils, *self.shape))
+        B, C = self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
 
-        if not self.persist_plan or self.raw_op.plans[1] is None:
-            self.raw_op._make_plan(1)
-            self.raw_op._set_pts(1)
-
+        check_size(obs_data, (B, C, K))
         if self.uses_sense:
-            dc_func = self._data_consistency_sense
+            check_size(image_data, (B, *XYZ))
         else:
-            dc_func = self._data_consistency_calibless
-        ret = dc_func(image_data, obs_data)
-        if not self.persist_plan:
-            self.raw_op._destroy_plan(1)
+            check_size(image_data, (B, C, *XYZ))
+
+        if self.uses_sense and is_host_array(image_data):
+            grad_func = self._grad_sense_host
+        elif self.uses_sense and is_cuda_array(image_data):
+            grad_func = self._grad_sense_device
+        elif not self.uses_sense and is_host_array(image_data):
+            grad_func = self._grad_calibless_host
+        elif not self.uses_sense and is_cuda_array(image_data):
+            grad_func = self._grad_calibless_device
+        else:
+            raise ValueError("No suitable gradient function found.")
+        ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 
-    def _data_consistency_sense(self, image_data, obs_data):
-        img_d = cp.array(image_data, copy=True)
-        coil_img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-        coil_ksp_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)
-        if is_host_array(obs_data):
-            coil_obs_data = cp.empty(self.n_samples, dtype=self.cpx_dtype)
-            obs_data_pinned = pin_memory(obs_data)
-            for i in range(self.n_coils):
-                cp.copyto(coil_img_d, img_d)
-                if self.smaps_cached:
-                    coil_img_d *= self.smaps[i]
-                else:
-                    self._smap_d.set(self._smaps[i])
-                    coil_img_d *= self._smap_d
-                self.__op(get_ptr(coil_img_d), get_ptr(coil_ksp_d))
-                coil_obs_data = cp.asarray(obs_data_pinned[i])
-                coil_ksp_d -= coil_obs_data
-                if self.uses_density:
-                    coil_ksp_d *= self.density_d
-                self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
-                if self.smaps_cached:
-                    sense_adj_mono(img_d, coil_img_d, self.smaps[i])
-                else:
-                    sense_adj_mono(img_d, coil_img_d, self._smap_d)
-            del obs_data_pinned
-            return img_d.get()
+    def _grad_sense_host(self, image_data, obs_data):
+        """Gradient computation when all data is on host."""
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
 
-        for i in range(self.n_coils):
-            cp.copyto(coil_img_d, img_d)
-            if self.smaps_cached:
-                coil_img_d *= self.smaps[i]
+        image_dataf = np.reshape(image_data, (B, *XYZ))
+        obs_dataf = np.reshape(obs_data, (B * C, K))
+
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+        obs_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+
+        grad_d = cp.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        grad = np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            data_batched.set(image_dataf[idx_batch].reshape((T, *XYZ)))
+            obs_batched.set(obs_dataf[i * T : (i + 1) * T])
+
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
-                self._smap_d.set(self._smaps[i])
-                coil_img_d *= self._smap_d
-            self.__op(get_ptr(coil_img_d), get_ptr(coil_ksp_d))
-            coil_ksp_d -= obs_data[i]
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            data_batched *= smaps_batched
+            self.__op(get_ptr(data_batched), get_ptr(ksp_batched))
+
+            ksp_batched /= self.norm_factor
+            ksp_batched -= obs_batched
+
             if self.uses_density:
-                coil_ksp_d *= self.density_d
-            self.__adj_op(get_ptr(coil_ksp_d), get_ptr(coil_img_d))
-            if self.smaps_cached:
-                sense_adj_mono(img_d, coil_img_d, self.smaps[i])
+                ksp_batched *= self.density
+            self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
+
+            for t, b in enumerate(idx_batch):
+                # TODO write a kernel for that.
+                grad_d = data_batched * smaps_batched.conj()
+                grad_d /= self.norm_factor
+                grad[b] += grad_d[t].get()
+
+        grad = grad.reshape((B, 1, *XYZ))
+        return grad
+
+    def _grad_sense_device(self, image_data, obs_data):
+        """Gradient computation when all data is on device."""
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        image_dataf = cp.reshape(image_data, (B, *XYZ))
+        obs_dataf = cp.reshape(obs_data, (B * C, K))
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+        grad = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            data_batched.set(image_dataf[i * T : (i + 1) * T])
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
-                sense_adj_mono(img_d, coil_img_d, self._smap_d)
-        return img_d
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            data_batched *= smaps_batched
+            self.__op(get_ptr(data_batched), get_ptr(ksp_batched))
+            ksp_batched /= self.norm_factor
+            ksp_batched -= obs_dataf[i * T : (i + 1) * T]
 
-    def _data_consistency_calibless(self, image_data, obs_data):
-        if is_cuda_array(image_data):
-            img_d = cp.empty((self.n_coils, *self.shape), dtype=self.cpx_dtype)
-            ksp_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)
-            for i in range(self.n_coils):
-                self.__op(get_ptr(image_data) + i * self.img_size, get_ptr(ksp_d))
-                ksp_d /= self.norm_factor
-                ksp_d -= obs_data[i]
-                if self.uses_density:
-                    ksp_d *= self.density_d
-                self.__adj_op(get_ptr(ksp_d), get_ptr(img_d) + i * self.img_size)
-            return img_d / self.norm_factor
-
-        img_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-        img = np.zeros((self.n_coils, *self.shape), dtype=self.cpx_dtype)
-        ksp_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)
-        obs_d = cp.empty(self.n_samples, dtype=self.cpx_dtype)
-        for i in range(self.n_coils):
-            img_d.set(image_data[i])
-            obs_d.set(obs_data[i])
-            self.__op(get_ptr(img_d), get_ptr(ksp_d))
-            ksp_d /= self.norm_factor
-            ksp_d -= obs_d
             if self.uses_density:
-                ksp_d *= self.density_d
-            self.__adj_op(get_ptr(ksp_d), get_ptr(img_d))
-            cp.asnumpy(img_d, out=img[i])
-        return img / self.norm_factor
+                ksp_batched *= self.density
+            self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
+
+            for t, b in enumerate(idx_batch):
+                # TODO write a kernel for that.
+                grad[b] += data_batched[t] * smaps_batched[t].conj()
+        grad = grad.reshape((B, 1, *XYZ))
+        grad /= self.norm_factor
+        return grad
+
+    def _grad_calibless_host(self, image_data, obs_data):
+        """Calibrationless Gradient computation when all data is on host."""
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        image_dataf = np.reshape(image_data, (B * C, *XYZ))
+        obs_dataf = np.reshape(obs_data, (B * C, K))
+
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+        obs_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+
+        grad = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+
+        for i in range(B * C // T):
+            data_batched.set(image_dataf[i * T : (i + 1) * T])
+            obs_batched.set(obs_dataf[i * T : (i + 1) * T])
+            self.__op(get_ptr(data_batched), get_ptr(ksp_batched))
+            ksp_batched /= self.norm_factor
+            ksp_batched -= obs_batched
+            if self.uses_density:
+                ksp_batched *= self.density
+            self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
+            data_batched /= self.norm_factor
+            grad[i * T : (i + 1) * T] = data_batched.get()
+        grad = grad.reshape((B, C, *XYZ))
+        return grad
+
+    def _grad_calibless_device(self, image_data, obs_data):
+        """Calibrationless Gradient computation when all data is on device."""
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+
+        grad = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+
+        for i in range(B * C // T):
+            data_batched.set(image_data[i * T : (i + 1) * T])
+            self.__op(get_ptr(data_batched), get_ptr(ksp_batched))
+            ksp_batched /= self.norm_factor
+            ksp_batched -= obs_data[i * T : (i + 1) * T]
+            if self.uses_density:
+                ksp_batched *= self.density
+            self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
+            grad[i * T : (i + 1) * T] = data_batched
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
