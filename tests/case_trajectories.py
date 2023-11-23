@@ -23,9 +23,9 @@ class CasesTrajectories:
     def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
         """Create a random 3D trajectory."""
         np.random.seed(seed)
-        samples = np.random.randn(M, 3)
-        samples /= samples.max()
-        samples -= 0.5
+        samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 3)
+        samples = samples.reshape(M, 3)
+        print(samples.min(), samples.max())
         return samples, (N, N, N)
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):
