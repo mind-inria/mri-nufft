@@ -21,9 +21,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     """Configure hook for pytest."""
-    print("Available backends:")
-    for backend in list_backends():
-        print(f"{backend:<14}: {FourierOperatorBase.interfaces[backend][0]}")
+    available = {b: FourierOperatorBase.interfaces[b][0] for b in list_backends()}
 
     if selected := config.getoption("backend"):
         # hijacks the availability of interfaces:
@@ -38,9 +36,13 @@ def pytest_configure(config):
         True,
         FourierOperatorBase.interfaces[ref_backend][1],
     )
-    print("Selected backends:")
-    for backend in list_backends():
-        print(f"{backend:<14}: {FourierOperatorBase.interfaces[backend][0]}")
+    selected = {b: FourierOperatorBase.interfaces[b][0] for b in list_backends()}
+
+    available[ref_backend] = "REF"
+    selected[ref_backend] = "REF"
+    print(f"{'backends':>20}: {'avail':>5} {'select':<5}")
+    for b in list_backends():
+        print(f"{b:>20}: {str(available[b]):>5} {str(selected[b]):>5}")
 
 
 # # for test directly parametrized by a backend
