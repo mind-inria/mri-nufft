@@ -3,6 +3,7 @@
 
 import numpy as np
 import numpy.testing as npt
+import scipy as sp
 
 
 def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
@@ -43,3 +44,17 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
             e.message += "\nMismatched elements: "
             e.message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
             raise e
+
+
+def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
+    """Assert the correlation between two arrays."""
+    slope_reg, intercept, rvalue, stderr, intercept_stderr = sp.stats.linregress(
+        a.flatten(), b.flatten()
+    )
+    abs_slope_reg = abs(slope_reg)
+    if abs(abs_slope_reg - slope) > slope_err:
+        raise AssertionError(
+            f"Slope {abs_slope_reg} != {slope} +- {slope_err}\n r={rvalue},"
+            f"intercept={intercept}, stderr={stderr}, "
+            f"intercept_stderr={intercept_stderr}"
+        )

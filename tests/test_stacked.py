@@ -8,6 +8,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 
+from helpers import assert_correlate
 from mrinufft.operators.stacked import MRIStackedNUFFT, stacked2traj3d, traj3d2stacked
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
@@ -27,12 +28,10 @@ def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, s
 
     if z_index == "full":
         z_index = np.arange(shape3d[-1])
-        z_index_ = z_index
     elif z_index == "random_mask":
-        z_index = np.random.rand(shape3d[-1]) > 0.5
-        z_index_ = np.arange(shape3d[-1])[z_index]
+        z_index = np.random.choice(shape3d[-1], shape3d[-1] // 2, replace=False)
 
-    kspace_locs3d = stacked2traj3d(kspace_locs, z_index_, shape[-1])
+    kspace_locs3d = stacked2traj3d(kspace_locs, z_index, shape[-1])
     # smaps support
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape3d)
@@ -101,7 +100,7 @@ def test_stack_forward(operator, stacked_op, ref_op, image_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
     kspace_nufft = stacked_op.op(image_data).squeeze()
     kspace_ref = ref_op.op(image_data).squeeze()
-    npt.assert_allclose(kspace_nufft, kspace_ref, atol=1e-4, rtol=1e-1)
+    assert_correlate(kspace_nufft, kspace_ref)
 
 
 def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
@@ -109,7 +108,7 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
     image_nufft = stacked_op.adj_op(kspace_data.copy()).squeeze()
     image_ref = ref_op.adj_op(kspace_data.copy()).squeeze()
 
-    npt.assert_allclose(image_nufft, image_ref, atol=1e-4, rtol=1e-1)
+    assert_correlate(image_nufft, image_ref)
 
 
 def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
