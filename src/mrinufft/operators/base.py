@@ -6,7 +6,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 :author: Pierre-Antoine Comby
 """
 from abc import ABC, abstractmethod
-
+from functools import partial
 import warnings
 import numpy as np
 
@@ -98,14 +98,21 @@ def get_operator(backend_name: str, *args, **kwargs):
     ------
     ValueError if the backend is not available.
     """
+    available = True
     try:
         available, operator = FourierOperatorBase.interfaces[backend_name]
     except KeyError as exc:
-        raise ValueError(f"backend {backend_name} is not available") from exc
+        if not backend_name.startswith("stacked-"):
+            raise ValueError(f"backend {backend_name} does not exist") from exc
+        # try to get the backend with stacked
+        # Dedicated registered stacked backend (like stacked-cufinufft)
+        # have be found earlier.
+        backend = backend_name.split("-")[1]
+        operator = get_operator("stacked")
+        operator = partial(operator, backend=backend)
+
     if not available:
-        raise ValueError(
-            f"backend {backend_name} is registered, but dependencies are not met."
-        )
+        raise ValueError(f"backend {backend_name} found, but dependencies are not met.")
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
@@ -169,6 +176,14 @@ class FourierOperatorBase(ABC):
             adjoint operator transform.
         """
         pass
+
+    def get_grad(self, image, obs_data):
+        """Compute the gradient data consistency.
+
+        This is the naive implementation using adj_op(op(x)-y).
+        Specific backend can (and should!) implement a more efficient version.
+        """
+        return self.adj_op(self.op(image) - obs_data)
 
     def with_off_resonnance_correction(self, B, C, indices):
         """Return a new operator with Off Resonnance Correction."""
@@ -290,6 +305,8 @@ class FourierOperatorBase(ABC):
 class FourierOperatorCPU(FourierOperatorBase):
     """Base class for CPU-based NUFFT operator.
 
+    The NUFFT operation will be done sequentially and looped over coils and batches.
+
     Parameters
     ----------
     samples: np.ndarray
@@ -315,20 +332,25 @@ class FourierOperatorCPU(FourierOperatorBase):
         shape,
         density=False,
         n_coils=1,
+        n_batchs=1,
+        n_trans=1,
         smaps=None,
         raw_op=None,
+        squeeze_dims=True,
     ):
         super().__init__()
+
         self.shape = shape
-        self.samples = proper_trajectory(samples, normalize="unit")
-        self._dtype = self.samples.dtype
-        self._uses_sense = False
+
+        # we will access the samples by their coordinate first.
+        self.samples = samples.reshape(-1, len(shape))
+        self.dtype = self.samples.dtype
 
         # Density Compensation Setup
         if density is True:
-            self.density = self.estimate_density(samples, shape)
+            self.density = self.estimate_density(self.samples, shape)
         elif isinstance(density, np.ndarray):
-            if len(density) != len(samples):
+            if len(density) != len(self.samples):
                 raise ValueError(
                     "Density array and samples array should have the same length."
                 )
@@ -339,15 +361,10 @@ class FourierOperatorCPU(FourierOperatorBase):
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
-        if smaps is not None:
-            self._uses_sense = True
-            if isinstance(smaps, np.ndarray):
-                raise ValueError("Smaps should be either a C-ordered ndarray")
-            self._smaps = smaps
-        else:
-            self._uses_sense = False
-
-        # Raw_op should be instantiated by subclasses.
+        self.smaps = smaps
+        self.n_batchs = n_batchs
+        self.n_trans = n_trans
+        self.squeeze_dims = squeeze_dims
 
         self.raw_op = raw_op
 
@@ -379,29 +396,41 @@ class FourierOperatorCPU(FourierOperatorBase):
             ret = self._op_sense(data, ksp)
         # calibrationless or monocoil.
         else:
-            if data.ndim == self.ndim:
-                data = np.expand_dims(data, axis=0)  # add coil dimension
             ret = self._op_calibless(data, ksp)
-        return ret
+        ret /= self.norm_factor
+        return self._safe_squeeze(ret)
 
-    def _op_sense(self, data, ksp_d=None):
-        coil_img = np.empty((self.n_coils, *self.shape), dtype=data.dtype)
-        ksp = np.zeros((self.n_coils, self.n_samples), dtype=data.dtype)
-        coil_img = data * self._smaps
-        self._op(coil_img)
+    def _op_sense(self, data, ksp=None):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        dataf = data.reshape((B, *XYZ))
+        if ksp is None:
+            ksp = np.empty((B * C, K), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            coil_img *= dataf[idx_batch]
+            self._op(coil_img, ksp[i * T : (i + 1) * T])
+        ksp = ksp.reshape((B, C, K))
         return ksp
 
     def _op_calibless(self, data, ksp=None):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
         if ksp is None:
-            ksp = np.empty((self.n_coils, self.n_samples), dtype=data.dtype)
-        for i in range(self.n_coils):
-            self._op(data[i], ksp[i])
+            ksp = np.empty((B * C, K), dtype=self.cpx_dtype)
+        dataf = np.reshape(data, (B * C, *XYZ))
+        for i in range((B * C) // T):
+            self._op(
+                dataf[i * T : (i + 1) * T],
+                ksp[i * T : (i + 1) * T],
+            )
+        ksp = ksp.reshape((B, C, K))
         return ksp
 
     def _op(self, image, coeffs):
         self.raw_op.op(coeffs, image)
-        coeffs /= self.norm_factor
-        return coeffs
 
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
@@ -424,34 +453,49 @@ class FourierOperatorCPU(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        return ret
+        ret /= self.norm_factor
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
-        coil_img = np.empty(self.shape, dtype=coeffs.dtype)
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
         if img is None:
-            img = np.zeros(self.shape, dtype=coeffs.dtype)
-        self._adj_op(coeffs, coil_img)
-        img = np.sum(coil_img * self._smaps.conjugate(), axis=0)
+            img = np.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        coeffs_flat = coeffs.reshape((B * C, K))
+        img_batched = np.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
+            img_batched *= self.smaps[idx_coils].conj()
+            for t, b in enumerate(idx_batch):
+                img[b] += img_batched[t]
+        img = img.reshape((B, 1, *XYZ))
         return img
 
     def _adj_op_calibless(self, coeffs, img=None):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
         if img is None:
-            img = np.zeros((self.n_coils, *self.shape), dtype=coeffs.dtype)
-        self._adj_op(coeffs, img)
+            img = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        coeffs_f = np.reshape(coeffs, (B * C, K))
+        for i in range((B * C) // T):
+            self._adj_op(coeffs_f[i * T : (i + 1) * T], img[i * T : (i + 1) * T])
+
+        img = img.reshape((B, C, *XYZ))
         return img
 
-    def _apply_dc(self, coeffs):
-        if self.density is not None:
-            return coeffs * self.density
-        return coeffs
-
     def _adj_op(self, coeffs, image):
-        self.raw_op.adj_op(self._apply_dc(coeffs), image)
-        image /= self.norm_factor
-        return image
+        if self.density is not None:
+            coeffs2 = coeffs.copy()
+            for i in range(self.n_trans):
+                coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
+        else:
+            coeffs2 = coeffs
+        self.raw_op.adj_op(coeffs2, image)
 
-    def data_consistency(self, image_data, obs_data):
-        """Compute the gradient estimation directly on gpu.
+    def get_grad(self, image_data, obs_data):
+        """Compute the gradient data consistency.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
         on a per coil basis. By doing the computation coil wise,
@@ -466,31 +510,61 @@ class FourierOperatorCPU(FourierOperatorBase):
             Observed data.
         """
         if self.uses_sense:
-            return self._data_consistency_sense(image_data, obs_data)
-        return self._data_consistency_calibless(image_data, obs_data)
+            return self._safe_squeeze(self._grad_sense(image_data, obs_data))
+        return self._safe_squeeze(self._grad_calibless(image_data, obs_data))
 
-    def _data_consistency_sense(self, image_data, obs_data):
-        img = np.empty_like(image_data)
-        coil_img = np.empty(self.shape, dtype=image_data.dtype)
-        coil_ksp = np.empty(self.n_samples, dtype=obs_data.dtype)
-        for i in range(self.n_coils):
-            np.copyto(coil_img, img)
-            coil_img *= self._smap
+    def _grad_sense(self, image_data, obs_data):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        dataf = image_data.reshape((B, *XYZ))
+        obs_dataf = obs_data.reshape((B * C, K))
+        grad = np.empty_like(dataf)
+
+        coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
+        coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            coil_img *= dataf[idx_batch]
             self._op(coil_img, coil_ksp)
-            coil_ksp -= obs_data[i]
-            if self.uses_density:
-                coil_ksp *= self.density_d
+            coil_ksp /= self.norm_factor
+            coil_ksp -= obs_dataf[i * T : (i + 1) * T]
             self._adj_op(coil_ksp, coil_img)
-            img += coil_img * self._smaps[i].conjugate()
-        return img
+            coil_img *= self.smaps[idx_coils].conj()
+            for t, b in enumerate(idx_batch):
+                grad[b] += coil_img[t]
+        grad /= self.norm_factor
+        return grad
 
-    def _data_consistency_calibless(self, image_data, obs_data):
-        img = np.empty((self.n_coils, *self.shape), dtype=image_data.dtype)
-        ksp = np.empty(self.n_samples, dtype=obs_data.dtype)
-        for i in range(self.n_coils):
-            self._op(image_data[i], ksp)
-            ksp -= obs_data[i]
+    def _grad_calibless(self, image_data, obs_data):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        dataf = image_data.reshape((B * C, *XYZ))
+        obs_dataf = obs_data.reshape((B * C, K))
+        grad = np.empty_like(dataf)
+        ksp = np.empty((T, K), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            self._op(dataf[i * T : (i + 1) * T], ksp)
+            ksp /= self.norm_factor
+            ksp -= obs_dataf[i * T : (i + 1) * T]
             if self.uses_density:
-                ksp *= self.density_d
-            self._adj_op(ksp, img[i])
-        return img
+                ksp *= self.density
+            self._adj_op(ksp, grad[i * T : (i + 1) * T])
+        grad /= self.norm_factor
+        return grad.reshape(B, C, *XYZ)
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr

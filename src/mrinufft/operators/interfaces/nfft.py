@@ -58,11 +58,13 @@ class MRInfft(FourierOperatorCPU):
     backend = "pynfft"
     available = PYNFFT_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, smaps=None):
+    def __init__(self, samples, shape, n_coils=1, n_batchs=1, smaps=None):
         super().__init__(
             samples,
             shape,
             n_coils=n_coils,
+            n_batchs=n_batchs,
+            n_trans=1,
             smaps=smaps,
             raw_op=None,  # is set later, after normalizing samples.
         )
