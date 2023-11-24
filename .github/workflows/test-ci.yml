@@ -40,7 +40,8 @@ jobs:
       matrix:
         backend: [finufft, pynfft, pynufft, bart, sigpy]
         exclude:
-          - backend: bart, pynfft  # FIXME: Those backend should either be fixed or removed.
+          - backend: bart
+          - backend: pynfft
 
     steps:
       - uses: actions/checkout@v3
