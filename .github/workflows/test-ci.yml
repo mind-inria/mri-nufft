@@ -221,7 +221,7 @@ jobs:
       - name: Run examples
         shell: bash
         run: |
-          export COVERAGE_FILE=coverage_examples
+          export COVERAGE_FILE=coverage_plots
           pytest examples --cov --cov-branch --cov-report=term
 
       - name: Upload coverage
@@ -256,7 +256,7 @@ jobs:
           python -m pip install -e .
 
       - name: Combine coverage
-        run: coverage combine coverage_data/*
+        run: coverage combine -a coverage_data/*
 
       - name: Reports
         run: |
