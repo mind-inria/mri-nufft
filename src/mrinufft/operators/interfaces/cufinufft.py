@@ -626,7 +626,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         obs_batched = cp.empty((T, K), dtype=self.cpx_dtype)
 
-        grad_d = cp.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        grad_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         grad = np.empty((B, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
@@ -649,11 +649,9 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
 
             for t, b in enumerate(idx_batch):
-                # TODO write a kernel for that.
-                grad_d = data_batched * smaps_batched.conj()
-                grad_d /= self.norm_factor
-                grad[b] += grad_d[t].get()
-
+                grad_d[b, :] += data_batched[t] * smaps_batched[t].conj()
+        grad_d /= self.norm_factor
+        grad = grad_d.get()
         grad = grad.reshape((B, 1, *XYZ))
         return grad
 
@@ -741,6 +739,9 @@ class MRICufiNUFFT(FourierOperatorBase):
                 ksp_batched *= self.density
             self.__adj_op(get_ptr(ksp_batched), get_ptr(data_batched))
             grad[i * T : (i + 1) * T] = data_batched
+        grad = grad.reshape((B, C, *XYZ))
+        grad /= self.norm_factor
+        return grad
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
