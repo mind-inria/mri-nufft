@@ -165,7 +165,8 @@ def test_get_grad_readonly(operator, image_data, kspace_data):
 
 def test_gradient_lipschitz(operator, image_data, kspace_data):
     """Test the gradient lipschitz constant."""
-    img = image_data.copy()
+    C = 1 if operator.uses_sense else operator.n_coils
+    img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape)
     for _ in range(10):
         grad = operator.get_grad(img, kspace_data)
         norm = np.linalg.norm(grad)

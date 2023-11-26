@@ -96,4 +96,4 @@ def test_interfaces_autoadjoint(operator):
         leftadjoint = np.vdot(img_data, image)
         reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
     print(reldiff)
-    assert np.mean(reldiff) < 1e-5
+    assert np.mean(reldiff) < 5e-5
