@@ -9,6 +9,13 @@ try:
 except ImportError:
     GPUNUFFT_AVAILABLE = False
 
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+    import cupyx as cx
+except ImportError:
+    CUPY_AVAILABLE = False
+
 
 class RawGpuNUFFT:
     """GPU implementation of N-D non-uniform fast Fourier Transform class.
@@ -40,6 +47,8 @@ class RawGpuNUFFT:
         balance_workload=True,
         smaps=None,
         pinned_smaps=None,
+        pinned_image=None,
+        pinned_kspace=None,
     ):
         """Initialize the 'NUFFT' class.
 
@@ -88,6 +97,10 @@ class RawGpuNUFFT:
         if density_comp is None:
             density_comp = np.ones(samples.shape[0])
 
+        if upsampfac is not None:
+            osf = upsampfac
+
+        # pinned memory stuff
         self.uses_sense = True
         if smaps is not None and pinned_smaps is None:
             # no pinning provided, we will pin it in the C++ code
@@ -99,8 +112,12 @@ class RawGpuNUFFT:
             # No smaps provided, we will not use SENSE
             self.uses_sense = False
 
-        if upsampfac is not None:
-            osf = upsampfac
+        if pinned_image is None:
+            pinned_image = cx.empty_pinned(
+                (np.prod(shape), n_coils), dtype=np.complex64
+            )
+        if pinned_kspace is None:
+            pinned_kspace = cx.empty_pinned((n_coils, len(samples)), dtype=np.complex64)
 
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
@@ -114,7 +131,7 @@ class RawGpuNUFFT:
             balance_workload,
         )
 
-    def op(self, image, interpolate_data=False):
+    def op(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
 
         Parameters
@@ -133,28 +150,26 @@ class RawGpuNUFFT:
         # Base gpuNUFFT Operator is written in CUDA and C++, we need to
         # reorganize data to follow a different memory hierarchy
         # TODO we need to update codes to use np.reshape for all this directly
-        if self.n_coils > 1 and not self.uses_sense:
-            coeff = self.operator.op(
-                np.asarray(
-                    [np.reshape(image_ch.T, image_ch.size) for image_ch in image]
-                ).T,
-                interpolate_data,
-            )
-        else:
-            coeff = self.operator.op(np.reshape(image.T, image.size), interpolate_data)
-            # Data is always returned as num_channels X coeff_array,
-            # so for single channel, we extract single array
-            if not self.uses_sense:
-                coeff = coeff[0]
-        return coeff
+        if kspace is None:
+            kspace = self.pinned_kspace
 
-    def adj_op(self, coeff, grid_data=False):
+        np.copyto(self.pinned_image, image.T.reshape(-1, self.n_coils))
+        coeffs = self.operator.op(
+            self.pinned_image,
+            kspace,
+            interpolate_data,
+        )
+        if not self.uses_sense:
+            coeffs = coeffs.squeeze()
+        return coeffs
+
+    def adj_op(self, coeffs, image=None, grid_data=False):
         """Compute adjoint of non-uniform Fourier transform.
 
         Parameters
         ----------
         coeff: np.ndarray
-            masked non-uniform Fourier transform 1D data.
+            masked non-uniform Fourier transform data.
         grid_data: bool, default False
             if True, the kspace data is gridded and returned,
             this is used for density compensation
@@ -165,14 +180,13 @@ class RawGpuNUFFT:
             adjoint operator of Non Uniform Fourier transform of the
             input coefficients.
         """
-        image = self.operator.adj_op(coeff, grid_data)
-        if self.n_coils > 1 and not self.uses_sense:
-            image = np.asarray([image_ch.T for image_ch in image])
-        else:
-            image = np.squeeze(image).T
-        # The recieved data from gpuNUFFT is num_channels x Nx x Ny x Nz,
-        # hence we use squeeze
-        return np.squeeze(image)
+        if image is None:
+            image = self.pinned_image
+        np.copyto(self.pinned_kspace, coeffs)
+        self.operator.adj_op(self.pinned_kspace, image, grid_data)
+
+        image_out = image.reshape((*self.shape, self.n_coils)).T
+        return np.squeeze(image_out)
 
 
 class MRIGpuNUFFT(FourierOperatorBase):
