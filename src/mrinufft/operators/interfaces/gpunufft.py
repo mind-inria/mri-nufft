@@ -11,7 +11,6 @@ except ImportError:
 
 CUPY_AVAILABLE = True
 try:
-    import cupy as cp
     import cupyx as cx
 except ImportError:
     CUPY_AVAILABLE = False
