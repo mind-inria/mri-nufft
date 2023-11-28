@@ -1,6 +1,7 @@
 """Interface to the GPU NUFFT library."""
 
 import numpy as np
+import warnings
 from ..base import FourierOperatorBase, proper_trajectory
 
 GPUNUFFT_AVAILABLE = True
@@ -92,7 +93,7 @@ class RawGpuNUFFT:
             raise ValueError("The number of coils should be an integer >= 1")
         self.n_coils = n_coils
         self.shape = shape
-        self.samples = proper_trajectory(samples, normalize="unit")
+        self.samples = samples
         if density_comp is None:
             density_comp = np.ones(samples.shape[0])
 
@@ -107,16 +108,28 @@ class RawGpuNUFFT:
         elif smaps is not None and pinned_smaps is not None:
             # Pinned memory space exists, we will overwrite it
             np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
-        else:
+        elif smaps is None and pinned_smaps is None:
             # No smaps provided, we will not use SENSE
             self.uses_sense = False
+        elif smaps is None and pinned_smaps is not None:
+            warnings.warn("Using pinned_smaps, but no smaps provided")
+        else:
+            raise ValueError("Unknown case")
 
         if pinned_image is None:
             pinned_image = cx.empty_pinned(
-                (np.prod(shape), n_coils), dtype=np.complex64
+                (np.prod(shape), (1 if self.uses_sense else n_coils)),
+                dtype=np.complex64,
+                order="F",
             )
         if pinned_kspace is None:
-            pinned_kspace = cx.empty_pinned((n_coils, len(samples)), dtype=np.complex64)
+            pinned_kspace = cx.empty_pinned(
+                (n_coils, len(samples)),
+                dtype=np.complex64,
+            )
+        print("pinned_kspace shape", pinned_kspace.shape)
+        self.pinned_image = pinned_image
+        self.pinned_kspace = pinned_kspace
 
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
@@ -151,16 +164,25 @@ class RawGpuNUFFT:
         # TODO we need to update codes to use np.reshape for all this directly
         if kspace is None:
             kspace = self.pinned_kspace
+        print(image.shape)
+        if self.uses_sense or self.n_coils == 1:
+            np.copyto(
+                self.pinned_image,
+                np.reshape(image, (-1, 1), "F"),
+            )
+        else:
+            np.copyto(
+                self.pinned_image,
+                np.asarray([np.ravel(c, order="F") for c in image]).T,
+            )
 
-        np.copyto(self.pinned_image, image.T.reshape(-1, self.n_coils))
-        coeffs = self.operator.op(
+        new_ksp = self.operator.op(
             self.pinned_image,
             kspace,
             interpolate_data,
         )
-        if not self.uses_sense:
-            coeffs = coeffs.squeeze()
-        return coeffs
+
+        return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
         """Compute adjoint of non-uniform Fourier transform.
@@ -182,10 +204,10 @@ class RawGpuNUFFT:
         if image is None:
             image = self.pinned_image
         np.copyto(self.pinned_kspace, coeffs)
-        self.operator.adj_op(self.pinned_kspace, image, grid_data)
-
-        image_out = image.reshape((*self.shape, self.n_coils)).T
-        return np.squeeze(image_out)
+        new_image = self.operator.adj_op(self.pinned_kspace, image, grid_data)
+        if self.uses_sense or self.n_coils == 1:
+            return np.squeeze(new_image).T
+        return np.asarray([c.T for c in new_image])
 
 
 class MRIGpuNUFFT(FourierOperatorBase):
@@ -257,7 +279,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             **self.kwargs,
         )
 
-    def op(self, data, *args):
+    def op(self, data, *args, **kwargs):
         """Compute forward non-uniform Fourier Transform.
 
         Parameters
@@ -270,9 +292,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        return self.impl.op(data, *args)
+        return self.impl.op(data, *args, **kwargs)
 
-    def adj_op(self, coeffs, *args):
+    def adj_op(self, coeffs, *args, **kwargs):
         """Compute adjoint Non Unform Fourier Transform.
 
         Parameters
@@ -285,7 +307,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
-        return self.impl.adj_op(coeffs, *args)
+        return self.impl.adj_op(coeffs, *args, **kwargs)
 
     @property
     def uses_sense(self):
@@ -317,6 +339,8 @@ def pipe(kspace_loc, volume_shape, num_iterations=10):
     density_comp = np.ones(kspace_loc.shape[0])
     for _ in range(num_iterations):
         density_comp = density_comp / np.abs(
-            grid_op.op(grid_op.adj_op(density_comp, True), True)
+            grid_op.op(
+                grid_op.adj_op(density_comp, grid_data=True), interpolate_data=True
+            )
         )
-    return density_comp
+    return density_comp.squeeze()
