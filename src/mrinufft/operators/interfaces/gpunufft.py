@@ -127,7 +127,6 @@ class RawGpuNUFFT:
                 (n_coils, len(samples)),
                 dtype=np.complex64,
             )
-        print("pinned_kspace shape", pinned_kspace.shape)
         self.pinned_image = pinned_image
         self.pinned_kspace = pinned_kspace
 
@@ -164,7 +163,6 @@ class RawGpuNUFFT:
         # TODO we need to update codes to use np.reshape for all this directly
         if kspace is None:
             kspace = self.pinned_kspace
-        print(image.shape)
         if self.uses_sense or self.n_coils == 1:
             np.copyto(
                 self.pinned_image,
