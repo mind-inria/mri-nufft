@@ -238,7 +238,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     """
 
     backend = "gpunufft"
-    available = GPUNUFFT_AVAILABLE
+    available = GPUNUFFT_AVAILABLE and CUPY_AVAILABLE
 
     def __init__(
         self,
