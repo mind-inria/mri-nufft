@@ -103,8 +103,11 @@ class RawGpuNUFFT:
         # pinned memory stuff
         self.uses_sense = True
         if smaps is not None and pinned_smaps is None:
-            # no pinning provided, we will pin it in the C++ code
-            pinned_smaps = smaps.T.reshape(-1, n_coils)
+            # no pinning provided, pinned it now.
+            smaps_ = smaps.T.reshape(-1, n_coils)
+            pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
+            np.copyto(pinned_smaps, smaps_)
+
         elif smaps is not None and pinned_smaps is not None:
             # Pinned memory space exists, we will overwrite it
             np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
@@ -112,7 +115,7 @@ class RawGpuNUFFT:
             # No smaps provided, we will not use SENSE
             self.uses_sense = False
         elif smaps is None and pinned_smaps is not None:
-            warnings.warn("Using pinned_smaps, but no smaps provided")
+            warnings.warn("Using pinned_smaps as is.")
         else:
             raise ValueError("Unknown case")
 
