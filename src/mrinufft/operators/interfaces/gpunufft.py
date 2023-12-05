@@ -17,6 +17,16 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
+def make_pinned_smaps(smaps):
+    """Make pinned smaps from smaps."""
+    if smaps is None:
+        return None
+    smaps_ = smaps.T.reshape(-1, smaps.shape[0])
+    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
+    np.copyto(pinned_smaps, smaps_)
+    return pinned_smaps
+
+
 class RawGpuNUFFT:
     """GPU implementation of N-D non-uniform fast Fourier Transform class.
 
@@ -104,10 +114,7 @@ class RawGpuNUFFT:
         self.uses_sense = True
         if smaps is not None and pinned_smaps is None:
             # no pinning provided, pinned it now.
-            smaps_ = smaps.T.reshape(-1, n_coils)
-            pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
-            np.copyto(pinned_smaps, smaps_)
-
+            pinned_smaps = make_pinned_smaps(smaps)
         elif smaps is not None and pinned_smaps is not None:
             # Pinned memory space exists, we will overwrite it
             np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
