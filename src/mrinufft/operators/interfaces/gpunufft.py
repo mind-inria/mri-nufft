@@ -13,6 +13,10 @@ except ImportError:
 CUPY_AVAILABLE = True
 try:
     import cupyx as cx
+    import cupy
+
+    # disable pinned memory pooling.
+    cupy.cuda.set_pinned_memory_allocator(None)
 except ImportError:
     CUPY_AVAILABLE = False
 
