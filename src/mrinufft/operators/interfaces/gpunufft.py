@@ -13,19 +13,36 @@ except ImportError:
 CUPY_AVAILABLE = True
 try:
     import cupyx as cx
-    import cupy
-
-    # disable pinned memory pooling.
-    cupy.cuda.set_pinned_memory_allocator(None)
+    import cupy as cp
 except ImportError:
     CUPY_AVAILABLE = False
 
 
+def _allocator(size):
+    """Allocate pinned memory which is context portable."""
+    flags = cp.cuda.runtime.hostAllocPortable
+    mem = cp.cuda.PinnedMemory(size, flags=flags)
+    return cp.cuda.PinnedMemoryPointer(mem, offset=0)
+
+
 def make_pinned_smaps(smaps):
-    """Make pinned smaps from smaps."""
+    """Make pinned smaps from smaps.
+
+    Parameters
+    ----------
+    smaps: np.ndarray or None
+        the sensitivity maps
+
+    Returns
+    -------
+    np.ndarray or None
+        the pinned sensitivity maps
+    """
+
     if smaps is None:
         return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
+    cp.cuda.set_pinned_memory_allocator(_allocator)
     pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
     np.copyto(pinned_smaps, smaps_)
     return pinned_smaps
@@ -117,11 +134,12 @@ class RawGpuNUFFT:
         # pinned memory stuff
         self.uses_sense = True
         if smaps is not None and pinned_smaps is None:
-            # no pinning provided, pinned it now.
             pinned_smaps = make_pinned_smaps(smaps)
+            warnings.warn("no pinning provided, pinning existing smaps now.")
         elif smaps is not None and pinned_smaps is not None:
             # Pinned memory space exists, we will overwrite it
             np.copyto(pinned_smaps, smaps.T.reshape(-1, n_coils))
+            warnings.warn("Overwriting the pinned data.")
         elif smaps is None and pinned_smaps is None:
             # No smaps provided, we will not use SENSE
             self.uses_sense = False
@@ -144,11 +162,12 @@ class RawGpuNUFFT:
         self.pinned_image = pinned_image
         self.pinned_kspace = pinned_kspace
 
+        self.pinned_smaps = pinned_smaps
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
-            shape,
-            n_coils,
-            pinned_smaps,
+            self.shape,
+            self.n_coils,
+            self.pinned_smaps,
             density_comp,
             kernel_width,
             sector_width,
@@ -193,7 +212,6 @@ class RawGpuNUFFT:
             kspace,
             interpolate_data,
         )
-
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
