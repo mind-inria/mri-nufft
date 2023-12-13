@@ -177,7 +177,7 @@ class FourierOperatorBase(ABC):
         """
         pass
 
-    def get_grad(self, image, obs_data):
+    def data_consistency(self, image, obs_data):
         """Compute the gradient data consistency.
 
         This is the naive implementation using adj_op(op(x)-y).
@@ -494,7 +494,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
-    def get_grad(self, image_data, obs_data):
+    def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
