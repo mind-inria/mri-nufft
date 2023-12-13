@@ -1,22 +1,15 @@
-"""
-Estimation of the density compensation array methods.
+"""Compute density compensation weights using Voronoi parcellation.
 
-Those methods are agnostic of the NUFFT operator.
+
+Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
+
 """
 import numpy as np
 from scipy.spatial import Voronoi
 from mrinufft.operators import proper_trajectory
-from mrinufft.operators.interfaces.cufinufft import pipe as pipe_cufinufft
-from mrinufft.operators.interfaces.tfnufft import pipe as pipe_tfnufft
-from mrinufft.operators.interfaces.gpunufft import pipe as pipe_gpunufft
 
 
-def compute_tetrahedron_volume(A, B, C, D):
-    """Compute the volume of a tetrahedron."""
-    return np.abs(np.dot(np.cross(B - A, C - A), D - A)) / 6.0
-
-
-def vol3d(points):
+def _vol3d(points):
     """Compute the volume of a convex 3D polygon.
 
     Parameters
@@ -35,7 +28,7 @@ def vol3d(points):
     return np.sum(np.abs(np.dot(np.cross(B, C), A.T))) / 6.0
 
 
-def vol2d(points):
+def _vol2d(points):
     """Compute the area of a convex 2D polygon.
 
     Parameters
@@ -57,7 +50,7 @@ def vol2d(points):
     return abs(area) / 2.0
 
 
-def _voronoi(kspace):
+def voronoi_unique(kspace):
     """Estimate  density compensation weight using voronoi parcellation.
 
     This assume unicity of the point in the kspace.
@@ -74,9 +67,9 @@ def _voronoi(kspace):
     """
     M = kspace.shape[0]
     if kspace.shape[1] == 2:
-        vol = vol2d
+        vol = _vol2d
     else:
-        vol = vol3d
+        vol = _vol3d
     wi = np.zeros(M)
     v = Voronoi(kspace)
     for mm in range(M):
@@ -112,32 +105,14 @@ def voronoi(kspace):
         i0f = i0f[0]
         i0[i0f] = False
         wi = np.zeros(len(kspace))
-        wi[~i0] = _voronoi(kspace[~i0])
+        wi[~i0] = voronoi_unique(kspace[~i0])
         i0[i0f] = True
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
-        wi = _voronoi(kspace)
+        wi = voronoi_unique(kspace)
     wi /= np.sum(wi)
     return wi
 
 
-def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
-    """Compute the density compensation weights using the pipe method.
 
-    Parameters
-    ----------
-    kspace_traj: array_like
-        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
-    grid_size: array_like
-        array of shape (2,) or (3,) containing the size of the grid.
-    backend: str
-        backend to use for the computation. Either "cufinufft" or "tensorflow".
-    """
-    if backend == "cufinufft":
-        return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "tensorflow":
-        return pipe_tfnufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "gpunufft":
-        return pipe_gpunufft(kspace_traj, grid_size, **kwargs)
-    else:
-        raise ValueError("backend not supported")
+def
