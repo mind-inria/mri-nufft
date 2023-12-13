@@ -102,7 +102,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             return y
         return y.get()
 
-    def get_grad(self, image_data, obs_data):
+    def data_consistency(self, image_data, obs_data):
         """Compute the data consistency error.
 
         Parameters
