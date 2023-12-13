@@ -43,7 +43,7 @@ def make_pinned_smaps(smaps):
         return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
     cp.cuda.set_pinned_memory_allocator(_allocator)
-    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
+    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64, order='F')
     np.copyto(pinned_smaps, smaps_)
     return pinned_smaps
 
