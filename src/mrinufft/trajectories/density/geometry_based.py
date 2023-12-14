@@ -1,12 +1,12 @@
 """Compute density compensation weights using Voronoi parcellation.
 
-
 Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
 
 """
 import numpy as np
 from scipy.spatial import Voronoi
-from mrinufft.operators import proper_trajectory
+
+from .utils import flat_traj
 
 
 def _vol3d(points):
@@ -50,7 +50,8 @@ def _vol2d(points):
     return abs(area) / 2.0
 
 
-def voronoi_unique(kspace):
+@flat_traj
+def voronoi_unique(traj):
     """Estimate  density compensation weight using voronoi parcellation.
 
     This assume unicity of the point in the kspace.
@@ -65,20 +66,20 @@ def voronoi_unique(kspace):
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
-    M = kspace.shape[0]
-    if kspace.shape[1] == 2:
+    M = traj.shape[0]
+    if traj.shape[1] == 2:
         vol = _vol2d
     else:
         vol = _vol3d
     wi = np.zeros(M)
-    v = Voronoi(kspace)
+    v = Voronoi(traj)
     for mm in range(M):
         idx_vertices = v.regions[v.point_region[mm]]
         if np.all([i != -1 for i in idx_vertices]):
             wi[mm] = vol(v.vertices[idx_vertices])
     # For edge point (infinite voronoi cells) we extrapolate from neighbours
     # Initial implementation in Jeff Fessler's MIRT
-    rho = np.sum(kspace**2, axis=1)
+    rho = np.sum(traj**2, axis=1)
     igood = rho > 0.6 * np.max(rho)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
@@ -87,29 +88,29 @@ def voronoi_unique(kspace):
     return wi
 
 
-def voronoi(kspace):
+@flat_traj
+def voronoi(traj):
     """Estimate  density compensation weight using voronoi parcellation.
 
     In case of multiple point in the center of kspace, the weight is split evenly.
 
     Parameters
     ----------
-    kspace: array_like
+    traj: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
     """
     # deduplication only works for the 0,0 coordinate !!
-    kspace = proper_trajectory(kspace)
-    i0 = np.sum(np.abs(kspace), axis=1) == 0
+    i0 = np.sum(np.abs(traj), axis=1) == 0
     if np.any(i0):
         i0f = np.where(i0)
         i0f = i0f[0]
         i0[i0f] = False
-        wi = np.zeros(len(kspace))
-        wi[~i0] = voronoi_unique(kspace[~i0])
+        wi = np.zeros(len(traj))
+        wi[~i0] = voronoi_unique(traj[~i0])
         i0[i0f] = True
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
-        wi = voronoi_unique(kspace)
+        wi = voronoi_unique(traj)
     wi /= np.sum(wi)
     return wi
 
