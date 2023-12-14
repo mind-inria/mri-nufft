@@ -114,5 +114,60 @@ def voronoi(kspace):
     return wi
 
 
+@flat_traj
+def cell_count(traj, shape, osf=1.0):
+    """
+    Compute the number of points in each cell of the grid.
 
-def
+    Parameters
+    ----------
+    traj: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    shape: tuple
+        shape of the grid.
+    osf: float
+        oversampling factor for the grid. default 1
+
+    Returns
+    -------
+    weights: array_like
+        array of shape (M,) containing the density compensation weights.
+
+    """
+    bins = [np.linspace(-0.5, 0.5, int(osf * s) + 1) for s in shape]
+
+    h, edges = np.histogramdd(traj, bins)
+    if len(shape) == 2:
+        hsum = [np.sum(h, axis=1).astype(int), np.sum(h, axis=0).astype(int)]
+    else:
+        hsum = [
+            np.sum(h, axis=(1, 2)).astype(int),
+            np.sum(h, axis=(0, 2)).astype(int),
+            np.sum(h, axis=(0, 1)).astype(int),
+        ]
+
+    # indices of ascending coordinate in each dimension.
+    locs_sorted = [np.argsort(traj[:, i]) for i in range(len(shape))]
+
+    weights = np.ones(len(traj))
+    set_xyz = [[], [], []]
+    for i in range(len(hsum)):
+        ind = 0
+        for binsize in hsum[i]:
+            s = set(locs_sorted[i][ind : ind + binsize])
+            if s:
+                set_xyz[i].append(s)
+            ind += binsize
+
+    for sx in set_xyz[0]:
+        for sy in set_xyz[1]:
+            sxy = sx.intersection(sy)
+            if not sxy:
+                continue
+            for sz in set_xyz[2]:
+                final = sxy.intersection(sz)
+                if final:
+                    weights[list(final)] = len(final)
+
+    weights /= np.sum(weights)
+    return 1 / weights
