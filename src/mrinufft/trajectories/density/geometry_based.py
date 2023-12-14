@@ -165,10 +165,13 @@ def cell_count(traj, shape, osf=1.0):
             sxy = sx.intersection(sy)
             if not sxy:
                 continue
+            if len(shape) == 2:
+                weights[list(sxy)] = len(sxy)
+                continue
             for sz in set_xyz[2]:
-                final = sxy.intersection(sz)
-                if final:
-                    weights[list(final)] = len(final)
+                sxyz = sxy.intersection(sz)
+                if sxyz:
+                    weights[list(sxyz)] = len(sxyz)
 
     weights /= np.sum(weights)
     return 1 / weights
