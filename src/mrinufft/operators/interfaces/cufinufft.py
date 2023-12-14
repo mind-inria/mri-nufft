@@ -264,7 +264,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # density compensation support
         if density is True:
-            self.density = pipe(self.samples, shape)
+            self.density = self.pipe(self.samples, shape)
         elif is_host_array(density) or is_cuda_array(density):
             self.density = cp.array(density)
         else:
@@ -800,6 +800,44 @@ class MRICufiNUFFT(FourierOperatorBase):
             ")"
         )
 
+    @classmethod
+    def pipe(kspace, grid_shape, num_iter=10, tol=2e-7):
+        """Estimate density compensation weight using the Pipe method.
+
+        Parameters
+        ----------
+        kspace: array_like
+            array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+        grid_shape: tuple
+            shape of the image grid.
+        num_iter: int, optional
+            number of iterations.
+        tol: float, optional
+            tolerance of the density estimation.
+
+        Returns
+        -------
+        density: array_like
+            array of shape (M,) containing the density compensation weights.
+        """
+        if not CUFINUFFT_AVAILABLE:
+            raise ImportError(
+                "cuFINUFFT library not available to do Pipe density estimation"
+            )
+        import cupy as cp
+
+        kspace = proper_trajectory(kspace, normalize="pi").astype(np.float32)
+        if is_host_array(kspace):
+            kspace = cp.array(kspace, order="F")
+        image = cp.empty(grid_shape, dtype=np.complex64)
+        density = cp.ones(kspace.shape[0], dtype=np.complex64)
+        update = cp.empty_like(density)
+        for _ in range(num_iter):
+            _do_spread_interp(kspace, density, image, type=1, tol=tol)
+            _do_spread_interp(kspace, update, image, type=2, tol=tol)
+            update_density(density, update)
+        return density.real
+
 
 def _get_samples_ptr(samples):
     x, y, z = None, None, None
@@ -831,41 +869,3 @@ def _do_spread_interp(samples, c, f, tol=1e-4, type=1):
         opts,
         tol,
     )
-
-
-def pipe(kspace, grid_shape, num_iter=10, tol=2e-7):
-    """Estimate density compensation weight using the Pipe method.
-
-    Parameters
-    ----------
-    kspace: array_like
-        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
-    grid_shape: tuple
-        shape of the image grid.
-    num_iter: int, optional
-        number of iterations.
-    tol: float, optional
-        tolerance of the density estimation.
-
-    Returns
-    -------
-    density: array_like
-        array of shape (M,) containing the density compensation weights.
-    """
-    if not CUFINUFFT_AVAILABLE:
-        raise ImportError(
-            "cuFINUFFT library not available to do Pipe density estimation"
-        )
-    import cupy as cp
-
-    kspace = proper_trajectory(kspace, normalize="pi").astype(np.float32)
-    if is_host_array(kspace):
-        kspace = cp.array(kspace, order="F")
-    image = cp.empty(grid_shape, dtype=np.complex64)
-    density = cp.ones(kspace.shape[0], dtype=np.complex64)
-    update = cp.empty_like(density)
-    for _ in range(num_iter):
-        _do_spread_interp(kspace, density, image, type=1, tol=tol)
-        _do_spread_interp(kspace, update, image, type=2, tol=tol)
-        update_density(density, update)
-    return density.real

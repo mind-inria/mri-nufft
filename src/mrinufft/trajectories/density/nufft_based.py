@@ -1,8 +1,6 @@
 """Density compensation weights using the NUFFT-based methods."""
 
-from .cufinufft import pipe_cufinufft
-from .tfnufft import pipe_tfnufft
-from .gpunufft import pipe_gpunufft
+from mrinufft import get_operator
 
 
 def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
@@ -17,11 +15,7 @@ def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
     backend: str
         backend to use for the computation. Either "cufinufft" or "tensorflow".
     """
-    if backend == "cufinufft":
-        return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "tensorflow":
-        return pipe_tfnufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "gpunufft":
-        return pipe_gpunufft(kspace_traj, grid_size, **kwargs)
-    else:
-        raise ValueError("backend not supported")
+    nufft_class = get_operator(backend)
+    if hasattr(nufft_class, "pipe"):
+        return nufft_class.pipe(kspace_traj, grid_size, **kwargs)
+    raise ValueError("backend does not have pipe iterations method.")
