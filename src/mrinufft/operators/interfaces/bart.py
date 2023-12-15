@@ -10,12 +10,8 @@ import os
 import subprocess as subp
 import tempfile
 from pathlib import Path
-
-import numpy as np
-
-from mrinufft.io.cfl import _readcfl, _writecfl, traj2cfl
-
-from ..base import FourierOperatorCPU, proper_trajectory
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorCPU
 
 # available if return code is 0
 BART_AVAILABLE = not subp.call(
