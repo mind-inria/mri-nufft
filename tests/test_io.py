@@ -1,6 +1,6 @@
 """Test the trajectories io module."""
 import numpy as np
-from mrinufft.trajectories.io import read_trajectory, write_trajectory
+from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 from pytest_cases import parametrize_with_cases
