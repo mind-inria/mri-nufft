@@ -35,6 +35,8 @@ from .trajectories import (
     display_3D_trajectory,
 )
 
+from .density import voronoi, cell_count, pipe
+
 __all__ = [
     "get_operator",
     "check_backend",
@@ -60,6 +62,9 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "voronoi",
+    "cell_count",
+    "pipe",
 ]
 
 

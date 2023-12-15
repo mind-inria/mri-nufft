@@ -135,23 +135,23 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         """
         return self.adj_op(self.op(data) - obs_data)
 
+    @classmethod
+    def pipe(samples, shape, n_iter=15):
+        """Estimate the density compensation using the pipe method.
 
-def pipe(samples, shape, n_iter=15):
-    """Estimate the density compensation using the pipe method.
+        Parameters
+        ----------
+        samples: Tensor
+            The samples location of shape ``Nsamples x N_dimensions``.
+            It should be C-contiguous.
+        shape: tuple
+            Shape of the image space.
+        n_iter: int
+            Number of iterations.
 
-    Parameters
-    ----------
-    samples: Tensor
-        The samples location of shape ``Nsamples x N_dimensions``.
-        It should be C-contiguous.
-    shape: tuple
-        Shape of the image space.
-    n_iter: int
-        Number of iterations.
-
-    Returns
-    -------
-    Tensor
-        The estimated density compensation.
-    """
-    return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
+        Returns
+        -------
+        Tensor
+            The estimated density compensation.
+        """
+        return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)

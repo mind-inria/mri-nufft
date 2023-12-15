@@ -37,7 +37,7 @@ ax[2].imshow(mri_data[:, :, 90])
 # ----------------------------
 
 from mrinufft import initialize_2D_spiral
-from mrinufft.trajectories.density import voronoi
+from mrinufft.density import voronoi
 
 samples = initialize_2D_spiral(Nc=16, Ns=500, nb_revolutions=10)
 density = voronoi(samples)
