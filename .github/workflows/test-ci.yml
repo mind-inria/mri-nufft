@@ -139,7 +139,7 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE
           rm -rf finufft
-          git clone https://github.com/flatiron/finufft
+          git clone https://github.com/flatironinstitute/finufft
           cd finufft && mkdir build && cd build
 
           export PATH=/usr/local/cuda-11.8/bin:$PATH
