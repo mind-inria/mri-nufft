@@ -5,7 +5,6 @@ import pkgutil
 from pathlib import Path
 
 from .base import (
-    proper_trajectory,
     FourierOperatorBase,
     get_operator,
     list_backends,
@@ -29,5 +28,4 @@ __all__ = [
     "check_backend",
     "get_operator",
     "list_backends",
-    "proper_trajectory",
 ]
