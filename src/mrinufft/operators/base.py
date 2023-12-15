@@ -10,6 +10,8 @@ from functools import partial
 import warnings
 import numpy as np
 
+from mrinufft.density import get_density
+
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
@@ -149,6 +151,34 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
+
+    def compute_density(self, method=None, **kwargs):
+        """Compute the density compensation weights and set it.
+
+        Parameters
+        ----------
+        method: str or callable or array
+            The method to use to compute the density compensation.
+            If a string, the method should be registered in the density registry.
+            If a callable, it should take the samples and the shape as input.
+            If an array, it should be of shape (Nsamples,) and will be used as is.
+        """
+        if isinstance(method, np.ndarray):
+            self.density = method
+            return None
+        if not method:
+            return None
+
+        if method == "pipe" and "backend" not in kwargs:
+            method = self.pipe  # will raise error if not defined.
+        if method == "pipe" and "backend" in kwargs:
+            warnings.warn(f"Using pipe with {kwargs['backend']}")
+        if isinstance(method, str):
+            method = get_density(method)
+        if not callable(method):
+            raise ValueError(f"Unknown density method: {method}")
+
+        self.density = method(self.samples, self.shape, **kwargs)
 
     @property
     def uses_sense(self):
@@ -306,16 +336,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.dtype = self.samples.dtype
 
         # Density Compensation Setup
-        if density is True:
-            self.density = self.estimate_density(self.samples, shape)
-        elif isinstance(density, np.ndarray):
-            if len(density) != len(self.samples):
-                raise ValueError(
-                    "Density array and samples array should have the same length."
-                )
-            self.density = np.asfortranarray(density)
-        else:
-            self.density = None
+        self.compute_density(density)
         # Multi Coil Setup
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
