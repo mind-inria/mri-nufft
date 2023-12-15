@@ -1,6 +1,9 @@
 """Utilities for density compensation."""
-from mrinufft.operators import proper_trajectory
 from functools import wraps
+
+import numpy as np
+
+from mrinufft.operators import proper_trajectory
 
 
 def flat_traj(normalize="unit"):
@@ -21,3 +24,12 @@ def flat_traj(normalize="unit"):
         return decorator(func)
     else:
         return decorator
+
+
+def normalize_weights(weights):
+    """Normalize samples weights to reflect their importance.
+
+    Higher weights have lower importance.
+    """
+    inv_weights = np.sum(weights) / weights
+    return inv_weights / (np.sum(inv_weights))

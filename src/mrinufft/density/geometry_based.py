@@ -1,12 +1,8 @@
-"""Compute density compensation weights using Voronoi parcellation.
-
-Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
-
-"""
+"""Compute density compensation weights using geometry-based methods."""
 import numpy as np
 from scipy.spatial import Voronoi
 
-from .utils import flat_traj
+from .utils import flat_traj, normalize_weights
 
 
 def _vol3d(points):
@@ -51,7 +47,7 @@ def _vol2d(points):
 
 
 @flat_traj
-def voronoi_unique(traj):
+def voronoi_unique(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
     This assume unicity of the point in the kspace.
@@ -60,6 +56,8 @@ def voronoi_unique(traj):
     ----------
     kspace: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    *args, **kwargs:
+        Dummy arguments to be compatible with other methods.
 
     Returns
     -------
@@ -89,7 +87,7 @@ def voronoi_unique(traj):
 
 
 @flat_traj
-def voronoi(traj):
+def voronoi(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
     In case of multiple point in the center of kspace, the weight is split evenly.
@@ -98,6 +96,13 @@ def voronoi(traj):
     ----------
     traj: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+
+    *args, **kwargs:
+        Dummy arguments to be compatible with other methods.
+
+    References
+    ----------
+    Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
     """
     # deduplication only works for the 0,0 coordinate !!
     i0 = np.sum(np.abs(traj), axis=1) == 0
@@ -111,8 +116,7 @@ def voronoi(traj):
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
         wi = voronoi_unique(traj)
-    wi /= np.sum(wi)
-    return wi
+    return normalize_weights(wi)
 
 
 @flat_traj
@@ -173,5 +177,4 @@ def cell_count(traj, shape, osf=1.0):
                 if sxyz:
                     weights[list(sxyz)] = len(sxyz)
 
-    weights /= np.sum(weights)
-    return 1 / weights
+    return normalize_weights(weights)
