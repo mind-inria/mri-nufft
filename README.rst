@@ -34,7 +34,7 @@ Usage
       import numpy as np
       import mrinufft
       from mrinufft.trajectories import display
-      from mrinufft.trajectories.density import voronoi
+      from mrinufft.density import voronoi
 
       # Create a 2D Radial trajectory for demo
       samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)

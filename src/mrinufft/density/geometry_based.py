@@ -1,22 +1,11 @@
-"""
-Estimation of the density compensation array methods.
-
-Those methods are agnostic of the NUFFT operator.
-"""
+"""Compute density compensation weights using geometry-based methods."""
 import numpy as np
 from scipy.spatial import Voronoi
-from mrinufft.operators import proper_trajectory
-from mrinufft.operators.interfaces.cufinufft import pipe as pipe_cufinufft
-from mrinufft.operators.interfaces.tfnufft import pipe as pipe_tfnufft
-from mrinufft.operators.interfaces.gpunufft import pipe as pipe_gpunufft
+
+from .utils import flat_traj, normalize_weights
 
 
-def compute_tetrahedron_volume(A, B, C, D):
-    """Compute the volume of a tetrahedron."""
-    return np.abs(np.dot(np.cross(B - A, C - A), D - A)) / 6.0
-
-
-def vol3d(points):
+def _vol3d(points):
     """Compute the volume of a convex 3D polygon.
 
     Parameters
@@ -35,7 +24,7 @@ def vol3d(points):
     return np.sum(np.abs(np.dot(np.cross(B, C), A.T))) / 6.0
 
 
-def vol2d(points):
+def _vol2d(points):
     """Compute the area of a convex 2D polygon.
 
     Parameters
@@ -57,7 +46,8 @@ def vol2d(points):
     return abs(area) / 2.0
 
 
-def _voronoi(kspace):
+@flat_traj
+def voronoi_unique(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
     This assume unicity of the point in the kspace.
@@ -66,26 +56,28 @@ def _voronoi(kspace):
     ----------
     kspace: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    *args, **kwargs:
+        Dummy arguments to be compatible with other methods.
 
     Returns
     -------
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
-    M = kspace.shape[0]
-    if kspace.shape[1] == 2:
-        vol = vol2d
+    M = traj.shape[0]
+    if traj.shape[1] == 2:
+        vol = _vol2d
     else:
-        vol = vol3d
+        vol = _vol3d
     wi = np.zeros(M)
-    v = Voronoi(kspace)
+    v = Voronoi(traj)
     for mm in range(M):
         idx_vertices = v.regions[v.point_region[mm]]
         if np.all([i != -1 for i in idx_vertices]):
             wi[mm] = vol(v.vertices[idx_vertices])
     # For edge point (infinite voronoi cells) we extrapolate from neighbours
     # Initial implementation in Jeff Fessler's MIRT
-    rho = np.sum(kspace**2, axis=1)
+    rho = np.sum(traj**2, axis=1)
     igood = rho > 0.6 * np.max(rho)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
@@ -94,50 +86,95 @@ def _voronoi(kspace):
     return wi
 
 
-def voronoi(kspace):
+@flat_traj
+def voronoi(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
     In case of multiple point in the center of kspace, the weight is split evenly.
 
     Parameters
     ----------
-    kspace: array_like
+    traj: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+
+    *args, **kwargs:
+        Dummy arguments to be compatible with other methods.
+
+    References
+    ----------
+    Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
     """
     # deduplication only works for the 0,0 coordinate !!
-    kspace = proper_trajectory(kspace)
-    i0 = np.sum(np.abs(kspace), axis=1) == 0
+    i0 = np.sum(np.abs(traj), axis=1) == 0
     if np.any(i0):
         i0f = np.where(i0)
         i0f = i0f[0]
         i0[i0f] = False
-        wi = np.zeros(len(kspace))
-        wi[~i0] = _voronoi(kspace[~i0])
+        wi = np.zeros(len(traj))
+        wi[~i0] = voronoi_unique(traj[~i0])
         i0[i0f] = True
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
-        wi = _voronoi(kspace)
-    wi /= np.sum(wi)
-    return wi
+        wi = voronoi_unique(traj)
+    return normalize_weights(wi)
 
 
-def pipe(kspace_traj, grid_size, backend="cufinufft", **kwargs):
-    """Compute the density compensation weights using the pipe method.
+@flat_traj
+def cell_count(traj, shape, osf=1.0):
+    """
+    Compute the number of points in each cell of the grid.
 
     Parameters
     ----------
-    kspace_traj: array_like
+    traj: array_like
         array of shape (M, 2) or (M, 3) containing the coordinates of the points.
-    grid_size: array_like
-        array of shape (2,) or (3,) containing the size of the grid.
-    backend: str
-        backend to use for the computation. Either "cufinufft" or "tensorflow".
+    shape: tuple
+        shape of the grid.
+    osf: float
+        oversampling factor for the grid. default 1
+
+    Returns
+    -------
+    weights: array_like
+        array of shape (M,) containing the density compensation weights.
+
     """
-    if backend == "cufinufft":
-        return pipe_cufinufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "tensorflow":
-        return pipe_tfnufft(kspace_traj, grid_size, **kwargs)
-    elif backend == "gpunufft":
-        return pipe_gpunufft(kspace_traj, grid_size, **kwargs)
+    bins = [np.linspace(-0.5, 0.5, int(osf * s) + 1) for s in shape]
+
+    h, edges = np.histogramdd(traj, bins)
+    if len(shape) == 2:
+        hsum = [np.sum(h, axis=1).astype(int), np.sum(h, axis=0).astype(int)]
     else:
-        raise ValueError("backend not supported")
+        hsum = [
+            np.sum(h, axis=(1, 2)).astype(int),
+            np.sum(h, axis=(0, 2)).astype(int),
+            np.sum(h, axis=(0, 1)).astype(int),
+        ]
+
+    # indices of ascending coordinate in each dimension.
+    locs_sorted = [np.argsort(traj[:, i]) for i in range(len(shape))]
+
+    weights = np.ones(len(traj))
+    set_xyz = [[], [], []]
+    for i in range(len(hsum)):
+        ind = 0
+        for binsize in hsum[i]:
+            s = set(locs_sorted[i][ind : ind + binsize])
+            if s:
+                set_xyz[i].append(s)
+            ind += binsize
+
+    for sx in set_xyz[0]:
+        for sy in set_xyz[1]:
+            sxy = sx.intersection(sy)
+            if not sxy:
+                continue
+            if len(shape) == 2:
+                weights[list(sxy)] = len(sxy)
+                continue
+            for sz in set_xyz[2]:
+                sxyz = sxy.intersection(sz)
+                if sxyz:
+                    weights[list(sxyz)] = len(sxyz)
+
+    return normalize_weights(weights)

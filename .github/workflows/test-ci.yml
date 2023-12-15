@@ -119,6 +119,7 @@ jobs:
     strategy:
       matrix:
         backend: [gpunufft, cufinufft]
+
     steps:
       - uses: actions/checkout@v3
 
@@ -133,13 +134,13 @@ jobs:
           pip install -e mri-nufft[test]
           pip install finufft
 
-      - name: Install Cufinufft
+      - name: Install Experimental cufinufft
         if: ${{ matrix.backend == 'cufinufft' }}
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
           rm -rf finufft
-          git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
+          git clone https://github.com/flatironinstitute/finufft
           cd finufft && mkdir build && cd build
 
           export PATH=/usr/local/cuda-11.8/bin:$PATH
