@@ -213,12 +213,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
 
         # density compensation support
-        if density is True:
-            self.density = self.pipe(self.samples, shape)
-        elif is_host_array(density) or is_cuda_array(density):
-            self.density = cp.array(density)
+        if is_cuda_array(density):
+            self.density = density
         else:
-            self.density = None
+            self.compute_density(density)
+            self.density = cp.array(density)
 
         # Smaps support
         self.smaps = smaps
