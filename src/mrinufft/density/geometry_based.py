@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.spatial import Voronoi
 
-from .utils import flat_traj, normalize_weights
+from .utils import flat_traj, normalize_weights, register_density
 
 
 def _vol3d(points):
@@ -47,6 +47,7 @@ def _vol2d(points):
 
 
 @flat_traj
+@register_density
 def voronoi_unique(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
@@ -87,6 +88,7 @@ def voronoi_unique(traj, *args, **kwargs):
 
 
 @flat_traj
+@register_density
 def voronoi(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
@@ -120,6 +122,7 @@ def voronoi(traj, *args, **kwargs):
 
 
 @flat_traj
+@register_density
 def cell_count(traj, shape, osf=1.0):
     """
     Compute the number of points in each cell of the grid.
