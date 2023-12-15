@@ -4,8 +4,9 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from .base import FourierOperatorBase, check_backend, get_operator, proper_trajectory
-from .interfaces.utils import (
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorBase, check_backend, get_operator
+from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
     pin_memory,

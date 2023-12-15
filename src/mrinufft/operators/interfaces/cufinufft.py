@@ -2,7 +2,9 @@
 
 import warnings
 import numpy as np
-from ..base import FourierOperatorBase, proper_trajectory
+from mrinufft.operators.base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
+
 from .utils import (
     CUPY_AVAILABLE,
     check_size,

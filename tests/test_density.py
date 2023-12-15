@@ -9,7 +9,7 @@ from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
 from mrinufft.density import cell_count, voronoi
 from mrinufft.density.utils import normalize_weights
-from mrinufft.operators import proper_trajectory
+from mrinufft._utils import proper_trajectory
 
 
 def slow_cell_count2D(traj, shape, osf):
