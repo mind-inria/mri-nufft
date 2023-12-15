@@ -119,6 +119,7 @@ jobs:
     strategy:
       matrix:
         backend: [gpunufft, cufinufft]
+
     steps:
       - uses: actions/checkout@v3
 
@@ -133,7 +134,7 @@ jobs:
           pip install -e mri-nufft[test]
           pip install finufft
 
-      - name: Install Cufinufft
+      - name: Install Experimental cufinufft
         if: ${{ matrix.backend == 'cufinufft' }}
         shell: bash
         run: |
@@ -152,10 +153,7 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install cupy-cuda11x
           cd $RUNNER_WORKSPACE/finufft/python/cufinufft
-          python setup.py develop
-          # FIXME: This is hardcoded
-          cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
-          cd $RUNNER_WORKSPACE
+          python setup.py install
 
       - name: Install gpuNUFFT
         if: ${{ matrix.backend == 'gpunufft' }}
