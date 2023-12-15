@@ -1,6 +1,5 @@
 """Density compensation weights using the NUFFT-based methods."""
 
-from mrinufft import get_operator
 from .utils import flat_traj
 
 
@@ -17,6 +16,9 @@ def pipe(traj, shape, backend="cufinufft", **kwargs):
     backend: str
         backend to use for the computation. Either "cufinufft" or "tensorflow".
     """
+    # here to avoid circular import
+    from mrinufft.operators.base import get_operator
+
     nufft_class = get_operator(backend)
     if hasattr(nufft_class, "pipe"):
         return nufft_class.pipe(traj, shape, **kwargs)

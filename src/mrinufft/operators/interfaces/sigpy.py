@@ -5,7 +5,8 @@ The SigPy NUFFT is fully implemented in Python.
 import warnings
 
 import numpy as np
-from ..base import FourierOperatorCPU, proper_trajectory
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorCPU
 
 
 SIGPY_AVAILABLE = True

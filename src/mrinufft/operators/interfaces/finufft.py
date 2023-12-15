@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from ..base import FourierOperatorCPU, proper_trajectory
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorCPU
 
 FINUFFT_AVAILABLE = True
 try:
