@@ -38,7 +38,6 @@ def make_pinned_smaps(smaps):
     np.ndarray or None
         the pinned sensitivity maps
     """
-
     if smaps is None:
         return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
