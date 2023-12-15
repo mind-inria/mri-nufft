@@ -1,9 +1,10 @@
 """Density compensation weights using the NUFFT-based methods."""
 
-from .utils import flat_traj
+from .utils import flat_traj, register_density
 
 
 @flat_traj
+@register_density
 def pipe(traj, shape, backend="cufinufft", **kwargs):
     """Compute the density compensation weights using the pipe method.
 
