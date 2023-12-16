@@ -167,6 +167,7 @@ class FourierOperatorBase(ABC):
             self.density = method
             return None
         if not method:
+            self.density = None
             return None
 
         if method == "pipe" and "backend" not in kwargs:
