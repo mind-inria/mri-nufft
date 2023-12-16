@@ -217,7 +217,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.density = density
         else:
             self.compute_density(density)
-            self.density = cp.array(density)
+            if is_host_array(self.density):
+                self.density = cp.array(self.density)
 
         # Smaps support
         self.smaps = smaps
