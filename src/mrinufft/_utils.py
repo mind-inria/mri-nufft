@@ -4,6 +4,58 @@ import warnings
 from collections import defaultdict
 from functools import wraps
 import numpy as np
+from numpy.typing import DTypeLike
+
+
+ARRAY_LIBS = {
+    "numpy": (np, np.ndarray),
+    "cupy": None,
+    "torch": None,
+    "tensorflow": None,
+}
+try:
+    import cupy
+
+    ARRAY_LIBS["cupy"] = (cupy, cupy.ndarray)
+except ImportError:
+    pass
+try:
+    import torch
+
+    ARRAY_LIBS["torch"] = (torch, torch.Tensor)
+except ImportError:
+    pass
+
+try:
+    from tensorflow.experimental import numpy as tnp
+
+    ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
+except ImportError:
+    pass
+
+
+NP2TORCH = {
+    np.dtype("float64"): torch.float64,
+    np.dtype("float32"): torch.float32,
+    np.dtype("complex64"): torch.complex64,
+    np.dtype("complex128"): torch.complex128,
+}
+
+
+def get_array_module(array):
+    """Get the module of the array."""
+    for lib, array_type in ARRAY_LIBS.values():
+        if lib is not None and isinstance(array, array_type):
+            return lib
+    raise ValueError("Unknown array library.")
+
+
+def auto_cast(array, dtype: DTypeLike):
+    module = get_array_module(array)
+    if module.__name__ == "torch":
+        return array.to(NP2TORCH[np.dtype(dtype)])
+    else:
+        return array.astype(dtype)
 
 
 def proper_trajectory(trajectory, normalize="pi"):

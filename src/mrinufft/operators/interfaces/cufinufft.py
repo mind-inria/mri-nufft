@@ -3,7 +3,7 @@
 import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
-from mrinufft._utils import proper_trajectory
+from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 
 from .utils import (
     CUPY_AVAILABLE,
@@ -273,8 +273,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             check_size(data, (self.n_batchs, *self.shape))
         else:
             check_size(data, (self.n_batchs, self.n_coils, *self.shape))
-        data = data.astype(self.cpx_dtype)
-
+        xp = get_array_module(data)
+        data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
             op_func = self._op_sense_device
@@ -287,12 +287,16 @@ class MRICufiNUFFT(FourierOperatorBase):
         ret = op_func(data, ksp_d)
 
         ret /= self.norm_factor
+        if xp.__name__ == "torch" and is_cuda_array(ret):
+            ret = xp.as_tensor(ret, device=data.device)
+        elif xp.__name__ == "torch":
+            ret = xp.from_numpy(ret)
         return self._safe_squeeze(ret)
 
     def _op_sense_device(self, data, ksp_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-
+        data = cp.asarray(data)
         image_dataf = cp.reshape(data, (B, *XYZ))
         ksp_d = ksp_d or cp.empty((B * C, K), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -338,6 +342,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _op_calibless_device(self, data, ksp_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K = self.n_samples
+        data = cp.asarray(data)
         bsize_samples2gpu = T * self.ksp_size
         bsize_img2gpu = T * self.img_size
         if ksp_d is None:
@@ -389,6 +394,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        xp = get_array_module(coeffs)
+        coeffs = auto_cast(coeffs, self.cpx_dtype)
         check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):
@@ -402,11 +409,17 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         ret = adj_op_func(coeffs, img_d)
         ret /= self.norm_factor
+
+        if xp.__name__ == "torch" and is_cuda_array(ret):
+            ret = xp.as_tensor(ret, device=coeffs.device)
+        elif xp.__name__ == "torch":
+            ret = xp.from_numpy(ret)
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
         """Perform sense reconstruction when data is on device."""
         # Define short name
+        coeffs = cp.asarray(coeffs)
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         # Allocate memory
@@ -448,6 +461,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
+        coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.flatten()
         # Allocate memory
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -478,6 +492,7 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _adj_op_calibless_device(self, coeffs, img_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
+        coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.flatten()
         ksp_batched = cp.empty(T * K, dtype=self.cpx_dtype)
         if self.uses_density:
