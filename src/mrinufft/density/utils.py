@@ -20,6 +20,7 @@ def get_density(name, *args, **kwargs):
 
     if args or kwargs:
         return method(*args, **kwargs)
+    return method
 
 
 def flat_traj(normalize="unit"):
