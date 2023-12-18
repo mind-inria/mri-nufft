@@ -25,21 +25,20 @@ try:
     ARRAY_LIBS["torch"] = (torch, torch.Tensor)
 except ImportError:
     pass
-
+    NP2TORCH = {}
+else:
+    NP2TORCH = {
+        np.dtype("float64"): torch.float64,
+        np.dtype("float32"): torch.float32,
+        np.dtype("complex64"): torch.complex64,
+        np.dtype("complex128"): torch.complex128,
+    }
 try:
     from tensorflow.experimental import numpy as tnp
 
     ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
 except ImportError:
     pass
-
-
-NP2TORCH = {
-    np.dtype("float64"): torch.float64,
-    np.dtype("float32"): torch.float32,
-    np.dtype("complex64"): torch.complex64,
-    np.dtype("complex128"): torch.complex128,
-}
 
 
 def get_array_module(array):
