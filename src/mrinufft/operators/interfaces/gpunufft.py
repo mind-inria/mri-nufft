@@ -43,7 +43,7 @@ def make_pinned_smaps(smaps):
         return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
     cp.cuda.set_pinned_memory_allocator(_allocator)
-    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64)
+    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64, order='F')
     np.copyto(pinned_smaps, smaps_)
     return pinned_smaps
 
@@ -207,11 +207,11 @@ class RawGpuNUFFT:
                 np.asarray([np.ravel(c, order="F") for c in image]).T,
             )
 
-        new_ksp = self.operator.op(
+        new_ksp = np.copy(self.operator.op(
             self.pinned_image,
             kspace,
             interpolate_data,
-        )
+        ))
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
@@ -234,7 +234,7 @@ class RawGpuNUFFT:
         if image is None:
             image = self.pinned_image
         np.copyto(self.pinned_kspace, coeffs)
-        new_image = self.operator.adj_op(self.pinned_kspace, image, grid_data)
+        new_image = np.copy(self.operator.adj_op(self.pinned_kspace, image, grid_data))
         if self.uses_sense or self.n_coils == 1:
             return np.squeeze(new_image).T
         return np.asarray([c.T for c in new_image])
