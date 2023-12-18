@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from functools import partial
 import warnings
 import numpy as np
-from mrinufft._utils import _power_method
+from mrinufft._utils import power_method
 
 from mrinufft.density import get_density
 
@@ -208,7 +208,7 @@ class FourierOperatorBase(ABC):
         tmp_op = self.__class__(
             self.samples, self.shape, density=self.density, n_coils=1, **kwargs
         )
-        return _power_method(max_iter, tmp_op)
+        return power_method(max_iter, tmp_op)
 
     @property
     def uses_sense(self):
