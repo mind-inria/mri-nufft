@@ -38,12 +38,11 @@ def make_pinned_smaps(smaps):
     np.ndarray or None
         the pinned sensitivity maps
     """
-
     if smaps is None:
         return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
     cp.cuda.set_pinned_memory_allocator(_allocator)
-    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64, order='F')
+    pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64, order="F")
     np.copyto(pinned_smaps, smaps_)
     return pinned_smaps
 
@@ -301,7 +300,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.smaps = smaps
         if density is True:
-            self.density = pipe(self.samples, shape)
+            self.density = self.pipe(self.samples, shape)
         elif isinstance(density, np.ndarray):
             self.density = density
         else:
@@ -352,33 +351,31 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.impl.uses_sense
 
+    @classmethod
+    def pipe(cls, kspace_loc, volume_shape, num_iterations=10):
+        """Compute the density compensation weights for a given set of kspace locations.
 
-def pipe(kspace_loc, volume_shape, num_iterations=10):
-    """Compute the density compensation weights for a given set of kspace locations.
-
-    Parameters
-    ----------
-    kspace_loc: np.ndarray
-        the kspace locations
-    volume_shape: np.ndarray
-        the volume shape
-    num_iterations: int default 10
-        the number of iterations for density estimation
-    """
-    if GPUNUFFT_AVAILABLE is False:
-        raise ValueError(
-            "gpuNUFFT is not available, cannot " "estimate the density compensation"
-        )
-    grid_op = MRIGpuNUFFT(
-        samples=kspace_loc,
-        shape=volume_shape,
-        osf=1,
-    )
-    density_comp = np.ones(kspace_loc.shape[0])
-    for _ in range(num_iterations):
-        density_comp = density_comp / np.abs(
-            grid_op.op(
-                grid_op.adj_op(density_comp, grid_data=True), interpolate_data=True
+        Parameters
+        ----------
+        kspace_loc: np.ndarray
+            the kspace locations
+        volume_shape: np.ndarray
+            the volume shape
+        num_iterations: int default 10
+            the number of iterations for density estimation
+        """
+        if GPUNUFFT_AVAILABLE is False:
+            raise ValueError(
+                "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        grid_op = MRIGpuNUFFT(
+            samples=kspace_loc,
+            shape=volume_shape,
+            osf=1,
         )
-    return density_comp.squeeze()
+        density_comp = np.ones(kspace_loc.shape[0])
+        for _ in range(num_iterations):
+            density_comp = density_comp / np.abs(
+                grid_op.op(grid_op.adj_op(density_comp, True), True)
+            )
+        return density_comp

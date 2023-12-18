@@ -132,10 +132,10 @@ def test_batch_adj_op(operator, flat_operator, kspace_data):
     npt.assert_allclose(image_data, image_flat, atol=1e-3, rtol=1e-3)
 
 
-def test_get_grad(operator, image_data, kspace_data):
+def test_data_consistency(operator, image_data, kspace_data):
     """Test the data consistency operation."""
     # image_data = np.zeros_like(image_data)
-    res = operator.get_grad(image_data, kspace_data)
+    res = operator.data_consistency(image_data, kspace_data)
     tmp = operator.op(image_data)
     res2 = operator.adj_op(tmp - kspace_data)
 
@@ -152,13 +152,13 @@ def test_get_grad(operator, image_data, kspace_data):
         assert_correlate(res[i], res2[i], slope_err=slope_err)
 
 
-def test_get_grad_readonly(operator, image_data, kspace_data):
+def test_data_consistency_readonly(operator, image_data, kspace_data):
     """Test that the data consistency does not modify the input parameters data."""
     kspace_tmp = kspace_data.copy()
     image_tmp = image_data.copy()
     kspace_tmp.setflags(write=False)
     image_tmp.setflags(write=False)
-    operator.get_grad(image_data, kspace_tmp)
+    operator.data_consistency(image_data, kspace_tmp)
     npt.assert_equal(kspace_tmp, kspace_data)
     npt.assert_equal(image_tmp, image_data)
 
@@ -168,7 +168,7 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     C = 1 if operator.uses_sense else operator.n_coils
     img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape)
     for _ in range(10):
-        grad = operator.get_grad(img, kspace_data)
+        grad = operator.data_consistency(img, kspace_data)
         norm = np.linalg.norm(grad)
         grad /= norm
         np.copyto(img, grad)
