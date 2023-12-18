@@ -625,6 +625,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
+        image_data = cp.asarray(image_data)
+        obs_data = cp.asarray(obs_data)
         image_dataf = cp.reshape(image_data, (B, *XYZ))
         obs_dataf = cp.reshape(obs_data, (B * C, K))
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -689,6 +691,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         """Calibrationless Gradient computation when all data is on device."""
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
+
+        image_data = cp.asarray(image_data)
+        obs_data = cp.asarray(obs_data)
 
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
