@@ -240,10 +240,11 @@ class RawGpuNUFFT:
             make_copy_back = True
         np.copyto(self.pinned_kspace, coeffs)
         new_image = self.operator.adj_op(self.pinned_kspace, image, grid_data)
-        if self.uses_sense or self.n_coils == 1:
-            return np.squeeze(new_image).T
         if make_copy_back:
             new_image = np.copy(new_image)
+        if self.uses_sense or self.n_coils == 1:
+            return np.squeeze(new_image).T
+        
         return np.asarray([c.T for c in new_image])
 
 
