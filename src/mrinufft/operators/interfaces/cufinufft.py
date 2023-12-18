@@ -3,7 +3,12 @@
 import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
-from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
+from mrinufft._utils import (
+    proper_trajectory,
+    get_array_module,
+    auto_cast,
+    power_method,
+)
 
 from .utils import (
     CUPY_AVAILABLE,
@@ -768,4 +773,35 @@ class MRICufiNUFFT(FourierOperatorBase):
             f"  smaps_cached: {self.smaps_cached}\n"
             f"  eps:{self.raw_op.eps:.0e}\n"
             ")"
+        )
+
+    def get_lipschitz_cst(self, max_iter, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            Number of iteration to perform to estimate the Lipschitz constant.
+        kwargs:
+            Extra kwargs for the cufinufft operator.
+
+        Returns
+        -------
+        float
+            Lipschitz constant of the operator.
+        """
+
+        tmp_op = self.__class__(
+            self.samples,
+            self.shape,
+            density=self.density,
+            n_coils=1,
+            smaps=None,
+            **kwargs,
+        )
+        return power_method(
+            max_iter,
+            tmp_op,
+            norm_func=lambda x: cp.linalg.norm(x, ord="fro"),
+            x0=cp.zeros(self.shape, dtype=self.cpx_dtype),
         )

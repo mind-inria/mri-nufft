@@ -98,6 +98,32 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
+def power_method(max_iter, operator, norm_func=None, x0=None):
+    """Power method to find the Lipschitz constant of an operator."""
+
+    def AHA(x):
+        return operator.adj_op(operator.op(x))
+
+    if norm_func is None:
+        norm_func = np.linalg.norm
+    if x0 is None:
+        x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    x_norm = norm_func(x)
+    x /= x_norm
+    for i in range(max_iter):  # noqa: B007
+        x_new = AHA(x)
+        x_new_norm = norm_func(x_new)
+        x_new /= x_new_norm
+        if abs(x_norm - x_new_norm) < 1e-6:
+            break
+        x_norm = x_new_norm
+        x = x_new
+
+    if i == max_iter - 1:
+        warnings.warn("Lipschitz constant did not converge")
+    return x_new_norm
+
+
 class MethodRegister:
     """
     A Decorator to register methods of the same type in dictionnaries.
