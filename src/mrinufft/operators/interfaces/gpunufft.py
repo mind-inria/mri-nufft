@@ -193,8 +193,10 @@ class RawGpuNUFFT:
         # Base gpuNUFFT Operator is written in CUDA and C++, we need to
         # reorganize data to follow a different memory hierarchy
         # TODO we need to update codes to use np.reshape for all this directly
+        make_copy_back = False
         if kspace is None:
             kspace = self.pinned_kspace
+            make_copy_back = True
         if self.uses_sense or self.n_coils == 1:
             np.copyto(
                 self.pinned_image,
@@ -205,12 +207,13 @@ class RawGpuNUFFT:
                 self.pinned_image,
                 np.asarray([np.ravel(c, order="F") for c in image]).T,
             )
-
         new_ksp = self.operator.op(
             self.pinned_image,
             kspace,
             interpolate_data,
         )
+        if make_copy_back:
+            new_ksp = np.copy(new_ksp)
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
@@ -230,12 +233,17 @@ class RawGpuNUFFT:
             adjoint operator of Non Uniform Fourier transform of the
             input coefficients.
         """
+        make_copy_back = False
         if image is None:
             image = self.pinned_image
+            make_copy_back = True
         np.copyto(self.pinned_kspace, coeffs)
         new_image = self.operator.adj_op(self.pinned_kspace, image, grid_data)
+        if make_copy_back:
+            new_image = np.copy(new_image)
         if self.uses_sense or self.n_coils == 1:
             return np.squeeze(new_image).T
+        
         return np.asarray([c.T for c in new_image])
 
 
