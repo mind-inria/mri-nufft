@@ -243,7 +243,7 @@ class RawGpuNUFFT:
             new_image = np.copy(new_image)
         if self.uses_sense or self.n_coils == 1:
             return np.squeeze(new_image).T
-        
+
         return np.asarray([c.T for c in new_image])
 
 
