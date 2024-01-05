@@ -1,4 +1,5 @@
-"""Basic codes for IO for trajectories."""
+"""Read/Write trajectoru for Neurospin sequences."""
+
 import warnings
 import os
 from typing import Tuple, Optional
@@ -6,7 +7,7 @@ import numpy as np
 from datetime import datetime
 from array import array
 
-from .utils import (
+from mrinufft.trajectories.utils import (
     KMAX,
     DEFAULT_RASTER_TIME,
     DEFAULT_GMAX,
