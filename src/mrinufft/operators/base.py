@@ -152,15 +152,17 @@ class FourierOperatorBase(ABC):
 
         return MRIFourierCorrected(self, B, C, indices)
 
-    def compute_density(self, method=None, **kwargs):
+    def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
 
         Parameters
         ----------
-        method: str or callable or array
+        method: str or callable or array or dict
             The method to use to compute the density compensation.
             If a string, the method should be registered in the density registry.
             If a callable, it should take the samples and the shape as input.
+            If a dict, it should have a key 'name', to determine which method to use.
+            other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
         """
         if isinstance(method, np.ndarray):
@@ -170,10 +172,10 @@ class FourierOperatorBase(ABC):
             self.density = None
             return None
 
-        if method == "pipe" and "backend" not in kwargs:
-            method = self.pipe  # will raise error if not defined.
-        if method == "pipe" and "backend" in kwargs:
-            warnings.warn(f"Using pipe with {kwargs['backend']}")
+        kwargs = {}
+        if isinstance(method, dict):
+            method = method["name"]  # should be a string !
+            kwargs = method.copy().remove("name")
         if isinstance(method, str):
             method = get_density(method)
         if not callable(method):
