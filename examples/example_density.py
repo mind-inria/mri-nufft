@@ -15,7 +15,7 @@ import brainweb_dl as bwdl
 
 import matplotlib.pyplot as plt
 import numpy as np
-from mrinufft import get_density, get_operator
+from mrinufft import get_density, get_operator, check_backend
 from mrinufft.trajectories import initialize_2D_radial
 from mrinufft.trajectories.display import display_2D_trajectory
 
@@ -24,11 +24,11 @@ from mrinufft.trajectories.display import display_2D_trajectory
 # Create sample data
 # ------------------
 
-mri_2D = bwdl.get_mri(4, "T1")[80, ...]
+mri_2D = bwdl.get_mri(4, "T1")[80, ...].astype(np.float32)
 
 print(mri_2D.shape)
 
-traj = initialize_2D_radial(192, 192)
+traj = initialize_2D_radial(192, 192).astype(np.float32)
 
 nufft = get_operator("finufft")(traj, mri_2D.shape, density=False)
 kspace = nufft.op(mri_2D)
@@ -60,7 +60,9 @@ axs[2].imshow(abs(adjoint))
 # %%
 voronoi_weights = get_density("voronoi", traj)
 
-nufft_voronoi = get_operator("finufft")(traj, shape=mri_2D.shape, density=voronoi_weights)
+nufft_voronoi = get_operator("finufft")(
+    traj, shape=mri_2D.shape, density=voronoi_weights
+)
 adjoint_voronoi = nufft_voronoi.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
@@ -79,15 +81,17 @@ axs[2].set_title("Voronoi density compensation")
 # This can be viewed as an approximation to the voronoi neth
 
 # .. note::
-#    Cell counting is faster than voronoi (especially in 3D), but is less precise. 
+#    Cell counting is faster than voronoi (especially in 3D), but is less precise.
 
-# The size of the niquist voxel can be tweak by using the osf parameter. Typically as the NUFFT (and by default in MRI-NUFFT) is performed at an OSF of 2 
+# The size of the niquist voxel can be tweak by using the osf parameter. Typically as the NUFFT (and by default in MRI-NUFFT) is performed at an OSF of 2
 
 
 # %%
 cell_count_weights = get_density("cell_count", traj, shape=mri_2D.shape, osf=2.0)
 
-nufft_cell_count = get_operator("finufft")(traj, shape=mri_2D.shape, density=cell_count_weights, upsampfac=2.0)
+nufft_cell_count = get_operator("finufft")(
+    traj, shape=mri_2D.shape, density=cell_count_weights, upsampfac=2.0
+)
 adjoint_cell_count = nufft_cell_count.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
@@ -100,14 +104,14 @@ axs[2].set_title("cell_count density compensation")
 # %%
 # Manual Density Estimation
 # -------------------------
-# 
+#
 # For some analytical trajectory it is also possible to determine the density compensation vector directly.
 # In radial trajectory for instance, a sample's weight can be determined from its distance to the center.
 
 
 # %%
 flat_traj = traj.reshape(-1, 2)
-weights = np.sqrt(np.sum(flat_traj ** 2, axis=1))
+weights = np.sqrt(np.sum(flat_traj**2, axis=1))
 nufft = get_operator("finufft")(traj, shape=mri_2D.shape, density=weights)
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -124,18 +128,18 @@ axs[2].set_title("manual density compensation")
 #
 # Pipe's Method
 # -------------
-# Pipe's method is an iterative scheme, that use the interpolation and spreading kernel operator for computing the density compensation. 
-# 
-# .. warning:: 
-#    If this method is widely used in the literature, there exists no convergence guarantees for it. 
+# Pipe's method is an iterative scheme, that use the interpolation and spreading kernel operator for computing the density compensation.
+#
+# .. warning::
+#    If this method is widely used in the literature, there exists no convergence guarantees for it.
 
-# .. note:: 
-#    The Pipe method is currently only implemented for gpuNUFFT. 
+# .. note::
+#    The Pipe method is currently only implemented for gpuNUFFT.
 
 # %%
 if check_backend("gpunufft"):
     flat_traj = traj.reshape(-1, 2)
-    nufft = get_operator("gpunufft")(traj, shape=mri_2D.shape, density="pipe")
+    nufft = get_operator("gpunufft")(traj, shape=mri_2D.shape, density=False)
     adjoint_manual = nufft.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     axs[0].imshow(abs(mri_2D))
@@ -144,5 +148,9 @@ if check_backend("gpunufft"):
     axs[1].set_title("no density compensation")
     axs[2].imshow(abs(adjoint_manual))
     axs[2].set_title("manual density compensation")
+
+# %%
+nufft = get_operator("gpunufft")
+hasattr(nufft, "pipe")
 
 # %%

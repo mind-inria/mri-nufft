@@ -176,6 +176,8 @@ class FourierOperatorBase(ABC):
         if isinstance(method, dict):
             method = method["name"]  # should be a string !
             kwargs = method.copy().remove("name")
+        if method == "pipe" and "backend" not in kwargs:
+            kwargs["backend"] = self.backend
         if isinstance(method, str):
             method = get_density(method)
         if not callable(method):
