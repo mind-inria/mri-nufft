@@ -3,8 +3,8 @@
 from .utils import flat_traj, register_density
 
 
-@flat_traj
 @register_density
+@flat_traj
 def pipe(traj, shape, backend="cufinufft", **kwargs):
     """Compute the density compensation weights using the pipe method.
 
@@ -16,6 +16,8 @@ def pipe(traj, shape, backend="cufinufft", **kwargs):
         array of shape (2,) or (3,) containing the size of the grid.
     backend: str
         backend to use for the computation. Either "cufinufft" or "tensorflow".
+    **kwargs:
+        Extra argument for the NUFFT operator.
     """
     # here to avoid circular import
     from mrinufft.operators.base import get_operator

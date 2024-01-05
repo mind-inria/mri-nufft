@@ -228,7 +228,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.smaps = smaps
-        self.compute_density()
+        self.compute_density(density)
         self.kwargs = kwargs
         self.impl = RawGpuNUFFT(
             samples=self.samples,
@@ -276,7 +276,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10):
+    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, **kwargs):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -292,11 +292,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
-        grid_op = MRIGpuNUFFT(
-            samples=kspace_loc,
-            shape=volume_shape,
-            osf=1,
-        )
+        grid_op = MRIGpuNUFFT(samples=kspace_loc, shape=volume_shape, **kwargs)
         density_comp = np.ones(kspace_loc.shape[0])
         for _ in range(num_iterations):
             density_comp = density_comp / np.abs(
