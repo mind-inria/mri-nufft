@@ -46,8 +46,8 @@ def _vol2d(points):
     return abs(area) / 2.0
 
 
-@flat_traj
 @register_density
+@flat_traj
 def voronoi_unique(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
@@ -87,8 +87,8 @@ def voronoi_unique(traj, *args, **kwargs):
     return wi
 
 
-@flat_traj
 @register_density
+@flat_traj
 def voronoi(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
@@ -118,11 +118,11 @@ def voronoi(traj, *args, **kwargs):
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
         wi = voronoi_unique(traj)
-    return normalize_weights(wi)
+    return 1 / normalize_weights(wi)
 
 
-@flat_traj
 @register_density
+@flat_traj
 def cell_count(traj, shape, osf=1.0):
     """
     Compute the number of points in each cell of the grid.
