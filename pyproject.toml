@@ -47,7 +47,7 @@ ignore = [
 "B905", #zip() without an explicit strict= parameter
 "B028", #No explicit stacklevel keyword argument found
 ]
-extend-exclude = [ "example_*.py" ]
+extend-exclude = [ "example_*.py" , "*_version.py"]
 [tool.ruff.pydocstyle]
 convention="numpy"
 

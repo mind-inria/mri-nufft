@@ -523,7 +523,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             ret = self.raw_op.type1(coeffs_d, image_d)
         return ret
 
-    def data_consistency(self, image_data, obs_data):
+    def get_grad(self, image_data, obs_data):
         """Compute the gradient estimation directly on gpu.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
