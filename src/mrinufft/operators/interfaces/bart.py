@@ -13,6 +13,9 @@ from pathlib import Path
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
 
+import numpy as np
+from mrinufft.io.cfl import traj2cfl, _writecfl, _readcfl
+
 # available if return code is 0
 BART_AVAILABLE = not subp.call(
     ["which", "bart"], stdout=subp.DEVNULL, stderr=subp.DEVNULL
