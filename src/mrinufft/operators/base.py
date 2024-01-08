@@ -18,6 +18,7 @@ DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 def check_backend(backend_name: str):
     """Check if a specific backend is available."""
+    backend_name = backend_name.lower()
     try:
         return FourierOperatorBase.interfaces[backend_name][0]
     except KeyError as e:
@@ -60,6 +61,7 @@ def get_operator(backend_name: str, *args, **kwargs):
     ValueError if the backend is not available.
     """
     available = True
+    backend_name = backend_name.lower()
     try:
         available, operator = FourierOperatorBase.interfaces[backend_name]
     except KeyError as exc:
