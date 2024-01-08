@@ -107,49 +107,17 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
+          pip install cupy-cuda11x
           pip install finufft
 
-      - name: Install Experimental cufinufft
-        if: ${{ matrix.backend == 'cufinufft' }}
+      - name: Install backend
         shell: bash
         run: |
-          cd $RUNNER_WORKSPACE
-          rm -rf finufft
-          git clone https://github.com/flatironinstitute/finufft
-          cd finufft && mkdir build && cd build
-
-          export PATH=/usr/local/cuda-11.8/bin:$PATH
-          export CUDA_PATH=/usr/local/cuda-11.8
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8
-
-          cmake -DFINUFFT_USE_CUDA=1 ../ && cmake --build . && cp libcufinufft.so ../python/cufinufft/.
-          # enter venv
           source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install cupy-cuda11x
-          cd $RUNNER_WORKSPACE/finufft/python/cufinufft
-          python setup.py develop
-          # FIXME: This is hardcoded
-          cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
-          cd $RUNNER_WORKSPACE
-
-      - name: Install gpuNUFFT
-        if: ${{ matrix.backend == 'gpunufft' }}
-        shell: bash
-        run: |
-          cd $RUNNER_WORKSPACE
-          rm -rf gpuNUFFT
-          git clone https://github.com/chaithyagr/gpuNUFFT
-          cd gpuNUFFT
-
-          export PATH=/usr/local/cuda-11.8/bin:$PATH
-          export CUDA_PATH=/usr/local/cuda-11.8
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8
-
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          python setup.py install
-          pip install cupy-cuda11x
+          export CUDA_BIN_PATH=/usr/local/cuda-11.8/
+          export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+          pip install ${{ matrix.backend }}
 
       - name: Run Tests
         shell: bash
