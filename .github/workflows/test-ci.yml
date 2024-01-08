@@ -16,7 +16,7 @@ env:
 jobs:
   test-cpu:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, "style")}}
+    if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [finufft, pynfft, pynufft, bart, sigpy]
@@ -90,7 +90,7 @@ jobs:
 
   test-gpu:
     runs-on: GPU
-    if: ${{ !contains(github.event.head_commit.message, "style")}}
+    if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [gpunufft, cufinufft]
@@ -178,7 +178,7 @@ jobs:
 
   test-examples:
     runs-on: ubuntu-latest
-    needs: linter-check
+    if: ${{ !contains(github.event.head_commit.message, 'style')}}
 
     steps:
       - uses: actions/checkout@v3
