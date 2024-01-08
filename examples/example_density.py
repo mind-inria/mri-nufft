@@ -148,9 +148,3 @@ if check_backend("gpunufft"):
     axs[1].set_title("no density compensation")
     axs[2].imshow(abs(adjoint_manual))
     axs[2].set_title("manual density compensation")
-
-# %%
-nufft = get_operator("gpunufft")
-hasattr(nufft, "pipe")
-
-# %%
