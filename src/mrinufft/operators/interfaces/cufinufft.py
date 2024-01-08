@@ -466,7 +466,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
-        coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.flatten()
         # Allocate memory
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
