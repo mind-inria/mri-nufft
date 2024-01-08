@@ -25,7 +25,6 @@ class CasesTrajectories:
         np.random.seed(seed)
         samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 3)
         samples = samples.reshape(M, 3)
-        print(samples.min(), samples.max())
         return samples, (N, N, N)
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):

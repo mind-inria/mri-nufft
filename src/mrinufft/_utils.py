@@ -98,7 +98,7 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
-def power_method(max_iter, operator, norm_func=None, x0=None):
+def power_method(max_iter, operator, norm_func=None, x=None):
     """Power method to find the Lipschitz constant of an operator."""
 
     def AHA(x):
@@ -106,7 +106,7 @@ def power_method(max_iter, operator, norm_func=None, x0=None):
 
     if norm_func is None:
         norm_func = np.linalg.norm
-    if x0 is None:
+    if x is None:
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
     x_norm = norm_func(x)
     x /= x_norm
