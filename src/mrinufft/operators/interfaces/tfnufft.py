@@ -118,7 +118,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         )
         return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
 
-    def data_consistency(self, data, obs_data):
+    def get_grad(self, data, obs_data):
         """Compute the data consistency.
 
         Parameters
