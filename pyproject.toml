@@ -62,3 +62,6 @@ testpaths=["tests"]
 [tool.pylsp-mypy]
 enabled = false
 live_mode = false
+
+[tool.mypy]
+ignore_missing_imports = true
