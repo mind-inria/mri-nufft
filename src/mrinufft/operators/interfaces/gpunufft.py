@@ -353,7 +353,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10):
+    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, **kwargs):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -364,15 +364,19 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the volume shape
         num_iterations: int default 10
             the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        volume_shape = tuple(int(osf * s) for s in volume_shape)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
             osf=1,
+            **kwargs,
         )
         density_comp = np.ones(kspace_loc.shape[0])
         for _ in range(num_iterations):
