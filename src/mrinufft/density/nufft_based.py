@@ -5,7 +5,7 @@ from .utils import flat_traj, register_density
 
 @register_density
 @flat_traj
-def pipe(traj, shape, backend="cufinufft", **kwargs):
+def pipe(traj, shape, backend="gpunufft", **kwargs):
     """Compute the density compensation weights using the pipe method.
 
     Parameters
