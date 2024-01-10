@@ -176,8 +176,8 @@ class FourierOperatorBase(ABC):
 
         kwargs = {}
         if isinstance(method, dict):
-            method = method["name"]  # should be a string !
-            kwargs = method.copy().remove("name")
+            kwargs = method.copy()
+            method = kwargs.pop("name")  # must be a string !
         if method == "pipe" and "backend" not in kwargs:
             kwargs["backend"] = self.backend
         if isinstance(method, str):
