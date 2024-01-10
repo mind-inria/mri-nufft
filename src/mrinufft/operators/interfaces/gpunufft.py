@@ -300,6 +300,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.smaps = smaps
+
         self.compute_density(density)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
