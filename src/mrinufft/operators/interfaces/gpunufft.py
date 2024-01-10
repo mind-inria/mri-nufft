@@ -300,13 +300,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.smaps = smaps
-        if density is True:
-            self.density = self.pipe(self.samples, shape)
-        elif isinstance(density, np.ndarray):
-            self.density = density
-        else:
-            self.density = None
-        self.kwargs = kwargs
+        self.compute_density(density)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
@@ -314,7 +308,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             density_comp=self.density,
             smaps=smaps,
             kernel_width=kwargs.get("kernel_width", -int(np.log10(eps))),
-            **self.kwargs,
+            **kwargs,
         )
 
     def op(self, data, *args, **kwargs):
