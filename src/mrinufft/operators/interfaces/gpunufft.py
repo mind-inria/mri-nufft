@@ -4,6 +4,7 @@ import numpy as np
 import warnings
 from ..base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
+from mrinufft.density import get_density
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -300,13 +301,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.smaps = smaps
-        if density is True:
-            self.density = self.pipe(self.samples, shape)
-        elif isinstance(density, np.ndarray):
-            self.density = density
-        else:
-            self.density = None
-        self.kwargs = kwargs
+        self.density = get_density(density)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
