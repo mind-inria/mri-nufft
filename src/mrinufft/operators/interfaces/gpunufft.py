@@ -377,6 +377,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density_comp = np.ones(kspace_loc.shape[0])
         for _ in range(num_iterations):
             density_comp = density_comp / np.abs(
-                grid_op.op(grid_op.adj_op(density_comp, True), True)
+                grid_op.op(grid_op.adj_op(density_comp, None, True), None, True)
             )
         return density_comp
