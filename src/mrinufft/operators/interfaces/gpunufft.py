@@ -311,35 +311,40 @@ class MRIGpuNUFFT(FourierOperatorBase):
             **kwargs,
         )
 
-    def op(self, data, *args, **kwargs):
+    def op(self, data, coeffs=None):
         """Compute forward non-uniform Fourier Transform.
 
         Parameters
         ----------
         img: np.ndarray
             input N-D array with the same shape as self.shape.
-
+        coeffs: np.ndarray, optional
+            output Array. Should be pinned memory for best performances.
         Returns
         -------
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        return self.impl.op(data, *args, **kwargs)
+        return self.impl.op(
+            data,
+            coeffs,
+        )
 
-    def adj_op(self, coeffs, *args, **kwargs):
+    def adj_op(self, coeffs, data=None):
         """Compute adjoint Non Unform Fourier Transform.
 
         Parameters
         ----------
-        x: np.ndarray
+        coeffs: np.ndarray
             masked non-uniform Fourier transform 1D data.
-
+        data: np.ndarray, optional
+            output image array. Should be pinned memory for best performances.
         Returns
         -------
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
-        return self.impl.adj_op(coeffs, *args, **kwargs)
+        return self.impl.adj_op(coeffs, data)
 
     @property
     def uses_sense(self):
@@ -375,6 +380,10 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density_comp = np.ones(kspace_loc.shape[0])
         for _ in range(num_iterations):
             density_comp = density_comp / np.abs(
-                grid_op.op(grid_op.adj_op(density_comp, None, True), None, True)
+                grid_op.impl.op(
+                    grid_op.impl.adj_op(density_comp, None, True),
+                    None,
+                    True,
+                )
             )
-        return density_comp
+        return density_comp.squeeze()
