@@ -301,7 +301,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.smaps = smaps
-        self.density = get_density(density)
+
+        self.compute_density(density)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
@@ -309,38 +310,45 @@ class MRIGpuNUFFT(FourierOperatorBase):
             density_comp=self.density,
             smaps=smaps,
             kernel_width=kwargs.get("kernel_width", -int(np.log10(eps))),
-            **self.kwargs,
+            **kwargs,
         )
 
-    def op(self, data, *args, **kwargs):
+    def op(self, data, coeffs=None):
         """Compute forward non-uniform Fourier Transform.
 
         Parameters
         ----------
         img: np.ndarray
             input N-D array with the same shape as self.shape.
+        coeffs: np.ndarray, optional
+            output Array. Should be pinned memory for best performances.
 
         Returns
         -------
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        return self.impl.op(data, *args, **kwargs)
+        return self.impl.op(
+            data,
+            coeffs,
+        )
 
-    def adj_op(self, coeffs, *args, **kwargs):
+    def adj_op(self, coeffs, data=None):
         """Compute adjoint Non Unform Fourier Transform.
 
         Parameters
         ----------
-        x: np.ndarray
+        coeffs: np.ndarray
             masked non-uniform Fourier transform 1D data.
+        data: np.ndarray, optional
+            output image array. Should be pinned memory for best performances.
 
         Returns
         -------
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
-        return self.impl.adj_op(coeffs, *args, **kwargs)
+        return self.impl.adj_op(coeffs, data)
 
     @property
     def uses_sense(self):
@@ -348,7 +356,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10):
+    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, **kwargs):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -359,19 +367,27 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the volume shape
         num_iterations: int default 10
             the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        volume_shape = tuple(int(osf * s) for s in volume_shape)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
             osf=1,
+            **kwargs,
         )
         density_comp = np.ones(kspace_loc.shape[0])
         for _ in range(num_iterations):
             density_comp = density_comp / np.abs(
-                grid_op.op(grid_op.adj_op(density_comp, None, True), None, True)
+                grid_op.impl.op(
+                    grid_op.impl.adj_op(density_comp, None, True),
+                    None,
+                    True,
+                )
             )
-        return density_comp
+        return density_comp.squeeze()
