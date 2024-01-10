@@ -17,12 +17,14 @@ from case_trajectories import CasesTrajectories
     [
         (1, 1, 1, False),
         (3, 1, 1, False),
-        (1, 4, 1, False),
         (1, 4, 1, True),
+        (1, 4, 1, False),
+        (1, 4, 2, True),
         (1, 4, 2, False),
-        (3, 2, 1, False),
         (3, 2, 1, True),
+        (3, 2, 1, False),
         (3, 4, 2, True),
+        (3, 4, 2, False),
     ],
 )
 @parametrize_with_cases(
@@ -65,7 +67,12 @@ def operator(
 def flat_operator(operator):
     """Generate a batch operator with n_batch=1."""
     return get_operator(operator.backend)(
-        operator.samples, operator.shape, n_coils=operator.n_coils, smaps=operator.smaps
+        operator.samples,
+        operator.shape,
+        n_coils=operator.n_coils,
+        smaps=operator.smaps,
+        squeeze_dims=False,
+        n_trans=1,
     )
 
 
@@ -92,7 +99,7 @@ def kspace_data(operator):
 
 def test_batch_op(operator, flat_operator, image_data):
     """Test the batch type 2 (forward)."""
-    kspace_data = operator.op(image_data)
+    kspace_batched = operator.op(image_data)
 
     if operator.uses_sense:
         image_flat = image_data.reshape(-1, *operator.shape)
@@ -107,7 +114,7 @@ def test_batch_op(operator, flat_operator, image_data):
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
 
-    npt.assert_array_almost_equal_nulp(kspace_data, kspace_flat)
+    npt.assert_array_almost_equal(kspace_batched, kspace_flat)
 
 
 def test_batch_adj_op(operator, flat_operator, kspace_data):
@@ -127,9 +134,9 @@ def test_batch_adj_op(operator, flat_operator, kspace_data):
         shape,
     )
 
-    image_data = operator.adj_op(kspace_data)
+    image_batched = operator.adj_op(kspace_data)
     # Reduced accuracy for the GPU cases...
-    npt.assert_allclose(image_data, image_flat, atol=1e-3, rtol=1e-3)
+    npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=1e-3)
 
 
 def test_data_consistency(operator, image_data, kspace_data):
@@ -166,12 +173,12 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
 def test_gradient_lipschitz(operator, image_data, kspace_data):
     """Test the gradient lipschitz constant."""
     C = 1 if operator.uses_sense else operator.n_coils
-    img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape)
+    img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape).squeeze()
     for _ in range(10):
         grad = operator.data_consistency(img, kspace_data)
         norm = np.linalg.norm(grad)
         grad /= norm
-        np.copyto(img, grad)
+        np.copyto(img, grad.squeeze())
         norm_prev = norm
 
     # TODO: check that the value is "not too far" from 1
