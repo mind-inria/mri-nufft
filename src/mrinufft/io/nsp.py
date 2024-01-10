@@ -1,4 +1,4 @@
-"""Read/Write trajectoru for Neurospin sequences."""
+"""Read/Write trajectory for Neurospin sequences."""
 
 import warnings
 import os

@@ -89,6 +89,9 @@ def traj2cfl(traj, shape, basename):
     """
     Export a trajectory defined in MRI-nufft to a BART compatible format.
 
+    The trajectory will be normalized to -(FOV-1)/2 +(FOV-1)/2,
+    and reshape to BART format.
+
     Parameters
     ----------
     traj: array_like
@@ -96,8 +99,6 @@ def traj2cfl(traj, shape, basename):
     shape: tuple
         volume shape (FOV)
 
-    The trajectory will be normalized to -(FOV-1)/2 +(FOV-1)/2,
-    and reshape to BART format.
     """
     traj_ = traj * (np.array(shape) - 1)
     if traj.shape[-1] == 2:

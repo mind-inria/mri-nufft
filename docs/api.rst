@@ -4,3 +4,5 @@
 
     mrinufft.operators
     mrinufft.trajectories
+    mrinufft.density
+    mrinufft.io
