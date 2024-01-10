@@ -320,6 +320,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             input N-D array with the same shape as self.shape.
         coeffs: np.ndarray, optional
             output Array. Should be pinned memory for best performances.
+
         Returns
         -------
         np.ndarray
@@ -339,6 +340,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             masked non-uniform Fourier transform 1D data.
         data: np.ndarray, optional
             output image array. Should be pinned memory for best performances.
+
         Returns
         -------
         np.ndarray
