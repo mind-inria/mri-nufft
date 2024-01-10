@@ -4,7 +4,6 @@ import numpy as np
 import warnings
 from ..base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
-from mrinufft.density import get_density
 
 GPUNUFFT_AVAILABLE = True
 try:
