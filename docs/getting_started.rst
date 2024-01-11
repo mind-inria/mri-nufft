@@ -33,17 +33,17 @@ These libraries needs to be installed separately from this package.
 
 .. Don't touch the spacing ! ..
 
-==================== ============ =================== =============== ============== ===============
-Backend              Hardward     Batch computation   Precision       Auto Density   Array Interface
-==================== ============ =================== =============== ============== ===============
-cufinufft_           GPU (CUDA)   ✔                   single          ✔ *             cupy/torch
-finufft_             CPU          ✔                   single/double   TBA            numpy
-gpunufft_            GPU          ✔                   single/double   ✔              numpy
-tensorflow-nufft_    GPU (CUDA)   ✘                   single          ✔              tensorflow
-pynufft-cpu_         CPU          ✘                   single/double   ✘              numpy
-pynfft_ (*)          CPU          ✘                   singles/double   ✘             numpy
-stacked (**)         CPU/GPU      ✔                   single/double   ✔              numpy
-==================== ============ =================== =============== ============== ===============
+==================== ============ =================== ===============  =================
+Backend              Hardward     Batch computation   Precision        Array Interface
+==================== ============ =================== ===============  =================
+cufinufft_           GPU (CUDA)   ✔                   single           cupy/torch/numpy
+finufft_             CPU          ✔                   single/double    numpy
+gpunufft_            GPU          ✔                   single/double    numpy
+tensorflow-nufft_    GPU (CUDA)   ✘                   single           tensorflow
+pynufft-cpu_         CPU          ✘                   single/double    numpy
+pynfft_ (*)          CPU          ✘                   singles/double   numpy
+stacked (**)         CPU/GPU      ✔                   single/double    numpy
+==================== ============ =================== ===============  =================
 
 
 .. _cufinufft: https://github.com/flatironinstitute/finufft
@@ -54,7 +54,7 @@ stacked (**)         CPU/GPU      ✔                   single/double   ✔     
 .. _pynfft: https://github.com/ghisvail/pynfft
 
 - (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
-- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy)
+- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
 
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.
@@ -64,41 +64,42 @@ It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MR
 .. _Modopt: https://github.com/CEA-COSMIC/ModOpt/
 .. _deepinv: https:/github.com/deepinv/deepinv/
 
-Custom Backend Installations
-----------------------------
+Backend Installations
+---------------------
 
 To benefit the most from certain backend we recommend to use the following instructions
 
-[Temporary] Custom Cufinufft installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+finufft / cufinufft
+~~~~~~~~~~~~~~~~~~~
 
-In order for the density compensation to work for cufinufft, we have to use the in-house fork enabling it
+Those are develop by the `flatiron-institute <https://github.com/flatironinstitute/finufft>` and are installable with `pip install finufft` and `pip install cufinufft`.
 
-.. code-block:: sh
+.. warning::
 
-    git clone https://github.com/chaithyagr/finufft --branch chaithyagr/issue306
-    cd finufft && mkdir build && cd build
-    cmake -DFINUFFT_USE_CUDA=1 ../ && make -j && cp libcufinufft.so ../python/cufinufft/.
-    cd ../python/cufinufft
-    python setup.py install
-    # Adapt to the name you have in python/cufinufft
-    cp libcufinufft.so  cufinufftc.cpython-310-x86_64-linux-gnu.so
+    for cufinufft, a working installation of CUDA and cupy is required.
 
-Development of this feature happens on this `pull request <https://github.com/flatironinstitute/finufft/pull/308>`_
+gpuNUFFT
+~~~~~~~~
 
-[Temporary] Faster gpuNUFFT with concurency
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A faster version of gpuNUFFT is available on this `fork <https://github.com/chaithyagr/gpuNUFFT>`_.
+an active gpuNUFFT fork is maintained by `chaithyagr <https://github.com/chaithyagr/gpunufft/>`.
 
 .. warning::
 
     This is compatible only up to CUDA 11.8 !
 
-To install it
+To install it use `pip install gpuNUFFT` or for local development.
 
 .. code-block:: sh
 
     git clone https://github.com/chaythiagr/gpuNUFFT
     cd gpuNUFFT
     python setup.py install
+
+
+Which backend to use
+--------------------
+[TBA] See the benchmark. Fastest are gpunufft and cufinufft (because they are using gpu). gpunufft is usually more memory efficient also.
+
+
+.. note::
+   if you are using pytorch gpu-array, you can only use cufinufft.
