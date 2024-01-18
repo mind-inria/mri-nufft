@@ -41,8 +41,10 @@ finufft_             CPU          ✔                   single/double    numpy
 gpunufft_            GPU          ✔                   single/double    numpy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single           tensorflow
 pynufft-cpu_         CPU          ✘                   single/double    numpy
-pynfft_ (*)          CPU          ✘                   singles/double   numpy
-stacked (**)         CPU/GPU      ✔                   single/double    numpy
+pynfft_              CPU          ✘                   single/double    numpy
+bart_                CPU/GPU      ✔                   single           numpy
+sigpy_               CPU          ✔                   single           numpy
+stacked (*)          CPU/GPU      ✔                   single/double    numpy
 ==================== ============ =================== ===============  =================
 
 
@@ -51,10 +53,11 @@ stacked (**)         CPU/GPU      ✔                   single/double    numpy
 .. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
 .. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
 .. _pynufft-cpu: https://github.com/jyhmiinlin/pynufft
-.. _pynfft: https://github.com/ghisvail/pynfft
+.. _pynfft: https://github.com/pynfft/pynfft
+.. _bart: https://github.com/mrirecon/bart
+.. _sigpy: https://github.com/sigpy/sigpy
 
-- (*) PyNFFT is only working with Cython < 3.0.0 , and is not actively maintained (https://github.com/mind-inria/mri-nufft/issues/19)
-- (**) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
+- (*) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
 
 
 **The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.
@@ -72,7 +75,7 @@ To benefit the most from certain backend we recommend to use the following instr
 finufft / cufinufft
 ~~~~~~~~~~~~~~~~~~~
 
-Those are develop by the `flatiron-institute <https://github.com/flatironinstitute/finufft>` and are installable with `pip install finufft` and `pip install cufinufft`.
+Those are develop by the `flatiron-institute <https://github.com/flatironinstitute/finufft>`_ and are installable with `pip install finufft` and `pip install cufinufft`.
 
 .. warning::
 
@@ -81,7 +84,7 @@ Those are develop by the `flatiron-institute <https://github.com/flatironinstitu
 gpuNUFFT
 ~~~~~~~~
 
-an active gpuNUFFT fork is maintained by `chaithyagr <https://github.com/chaithyagr/gpunufft/>`.
+an active gpuNUFFT fork is maintained by `chaithyagr <https://github.com/chaithyagr/gpunufft/>`_.
 
 .. warning::
 
@@ -95,6 +98,21 @@ To install it use `pip install gpuNUFFT` or for local development.
     cd gpuNUFFT
     python setup.py install
 
+BART
+~~~~
+
+BART has to be installed separately and `bart` command needs to be runnable from your `PATH`.
+See `installation instructions <https://mrirecon.github.io/bart/installation.html>`_
+
+
+PyNFFT
+~~~~~~
+
+PyNFFT requires Cython<3.0.0 to work.  and can be installed using
+
+.. code-block:: sh
+
+    pip install cython<3.0.0 pynfft2
 
 Which backend to use
 --------------------

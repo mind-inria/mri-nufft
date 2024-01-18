@@ -11,10 +11,14 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpu = ["cupy-wheel"]
+gpunufft = ["gpunufft", "cupy-cuda11x"]
+cufinufft = ["cufinufft", "cupy-cuda11x"]
+finufft = ["finufft"]
+pynfft = ["pynfft2", "cython<3.0.0"]
+pynufft = ["pynufft"]
+
 test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
-
 doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
 # pooch is for scipy.datasets
 

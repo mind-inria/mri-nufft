@@ -35,4 +35,11 @@
    misc/code_of_conduct
    misc/license
    misc/development
-   misc/related
+
+.. toctree::
+   :hidden:
+   :caption: Related Projects
+
+   PySAP <https://cea-cosmic.github.io/pysap>
+   ModOpt <https://cea-cosmic.github.io/ModOpt/>
+   Brainweb-dl <http://github.com/paquiteau/brainweb-dl>
