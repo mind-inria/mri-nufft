@@ -201,9 +201,31 @@ jobs:
           python -m pip install -e .
 
       - name: Combine coverage
-        run: coverage combine -a coverage_data/*
+        run: |
+          export COVERAGE_FILE=coverage_combined
+          coverage combine -a coverage_data/*
+
+      - name: Upload Combined coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_combined
+          path: coverage_combined
 
       - name: Reports
         run: |
+          export COVERAGE_FILE=coverage_combined
           coverage xml
           coverage report
+          echo COVERAGE_PERC=$(coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
+
+      - name: Create a Coverage Badge
+        if: ${{github.event_name == 'push'}}
+        run: |
+          wget https://img.shields.io/badge/coverage-${{env.COVERAGE_PERC}}%25-green -O coverage_badge.svg
+
+      - name: Upload badge as artifact
+        if: ${{github.event_name == 'push'}}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_badge
+          path: coverage_badge.svg

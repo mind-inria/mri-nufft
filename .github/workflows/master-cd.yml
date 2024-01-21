@@ -50,6 +50,17 @@ jobs:
         run: |
           python -m sphinx docs docs_build
 
+      - name: Get the badge from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage_badge
+          path: docs_build/_static
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Display data
+        run: ls -R
+        working-directory: docs_build/_static
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
