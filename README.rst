@@ -8,8 +8,7 @@ Doing non-Cartesian MR Imaging has never been so easy.
    :widths: 25 25 25
    :header-rows: 0
 
-   * - .. image:: https://img.shields.io/badge/coverage-TBA-green
-        :target: https://app.codecov.io/gh/mind-inria/mri-nufft
+   * - .. image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CI/badge.svg
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
    * - .. image:: https://img.shields.io/badge/style-black-black
