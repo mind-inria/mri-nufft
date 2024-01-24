@@ -5,7 +5,6 @@ Only finufft and cufinufft support batch computations.
 
 import numpy as np
 import numpy.testing as npt
-import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import assert_correlate
 from mrinufft import get_operator

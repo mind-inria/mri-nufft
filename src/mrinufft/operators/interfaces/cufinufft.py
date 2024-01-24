@@ -770,7 +770,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         float
             Lipschitz constant of the operator.
         """
-
         tmp_op = self.__class__(
             self.samples,
             self.shape,
