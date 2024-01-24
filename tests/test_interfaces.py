@@ -1,7 +1,6 @@
 """Test the interfaces module."""
 
 import numpy as np
-import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 
 from mrinufft import get_operator
