@@ -406,9 +406,9 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _adj_op_sense_device(self, coeffs, img_d=None):
         """Perform sense reconstruction when data is on device."""
         # Define short name
-        coeffs = cp.asarray(coeffs)
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
+        coeffs = cp.asarray(coeffs).reshape(B * C, K)
         # Allocate memory
         if img_d is None:
             img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
@@ -489,11 +489,11 @@ class MRICufiNUFFT(FourierOperatorBase):
             if self.uses_density:
                 cp.copyto(ksp_batched, coeffs_f[i * T : (i + 1) * T])
                 ksp_batched *= density_batched
-                self.__adj_op(ksp_batched, img_d[i * T : (i + 1) * T])
+                self.__adj_op(ksp_batched, img_d[i * T : (i + 1) * T].squeeze())
             else:
                 self.__adj_op(
                     coeffs_f[i * T : (i + 1) * T],
-                    img_d[i * T : (i + 1) * T],
+                    img_d[i * T : (i + 1) * T].squeeze(),
                 )
         return img_d.reshape(B, C, *XYZ)
 
