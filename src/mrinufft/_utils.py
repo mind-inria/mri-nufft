@@ -99,7 +99,25 @@ def proper_trajectory(trajectory, normalize="pi"):
 
 
 def power_method(max_iter, operator, norm_func=None, x=None):
-    """Power method to find the Lipschitz constant of an operator."""
+    """Power method to find the Lipschitz constant of an operator.
+
+    Parameters
+    ----------
+    max_iter: int
+        Maximum number of iterations
+    operator: FourierOperatorBase or child class
+        NUFFT Operator of which to estimate the lipchitz constant.
+    norm_func: callable, optional
+        Function to compute the norm , by default np.linalg.norm.
+        Change this if you want custom norm, or for computing on GPU.
+    x: array_like, optional
+        Initial value to use, by default a random numpy array is used.
+
+    Returns
+    -------
+    float
+        The lipschitz constant of the operator.
+    """
 
     def AHA(x):
         return operator.adj_op(operator.op(x))
@@ -121,6 +139,11 @@ def power_method(max_iter, operator, norm_func=None, x=None):
 
     if i == max_iter - 1:
         warnings.warn("Lipschitz constant did not converge")
+
+    if hasattr(x_new_norm, "__cuda_array_interface__"):
+        import cupy as cp
+
+        x_new_norm = cp.asarray(x_new_norm).get().item()
     return x_new_norm
 
 
