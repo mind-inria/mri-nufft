@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from functools import partial
 import warnings
 import numpy as np
+from mrinufft._utils import power_method
 
 from mrinufft.density import get_density
 
@@ -187,6 +188,30 @@ class FourierOperatorBase(ABC):
             raise ValueError(f"Unknown density method: {method}")
 
         self.density = method(self.samples, self.shape, **kwargs)
+
+    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ---------
+        max_iter: int
+            number of iteration to compute the lipschitz constant.
+        **kwargs:
+            Extra arguments givent
+        Returns
+        -------
+        float
+            Spectral Radius
+
+        Notes
+        -----
+        This uses the Iterative Power Method to compute the largest singular value of a
+        minified version of the nufft operator (no coil or B0, but includes any computed density.
+        """
+        tmp_op = self.__class__(
+            self.samples, self.shape, density=self.density, n_coils=1, **kwargs
+        )
+        return power_method(max_iter, tmp_op)
 
     @property
     def uses_sense(self):

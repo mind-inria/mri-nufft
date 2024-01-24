@@ -98,3 +98,22 @@ def test_interfaces_autoadjoint(operator):
         reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
     print(reldiff)
     assert np.mean(reldiff) < 5e-5
+
+
+def test_interface_lipschitz(operator):
+    """Test the Lipschitz constant of the operator."""
+    spec_rad = operator.get_lipschitz_cst(20)
+
+    def AHA(x):
+        return operator.adj_op(operator.op(x))
+
+    L = np.zeros(10)
+    for i in range(10):
+        img_data = image_from_op(operator)
+        img2_data = image_from_op(operator)
+
+        L[i] = np.linalg.norm(AHA(img2_data) - AHA(img_data)) / np.linalg.norm(
+            img2_data - img_data
+        )
+
+    assert np.mean(L) < 1.1 * spec_rad

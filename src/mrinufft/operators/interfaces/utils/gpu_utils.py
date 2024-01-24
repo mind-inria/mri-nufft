@@ -36,14 +36,6 @@ def is_host_array(var):
         return False
 
 
-def get_ptr(var):
-    """Return the pointer to data that follow a __cuda_array_interface__."""
-    try:
-        return var.__cuda_array_interface__["data"][0]
-    except RuntimeError:  # Special case for torch tensors with gradients.
-        return var.data_ptr()
-
-
 def pin_memory(array):
     """Create a copy of the array in pinned memory."""
     mem = cp.cuda.alloc_pinned_memory(array.nbytes)

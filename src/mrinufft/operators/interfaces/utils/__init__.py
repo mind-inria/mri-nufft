@@ -13,7 +13,6 @@ from .gpu_utils import (
     is_cuda_array,
     pin_memory,
     nvtx_mark,
-    get_ptr,
 )
 
 __all__ = [
@@ -26,5 +25,4 @@ __all__ = [
     "is_cuda_array",
     "pin_memory",
     "nvtx_mark",
-    "get_ptr",
 ]
