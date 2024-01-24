@@ -509,16 +509,17 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
         coeffs_f = coeffs.reshape(B, C, NZ * NS)
-        coeffs_f = coeffs_f.reshape(B * C, NZ * NS)
+        coeffs_f = coeffs_f.reshape(B * C, NZ, NS)
+        coeffs_f = coeffs_f.reshape(B * C * NZ, NS)
         # Allocate Memory
         ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
         img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        for i in range((B * C) // T):
-            ksp_batched = ksp_batched.reshape(T, NZ * NS)
-            ksp_batched.set(coeffs_f[i * T : (i + 1) * T])
-            ksp_batched = ksp_batched.reshape(T, NZ, NS)
-            ksp_batched = ksp_batched.reshape(T * NZ, NS)
+        TZ = T * NZ
+        for i in range((B * C * NZ) // TZ):
+            ksp_batched = ksp_batched.reshape(TZ, NS)
+            ksp_batched.set(coeffs_f[i * TZ : (i + 1) * TZ])
+            ksp_batched = ksp_batched.reshape(TZ, NS)
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
             tmp_adj /= self.norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
