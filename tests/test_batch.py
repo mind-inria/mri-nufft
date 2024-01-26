@@ -6,7 +6,12 @@ Only finufft and cufinufft support batch computations.
 import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
-from helpers import assert_correlate
+from helpers import (
+    assert_correlate,
+    param_array_interface,
+    to_interface,
+    from_interface,
+)
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
@@ -97,9 +102,13 @@ def kspace_data(operator):
     return kspace
 
 
-def test_batch_op(operator, flat_operator, image_data):
+@param_array_interface
+def test_batch_op(operator, array_interface, flat_operator, image_data):
     """Test the batch type 2 (forward)."""
-    kspace_batched = operator.op(image_data)
+
+    image_data = to_interface(image_data, array_interface)
+
+    kspace_batched = from_interface(operator.op(image_data), array_interface)
 
     if operator.uses_sense:
         image_flat = image_data.reshape(-1, *operator.shape)
@@ -107,7 +116,9 @@ def test_batch_op(operator, flat_operator, image_data):
         image_flat = image_data.reshape(-1, operator.n_coils, *operator.shape)
     kspace_flat = [None] * operator.n_batchs
     for i in range(len(kspace_flat)):
-        kspace_flat[i] = flat_operator.op(image_flat[i])
+        kspace_flat[i] = from_interface(
+            flat_operator.op(image_flat[i]), array_interface
+        )
 
     kspace_flat = np.reshape(
         np.concatenate(kspace_flat, axis=0),
@@ -117,12 +128,22 @@ def test_batch_op(operator, flat_operator, image_data):
     npt.assert_array_almost_equal(kspace_batched, kspace_flat)
 
 
-def test_batch_adj_op(operator, flat_operator, kspace_data):
+@param_array_interface
+def test_batch_adj_op(
+    operator,
+    array_interface,
+    flat_operator,
+    kspace_data,
+):
     """Test the batch type 1 (adjoint)."""
+    kspace_data = to_interface(kspace_data, array_interface)
+
     kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
     image_flat = [None] * operator.n_batchs
     for i in range(len(image_flat)):
-        image_flat[i] = flat_operator.adj_op(kspace_flat[i])
+        image_flat[i] = from_interface(
+            flat_operator.adj_op(kspace_flat[i]), array_interface
+        )
 
     if operator.uses_sense:
         shape = (operator.n_batchs, 1, *operator.shape)
@@ -134,14 +155,23 @@ def test_batch_adj_op(operator, flat_operator, kspace_data):
         shape,
     )
 
-    image_batched = operator.adj_op(kspace_data)
+    image_batched = from_interface(operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
     npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=1e-3)
 
 
-def test_data_consistency(operator, image_data, kspace_data):
+@param_array_interface
+def test_data_consistency(
+    operator,
+    array_interface,
+    image_data,
+    kspace_data,
+):
     """Test the data consistency operation."""
     # image_data = np.zeros_like(image_data)
+    image_data = to_interface(image_data)
+    kspace_data = to_interface(kspace_data)
+
     res = operator.data_consistency(image_data, kspace_data)
     tmp = operator.op(image_data)
     res2 = operator.adj_op(tmp - kspace_data)
@@ -150,6 +180,8 @@ def test_data_consistency(operator, image_data, kspace_data):
     res = res.reshape(-1, *operator.shape)
     res2 = res2.reshape(-1, *operator.shape)
 
+    res = from_interface(res, array_interface)
+    res2 = from_interface(res2, array_interface)
     slope_err = 1e-3
     # FIXME 2D Sense is not very accurate...
     if len(operator.shape) == 2 and operator.uses_sense:
