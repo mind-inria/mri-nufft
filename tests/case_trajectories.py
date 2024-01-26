@@ -16,9 +16,8 @@ class CasesTrajectories:
     def case_random2D(self, M=1000, N=64, pdf="uniform", seed=0):
         """Create a random 2D trajectory."""
         np.random.seed(seed)
-        samples = np.random.rand(M, 2) - 0.5
-        samples /= samples.max()
-        samples -= 0.5
+        samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 2)
+        samples = samples.reshape(M, 2)
         return samples, (N, N)
 
     def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
