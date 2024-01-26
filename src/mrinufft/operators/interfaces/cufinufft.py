@@ -480,9 +480,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         K, XYZ = self.n_samples, self.shape
         coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.reshape(B * C, K)
-        ksp_batched = cp.empty(T * K, dtype=self.cpx_dtype)
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0).flatten()
+            density_batched = cp.repeat(self.density[None, :], T, axis=0)
         img_d = img_d or cp.empty((B, C, *XYZ), dtype=self.cpx_dtype)
         img_d = img_d.reshape(B * C, *XYZ)
         for i in range((B * C) // T):
@@ -776,6 +776,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             density=self.density,
             n_coils=1,
             smaps=None,
+            squeeze_dims=True,
             **kwargs,
         )
         x = 1j * np.random.random(self.shape).astype(self.cpx_dtype)

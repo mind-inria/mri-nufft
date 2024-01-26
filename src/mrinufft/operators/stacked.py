@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from mrinufft._utils import proper_trajectory
+from mrinufft._utils import proper_trajectory, power_method
 from mrinufft.operators.base import FourierOperatorBase, check_backend, get_operator
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
@@ -533,6 +533,41 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _adj_op_calibless_device(self, coeffs, img):
         raise NotImplementedError
+
+    def get_lipschitz_cst(self, max_iter, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            Number of iteration to perform to estimate the Lipschitz constant.
+        kwargs:
+            Extra kwargs for the cufinufft operator.
+
+        Returns
+        -------
+        float
+            Lipschitz constant of the operator.
+        """
+        # The fourier transform is orthonormal, so it's lipschizt constant is 1.
+        # We only compute the lipschitz constant of the 2d underlying nufft.
+        #
+        tmp_op = self.operator.__class__(
+            self.operator.samples,
+            self.operator.shape,
+            density=self.operator.density,
+            smaps=None,
+            n_coils=1,
+            squeeze_dims=True,
+        )
+
+        x = 1j * np.random.random(self.operator.shape).astype(self.cpx_dtype)
+        x += np.random.random(self.operator.shape).astype(self.cpx_dtype)
+
+        x = cp.asarray(x)
+        return power_method(
+            max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
+        )
 
 
 def traj3d2stacked(samples, dim_z, n_samples=0):
