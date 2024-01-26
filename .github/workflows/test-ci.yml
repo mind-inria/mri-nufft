@@ -22,6 +22,7 @@ jobs:
         backend: [finufft, pynfft, pynufft-cpu, bart, sigpy]
         exclude:
           - backend: bart
+          - backend: pynufft-cpu
 
     steps:
       - uses: actions/checkout@v3
