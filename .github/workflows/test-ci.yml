@@ -108,6 +108,7 @@ jobs:
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
           pip install cupy-cuda11x
+          pip install torch --index-url https://download.pytorch.org/whl/cu118
           pip install finufft
 
       - name: Install backend
