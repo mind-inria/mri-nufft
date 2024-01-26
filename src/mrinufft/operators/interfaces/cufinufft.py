@@ -489,11 +489,11 @@ class MRICufiNUFFT(FourierOperatorBase):
             if self.uses_density:
                 cp.copyto(ksp_batched, coeffs_f[i * T : (i + 1) * T])
                 ksp_batched *= density_batched
-                self.__adj_op(ksp_batched, img_d[i * T : (i + 1) * T].squeeze())
+                self.__adj_op(ksp_batched, img_d[i * T : (i + 1) * T])
             else:
                 self.__adj_op(
                     coeffs_f[i * T : (i + 1) * T],
-                    img_d[i * T : (i + 1) * T].squeeze(),
+                    img_d[i * T : (i + 1) * T],
                 )
         return img_d.reshape(B, C, *XYZ)
 
