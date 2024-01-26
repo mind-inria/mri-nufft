@@ -6,7 +6,7 @@ import pytest
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from helpers import kspace_from_op, image_from_op
+from helpers import kspace_from_op, image_from_op, to_interface, from_interface
 
 
 CUPY_AVAILABLE = True
@@ -80,7 +80,7 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
-@parametrize(
+param_array_interface = parametrize(
     "array_interface",
     [
         "numpy",
@@ -101,55 +101,37 @@ def kspace_data(operator):
         ),
     ],
 )
+
+
+@param_array_interface
 def test_interfaces_accuracy_forward(
     operator, image_data, ref_operator, array_interface
 ):
     """Compare the interface to the raw NUDFT implementation."""
-    image_data_ = image_data
-    if array_interface == "cupy":
-        image_data_ = cp.array(image_data)
-    elif array_interface == "torch":
-        image_data_ = torch.from_numpy(image_data).to("cuda")
+    if operator.backend != "cufinufft" and array_interface != "numpy":
+        pytest.skip("operator not gpu array compatible.")
+    image_data_ = to_interface(image_data, array_interface)
+
     kspace_nufft = operator.op(image_data_).squeeze()
-    # FIXME: check with complex values ail
     kspace_ref = ref_operator.op(image_data).squeeze()
 
-    if array_interface == "cupy":
-        kspace_nufft = kspace_nufft.get()
-
-    if array_interface == "torch":
-        kspace_nufft = kspace_nufft.to("cpu").numpy()
+    kspace_nufft = from_interface(kspace_nufft, array_interface)
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
-@parametrize(
-    "array_interface",
-    [
-        "numpy",
-        pytest.param(
-            "cupy",
-            marks=[
-                pytest.mark.skipif(
-                    not CUPY_AVAILABLE,
-                    reason="cupy not available",
-                )
-            ],
-        ),
-        pytest.param(
-            "torch",
-            marks=[
-                pytest.mark.skipif(not TORCH_AVAILABLE, reason="torch not available")
-            ],
-        ),
-    ],
-)
+@param_array_interface
 def test_interfaces_accuracy_backward(
     operator, kspace_data, ref_operator, array_interface
 ):
     """Compare the interface to the raw NUDFT implementation."""
-    image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
-    image_ref = ref_operator.adj_op(kspace_data.copy()).squeeze()
+    if operator.backend != "cufinufft" and array_interface != "numpy":
+        pytest.skip("operator not gpu array compatible.")
+    kspace_data_ = to_interface(kspace_data, array_interface)
 
+    image_nufft = operator.adj_op(kspace_data_).squeeze()
+    image_ref = ref_operator.adj_op(kspace_data).squeeze()
+
+    image_nufft = from_interface(image_nufft, array_interface)
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
