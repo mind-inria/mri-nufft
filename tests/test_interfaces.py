@@ -6,22 +6,14 @@ import pytest
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from helpers import kspace_from_op, image_from_op, to_interface, from_interface
+from helpers import (
+    kspace_from_op,
+    image_from_op,
+    to_interface,
+    from_interface,
+    param_array_interface,
+)
 
-
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-TORCH_AVAILABLE = True
-try:
-    import torch
-except ImportError:
-    TORCH_AVAILABLE = False
-else:
-    TORCH_AVAILABLE = torch.cuda.is_available()
 # #########################
 # # Main Operator Fixture #
 # #########################
@@ -36,6 +28,7 @@ else:
     [
         "bart",
         "pynfft",
+        "pynufft-cpu",
         "finufft",
         "cufinufft",
         "gpunufft",
@@ -80,36 +73,11 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
-param_array_interface = parametrize(
-    "array_interface",
-    [
-        "numpy",
-        pytest.param(
-            "cupy",
-            marks=[
-                pytest.mark.skipif(
-                    not CUPY_AVAILABLE,
-                    reason="cupy not available",
-                )
-            ],
-        ),
-        pytest.param(
-            "torch",
-            marks=[
-                pytest.mark.skipif(not TORCH_AVAILABLE, reason="torch not available")
-            ],
-        ),
-    ],
-)
-
-
 @param_array_interface
 def test_interfaces_accuracy_forward(
-    operator, image_data, ref_operator, array_interface
+    operator, array_interface, image_data, ref_operator
 ):
     """Compare the interface to the raw NUDFT implementation."""
-    if operator.backend != "cufinufft" and array_interface != "numpy":
-        pytest.skip("operator not gpu array compatible.")
     image_data_ = to_interface(image_data, array_interface)
 
     kspace_nufft = operator.op(image_data_).squeeze()
@@ -121,11 +89,9 @@ def test_interfaces_accuracy_forward(
 
 @param_array_interface
 def test_interfaces_accuracy_backward(
-    operator, kspace_data, ref_operator, array_interface
+    operator, array_interface, kspace_data, ref_operator
 ):
     """Compare the interface to the raw NUDFT implementation."""
-    if operator.backend != "cufinufft" and array_interface != "numpy":
-        pytest.skip("operator not gpu array compatible.")
     kspace_data_ = to_interface(kspace_data, array_interface)
 
     image_nufft = operator.adj_op(kspace_data_).squeeze()
@@ -135,18 +101,25 @@ def test_interfaces_accuracy_backward(
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
-def test_interfaces_autoadjoint(operator):
+@param_array_interface
+def test_interfaces_autoadjoint(operator, array_interface):
     """Test the adjoint property of the operator."""
     reldiff = np.zeros(10)
     for i in range(10):
-        img_data = image_from_op(operator)
-        ksp_data = kspace_from_op(operator)
+        img_data = to_interface(image_from_op(operator), array_interface)
+        ksp_data = to_interface(kspace_from_op(operator), array_interface)
         kspace = operator.op(img_data)
 
-        rightadjoint = np.vdot(kspace, ksp_data)
+        rightadjoint = np.vdot(
+            from_interface(kspace, array_interface),
+            from_interface(ksp_data, array_interface),
+        )
 
         image = operator.adj_op(ksp_data)
-        leftadjoint = np.vdot(img_data, image)
+        leftadjoint = np.vdot(
+            from_interface(img_data, array_interface),
+            from_interface(image, array_interface),
+        )
         reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
     print(reldiff)
     assert np.mean(reldiff) < 5e-5

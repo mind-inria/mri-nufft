@@ -8,6 +8,7 @@ from .factories import (
     from_interface,
     CUPY_AVAILABLE,
     TORCH_AVAILABLE,
+    param_array_interface,
 )
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "from_interface",
     "CUPY_AVAILABLE",
     "TORCH_AVAILABLE",
+    "param_array_interface",
 ]

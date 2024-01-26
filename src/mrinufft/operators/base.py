@@ -8,9 +8,8 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 from abc import ABC, abstractmethod
 from functools import partial
-import warnings
 import numpy as np
-from mrinufft._utils import power_method
+from mrinufft._utils import power_method, auto_cast, get_array_module
 
 from mrinufft.density import get_density
 
@@ -92,7 +91,7 @@ class FourierOperatorBase(ABC):
     as required by ModOpt.
     """
 
-    interfaces = {}
+    interfaces: dict[str, tuple] = {}
 
     def __init__(self):
         if not self.available:
@@ -226,6 +225,11 @@ class FourierOperatorBase(ABC):
         return getattr(self, "density", None) is not None
 
     @property
+    def ndim(self):
+        """Number of dimensions in image space of the operator."""
+        return len(self._shape)
+
+    @property
     def shape(self):
         """Shape of the image space of the operator."""
         return self._shape
@@ -238,11 +242,6 @@ class FourierOperatorBase(ABC):
     def n_coils(self):
         """Number of coils for the operator."""
         return self._n_coils
-
-    @property
-    def ndim(self):
-        """Number of dimensions in image space of the operator."""
-        return len(self._shape)
 
     @n_coils.setter
     def n_coils(self, n_coils):
@@ -286,14 +285,14 @@ class FourierOperatorBase(ABC):
         """Return floating precision of the operator."""
         return self._dtype
 
+    @dtype.setter
+    def dtype(self, dtype):
+        self._dtype = np.dtype(dtype)
+
     @property
     def cpx_dtype(self):
         """Return complex floating precision of the operator."""
         return np.dtype(DTYPE_R2C[str(self.dtype)])
-
-    @dtype.setter
-    def dtype(self, dtype):
-        self._dtype = np.dtype(dtype)
 
     @property
     def samples(self):
@@ -400,20 +399,23 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        if data.dtype != self.cpx_dtype:
-            warnings.warn(
-                f"Data should be of dtype {self.cpx_dtype} (is {data.dtype}). "
-                "Casting it for you."
-            )
-            data = data.astype(self.cpx_dtype)
         # sense
+        xp = get_array_module(data)
+        data = auto_cast(data, self.cpx_dtype)
+
+        if xp.__name__ == "torch":
+            data = data.to("cpu").numpy()
         if self.uses_sense:
             ret = self._op_sense(data, ksp)
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
         ret /= self.norm_factor
-        return self._safe_squeeze(ret)
+
+        ret = self._safe_squeeze(ret)
+        if xp.__name__ == "torch":
+            return xp.from_numpy(ret)
+        return ret
 
     def _op_sense(self, data, ksp=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -458,18 +460,20 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if coeffs.dtype != self.cpx_dtype:
-            warnings.warn(
-                f"coeffs should be of dtype {self.cpx_dtype}. Casting it for you."
-            )
-            coeffs = coeffs.astype(self.cpx_dtype)
+        coeffs = auto_cast(coeffs, self.cpx_dtype)
+        xp = get_array_module(coeffs)
+        if xp.__name__ == "torch":
+            coeffs = coeffs.to("cpu").numpy()
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
         ret /= self.norm_factor
-        return self._safe_squeeze(ret)
+        ret = self._safe_squeeze(ret)
+        if xp.__name__ == "torch":
+            return xp.from_numpy(ret)
+        return ret
 
     def _adj_op_sense(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
