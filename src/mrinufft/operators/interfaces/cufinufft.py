@@ -523,8 +523,8 @@ class MRICufiNUFFT(FourierOperatorBase):
     def __adj_op(self, coeffs_d, image_d):
         return self.raw_op.type1(coeffs_d, image_d)
 
-    def get_grad(self, image_data, obs_data):
-        """Compute the gradient estimation directly on gpu.
+    def data_consistency(self, image_data, obs_data):
+        """Compute the data consistency estimation directly on gpu.
 
         This mixes the op and adj_op method to perform F_adj(F(x-y))
         on a per coil basis. By doing the computation coil wise,
@@ -548,19 +548,19 @@ class MRICufiNUFFT(FourierOperatorBase):
             check_size(image_data, (B, C, *XYZ))
 
         if self.uses_sense and is_host_array(image_data):
-            grad_func = self._grad_sense_host
+            grad_func = self._dc_sense_host
         elif self.uses_sense and is_cuda_array(image_data):
-            grad_func = self._grad_sense_device
+            grad_func = self._dc_sense_device
         elif not self.uses_sense and is_host_array(image_data):
-            grad_func = self._grad_calibless_host
+            grad_func = self._dc_calibless_host
         elif not self.uses_sense and is_cuda_array(image_data):
-            grad_func = self._grad_calibless_device
+            grad_func = self._dc_calibless_device
         else:
             raise ValueError("No suitable gradient function found.")
         ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 
-    def _grad_sense_host(self, image_data, obs_data):
+    def _dc_sense_host(self, image_data, obs_data):
         """Gradient computation when all data is on host."""
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -603,7 +603,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad = grad.reshape((B, 1, *XYZ))
         return grad
 
-    def _grad_sense_device(self, image_data, obs_data):
+    def _dc_sense_device(self, image_data, obs_data):
         """Gradient computation when all data is on device."""
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -641,7 +641,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad /= self.norm_factor
         return grad
 
-    def _grad_calibless_host(self, image_data, obs_data):
+    def _dc_calibless_host(self, image_data, obs_data):
         """Calibrationless Gradient computation when all data is on host."""
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -670,7 +670,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad = grad.reshape((B, C, *XYZ))
         return grad
 
-    def _grad_calibless_device(self, image_data, obs_data):
+    def _dc_calibless_device(self, image_data, obs_data):
         """Calibrationless Gradient computation when all data is on device."""
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
