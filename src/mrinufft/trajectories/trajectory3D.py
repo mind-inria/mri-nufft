@@ -5,9 +5,10 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
+from .maths import Ry, Rz
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
-from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX, Packings
+from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
 
 
 ############################

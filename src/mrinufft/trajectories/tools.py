@@ -1,12 +1,9 @@
 """Functions to manipulate trajectories."""
 import numpy as np
 
+from .maths import (Rv, Rx, Ry, Rz)
 from .utils import (
     KMAX,
-    Rv,
-    Rx,
-    Ry,
-    Rz,
     initialize_tilt,
 )
 
