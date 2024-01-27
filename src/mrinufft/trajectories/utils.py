@@ -279,7 +279,7 @@ def convert_gradients_to_trajectory(
 
     # Prepare and integrate gradients
     trajectory = gradients * gamma * raster_time
-    trajectory = np.concatenate([initial_positions, trajectory])
+    trajectory = np.concatenate([initial_positions[:, None, :], trajectory], axis=1)
     trajectory = np.cumsum(trajectory, axis=1)
 
     # Normalize the trajectory for NUFFT usage
@@ -345,7 +345,7 @@ def convert_slew_rates_to_gradients(
 
     # Prepare and integrate slew rates
     gradients = slewrates * raster_time
-    gradients = np.concatenate([initial_gradients, gradients])
+    gradients = np.concatenate([initial_gradients[:, None, :], gradients], axis=1)
     gradients = np.cumsum(gradients, axis=1)
     return gradients
 
