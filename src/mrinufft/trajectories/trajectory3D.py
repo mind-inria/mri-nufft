@@ -16,7 +16,9 @@ from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
 ############################
 
 
-def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1):
+def initialize_3D_cones(
+    Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1
+):
     """Initialize 3D trajectories with cones.
 
     Parameters
@@ -53,10 +55,15 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spira
 
     # Estimate best cone angle based on the ratio between
     # sphere volume divided by Nc and spherical sector packing optimaly a sphere
-    optimal_packing = np.pi / (2 * np.sqrt(3))  # Optimal density when Nc tends to infinity
-    max_angle = np.pi / 2 - width * np.arccos(1 - optimal_packing * 2 / Nc / (1 + in_out))
+    optimal_packing = np.pi / (
+        2 * np.sqrt(3)
+    )  # Optimal density when Nc tends to infinity
+    max_angle = np.pi / 2 - width * np.arccos(
+        1 - optimal_packing * 2 / Nc / (1 + in_out)
+    )
 
     # Initialize first cone
+    ## Create three cones for proper partitioning, but only one is needed
     cone = conify(
         spiral,
         nb_cones=3,
@@ -64,11 +71,12 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spira
         in_out=in_out,
         max_angle=max_angle,
         borderless=False,
-    )[-1:]  # Create three cones for proper partitioning, but only one is needed
+    )[-1:]
 
     # Apply precession to the first cone
-    trajectory = precess(cone, tilt=tilt, nb_rotations=Nc,
-                         half_sphere=in_out, partition="axial", axis=2)
+    trajectory = precess(
+        cone, tilt=tilt, nb_rotations=Nc, half_sphere=in_out, partition="axial", axis=2
+    )
 
     return trajectory
 
@@ -332,8 +340,14 @@ def initialize_3D_seiffert_spiral(
     spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
     # Apply precession to the first spiral
-    trajectory = precess(spiral, tilt=tilt, nb_rotations=Nc,
-                         half_sphere=in_out, partition="axial", axis=2)
+    trajectory = precess(
+        spiral,
+        tilt=tilt,
+        nb_rotations=Nc,
+        half_sphere=in_out,
+        partition="axial",
+        axis=2,
+    )
 
     # Handle in_out case
     if in_out:

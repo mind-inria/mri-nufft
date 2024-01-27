@@ -174,11 +174,14 @@ def Rv(v1, v2, normalize=True):
 def generate_fibonacci_lattice(nb_points, epsilon=0.25):
     fibonacci_square = np.zeros((nb_points, 2))
     fibonacci_square[:, 0] = (np.arange(nb_points) / (1 + np.sqrt(5)) / 2) % 1
-    fibonacci_square[:, 1] = (np.arange(nb_points) + epsilon) / (nb_points - 1 + 2 * epsilon)
+    fibonacci_square[:, 1] = (np.arange(nb_points) + epsilon) / (
+        nb_points - 1 + 2 * epsilon
+    )
     return fibonacci_square
 
+
 def generate_fibonacci_circle(nb_points, epsilon=0.25):
-    fibonacci_square = generate_fibonacci_square_lattice(nb_points, epsilon)
+    fibonacci_square = generate_fibonacci_lattice(nb_points, epsilon)
     radius = np.sqrt(fibonacci_square[:, 1])
     angles = 2 * np.pi * fibonacci_square[:, 0]
 
@@ -186,6 +189,7 @@ def generate_fibonacci_circle(nb_points, epsilon=0.25):
     fibonacci_circle[:, 0] = radius * np.cos(angles)
     fibonacci_circle[:, 1] = radius * np.sin(angles)
     return fibonacci_circle
+
 
 def generate_fibonacci_sphere(nb_points, epsilon=0.25):
     fibonacci_square = generate_fibonacci_lattice(nb_points, epsilon)

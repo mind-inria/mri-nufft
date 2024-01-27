@@ -1,7 +1,7 @@
 """Functions to manipulate trajectories."""
 import numpy as np
 
-from .maths import (Rv, Rx, Ry, Rz)
+from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
     initialize_tilt,
@@ -96,8 +96,14 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
     return new_trajectory.reshape(nb_rotations * Nc, Ns, 3)
 
 
-def precess(trajectory, nb_rotations, tilt="golden", half_sphere=False,
-            partition="axial", axis=2):
+def precess(
+    trajectory,
+    nb_rotations,
+    tilt="golden",
+    half_sphere=False,
+    partition="axial",
+    axis=2,
+):
     """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
 
     Parameters
@@ -126,7 +132,7 @@ def precess(trajectory, nb_rotations, tilt="golden", half_sphere=False,
     """
     # Check for partition option error
     if partition not in ["polar", "axial"]:
-        raise NotImplementedError("Unknown partition type: {}".format(partition))
+        raise NotImplementedError(f"Unknown partition type: {partition}")
 
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
@@ -139,7 +145,7 @@ def precess(trajectory, nb_rotations, tilt="golden", half_sphere=False,
     vectors = np.zeros((nb_rotations, 3))
     phi = initialize_tilt(tilt, nb_rotations) * np.arange(nb_rotations)
     vectors[:, 2] = np.linspace(-1 + half_sphere, 1, nb_rotations)
-    if (partition == "polar"):
+    if partition == "polar":
         vectors[:, 2] = np.sin(np.pi / 2 * vectors[:, 2])
     radius = np.sqrt(1 - vectors[:, 2] ** 2)
     vectors[:, 0] = np.cos(phi) * radius
@@ -156,7 +162,14 @@ def precess(trajectory, nb_rotations, tilt="golden", half_sphere=False,
     return new_trajectory.reshape((nb_rotations * Nc, Ns, 3))
 
 
-def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2, borderless=True):
+def conify(
+    trajectory,
+    nb_cones,
+    z_tilt=None,
+    in_out=False,
+    max_angle=np.pi / 2,
+    borderless=True,
+):
     """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
@@ -191,7 +204,7 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2,
     # Initialize angles
     z_angle = initialize_tilt(z_tilt, nb_cones)
     alphas = np.linspace(-max_angle, +max_angle, nb_cones + 2 * borderless)
-    if (borderless):
+    if borderless:
         alphas = alphas[1:-1]  # Remove partition borders
 
     # Start processing the trajectory
