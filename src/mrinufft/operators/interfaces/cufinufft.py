@@ -263,6 +263,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             check_size(data, (self.n_batchs, self.n_coils, *self.shape))
         xp = get_array_module(data)
+        if xp.__name__ == "torch" and data.is_cpu:
+            data = data.numpy()
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
