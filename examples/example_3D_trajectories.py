@@ -249,11 +249,10 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 
 trajectory = mn.initialize_3D_floret(
-    Nc,
+    Nc * nb_repetitions,
     Ns,
     in_out=in_out,
     nb_revolutions=nb_revolutions,
-    nb_cones=nb_repetitions,
     max_angle=np.pi / 2,
 )[::-1]
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -276,11 +275,10 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [(2,), (0,), (0, 2), (0, 1, 2)]
 function = lambda x: mn.initialize_3D_floret(
-    Nc,
+    Nc * nb_repetitions,
     Ns,
     in_out=in_out,
     nb_revolutions=nb_revolutions,
-    nb_cones=nb_repetitions,
     max_angle=np.pi / 4,
     axes=x,
 )[::-1]

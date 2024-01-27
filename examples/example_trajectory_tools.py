@@ -340,7 +340,7 @@ show_argument(
 #
 
 trajectory = tools.precess(
-    planar_trajectories["Radial"], nb_rotations=nb_repetitions, z_tilt="golden"
+    planar_trajectories["Radial"], nb_rotations=nb_repetitions, tilt="golden"
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
@@ -355,7 +355,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    planar_trajectories[x], nb_rotations=nb_repetitions, z_tilt="golden"
+    planar_trajectories[x], nb_rotations=nb_repetitions, tilt="golden"
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -370,7 +370,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    single_trajectories[x], nb_rotations=Nc, z_tilt="golden"
+    single_trajectories[x], nb_rotations=Nc, tilt="golden"
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
