@@ -169,8 +169,8 @@ def test_data_consistency(
 ):
     """Test the data consistency operation."""
     # image_data = np.zeros_like(image_data)
-    image_data = to_interface(image_data)
-    kspace_data = to_interface(kspace_data)
+    image_data = to_interface(image_data, array_interface)
+    kspace_data = to_interface(kspace_data, array_interface)
 
     res = operator.data_consistency(image_data, kspace_data)
     tmp = operator.op(image_data)
