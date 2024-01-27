@@ -15,7 +15,7 @@ from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX, Packing
 ############################
 
 
-def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width=1):
+def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1):
     """Initialize 3D trajectories with cones.
 
     Parameters
@@ -31,30 +31,43 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
         by default False
     nb_zigzags : float, optional
         Number of zigzags of the cones, by default 5
+    spiral : str, float, optional
+        Spiral type, by default "archimedes"
     width : float, optional
-        Width of a cone such that 1 has no redundacy and full coverage, by default 1
+        Cone width normalized such that `width=1` avoids cone overlaps, by default 1
 
     Returns
     -------
     array_like
         3D cones trajectory
     """
-    # Initialize first cone
-    radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
-    angles = np.linspace(
-        -2 * np.pi * nb_zigzags if (in_out) else 0, 2 * np.pi * nb_zigzags, Ns
-    )
-    cone = np.zeros((1, Ns, 3))
-    cone[:, :, 0] = radius
-    cone[:, :, 1] = (
-        radius * np.cos(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
-    )
-    cone[:, :, 2] = (
-        radius * np.sin(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
+    # Initialize first spiral
+    spiral = initialize_2D_spiral(
+        Nc=1,
+        Ns=Ns,
+        spiral=spiral,
+        in_out=in_out,
+        nb_revolutions=nb_zigzags,
     )
 
+    # Estimate best cone angle based on the ratio between
+    # sphere volume divided by Nc and spherical sector packing optimaly a sphere
+    optimal_packing = np.pi / (2 * np.sqrt(3))  # Optimal density when Nc tends to infinity
+    max_angle = np.pi / 2 - width * np.arccos(1 - optimal_packing * 2 / Nc / (1 + in_out))
+
+    # Initialize first cone
+    cone = conify(
+        spiral,
+        nb_cones=3,
+        z_tilt=None,
+        in_out=in_out,
+        max_angle=max_angle,
+        borderless=False,
+    )[-1:]  # Create three cones for proper partitioning, but only one is needed
+
     # Apply precession to the first cone
-    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt)
+    trajectory = precess(cone, tilt=tilt, nb_rotations=Nc,
+                         half_sphere=in_out, partition="axial", axis=2)
 
     return trajectory
 
@@ -64,9 +77,7 @@ def initialize_3D_floret(
     Ns,
     in_out=False,
     nb_revolutions=1,
-    spiral_tilt="uniform",
     spiral="fermat",
-    nb_cones=None,
     cone_tilt="golden",
     max_angle=np.pi / 2,
     axes=(2,),
@@ -88,13 +99,8 @@ def initialize_3D_floret(
         Whether to start from the center or not, by default False
     nb_revolutions : float, optional
         Number of revolutions of the spirals, by default 1
-    spiral_tilt : str, float, optional
-        Tilt of the spirals around the :math:`k_z`-axis, by default "uniform"
     spiral : str, float, optional
         Spiral type, by default "fermat"
-    nb_cones : int, optional
-        Number of cones used to partition the k-space sphere,
-        with `None` making one cone per shot, by default `None`.
     cone_tilt : str, float, optional
         Tilt of the cones around the :math:`k_z`-axis, by default "golden"
     max_angle : float, optional
@@ -116,32 +122,24 @@ def initialize_3D_floret(
        oversampled k‐space trajectories."
        Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.
     """
-    # Define variables for convenience
-    nb_cones = Nc if (nb_cones is None) else nb_cones
-    Nd = len(axes)
-    Nc_per_spiral = Nc // nb_cones
-    nb_cones_per_axis = nb_cones // Nd
-
-    # Check argument errors
-    if Nc % nb_cones != 0:
-        raise ValueError("Nc should be divisible by nb_cones.")
-    if nb_cones % Nd != 0:
-        raise ValueError("nb_cones should be divisible by len(axes).")
+    # Define convenience variables and check argument errors
+    Nc_per_axis = Nc // len(axes)
+    if Nc % len(axes) != 0:
+        raise ValueError("Nc should be divisible by len(axes).")
 
     # Initialize first spiral
     spiral = initialize_2D_spiral(
-        Nc=Nc_per_spiral,
+        Nc=1,
         Ns=Ns,
         spiral=spiral,
         in_out=in_out,
-        tilt=spiral_tilt,
         nb_revolutions=nb_revolutions,
     )
 
     # Initialize first cone
     cone = conify(
         spiral,
-        nb_cones=nb_cones_per_axis,
+        nb_cones=Nc_per_axis,
         z_tilt=cone_tilt,
         in_out=in_out,
         max_angle=max_angle,
@@ -333,7 +331,8 @@ def initialize_3D_seiffert_spiral(
     spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
     # Apply precession to the first spiral
-    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt)
+    trajectory = precess(spiral, tilt=tilt, nb_rotations=Nc,
+                         half_sphere=in_out, partition="axial", axis=2)
 
     # Handle in_out case
     if in_out:

@@ -99,7 +99,8 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
     return new_trajectory.reshape(nb_rotations * Nc, Ns, 3)
 
 
-def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
+def precess(trajectory, nb_rotations, tilt="golden", half_sphere=False,
+            partition="axial", axis=2):
     """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
 
     Parameters
@@ -113,12 +114,23 @@ def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
         of the k-space sphere, typically for in-out trajectories or planes.
+    partition : str, optional
+        Partition type between an axial or polar split of the
+        selected axis, by default "axial".
+    axis : int, optional
+        Axis selected to apply the precession, generally
+        corresponding to the shot direction for single shot
+        `trajectory` inputs, by default 2.
 
     Returns
     -------
     array_like
         Precessed trajectory.
     """
+    # Check for partition option error
+    if partition not in ["polar", "axial"]:
+        raise NotImplementedError("Unknown partition type: {}".format(partition))
+
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
     if trajectory.shape[-1] == 2:
@@ -128,21 +140,26 @@ def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
 
     # Determine direction vectors on a sphere
     vectors = np.zeros((nb_rotations, 3))
-    phi = initialize_tilt(z_tilt, nb_rotations) * np.arange(nb_rotations)
-    vectors[:, 2] = np.sin(np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_rotations))
+    phi = initialize_tilt(tilt, nb_rotations) * np.arange(nb_rotations)
+    vectors[:, 2] = np.linspace(-1 + half_sphere, 1, nb_rotations)
+    if (partition == "polar"):
+        vectors[:, 2] = np.sin(np.pi / 2 * vectors[:, 2])
     radius = np.sqrt(1 - vectors[:, 2] ** 2)
     vectors[:, 0] = np.cos(phi) * radius
     vectors[:, 1] = np.sin(phi) * radius
 
     # Rotate initial trajectory
-    for i in np.arange(nb_rotations):
-        rotation = Rv(np.array((1, 0, 0)), vectors[i], normalize=False).T
+    axis_vector = np.zeros(3)
+    axis_vector[axis] = 1
+    new_trajectory[0] = trajectory
+    for i in np.arange(1, nb_rotations):
+        rotation = Rv(axis_vector, vectors[i], normalize=False).T
         new_trajectory[i] = trajectory @ rotation
 
     return new_trajectory.reshape((nb_rotations * Nc, Ns, 3))
 
 
-def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2):
+def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2, borderless=True):
     """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
@@ -158,6 +175,9 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
         to avoid hard angles around the center, by default False.
     max_angle : float, optional
         Maximum angle of the cones, by default pi / 2.
+    borderless : bool, optional
+        Whether the cones should reach `max_angle` or not,
+        and avoid 1D cones if equal to pi / 2, by default True.
 
     Returns
     -------
@@ -173,9 +193,9 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
 
     # Initialize angles
     z_angle = initialize_tilt(z_tilt, nb_cones)
-    alphas = np.linspace(-max_angle, +max_angle, nb_cones + 2)[
-        1:-1
-    ]  # Borderless partition
+    alphas = np.linspace(-max_angle, +max_angle, nb_cones + 2 * borderless)
+    if (borderless):
+        alphas = alphas[1:-1]  # Remove partition borders
 
     # Start processing the trajectory
     new_trajectory[:] = trajectory
