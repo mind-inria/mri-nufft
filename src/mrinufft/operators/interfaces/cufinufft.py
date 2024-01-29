@@ -542,7 +542,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
-
         xp = get_array_module(image_data)
         if xp.__name__ == "torch" and image_data.is_cpu:
             image_data = image_data.numpy()

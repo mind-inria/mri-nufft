@@ -105,7 +105,6 @@ def kspace_data(operator):
 @param_array_interface
 def test_batch_op(operator, array_interface, flat_operator, image_data):
     """Test the batch type 2 (forward)."""
-
     image_data = to_interface(image_data, array_interface)
 
     kspace_batched = from_interface(operator.op(image_data), array_interface)
