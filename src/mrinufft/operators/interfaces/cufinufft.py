@@ -542,6 +542,16 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
+
+        xp = get_array_module(image_data)
+        if xp.__name__ == "torch" and image_data.is_cpu:
+            image_data = image_data.numpy()
+        xp = get_array_module(obs_data)
+        if xp.__name__ == "torch" and obs_data.is_cpu:
+            obs_data = obs_data.numpy()
+        obs_data = auto_cast(obs_data, self.cpx_dtype)
+        image_data = auto_cast(image_data, self.cpx_dtype)
+
         B, C = self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
@@ -562,7 +572,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             raise ValueError("No suitable gradient function found.")
         ret = grad_func(image_data, obs_data)
-        return self._safe_squeeze(ret)
+
+        ret = self._safe_squeeze(ret)
+        if xp.__name__ == "torch" and is_cuda_array(ret):
+            ret = xp.as_tensor(ret, device=image_data.device)
+        elif xp.__name__ == "torch":
+            ret = xp.from_numpy(ret)
+        return ret
 
     def _dc_sense_host(self, image_data, obs_data):
         """Gradient computation when all data is on host."""
@@ -624,7 +640,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
-            data_batched.set(image_dataf[i * T : (i + 1) * T])
+            cp.copyto(data_batched, image_dataf[idx_batch])
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
@@ -679,8 +695,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
-        image_data = cp.asarray(image_data)
-        obs_data = cp.asarray(obs_data)
+        image_data = cp.asarray(image_data).reshape(B * C, *XYZ)
+        obs_data = cp.asarray(obs_data).reshape(B * C, K)
 
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
@@ -688,7 +704,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
 
         for i in range(B * C // T):
-            data_batched.set(image_data[i * T : (i + 1) * T])
+            cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
             self.__op(data_batched, ksp_batched)
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_data[i * T : (i + 1) * T]
