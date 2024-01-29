@@ -88,6 +88,8 @@ _param_array_interface = pytest.mark.parametrize(
 
 
 def param_array_interface(func):
+    """Parametrize the array interfaces for a test."""
+
     @wraps(func)
     def wrapper(operator, array_interface, *args, **kwargs):
         if operator.backend != "cufinufft" and array_interface in ["torch-gpu", "cupy"]:
