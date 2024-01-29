@@ -384,6 +384,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         xp = get_array_module(coeffs)
+        if xp.__name__ == "torch" and coeffs.is_cpu:
+            coeffs = coeffs.numpy()
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
