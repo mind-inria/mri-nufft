@@ -7,7 +7,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 """
 
 from abc import ABC, abstractmethod
-from functools import partial
+from functools import partial, wraps
 import numpy as np
 from mrinufft._utils import power_method, auto_cast, get_array_module
 
@@ -81,6 +81,31 @@ def get_operator(backend_name: str, *args, **kwargs):
     if args or kwargs:
         operator = operator(*args, **kwargs)
     return operator
+
+
+def with_numpy(fun):
+    """Ensure the function works internally with numpy array."""
+
+    @wraps(fun)
+    def wrapper(data, *args, **kwargs):
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = data.to("cpu").numpy()
+        elif xp.__name__ == "cupy":
+            data_ = data.get()
+
+        ret_ = fun(data_, *args, **kwargs)
+
+        if xp.__name__ == "torch":
+            if data.is_cpu:
+                return xp.from_numpy(data)
+            return xp.from_numpy(data).to(data.device)
+        elif xp.__name__ == "cupy":
+            return xp.array(ret_)
+        else:
+            return ret_
+
+    return wrapper
 
 
 class FourierOperatorBase(ABC):
@@ -382,6 +407,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         self.raw_op = raw_op
 
+    @with_numpy
     def op(self, data, ksp=None):
         r"""Non Cartesian MRI forward operator.
 
@@ -400,11 +426,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
         # sense
-        xp = get_array_module(data)
         data = auto_cast(data, self.cpx_dtype)
 
-        if xp.__name__ == "torch":
-            data = data.to("cpu").numpy()
         if self.uses_sense:
             ret = self._op_sense(data, ksp)
         # calibrationless or monocoil.
@@ -413,8 +436,6 @@ class FourierOperatorCPU(FourierOperatorBase):
         ret /= self.norm_factor
 
         ret = self._safe_squeeze(ret)
-        if xp.__name__ == "torch":
-            return xp.from_numpy(ret)
         return ret
 
     def _op_sense(self, data, ksp=None):
@@ -449,6 +470,7 @@ class FourierOperatorCPU(FourierOperatorBase):
     def _op(self, image, coeffs):
         self.raw_op.op(coeffs, image)
 
+    @with_numpy
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
 
@@ -461,19 +483,13 @@ class FourierOperatorCPU(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         coeffs = auto_cast(coeffs, self.cpx_dtype)
-        xp = get_array_module(coeffs)
-        if xp.__name__ == "torch":
-            coeffs = coeffs.to("cpu").numpy()
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
         ret /= self.norm_factor
-        ret = self._safe_squeeze(ret)
-        if xp.__name__ == "torch":
-            return xp.from_numpy(ret)
-        return ret
+        return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
