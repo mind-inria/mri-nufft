@@ -2,7 +2,7 @@
 
 import numpy as np
 import warnings
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, with_numpy
 from mrinufft._utils import proper_trajectory
 
 GPUNUFFT_AVAILABLE = True
@@ -312,6 +312,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             **kwargs,
         )
 
+    @with_numpy
     def op(self, data, coeffs=None):
         """Compute forward non-uniform Fourier Transform.
 
@@ -332,6 +333,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             coeffs,
         )
 
+    @with_numpy
     def adj_op(self, coeffs, data=None):
         """Compute adjoint Non Unform Fourier Transform.
 
