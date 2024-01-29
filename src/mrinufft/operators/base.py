@@ -101,8 +101,8 @@ def with_numpy(fun):
 
         if xp.__name__ == "torch":
             if data.is_cpu:
-                return xp.from_numpy(data)
-            return xp.from_numpy(data).to(data.device)
+                return xp.from_numpy(ret_)
+            return xp.from_numpy(ret_).to(data.device)
         elif xp.__name__ == "cupy":
             return xp.array(ret_)
         else:
