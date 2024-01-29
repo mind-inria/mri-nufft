@@ -87,14 +87,17 @@ def with_numpy(fun):
     """Ensure the function works internally with numpy array."""
 
     @wraps(fun)
-    def wrapper(data, *args, **kwargs):
+    def wrapper(self, data, *args, **kwargs):
         xp = get_array_module(data)
         if xp.__name__ == "torch":
             data_ = data.to("cpu").numpy()
         elif xp.__name__ == "cupy":
             data_ = data.get()
-
-        ret_ = fun(data_, *args, **kwargs)
+        elif xp.__name__ == "numpy":
+            data_ = data
+        else:
+            raise ValueError(f"Array library {xp} not supported.")
+        ret_ = fun(self, data_, *args, **kwargs)
 
         if xp.__name__ == "torch":
             if data.is_cpu:
