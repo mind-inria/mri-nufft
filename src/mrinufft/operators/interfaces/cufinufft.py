@@ -324,12 +324,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 cp.copyto(coil_img_d, self.smaps[idx_coils])
             coil_img_d *= data_batched
-            print("op sense host", i, B, C, T, idx_coils, idx_batch)
-            cp.cuda.runtime.deviceSynchronize()
             self.__op(coil_img_d, ksp_batched)
-            cp.cuda.runtime.deviceSynchronize()
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
-            cp.cuda.runtime.deviceSynchronize()
         ksp = ksp.reshape((B, C, K))
         return ksp
 
