@@ -6,6 +6,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 :author: Pierre-Antoine Comby
 """
 
+import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
 import numpy as np
@@ -88,6 +89,8 @@ def with_numpy(fun):
 
     @wraps(fun)
     def wrapper(self, data, *args, **kwargs):
+        if hasattr(data, "__cuda_array_interface__"):
+            warnings.warn("data is on gpu, it will be moved to CPU.")
         xp = get_array_module(data)
         if xp.__name__ == "torch":
             data_ = data.to("cpu").numpy()
