@@ -770,7 +770,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             ")"
         )
 
-    def get_lipschitz_cst(self, max_iter, **kwargs):
+    def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
 
         Parameters
