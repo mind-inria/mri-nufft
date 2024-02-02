@@ -1,6 +1,5 @@
 """Utils for tests."""
 
-
 import numpy as np
 import numpy.testing as npt
 import scipy as sp

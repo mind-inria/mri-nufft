@@ -1,6 +1,5 @@
 """Test for mrinufft interfaces."""
 
-
 import mrinufft
 import pytest
 

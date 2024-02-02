@@ -1,4 +1,5 @@
 """Utilities for density compensation."""
+
 from functools import wraps
 
 import numpy as np

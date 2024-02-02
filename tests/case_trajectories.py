@@ -1,4 +1,5 @@
 """Trajectories cases we want to test."""
+
 import numpy as np
 import scipy as sp
 

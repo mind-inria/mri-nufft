@@ -1,4 +1,5 @@
 """Test the trajectories io module."""
+
 import numpy as np
 from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial

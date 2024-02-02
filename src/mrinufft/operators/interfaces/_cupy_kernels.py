@@ -1,4 +1,5 @@
 """Kernel function for GPUArray data."""
+
 from .utils.gpu_utils import get_maxThreadBlock, CUPY_AVAILABLE
 
 update_density_kernel = lambda *args, **kwargs: None  # noqa: E731

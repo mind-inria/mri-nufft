@@ -1,4 +1,5 @@
 """Utility functions for the trajectory design."""
+
 import numpy as np
 
 from enum import Enum, EnumMeta
