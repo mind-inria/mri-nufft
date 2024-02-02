@@ -17,7 +17,7 @@ finufft = ["finufft"]
 pynfft = ["pynfft2", "cython<3.0.0"]
 pynufft = ["pynufft"]
 
-test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
+test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
 doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
 # pooch is for scipy.datasets
