@@ -3,6 +3,7 @@
 The tests compares the stacked NUFFT (which uses FFT in the z-direction)
 and the fully 3D ones.
 """
+
 import numpy as np
 
 import numpy.testing as npt

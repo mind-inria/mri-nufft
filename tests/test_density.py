@@ -1,6 +1,5 @@
 """Test the density compensation methods."""
 
-
 import numpy as np
 import numpy.testing as npt
 from pytest_cases import fixture, parametrize, parametrize_with_cases

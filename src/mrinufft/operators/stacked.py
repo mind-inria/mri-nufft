@@ -1,4 +1,5 @@
 """Stacked Operator for NUFFT."""
+
 import warnings
 
 import numpy as np

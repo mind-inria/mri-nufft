@@ -1,4 +1,5 @@
 """Compute density compensation weights using geometry-based methods."""
+
 import numpy as np
 from scipy.spatial import Voronoi
 

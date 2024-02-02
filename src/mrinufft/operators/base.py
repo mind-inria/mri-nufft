@@ -5,6 +5,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 :author: Pierre-Antoine Comby
 """
+
 from abc import ABC, abstractmethod
 from functools import partial
 import warnings

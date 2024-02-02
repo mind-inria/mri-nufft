@@ -1,4 +1,5 @@
 """Utilities for interfaces."""
+
 from .utils import (
     check_error,
     check_size,

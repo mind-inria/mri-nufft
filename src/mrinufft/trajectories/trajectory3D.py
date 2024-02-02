@@ -1,4 +1,5 @@
 """3D Trajectory initialization functions."""
+
 import numpy as np
 import numpy.linalg as nl
 

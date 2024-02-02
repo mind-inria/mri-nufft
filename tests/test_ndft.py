@@ -1,4 +1,5 @@
 """Test for the NDFT implementations."""
+
 import numpy as np
 import scipy as sp
 from pytest_cases import parametrize_with_cases

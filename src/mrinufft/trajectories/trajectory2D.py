@@ -1,4 +1,5 @@
 """2D trajectory initializations."""
+
 import numpy as np
 
 from .utils import (

@@ -1,4 +1,5 @@
 """Functions to manipulate trajectories."""
+
 import numpy as np
 
 from .utils import (
