@@ -8,7 +8,7 @@ import numpy as np
 
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
-
+from helpers import param_array_interface, from_interface, to_interface
 from mrinufft.operators.stacked import (
     MRIStackedNUFFTGPU,
     stacked2traj3d,
@@ -102,17 +102,25 @@ def kspace_data(stacked_op):
     return kspace
 
 
-def test_stack_forward(operator, stacked_op, ref_op, image_data):
+@param_array_interface
+def test_stack_forward(operator, array_interface, ref_op, stacked_op, image_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
-    kspace_nufft = stacked_op.op(image_data).squeeze()
-    kspace_ref = ref_op.op(image_data).squeeze()
+    image_data_ = to_interface(image_data, array_interface)
+    kspace_nufft_ = stacked_op.op(image_data_).squeeze()
+    kspace_ref_ = ref_op.op(image_data_).squeeze()
+    kspace_nufft = from_interface(kspace_nufft_, array_interface)
+    kspace_ref = from_interface(kspace_ref_, array_interface)
     npt.assert_allclose(kspace_nufft, kspace_ref, atol=1e-4, rtol=1e-1)
 
 
-def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
+@param_array_interface
+def test_stack_backward(operator, array_interface, stacked_op, ref_op, kspace_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
-    image_nufft = stacked_op.adj_op(kspace_data.copy()).squeeze()
-    image_ref = ref_op.adj_op(kspace_data.copy()).squeeze()
+    kspace_data_ = to_interface(kspace_data, array_interface)
+    image_nufft_ = stacked_op.adj_op(kspace_data_).squeeze()
+    image_ref_ = ref_op.adj_op(kspace_data_).squeeze()
+    image_nufft = from_interface(image_nufft_, array_interface)
+    image_ref = from_interface(image_ref_, array_interface)
     npt.assert_allclose(image_nufft, image_ref, atol=1e-4, rtol=1e-1)
 
 

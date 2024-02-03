@@ -92,7 +92,11 @@ def param_array_interface(func):
 
     @wraps(func)
     def wrapper(operator, array_interface, *args, **kwargs):
-        if operator.backend != "cufinufft" and array_interface in ["torch-gpu", "cupy"]:
+        if isinstance(operator, tuple):  # special case for test_stacked_gpu params
+            op = operator[0]
+        else:
+            op = operator
+        if "cufinufft" not in op.backend and array_interface in ["torch-gpu", "cupy"]:
             pytest.skip("Uncompatible backend and array")
         return func(operator, array_interface, *args, **kwargs)
 
