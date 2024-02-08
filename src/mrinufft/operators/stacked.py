@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from mrinufft._utils import proper_trajectory, power_method, get_array_module
+from mrinufft._utils import proper_trajectory, power_method, get_array_module, auto_cast
 from mrinufft.operators.base import FourierOperatorBase, check_backend, get_operator
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
@@ -373,6 +373,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         xp = get_array_module(data)
         if xp.__name__ == "torch" and data.is_cpu:
             data = data.numpy()
+        data = auto_cast(data, self.cpx_dtype)
 
         if self.uses_sense and is_cuda_array(data):
             op_func = self._op_sense_device
@@ -530,6 +531,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
         # Dispatch to special case.
+        xp = get_array_module(coeffs)
+        if xp.__name__ == "torch" and coeffs.is_cpu:
+            coeffs = coeffs.numpy()
+        coeffs = auto_cast(coeffs, self.cpx_dtype)
+
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device
         elif self.uses_sense:
@@ -540,6 +546,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             adj_op_func = self._adj_op_calibless_host
 
         ret = adj_op_func(coeffs, img)
+
+        if xp.__name__ == "torch" and is_cuda_array(ret):
+            ret = xp.as_tensor(ret, device=coeffs.device)
+        elif xp.__name__ == "torch":
+            ret = xp.from_numpy(ret)
 
         return self._safe_squeeze(ret)
 
