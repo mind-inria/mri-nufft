@@ -29,6 +29,7 @@ requires = ["setuptools", "setuptools-scm[toml]", "wheel"]
 write_to = "src/mrinufft/_version.py"
 version_scheme = "python-simplified-semver"
 local_scheme="no-local-version"
+fallback_version="v99-dev"
 
 [tool.coverage.run]
 omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
