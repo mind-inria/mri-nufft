@@ -10,10 +10,17 @@ import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
 import numpy as np
-from mrinufft._utils import power_method, auto_cast, get_array_module
+from mrinufft._utils import power_method, auto_cast, get_array_module, is_cuda_array
 
 from mrinufft.density import get_density
 
+CUPY_AVAILABLE = True
+try:
+    import cupyx as cx
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
+    
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
@@ -113,6 +120,40 @@ def with_numpy(fun):
 
     return wrapper
 
+def with_numpy_cupy(fun):
+    """Ensure the function works internally with numpy or cupy array."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+        if xp.__name__ == "torch" and is_cuda_array(data):
+            # Move them to cupy
+            data_ = cp.from_dlpack(data)
+            if output is not None:
+                output_ = cp.from_dlpack(output)
+        elif xp.__name__ == "torch":
+            # Move to numpy
+            data_ = data.to("cpu").numpy()
+            if output is not None:
+                output_ = output.to("cpu").numpy()
+        else:
+            data_ = data
+            output_ = output
+        
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+        
+        if xp.__name__ == "torch" and is_cuda_array(data):
+            return xp.as_tensor(ret_, device=data.device)
+            
+        if xp.__name__ == "torch":
+            if data.is_cpu:
+                return xp.from_numpy(ret_)
+            return xp.from_numpy(ret_).to(data.device)
+        
+        return ret_
+
+    return wrapper
+    
 
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
