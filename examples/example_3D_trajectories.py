@@ -346,7 +346,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # The method used to pack circles of same size within an arbitrary ``shape``.
 # The available methods are ``"triangular"`` and ``"square"`` for regular tiling
-# over dense grids, and ``"circular"`` and ``"random"`` for irregular packing.
+# over dense grids, and ``"circular"``, ``fibonacci`` and ``"random"`` for
+# irregular packing.
 # Different aliases are available, such as ``"triangle"``, ``"hexagon"`` instead
 # of ``"triangular"``.
 #
@@ -356,7 +357,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 #
 
-arguments = ["triangular", "square", "circular", "random"]
+arguments = ["triangular", "square", "circular", "fibonacci", "random"]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 

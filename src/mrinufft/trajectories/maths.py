@@ -2,6 +2,10 @@
 import numpy as np
 
 
+CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
+
+
+
 ##########
 # PRIMES #
 ##########

@@ -5,7 +5,7 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .maths import Ry, Rz, Ra, generate_fibonacci_circle
+from .maths import Ry, Rz, Ra, generate_fibonacci_circle, CIRCLE_PACKING_DENSITY
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
 from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
@@ -20,6 +20,13 @@ def initialize_3D_cones(
     Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1
 ):
     """Initialize 3D trajectories with cones.
+
+    Initialize a trajectory consisting of 3D cones duplicated
+    in each direction and almost evenly distributed using a Fibonacci
+    lattice spherical projection when the tilt is set to "golden".
+
+    The cone width is automatically determined based on the optimal
+    circle packing of a sphere surface, as discussed in [CK90]_.
 
     Parameters
     ----------
@@ -43,6 +50,12 @@ def initialize_3D_cones(
     -------
     array_like
         3D cones trajectory
+
+    References
+    ----------
+    .. [CK90] Clare, B. W., and D. L. Kepert.
+       "The optimal packing of circles on a sphere."
+       Journal of mathematical chemistry 6, no. 1 (1991): 325-349.
     """
     # Initialize first spiral
     spiral = initialize_2D_spiral(
@@ -55,11 +68,8 @@ def initialize_3D_cones(
 
     # Estimate best cone angle based on the ratio between
     # sphere volume divided by Nc and spherical sector packing optimaly a sphere
-    optimal_packing = np.pi / (
-        2 * np.sqrt(3)
-    )  # Optimal density when Nc tends to infinity
     max_angle = np.pi / 2 - width * np.arccos(
-        1 - optimal_packing * 2 / Nc / (1 + in_out)
+        1 - CIRCLE_PACKING_DENSITY * 2 / Nc / (1 + in_out)
     )
 
     # Initialize first cone
@@ -221,8 +231,8 @@ def initialize_3D_wave_caipi(
     trajectory[0, :, 1] = width * np.sin(angles)
     trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
 
+    # Choose the helix positions according to packing
     packing = Packings[packing]
-    # Packing
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
     if packing == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
@@ -255,12 +265,9 @@ def initialize_3D_wave_caipi(
         positions[:, 0] /= ratio / 2
 
     if packing == Packings.FIBONACCI:
-        # Estimate circle positions and width based on the k-space 2D surface
-        # and its optimal circle packing
-        optimal_packing = np.pi / (
-            2 * np.sqrt(3)
-        )  # Optimal density (hexagonal) when Nc tends to infinity
-        positions = np.sqrt(Nc * 2 / optimal_packing) * generate_fibonacci_circle(
+        # Estimate helix width based on the k-space 2D surface
+        # and an optimal circle packing
+        positions = np.sqrt(Nc * 2 / CIRCLE_PACKING_DENSITY) * generate_fibonacci_circle(
             Nc * 2
         )
 
