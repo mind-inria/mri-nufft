@@ -498,7 +498,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return ksp
 
     def _op_calibless_device(self, data, ksp=None):
-
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
         data = cp.asarray(data)
@@ -590,7 +589,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return img
 
     def _adj_op_sense_device(self, coeffs, img):
-
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
         coeffs = cp.asarray(coeffs)
