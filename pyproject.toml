@@ -11,7 +11,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpunufft", "cupy-cuda11x"]
+gpunufft = ["git+https://github.com/chaithyagr/gpuNUFFT@gpu", "cupy-cuda11x"] # Temporary
 cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2", "cython<3.0.0"]
