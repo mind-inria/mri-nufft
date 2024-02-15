@@ -80,7 +80,7 @@ def test_interfaces_accuracy_forward(
     image_data_ = to_interface(image_data, array_interface)
     kspace_nufft = operator.op(image_data_).squeeze()
     kspace_ref = ref_operator.op(image_data).squeeze()
-    
+
     kspace_nufft = from_interface(kspace_nufft, array_interface)
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 

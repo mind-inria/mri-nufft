@@ -267,7 +267,7 @@ def stack_spherically(
 
     # Attribute shots to stacks following density proportional to surface
     Nc_per_stack = np.ones(nb_stacks).astype(int)
-    density = radii**2  # simplified version
+    density = radii ** 2  # simplified version
     for _ in range(Nc - nb_stacks):
         idx = np.argmax(density / Nc_per_stack)
         Nc_per_stack[idx] += 1
@@ -363,7 +363,7 @@ def shellify(
             )
 
         # Carve upper hemisphere from trajectory
-        z_coords = KMAX**2 - shell_upper[..., 0] ** 2 - shell_upper[..., 1] ** 2
+        z_coords = KMAX ** 2 - shell_upper[..., 0] ** 2 - shell_upper[..., 1] ** 2
         z_signs = np.sign(z_coords)
         shell_upper[..., 2] += z_signs * np.sqrt(np.abs(z_coords))
 
