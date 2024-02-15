@@ -1,3 +1,4 @@
+"""Utility functions for mathematical operations."""
 import numpy as np
 
 
@@ -195,19 +196,19 @@ def Ra(vector, theta):
     return np.array(
         [
             [
-                cos_t + v_x ** 2 * (1 - cos_t),
+                cos_t + v_x**2 * (1 - cos_t),
                 v_x * v_y * (1 - cos_t) + v_z * sin_t,
                 v_x * v_z * (1 - cos_t) - v_y * sin_t,
             ],
             [
                 v_y * v_x * (1 - cos_t) - v_z * sin_t,
-                cos_t + v_y ** 2 * (1 - cos_t),
+                cos_t + v_y**2 * (1 - cos_t),
                 v_y * v_z * (1 - cos_t) + v_x * sin_t,
             ],
             [
                 v_z * v_x * (1 - cos_t) + v_y * sin_t,
                 v_z * v_y * (1 - cos_t) - v_x * sin_t,
-                cos_t + v_z ** 2 * (1 - cos_t),
+                cos_t + v_z**2 * (1 - cos_t),
             ],
         ]
     )
@@ -219,6 +220,22 @@ def Ra(vector, theta):
 
 
 def generate_fibonacci_lattice(nb_points, epsilon=0.25):
+    """Generate 2D Cartesian coordinates using the Fibonacci lattice.
+
+    Place 2D points over a 1x1 square following the Fibonacci lattice.
+
+    Parameters
+    ----------
+    nb_points : int
+        Number of 2D points to generate.
+    epsilon : float
+        Continuous offset used to reduce initially wrong lattice behavior.
+
+    Returns
+    -------
+    np.ndarray
+        Array of 2D Cartesian coordinates covering a 1x1 square.
+    """
     angle = (1 + np.sqrt(5)) / 2
     fibonacci_square = np.zeros((nb_points, 2))
     fibonacci_square[:, 0] = (np.arange(nb_points) / angle) % 1
@@ -229,6 +246,23 @@ def generate_fibonacci_lattice(nb_points, epsilon=0.25):
 
 
 def generate_fibonacci_circle(nb_points, epsilon=0.25):
+    """Generate 2D Cartesian coordinates shaped as Fibonacci spirals.
+
+    Place 2D points structured as Fibonacci spirals by distorting
+    a square Fibonacci lattice into a circle of radius 1.
+
+    Parameters
+    ----------
+    nb_points : int
+        Number of 2D points to generate.
+    epsilon : float
+        Continuous offset used to reduce initially wrong lattice behavior.
+
+    Returns
+    -------
+    np.ndarray
+        Array of 2D Cartesian coordinates covering a circle of radius 1.
+    """
     fibonacci_square = generate_fibonacci_lattice(nb_points, epsilon)
     radius = np.sqrt(fibonacci_square[:, 1])
     angles = 2 * np.pi * fibonacci_square[:, 0]
@@ -240,6 +274,23 @@ def generate_fibonacci_circle(nb_points, epsilon=0.25):
 
 
 def generate_fibonacci_sphere(nb_points, epsilon=0.25):
+    """Generate 3D Cartesian coordinates as a Fibonacci sphere.
+
+    Place 3D points almost evenly over a sphere surface of radius
+    1 by distorting a square Fibonacci lattice into a sphere.
+
+    Parameters
+    ----------
+    nb_points : int
+        Number of 3D points to generate.
+    epsilon : float
+        Continuous offset used to reduce initially wrong lattice behavior.
+
+    Returns
+    -------
+    np.ndarray
+        Array of 3D Cartesian coordinates covering a sphere of radius 1.
+    """
     fibonacci_square = generate_fibonacci_lattice(nb_points, epsilon)
     theta = 2 * np.pi * fibonacci_square[:, 0]
     phi = np.arccos(1 - 2 * fibonacci_square[:, 1])

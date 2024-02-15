@@ -5,7 +5,7 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .maths import Ry, Rz, Ra
+from .maths import Ry, Rz, Ra, generate_fibonacci_circle
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
 from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
@@ -257,8 +257,12 @@ def initialize_3D_wave_caipi(
     if packing == Packings.FIBONACCI:
         # Estimate circle positions and width based on the k-space 2D surface
         # and its optimal circle packing
-        optimal_packing = np.pi / (2 * np.sqrt(3))  # Optimal density (hexagonal) when Nc tends to infinity
-        positions = np.sqrt(Nc * 2 / optimal_packing) * generate_fibonacci_circle(Nc * 2)
+        optimal_packing = np.pi / (
+            2 * np.sqrt(3)
+        )  # Optimal density (hexagonal) when Nc tends to infinity
+        positions = np.sqrt(Nc * 2 / optimal_packing) * generate_fibonacci_circle(
+            Nc * 2
+        )
 
     # Remove points by distance to fit both shape and Nc
     main_order = initialize_shape_norm(shape)
@@ -279,7 +283,13 @@ def initialize_3D_wave_caipi(
 
 
 def initialize_3D_seiffert_spiral(
-    Nc, Ns, curve_index=0.2, nb_revolutions=1, axis_tilt="golden", spiral_tilt="golden", in_out=False
+    Nc,
+    Ns,
+    curve_index=0.2,
+    nb_revolutions=1,
+    axis_tilt="golden",
+    spiral_tilt="golden",
+    in_out=False,
 ):
     """Initialize 3D trajectories with modulated Seiffert spirals.
 
