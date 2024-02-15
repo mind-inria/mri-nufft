@@ -1,4 +1,5 @@
 """Utility functions for the trajectory design."""
+import numbers as nb
 import numpy as np
 
 from enum import Enum, EnumMeta
@@ -131,12 +132,14 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     TRIANGLE = "triangle"
     HEXAGON = "hexagon"
     SQUARE = "square"
+    FIBONACCI = "fibonacci"
 
     # Aliases
     CIRCULAR = CIRCLE
     TRIANGULAR = TRIANGLE
     HEXAGONAL = HEXAGON
     UNIFORM = RANDOM
+    SPIRAL = FIBONACCI
 
 
 ###############
@@ -464,7 +467,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     Tilts
 
     """
-    if not (isinstance(tilt, str) or tilt is None):
+    if isinstance(tilt, nb.Number):
         return tilt
     elif tilt is None or tilt == Tilts.NONE:
         return 0
@@ -495,7 +498,7 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
-    if isinstance(spiral, float):
+    if isinstance(spiral, nb.Number):
         return spiral
     return Spirals[spiral]
 
@@ -513,6 +516,6 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    if isinstance(shape, float):
+    if isinstance(shape, nb.Number):
         return shape
     return NormShapes[shape]
