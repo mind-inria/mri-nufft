@@ -92,35 +92,6 @@ def get_operator(backend_name: str, *args, **kwargs):
     return operator
 
 
-def with_numpy(fun):
-    """Ensure the function works internally with numpy array."""
-
-    @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        if hasattr(data, "__cuda_array_interface__"):
-            warnings.warn("data is on gpu, it will be moved to CPU.")
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = data.to("cpu").numpy()
-        elif xp.__name__ == "cupy":
-            data_ = data.get()
-        elif xp.__name__ == "numpy":
-            data_ = data
-        else:
-            raise ValueError(f"Array library {xp} not supported.")
-        ret_ = fun(self, data_, *args, **kwargs)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-        elif xp.__name__ == "cupy":
-            return xp.array(ret_)
-        else:
-            return ret_
-
-    return wrapper
-
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
 
