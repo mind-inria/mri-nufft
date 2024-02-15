@@ -144,12 +144,17 @@ def Rz(theta):
 def Rv(v1, v2, normalize=True):
     """Initialize 3D rotation matrix from two vectors.
 
+    Initialize a 3D rotation matrix from two vectors using Rodrigues's rotation
+    formula. Note that the rotation is carried around the axis orthogonal to both
+    vectors from the origin, and therefore is undetermined when both vectors
+    are co-linear.
+
     Parameters
     ----------
     v1 : np.ndarray
-        First vector.
+        Source vector.
     v2 : np.ndarray
-        Second vector.
+        Target vector.
     normalize : bool, optional
         Normalize the vectors. The default is True.
 
@@ -166,14 +171,57 @@ def Rv(v1, v2, normalize=True):
     return np.identity(3) + cross_matrix + cross_matrix @ cross_matrix / (1 + cos_theta)
 
 
+def Ra(vector, theta):
+    """Initialize 3D rotation matrix around an arbitrary vector.
+
+    Initialize a 3D rotation matrix to rotate around `vector` by an angle `theta`.
+    It corresponds to the generalized formula with `Rx`, `Ry` and `Rz` as subcases.
+
+    Parameters
+    ----------
+    vector : np.ndarray
+        Vector defining the rotation axis, automatically normalized.
+    theta : float
+        Angle in radians defining the rotation around `vector`.
+
+    Returns
+    -------
+    np.ndarray
+        3D rotation matrix.
+    """
+    cos_t = np.cos(theta)
+    sin_t = np.sin(theta)
+    v_x, v_y, v_z = vector / np.linalg.norm(vector)
+    return np.array(
+        [
+            [
+                cos_t + v_x ** 2 * (1 - cos_t),
+                v_x * v_y * (1 - cos_t) + v_z * sin_t,
+                v_x * v_z * (1 - cos_t) - v_y * sin_t,
+            ],
+            [
+                v_y * v_x * (1 - cos_t) - v_z * sin_t,
+                cos_t + v_y ** 2 * (1 - cos_t),
+                v_y * v_z * (1 - cos_t) + v_x * sin_t,
+            ],
+            [
+                v_z * v_x * (1 - cos_t) + v_y * sin_t,
+                v_z * v_y * (1 - cos_t) - v_x * sin_t,
+                cos_t + v_z ** 2 * (1 - cos_t),
+            ],
+        ]
+    )
+
+
 #############
 # FIBONACCI #
 #############
 
 
 def generate_fibonacci_lattice(nb_points, epsilon=0.25):
+    angle = (1 + np.sqrt(5)) / 2
     fibonacci_square = np.zeros((nb_points, 2))
-    fibonacci_square[:, 0] = (np.arange(nb_points) / (1 + np.sqrt(5)) / 2) % 1
+    fibonacci_square[:, 0] = (np.arange(nb_points) / angle) % 1
     fibonacci_square[:, 1] = (np.arange(nb_points) + epsilon) / (
         nb_points - 1 + 2 * epsilon
     )
