@@ -17,7 +17,6 @@ from mrinufft.density import get_density
 
 CUPY_AVAILABLE = True
 try:
-    import cupyx as cx
     import cupy as cp
 except ImportError:
     CUPY_AVAILABLE = False
