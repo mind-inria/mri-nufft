@@ -10,7 +10,8 @@ import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
 import numpy as np
-from mrinufft._utils import power_method, auto_cast, get_array_module, is_cuda_array
+from mrinufft._utils import power_method, auto_cast, get_array_module
+from mrinufft.operators.interfaces.utils import is_cuda_array
 
 from mrinufft.density import get_density
 
@@ -129,13 +130,11 @@ def with_numpy_cupy(fun):
         if xp.__name__ == "torch" and is_cuda_array(data):
             # Move them to cupy
             data_ = cp.from_dlpack(data)
-            if output is not None:
-                output_ = cp.from_dlpack(output)
+            output_ = cp.from_dlpack(output) if output is not None else None
         elif xp.__name__ == "torch":
             # Move to numpy
             data_ = data.to("cpu").numpy()
-            if output is not None:
-                output_ = output.to("cpu").numpy()
+            output_ = output.to("cpu").numpy() if output is not None else None
         else:
             data_ = data
             output_ = output

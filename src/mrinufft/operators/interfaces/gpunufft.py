@@ -3,7 +3,8 @@
 import numpy as np
 import warnings
 from ..base import FourierOperatorBase, with_numpy_cupy
-from mrinufft._utils import proper_trajectory, get_array_module, is_cuda_array
+from mrinufft._utils import proper_trajectory, get_array_module
+from mrinufft.operators.interfaces.utils import is_cuda_array
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -113,6 +114,9 @@ class RawGpuNUFFT:
             Pinned memory array for the smaps.
         use_gpu_direct: bool default False
             if True, direct GPU array can be passed.
+            In this case pinned memory is not used and this saved memory.
+            It will not be an error if this is False and you pass GPU array,
+            just that it is inefficient.
         
         Notes
         -----
@@ -185,12 +189,12 @@ class RawGpuNUFFT:
         xp = get_array_module(image)
         if direction == "op":
             if self.uses_sense or self.n_coils == 1:
-                return image.reshape((-1, 1), "F")
-            return xp.asarray([c.ravel(order="F") for c in image]).T
+                return image.reshape((-1, 1), order="F").astype(xp.complex64)
+            return xp.asarray([c.ravel(order="F") for c in image], dtype=xp.complex64).T
         else:
             if self.uses_sense or self.n_coils == 1:
-                return image.squeeze().T
-            return xp.asarray([c.T for c in image])
+                return image.squeeze().astype(xp.complex64).T
+            return xp.asarray([c.T for c in image], dtype=xp.complex64)
         
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
@@ -212,7 +216,7 @@ class RawGpuNUFFT:
             Non-uniform Fourier transform of the input image.
         """ 
         if kspace is None:
-            kspace = cp.empty_pinned(
+            kspace = cp.empty(
                 (self.n_coils, len(self.samples)),
                 dtype=cp.complex64,
             )
@@ -251,13 +255,13 @@ class RawGpuNUFFT:
             self.pinned_image,
             self._reshape_image(image)
         )
-        self.operator.op_direct(
-            image.data.ptr,
-            kspace.data.ptr,
+        new_ksp = self.operator.op(
+            self.pinned_image,
+            kspace,
             interpolate_data,
         )
         if make_copy_back:
-            new_ksp = cp.copy(kspace)
+            new_ksp = cp.copy(new_ksp)
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
@@ -305,6 +309,7 @@ class RawGpuNUFFT:
             adjoint operator of Non Uniform Fourier transform of the
             input coefficients.
         """
+        coeffs = coeffs.astype(cp.complex64)
         if image is None:
             image = cp.empty(
                 (np.prod(self.shape), (1 if self.uses_sense else self.n_coils)),
@@ -316,6 +321,7 @@ class RawGpuNUFFT:
             image.data.ptr, 
             grid_data
         )
+        image = image.reshape(self.n_coils, *self.shape[::-1])
         return self._reshape_image(image, 'adjoint') 
         
         
@@ -399,9 +405,10 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        if self.impl.use_gpu_direct:
-            if is_cuda_array(data):
-                return self.impl.op_direct(data, coeffs)
+        if is_cuda_array(data):
+            if not self.impl.use_gpu_direct:
+                warnings.warn("Using direct GPU array without passing "
+                              "`use_gpu_direct=True`, this is memory inefficient.")
             return self.impl.op_direct(data, coeffs)
         return self.impl.op(
             data,
@@ -424,8 +431,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
-        if self.impl.use_gpu_direct:
-            return self.impl.adj_op_direct(data, coeffs)
+        if is_cuda_array(coeffs):
+            if not self.impl.use_gpu_direct:
+                warnings.warn("Using direct GPU array without passing "
+                              "`use_gpu_direct=True`, this is memory inefficient.")
+            return self.impl.adj_op_direct(coeffs, data)
         return self.impl.adj_op(coeffs, data)
 
     @property
