@@ -102,7 +102,7 @@ def precess(
     tilt="golden",
     half_sphere=False,
     partition="axial",
-    axis=2,
+    axis=None,
 ):
     """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
 
@@ -121,9 +121,10 @@ def precess(
         Partition type between an axial or polar split of the
         selected axis, by default "axial".
     axis : int, optional
-        Axis selected to apply the precession, generally
+        Axis selected for reference to apply the precession, generally
         corresponding to the shot direction for single shot
-        `trajectory` inputs, by default 2.
+        `trajectory` inputs. The default behavior when `None` is to select
+        the last coordinate of the first shot as the axis, by default `None`.
 
     Returns
     -------
@@ -151,13 +152,27 @@ def precess(
     vectors[:, 0] = np.cos(phi) * radius
     vectors[:, 1] = np.sin(phi) * radius
 
+    # Select rotation axis when axis is not already a vector
+    if axis is None:
+        axis_vector = trajectory[Ns - 1]
+        axis_vector /= np.linalg.norm(axis_vector)
+        print(axis_vector)
+    elif isinstance(axis, int):
+        axis_vector = np.zeros(3)
+        axis_vector[axis] = 1
+    else:
+        axis_vector = axis
+
     # Rotate initial trajectory
-    axis_vector = np.zeros(3)
-    axis_vector[axis] = 1
-    new_trajectory[0] = trajectory
-    for i in np.arange(1, nb_rotations):
+    for i in np.arange(1, nb_rotations - 1 + half_sphere):
         rotation = Rv(axis_vector, vectors[i], normalize=False).T
         new_trajectory[i] = trajectory @ rotation
+
+    # Handle manually the case with parallel vectors
+    # not properly handled by Rv
+    new_trajectory[0] = trajectory
+    if not half_sphere:
+        new_trajectory[-1] = -trajectory
 
     return new_trajectory.reshape((nb_rotations * Nc, Ns, 3))
 

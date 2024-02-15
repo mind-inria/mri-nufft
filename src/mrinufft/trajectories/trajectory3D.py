@@ -5,7 +5,7 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .maths import Ry, Rz
+from .maths import Ry, Rz, Ra
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
 from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
@@ -254,6 +254,12 @@ def initialize_3D_wave_caipi(
         ratio = nl.norm(np.diff(positions[:2], axis=-1))
         positions[:, 0] /= ratio / 2
 
+    if packing == Packings.FIBONACCI:
+        # Estimate circle positions and width based on the k-space 2D surface
+        # and its optimal circle packing
+        optimal_packing = np.pi / (2 * np.sqrt(3))  # Optimal density (hexagonal) when Nc tends to infinity
+        positions = np.sqrt(Nc * 2 / optimal_packing) * generate_fibonacci_circle(Nc * 2)
+
     # Remove points by distance to fit both shape and Nc
     main_order = initialize_shape_norm(shape)
     tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
@@ -273,7 +279,7 @@ def initialize_3D_wave_caipi(
 
 
 def initialize_3D_seiffert_spiral(
-    Nc, Ns, curve_index=0.2, nb_revolutions=1, tilt="golden", in_out=False
+    Nc, Ns, curve_index=0.2, nb_revolutions=1, axis_tilt="golden", spiral_tilt="golden", in_out=False
 ):
     """Initialize 3D trajectories with modulated Seiffert spirals.
 
@@ -293,8 +299,10 @@ def initialize_3D_seiffert_spiral(
     nb_revolutions : float
         Number of revolutions, i.e. times the polar angle of the curves
         passes through 0, by default 1
-    tilt : str, float, optional
-        Angle between shots around z-axis over precession, by default "golden"
+    axis_tilt : str, float, optional
+        Angle between shots over a precession around the z-axis, by default "golden"
+    spiral_tilt : str, float, optional
+        Angle of the spiral within its own axis, by default "golden"
     in_out : bool
         Whether the curves are going in-and-out or start from the center,
         by default False
@@ -342,12 +350,18 @@ def initialize_3D_seiffert_spiral(
     # Apply precession to the first spiral
     trajectory = precess(
         spiral,
-        tilt=tilt,
+        tilt=axis_tilt,
         nb_rotations=Nc,
         half_sphere=in_out,
         partition="axial",
-        axis=2,
+        axis=None,
     )
+
+    # Tilt the spiral along its own axis
+    for i in range(Nc):
+        angle = i * initialize_tilt(spiral_tilt)
+        rotation = Ra(trajectory[i, -1], angle).T
+        trajectory[i] = trajectory[i] @ rotation
 
     # Handle in_out case
     if in_out:
