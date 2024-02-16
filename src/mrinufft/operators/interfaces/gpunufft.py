@@ -457,20 +457,42 @@ class MRIGpuNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
-        volume_shape = tuple(int(osf * s) for s in volume_shape)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
-            osf=1,
+            osf=osf,
             **kwargs,
         )
-        density_comp = np.ones(kspace_loc.shape[0])
-        for _ in range(num_iterations):
-            density_comp = density_comp / np.abs(
-                grid_op.impl.op(
-                    grid_op.impl.adj_op(density_comp, None, True),
-                    None,
-                    True,
-                )
-            )
+        density_comp = grid_op.impl.operator.estimate_density_comp(max_iter=num_iterations)
         return density_comp.squeeze()
+    
+    def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            Number of iteration to perform to estimate the Lipschitz constant.
+        tolerance: float, optional default 1e-5
+            Tolerance for the spectral radius estimation.
+        kwargs:
+            Extra kwargs for the operator.
+
+        Returns
+        -------
+        float
+            Lipschitz constant of the operator.
+        """
+        tmp_op = self.__class__(
+            self.samples,
+            self.shape,
+            density=self.density,
+            n_coils=1,
+            smaps=None,
+            squeeze_dims=True,
+            **kwargs,
+        )
+        return tmp_op.impl.operator.get_spectral_radius(
+            max_iter=max_iter,
+            tolerance=tolerance
+        )
