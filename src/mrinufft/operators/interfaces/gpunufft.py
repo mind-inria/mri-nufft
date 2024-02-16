@@ -463,9 +463,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
             osf=osf,
             **kwargs,
         )
-        density_comp = grid_op.impl.operator.estimate_density_comp(max_iter=num_iterations)
+        density_comp = grid_op.impl.operator.estimate_density_comp(
+            max_iter=num_iterations
+        )
         return density_comp.squeeze()
-    
+
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
         """Return the Lipschitz constant of the operator.
 
@@ -493,6 +495,5 @@ class MRIGpuNUFFT(FourierOperatorBase):
             **kwargs,
         )
         return tmp_op.impl.operator.get_spectral_radius(
-            max_iter=max_iter,
-            tolerance=tolerance
+            max_iter=max_iter, tolerance=tolerance
         )
