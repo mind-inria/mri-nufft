@@ -2,7 +2,7 @@
 
 import warnings
 import numpy as np
-from mrinufft.operators.base import FourierOperatorBase
+from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import (
     proper_trajectory,
     get_array_module,
@@ -239,6 +239,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         )
         # Support for concurrent stream and computations.
 
+    @with_numpy_cupy
     @nvtx_mark()
     def op(self, data, ksp_d=None):
         r"""Non Cartesian MRI forward operator.
@@ -262,9 +263,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             check_size(data, (self.n_batchs, *self.shape))
         else:
             check_size(data, (self.n_batchs, self.n_coils, *self.shape))
-        xp = get_array_module(data)
-        if xp.__name__ == "torch" and data.is_cpu:
-            data = data.numpy()
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
@@ -278,10 +276,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         ret = op_func(data, ksp_d)
 
         ret /= self.norm_factor
-        if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=data.device)
-        elif xp.__name__ == "torch":
-            ret = xp.from_numpy(ret)
         return self._safe_squeeze(ret)
 
     def _op_sense_device(self, data, ksp_d=None):
@@ -368,6 +362,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         return self.raw_op.type2(image_d, coeffs_d)
 
     @nvtx_mark()
+    @with_numpy_cupy
     def adj_op(self, coeffs, img_d=None):
         """Non Cartesian MRI adjoint operator.
 
@@ -379,9 +374,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        xp = get_array_module(coeffs)
-        if xp.__name__ == "torch" and coeffs.is_cpu:
-            coeffs = coeffs.numpy()
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
@@ -397,10 +389,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         ret = adj_op_func(coeffs, img_d)
         ret /= self.norm_factor
 
-        if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=coeffs.device)
-        elif xp.__name__ == "torch":
-            ret = xp.from_numpy(ret)
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
