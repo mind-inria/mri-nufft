@@ -96,8 +96,9 @@ def param_array_interface(func):
             op = operator[0]
         else:
             op = operator
-        if "cufinufft" not in op.backend and array_interface in ["torch-gpu", "cupy"]:
-            pytest.skip("Uncompatible backend and array")
+        if array_interface in ["torch-gpu", "cupy"]:
+            if "cufinufft" not in op.backend and "gpunufft" not in op.backend:
+                pytest.skip("Uncompatible backend and array")
         return func(operator, array_interface, *args, **kwargs)
 
     return _param_array_interface(wrapper)

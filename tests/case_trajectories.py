@@ -18,14 +18,16 @@ class CasesTrajectories:
         np.random.seed(seed)
         samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 2)
         samples = samples.reshape(M, 2)
-        return samples, (N, N)
+        # Have assymetric image size to better catch shape mismatch issues
+        return samples, (N, N * 2)
 
     def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
         """Create a random 3D trajectory."""
         np.random.seed(seed)
         samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 3)
         samples = samples.reshape(M, 3)
-        return samples, (N, N, N)
+        # Have assymetric image size to better catch shape mismatch issues
+        return samples, (N, N * 2, N + 10)
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):
         """Create a 2D radial trajectory."""
