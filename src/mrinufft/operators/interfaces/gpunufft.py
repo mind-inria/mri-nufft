@@ -170,7 +170,7 @@ class RawGpuNUFFT:
                 )
         self.pinned_image = pinned_image
         self.pinned_kspace = pinned_kspace
-
+        self.osf = osf
         self.pinned_smaps = pinned_smaps
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
@@ -483,10 +483,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        volume_shape = (np.array(volume_shape) * osf).astype(int)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
-            osf=osf,
+            osf=1,
             **kwargs,
         )
         density_comp = grid_op.impl.operator.estimate_density_comp(
@@ -497,7 +498,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
         """Return the Lipschitz constant of the operator.
 
-        Parameters
         ----------
         max_iter: int
             Number of iteration to perform to estimate the Lipschitz constant.

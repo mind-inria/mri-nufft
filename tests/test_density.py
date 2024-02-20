@@ -43,9 +43,8 @@ def radial_distance():
     traj, shape = CasesTrajectories().case_radial2D()
 
     proper_traj = proper_trajectory(traj, normalize="unit")
-    weights = 2 * np.pi * np.sqrt(proper_traj[:, 0] ** 2 + proper_traj[:, 1] ** 2)
-
-    return normalize_weights(weights)
+    weights = 2 * np.pi * np.linalg.norm(proper_traj, axis=-1)
+    return weights
 
 
 @parametrize("osf", [1, 1.25, 2])
@@ -61,10 +60,25 @@ def test_cell_count2D(traj, shape, osf):
 def test_voronoi(traj, shape, radial_distance):
     """Test the voronoi method."""
     result = voronoi(traj)
+    distance = radial_distance(traj, shape)
+    result = result / np.mean(result)
+    distance = distance / np.mean(distance)
+    assert_correlate(result, distance, slope=1)
 
     assert_correlate(result, radial_distance, slope=2 * np.pi)
 
-
-def test_pipe():
+@parametrize("osf", [1, 1.25, 2])
+@parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_nyquist_radial2D,
+                                              CasesTrajectories.case_nyquist_radial3D])
+def test_pipe(traj, shape, osf):
     """Test the pipe method."""
-    pass
+    distance = radial_distance(traj, shape)
+    result = pipe(traj, shape, osf=osf, num_iterations=10)
+    result = result / np.mean(result)
+    distance = distance / np.mean(distance)
+    if osf != 2:
+        # If OSF < 2, we dont perfectly estimate
+        assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.2)
+    else:
+        assert_correlate(result, distance, slope=1, slope_err=0.1, r_value_err=0.1)
+    
