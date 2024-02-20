@@ -2,7 +2,7 @@
 
 import numpy as np
 import numpy.testing as npt
-from pytest_cases import fixture, parametrize, parametrize_with_cases
+from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
@@ -62,9 +62,15 @@ def test_voronoi(traj, shape):
     distance = distance / np.mean(distance)
     assert_correlate(result, distance, slope=1)
 
+
 @parametrize("osf", [1, 1.25, 2])
-@parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_nyquist_radial2D,
-                                              CasesTrajectories.case_nyquist_radial3D])
+@parametrize_with_cases(
+    "traj, shape",
+    cases=[
+        CasesTrajectories.case_nyquist_radial2D,
+        CasesTrajectories.case_nyquist_radial3D,
+    ],
+)
 @parametrize(backend=["gpunufft"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
@@ -77,4 +83,3 @@ def test_pipe(backend, traj, shape, osf):
         assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.2)
     else:
         assert_correlate(result, distance, slope=1, slope_err=0.1, r_value_err=0.1)
-    

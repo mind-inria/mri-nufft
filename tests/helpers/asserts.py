@@ -51,7 +51,7 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
         a.flatten(), b.flatten()
     )
     abs_slope_reg = abs(slope_reg)
-    if r_value_err is not None and abs(rvalue-1) > r_value_err:
+    if r_value_err is not None and abs(rvalue - 1) > r_value_err:
         raise AssertionError(
             f"RValue {rvalue} != 1 +- {r_value_err}\n "
             f"intercept={intercept}, stderr={stderr}, "

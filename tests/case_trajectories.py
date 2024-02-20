@@ -33,20 +33,19 @@ class CasesTrajectories:
         """Create a 2D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         return trajectory, (N, N)
-    
-    def case_nyquist_radial2D(self, Nc=32*4, Ns=16, N=32):
+
+    def case_nyquist_radial2D(self, Nc=32 * 4, Ns=16, N=32):
         """Create a 2D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         return trajectory, (N, N)
-    
 
     def case_radial3D(self, Nc=20, Ns=1000, Nr=20, N=64, expansion="rotations"):
         """Create a 3D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = stack(trajectory, nb_stacks=Nr)
         return trajectory, (N, N, N)
-    
-    def case_nyquist_radial3D(self, Nc=32*4, Ns=16, Nr=32*4, N=32):
+
+    def case_nyquist_radial3D(self, Nc=32 * 4, Ns=16, Nr=32 * 4, N=32):
         """Create a 3D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = rotate(trajectory, nb_rotations=Nr)
