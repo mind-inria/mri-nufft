@@ -37,13 +37,10 @@ def slow_cell_count2D(traj, shape, osf):
     return normalize_weights(weights)
 
 
-@fixture(scope="module")
-def radial_distance():
+def radial_distance(traj, shape):
     """Compute the radial distance of a trajectory."""
-    traj, shape = CasesTrajectories().case_radial2D()
-
     proper_traj = proper_trajectory(traj, normalize="unit")
-    weights = 2 * np.pi * np.linalg.norm(proper_traj, axis=-1)
+    weights = np.linalg.norm(proper_traj, axis=-1)
     return weights
 
 
