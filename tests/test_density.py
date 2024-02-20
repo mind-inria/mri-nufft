@@ -54,15 +54,13 @@ def test_cell_count2D(traj, shape, osf):
 
 
 @parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_radial2D])
-def test_voronoi(traj, shape, radial_distance):
+def test_voronoi(traj, shape):
     """Test the voronoi method."""
     result = voronoi(traj)
     distance = radial_distance(traj, shape)
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     assert_correlate(result, distance, slope=1)
-
-    assert_correlate(result, radial_distance, slope=2 * np.pi)
 
 @parametrize("osf", [1, 1.25, 2])
 @parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_nyquist_radial2D,
