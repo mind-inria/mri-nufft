@@ -6,7 +6,7 @@ from pytest_cases import fixture, parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
-from mrinufft.density import cell_count, voronoi
+from mrinufft.density import cell_count, voronoi, pipe
 from mrinufft.density.utils import normalize_weights
 from mrinufft._utils import proper_trajectory
 
