@@ -67,7 +67,8 @@ def test_voronoi(traj, shape, radial_distance):
 @parametrize("osf", [1, 1.25, 2])
 @parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_nyquist_radial2D,
                                               CasesTrajectories.case_nyquist_radial3D])
-def test_pipe(traj, shape, osf):
+@parametrize(backend=["gpunufft"])
+def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
     distance = radial_distance(traj, shape)
     result = pipe(traj, shape, osf=osf, num_iterations=10)
