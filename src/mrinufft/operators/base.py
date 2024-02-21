@@ -21,6 +21,14 @@ try:
 except ImportError:
     CUPY_AVAILABLE = False
 
+AUTOGRAD_AVAILABLE = True
+try:
+    import torch
+    from .autodiff import make_autograd
+except ImportError:
+    AUTOGRAD_AVAILABLE = False
+
+
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
