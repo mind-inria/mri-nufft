@@ -5,6 +5,7 @@ Only finufft and cufinufft support batch computations.
 
 import numpy as np
 import numpy.testing as npt
+import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import (
     assert_correlate,
@@ -37,7 +38,7 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*random*",
 )
-@parametrize(backend=["finufft", "cufinufft"])
+@parametrize(backend=["gpunufft", "finufft", "cufinufft"])
 def operator(
     request,
     kspace_locs,
@@ -49,6 +50,8 @@ def operator(
     backend="finufft",
 ):
     """Generate a batch operator."""
+    if n_trans != 1 and backend == "gpunufft":
+        pytest.skip("Duplicate case.")
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)

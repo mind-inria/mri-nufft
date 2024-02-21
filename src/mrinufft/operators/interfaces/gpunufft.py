@@ -170,7 +170,7 @@ class RawGpuNUFFT:
                 )
         self.pinned_image = pinned_image
         self.pinned_kspace = pinned_kspace
-
+        self.osf = osf
         self.pinned_smaps = pinned_smaps
         self.operator = NUFFTOp(
             np.reshape(samples, samples.shape[::-1], order="F"),
@@ -193,8 +193,9 @@ class RawGpuNUFFT:
             return xp.asarray([c.ravel(order="F") for c in image], dtype=xp.complex64).T
         else:
             if self.uses_sense or self.n_coils == 1:
-                return image.squeeze().astype(xp.complex64).T
-            return xp.asarray([c.T for c in image], dtype=xp.complex64)
+                # Support for one additional dimension
+                return image.squeeze().astype(xp.complex64).T[None]
+            return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
@@ -304,15 +305,16 @@ class RawGpuNUFFT:
             adjoint operator of Non Uniform Fourier transform of the
             input coefficients.
         """
+        C = 1 if self.uses_sense else self.n_coils
         coeffs = coeffs.astype(cp.complex64)
         if image is None:
             image = cp.empty(
-                (np.prod(self.shape), (1 if self.uses_sense else self.n_coils)),
+                (np.prod(self.shape), C),
                 dtype=cp.complex64,
                 order="F",
             )
         self.operator.adj_op_direct(coeffs.data.ptr, image.data.ptr, grid_data)
-        image = image.reshape(self.n_coils, *self.shape[::-1])
+        image = image.reshape(C, *self.shape[::-1])
         return self._reshape_image(image, "adjoint")
 
 
@@ -334,10 +336,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         if True, the density compensation is estimated from the samples
         locations. If an array is passed, it is used as the density
         compensation.
-    squeeze_dims: bool default True
-        This has no effect, gpuNUFFT always squeeze the data.
+    squeeze_dims: bool, default True
+        If True, will try to remove the singleton dimension for batch and coils.
     smaps: np.ndarray default None
         Holds the sensitivity maps for SENSE reconstruction.
+    n_trans: int, default =1
+        This has no effect for now.
     kwargs: extra keyword args
         these arguments are passed to gpuNUFFT operator. This is used
         only in gpuNUFFT
@@ -351,9 +355,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples,
         shape,
         n_coils=1,
+        n_batchs=1,
+        n_trans=1,
         density=None,
         smaps=None,
-        squeeze_dims=False,
+        squeeze_dims=True,
         eps=1e-3,
         **kwargs,
     ):
@@ -367,8 +373,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.samples = proper_trajectory(samples, normalize="unit")
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
+        self.n_batchs = n_batchs
         self.smaps = smaps
-
+        self.squeeze_dims = squeeze_dims
         self.compute_density(density)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
@@ -396,21 +403,32 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
+        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+
+        op_func = self.impl.op
         if is_cuda_array(data):
+            op_func = self.impl.op_direct
             if not self.impl.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
-            return self.impl.op_direct(data, coeffs)
-        return self.impl.op(
-            data,
-            coeffs,
-        )
+        data_ = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        if coeffs is not None:
+            coeffs.reshape((B, C, K))
+        result = []
+        for i in range(B):
+            if coeffs is None:
+                result.append(op_func(data_[i], None))
+            else:
+                op_func(data_[i], coeffs[i])
+        if coeffs is None:
+            coeffs = get_array_module(data).stack(result)
+        return self._safe_squeeze(coeffs)
 
     @with_numpy_cupy
     def adj_op(self, coeffs, data=None):
-        """Compute adjoint Non Unform Fourier Transform.
+        """Compute adjoint Non Uniform Fourier Transform.
 
         Parameters
         ----------
@@ -424,14 +442,28 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
+        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+
+        adj_op_func = self.impl.adj_op
         if is_cuda_array(coeffs):
+            adj_op_func = self.impl.adj_op_direct
             if not self.impl.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
-            return self.impl.adj_op_direct(coeffs, data)
-        return self.impl.adj_op(coeffs, data)
+        coeffs_ = coeffs.reshape(B, C, K)
+        if data is not None:
+            data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        result = []
+        for i in range(B):
+            if data is None:
+                result.append(adj_op_func(coeffs_[i], None))
+            else:
+                adj_op_func(coeffs_[i], data[i])
+        if data is None:
+            data = get_array_module(coeffs).stack(result)
+        return self._safe_squeeze(data)
 
     @property
     def uses_sense(self):
@@ -457,10 +489,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        volume_shape = (np.array(volume_shape) * osf).astype(int)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
-            osf=osf,
+            osf=1,
             **kwargs,
         )
         density_comp = grid_op.impl.operator.estimate_density_comp(
@@ -471,7 +504,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
         """Return the Lipschitz constant of the operator.
 
-        Parameters
         ----------
         max_iter: int
             Number of iteration to perform to estimate the Lipschitz constant.
@@ -497,3 +529,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return tmp_op.impl.operator.get_spectral_radius(
             max_iter=max_iter, tolerance=tolerance
         )
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
