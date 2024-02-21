@@ -193,8 +193,9 @@ class RawGpuNUFFT:
             return xp.asarray([c.ravel(order="F") for c in image], dtype=xp.complex64).T
         else:
             if self.uses_sense or self.n_coils == 1:
-                return image.squeeze().astype(xp.complex64).T
-            return xp.asarray([c.T for c in image], dtype=xp.complex64)
+                # Support for one additional dimension
+                return image.squeeze().astype(xp.complex64).T[None]
+            return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
@@ -412,19 +413,22 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
-
         data_ = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
-        if coeffs is None:
-            coeffs = get_array_module(data).zeros((B, C, K), dtype=self.cpx_dtype)
-        else:
+        if coeffs is not None:
             coeffs.reshape((B, C, K))
+        result = []
         for i in range(B):
-            op_func(data_[i], coeffs[i])
+            if coeffs is None:
+                result.append(op_func(data_[i], None))
+            else:
+                op_func(data_[i], coeffs[i])
+        if coeffs is None:
+            coeffs = get_array_module(data).stack(result)
         return self._safe_squeeze(coeffs)
 
     @with_numpy_cupy
     def adj_op(self, coeffs, data=None):
-        """Compute adjoint Non Unform Fourier Transform.
+        """Compute adjoint Non Uniform Fourier Transform.
 
         Parameters
         ----------
@@ -449,14 +453,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
         coeffs_ = coeffs.reshape(B, C, K)
-        if data is None:
-            data = get_array_module(coeffs).zeros(
-                (B, 1 if self.uses_sense else C, *XYZ), dtype=self.cpx_dtype
-            )
-        else:
+        if data is not None:
             data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        result = []
         for i in range(B):
-            adj_op_func(coeffs_[i], data[i])
+            if data is None:
+                result.append(adj_op_func(coeffs_[i], None))
+            else:
+                adj_op_func(coeffs_[i], data[i])
+        if data is None:
+            data = get_array_module(coeffs).stack(result)
         return self._safe_squeeze(data)
 
     @property
