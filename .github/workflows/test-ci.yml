@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          pytest --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
+          pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
@@ -126,7 +126,7 @@ jobs:
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          python -m pytest --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term
+          python -m pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term
 
       - name: Upload coverage
         if: success()
@@ -168,7 +168,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_plots
-          pytest examples --cov --cov-branch --cov-report=term
+          pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term
 
       - name: Upload coverage
         if: success()
