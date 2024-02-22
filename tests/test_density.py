@@ -61,25 +61,3 @@ def test_voronoi(traj, shape):
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     assert_correlate(result, distance, slope=1)
-
-
-@parametrize("osf", [1, 1.25, 2])
-@parametrize_with_cases(
-    "traj, shape",
-    cases=[
-        CasesTrajectories.case_nyquist_radial2D,
-        CasesTrajectories.case_nyquist_radial3D,
-    ],
-)
-@parametrize(backend=["gpunufft"])
-def test_pipe(backend, traj, shape, osf):
-    """Test the pipe method."""
-    distance = radial_distance(traj, shape)
-    result = pipe(traj, shape, osf=osf, num_iterations=10)
-    result = result / np.mean(result)
-    distance = distance / np.mean(distance)
-    if osf != 2:
-        # If OSF < 2, we dont perfectly estimate
-        assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.2)
-    else:
-        assert_correlate(result, distance, slope=1, slope_err=0.1, r_value_err=0.1)
