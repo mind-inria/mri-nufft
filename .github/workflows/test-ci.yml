@@ -126,7 +126,8 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' }}
         shell: bash
         run: |
-          python -m pip install pynfft2
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install pynfft2
 
       - name: Run Tests
         shell: bash
