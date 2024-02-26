@@ -267,9 +267,9 @@ def initialize_3D_wave_caipi(
     if packing == Packings.FIBONACCI:
         # Estimate helix width based on the k-space 2D surface
         # and an optimal circle packing
-        positions = np.sqrt(Nc * 2 / CIRCLE_PACKING_DENSITY) * generate_fibonacci_circle(
-            Nc * 2
-        )
+        positions = np.sqrt(
+            Nc * 2 / CIRCLE_PACKING_DENSITY
+        ) * generate_fibonacci_circle(Nc * 2)
 
     # Remove points by distance to fit both shape and Nc
     main_order = initialize_shape_norm(shape)

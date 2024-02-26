@@ -305,7 +305,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.rotate(
-    planar_trajectories[x], nb_rotations=nb_repetitions, x_tilt="uniform",
+    planar_trajectories[x],
+    nb_rotations=nb_repetitions,
+    x_tilt="uniform",
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
@@ -340,7 +342,11 @@ show_argument(
 #
 
 trajectory = tools.precess(
-    planar_trajectories["Radial"], nb_rotations=nb_repetitions, tilt="golden", half_sphere=in_out, axis=2,
+    planar_trajectories["Radial"],
+    nb_rotations=nb_repetitions,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=2,
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
@@ -355,7 +361,11 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    planar_trajectories[x], nb_rotations=nb_repetitions, tilt="golden", half_sphere=in_out, axis=2,
+    planar_trajectories[x],
+    nb_rotations=nb_repetitions,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=2,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -370,7 +380,11 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    single_trajectories[x], nb_rotations=Nc, tilt="golden", half_sphere=in_out, axis=0,
+    single_trajectories[x],
+    nb_rotations=Nc,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=0,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 

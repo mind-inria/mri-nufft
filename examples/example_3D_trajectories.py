@@ -499,7 +499,10 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = [0, 0.5, 1, 2]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
-    Nc, Ns, in_out=in_out, nb_revolutions=x,
+    Nc,
+    Ns,
+    in_out=in_out,
+    nb_revolutions=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -519,7 +522,11 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
-    Nc, Ns, in_out=in_out, axis_tilt=x, spiral_tilt=0,
+    Nc,
+    Ns,
+    in_out=in_out,
+    axis_tilt=x,
+    spiral_tilt=0,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -541,7 +548,11 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
-    Nc, Ns, in_out=in_out, axis_tilt="golden", spiral_tilt=x,
+    Nc,
+    Ns,
+    in_out=in_out,
+    axis_tilt="golden",
+    spiral_tilt=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
