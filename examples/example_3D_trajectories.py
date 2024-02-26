@@ -235,12 +235,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   ``(default False)``. See 3D cones or 2D spiral
 # - ``nb_revolutions (float)``: number of revolutions performed from the
 #   center. ``(default 1)``. See 2D spiral
-# - ``spiral_tilt (str, float)``: angle between each spiral within a plane
-#   (in radians). ``(default "uniform")``. See 2D spiral
 # - ``spiral (str, float)``: type of spiral defined through the general
 #   archimedean equation. ``(default "fermat")``. See 2D spiral
-# - ``nb_cones (int)``: number of cones around the :math:`k_z`-axis.
-#   See ``tools.conify``
 # - ``cone_tilt (float)``: angle tilt between consecutive cones
 #   around the :math:`k_z`-axis. ``(default "golden")``. See ``tools.conify``
 # - ``max_angle (float)``: maximum angle of the cones. ``(default pi / 2)``.
@@ -475,7 +471,7 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # subsequently defines the length of the curve.
 #
 
-arguments = [0.5, 1, 1.5, 2]
+arguments = [0, 0.5, 1, 2]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
     Nc, Ns, in_out=in_out, nb_revolutions=x
 )

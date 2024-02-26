@@ -156,7 +156,6 @@ def precess(
     if axis is None:
         axis_vector = trajectory[Ns - 1]
         axis_vector /= np.linalg.norm(axis_vector)
-        print(axis_vector)
     elif isinstance(axis, int):
         axis_vector = np.zeros(3)
         axis_vector[axis] = 1

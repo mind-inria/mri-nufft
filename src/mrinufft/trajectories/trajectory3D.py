@@ -106,7 +106,7 @@ def initialize_3D_floret(
     This implementation is based on the work from [Pip+11]_.
     The acronym FLORET stands for Fermat Looped, Orthogonally
     Encoded Trajectories. It consists of Fermat spirals
-    folded into 3D cones along the :math:`k_z`-axis.
+    folded into 3D cones along one or several axes.
 
     Parameters
     ----------
