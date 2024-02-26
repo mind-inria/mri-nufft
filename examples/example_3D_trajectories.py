@@ -115,6 +115,8 @@ one_shot = -5  # Highlight one shot in particular
 #   the center then outside (in-out) or not (center-out). ``(default False)``
 # - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
 #   ``(default 5)``
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "archimedes")``. See 2D spiral
 # - ``width (float)``: cone width factor, normalized to densely cover the k-space
 #   by default. ``(default 1)``
 #
@@ -203,6 +205,21 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 
 # %%
+# ``spiral (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~
+#
+#
+# The shape of the spiral defined and documented in
+# ``initialize_2D_spiral``. Both ``"archimedes"`` and ``"fermat"``
+# spirals are available as string options for convenience.
+#
+
+arguments = ["archimedes", "fermat", 0.5, 1.5]
+function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, spiral=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
 # ``width (float)``
 # ~~~~~~~~~~~~~~~~~
 #
@@ -249,7 +266,7 @@ trajectory = mn.initialize_3D_floret(
     Ns,
     in_out=in_out,
     nb_revolutions=nb_revolutions,
-    max_angle=np.pi / 2,
+    max_angle=np.pi / 3,
 )[::-1]
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
@@ -269,7 +286,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # proposed by [Pip+11]_.
 #
 
-arguments = [(2,), (0,), (0, 2), (0, 1, 2)]
+arguments = [(0,), (1,), (0, 1), (0, 1, 2)]
 function = lambda x: mn.initialize_3D_floret(
     Nc * nb_repetitions,
     Ns,
@@ -279,6 +296,12 @@ function = lambda x: mn.initialize_3D_floret(
     axes=x,
 )[::-1]
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
 
 
 # %%

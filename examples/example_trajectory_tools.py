@@ -394,6 +394,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   nature of some trajectories to avoid hard angles
 #   around the center, ``(default False)``
 # - ``max_angle (float)``: maximum angle of the cones. ``(default pi / 2)``
+# - ``borderless (bool)``: Whether the cones should reach `max_angle` or not,
+#   mostly to avoid 1D cones if ``max_angle`` is equal to pi / 2, by default True.
 #
 
 trajectory = tools.conify(
@@ -466,6 +468,33 @@ function = lambda x: tools.conify(
     nb_cones=nb_repetitions,
     in_out=in_out,
     max_angle=x,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(0, 2),
+)
+
+
+# %%
+# ``borderless (bool)``
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# Define whether or not the edge cones should reach ``max_angle``
+# when equal to ``False``, or instead simply partition the
+# sphere over a polar split.
+#
+
+arguments = [True, False]
+function = lambda x: tools.conify(
+    planar_trajectories["Radial"],
+    nb_cones=nb_repetitions,
+    in_out=in_out,
+    max_angle=np.pi / 2,
+    borderless=x,
 )
 show_argument(
     function,

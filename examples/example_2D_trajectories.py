@@ -214,7 +214,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # The shape of the spiral defined through :math:`n` in the
 # :math:`r = a \theta^{1/n}` equality, with :math:`r` the radius and
 # :math:`\theta` the polar angle. Both ``"archimedes"`` and ``"fermat"``
-# are available as string options for simplicity.
+# are available as string options for convenience.
 #
 
 arguments = ["archimedes", "fermat", 0.5, 1.5]
