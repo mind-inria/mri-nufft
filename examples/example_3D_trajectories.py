@@ -370,8 +370,9 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # Different aliases are available, such as ``"triangle"``, ``"hexagon"`` instead
 # of ``"triangular"``.
 #
-# Note that ``"triangular"`` packing has slightly overlapping helices,
-# as it corresponds to a triangular/hexagonal grid.
+# Note that ``"triangular"`` and ``fibonacci`` packings have slightly overlapping
+# helices, as their widths correspond to that of an optimaly packed
+# triangular/hexagonal grid.
 # The ``"random"`` packing also naturally overlaps as the positions are determined
 # following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 #
@@ -458,8 +459,10 @@ show_argument(
 #   ``(default 0.3)``
 # - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
 #   ``(default 1)``
-# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
-#   ``(default "uniform")``. See 3D cones
+# - ``axis_tilt (str, float)``: angle between each consecutive shot (in radians)
+#   while descending over the :math:`k_z`-axis ``(default "golden")``. See 3D cones
+# - ``spiral_tilt (str, float)``: angle of the spiral within its own axis,
+#   defined from center to its outermost point ``(default "golden")``.
 # - ``in_out (bool)``: define whether the shots should travel toward the center
 #   then outside (in-out) or not (center-out). ``(default False)``. See 3D cones
 #
@@ -496,7 +499,49 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = [0, 0.5, 1, 2]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
-    Nc, Ns, in_out=in_out, nb_revolutions=x
+    Nc, Ns, in_out=in_out, nb_revolutions=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``axis_tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Angle between consecutive shots while descending along the :math:`k_z`-axis.
+# The ``"golden"`` value chosen as default provides an almost even distribution
+# over the k-space sphere by relying on Fibonacci lattice, and therefore it should
+# be changed carefully when relevant.
+#
+# Note that in the examples below, the ``spiral_tilt`` argument is set to 0
+# for clarity.
+#
+
+arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc, Ns, in_out=in_out, axis_tilt=x, spiral_tilt=0,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``spiral_tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Define the angle of the spiral within its own axis after precession of the spiral
+# along the :math:`k_z`-axis. Since the precession is applied through Rodrigues'
+# coefficients and Seiffert spirals are asymetric, their orientation right after
+# the precession can be quite biased and yield unbalanced densities.
+#
+# The method proposed in [SMR18]_ to handle that issue is to rotate the spirals
+# along their own axes, but the exact way to choose the rotation is not specified.
+# Rather than picking random angles, we decided to provide the conventional "tilt"
+# argument.
+#
+
+arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc, Ns, in_out=in_out, axis_tilt="golden", spiral_tilt=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 

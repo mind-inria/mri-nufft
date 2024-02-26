@@ -319,7 +319,8 @@ def initialize_3D_seiffert_spiral(
     axis_tilt : str, float, optional
         Angle between shots over a precession around the z-axis, by default "golden"
     spiral_tilt : str, float, optional
-        Angle of the spiral within its own axis, by default "golden"
+        Angle of the spiral within its own axis defined from center to its outermost
+        point, by default "golden"
     in_out : bool
         Whether the curves are going in-and-out or start from the center,
         by default False
