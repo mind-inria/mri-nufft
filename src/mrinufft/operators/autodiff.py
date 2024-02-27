@@ -61,21 +61,3 @@ class MRINufftAutoGrad(torch.nn.Module):
     def __getattr__(self, name):
         """Get the attribute from the root operator."""
         return getattr(self.nufft_op, name)
-
-
-def make_autograd(nufft_op, variable="data"):
-    """Make a new Operator with autodiff support.
-
-    Parameters
-    ----------
-    variable: str, default data
-        variable on which the gradient is computed with respect to.
-
-    Returns
-    -------
-
-    """
-    if variable == "data":
-        return MRINufftAutoGrad(nufft_op)
-    else:
-        raise ValueError(f"Autodiff with respect to {variable} is not supported.")

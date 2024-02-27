@@ -58,13 +58,17 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, *args, **kwargs):
+def get_operator(backend_name: str, *args, autograd=None, **kwargs):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
     ----------
     backend_name: str
         Backend name
+
+    autograd: str, default None
+        if set to "data" will provide an operator with autodiff capabilities with respect to it.
+
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -96,6 +100,9 @@ def get_operator(backend_name: str, *args, **kwargs):
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
+
+    if autograd:
+        operator.make_autograd(variable=autograd)
     return operator
 
 
