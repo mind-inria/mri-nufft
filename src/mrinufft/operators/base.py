@@ -24,7 +24,7 @@ except ImportError:
 AUTOGRAD_AVAILABLE = True
 try:
     import torch
-    from .autodiff import make_autograd
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
 except ImportError:
     AUTOGRAD_AVAILABLE = False
 
@@ -233,6 +233,31 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
+
+    def make_autograd(self, variable="data"):
+        """Make a new Operator with autodiff support.
+
+        Parameters
+        ----------
+        variable: str, default data
+            variable on which the gradient is computed with respect to.
+
+        Returns
+        -------
+        torch.nn.module
+            A NUFFT operator with autodiff capabilities.
+
+        Raises
+        ------
+        ValueError
+            If autograd is not available.
+        """
+        if not AUTOGRAD_AVAILABLE:
+            raise ValueError("Autograd not available, ensure torch is installed.")
+        if variable == "data":
+            return MRINufftAutoGrad(self)
+        else:
+            raise ValueError(f"Autodiff with respect to {variable} is not supported.")
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
