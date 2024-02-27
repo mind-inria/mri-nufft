@@ -34,14 +34,24 @@ class _NUFFT_ADJOP(torch.autograd.Function):
 
 
 class MRINufftAutoGrad(torch.nn.Module):
+    r"""
+    Wraps the NUFFT operator to support autodiff.
+
+    Parameters
+    ----------
+    nufft_op: NUFFT
+    """
+
     def __init__(self, nufft_op):
         super().__init__()
         self.nufft_op = nufft_op
 
     def op(self, x):
+        r"""Compute the forward image -> k-space."""
         return _NUFFT_OP.apply(x, self.nufft_op)
 
     def adj_op(self, kspace):
+        r"""Compute the adjoint k-space -> image."""
         return _NUFFT_ADJOP.apply(kspace, self.nufft_op)
 
     def __getattr__(self, name):
