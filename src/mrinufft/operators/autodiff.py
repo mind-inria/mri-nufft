@@ -4,6 +4,8 @@ import torch
 
 
 class _NUFFT_OP(torch.autograd.Function):
+    """Autograd support for op nufft function."""
+
     @staticmethod
     def forward(ctx, x, nufft_op):
         """Forward image -> k-space."""
@@ -14,32 +16,34 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dy):
         """Backward image -> k-space."""
-        x, = ctx.saved_tensors
+        (x,) = ctx.saved_tensors
         return ctx.nufft_op.adj_op(dy), None
 
 
 class _NUFFT_ADJOP(torch.autograd.Function):
+    """Autograd support for adj_op nufft function."""
+
     @staticmethod
     def forward(ctx, y, nufft_op):
-        """Forward kspace-> image."""
+        """Forward kspace -> image."""
         ctx.save_for_backward(y)
         ctx.nufft_op = nufft_op
         return nufft_op.adj_op(y)
 
     @staticmethod
     def backward(ctx, dx):
-        """Backward kspace-> image."""
-        y, = ctx.saved_tensors
+        """Backward kspace -> image."""
+        (y,) = ctx.saved_tensors
         return ctx.nufft_op.op(dx), None
 
 
 class MRINufftAutoGrad(torch.nn.Module):
-    r"""
-    Wraps the NUFFT operator to support autodiff.
+    """
+    Wraps the NUFFT operator to support torch autodiff.
 
     Parameters
     ----------
-    nufft_op: NUFFT
+    nufft_op: Classic Non differentiable MRI-NUFFT operator.
     """
 
     def __init__(self, nufft_op):
@@ -60,7 +64,17 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 
 def make_autograd(nufft_op, variable="data"):
-    """Make a new Operator with autodiff support."""
+    """Make a new Operator with autodiff support.
+
+    Parameters
+    ----------
+    variable: str, default data
+        variable on which the gradient is computed with respect to.
+
+    Returns
+    -------
+
+    """
     if variable == "data":
         return MRINufftAutoGrad(nufft_op)
     else:
