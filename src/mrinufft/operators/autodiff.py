@@ -4,48 +4,45 @@ import torch
 
 
 class _NUFFT_OP(torch.autograd.Function):
-    def __init__(self, nufft_op):
-        self.nufft_op = nufft_op
-
-    def forward(self, x):
+    @staticmethod
+    def forward(ctx, x, nufft_op):
         """Forward image -> k-space."""
-        return self.nufft_op.op(x)
+        ctx.save_for_backward(x)
+        ctx.nufft_op = nufft_op
+        return nufft_op.op(x)
 
-    def backward(self, dy):
+    @staticmethod
+    def backward(ctx, dy):
         """Backward image -> k-space."""
-        return self.nufft_op.adj_op(dy)
+        x, = ctx.saved_tensors
+        return ctx.nufft_op.adj_op(dy), None
 
 
 class _NUFFT_ADJOP(torch.autograd.Function):
-
-    def __init__(self, nufft_op):
-        self.nufft_op = nufft_op
-
-    def forward(self, y):
+    @staticmethod
+    def forward(ctx, y, nufft_op):
         """Forward kspace-> image."""
-        return self.nufft_op.adj_op(y)
+        ctx.save_for_backward(y)
+        ctx.nufft_op = nufft_op
+        return nufft_op.adj_op(y)
 
-    def backward(self, dx):
+    @staticmethod
+    def backward(ctx, dx):
         """Backward kspace-> image."""
-        return self.nufft_op.op(dx)
+        y, = ctx.saved_tensors
+        return ctx.nufft_op.op(dx), None
 
 
-class MRINufftAutoGrad:
-    """
-    Wrapper around FourierOperatorBase with support for autodifferentiation.
-
-    Parameters
-    ----------
-    nufft_op: FourierOperatorBase
-        MRI-nufft operator.
-
-    """
-
+class MRINufftAutoGrad(torch.nn.Module):
     def __init__(self, nufft_op):
+        super().__init__()
         self.nufft_op = nufft_op
 
-        self.op = _NUFFT_OP(self.nufft_op)
-        self.adj_op = _NUFFT_ADJOP(self.nufft_op)
+    def op(self, x):
+        return _NUFFT_OP.apply(x, self.nufft_op)
+
+    def adj_op(self, kspace):
+        return _NUFFT_ADJOP.apply(kspace, self.nufft_op)
 
     def __getattr__(self, name):
         """Get the attribute from the root operator."""
