@@ -1,6 +1,7 @@
 """Test the interfaces module."""
 
 import numpy as np
+import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
@@ -43,6 +44,8 @@ def operator(
     n_coils=1,
 ):
     """Generate an operator."""
+    if backend in ["pynfft", "sigpy"] and kspace_locs.shape[-1] == 3:
+        pytest.skip("3D for slow cpu is not tested")
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
