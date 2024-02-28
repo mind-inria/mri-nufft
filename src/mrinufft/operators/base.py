@@ -67,7 +67,8 @@ def get_operator(backend_name: str, *args, autograd=None, **kwargs):
         Backend name
 
     autograd: str, default None
-        if set to "data" will provide an operator with autodiff capabilities with respect to it.
+        if set to "data" will provide an operator with autodiff capabilities with
+        respect to it.
 
     *args, **kwargs:
         Arguments to pass to the operator constructor.
