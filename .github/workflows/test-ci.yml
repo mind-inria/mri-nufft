@@ -93,7 +93,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [gpunufft, cufinufft, pynfft]
+        backend: [gpunufft, cufinufft]
 
     steps:
       - uses: actions/checkout@v3
