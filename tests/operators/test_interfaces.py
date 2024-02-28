@@ -1,6 +1,7 @@
 """Test the interfaces module."""
 
 import numpy as np
+import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
