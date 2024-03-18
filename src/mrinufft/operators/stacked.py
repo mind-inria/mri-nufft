@@ -6,7 +6,12 @@ import numpy as np
 import scipy as sp
 
 from mrinufft._utils import proper_trajectory, power_method, get_array_module, auto_cast
-from mrinufft.operators.base import FourierOperatorBase, check_backend, get_operator
+from mrinufft.operators.base import (
+    FourierOperatorBase,
+    check_backend,
+    get_operator,
+    with_numpy_cupy,
+)
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
@@ -36,8 +41,13 @@ class MRIStackedNUFFT(FourierOperatorBase):
         Shape of the image.
     z_index: array-like
         Cartesian z index of masked plan.
-    backend: str
+    backend: str or FourierOperatorBase
         Backend to use.
+        If str, a NUFFT operator is initialized with str being a registered backend.
+        If FourierOperatorBase, the operator is checked for compatibility and used as is.
+        notably one should have:
+        ``n_coils = self.n_coils*len(z_index), squeeze_dims=True, smaps=None``
+
     smaps: array-like
         Sensitivity maps.
     n_coils: int
@@ -73,22 +83,48 @@ class MRIStackedNUFFT(FourierOperatorBase):
         **kwargs,
     ):
         super().__init__()
-        samples2d, z_index_ = self._init_samples(samples, z_index, shape)
         self.shape = shape
-        self.samples = samples2d.reshape(-1, 2)
-        self.z_index = z_index_
         self.n_coils = n_coils
         self.n_batchs = n_batchs
         self.squeeze_dims = squeeze_dims
         self.smaps = smaps
-        self.operator = get_operator(backend)(
-            self.samples,
-            shape[:-1],
-            n_coils=self.n_coils * len(self.z_index),
-            smaps=None,
-            squeeze_dims=True,
-            **kwargs,
-        )
+        if isinstance(backend, str):
+            samples2d, z_index_ = self._init_samples(samples, z_index, shape)
+            self.samples = samples2d.reshape(-1, 2)
+            self.z_index = z_index_
+            self.operator = get_operator(backend)(
+                self.samples,
+                shape[:-1],
+                n_coils=self.n_coils * len(self.z_index),
+                smaps=None,
+                squeeze_dims=True,
+                **kwargs,
+            )
+        elif isinstance(backend, FourierOperatorBase):
+            # get all the interesting values from the operator
+            if backend.shape != shape[:-1]:
+                raise ValueError("Backend operator should have compatible shape")
+
+            samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
+            self.samples = samples2d.reshape(-1, 2)
+            self.z_index = z_index_
+
+            if backend.n_coils != self.n_coils * (len(z_index_)):
+                raise ValueError(
+                    "The backend operator should have ``n_coils * len(z_index)``"
+                    " specified for its coil dimension."
+                )
+            if backend.uses_sense:
+                raise ValueError("Backend operator should not uses smaps.")
+            if not backend.squeeze_dims:
+                raise ValueError("Backend operator should have ``squeeze_dims=True``")
+            self.operator = backend
+
+        else:
+            raise ValueError(
+                "backend should either be a 2D nufft operator,"
+                " or a str specifying which nufft library to use."
+            )
 
     @staticmethod
     def _init_samples(samples, z_index, shape):
@@ -145,6 +181,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
             sp.fft.ifft(sp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
 
+    @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
         if self.uses_sense:
@@ -189,6 +226,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
+    @with_numpy_cupy
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
         if self.uses_sense:
@@ -367,12 +405,10 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             axes=-1,
         )
 
+    @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
         # Dispatch to special case.
-        xp = get_array_module(data)
-        if xp.__name__ == "torch" and data.is_cpu:
-            data = data.numpy()
         data = auto_cast(data, self.cpx_dtype)
 
         if self.uses_sense and is_cuda_array(data):
@@ -385,10 +421,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             op_func = self._op_calibless_host
         ret = op_func(data, ksp)
 
-        if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=data.device)
-        elif xp.__name__ == "torch":
-            ret = xp.from_numpy(ret)
         return self._safe_squeeze(ret)
 
     def _op_sense_host(self, data, ksp=None):
@@ -527,12 +559,10 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
+    @with_numpy_cupy
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
         # Dispatch to special case.
-        xp = get_array_module(coeffs)
-        if xp.__name__ == "torch" and coeffs.is_cpu:
-            coeffs = coeffs.numpy()
         coeffs = auto_cast(coeffs, self.cpx_dtype)
 
         if self.uses_sense and is_cuda_array(coeffs):
@@ -545,11 +575,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             adj_op_func = self._adj_op_calibless_host
 
         ret = adj_op_func(coeffs, img)
-
-        if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=coeffs.device)
-        elif xp.__name__ == "torch":
-            ret = xp.from_numpy(ret)
 
         return self._safe_squeeze(ret)
 
