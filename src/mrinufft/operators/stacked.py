@@ -323,6 +323,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
+        backend="cufinufft",
         **kwargs,
     ):
         if not (CUPY_AVAILABLE and check_backend("cufinufft")):
@@ -331,25 +332,49 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
 
-        samples2d, z_index_ = self._init_samples(samples, z_index, shape)
         self.shape = shape
-        self.samples = samples2d.reshape(-1, 2)
-        self.z_index = z_index_
         self.n_coils = n_coils
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+        if isinstance(backend, str):
+            samples2d, z_index_ = self._init_samples(samples, z_index, shape)
+            self.samples = samples2d.reshape(-1, 2)
+            self.z_index = z_index_
+            self.operator = get_operator(backend)(
+                self.samples,
+                shape[:-1],
+                n_coils=self.n_trans * len(self.z_index),
+                n_trans=len(self.z_index),
+                smaps=None,
+                squeeze_dims=True,
+                **kwargs,
+            )
+        elif isinstance(backend, FourierOperatorBase):
+            # get all the interesting values from the operator
+            if backend.shape != shape[:-1]:
+                raise ValueError("Backend operator should have compatible shape")
 
-        self.operator = get_operator("cufinufft")(
-            self.samples,
-            shape[:-1],
-            n_coils=n_trans * len(self.z_index),
-            n_trans=len(self.z_index),
-            smaps=None,
-            squeeze_dims=True,
-            density=density,
-            **kwargs,
-        )
+            samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
+            self.samples = samples2d.reshape(-1, 2)
+            self.z_index = z_index_
+
+            if backend.n_coils != self.n_trans * len(z_index_):
+                raise ValueError(
+                    "The backend operator should have ``n_coils * len(z_index)``"
+                    " specified for its coil dimension."
+                )
+            if backend.uses_sense:
+                raise ValueError("Backend operator should not uses smaps.")
+            if not backend.squeeze_dims:
+                raise ValueError("Backend operator should have ``squeeze_dims=True``")
+            self.operator = backend
+        else:
+            raise ValueError(
+                "backend should either be a 2D nufft operator,"
+                " or a str specifying which nufft library to use."
+            )
+
         # Smaps support
         self.smaps = smaps
         self.smaps_cached = False
@@ -358,7 +383,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 raise ValueError(
                     "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
                 )
-            self.smaps_cached = False
             if smaps_cached:
                 warnings.warn(
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
