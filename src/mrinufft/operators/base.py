@@ -103,7 +103,7 @@ def get_operator(backend_name: str, *args, autograd=None, **kwargs):
         operator = operator(*args, **kwargs)
 
     if autograd:
-        operator.make_autograd(variable=autograd)
+        operator = operator.make_autograd(variable=autograd)
     return operator
 
 
