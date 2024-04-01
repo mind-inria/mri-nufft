@@ -104,27 +104,32 @@ def precess(
     partition="axial",
     axis=None,
 ):
-    """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
+    """Rotate trajectories as a precession around the :math:`k_z`-axis.
 
     Parameters
     ----------
     trajectory : array_like
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
-        Number of rotations repeating the provided trajectory.
-    z_tilt : str, optional
-        Tilt of the trajectory over the :math:`k_z`-axis, by default "golden".
+        Number of rotations repeating the provided trajectory while precessing.
+    tilt : str, optional
+        Angle tilt between consecutive rotations around the :math:`k_z`-axis,
+        by default "golden".
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
-        of the k-space sphere, typically for in-out trajectories or planes.
+        of the k-space sphere.
+        It is typically used for in-out trajectories or planes.
     partition : str, optional
-        Partition type between an axial or polar split of the
-        selected axis, by default "axial".
-    axis : int, optional
-        Axis selected for reference to apply the precession, generally
-        corresponding to the shot direction for single shot
-        `trajectory` inputs. The default behavior when `None` is to select
-        the last coordinate of the first shot as the axis, by default `None`.
+        Partition type between an "axial" or "polar" split of the
+        :math:`k_z`-axis, designating whether the axis should be fragmented
+        by radius or angle respectively, by default "axial".
+    axis : int, array_like, optional
+        Axis selected for alignment reference when rotating the trajectory
+        around the :math:`k_z`-axis, generally corresponding to the shot
+        direction for single shot ``trajectory`` inputs. It can either
+        be an integer for one of the three k-space axes, or directly a 3D
+        array. The default behavior when `None` is to select the last
+        coordinate of the first shot as the axis, by default `None`.
 
     Returns
     -------
@@ -154,7 +159,7 @@ def precess(
 
     # Select rotation axis when axis is not already a vector
     if axis is None:
-        axis_vector = trajectory[Ns - 1]
+        axis_vector = np.copy(trajectory[Ns - 1])
         axis_vector /= np.linalg.norm(axis_vector)
     elif isinstance(axis, int):
         axis_vector = np.zeros(3)
@@ -163,15 +168,9 @@ def precess(
         axis_vector = axis
 
     # Rotate initial trajectory
-    for i in np.arange(1, nb_rotations - 1 + half_sphere):
+    for i in np.arange(nb_rotations):
         rotation = Rv(axis_vector, vectors[i], normalize=False).T
         new_trajectory[i] = trajectory @ rotation
-
-    # Handle manually the case with parallel vectors
-    # not properly handled by Rv
-    new_trajectory[0] = trajectory
-    if not half_sphere:
-        new_trajectory[-1] = -trajectory
 
     return new_trajectory.reshape((nb_rotations * Nc, Ns, 3))
 
