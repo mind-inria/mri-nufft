@@ -1,5 +1,6 @@
 """Utility functions for mathematical operations."""
 import numpy as np
+import numpy.linalg as nl
 
 
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
@@ -90,7 +91,7 @@ def Rx(theta):
     Returns
     -------
     np.ndarray
-        2D rotation matrix.
+        3D rotation matrix.
     """
     return np.array(
         [
@@ -112,7 +113,7 @@ def Ry(theta):
     Returns
     -------
     np.ndarray
-        2D rotation matrix.
+        3D rotation matrix.
     """
     return np.array(
         [
@@ -134,7 +135,7 @@ def Rz(theta):
     Returns
     -------
     np.ndarray
-        2D rotation matrix.
+        3D rotation matrix.
     """
     return np.array(
         [
@@ -145,13 +146,14 @@ def Rz(theta):
     )
 
 
-def Rv(v1, v2, normalize=True):
+def Rv(v1, v2, normalize=True, eps=1e-8):
     """Initialize 3D rotation matrix from two vectors.
 
     Initialize a 3D rotation matrix from two vectors using Rodrigues's rotation
     formula. Note that the rotation is carried around the axis orthogonal to both
     vectors from the origin, and therefore is undetermined when both vectors
-    are co-linear.
+    are colinear. While this case is handled manually, close cases might result
+    in approximative behaviors.
 
     Parameters
     ----------
@@ -167,6 +169,11 @@ def Rv(v1, v2, normalize=True):
     np.ndarray
         3D rotation matrix.
     """
+    # Check for colinearity, not handled by Rodrigues' coefficients
+    if nl.norm(np.cross(v1, v2)) < eps:
+        sign = np.sign(np.dot(v1, v2))
+        return sign * np.identity(3)
+
     if normalize:
         v1, v2 = v1 / np.linalg.norm(v1), v2 / np.linalg.norm(v2)
     cos_theta = np.dot(v1, v2)
@@ -179,7 +186,7 @@ def Ra(vector, theta):
     """Initialize 3D rotation matrix around an arbitrary vector.
 
     Initialize a 3D rotation matrix to rotate around `vector` by an angle `theta`.
-    It corresponds to the generalized formula with `Rx`, `Ry` and `Rz` as subcases.
+    It corresponds to the generalized formula, while `Rx`, `Ry` and `Rz` are subcases.
 
     Parameters
     ----------
