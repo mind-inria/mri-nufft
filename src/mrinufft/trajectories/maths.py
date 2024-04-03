@@ -1,4 +1,5 @@
 """Utility functions for mathematical operations."""
+
 import numpy as np
 import numpy.linalg as nl
 

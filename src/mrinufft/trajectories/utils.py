@@ -1,4 +1,5 @@
 """Utility functions for the trajectory design."""
+
 import numbers as nb
 import numpy as np
 
