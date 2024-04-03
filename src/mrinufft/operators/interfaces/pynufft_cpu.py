@@ -1,7 +1,7 @@
 """PyNUFFT CPU Interface."""
 
 from ..base import FourierOperatorCPU
-
+from mrinufft._utils import proper_trajectory
 
 PYNUFFT_CPU_AVAILABLE = True
 try:
@@ -24,12 +24,12 @@ class RawPyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        coeffs_data = self._nufft_obj.forward(grid_data)
+        coeffs_data = self._nufft_obj.forward(grid_data.squeeze())
         return coeffs_data
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
-        grid_data = self._nufft_obj.backward(coeffs_data)
+        grid_data = self._nufft_obj.adjoint(coeffs_data.squeeze())
         return grid_data
 
 
@@ -45,10 +45,24 @@ class MRIPynufft(FourierOperatorCPU):
         shape,
         density=False,
         n_coils=1,
+        n_batchs=1,
         smaps=None,
         osf=2,
         **kwargs,
     ):
-        super().__init__(samples, shape, density, n_coils, smaps)
+        super().__init__(
+            proper_trajectory(samples, normalize="pi"),
+            shape,
+            density=density,
+            n_coils=n_coils,
+            n_batchs=n_batchs,
+            n_trans=1,
+            smaps=smaps,
+        )
 
-        self.raw_op = RawPyNUFFT(samples, shape, osf, **kwargs)
+        self.raw_op = RawPyNUFFT(self.samples, shape, osf, **kwargs)
+
+    # @property
+    # def norm_factor(self):
+    #     """Normalization factor of the operator."""
+    #     return np.sqrt(2 ** len(self.shape))

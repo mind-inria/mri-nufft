@@ -58,7 +58,9 @@ class MRInfft(FourierOperatorCPU):
     backend = "pynfft"
     available = PYNFFT_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, n_batchs=1, smaps=None):
+    def __init__(
+        self, samples, shape, n_coils=1, n_batchs=1, smaps=None, density=False
+    ):
         super().__init__(
             samples,
             shape,
@@ -66,6 +68,7 @@ class MRInfft(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=1,
             smaps=smaps,
+            density=density,
             raw_op=None,  # is set later, after normalizing samples.
         )
         self.raw_op = RawPyNFFT(self.samples, shape)

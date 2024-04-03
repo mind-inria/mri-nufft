@@ -19,10 +19,10 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [finufft, pynfft, pynufft, bart, sigpy]
+        backend: [finufft, pynfft, pynufft-cpu, bart, sigpy]
         exclude:
           - backend: bart
-          - backend: pynfft
+          - backend: pynufft-cpu
 
     steps:
       - uses: actions/checkout@v3
@@ -48,10 +48,10 @@ jobs:
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install pynfft2 "cython<3.0.0"
+          python -m pip install pynfft2
 
       - name: Install pynufft
-        if: ${{ matrix.backend == 'pynufft' || env.ref_backend == 'pynufft' }}
+        if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
         run: python -m pip install pynufft
 
       - name: Install finufft
@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          pytest --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
+          pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
@@ -89,7 +89,7 @@ jobs:
           path: coverage_${{ matrix.backend}}
 
   test-gpu:
-    runs-on: GPU
+    runs-on: gpu
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
@@ -108,9 +108,12 @@ jobs:
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
           pip install cupy-cuda11x
+          pip install torch --index-url https://download.pytorch.org/whl/cu118
           pip install finufft
 
+
       - name: Install backend
+        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' }}
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
@@ -119,13 +122,20 @@ jobs:
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
           pip install ${{ matrix.backend }}
 
+      - name: Install pynfft
+        if: ${{ matrix.backend == 'pynfft' }}
+        shell: bash
+        run: |
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install pynfft2
+
       - name: Run Tests
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE/mri-nufft
           source $RUNNER_WORKSPACE/venv/bin/activate
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          python -m pytest --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term
+          python -m pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term
 
       - name: Upload coverage
         if: success()
@@ -167,7 +177,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_plots
-          pytest examples --cov --cov-branch --cov-report=term
+          pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term
 
       - name: Upload coverage
         if: success()

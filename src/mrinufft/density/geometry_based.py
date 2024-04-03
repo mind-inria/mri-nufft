@@ -1,4 +1,5 @@
 """Compute density compensation weights using geometry-based methods."""
+
 import numpy as np
 from scipy.spatial import Voronoi
 
@@ -76,14 +77,22 @@ def voronoi_unique(traj, *args, **kwargs):
         idx_vertices = v.regions[v.point_region[mm]]
         if np.all([i != -1 for i in idx_vertices]):
             wi[mm] = vol(v.vertices[idx_vertices])
+        else:
+            wi[mm] = np.inf
+    # some voronoi cell are considered closed, but have a too big area.
+    # (They are closing near infinity).
+    # we classify them as open cells as well.
+    outlier_thresh = np.percentile(wi, 95)
+    wi[wi > outlier_thresh] = np.inf
+
     # For edge point (infinite voronoi cells) we extrapolate from neighbours
     # Initial implementation in Jeff Fessler's MIRT
     rho = np.sum(traj**2, axis=1)
-    igood = rho > 0.6 * np.max(rho)
+    igood = (rho > 0.6 * np.max(rho)) & ~np.isinf(wi)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
     poly = np.polynomial.Polynomial.fit(rho[igood], wi[igood], 3)
-    wi[wi == 0] = poly(rho[wi == 0])
+    wi[np.isinf(wi)] = poly(rho[np.isinf(wi)])
     return wi
 
 

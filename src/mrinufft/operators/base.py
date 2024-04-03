@@ -5,12 +5,21 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 :author: Pierre-Antoine Comby
 """
-from abc import ABC, abstractmethod
-from functools import partial
+
 import warnings
+from abc import ABC, abstractmethod
+from functools import partial, wraps
 import numpy as np
+from mrinufft._utils import power_method, auto_cast, get_array_module
+from mrinufft.operators.interfaces.utils import is_cuda_array
 
 from mrinufft.density import get_density
+
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
 
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
@@ -82,6 +91,69 @@ def get_operator(backend_name: str, *args, **kwargs):
     return operator
 
 
+def with_numpy(fun):
+    """Ensure the function works internally with numpy array."""
+
+    @wraps(fun)
+    def wrapper(self, data, *args, **kwargs):
+        if hasattr(data, "__cuda_array_interface__"):
+            warnings.warn("data is on gpu, it will be moved to CPU.")
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = data.to("cpu").numpy()
+        elif xp.__name__ == "cupy":
+            data_ = data.get()
+        elif xp.__name__ == "numpy":
+            data_ = data
+        else:
+            raise ValueError(f"Array library {xp} not supported.")
+        ret_ = fun(self, data_, *args, **kwargs)
+
+        if xp.__name__ == "torch":
+            if data.is_cpu:
+                return xp.from_numpy(ret_)
+            return xp.from_numpy(ret_).to(data.device)
+        elif xp.__name__ == "cupy":
+            return xp.array(ret_)
+        else:
+            return ret_
+
+    return wrapper
+
+
+def with_numpy_cupy(fun):
+    """Ensure the function works internally with numpy or cupy array."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+        if xp.__name__ == "torch" and is_cuda_array(data):
+            # Move them to cupy
+            data_ = cp.from_dlpack(data)
+            output_ = cp.from_dlpack(output) if output is not None else None
+        elif xp.__name__ == "torch":
+            # Move to numpy
+            data_ = data.to("cpu").numpy()
+            output_ = output.to("cpu").numpy() if output is not None else None
+        else:
+            data_ = data
+            output_ = output
+
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+
+        if xp.__name__ == "torch" and is_cuda_array(data):
+            return xp.as_tensor(ret_, device=data.device)
+
+        if xp.__name__ == "torch":
+            if data.is_cpu:
+                return xp.from_numpy(ret_)
+            return xp.from_numpy(ret_).to(data.device)
+
+        return ret_
+
+    return wrapper
+
+
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
@@ -90,7 +162,7 @@ class FourierOperatorBase(ABC):
     as required by ModOpt.
     """
 
-    interfaces = {}
+    interfaces: dict[str, tuple] = {}
 
     def __init__(self):
         if not self.available:
@@ -187,6 +259,32 @@ class FourierOperatorBase(ABC):
 
         self.density = method(self.samples, self.shape, **kwargs)
 
+    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            number of iteration to compute the lipschitz constant.
+        **kwargs:
+            Extra arguments givent
+
+        Returns
+        -------
+        float
+            Spectral Radius
+
+        Notes
+        -----
+        This uses the Iterative Power Method to compute the largest singular value of a
+        minified version of the nufft operator. No coil or B0 compensation is used,
+        but includes any computed density.
+        """
+        tmp_op = self.__class__(
+            self.samples, self.shape, density=self.density, n_coils=1, **kwargs
+        )
+        return power_method(max_iter, tmp_op)
+
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""
@@ -196,6 +294,11 @@ class FourierOperatorBase(ABC):
     def uses_density(self):
         """Return True if the operator uses density compensation."""
         return getattr(self, "density", None) is not None
+
+    @property
+    def ndim(self):
+        """Number of dimensions in image space of the operator."""
+        return len(self._shape)
 
     @property
     def shape(self):
@@ -210,11 +313,6 @@ class FourierOperatorBase(ABC):
     def n_coils(self):
         """Number of coils for the operator."""
         return self._n_coils
-
-    @property
-    def ndim(self):
-        """Number of dimensions in image space of the operator."""
-        return len(self._shape)
 
     @n_coils.setter
     def n_coils(self, n_coils):
@@ -258,14 +356,14 @@ class FourierOperatorBase(ABC):
         """Return floating precision of the operator."""
         return self._dtype
 
+    @dtype.setter
+    def dtype(self, dtype):
+        self._dtype = np.dtype(dtype)
+
     @property
     def cpx_dtype(self):
         """Return complex floating precision of the operator."""
         return np.dtype(DTYPE_R2C[str(self.dtype)])
-
-    @dtype.setter
-    def dtype(self, dtype):
-        self._dtype = np.dtype(dtype)
 
     @property
     def samples(self):
@@ -355,6 +453,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         self.raw_op = raw_op
 
+    @with_numpy
     def op(self, data, ksp=None):
         r"""Non Cartesian MRI forward operator.
 
@@ -372,20 +471,18 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        if data.dtype != self.cpx_dtype:
-            warnings.warn(
-                f"Data should be of dtype {self.cpx_dtype} (is {data.dtype}). "
-                "Casting it for you."
-            )
-            data = data.astype(self.cpx_dtype)
         # sense
+        data = auto_cast(data, self.cpx_dtype)
+
         if self.uses_sense:
             ret = self._op_sense(data, ksp)
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
         ret /= self.norm_factor
-        return self._safe_squeeze(ret)
+
+        ret = self._safe_squeeze(ret)
+        return ret
 
     def _op_sense(self, data, ksp=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -419,6 +516,7 @@ class FourierOperatorCPU(FourierOperatorBase):
     def _op(self, image, coeffs):
         self.raw_op.op(coeffs, image)
 
+    @with_numpy
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
 
@@ -430,11 +528,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if coeffs.dtype != self.cpx_dtype:
-            warnings.warn(
-                f"coeffs should be of dtype {self.cpx_dtype}. Casting it for you."
-            )
-            coeffs = coeffs.astype(self.cpx_dtype)
+        coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
         # calibrationless or monocoil.

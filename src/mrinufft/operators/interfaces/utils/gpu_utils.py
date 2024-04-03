@@ -1,4 +1,5 @@
 """Utils for GPU."""
+
 import numpy as np
 from pathlib import Path
 from hashlib import md5
@@ -33,14 +34,6 @@ def is_host_array(var):
         return isinstance(var, np.ndarray) and var.flags.c_contiguous
     except Exception:
         return False
-
-
-def get_ptr(var):
-    """Return the pointer to data that follow a __cuda_array_interface__."""
-    try:
-        return var.__cuda_array_interface__["data"][0]
-    except RuntimeError:  # Special case for torch tensors with gradients.
-        return var.data_ptr()
 
 
 def pin_memory(array):

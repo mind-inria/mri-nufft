@@ -11,13 +11,13 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpunufft", "cupy-cuda11x"]
+gpunufft = ["gpuNUFFT>=0.7.5", "cupy-cuda11x"]
 cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2", "cython<3.0.0"]
 pynufft = ["pynufft"]
 
-test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
+test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
 doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
 # pooch is for scipy.datasets
@@ -29,6 +29,7 @@ requires = ["setuptools", "setuptools-scm[toml]", "wheel"]
 write_to = "src/mrinufft/_version.py"
 version_scheme = "python-simplified-semver"
 local_scheme="no-local-version"
+fallback_version="v99-dev"
 
 [tool.coverage.run]
 omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
@@ -44,15 +45,17 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 #linting using ruff
 [tool.ruff]
-src = ["src", "tests"]
+extend-exclude = [ "example_*.py" , "*_version.py"]
+
+[tool.ruff.lint]
 select = ["E", "F", "B", "Q", "UP", "D"]
 
 ignore = [
-"B905", #zip() without an explicit strict= parameter
-"B028", #No explicit stacklevel keyword argument found
+"B905", # zip() without an explicit strict= parameter
+"B028", # No explicit stacklevel keyword argument found
+"F401", # Using ``try: import ... except:`` is nice.
 ]
-extend-exclude = [ "example_*.py" , "*_version.py"]
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention="numpy"
 
 [tool.isort]

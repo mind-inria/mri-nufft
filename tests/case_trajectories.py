@@ -1,9 +1,10 @@
 """Trajectories cases we want to test."""
+
 import numpy as np
 import scipy as sp
 
 from mrinufft.trajectories import initialize_2D_radial
-from mrinufft.trajectories.tools import stack
+from mrinufft.trajectories.tools import stack, rotate
 
 
 class CasesTrajectories:
@@ -15,20 +16,25 @@ class CasesTrajectories:
     def case_random2D(self, M=1000, N=64, pdf="uniform", seed=0):
         """Create a random 2D trajectory."""
         np.random.seed(seed)
-        samples = np.random.rand(M, 2) - 0.5
-        samples /= samples.max()
-        samples -= 0.5
-        return samples, (N, N)
+        samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 2)
+        samples = samples.reshape(M, 2)
+        # Have assymetric image size to better catch shape mismatch issues
+        return samples, (N, N * 2)
 
     def case_random3D(self, M=200000, N=64, pdf="uniform", seed=0):
         """Create a random 3D trajectory."""
         np.random.seed(seed)
         samples = sp.stats.truncnorm(-3, 3, loc=0, scale=0.16).rvs(size=M * 3)
         samples = samples.reshape(M, 3)
-        print(samples.min(), samples.max())
-        return samples, (N, N, N)
+        # Have assymetric image size to better catch shape mismatch issues
+        return samples, (N, N * 2, N + 10)
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):
+        """Create a 2D radial trajectory."""
+        trajectory = initialize_2D_radial(Nc, Ns)
+        return trajectory, (N, N)
+
+    def case_nyquist_radial2D(self, Nc=32 * 4, Ns=16, N=32):
         """Create a 2D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         return trajectory, (N, N)
@@ -37,6 +43,12 @@ class CasesTrajectories:
         """Create a 3D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = stack(trajectory, nb_stacks=Nr)
+        return trajectory, (N, N, N)
+
+    def case_nyquist_radial3D(self, Nc=32 * 4, Ns=16, Nr=32 * 4, N=32):
+        """Create a 3D radial trajectory."""
+        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
     def case_grid2D(self, N=16):

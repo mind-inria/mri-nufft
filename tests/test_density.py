@@ -1,13 +1,12 @@
 """Test the density compensation methods."""
 
-
 import numpy as np
 import numpy.testing as npt
-from pytest_cases import fixture, parametrize, parametrize_with_cases
+from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
-from mrinufft.density import cell_count, voronoi
+from mrinufft.density import cell_count, voronoi, pipe
 from mrinufft.density.utils import normalize_weights
 from mrinufft._utils import proper_trajectory
 
@@ -38,15 +37,11 @@ def slow_cell_count2D(traj, shape, osf):
     return normalize_weights(weights)
 
 
-@fixture(scope="module")
-def radial_distance():
+def radial_distance(traj, shape):
     """Compute the radial distance of a trajectory."""
-    traj, shape = CasesTrajectories().case_radial2D()
-
     proper_traj = proper_trajectory(traj, normalize="unit")
-    weights = 2 * np.pi * np.sqrt(proper_traj[:, 0] ** 2 + proper_traj[:, 1] ** 2)
-
-    return normalize_weights(weights)
+    weights = np.linalg.norm(proper_traj, axis=-1)
+    return weights
 
 
 @parametrize("osf", [1, 1.25, 2])
@@ -59,13 +54,10 @@ def test_cell_count2D(traj, shape, osf):
 
 
 @parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_radial2D])
-def test_voronoi(traj, shape, radial_distance):
+def test_voronoi(traj, shape):
     """Test the voronoi method."""
     result = voronoi(traj)
-
-    assert_correlate(result, radial_distance, slope=2 * np.pi)
-
-
-def test_pipe():
-    """Test the pipe method."""
-    pass
+    distance = radial_distance(traj, shape)
+    result = result / np.mean(result)
+    distance = distance / np.mean(distance)
+    assert_correlate(result, distance, slope=1)

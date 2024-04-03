@@ -1,12 +1,18 @@
 """Test the interfaces module."""
-import numpy as np
-import numpy.testing as npt
-from pytest_cases import parametrize_with_cases, parametrize, fixture
 
+import numpy as np
+import pytest
+from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from helpers import kspace_from_op, image_from_op
+from helpers import (
+    kspace_from_op,
+    image_from_op,
+    to_interface,
+    from_interface,
+    param_array_interface,
+)
 
 # #########################
 # # Main Operator Fixture #
@@ -22,6 +28,7 @@ from helpers import kspace_from_op, image_from_op
     [
         "bart",
         "pynfft",
+        "pynufft-cpu",
         "finufft",
         "cufinufft",
         "gpunufft",
@@ -37,6 +44,8 @@ def operator(
     n_coils=1,
 ):
     """Generate an operator."""
+    if backend in ["pynfft", "sigpy"] and kspace_locs.shape[-1] == 3:
+        pytest.skip("3D for slow cpu is not tested")
     return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
 
@@ -66,34 +75,71 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
-def test_interfaces_accuracy_forward(operator, image_data, ref_operator):
+@param_array_interface
+def test_interfaces_accuracy_forward(
+    operator, array_interface, image_data, ref_operator
+):
     """Compare the interface to the raw NUDFT implementation."""
-    kspace_nufft = operator.op(image_data).squeeze()
-    # FIXME: check with complex values ail
+    image_data_ = to_interface(image_data, array_interface)
+    kspace_nufft = operator.op(image_data_).squeeze()
     kspace_ref = ref_operator.op(image_data).squeeze()
+
+    kspace_nufft = from_interface(kspace_nufft, array_interface)
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
-def test_interfaces_accuracy_backward(operator, kspace_data, ref_operator):
+@param_array_interface
+def test_interfaces_accuracy_backward(
+    operator, array_interface, kspace_data, ref_operator
+):
     """Compare the interface to the raw NUDFT implementation."""
-    image_nufft = operator.adj_op(kspace_data.copy()).squeeze()
-    image_ref = ref_operator.adj_op(kspace_data.copy()).squeeze()
+    kspace_data_ = to_interface(kspace_data, array_interface)
 
+    image_nufft = operator.adj_op(kspace_data_).squeeze()
+    image_ref = ref_operator.adj_op(kspace_data).squeeze()
+
+    image_nufft = from_interface(image_nufft, array_interface)
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
-def test_interfaces_autoadjoint(operator):
+@param_array_interface
+def test_interfaces_autoadjoint(operator, array_interface):
     """Test the adjoint property of the operator."""
     reldiff = np.zeros(10)
     for i in range(10):
-        img_data = image_from_op(operator)
-        ksp_data = kspace_from_op(operator)
+        img_data = to_interface(image_from_op(operator), array_interface)
+        ksp_data = to_interface(kspace_from_op(operator), array_interface)
         kspace = operator.op(img_data)
 
-        rightadjoint = np.vdot(kspace, ksp_data)
+        rightadjoint = np.vdot(
+            from_interface(kspace, array_interface),
+            from_interface(ksp_data, array_interface),
+        )
 
         image = operator.adj_op(ksp_data)
-        leftadjoint = np.vdot(img_data, image)
+        leftadjoint = np.vdot(
+            from_interface(img_data, array_interface),
+            from_interface(image, array_interface),
+        )
         reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
     print(reldiff)
     assert np.mean(reldiff) < 5e-5
+
+
+def test_interface_lipschitz(operator):
+    """Test the Lipschitz constant of the operator."""
+    spec_rad = operator.get_lipschitz_cst(20)
+
+    def AHA(x):
+        return operator.adj_op(operator.op(x))
+
+    L = np.zeros(10)
+    for i in range(10):
+        img_data = image_from_op(operator)
+        img2_data = image_from_op(operator)
+
+        L[i] = np.linalg.norm(AHA(img2_data) - AHA(img_data)) / np.linalg.norm(
+            img2_data - img_data
+        )
+
+    assert np.mean(L) < 1.1 * spec_rad

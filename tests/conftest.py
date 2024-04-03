@@ -1,4 +1,5 @@
 """Configuration for pytest."""
+
 import pytest
 
 from mrinufft.operators import FourierOperatorBase, check_backend, list_backends

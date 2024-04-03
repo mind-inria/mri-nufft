@@ -1,4 +1,5 @@
 """Display function for trajectories."""
+
 import itertools
 
 import matplotlib as mpl

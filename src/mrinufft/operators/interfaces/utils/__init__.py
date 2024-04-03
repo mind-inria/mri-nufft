@@ -1,4 +1,5 @@
 """Utilities for interfaces."""
+
 from .utils import (
     check_error,
     check_size,
@@ -12,7 +13,6 @@ from .gpu_utils import (
     is_cuda_array,
     pin_memory,
     nvtx_mark,
-    get_ptr,
 )
 
 __all__ = [
@@ -25,5 +25,4 @@ __all__ = [
     "is_cuda_array",
     "pin_memory",
     "nvtx_mark",
-    "get_ptr",
 ]
