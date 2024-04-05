@@ -2,12 +2,9 @@
 
 import numpy as np
 
+from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
-    Rv,
-    Rx,
-    Ry,
-    Rz,
     initialize_tilt,
 )
 
@@ -100,26 +97,50 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
     return new_trajectory.reshape(nb_rotations * Nc, Ns, 3)
 
 
-def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
-    """Rotate 2D or 3D trajectories as a precession around :math:`k_z`.
+def precess(
+    trajectory,
+    nb_rotations,
+    tilt="golden",
+    half_sphere=False,
+    partition="axial",
+    axis=None,
+):
+    """Rotate trajectories as a precession around the :math:`k_z`-axis.
 
     Parameters
     ----------
     trajectory : array_like
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
-        Number of rotations repeating the provided trajectory.
-    z_tilt : str, optional
-        Tilt of the trajectory over the :math:`k_z`-axis, by default "golden".
+        Number of rotations repeating the provided trajectory while precessing.
+    tilt : str, optional
+        Angle tilt between consecutive rotations around the :math:`k_z`-axis,
+        by default "golden".
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
-        of the k-space sphere, typically for in-out trajectories or planes.
+        of the k-space sphere.
+        It is typically used for in-out trajectories or planes.
+    partition : str, optional
+        Partition type between an "axial" or "polar" split of the
+        :math:`k_z`-axis, designating whether the axis should be fragmented
+        by radius or angle respectively, by default "axial".
+    axis : int, array_like, optional
+        Axis selected for alignment reference when rotating the trajectory
+        around the :math:`k_z`-axis, generally corresponding to the shot
+        direction for single shot ``trajectory`` inputs. It can either
+        be an integer for one of the three k-space axes, or directly a 3D
+        array. The default behavior when `None` is to select the last
+        coordinate of the first shot as the axis, by default `None`.
 
     Returns
     -------
     array_like
         Precessed trajectory.
     """
+    # Check for partition option error
+    if partition not in ["polar", "axial"]:
+        raise NotImplementedError(f"Unknown partition type: {partition}")
+
     # Check dimensionality and initialize output
     Nc, Ns = trajectory.shape[:2]
     if trajectory.shape[-1] == 2:
@@ -129,21 +150,40 @@ def precess(trajectory, nb_rotations, z_tilt="golden", half_sphere=False):
 
     # Determine direction vectors on a sphere
     vectors = np.zeros((nb_rotations, 3))
-    phi = initialize_tilt(z_tilt, nb_rotations) * np.arange(nb_rotations)
-    vectors[:, 2] = np.sin(np.pi / 2 * np.linspace(-1 + half_sphere, 1, nb_rotations))
+    phi = initialize_tilt(tilt, nb_rotations) * np.arange(nb_rotations)
+    vectors[:, 2] = np.linspace(-1 + half_sphere, 1, nb_rotations)
+    if partition == "polar":
+        vectors[:, 2] = np.sin(np.pi / 2 * vectors[:, 2])
     radius = np.sqrt(1 - vectors[:, 2] ** 2)
     vectors[:, 0] = np.cos(phi) * radius
     vectors[:, 1] = np.sin(phi) * radius
 
+    # Select rotation axis when axis is not already a vector
+    if axis is None:
+        axis_vector = np.copy(trajectory[Ns - 1])
+        axis_vector /= np.linalg.norm(axis_vector)
+    elif isinstance(axis, int):
+        axis_vector = np.zeros(3)
+        axis_vector[axis] = 1
+    else:
+        axis_vector = axis
+
     # Rotate initial trajectory
     for i in np.arange(nb_rotations):
-        rotation = Rv(np.array((1, 0, 0)), vectors[i], normalize=False).T
+        rotation = Rv(axis_vector, vectors[i], normalize=False).T
         new_trajectory[i] = trajectory @ rotation
 
     return new_trajectory.reshape((nb_rotations * Nc, Ns, 3))
 
 
-def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2):
+def conify(
+    trajectory,
+    nb_cones,
+    z_tilt=None,
+    in_out=False,
+    max_angle=np.pi / 2,
+    borderless=True,
+):
     """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
@@ -159,6 +199,9 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
         to avoid hard angles around the center, by default False.
     max_angle : float, optional
         Maximum angle of the cones, by default pi / 2.
+    borderless : bool, optional
+        Whether the cones should reach `max_angle` or not,
+        and avoid 1D cones if equal to pi / 2, by default True.
 
     Returns
     -------
@@ -174,9 +217,9 @@ def conify(trajectory, nb_cones, z_tilt=None, in_out=False, max_angle=np.pi / 2)
 
     # Initialize angles
     z_angle = initialize_tilt(z_tilt, nb_cones)
-    alphas = np.linspace(-max_angle, +max_angle, nb_cones + 2)[
-        1:-1
-    ]  # Borderless partition
+    alphas = np.linspace(-max_angle, +max_angle, nb_cones + 2 * borderless)
+    if borderless:
+        alphas = alphas[1:-1]  # Remove partition borders
 
     # Start processing the trajectory
     new_trajectory[:] = trajectory

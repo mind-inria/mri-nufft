@@ -23,6 +23,17 @@ from .trajectory3D import (
     initialize_3D_seiffert_shells,
 )
 
+from .tools import (
+    stack,
+    rotate,
+    precess,
+    conify,
+    stack_spherically,
+    shellify,
+    duplicate_along_axes,
+    radialize_center,
+)
+
 from .display import (
     displayConfig,
     display_2D_trajectory,
@@ -48,6 +59,14 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "initialize_3D_seiffert_shells",
+    "stack",
+    "rotate",
+    "precess",
+    "conify",
+    "stack_spherically",
+    "shellify",
+    "duplicate_along_axes",
+    "radialize_center",
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",

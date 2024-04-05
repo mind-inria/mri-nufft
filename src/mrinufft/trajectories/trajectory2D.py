@@ -2,12 +2,14 @@
 
 import numpy as np
 
+from .maths import (
+    R2D,
+    compute_coprime_factors,
+)
 from .utils import (
     KMAX,
-    R2D,
     initialize_tilt,
     initialize_spiral,
-    compute_coprime_factors,
 )
 from .tools import rotate
 

@@ -6,9 +6,10 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
+from .maths import Ry, Rz, Ra, generate_fibonacci_circle, CIRCLE_PACKING_DENSITY
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
-from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX, Packings
+from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
 
 
 ############################
@@ -16,8 +17,17 @@ from .utils import Ry, Rz, initialize_tilt, initialize_shape_norm, KMAX, Packing
 ############################
 
 
-def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width=1):
+def initialize_3D_cones(
+    Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1
+):
     """Initialize 3D trajectories with cones.
+
+    Initialize a trajectory consisting of 3D cones duplicated
+    in each direction and almost evenly distributed using a Fibonacci
+    lattice spherical projection when the tilt is set to "golden".
+
+    The cone width is automatically determined based on the optimal
+    circle packing of a sphere surface, as discussed in [CK90]_.
 
     Parameters
     ----------
@@ -32,30 +42,52 @@ def initialize_3D_cones(Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, width
         by default False
     nb_zigzags : float, optional
         Number of zigzags of the cones, by default 5
+    spiral : str, float, optional
+        Spiral type, by default "archimedes"
     width : float, optional
-        Width of a cone such that 1 has no redundacy and full coverage, by default 1
+        Cone width normalized such that `width=1` avoids cone overlaps, by default 1
 
     Returns
     -------
     array_like
         3D cones trajectory
+
+    References
+    ----------
+    .. [CK90] Clare, B. W., and D. L. Kepert.
+       "The optimal packing of circles on a sphere."
+       Journal of mathematical chemistry 6, no. 1 (1991): 325-349.
     """
-    # Initialize first cone
-    radius = np.linspace(-KMAX if (in_out) else 0, KMAX, Ns)
-    angles = np.linspace(
-        -2 * np.pi * nb_zigzags if (in_out) else 0, 2 * np.pi * nb_zigzags, Ns
-    )
-    cone = np.zeros((1, Ns, 3))
-    cone[:, :, 0] = radius
-    cone[:, :, 1] = (
-        radius * np.cos(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
-    )
-    cone[:, :, 2] = (
-        radius * np.sin(angles) * width * 2 * np.pi / Nc ** (2 / 3) / (1 + in_out)
+    # Initialize first spiral
+    spiral = initialize_2D_spiral(
+        Nc=1,
+        Ns=Ns,
+        spiral=spiral,
+        in_out=in_out,
+        nb_revolutions=nb_zigzags,
     )
 
+    # Estimate best cone angle based on the ratio between
+    # sphere volume divided by Nc and spherical sector packing optimaly a sphere
+    max_angle = np.pi / 2 - width * np.arccos(
+        1 - CIRCLE_PACKING_DENSITY * 2 / Nc / (1 + in_out)
+    )
+
+    # Initialize first cone
+    ## Create three cones for proper partitioning, but only one is needed
+    cone = conify(
+        spiral,
+        nb_cones=3,
+        z_tilt=None,
+        in_out=in_out,
+        max_angle=max_angle,
+        borderless=False,
+    )[-1:]
+
     # Apply precession to the first cone
-    trajectory = precess(cone, nb_rotations=Nc, z_tilt=tilt)
+    trajectory = precess(
+        cone, tilt=tilt, nb_rotations=Nc, half_sphere=in_out, partition="axial", axis=2
+    )
 
     return trajectory
 
@@ -65,9 +97,7 @@ def initialize_3D_floret(
     Ns,
     in_out=False,
     nb_revolutions=1,
-    spiral_tilt="uniform",
     spiral="fermat",
-    nb_cones=None,
     cone_tilt="golden",
     max_angle=np.pi / 2,
     axes=(2,),
@@ -77,7 +107,7 @@ def initialize_3D_floret(
     This implementation is based on the work from [Pip+11]_.
     The acronym FLORET stands for Fermat Looped, Orthogonally
     Encoded Trajectories. It consists of Fermat spirals
-    folded into 3D cones along the :math:`k_z`-axis.
+    folded into 3D cones along one or several axes.
 
     Parameters
     ----------
@@ -89,13 +119,8 @@ def initialize_3D_floret(
         Whether to start from the center or not, by default False
     nb_revolutions : float, optional
         Number of revolutions of the spirals, by default 1
-    spiral_tilt : str, float, optional
-        Tilt of the spirals around the :math:`k_z`-axis, by default "uniform"
     spiral : str, float, optional
         Spiral type, by default "fermat"
-    nb_cones : int, optional
-        Number of cones used to partition the k-space sphere,
-        with `None` making one cone per shot, by default `None`.
     cone_tilt : str, float, optional
         Tilt of the cones around the :math:`k_z`-axis, by default "golden"
     max_angle : float, optional
@@ -117,32 +142,24 @@ def initialize_3D_floret(
        oversampled k‐space trajectories."
        Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.
     """
-    # Define variables for convenience
-    nb_cones = Nc if (nb_cones is None) else nb_cones
-    Nd = len(axes)
-    Nc_per_spiral = Nc // nb_cones
-    nb_cones_per_axis = nb_cones // Nd
-
-    # Check argument errors
-    if Nc % nb_cones != 0:
-        raise ValueError("Nc should be divisible by nb_cones.")
-    if nb_cones % Nd != 0:
-        raise ValueError("nb_cones should be divisible by len(axes).")
+    # Define convenience variables and check argument errors
+    Nc_per_axis = Nc // len(axes)
+    if Nc % len(axes) != 0:
+        raise ValueError("Nc should be divisible by len(axes).")
 
     # Initialize first spiral
     spiral = initialize_2D_spiral(
-        Nc=Nc_per_spiral,
+        Nc=1,
         Ns=Ns,
         spiral=spiral,
         in_out=in_out,
-        tilt=spiral_tilt,
         nb_revolutions=nb_revolutions,
     )
 
     # Initialize first cone
     cone = conify(
         spiral,
-        nb_cones=nb_cones_per_axis,
+        nb_cones=Nc_per_axis,
         z_tilt=cone_tilt,
         in_out=in_out,
         max_angle=max_angle,
@@ -215,8 +232,8 @@ def initialize_3D_wave_caipi(
     trajectory[0, :, 1] = width * np.sin(angles)
     trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
 
+    # Choose the helix positions according to packing
     packing = Packings[packing]
-    # Packing
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
     if packing == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
@@ -248,6 +265,13 @@ def initialize_3D_wave_caipi(
         ratio = nl.norm(np.diff(positions[:2], axis=-1))
         positions[:, 0] /= ratio / 2
 
+    if packing == Packings.FIBONACCI:
+        # Estimate helix width based on the k-space 2D surface
+        # and an optimal circle packing
+        positions = np.sqrt(
+            Nc * 2 / CIRCLE_PACKING_DENSITY
+        ) * generate_fibonacci_circle(Nc * 2)
+
     # Remove points by distance to fit both shape and Nc
     main_order = initialize_shape_norm(shape)
     tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
@@ -267,7 +291,13 @@ def initialize_3D_wave_caipi(
 
 
 def initialize_3D_seiffert_spiral(
-    Nc, Ns, curve_index=0.2, nb_revolutions=1, tilt="golden", in_out=False
+    Nc,
+    Ns,
+    curve_index=0.2,
+    nb_revolutions=1,
+    axis_tilt="golden",
+    spiral_tilt="golden",
+    in_out=False,
 ):
     """Initialize 3D trajectories with modulated Seiffert spirals.
 
@@ -287,8 +317,11 @@ def initialize_3D_seiffert_spiral(
     nb_revolutions : float
         Number of revolutions, i.e. times the polar angle of the curves
         passes through 0, by default 1
-    tilt : str, float, optional
-        Angle between shots around z-axis over precession, by default "golden"
+    axis_tilt : str, float, optional
+        Angle between shots over a precession around the z-axis, by default "golden"
+    spiral_tilt : str, float, optional
+        Angle of the spiral within its own axis defined from center to its outermost
+        point, by default "golden"
     in_out : bool
         Whether the curves are going in-and-out or start from the center,
         by default False
@@ -334,7 +367,20 @@ def initialize_3D_seiffert_spiral(
     spiral = magnitudes.reshape((1, -1, 1)) * spiral
 
     # Apply precession to the first spiral
-    trajectory = precess(spiral, nb_rotations=Nc, z_tilt=tilt)
+    trajectory = precess(
+        spiral,
+        tilt=axis_tilt,
+        nb_rotations=Nc,
+        half_sphere=in_out,
+        partition="axial",
+        axis=None,
+    )
+
+    # Tilt the spiral along its own axis
+    for i in range(Nc):
+        angle = i * initialize_tilt(spiral_tilt)
+        rotation = Ra(trajectory[i, -1], angle).T
+        trajectory[i] = trajectory[i] @ rotation
 
     # Handle in_out case
     if in_out:

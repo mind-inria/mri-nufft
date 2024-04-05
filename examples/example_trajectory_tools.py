@@ -129,11 +129,6 @@ single_trajectories = {
     ],
 }
 
-# Adjust the trajectory direction
-single_trajectories["3D Cones"] = np.roll(
-    single_trajectories["3D Cones"], axis=-1, shift=1
-)
-
 # %%
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
@@ -305,7 +300,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.rotate(
-    planar_trajectories[x], nb_rotations=nb_repetitions, x_tilt="uniform"
+    planar_trajectories[x],
+    nb_rotations=nb_repetitions,
+    x_tilt="uniform",
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
@@ -324,7 +321,7 @@ show_argument(
 # -------
 #
 # A method to duplicate a trajectory while applying a
-# precession-like rotation around the :math:`k_x`-axis.
+# precession-like rotation around a provided axis.
 #
 # Arguments:
 #
@@ -332,15 +329,29 @@ show_argument(
 #   size :math:`(N_c, N_s, N_d)`
 # - ``nb_rotations (int)``: number of rotations repeating ``trajectory``
 #   over the :math:`k_z`-axis.
-# - ``z_tilt (float)``: angle tilt between consecutive stacks
-#   over the :math:`k_z`-axis. ``(default "golden")``
+# - ``tilt (float)``: angle tilt between consecutive rotations
+#   around the :math:`k_z`-axis. ``(default "golden")``
 # - ``half_sphere (bool)``: whether the precession should be limited
 #   to the upper half of the k-space sphere, typically for in-out
 #   trajectories or planes. ``(default False)``
+# - ``partition (str)``: partition type between an "axial" or "polar"
+#   split of the :math:`k_z`-axis, designating whether the axis should
+#   be fragmented by radius or angle respectively. ``(default "axial")``
+# - ``axis (int, array)``: axis selected for alignment reference
+#   when rotating the trajectory around the :math:`k_z`-axis,
+#   generally corresponding to the shot direction for
+#   single shot ``trajectory`` inputs. It can either be an integer for
+#   one of the three k-space axes, or directly a 3D array.
+#   The default behavior when ``None`` is to select the last coordinate
+#   of the first shot as the axis. ``(default None)``
 #
 
 trajectory = tools.precess(
-    planar_trajectories["Radial"], nb_rotations=nb_repetitions, z_tilt="golden"
+    planar_trajectories["Radial"],
+    nb_rotations=nb_repetitions,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=2,
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
@@ -349,13 +360,17 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # ~~~~~~~~~~~~~~~~~~~~~~
 #
 # This method provides a way to distribute duplicated trajectories
-# (planes or anything else) to cover evenly polar angles, while
-# tilting the azimuthal orientation.
+# (single shots, planes or anything else) to cover evenly a provided
+# axis tilting the azimuthal orientation.
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    planar_trajectories[x], nb_rotations=nb_repetitions, z_tilt="golden"
+    planar_trajectories[x],
+    nb_rotations=nb_repetitions,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=2,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -370,9 +385,178 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.precess(
-    single_trajectories[x], nb_rotations=Nc, z_tilt="golden"
+    single_trajectories[x],
+    nb_rotations=Nc,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=0,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``half_sphere (bool)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# Whether the precession should be limited to the upper half
+# of the k-space sphere (with respect to the provided axis).
+# It is typically used for in-out trajectories or planes, as
+# otherwise shots would likely be stacked in a redundant way.
+#
+# In the example hereafter, center-out shots are shown for clarity.
+#
+
+
+arguments = [True, False]
+function = lambda x: tools.precess(
+    single_trajectories["Radial"][:, Ns // (1 + in_out) :],
+    nb_rotations=Nc,
+    tilt="golden",
+    half_sphere=x,
+    axis=0,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(0, 2),
+)
+
+
+# %%
+# ``partition (str)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# Partition type between an "axial" or "polar"
+# split of the :math:`k_z`-axis, designating whether the axis should
+# be fragmented by radius or angle respectively.
+#
+
+arguments = ["axial", "polar"]
+function = lambda x: tools.precess(
+    single_trajectories["Radial"],
+    nb_rotations=Nc,
+    tilt=None,
+    partition=x,
+    axis=0,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(0, 2),
+)
+
+# %%
+#
+# While "polar" looks more natural in the absence of rotation (``tilt=None``),
+# it results in too many shots close to the rotation axis, and therefore
+# a non-uniform density. The best approximation of a uniform distribution
+# is obtained with an "axial" partition and "golden" tilt along
+# the provided axis.
+#
+
+arguments = ["axial", "polar"]
+function = lambda x: tools.precess(
+    single_trajectories["Radial"],
+    nb_rotations=Nc,
+    tilt="golden",
+    partition=x,
+    axis=0,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(0, 2),
+)
+
+# %%
+#
+# The distribution over the k-space sphere surface can be shown by
+# displaying only the tip of the shots.
+#
+
+arguments = ["axial", "polar"]
+function = lambda x: tools.precess(
+    single_trajectories["Radial"][:, -5:],
+    nb_rotations=Nc,
+    tilt="golden",
+    partition=x,
+    axis=0,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``axis (int, array)``
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# Axis selected for alignment reference when rotating the trajectory
+# around the :math:`k_z`-axis, generally corresponding to the
+# shot direction for single shot ``trajectory`` inputs.
+# It can either be an integer for one of the three k-space axes,
+# or directly a 3D array. The default behavior when `None`
+# is to select the last coordinate of the first shot as the axis.
+#
+# This argument is simple to select but still important, as the
+# precession relies on Rodrigues' rotation coefficients that enable
+# a rotation from one vector to another to align the trajectory
+# through the provided axis with the precession vectors all over
+# the k-space sphere. However, misalignement between shots and the
+# provided axis will result in a non-uniform distribution, as the
+# rotation around the axis is unfavorably deterministic.
+#
+# The first case is single shots, where the provided axis should
+# simply correspond to the shot axis.
+#
+
+arguments = [None, 0, 1, 2]
+function = lambda x: tools.precess(
+    single_trajectories["Radial"],
+    nb_rotations=Nc,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=x,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(1, 2),
+)
+
+# %%
+#
+# The second case is planar trajectories, where the axis orthogonal
+# to the shots plane is preferred.
+#
+
+arguments = [None, 0, 1, 2]
+function = lambda x: tools.precess(
+    planar_trajectories["Radial"],
+    nb_rotations=nb_repetitions,
+    tilt="golden",
+    half_sphere=in_out,
+    axis=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+#
+# Some trickier cases exist in the literature, with the example of Seiffert spirals.
+# Those 3D spirals neither correspond to a single-axis shot or a plane, so the authors
+# chose to use the center-out axis of each shot as a reference axis for the rotation.
+# In order to handle the redundant distribution, they added a pseudo-random rotation
+# within the shot axes.
+#
 
 
 # %%
@@ -394,6 +578,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   nature of some trajectories to avoid hard angles
 #   around the center, ``(default False)``
 # - ``max_angle (float)``: maximum angle of the cones. ``(default pi / 2)``
+# - ``borderless (bool)``: Whether the cones should reach `max_angle` or not,
+#   mostly to avoid 1D cones if ``max_angle`` is equal to pi / 2, by default True.
 #
 
 trajectory = tools.conify(
@@ -466,6 +652,33 @@ function = lambda x: tools.conify(
     nb_cones=nb_repetitions,
     in_out=in_out,
     max_angle=x,
+)
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(0, 2),
+)
+
+
+# %%
+# ``borderless (bool)``
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# Define whether or not the edge cones should reach ``max_angle``
+# when equal to ``False``, or instead simply partition the
+# sphere over a polar split.
+#
+
+arguments = [True, False]
+function = lambda x: tools.conify(
+    planar_trajectories["Radial"],
+    nb_cones=nb_repetitions,
+    in_out=in_out,
+    max_angle=np.pi / 2,
+    borderless=x,
 )
 show_argument(
     function,

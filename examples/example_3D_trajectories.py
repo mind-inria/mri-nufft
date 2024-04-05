@@ -115,6 +115,8 @@ one_shot = -5  # Highlight one shot in particular
 #   the center then outside (in-out) or not (center-out). ``(default False)``
 # - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
 #   ``(default 5)``
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "archimedes")``. See 2D spiral
 # - ``width (float)``: cone width factor, normalized to densely cover the k-space
 #   by default. ``(default 1)``
 #
@@ -203,6 +205,21 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 
 
 # %%
+# ``spiral (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~
+#
+#
+# The shape of the spiral defined and documented in
+# ``initialize_2D_spiral``. Both ``"archimedes"`` and ``"fermat"``
+# spirals are available as string options for convenience.
+#
+
+arguments = ["archimedes", "fermat", 0.5, 1.5]
+function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, spiral=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
 # ``width (float)``
 # ~~~~~~~~~~~~~~~~~
 #
@@ -235,12 +252,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #   ``(default False)``. See 3D cones or 2D spiral
 # - ``nb_revolutions (float)``: number of revolutions performed from the
 #   center. ``(default 1)``. See 2D spiral
-# - ``spiral_tilt (str, float)``: angle between each spiral within a plane
-#   (in radians). ``(default "uniform")``. See 2D spiral
 # - ``spiral (str, float)``: type of spiral defined through the general
 #   archimedean equation. ``(default "fermat")``. See 2D spiral
-# - ``nb_cones (int)``: number of cones around the :math:`k_z`-axis.
-#   See ``tools.conify``
 # - ``cone_tilt (float)``: angle tilt between consecutive cones
 #   around the :math:`k_z`-axis. ``(default "golden")``. See ``tools.conify``
 # - ``max_angle (float)``: maximum angle of the cones. ``(default pi / 2)``.
@@ -249,12 +262,11 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 
 trajectory = mn.initialize_3D_floret(
-    Nc,
+    Nc * nb_repetitions,
     Ns,
     in_out=in_out,
     nb_revolutions=nb_revolutions,
-    nb_cones=nb_repetitions,
-    max_angle=np.pi / 2,
+    max_angle=np.pi / 3,
 )[::-1]
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
@@ -274,17 +286,22 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # proposed by [Pip+11]_.
 #
 
-arguments = [(2,), (0,), (0, 2), (0, 1, 2)]
+arguments = [(0,), (1,), (0, 1), (0, 1, 2)]
 function = lambda x: mn.initialize_3D_floret(
-    Nc,
+    Nc * nb_repetitions,
     Ns,
     in_out=in_out,
     nb_revolutions=nb_revolutions,
-    nb_cones=nb_repetitions,
     max_angle=np.pi / 4,
     axes=x,
 )[::-1]
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
 
 
 # %%
@@ -348,17 +365,19 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # The method used to pack circles of same size within an arbitrary ``shape``.
 # The available methods are ``"triangular"`` and ``"square"`` for regular tiling
-# over dense grids, and ``"circular"`` and ``"random"`` for irregular packing.
+# over dense grids, and ``"circular"``, ``fibonacci`` and ``"random"`` for
+# irregular packing.
 # Different aliases are available, such as ``"triangle"``, ``"hexagon"`` instead
 # of ``"triangular"``.
 #
-# Note that ``"triangular"`` packing has slightly overlapping helices,
-# as it corresponds to a triangular/hexagonal grid.
+# Note that ``"triangular"`` and ``fibonacci`` packings have slightly overlapping
+# helices, as their widths correspond to that of an optimaly packed
+# triangular/hexagonal grid.
 # The ``"random"`` packing also naturally overlaps as the positions are determined
 # following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 #
 
-arguments = ["triangular", "square", "circular", "random"]
+arguments = ["triangular", "square", "circular", "fibonacci", "random"]
 function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
@@ -440,8 +459,10 @@ show_argument(
 #   ``(default 0.3)``
 # - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
 #   ``(default 1)``
-# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
-#   ``(default "uniform")``. See 3D cones
+# - ``axis_tilt (str, float)``: angle between each consecutive shot (in radians)
+#   while descending over the :math:`k_z`-axis ``(default "golden")``. See 3D cones
+# - ``spiral_tilt (str, float)``: angle of the spiral within its own axis,
+#   defined from center to its outermost point ``(default "golden")``.
 # - ``in_out (bool)``: define whether the shots should travel toward the center
 #   then outside (in-out) or not (center-out). ``(default False)``. See 3D cones
 #
@@ -476,9 +497,62 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # subsequently defines the length of the curve.
 #
 
-arguments = [0.5, 1, 1.5, 2]
+arguments = [0, 0.5, 1, 2]
 function = lambda x: mn.initialize_3D_seiffert_spiral(
-    Nc, Ns, in_out=in_out, nb_revolutions=x
+    Nc,
+    Ns,
+    in_out=in_out,
+    nb_revolutions=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``axis_tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Angle between consecutive shots while descending along the :math:`k_z`-axis.
+# The ``"golden"`` value chosen as default provides an almost even distribution
+# over the k-space sphere by relying on Fibonacci lattice, and therefore it should
+# be changed carefully when relevant.
+#
+# Note that in the examples below, the ``spiral_tilt`` argument is set to 0
+# for clarity.
+#
+
+arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc,
+    Ns,
+    in_out=in_out,
+    axis_tilt=x,
+    spiral_tilt=0,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``spiral_tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Define the angle of the spiral within its own axis after precession of the spiral
+# along the :math:`k_z`-axis. Since the precession is applied through Rodrigues'
+# coefficients and Seiffert spirals are asymetric, their orientation right after
+# the precession can be quite biased and yield unbalanced densities.
+#
+# The method proposed in [SMR18]_ to handle that issue is to rotate the spirals
+# along their own axes, but the exact way to choose the rotation is not specified.
+# Rather than picking random angles, we decided to provide the conventional "tilt"
+# argument.
+#
+
+arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
+function = lambda x: mn.initialize_3D_seiffert_spiral(
+    Nc,
+    Ns,
+    in_out=in_out,
+    axis_tilt="golden",
+    spiral_tilt=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
