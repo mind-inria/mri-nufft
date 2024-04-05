@@ -44,7 +44,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
     backend: str or FourierOperatorBase
         Backend to use.
         If str, a NUFFT operator is initialized with str being a registered backend.
-        If FourierOperatorBase, the operator is checked for compatibility and used as is.
+        If FourierOperatorBase, operator is checked for compatibility and used as is
         notably one should have:
         ``n_coils = self.n_coils*len(z_index), squeeze_dims=True, smaps=None``
 
