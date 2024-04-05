@@ -3,33 +3,12 @@
 import numpy as np
 import numpy.linalg as nl
 
-
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
 
 
 ##########
 # PRIMES #
 ##########
-
-
-def compute_greatest_common_divider(p, q):
-    """Compute the greatest common divider of two integers p and q.
-
-    Parameters
-    ----------
-    p : int
-        First integer.
-    q : int
-        Second integer.
-
-    Returns
-    -------
-    int
-        The greatest common divider of p and q.
-    """
-    while q != 0:
-        p, q = q, p % q
-    return p
 
 
 def compute_coprime_factors(Nc, length, start=1, update=1):
@@ -54,7 +33,8 @@ def compute_coprime_factors(Nc, length, start=1, update=1):
     count = start
     coprimes = []
     while len(coprimes) < length:
-        if compute_greatest_common_divider(Nc, count) == 1:
+        # Check greatest common divider (gcd)
+        if np.gcd(Nc, count) == 1:
             coprimes.append(count)
         count += update
     return coprimes

@@ -1,10 +1,9 @@
 """Utility functions for the trajectory design."""
 
-import numbers as nb
-import numpy as np
-
 from enum import Enum, EnumMeta
+from numbers import Real
 
+import numpy as np
 
 #############
 # CONSTANTS #
@@ -468,7 +467,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     Tilts
 
     """
-    if isinstance(tilt, nb.Number):
+    if isinstance(tilt, Real):
         return tilt
     elif tilt is None or tilt == Tilts.NONE:
         return 0
@@ -499,7 +498,7 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
-    if isinstance(spiral, nb.Number):
+    if isinstance(spiral, Real):
         return spiral
     return Spirals[spiral]
 
@@ -517,6 +516,6 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    if isinstance(shape, nb.Number):
+    if isinstance(shape, Real):
         return shape
     return NormShapes[shape]
