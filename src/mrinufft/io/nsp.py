@@ -466,7 +466,7 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
         hdr["trajectory_name"] = twixObj.search_header_for_val(
             "Phoenix", ("sWipMemBlock", "tFree")
         )[0][1:-1]
-        if(hdr["num_contrasts"] > 1):
+        if(hdr["n_contrasts"] > 1):
             hdr["turboFactor"] = twixObj.search_header_for_val(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]
