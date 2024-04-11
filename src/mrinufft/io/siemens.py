@@ -63,16 +63,14 @@ def read_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
         hdr["num_slices"], 
         hdr["num_contrasts"]
     )
-    if "SPARKLING_VE11C" in data_type:
-        hdr["shifts"] = tuple([
-            0 if twixObj.search_header_for_val(
+    if "ARBGRAD_VE11C" in data_type:
+        hdr["type"] = "ARBGRAD_GRE"
+        hdr["shifts"] = ()
+        for s in [7, 6, 8]:
+            shift = twixObj.search_header_for_val(
                 "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            ) == []
-            else twixObj.search_header_for_val(
-                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            )[0]
-            for s in [7, 6, 8]
-        ])
+            )
+            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
         hdr["oversampling_factor"] = twixObj.search_header_for_val(
             "Phoenix", ("sWiPMemBlock", "alFree", "4")
         )[0]
@@ -83,5 +81,5 @@ def read_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
             hdr["turboFactor"] = twixObj.search_header_for_val(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]
-            hdr["type"] = "MP2RAGE"
+            hdr["type"] = "ARBGRAD_MP2RAGE"
     return data, hdr
