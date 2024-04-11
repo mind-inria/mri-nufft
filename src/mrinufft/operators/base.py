@@ -227,20 +227,23 @@ class FourierOperatorBase(ABC):
 
         return MRIFourierCorrected(self, B, C, indices)
     
-    def compute_smaps(self, kspace_data, method=None):
+    def compute_smaps(self, method=None):
         """Compute the sensitivity maps and set it.
 
         Parameters
         ----------
-        kspace_data: np.ndarray
-            The k-space data to be used to estimate sensitivity maps
-        method: str or callable or dict
+        method: callable or dict or array
             The method to use to compute the sensitivity maps.
-            If a string, the method should be registered in the smaps registry.
-            If a callable, it should take the samples and the shape as input.
+            If an array, it should be of shape (NCoils,XYZ) and will be used as is.
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
+            If a callable, it should take the samples and the shape as input.
+            Note that this callable function should also hold the k-space data 
+            (use funtools.partial)
         """
+        if isinstance(method, np.ndarray):
+            self.smaps = method
+            return None
         if not method:
             self.smaps = None
             return None
@@ -476,6 +479,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         # Density Compensation Setup
         self.compute_density(density)
+        self.compute_smaps(smaps)
         # Multi Coil Setup
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")

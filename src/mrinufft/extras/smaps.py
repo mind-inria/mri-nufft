@@ -142,6 +142,7 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
     # Smooth out the sensitivity maps
     if blurr_factor > 0:
         Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
+        # Re-normalize the sensitivity maps
         SOS = np.linalg.norm(Smaps, axis=0)
         Smaps = Smaps / SOS
     return Smaps, SOS
