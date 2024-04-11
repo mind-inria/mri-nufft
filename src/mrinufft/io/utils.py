@@ -1,3 +1,6 @@
+"""
+Module containing utility functions for IO in MRI NUFFT.
+"""
 import numpy as np
 
 
