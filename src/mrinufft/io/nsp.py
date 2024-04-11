@@ -253,7 +253,7 @@ def read_trajectory(
     grad_filename: str,
     dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
-    gamma: Union[Gammas,float] = Gammas.HYDROGEN,
+    gamma: Union[Gammas, float] = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
@@ -392,10 +392,14 @@ def read_trajectory(
         return kspace_loc, params
 
 
-def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
-                        data_type: str = "ARBGRAD_VE11C"):
+def read_siemens_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    squeeze: bool = True,
+    data_type: str = "ARBGRAD_VE11C",
+):
     """Read raw data from a Siemens MRI file.
-    
+
     Parameters
     ----------
     filename : str
@@ -421,7 +425,7 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
 
     Notes
     -----
-    This function requires the mapVBVD module to be installed. 
+    This function requires the mapVBVD module to be installed.
     You can install it using the following command:
         `pip install pymapVBVD`
     """
@@ -437,7 +441,7 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
         twixObj = twixObj[-1]
     twixObj.image.flagRemoveOS = removeOS
     twixObj.image.squeeze = squeeze
-    raw_kspace = twixObj.image['']
+    raw_kspace = twixObj.image[""]
     data = np.moveaxis(raw_kspace, 0, 2)
     hdr = {
         "n_coils": int(twixObj.image.NCha),
@@ -447,10 +451,10 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
         "n_slices": int(twixObj.image.NSli),
     }
     data = data.reshape(
-        hdr["n_coils"], 
-        hdr["n_shots"]*hdr["n_adc_samples"], 
-        hdr["n_slices"], 
-        hdr["n_contrasts"]
+        hdr["n_coils"],
+        hdr["n_shots"] * hdr["n_adc_samples"],
+        hdr["n_slices"],
+        hdr["n_contrasts"],
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
@@ -466,7 +470,7 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
         hdr["trajectory_name"] = twixObj.search_header_for_val(
             "Phoenix", ("sWipMemBlock", "tFree")
         )[0][1:-1]
-        if(hdr["n_contrasts"] > 1):
+        if hdr["n_contrasts"] > 1:
             hdr["turboFactor"] = twixObj.search_header_for_val(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]

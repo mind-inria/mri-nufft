@@ -22,7 +22,7 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
     Raises
     ------
     ValueError
-        If the dimension of normalized_shifts does not match the number of 
+        If the dimension of normalized_shifts does not match the number of
         dimensions in kspace_loc.
     """
     if len(normalized_shifts) != kspace_loc.shape[1]:
@@ -30,7 +30,6 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
             "Dimension mismatch between shift and kspace locations! "
             "Ensure that shifts are right"
         )
-    phi = np.sum(kspace_loc*normalized_shifts, axis=-1)
+    phi = np.sum(kspace_loc * normalized_shifts, axis=-1)
     phase = np.exp(-2 * np.pi * 1j * phi)
     return kspace_data * phase
-
