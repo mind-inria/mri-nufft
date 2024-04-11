@@ -10,8 +10,12 @@ register_smaps = MethodRegister("sensitivity_maps")
 def extract_kspace_center(
         kspace_data, kspace_loc, threshold=None, window_fun="ellipse", 
     ):
-    r"""
-    Extract k-space center and corresponding sampling locations.
+    r"""Extract k-space center and corresponding sampling locations.
+    
+    The extracted center of the k-space, i.e. both the kspace locations and
+    kspace values. If the density compensators are passed, the corresponding
+    compensators for the center of k-space data will also be returned. The
+    return dtypes for density compensation and kspace data is same as input
     
     Parameters
     ----------
@@ -21,22 +25,22 @@ def extract_kspace_center(
         The samples location in the k-sapec domain (between [-0.5, 0.5[)
     threshold: tuple or float
         The threshold used to extract the k_space center (between (0, 1])
-    window_fun: "hann" / "hanning", "hamming", "ellipse", "rect", or a callable, 
-        default "ellipse".
+    window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
         The window function to apply to the selected data. It is computed with
         the center locations selected. Only works with circular mask.
         If window_fun is a callable, it takes as input the array (n_samples x n_dims)
         of sample positions and returns an array of n_samples weights to be
         applied to the selected k-space values, before the smaps estimation.
-
-
+        
     Returns
     -------
-    The extracted center of the k-space, i.e. both the kspace locations and
-    kspace values. If the density compensators are passed, the corresponding
-    compensators for the center of k-space data will also be returned. The
-    return stypes for density compensation and kspace data is same as input
-
+    data_thresholded: ndarray 
+        The k-space values in the center region.
+    center_loc: ndarray
+        The locations in the center region.
+    density_comp: ndarray, optional 
+        The density compensation weights (if requested)
+    
     Notes
     -----
     The Hann (or Hanning) and Hamming windows  of width :math:`2\theta` are defined as:
