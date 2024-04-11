@@ -253,7 +253,7 @@ def read_trajectory(
     grad_filename: str,
     dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
-    gamma: Gammas |  = Gammas.HYDROGEN,
+    gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
