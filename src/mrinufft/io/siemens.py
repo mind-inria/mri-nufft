@@ -25,7 +25,7 @@ def read_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
     Returns
     -------
     data: ndarray
-        Imported data formatted as XXX 
+        Imported data formatted as n_coils X n_samples X n_slices X n_contrasts
     hdr: dict
         Extra information about the data parsed from the twix file
 
@@ -53,17 +53,17 @@ def read_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
     raw_kspace = twixObj.image['']
     data = np.moveaxis(raw_kspace, 0, 2)
     hdr = {
-        "num_coils": int(twixObj.image.NCha),
-        "num_shots": int(twixObj.image.NLin),
-        "num_contrasts": int(twixObj.image.NSet),
-        "num_adc_samples": int(twixObj.image.NCol),
-        "num_slices": int(twixObj.image.NSli),
+        "n_coils": int(twixObj.image.NCha),
+        "n_shots": int(twixObj.image.NLin),
+        "n_contrasts": int(twixObj.image.NSet),
+        "n_adc_samples": int(twixObj.image.NCol),
+        "n_slices": int(twixObj.image.NSli),
     }
     data = data.reshape(
-        hdr["num_coils"], 
-        hdr["num_shots"]*hdr["num_adc_samples"], 
-        hdr["num_slices"], 
-        hdr["num_contrasts"]
+        hdr["n_coils"], 
+        hdr["n_shots"]*hdr["n_adc_samples"], 
+        hdr["n_slices"], 
+        hdr["n_contrasts"]
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
