@@ -89,15 +89,44 @@ def extract_kspace_center(
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, kspace_data, shape, threshold, backend, density=None, 
-                  extract_args=None, blurr_factor=0):
+def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
+                  extract_kwargs=None, blurr_factor=0):
+    """
+    Calculate low-frequency sensitivity maps.
+
+    Parameters
+    ----------
+    traj : numpy.ndarray
+        The trajectory of the samples.
+    kspace_data : numpy.ndarray
+        The k-space data.
+    shape : tuple
+        The shape of the image.
+    threshold : float
+        The threshold used for extracting the k-space center.
+    backend : str
+        The backend used for the operator.
+    density : numpy.ndarray, optional
+        The density compensation weights.
+    extract_kwargs : dict, optional
+        Additional keyword arguments for the `extract_kspace_center` function.
+    blurr_factor : float, optional
+        The blurring factor for smoothing the sensitivity maps.
+
+    Returns
+    -------
+    Smaps : numpy.ndarray
+        The low-frequency sensitivity maps.
+    SOS : numpy.ndarray
+        The sum of squares of the sensitivity maps.
+    """
     k_space, samples, dc = extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
         threshold=threshold,
         density=density,
         img_shape=shape,
-        **(extract_args or {}),
+        **(extract_kwargs or {}),
     )
     smaps_adj_op = get_operator(backend)(
         samples,
