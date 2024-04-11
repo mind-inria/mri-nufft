@@ -1,15 +1,13 @@
-from mrinufft._utils import MethodRegister
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import get_array_module
 from mrinufft import get_operator
 from skimage.filters import threshold_otsu, gaussian
 from skimage.morphology import convex_hull_image
+from .utils import register_smaps
 import numpy as np
 
-register_smaps = MethodRegister("sensitivity_maps")
 
-
-def extract_kspace_center(
+def _extract_kspace_center(
         kspace_data, kspace_loc, threshold=None, density=None, window_fun="ellipse", 
     ):
     r"""Extract k-space center and corresponding sampling locations.
@@ -122,7 +120,7 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
     SOS : numpy.ndarray
         The sum of squares of the sensitivity maps.
     """
-    k_space, samples, dc = extract_kspace_center(
+    k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
         threshold=threshold,

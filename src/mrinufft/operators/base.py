@@ -14,6 +14,7 @@ from mrinufft._utils import power_method, auto_cast, get_array_module
 from mrinufft.operators.interfaces.utils import is_cuda_array
 
 from mrinufft.density import get_density
+from mrinufft.extras import get_smaps
 
 CUPY_AVAILABLE = True
 try:
@@ -225,6 +226,39 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
+    
+    def compute_smaps(self, kspace_data, method=None):
+        """Compute the sensitivity maps and set it.
+
+        Parameters
+        ----------
+        kspace_data: np.ndarray
+            The k-space data to be used to estimate sensitivity maps
+        method: str or callable or dict
+            The method to use to compute the sensitivity maps.
+            If a string, the method should be registered in the smaps registry.
+            If a callable, it should take the samples and the shape as input.
+            If a dict, it should have a key 'name', to determine which method to use.
+            other items will be used as kwargs.
+        """
+        if not method:
+            self.smaps = None
+            return None
+        kwargs = {}
+        if isinstance(method, dict):
+            kwargs = method.copy()
+            method = kwargs.pop("name")
+        if isinstance(method, str):
+            method = get_smaps(method)
+        if not callable(method):
+            raise ValueError(f"Unknown smaps method: {method}")
+        self.smaps, self.SOS = method(
+            self.samples,
+            self.shape,
+            density=self.density,
+            backend=self.backend,
+            **kwargs
+        )
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
