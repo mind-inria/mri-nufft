@@ -1,6 +1,7 @@
 from mrinufft._utils import MethodRegister
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import with_numpy_cupy, get_array_module
+from mrinufft import get_operator
 
 
 register_smaps = MethodRegister("sensitivity_maps")
@@ -82,12 +83,13 @@ def extract_kspace_center(
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, kspace_data, shape, backend, threshold, *args, **kwargs):
+def low_frequency(traj, kspace_data, shape, backend, threshold, density=None, *args, **kwargs):
     xp = get_array_module(kspace_data)
-    k_space, traj = extract_kspace_center(
+    k_space, samples, dc = extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
         threshold=threshold,
+        density=density,
         img_shape=shape,
         **kwargs,
     )
