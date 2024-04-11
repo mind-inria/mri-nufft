@@ -2,7 +2,7 @@
 
 import warnings
 import os
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 import numpy as np
 from datetime import datetime
 from array import array
@@ -253,7 +253,7 @@ def read_trajectory(
     grad_filename: str,
     dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
-    gamma: float = Gammas.HYDROGEN,
+    gamma: Union[Gammas,float] = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
@@ -393,7 +393,7 @@ def read_trajectory(
 
 
 def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
-                        data_type: str = "SPARKLING_VE11C"):
+                        data_type: str = "ARBGRAD_VE11C"):
     """Read raw data from a Siemens MRI file.
     
     Parameters
@@ -405,7 +405,7 @@ def read_siemens_rawdat(filename: str, removeOS: bool = False, squeeze: bool = T
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     data_type : str, optional
-        The type of data to read, by default 'SPARKLING_VE11C'.
+        The type of data to read, by default 'ARBGRAD_VE11C'.
 
     Returns
     -------
