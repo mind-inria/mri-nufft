@@ -1,8 +1,10 @@
 from mrinufft._utils import MethodRegister
 from mrinufft.density.utils import flat_traj
-from mrinufft.operators.base import with_numpy_cupy, get_array_module
+from mrinufft.operators.base import get_array_module
 from mrinufft import get_operator
-
+from skimage.filters import threshold_otsu, gaussian
+from skimage.morphology import convex_hull_image
+import numpy as np
 
 register_smaps = MethodRegister("sensitivity_maps")
 
@@ -87,15 +89,15 @@ def extract_kspace_center(
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, kspace_data, shape, backend, threshold, density=None, *args, **kwargs):
-    xp = get_array_module(kspace_data)
+def low_frequency(traj, kspace_data, shape, threshold, backend, density=None, 
+                  extract_args=None, blurr_factor=0):
     k_space, samples, dc = extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
         threshold=threshold,
         density=density,
         img_shape=shape,
-        **kwargs,
+        **(extract_args or {}),
     )
     smaps_adj_op = get_operator(backend)(
         samples,
@@ -104,8 +106,14 @@ def low_frequency(traj, kspace_data, shape, backend, threshold, density=None, *a
         n_coils=k_space.shape[0]
     )
     Smaps_ = smaps_adj_op.adj_op(k_space)
-    SOS = xp.linalg.norm(Smaps_ , axis=0)
+    SOS = np.linalg.norm(Smaps_, axis=0)
     thresh = threshold_otsu(SOS)
     convex_hull = convex_hull_image(SOS>thresh)
-    
+    Smaps = Smaps_ * convex_hull / SOS
+    # Smooth out the sensitivity maps
+    if blurr_factor > 0:
+        Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
+        SOS = np.linalg.norm(Smaps, axis=0)
+        Smaps = Smaps / SOS
+    return Smaps, SOS
     
