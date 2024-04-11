@@ -24,8 +24,10 @@ def read_rawdat(filename: str, removeOS: bool = False, squeeze: bool = True,
 
     Returns
     -------
-    tuple
-        A tuple containing the raw data and the header information.
+    data: ndarray
+        Imported data formatted as XXX 
+    hdr: dict
+        Extra information about the data parsed from the twix file
 
     Raises
     ------
