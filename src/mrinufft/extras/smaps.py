@@ -10,7 +10,7 @@ register_smaps = MethodRegister("sensitivity_maps")
 
 
 def extract_kspace_center(
-        kspace_data, kspace_loc, threshold=None, window_fun="ellipse", 
+        kspace_data, kspace_loc, threshold=None, density=None, window_fun="ellipse", 
     ):
     r"""Extract k-space center and corresponding sampling locations.
     
@@ -70,6 +70,8 @@ def extract_kspace_center(
         index = xp.extract(condition, index)
         center_locations = kspace_loc[index, :]
         data_thresholded = data_ordered[:, index]
+        dc = density[index]
+        return data_thresholded, center_locations, dc
     else:
         if callable(window_fun):
             window = window_fun(center_locations)
@@ -83,8 +85,8 @@ def extract_kspace_center(
             else:
                 raise ValueError("Unsupported window function.")
         data_thresholded = window * data_thresholded
-        # Return k-space locations just for consistency
-        return data_thresholded, kspace_loc
+        # Return k-space locations & density just for consistency
+        return data_thresholded, kspace_loc, density
 
 
 @register_smaps
