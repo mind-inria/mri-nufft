@@ -138,7 +138,6 @@ def test_stacked2traj3d():
 
 def test_stack_reuse(operator, stacked_op):
     """Test the reuse of the stacked operator."""
-
     nufft_2d = stacked_op.operator
 
     reuse_op = MRIStackedNUFFT(
