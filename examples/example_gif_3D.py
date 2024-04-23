@@ -225,7 +225,7 @@ frame_setup = [
 
 
 def draw_frame(func, index, name, arg, save_dir="/tmp/"):
-
+    """Draw a single frame of the gif and save it to a tmp file."""
     trajectory = func(arg)
     # General configuration
     fig = plt.figure(figsize=(2 * figsize, figsize))
