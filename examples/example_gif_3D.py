@@ -254,7 +254,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     return filename
 
 
-image_files = joblib.Parallel(n_jobs=-1)(
+image_files = joblib.Parallel(n_jobs=1)(
     joblib.delayed(draw_frame)(*data) for data in frame_setup
 )
 
