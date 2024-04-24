@@ -89,7 +89,7 @@ def _extract_kspace_center(
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
+def low_frequency(traj, shape, kspace_data, threshold, backend, density=None,
                   extract_kwargs=None, blurr_factor=0, mask=True):
     """
     Calculate low-frequency sensitivity maps.
@@ -98,10 +98,10 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
     ----------
     traj : numpy.ndarray
         The trajectory of the samples.
-    kspace_data : numpy.ndarray
-        The k-space data.
     shape : tuple
         The shape of the image.
+    kspace_data : numpy.ndarray
+        The k-space data.
     threshold : float
         The threshold used for extracting the k-space center.
     backend : str
@@ -136,18 +136,20 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
         density=dc,
         n_coils=k_space.shape[0]
     )
-    Smaps_ = smaps_adj_op.adj_op(k_space)
-    SOS = np.linalg.norm(Smaps_, axis=0)
+    Smaps = smaps_adj_op.adj_op(k_space)
+    SOS = np.linalg.norm(Smaps, axis=0)
     if mask:
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
         convex_hull = convex_hull_image(SOS>thresh)
-        Smaps = Smaps_ * convex_hull / SOS
+        Smaps = Smaps * convex_hull 
     # Smooth out the sensitivity maps
     if blurr_factor > 0:
         Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
         # Re-normalize the sensitivity maps
-        SOS = np.linalg.norm(Smaps, axis=0)
-        Smaps = Smaps / SOS
+    if mask or blurr_factor > 0:
+        # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
+        SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
+    Smaps = Smaps / SOS
     return Smaps, SOS
     
