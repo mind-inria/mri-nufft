@@ -90,7 +90,7 @@ def _extract_kspace_center(
 @register_smaps
 @flat_traj
 def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
-                  extract_kwargs=None, blurr_factor=0):
+                  extract_kwargs=None, blurr_factor=0, mask=True):
     """
     Calculate low-frequency sensitivity maps.
 
@@ -112,6 +112,8 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
         Additional keyword arguments for the `extract_kspace_center` function.
     blurr_factor : float, optional
         The blurring factor for smoothing the sensitivity maps.
+    mask: bool, optional default `True`
+        Whether the Sensitivity maps must be masked
 
     Returns
     -------
@@ -136,9 +138,11 @@ def low_frequency(traj, kspace_data, shape, threshold, backend, density=None,
     )
     Smaps_ = smaps_adj_op.adj_op(k_space)
     SOS = np.linalg.norm(Smaps_, axis=0)
-    thresh = threshold_otsu(SOS)
-    convex_hull = convex_hull_image(SOS>thresh)
-    Smaps = Smaps_ * convex_hull / SOS
+    if mask:
+        thresh = threshold_otsu(SOS)
+        # Create convex hull from mask
+        convex_hull = convex_hull_image(SOS>thresh)
+        Smaps = Smaps_ * convex_hull / SOS
     # Smooth out the sensitivity maps
     if blurr_factor > 0:
         Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
