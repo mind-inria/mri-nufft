@@ -197,6 +197,7 @@ imgs[0].save(
 # cleanup
 import os
 import shutil
+from pathlib import Path
 
 for f in image_files:
     try:
@@ -204,13 +205,8 @@ for f in image_files:
     except OSError:
         continue
 
-try:
-    shutil.copyfile(
-        "mrinufft_2D_traj.gif",
-        "../docs/generated/autoexamples/images/mrinufft_2D_traj.gif",
-    )
-except FileNotFoundError:
-    pass
+final_dir = Path(__file__).parent / "generated" / "autoexamples" / "images"
+shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
 # sphinx_gallery_end_ignore
 
 # %%
