@@ -201,12 +201,16 @@ import shutil
 for f in image_files:
     try:
         os.remove(f)
-    except:
+    except OSError:
         continue
 
-shutil.copyfile(
-    "mrinufft_2D_traj.gif", "../docs/generated/autoexamples/images/mrinufft_2D_traj.gif"
-)
+try:
+    shutil.copyfile(
+        "mrinufft_2D_traj.gif",
+        "../docs/generated/autoexamples/images/mrinufft_2D_traj.gif",
+    )
+except FileNotFoundError:
+    pass
 # sphinx_gallery_end_ignore
 
 # %%
