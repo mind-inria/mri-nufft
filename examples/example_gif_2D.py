@@ -204,9 +204,13 @@ for f in image_files:
         os.remove(f)
     except OSError:
         continue
+# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+try:
+    final_dir = Path(__file__).parent / "docs" / "generated" / "autoexamples" / "images"
+    shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
+except FileNotFoundError:
+    pass
 
-final_dir = Path(__file__).parent / "generated" / "autoexamples" / "images"
-shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
 # sphinx_gallery_end_ignore
 
 # %%

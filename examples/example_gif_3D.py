@@ -276,16 +276,20 @@ imgs[0].save(
 # cleanup
 import os
 import shutil
+from pathlib import Path
 
 for f in image_files:
     try:
         os.remove(f)
-    except:
+    except OSError:
         continue
+# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+try:
+    final_dir = Path(__file__).parent / "docs" / "generated" / "autoexamples" / "images"
+    shutil.copyfile("mrinufft_3D_traj.gif", final_dir / "mrinufft_3D_traj.gif")
+except FileNotFoundError:
+    pass
 
-shutil.copyfile(
-    "mrinufft_3D_traj.gif", "../docs/generated/autoexamples/images/mrinufft_3D_traj.gif"
-)
 # sphinx_gallery_end_ignore
 
 # %%
