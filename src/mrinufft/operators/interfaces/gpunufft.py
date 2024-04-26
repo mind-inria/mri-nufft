@@ -372,7 +372,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
                 "or use cpu for implementation"
             )
         self.shape = shape
-        self.samples = proper_trajectory(samples, normalize="unit")
+
+        self.samples = proper_trajectory(samples.astype(np.float32), normalize="unit")
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
@@ -614,16 +615,14 @@ class MRIGpuNUFFT(FourierOperatorBase):
         image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         obs_data_ = obs_data.reshape((B, C, K))
 
-        ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
-        obs_data_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
-        tmp_img = cp.empty(image_data_.shape[1:], dtype=self.cpx_dtype)
-        final_img = np.empty_like(image_data_)
+        ksp_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
+        obs_data_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
+        tmp_img = cp.zeros(image_data_.shape[1:], dtype=self.cpx_dtype)
+        final_img = np.zeros_like(image_data_)
 
         for i in range(B):
             tmp_img.set(image_data_[i])
             obs_data_tmp.set(obs_data_[i])
-            # synchronize
-            cp.cuda.Stream.null.synchronize()
             self.impl.op_direct(tmp_img, ksp_tmp)
             ksp_tmp -= obs_data_tmp
             final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
@@ -635,16 +634,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
         image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         obs_data_ = obs_data.reshape((B, C, K))
-
-        tmp_img = cp.empty(image_data_.shape[1:], dtype=self.cpx_dtype).squeeze()
-        ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
         final_img = cp.empty_like(image_data_)
         for i in range(B):
-            cp.copyto(tmp_img, image_data_[i])
-            ksp_tmp = self.impl.op_direct(tmp_img).squeeze()
-            ksp_tmp -= obs_data_[i].squeeze()
+            ksp_tmp = self.impl.op_direct(image_data_[i].copy())
+            ksp_tmp -= obs_data_[i]
             final_img[i] = self.impl.adj_op_direct(ksp_tmp)
-        return self._safe_squeeze(image_data_)
+        return self._safe_squeeze(final_img)
 
     # TODO : For data consistency the workflow is currently:
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
