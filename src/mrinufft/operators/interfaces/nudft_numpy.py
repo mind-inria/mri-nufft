@@ -32,7 +32,7 @@ def implicit_type2_ndft(ktraj, image, shape, normalize=False):
     for j in range(np.prod(image.shape)):
         res += image[j] * np.exp(-2j * np.pi * ktraj @ grid_r[:, j])
     if normalize:
-        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
+        res /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 
@@ -44,7 +44,7 @@ def implicit_type1_ndft(ktraj, coeffs, shape, normalize=False):
     for i in range(len(ktraj)):
         res += coeffs[i] * np.exp(2j * np.pi * ktraj[i] @ grid_r)
     if normalize:
-        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
+        res /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 

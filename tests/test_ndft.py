@@ -64,7 +64,7 @@ def test_ndft_implicit1(kspace, shape):
     ],
 )
 def test_ndft_nufft(kspace, shape):
-    """Test that NDFT matches NUFFT"""
+    """Test that NDFT matches NUFFT."""
     ndft_op = RawNDFT(kspace, shape, normalize=True)
     random_kspace = 1j * np.random.randn(len(kspace))
     random_kspace += np.random.randn(len(kspace))
