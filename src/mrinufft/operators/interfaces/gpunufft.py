@@ -594,6 +594,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         else:
             raise ValueError("image and obs_data should be on the same device")
 
+        if not self.impl.use_gpu_direct:
+            warnings.warn(
+                "Using direct GPU array without passing "
+                "`use_gpu_direct=True`, this is memory inefficient."
+            )
+
         ret = grad_func(image_data, obs_data)
 
         ret = self._safe_squeeze(ret)
@@ -610,28 +616,34 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
         ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
         obs_data_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
-        final_img = cp.empty_like(image_data_)
-        for i in range(B):
-            final_img[i].set(image_data_[i])
-            obs_data_tmp.set(obs_data_[i])
-            self.impl.op_direct(final_img[i], ksp_tmp)
-            ksp_tmp -= obs_data_tmp
-            self.impl.adj_op_direct(ksp_tmp, final_img[i])
+        tmp_img = cp.empty(image_data_.shape[1:], dtype=self.cpx_dtype)
+        final_img = np.empty_like(image_data_)
 
-        return self._safe_squeeze(final_img.get())
+        for i in range(B):
+            tmp_img.set(image_data_[i])
+            obs_data_tmp.set(obs_data_[i])
+            # synchronize
+            cp.cuda.Stream.null.synchronize()
+            self.impl.op_direct(tmp_img, ksp_tmp)
+            ksp_tmp -= obs_data_tmp
+            final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
+
+        return self._safe_squeeze(final_img)
 
     def _dc_direct(self, image_data, obs_data):
-
+        """Data Consistency with direct GPU arrays."""
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
         image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         obs_data_ = obs_data.reshape((B, C, K))
 
+        tmp_img = cp.empty(image_data_.shape[1:], dtype=self.cpx_dtype).squeeze()
         ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
         final_img = cp.empty_like(image_data_)
         for i in range(B):
-            self.impl.op_direct(image_data[i], ksp_tmp)
-            ksp_tmp -= obs_data_[i]
-            self.impl.adj_op_direct(ksp_tmp, final_img[i])
+            cp.copyto(tmp_img, image_data_[i])
+            ksp_tmp = self.impl.op_direct(tmp_img).squeeze()
+            ksp_tmp -= obs_data_[i].squeeze()
+            final_img[i] = self.impl.adj_op_direct(ksp_tmp)
         return self._safe_squeeze(image_data_)
 
     # TODO : For data consistency the workflow is currently:
