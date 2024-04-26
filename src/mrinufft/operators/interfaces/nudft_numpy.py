@@ -6,10 +6,12 @@ import numpy as np
 import scipy as sp
 
 from ..base import FourierOperatorCPU
+from mrinufft._utils import proper_trajectory
 
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     """Get the NDFT Fourier Matrix."""
+    ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)
     ndim = len(shape)
     matrix = np.zeros((len(ktraj), n), dtype=dtype)

@@ -40,6 +40,7 @@ def operator(kspace_loc, shape, backend, autograd):
         samples=kspace_loc,
         shape=shape,
         smaps=None,
+        squeeze_dims=False,  # Squeezing breaks dimensions ! 
     )
 
     return nufft
@@ -48,7 +49,7 @@ def operator(kspace_loc, shape, backend, autograd):
 @fixture(scope="module")
 def ndft_matrix(operator):
     """Get the NDFT matrix from the operator."""
-    return get_fourier_matrix(operator.samples, operator.shape)
+    return get_fourier_matrix(operator.samples, operator.shape, normalize=True)
 
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
@@ -64,7 +65,7 @@ def test_adjoint_and_grad(operator, ndft_matrix, interface):
 
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
-        adj_data_ndft = (ndft_matrix_torch.T @ ksp_data.flatten()).reshape(
+        adj_data_ndft = (ndft_matrix_torch.conj().T @ ksp_data.flatten()).reshape(
             adj_data.shape
         )
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
@@ -72,9 +73,7 @@ def test_adjoint_and_grad(operator, ndft_matrix, interface):
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
-        0
-    ]
+    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[0]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
 
