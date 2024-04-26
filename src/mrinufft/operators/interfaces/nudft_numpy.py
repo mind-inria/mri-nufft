@@ -8,17 +8,6 @@ import scipy as sp
 from ..base import FourierOperatorCPU
 
 
-<<<<<<< Updated upstream
-def get_fourier_matrix(ktraj, shape):
-    """Get the NDFT Fourier Matrix."""
-    n = np.prod(shape)
-    ndim = len(shape)
-    matrix = np.zeros((len(ktraj), n), dtype=complex)
-    r = [np.arange(shape[i]) for i in range(ndim)]
-    grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
-    traj_grid = ktraj @ grid_r
-    matrix = np.exp(-2j * np.pi * traj_grid)
-=======
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     """Get the NDFT Fourier Matrix."""
     n = np.prod(shape)
@@ -30,7 +19,6 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     matrix = np.exp(-2j * np.pi * traj_grid, dtype=dtype)
     if normalize:
         matrix /= (np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape)))
->>>>>>> Stashed changes
     return matrix
 
 
