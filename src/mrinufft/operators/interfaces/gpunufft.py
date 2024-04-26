@@ -620,6 +620,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         tmp_img = cp.zeros(image_data_.shape[1:], dtype=self.cpx_dtype)
         final_img = np.zeros_like(image_data_)
 
+        print(image_data_.shape)
         for i in range(B):
             tmp_img.set(image_data_[i])
             obs_data_tmp.set(obs_data_[i])
@@ -636,7 +637,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         obs_data_ = obs_data.reshape((B, C, K))
         final_img = cp.empty_like(image_data_)
         for i in range(B):
-            ksp_tmp = self.impl.op_direct(image_data_[i].copy())
+            ksp_tmp = self.impl.op_direct(image_data_[i])
             ksp_tmp -= obs_data_[i]
             final_img[i] = self.impl.adj_op_direct(ksp_tmp)
         return self._safe_squeeze(final_img)
