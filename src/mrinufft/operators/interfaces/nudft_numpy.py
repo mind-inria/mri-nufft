@@ -13,18 +13,18 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     n = np.prod(shape)
     ndim = len(shape)
     matrix = np.zeros((len(ktraj), n), dtype=dtype)
-    r = [np.linspace(-s/2, s/2-1, s) for s in shape]
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
     traj_grid = ktraj @ grid_r
     matrix = np.exp(-2j * np.pi * traj_grid, dtype=dtype)
     if normalize:
-        matrix /= (np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape)))
+        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return matrix
 
 
 def implicit_type2_ndft(ktraj, image, shape, normalize=False):
     """Compute the NDFT using the implicit type 2 (image -> kspace) algorithm."""
-    r = [np.linspace(-s/2, s/2-1, s) for s in shape]
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(
         np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(image.shape))
     )
@@ -32,19 +32,19 @@ def implicit_type2_ndft(ktraj, image, shape, normalize=False):
     for j in range(np.prod(image.shape)):
         res += image[j] * np.exp(-2j * np.pi * ktraj @ grid_r[:, j])
     if normalize:
-        matrix /= (np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape)))
+        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 
 def implicit_type1_ndft(ktraj, coeffs, shape, normalize=False):
     """Compute the NDFT using the implicit type 1 (kspace -> image) algorithm."""
-    r = [np.linspace(-s/2, s/2-1, s) for s in shape]
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(shape)))
     res = np.zeros(np.prod(shape), dtype=coeffs.dtype)
     for i in range(len(ktraj)):
         res += coeffs[i] * np.exp(2j * np.pi * ktraj[i] @ grid_r)
     if normalize:
-        matrix /= (np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape)))
+        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 
@@ -75,9 +75,13 @@ class RawNDFT:
                 )
             except MemoryError:
                 warnings.warn("Not enough memory, using an implicit definition anyway")
-                self._fourier_matrix = get_implicit_matrix(self.samples, self.shape, normalize)
+                self._fourier_matrix = get_implicit_matrix(
+                    self.samples, self.shape, normalize
+                )
         else:
-            self._fourier_matrix = get_implicit_matrix(self.samples, self.shape, normalize)
+            self._fourier_matrix = get_implicit_matrix(
+                self.samples, self.shape, normalize
+            )
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""
