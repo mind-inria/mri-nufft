@@ -63,18 +63,18 @@ def test_ndft_implicit1(kspace, shape):
         CasesTrajectories.case_grid3D,
     ],
 )
-def test_ndft_nufft(kspace, shape):
+def test_ndft_nufft(kspace, shape, request):
     """Test that NDFT matches NUFFT."""
     ndft_op = RawNDFT(kspace, shape, normalize=True)
     random_kspace = 1j * np.random.randn(len(kspace))
     random_kspace += np.random.randn(len(kspace))
     random_image = np.random.randn(*shape) + 1j * np.random.randn(*shape)
-    operator = get_operator("pynfft")(
+    operator = get_operator(request.config.getoption("ref"))(
         kspace, shape
-    )  # FIXME: @PAC, we need to get ref here
+    )
     nufft_k = operator.op(random_image)
     nufft_i = operator.adj_op(random_kspace)
-
+    
     ndft_k = np.empty(ndft_op.n_samples, dtype=random_image.dtype)
     ndft_i = np.empty(shape, dtype=random_kspace.dtype)
     ndft_op.op(ndft_k, random_image)
