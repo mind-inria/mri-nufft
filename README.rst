@@ -22,6 +22,19 @@ This python package extends various NUFFT (Non-Uniform Fast Fourier Transform) p
 
 In particular, it provides a unified interface for all the methods, with extra features such as coil sensitivity, density compensated adjoint and off-resonance corrections (for static B0 inhomogeneities).
 
+.. raw:: html 
+   
+   <div align="center">
+
+.. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.svg
+   :width: 700
+   :align: center
+
+Modularity and Integration of MRI-nufft with the python computing libraries.
+
+.. raw:: html 
+   
+   </div>
 
 Usage
 =====
