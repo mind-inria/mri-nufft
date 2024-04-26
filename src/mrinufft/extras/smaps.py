@@ -1,6 +1,5 @@
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import get_array_module
-from mrinufft import get_operator
 from skimage.filters import threshold_otsu, gaussian
 from skimage.morphology import convex_hull_image
 from .utils import register_smaps
@@ -22,7 +21,7 @@ def _extract_kspace_center(
     kspace_data: numpy.ndarray
         The value of the samples
     kspace_loc: numpy.ndarray
-        The samples location in the k-sapec domain (between [-0.5, 0.5[)
+        The samples location in the k-space domain (between [-0.5, 0.5[)
     threshold: tuple or float
         The threshold used to extract the k_space center (between (0, 1])
     window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
@@ -122,6 +121,8 @@ def low_frequency(traj, shape, kspace_data, threshold, backend, density=None,
     SOS : numpy.ndarray
         The sum of squares of the sensitivity maps.
     """
+    # defer import to later to prevent circular import
+    from mrinufft import get_operator
     k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
