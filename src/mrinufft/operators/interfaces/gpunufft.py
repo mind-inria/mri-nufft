@@ -632,15 +632,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
     def _dc_direct(self, image_data, obs_data):
         """Data Consistency with direct GPU arrays."""
-        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
-        image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
-        obs_data_ = obs_data.reshape((B, C, K))
-        final_img = cp.empty_like(image_data_)
-        for i in range(B):
-            ksp_tmp = self.impl.op_direct(image_data_[i])
-            ksp_tmp -= obs_data_[i]
-            final_img[i] = self.impl.adj_op_direct(ksp_tmp)
-        return self._safe_squeeze(final_img)
+
+        tmp = self.op(image_data)
+        tmp -= obs_data
+        image_data_ = self.adj_op(tmp)
+        return self._safe_squeeze(image_data_)
 
     # TODO : For data consistency the workflow is currently:
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
