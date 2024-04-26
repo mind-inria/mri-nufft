@@ -561,11 +561,19 @@ class MRIGpuNUFFT(FourierOperatorBase):
             Observed data.
         """
         xp = get_array_module(image_data)
-        if xp.__name__ == "torch" and image_data.is_cpu:
-            image_data = image_data.numpy()
+        if xp.__name__ == "torch":
+            image_data_device = image_data.device
+            if image_data.is_cpu:
+                image_data = image_data.numpy()
+            else:
+                image_data = cp.from_dlpack(image_data)
         xp = get_array_module(obs_data)
-        if xp.__name__ == "torch" and obs_data.is_cpu:
-            obs_data = obs_data.numpy()
+        if xp.__name__ == "torch":
+            if obs_data.is_cpu:
+                obs_data = obs_data.numpy()
+            else:
+                obs_data = cp.from_dlpack(obs_data)
+
         obs_data = auto_cast(obs_data, self.cpx_dtype)
         image_data = auto_cast(image_data, self.cpx_dtype)
 
@@ -590,25 +598,41 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
         ret = self._safe_squeeze(ret)
         if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=image_data.device)
+            ret = xp.as_tensor(ret, device=image_data_device)
         elif xp.__name__ == "torch":
             ret = xp.from_numpy(ret)
         return ret
 
     def _dc_host(self, image_data, obs_data):
-        image_data_d = cp.array(image_data)
-        ksp_d = self.impl.op_direct(image_data_d)
-        obs_data_d = cp.array(obs_data)
-        ksp_d -= obs_data_d
-        self.impl.adj_op_direct(ksp_d, image_data_d)
+        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        obs_data_ = obs_data.reshape((B, C, K))
 
-        return image_data_d.get().reshape(image_data.shape)
+        ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
+        obs_data_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
+        final_img = cp.empty_like(image_data_)
+        for i in range(B):
+            final_img[i].set(image_data_[i])
+            obs_data_tmp.set(obs_data_[i])
+            self.impl.op_direct(final_img[i], ksp_tmp)
+            ksp_tmp -= obs_data_tmp
+            self.impl.adj_op_direct(ksp_tmp, final_img[i])
 
-    def _dc_device(self, image_data, obs_data):
-        ksp_d = self.impl.op_direct(image_data)
-        ksp_d -= obs_data
-        img_d = self.impl.adj_op_direct(ksp_d)
-        return img_d
+        return self._safe_squeeze(final_img.get())
+
+    def _dc_direct(self, image_data, obs_data):
+
+        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        obs_data_ = obs_data.reshape((B, C, K))
+
+        ksp_tmp = cp.empty((C, K), dtype=self.cpx_dtype)
+        final_img = cp.empty_like(image_data_)
+        for i in range(B):
+            self.impl.op_direct(image_data[i], ksp_tmp)
+            ksp_tmp -= obs_data_[i]
+            self.impl.adj_op_direct(ksp_tmp, final_img[i])
+        return self._safe_squeeze(image_data_)
 
     # TODO : For data consistency the workflow is currently:
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
