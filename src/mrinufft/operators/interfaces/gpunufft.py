@@ -615,24 +615,24 @@ class MRIGpuNUFFT(FourierOperatorBase):
         image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         obs_data_ = obs_data.reshape((B, C, K))
 
-        ksp_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
         obs_data_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
-        tmp_img = cp.zeros(image_data_.shape[1:], dtype=self.cpx_dtype)
+        tmp_img = cp.zeros((1 if self.uses_sense else C, *XYZ), dtype=np.complex64)
         final_img = np.zeros_like(image_data_)
 
         print(image_data_.shape)
         for i in range(B):
             tmp_img.set(image_data_[i])
             obs_data_tmp.set(obs_data_[i])
-            self.impl.op_direct(tmp_img, ksp_tmp)
+            ksp_tmp = self.impl.op_direct(tmp_img)
             ksp_tmp -= obs_data_tmp
-            final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
-
+            ret_tmp = self.impl.adj_op_direct(ksp_tmp).copy()
+            final_img[i] = ret_tmp.get()
         return self._safe_squeeze(final_img)
 
     def _dc_direct(self, image_data, obs_data):
-        """Data Consistency with direct GPU arrays."""
+        """Get data consistency with direct GPU arrays."""
 
+        # TODO: This is not memory efficient, the size of the tmp buffer could be reduced by working batch wise.
         tmp = self.op(image_data)
         tmp -= obs_data
         image_data_ = self.adj_op(tmp)
