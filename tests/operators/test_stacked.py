@@ -134,3 +134,19 @@ def test_stacked2traj3d():
 
     npt.assert_allclose(traj2d, traj2d)
     npt.assert_allclose(z_index, z_index2)
+
+
+def test_stack_reuse(operator, stacked_op):
+    """Test the reuse of the stacked operator."""
+    nufft_2d = stacked_op.operator
+
+    reuse_op = MRIStackedNUFFT(
+        backend=nufft_2d,
+        shape=stacked_op.shape,
+        samples=stacked_op.samples,
+        z_index=stacked_op.z_index,
+        n_coils=stacked_op.n_coils,
+        n_batchs=stacked_op.n_batchs,
+        smaps=stacked_op.smaps,
+    )
+    assert reuse_op.operator is nufft_2d
