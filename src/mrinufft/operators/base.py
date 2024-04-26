@@ -103,7 +103,10 @@ def get_operator(backend_name: str, *args, autograd=None, **kwargs):
         operator = operator(*args, **kwargs)
 
     if autograd:
-        operator = operator.make_autograd(variable=autograd)
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(variable=autograd)
+        else:  # partial
+            operator = partial(operator.with_autograd, variable=autograd)
     return operator
 
 
@@ -435,6 +438,11 @@ class FourierOperatorBase(ABC):
             f"  uses_sense: {self.uses_sense}\n"
             ")"
         )
+
+    @classmethod
+    def with_autograd(cls, variable, *args, **kwargs):
+        """Return a Fourier operator with autograd capabilities."""
+        return cls(*args, **kwargs).make_autograd(variable)
 
 
 class FourierOperatorCPU(FourierOperatorBase):

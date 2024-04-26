@@ -1,18 +1,12 @@
-"""Test the autodiff functionnality """
+"""Test the autodiff functionnality."""
 
 import numpy as np
-
-TORCH_AVAILABLE = True
-try:
-    import torch
-except ImportError:
-    TORCH_AVAILABLE = False
-
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 import pytest
-from pytest_cases import parametrize_with_cases
+from pytest_cases import parametrize_with_cases, parametrize, fixture
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator
+
 
 from helpers import (
     kspace_from_op,
@@ -21,68 +15,90 @@ from helpers import (
 )
 
 
-@pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_grid2D)
-@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-def test_adjoint_and_gradients(kspace_locs, shape, interface):
-    """."""
-    operator = get_operator(
-        "cufinufft", kspace_locs, shape, n_coils=1, smaps=None, autograd="data"
+TORCH_AVAILABLE = True
+try:
+    import torch
+except ImportError:
+    TORCH_AVAILABLE = False
+
+
+@fixture(scope="module")
+@parametrize(backend=["cufinufft", "finufft"])
+@parametrize(autograd=["data"])
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[
+        CasesTrajectories.case_grid2D,
+        CasesTrajectories.case_nyquist_radial2D,
+    ],  # 2D cases only for reduced memory footprint.
+)
+def operator(kspace_loc, shape, backend, autograd):
+    """Create NUFFT operator with autodiff capabilities."""
+    kspace_loc = kspace_loc.astype(np.float32)
+
+    nufft = get_operator(backend_name=backend, autograd=autograd)(
+        samples=kspace_loc,
+        shape=shape,
+        smaps=None,
     )
-    kdata = kspace_from_op(operator)
-    kdata_ = to_interface(kdata, interface=interface)
-    Idata = operator.adj_op(kdata_)
-    kdata_.requires_grad = True
-    breakpoint()
-    ktraj = kspace_locs + 0.01 * np.random.uniform(shape) * 2 * np.pi
+
+    return nufft
+
+
+@fixture(scope="module")
+def ndft_matrix(operator):
+    """Get the NDFT matrix from the operator."""
+    return get_fourier_matrix(operator.samples, operator.shape)
+
+
+@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+def test_adjoint_and_grad(operator, ndft_matrix, interface):
+    """Test the adjoint and gradient of the operator."""
+    if operator.backend == "finufft" and "gpu" in interface:
+        pytest.skip("GPU not supported for finufft backend")
+    ndft_matrix_torch = to_interface(ndft_matrix, interface=interface)
+    ksp_data = to_interface(kspace_from_op(operator), interface=interface)
+    img_data = to_interface(image_from_op(operator), interface=interface)
+    ksp_data.requires_grad = True
+
     with torch.autograd.set_detect_anomaly(True):
-        operator_n = get_operator(
-            "cufinufft", ktraj, shape, n_coils=1, smaps=None, autograd="data"
+        adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
+        adj_data_ndft = (ndft_matrix_torch.T @ ksp_data.flatten()).reshape(
+            adj_data.shape
         )
-        I_nufft = operator_n.adj_op(kdata_)
-        A = get_fourier_matrix(ktraj, shape)
-        A = to_interface(A, interface=interface).type(torch.complex64)
-        I_ndft = (((A.conj()).T) @ kdata_.flatten()).unsqueeze(0).view(I_nufft.shape)
-        loss_nufft = torch.mean(torch.abs(Idata - I_nufft) ** 2)
-        loss_nudft = torch.mean(torch.abs(Idata - I_ndft) ** 2)
+        loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
+        loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
-    # Test if the NUFFT and NDFT operations are close
-    assert torch.quantile(abs(I_nufft - I_ndft) / abs(I_ndft), 0.95) < 1e-1
-
-    # Test gradients with respect to kdata
-    gradient_ndft_kdata = torch.autograd.grad(loss_nudft, kdata_, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, kdata_, retain_graph=True)[0]
+    # Check if nufft and ndft are close in the backprop
+    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
+    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
+        0
+    ]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
 
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_grid2D)
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-def test_forward_and_gradients(kspace_locs, shape, interface):
-    """."""
-    operator = get_operator(
-        "cufinufft", kspace_locs, shape, n_coils=1, smaps=None, autograd="data"
-    )
-    image = image_from_op(operator)
-    image = to_interface(image, interface=interface)
-    kdata = operator.op(image)
-    image.requires_grad = True
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+def test_forward_and_grad(operator, ndft_matrix, interface):
+    """Test the adjoint and gradient of the operator."""
+    if operator.backend == "finufft" and "gpu" in interface:
+        pytest.skip("GPU not supported for finufft backend")
 
-    ktraj = kspace_locs + 0.01 * np.random.uniform(shape) * 2 * np.pi
+    ndft_matrix_torch = to_interface(ndft_matrix, interface=interface)
+    ksp_data_ref = to_interface(kspace_from_op(operator), interface=interface)
+    img_data = to_interface(image_from_op(operator), interface=interface)
+    img_data.requires_grad = True
+
     with torch.autograd.set_detect_anomaly(True):
-        operator_n = get_operator(
-            "cufinufft", ktraj, shape, n_coils=1, smaps=None, autograd="data"
-        )
-        kdata_nufft = operator_n.op(image)
-        A = get_fourier_matrix(ktraj, shape)
-        A = to_interface(A, interface=interface).type(torch.complex64)
+        ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
+        ksp_data_ndft = (ndft_matrix_torch @ img_data.flatten()).reshape(ksp_data.shape)
+        loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
+        loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
 
-        kdata_ndft = A @ image.flatten()
-        loss_nufft = torch.mean(torch.abs(kdata - kdata_nufft) ** 2)
-        loss_ndft = torch.mean(torch.abs(kdata - kdata_ndft) ** 2)
-
-    assert torch.quantile(abs(kdata_ndft - kdata_ndft) / abs(kdata_ndft), 0.95) < 1e-1
-
-    # Test gradients with respect to image
-    gradient_ndft_kdata = torch.autograd.grad(loss_nufft, image, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_ndft, image, retain_graph=True)[0]
+    # Check if nufft and ndft are close in the backprop
+    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
+    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
+        0
+    ]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
