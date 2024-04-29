@@ -145,17 +145,15 @@ def test_interface_lipschitz(operator):
     assert np.mean(L) < 1.1 * spec_rad
 
 
-def test_autograd_forward(operator, image_data, array_interface):
+def test_autograd_forward(operator, image_data):
     """Test the forward pass of the autograd."""
-    image_data_ = to_interface(image_data, array_interface)
-    kspace = operator.op(image_data_)
+    kspace = operator.op(image_data)
 
     assert kspace.requires_grad
 
 
 def test_autograd_backward(operator, kspace_data):
     """Test the backward pass of the autograd."""
-    kspace_data_ = to_interface(kspace_data, array_interface)
-    image = operator.adj_op(kspace_data_)
+    image = operator.adj_op(kspace_data)
 
     assert image.requires_grad
