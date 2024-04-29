@@ -258,7 +258,7 @@ class RawGpuNUFFT:
             interpolate_data,
         )
         if make_copy_back:
-            new_ksp = cp.copy(new_ksp)
+            new_ksp = np.copy(new_ksp)
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
@@ -316,7 +316,7 @@ class RawGpuNUFFT:
                 order="F",
             )
         self.operator.adj_op_direct(coeffs.data.ptr, image.data.ptr, grid_data)
-        image = image.reshape(C, *self.shape[::-1])
+        image = image.T.reshape(C, *self.shape[::-1], order="C")
         return self._reshape_image(image, "adjoint")
 
 
@@ -546,6 +546,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
                 pass
         return arr
 
+    @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the data consistency estimation directly on gpu.
 
@@ -561,20 +562,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
         obs_data: array
             Observed data.
         """
-        xp = get_array_module(image_data)
-        if xp.__name__ == "torch":
-            image_data_device = image_data.device
-            if image_data.is_cpu:
-                image_data = image_data.numpy()
-            else:
-                image_data = cp.from_dlpack(image_data)
-        xp = get_array_module(obs_data)
-        if xp.__name__ == "torch":
-            if obs_data.is_cpu:
-                obs_data = obs_data.numpy()
-            else:
-                obs_data = cp.from_dlpack(obs_data)
-
         obs_data = auto_cast(obs_data, self.cpx_dtype)
         image_data = auto_cast(image_data, self.cpx_dtype)
 
@@ -591,24 +578,19 @@ class MRIGpuNUFFT(FourierOperatorBase):
         if is_host_array(image_data) and is_host_array(obs_data):
             grad_func = self._dc_host
         elif is_cuda_array(image_data) and is_cuda_array(obs_data):
-            grad_func = self._dc_direct
-        else:
-            raise ValueError("image and obs_data should be on the same device")
-
-        if not self.impl.use_gpu_direct:
-            warnings.warn(
-                "Using direct GPU array without passing "
-                "`use_gpu_direct=True`, this is memory inefficient."
-            )
-
+            if B > 1 or (C > 1 and not self.uses_sense):
+                warnings.warn(
+                    "Having all the batches / coils on GPU could be faster, "
+                    "but is memory inefficient!"
+                )
+            grad_func = super(MRIGpuNUFFT, self).data_consistency
+            if not self.impl.use_gpu_direct:
+                warnings.warn(
+                    "Using direct GPU array without passing "
+                    "`use_gpu_direct=True`, this is memory inefficient."
+                )
         ret = grad_func(image_data, obs_data)
-
-        ret = self._safe_squeeze(ret)
-        if xp.__name__ == "torch" and is_cuda_array(ret):
-            ret = xp.as_tensor(ret, device=image_data_device)
-        elif xp.__name__ == "torch":
-            ret = xp.from_numpy(ret)
-        return ret
+        return self._safe_squeeze(ret)
 
     def _dc_host(self, image_data, obs_data):
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
@@ -618,25 +600,13 @@ class MRIGpuNUFFT(FourierOperatorBase):
         obs_data_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
         tmp_img = cp.zeros((1 if self.uses_sense else C, *XYZ), dtype=np.complex64)
         final_img = np.zeros_like(image_data_)
-
-        print(image_data_.shape)
         for i in range(B):
             tmp_img.set(image_data_[i])
             obs_data_tmp.set(obs_data_[i])
             ksp_tmp = self.impl.op_direct(tmp_img)
             ksp_tmp -= obs_data_tmp
-            ret_tmp = self.impl.adj_op_direct(ksp_tmp).copy()
-            final_img[i] = ret_tmp.get()
-        return self._safe_squeeze(final_img)
-
-    def _dc_direct(self, image_data, obs_data):
-        """Get data consistency with direct GPU arrays."""
-
-        # TODO: This is not memory efficient, the size of the tmp buffer could be reduced by working batch wise.
-        tmp = self.op(image_data)
-        tmp -= obs_data
-        image_data_ = self.adj_op(tmp)
-        return self._safe_squeeze(image_data_)
+            final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
+        return final_img
 
     # TODO : For data consistency the workflow is currently:
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
