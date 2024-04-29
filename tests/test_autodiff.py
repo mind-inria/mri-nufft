@@ -73,7 +73,11 @@ def test_adjoint_and_grad(operator, ndft_matrix, interface):
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[0]
+    gradient_nufft_kdata = torch.autograd.grad(
+        loss_nufft,
+        ksp_data,
+        retain_graph=True
+    )[0]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
 
