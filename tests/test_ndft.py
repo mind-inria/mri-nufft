@@ -76,4 +76,3 @@ def test_ndft_fft(kspace_grid, shape):
         kspace = kspace.swapaxes(0, 1)
     kspace_fft = sp.fft.fftn(sp.fft.fftshift(img))
     assert_almost_allclose(kspace, kspace_fft, atol=1e-4, rtol=1e-4, mismatch=5)
-
