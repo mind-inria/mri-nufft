@@ -9,9 +9,9 @@ from numpy.typing import DTypeLike
 
 ARRAY_LIBS = {
     "numpy": (np, np.ndarray),
-    "cupy": None,
-    "torch": None,
-    "tensorflow": None,
+    "cupy": (None, None),
+    "torch": (None, None),
+    "tensorflow": (None, None),
 }
 try:
     import cupy
