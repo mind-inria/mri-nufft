@@ -612,7 +612,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
     #
     # By modifying c++ code and exposing it it should be possible to do
-    # op coil 1 / data_consistency 1 / adj_op coil 1 / ... / op_coil N / 
+    # op coil 1 / data_consistency 1 / adj_op coil 1 / ... / op_coil N /
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
