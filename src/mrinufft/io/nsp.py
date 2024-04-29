@@ -397,7 +397,7 @@ def read_siemens_rawdat(
     removeOS: bool = False,
     squeeze: bool = True,
     data_type: str = "ARBGRAD_VE11C",
-):
+):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
 
     Parameters
