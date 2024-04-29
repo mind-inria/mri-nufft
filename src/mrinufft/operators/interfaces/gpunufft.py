@@ -583,7 +583,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Having all the batches / coils on GPU could be faster, "
                     "but is memory inefficient!"
                 )
-            grad_func = super(MRIGpuNUFFT, self).data_consistency
+            grad_func = super().data_consistency
             if not self.impl.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
@@ -612,6 +612,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
     #
     # By modifying c++ code and exposing it it should be possible to do
-    # op coil 1 / data_consistency 1 / adj_op coil 1 / ... / op_coil N / data_consistency N / adj_op coil n
+    # op coil 1 / data_consistency 1 / adj_op coil 1 / ... / op_coil N / 
+    # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.

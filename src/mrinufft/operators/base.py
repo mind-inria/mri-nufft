@@ -145,7 +145,8 @@ def with_numpy_cupy(fun):
             ) or (
                 is_cuda_array(data_) and is_cuda_array(output_))
             ):
-                raise ValueError("input data and output should be on the same memory space.")
+                raise ValueError("input data and output should be "
+                                 "on the same memory space.")
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
         if xp.__name__ == "torch" and is_cuda_array(data):
