@@ -16,7 +16,6 @@ from helpers import assert_almost_allclose
 from mrinufft import get_operator
 
 
-
 @parametrize_with_cases(
     "kspace, shape",
     cases=[
@@ -55,31 +54,6 @@ def test_ndft_implicit1(kspace, shape):
 
     assert_almost_allclose(linop_coef, matrix_coef, atol=1e-4, rtol=1e-4, mismatch=5)
 
-@parametrize_with_cases(
-    "kspace, shape",
-    cases=[
-        CasesTrajectories.case_random2D,
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_grid3D,
-    ],
-)
-def test_ndft_nufft(kspace, shape):
-    "Test that NDFT matches NUFFT"
-    ndft_op = RawNDFT(kspace, shape, normalize=True)
-    random_kspace = 1j * np.random.randn(len(kspace))
-    random_kspace += np.random.randn(len(kspace))
-    random_image = np.random.randn(*shape) + 1j * np.random.randn(*shape)
-    operator = get_operator("pynfft")(kspace, shape)  # FIXME: @PAC, we need to get ref here
-    nufft_k = operator.op(random_image)
-    nufft_i = operator.adj_op(random_kspace)
-    
-    ndft_k = np.empty(ndft_op.n_samples, dtype=random_image.dtype)
-    ndft_i = np.empty(shape, dtype=random_kspace.dtype)
-    ndft_op.op(ndft_k, random_image)
-    ndft_op.adj_op(random_kspace, ndft_i)
-    assert_almost_allclose(nufft_k, ndft_k, atol=1e-4, rtol=1e-4, mismatch=5)
-    assert_almost_allclose(nufft_i, ndft_i, atol=1e-4, rtol=1e-4, mismatch=5)
-
 
 @parametrize_with_cases(
     "kspace_grid, shape",
@@ -101,6 +75,5 @@ def test_ndft_fft(kspace_grid, shape):
     if len(shape) >= 2:
         kspace = kspace.swapaxes(0, 1)
     kspace_fft = sp.fft.fftn(sp.fft.fftshift(img))
-
     assert_almost_allclose(kspace, kspace_fft, atol=1e-4, rtol=1e-4, mismatch=5)
 

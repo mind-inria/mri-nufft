@@ -15,7 +15,7 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--ref",
-        default="pynfft",
+        default="finufft",
         help="Reference backend on which the tests are performed.",
     )
 
