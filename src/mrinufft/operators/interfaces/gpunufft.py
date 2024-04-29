@@ -3,8 +3,8 @@
 import numpy as np
 import warnings
 from ..base import FourierOperatorBase, with_numpy_cupy
-from mrinufft._utils import proper_trajectory, get_array_module
-from mrinufft.operators.interfaces.utils import is_cuda_array
+from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array, check_size
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -258,7 +258,7 @@ class RawGpuNUFFT:
             interpolate_data,
         )
         if make_copy_back:
-            new_ksp = cp.copy(new_ksp)
+            new_ksp = np.copy(new_ksp)
         return new_ksp
 
     def adj_op(self, coeffs, image=None, grid_data=False):
@@ -291,6 +291,8 @@ class RawGpuNUFFT:
     def adj_op_direct(self, coeffs, image=None, grid_data=False):
         """Compute adjoint of non-uniform Fourier transform.
 
+        The incoming data is on GPU already and we return a GPU array.
+
         Parameters
         ----------
         coeff: np.ndarray
@@ -314,7 +316,7 @@ class RawGpuNUFFT:
                 order="F",
             )
         self.operator.adj_op_direct(coeffs.data.ptr, image.data.ptr, grid_data)
-        image = image.reshape(C, *self.shape[::-1])
+        image = image.T.reshape(C, *self.shape[::-1], order="C")
         return self._reshape_image(image, "adjoint")
 
 
@@ -370,7 +372,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
                 "or use cpu for implementation"
             )
         self.shape = shape
-        self.samples = proper_trajectory(samples, normalize="unit")
+
+        self.samples = proper_trajectory(samples.astype(np.float32), normalize="unit")
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
@@ -542,3 +545,74 @@ class MRIGpuNUFFT(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
+
+    @with_numpy_cupy
+    def data_consistency(self, image_data, obs_data):
+        """Compute the data consistency estimation directly on gpu.
+
+        This mixes the op and adj_op method to perform F_adj(F(x-y))
+        on a per coil basis. By doing the computation coil wise,
+        it uses less memory than the naive call to adj_op(op(x)-y)
+
+        Parameters
+        ----------
+        image: array
+            Image on which the gradient operation will be evaluated.
+            N_coil x Image shape is not using sense.
+        obs_data: array
+            Observed data.
+        """
+        obs_data = auto_cast(obs_data, self.cpx_dtype)
+        image_data = auto_cast(image_data, self.cpx_dtype)
+
+        B, C = self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+
+        check_size(obs_data, (B, C, K))
+        if self.uses_sense:
+            check_size(image_data, (B, *XYZ))
+        else:
+            check_size(image_data, (B, C, *XYZ))
+
+        # dispatch
+        if is_host_array(image_data) and is_host_array(obs_data):
+            grad_func = self._dc_host
+        elif is_cuda_array(image_data) and is_cuda_array(obs_data):
+            if B > 1 or (C > 1 and not self.uses_sense):
+                warnings.warn(
+                    "Having all the batches / coils on GPU could be faster, "
+                    "but is memory inefficient!"
+                )
+            grad_func = super().data_consistency
+            if not self.impl.use_gpu_direct:
+                warnings.warn(
+                    "Using direct GPU array without passing "
+                    "`use_gpu_direct=True`, this is memory inefficient."
+                )
+        ret = grad_func(image_data, obs_data)
+        return self._safe_squeeze(ret)
+
+    def _dc_host(self, image_data, obs_data):
+        B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        image_data_ = image_data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        obs_data_ = obs_data.reshape((B, C, K))
+
+        obs_data_tmp = cp.zeros((C, K), dtype=self.cpx_dtype)
+        tmp_img = cp.zeros((1 if self.uses_sense else C, *XYZ), dtype=np.complex64)
+        final_img = np.zeros_like(image_data_)
+        for i in range(B):
+            tmp_img.set(image_data_[i])
+            obs_data_tmp.set(obs_data_[i])
+            ksp_tmp = self.impl.op_direct(tmp_img)
+            ksp_tmp -= obs_data_tmp
+            final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
+        return final_img
+
+    # TODO : For data consistency the workflow is currently:
+    # op coil 1 / .../ op coil N / data_consistency / adj_op coil 1 / adj_op coil n
+    #
+    # By modifying c++ code and exposing it it should be possible to do
+    # op coil 1 / data_consistency 1 / adj_op coil 1 / ... / op_coil N /
+    # data_consistency N / adj_op coil n
+    #
+    # This should bring some performance improvements, due to the asynchronous stuff.

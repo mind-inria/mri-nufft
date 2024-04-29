@@ -53,13 +53,13 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
     abs_slope_reg = abs(slope_reg)
     if r_value_err is not None and abs(rvalue - 1) > r_value_err:
         raise AssertionError(
-            f"RValue {rvalue} != 1 +- {r_value_err}\n "
+            f"RValue {rvalue} != 1 ± {r_value_err}\n "
             f"intercept={intercept}, stderr={stderr}, "
             f"intercept_stderr={intercept_stderr}"
         )
     if slope_err is not None and abs(abs_slope_reg - slope) > slope_err:
         raise AssertionError(
-            f"Slope {abs_slope_reg} != {slope} +- {slope_err}\n r={rvalue},"
+            f"Slope {abs_slope_reg} != {slope} ± {slope_err}\n r={rvalue},"
             f"intercept={intercept}, stderr={stderr}, "
             f"intercept_stderr={intercept_stderr}"
         )
