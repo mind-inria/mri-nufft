@@ -377,7 +377,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
-        self.smaps = smaps
         self.squeeze_dims = squeeze_dims
         self.compute_density(density)
         self.compute_smaps(smaps)

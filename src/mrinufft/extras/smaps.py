@@ -4,6 +4,7 @@ from skimage.filters import threshold_otsu, gaussian
 from skimage.morphology import convex_hull_image
 from .utils import register_smaps
 import numpy as np
+from typing import Tuple
 
 
 def _extract_kspace_center(
@@ -81,15 +82,16 @@ def _extract_kspace_center(
                 window = xp.sum(kspace_loc**2/ xp.asarray(threshold)**2, axis=1) <= 1
             else:
                 raise ValueError("Unsupported window function.")
-        data_thresholded = window * data_thresholded
+        data_thresholded = window * kspace_data
         # Return k-space locations & density just for consistency
         return data_thresholded, kspace_loc, density
 
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, shape, kspace_data, threshold, backend, density=None,
-                  extract_kwargs=None, blurr_factor=0, mask=True):
+def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[float, ...] = 0.1,
+                  density=None, window_fun: str = "ellipse", blurr_factor: float = 0, 
+                  mask: bool = True):
     """
     Calculate low-frequency sensitivity maps.
 
@@ -101,14 +103,19 @@ def low_frequency(traj, shape, kspace_data, threshold, backend, density=None,
         The shape of the image.
     kspace_data : numpy.ndarray
         The k-space data.
-    threshold : float
+    threshold : float, or tuple of float, optional
         The threshold used for extracting the k-space center.
+        By default it is 0.1
     backend : str
         The backend used for the operator.
     density : numpy.ndarray, optional
         The density compensation weights.
-    extract_kwargs : dict, optional
-        Additional keyword arguments for the `extract_kspace_center` function.
+    window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
+        The window function to apply to the selected data. It is computed with
+        the center locations selected. Only works with circular mask.
+        If window_fun is a callable, it takes as input the array (n_samples x n_dims)
+        of sample positions and returns an array of n_samples weights to be
+        applied to the selected k-space values, before the smaps estimation.
     blurr_factor : float, optional
         The blurring factor for smoothing the sensitivity maps.
     mask: bool, optional default `True`
@@ -128,8 +135,7 @@ def low_frequency(traj, shape, kspace_data, threshold, backend, density=None,
         kspace_loc=traj,
         threshold=threshold,
         density=density,
-        img_shape=shape,
-        **(extract_kwargs or {}),
+        window_fun=window_fun,
     )
     smaps_adj_op = get_operator(backend)(
         samples,
