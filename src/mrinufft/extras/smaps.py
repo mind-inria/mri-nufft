@@ -91,7 +91,7 @@ def _extract_kspace_center(
 @flat_traj
 def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[float, ...] = 0.1,
                   density=None, window_fun: str = "ellipse", blurr_factor: float = 0, 
-                  mask: bool = True):
+                  mask: bool = False):
     """
     Calculate low-frequency sensitivity maps.
 
@@ -118,7 +118,7 @@ def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[floa
         applied to the selected k-space values, before the smaps estimation.
     blurr_factor : float, optional
         The blurring factor for smoothing the sensitivity maps.
-    mask: bool, optional default `True`
+    mask: bool, optional default `False`
         Whether the Sensitivity maps must be masked
 
     Returns
