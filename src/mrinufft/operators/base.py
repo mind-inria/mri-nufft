@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from functools import partial, wraps
 import numpy as np
 from mrinufft._utils import power_method, auto_cast, get_array_module
-from mrinufft.operators.interfaces.utils import is_cuda_array
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 from mrinufft.density import get_density
 
@@ -20,6 +20,14 @@ try:
     import cupy as cp
 except ImportError:
     CUPY_AVAILABLE = False
+
+AUTOGRAD_AVAILABLE = True
+try:
+    import torch
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+except ImportError:
+    AUTOGRAD_AVAILABLE = False
+
 
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
@@ -50,13 +58,18 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, *args, **kwargs):
+def get_operator(backend_name: str, *args, autograd=None, **kwargs):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
     ----------
     backend_name: str
         Backend name
+
+    autograd: str, default None
+        if set to "data" will provide an operator with autodiff capabilities with
+        respect to it.
+
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -88,6 +101,12 @@ def get_operator(backend_name: str, *args, **kwargs):
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
+
+    if autograd:
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(variable=autograd)
+        else:  # partial
+            operator = partial(operator.with_autograd, variable=autograd)
     return operator
 
 
@@ -139,6 +158,14 @@ def with_numpy_cupy(fun):
             data_ = data
             output_ = output
 
+        if output_ is not None:
+            if not (
+                (is_host_array(data_) and is_host_array(output_))
+                or (is_cuda_array(data_) and is_cuda_array(output_))
+            ):
+                raise ValueError(
+                    "input data and output should be " "on the same memory space."
+                )
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
         if xp.__name__ == "torch" and is_cuda_array(data):
@@ -225,6 +252,31 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
+
+    def make_autograd(self, variable="data"):
+        """Make a new Operator with autodiff support.
+
+        Parameters
+        ----------
+        variable: str, default data
+            variable on which the gradient is computed with respect to.
+
+        Returns
+        -------
+        torch.nn.module
+            A NUFFT operator with autodiff capabilities.
+
+        Raises
+        ------
+        ValueError
+            If autograd is not available.
+        """
+        if not AUTOGRAD_AVAILABLE:
+            raise ValueError("Autograd not available, ensure torch is installed.")
+        if variable == "data":
+            return MRINufftAutoGrad(self)
+        else:
+            raise ValueError(f"Autodiff with respect to {variable} is not supported.")
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
@@ -394,6 +446,11 @@ class FourierOperatorBase(ABC):
             f"  uses_sense: {self.uses_sense}\n"
             ")"
         )
+
+    @classmethod
+    def with_autograd(cls, variable, *args, **kwargs):
+        """Return a Fourier operator with autograd capabilities."""
+        return cls(*args, **kwargs).make_autograd(variable)
 
 
 class FourierOperatorCPU(FourierOperatorBase):
