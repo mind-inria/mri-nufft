@@ -1,6 +1,7 @@
 """2D trajectory initializations."""
 
 import numpy as np
+import numpy.linalg as nl
 
 from .maths import (
     R2D,
@@ -9,9 +10,12 @@ from .maths import (
 from .utils import (
     KMAX,
     initialize_tilt,
-    initialize_spiral,
+    initialize_algebraic_spiral,
 )
 from .tools import rotate
+from .gradients import patch_center_monoticity
+
+from scipy.interpolate import CubicSpline
 
 
 #####################
@@ -46,10 +50,13 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
     return trajectory
 
 
-def initialize_2D_spiral(
-    Nc, Ns, tilt="uniform", in_out=False, nb_revolutions=1, spiral="archimedes"
-):
-    """Initialize a 2D spiral trajectory.
+def initialize_2D_spiral(Nc, Ns, tilt="uniform", in_out=False, nb_revolutions=1, spiral="archimedes"):
+    """Initialize a 2D algebraic spiral trajectory.
+
+    A generalized function that generates algebraic spirals defined
+    through the :math:`r = a O^n` equality, with :math:`r` the radius,
+    :math:`O` the polar angle and :math:`n` the spiral power.
+    Common algebraic spirals include Archimedes, Fermat and Galilean spirals.
 
     Parameters
     ----------
@@ -64,28 +71,52 @@ def initialize_2D_spiral(
     nb_revolutions : int, optional
         Number of revolutions, by default 1
     spiral : str, float, optional
-        Spiral type, by default "archimedes"
+        Spiral type or algebraic power, by default "archimedes"
 
     Returns
     -------
     array_like
         2D spiral trajectory
     """
-    # Initialize a first shot in polar coordinates
-    segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
-    radius = KMAX * segment
-    angles = 2 * np.pi * nb_revolutions * (np.abs(segment) ** initialize_spiral(spiral))
+    # Negative spirals like hyperbolic or lithuus have
+    # asymptotic behavior around the center, making them
+    # irrelevant for MRI or real life applications.
+    spiral_power = initialize_algebraic_spiral(spiral)
+    if (spiral_power <= 0):
+        raise ValueError(f"Negative spiral definition is invalid (spiral={spiral}).")
 
-    # Convert the first shot to Cartesian coordinates
-    trajectory = np.zeros((Nc, Ns, 2))
-    trajectory[0, :, 0] = radius * np.cos(angles)
-    trajectory[0, :, 1] = radius * np.sin(angles)
+    # Initialize a first shot in polar coordinates
+    angles = 2 * np.pi * nb_revolutions * np.linspace(-1 if (in_out) else 0, 1, Ns)
+    radius = np.abs(angles) ** spiral_power
+
+    # Algebraic spirals with power coefficients superior to 1
+    # have a non-monotonic gradient norm when varying the angle
+    # over [0, +inf)
+    def _update_shot(angles, radius, *args):
+        shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
+        return np.stack([shot.real, shot.imag], axis=-1)
+
+    def _update_parameters(single_shot, angles, radius, spiral_power):
+        radius = nl.norm(single_shot, axis=-1)
+        angles = np.sign(angles) * np.abs(radius) ** (1 / spiral_power)
+        return angles, radius, spiral_power
+
+    if (spiral_power < 1):
+        parameters = (angles, radius, spiral_power)
+        learning_rate = min(1, spiral_power)  # because low spiral power requires higher accuracy
+        angles, radius, _ = patch_center_monoticity(parameters, update_shot=_update_shot,
+                                                    update_parameters=_update_parameters, in_out=in_out, learning_rate=learning_rate)
+
+    # Convert the first shot from polar to Cartesian coordinates
+    trajectory = np.zeros((Nc, len(angles), 2))
+    trajectory[0, :] = _update_shot(angles, radius)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory[i] = trajectory[i - 1] @ rotation
-    return trajectory
+
+    return KMAX * trajectory / np.max(np.abs(trajectory))
 
 
 def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1):

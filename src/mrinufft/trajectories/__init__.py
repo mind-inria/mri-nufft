@@ -40,6 +40,8 @@ from .display import (
     display_3D_trajectory,
 )
 
+from .gradients import patch_center_monoticity
+
 __all__ = [
     "initialize_2D_radial",
     "initialize_2D_spiral",
@@ -70,4 +72,5 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "patch_center_monoticity",
 ]

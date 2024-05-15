@@ -168,10 +168,10 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # Spiral
 # ------
 #
-# A generalized function that generates spirals defined through the
-# :math:`r = a \theta^{1/n}` equality, with :math:`r` the radius and
-# :math:`\theta` the polar angle. Note that the most common spirals,
-# Archimedes and Fermat, are subcases of this equation.
+# A generalized function that generates algebraic spirals defined
+# through the :math:`r = a \theta^n` equality, with :math:`r` the radius,
+# :math:`\theta` the polar angle and :math:`n` the spiral power.
+# Common algebraic spirals include Archimedes, Fermat and Galilean spirals.
 #
 # Arguments:
 #
@@ -210,14 +210,17 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # ``spiral (str, float)``
 # ~~~~~~~~~~~~~~~~~~~~~~~
 #
-#
-# The shape of the spiral defined through :math:`n` in the
-# :math:`r = a \theta^{1/n}` equality, with :math:`r` the radius and
-# :math:`\theta` the polar angle. Both ``"archimedes"`` and ``"fermat"``
-# are available as string options for convenience.
+# The algebraic spiral power defined through :math:`n` in the
+# :math:`r = a \theta^n` equality, with :math:`r` the radius and
+# :math:`\theta` the polar angle. It defines the gradient behavior,
+# and therefore the distance between consecutive points and the shape
+# of the spiral.
+# 
+# ``"archimedes"``, ``"fermat"`` and ``"galilean"`` are available
+# as string options for convenience.
 #
 
-arguments = ["archimedes", "fermat", 0.5, 1.5]
+arguments = ["galilean", "archimedes", "fermat", 1 / 4]
 function = lambda x: mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, spiral=x, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
