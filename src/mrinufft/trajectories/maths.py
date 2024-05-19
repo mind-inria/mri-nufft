@@ -210,6 +210,55 @@ def Ra(vector, theta):
 #############
 
 
+def is_from_fibonacci_sequence(n):
+    """Check if an integer belongs to the Fibonacci sequence.
+
+    An integer belongs to the Fibonacci sequence if either
+    :math:`5*n²+4` or :math:`5*n²-4` is a perfect square.
+
+    Parameters
+    ----------
+    n : int
+        Integer to check.
+
+    Returns
+    -------
+    bool
+        Whether or not ``n`` belongs to the Fibonacci sequence.
+    """
+
+    def _is_perfect_square(n):
+        r = int(np.sqrt(n))
+        return r * r == n
+
+    return _is_perfect_square(5 * n**2 + 4) or _is_perfect_square(5 * n**2 - 4)
+
+
+def get_closest_fibonacci_number(n):
+    """Provide the closest Fibonacci number.
+
+    Parameters
+    ----------
+    n : int
+        Integer to match.
+
+    Returns
+    -------
+    int
+        Closest number from the Fibonacci sequence.
+    """
+    # Generate Fibonacci number up to n
+    fibonacci_sequence = [0, 1]
+    while fibonacci_sequence[-1] < n:
+        fibonacci_sequence.append(fibonacci_sequence[-2] + fibonacci_sequence[-1])
+
+    # Check closest between the ones below and above n
+    lower_nf = fibonacci_sequence[-2]
+    upper_nf = fibonacci_sequence[-1]
+    nf = lower_nf if (n - lower_nf) < (upper_nf - n) else upper_nf
+    return nf
+
+
 def generate_fibonacci_lattice(nb_points, epsilon=0.25):
     """Generate 2D Cartesian coordinates using the Fibonacci lattice.
 

@@ -1,4 +1,4 @@
-"""Utility functions for the trajectory design."""
+"""Utility functions in general."""
 
 from enum import Enum, EnumMeta
 from numbers import Real
@@ -71,6 +71,7 @@ class Spirals(FloatEnum):
     ARCHIMEDES = 1
     ARITHMETIC = ARCHIMEDES
     GALILEAN = 2
+    GALILEO = GALILEAN
     FERMAT = 0.5
     PARABOLIC = FERMAT
     HYPERBOLIC = -1

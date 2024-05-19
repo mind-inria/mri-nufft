@@ -15,6 +15,7 @@ from .operators import (
 from .trajectories import (
     initialize_2D_radial,
     initialize_2D_spiral,
+    initialize_2D_fibonacci_spiral,
     initialize_2D_cones,
     initialize_2D_sinusoide,
     initialize_2D_propeller,
@@ -51,6 +52,7 @@ __all__ = [
     "list_backends",
     "initialize_2D_radial",
     "initialize_2D_spiral",
+    "initialize_2D_fibonacci_spiral",
     "initialize_2D_cones",
     "initialize_2D_sinusoide",
     "initialize_2D_propeller",
@@ -75,6 +77,7 @@ __all__ = [
     "shellify",
     "duplicate_along_axes",
     "radialize_center",
+    "patch_center_anomaly",
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",

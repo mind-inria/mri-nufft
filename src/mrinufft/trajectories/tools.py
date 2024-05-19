@@ -1,4 +1,4 @@
-"""Functions to manipulate trajectories."""
+"""Functions to manipulate/modify trajectories."""
 
 import numpy as np
 

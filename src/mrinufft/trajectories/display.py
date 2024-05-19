@@ -1,4 +1,4 @@
-"""Display function for trajectories."""
+"""Display functions for trajectories."""
 
 import itertools
 

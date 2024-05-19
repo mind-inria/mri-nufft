@@ -1,4 +1,4 @@
-"""3D Trajectory initialization functions."""
+"""Functions to initialize 3D trajectories."""
 
 import numpy as np
 import numpy.linalg as nl
@@ -411,8 +411,8 @@ def initialize_3D_helical_shells(
         Number of samples per shot
     nb_shells : int
         Number of concentric shells/spheres
-    spiral_reduction : float
-        Factor used to reduce the automatic spiral curvature, by default 1
+    spiral_reduction : float, optional
+        Factor used to reduce the automatic spiral length, by default 1
     shell_tilt : str, float, optional
         Angle between consecutive shells along z-axis, by default "intergaps"
     shot_tilt : str, float, optional
