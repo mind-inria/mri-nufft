@@ -202,7 +202,7 @@ def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True
     if patch_center:
         patched_trajectory = []
         for i in range(Nc):
-            patched_shot, _ = patch_center_anomaly(trajectory[i])
+            patched_shot, _ = patch_center_anomaly(trajectory[i], in_out=False)
             patched_trajectory.append(patched_shot)
         trajectory = np.array(patched_trajectory)
     return trajectory

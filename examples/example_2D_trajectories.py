@@ -219,7 +219,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 # rather the curve length and point distribution. Spirals with small
 # :math:`n` (close to 0) tend to have radial behaviors
 # around the center, and dedicate more points towards curved edges.
-# 
+#
 # ``"archimedes"`` (1), ``"fermat"`` (0.5) and ``"galilean"`` (2) are available
 # as string options for convenience. Algebraic spirals with negative powers,
 # such as hyperbolic or lithuus spirals, are not considered relevant because
@@ -251,7 +251,9 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [False, True]
 function = lambda x: mn.initialize_2D_spiral(
-    Nc, Ns, patch_center=x,
+    Nc,
+    Ns,
+    patch_center=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
@@ -295,7 +297,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [0.5, 1, 2, 3]
 function = lambda x: mn.initialize_2D_fibonacci_spiral(
-    Nc_fibonacci, Ns, spiral_reduction=x,
+    Nc_fibonacci,
+    Ns,
+    spiral_reduction=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
@@ -319,7 +323,9 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [False, True]
 function = lambda x: mn.initialize_2D_fibonacci_spiral(
-    Nc_fibonacci, Ns, patch_center=x,
+    Nc_fibonacci,
+    Ns,
+    patch_center=x,
 )
 show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
 
