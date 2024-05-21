@@ -1,3 +1,5 @@
+"""SMaps module for sensitivity maps estimation."""
+
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import get_array_module
 from skimage.filters import threshold_otsu, gaussian
@@ -8,15 +10,19 @@ from typing import Tuple
 
 
 def _extract_kspace_center(
-        kspace_data, kspace_loc, threshold=None, density=None, window_fun="ellipse", 
-    ):
+    kspace_data,
+    kspace_loc,
+    threshold=None,
+    density=None,
+    window_fun="ellipse",
+):
     r"""Extract k-space center and corresponding sampling locations.
-    
+
     The extracted center of the k-space, i.e. both the kspace locations and
     kspace values. If the density compensators are passed, the corresponding
     compensators for the center of k-space data will also be returned. The
     return dtypes for density compensation and kspace data is same as input
-    
+
     Parameters
     ----------
     kspace_data: numpy.ndarray
@@ -31,16 +37,16 @@ def _extract_kspace_center(
         If window_fun is a callable, it takes as input the array (n_samples x n_dims)
         of sample positions and returns an array of n_samples weights to be
         applied to the selected k-space values, before the smaps estimation.
-        
+
     Returns
     -------
-    data_thresholded: ndarray 
+    data_thresholded: ndarray
         The k-space values in the center region.
     center_loc: ndarray
         The locations in the center region.
-    density_comp: ndarray, optional 
+    density_comp: ndarray, optional
         The density compensation weights (if requested)
-    
+
     Notes
     -----
     The Hann (or Hanning) and Hamming windows  of width :math:`2\theta` are defined as:
@@ -58,13 +64,17 @@ def _extract_kspace_center(
     xp = get_array_module(kspace_data)
     if isinstance(threshold, float):
         threshold = (threshold,) * kspace_loc.shape[1]
-        
+
     if window_fun == "rect":
         data_ordered = xp.copy(kspace_data)
-        index = xp.linspace(0, kspace_loc.shape[0] - 1, kspace_loc.shape[0], dtype=xp.int64)
-        condition = xp.logical_and.reduce(tuple(
-            xp.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
-        ))
+        index = xp.linspace(
+            0, kspace_loc.shape[0] - 1, kspace_loc.shape[0], dtype=xp.int64
+        )
+        condition = xp.logical_and.reduce(
+            tuple(
+                xp.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
+            )
+        )
         index = xp.extract(condition, index)
         center_locations = kspace_loc[index, :]
         data_thresholded = data_ordered[:, index]
@@ -79,7 +89,9 @@ def _extract_kspace_center(
                 a_0 = 0.5 if window_fun in ["hann", "hanning"] else 0.53836
                 window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold)
             elif window_fun == "ellipse":
-                window = xp.sum(kspace_loc**2/ xp.asarray(threshold)**2, axis=1) <= 1
+                window = (
+                    xp.sum(kspace_loc ** 2 / xp.asarray(threshold) ** 2, axis=1) <= 1
+                )
             else:
                 raise ValueError("Unsupported window function.")
         data_thresholded = window * kspace_data
@@ -89,9 +101,17 @@ def _extract_kspace_center(
 
 @register_smaps
 @flat_traj
-def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[float, ...] = 0.1,
-                  density=None, window_fun: str = "ellipse", blurr_factor: float = 0, 
-                  mask: bool = False):
+def low_frequency(
+    traj,
+    shape,
+    kspace_data,
+    backend,
+    threshold: float | Tuple[float, ...] = 0.1,
+    density=None,
+    window_fun: str = "ellipse",
+    blurr_factor: float = 0,
+    mask: bool = False,
+):
     """
     Calculate low-frequency sensitivity maps.
 
@@ -130,6 +150,7 @@ def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[floa
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
+
     k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,
         kspace_loc=traj,
@@ -138,18 +159,15 @@ def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[floa
         window_fun=window_fun,
     )
     smaps_adj_op = get_operator(backend)(
-        samples,
-        shape,
-        density=dc,
-        n_coils=k_space.shape[0]
+        samples, shape, density=dc, n_coils=k_space.shape[0]
     )
     Smaps = smaps_adj_op.adj_op(k_space)
     SOS = np.linalg.norm(Smaps, axis=0)
     if mask:
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
-        convex_hull = convex_hull_image(SOS>thresh)
-        Smaps = Smaps * convex_hull 
+        convex_hull = convex_hull_image(SOS > thresh)
+        Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
     if blurr_factor > 0:
         Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
@@ -159,4 +177,3 @@ def low_frequency(traj, shape, kspace_data, backend, threshold: float|Tuple[floa
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
     return Smaps, SOS
-    
