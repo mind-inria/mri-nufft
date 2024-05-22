@@ -94,7 +94,7 @@ def initialize_2D_spiral(
     # asymptotic behavior around the center, making them
     # irrelevant for MRI or real life applications.
     spiral_power = initialize_algebraic_spiral(spiral)
-    if spiral_power <= 0:
+    if spiral_power < 0:
         raise ValueError(f"Negative spiral definition is invalid (spiral={spiral}).")
 
     # Initialize a first shot in polar coordinates
