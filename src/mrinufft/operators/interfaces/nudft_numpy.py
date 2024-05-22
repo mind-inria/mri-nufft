@@ -6,58 +6,66 @@ import numpy as np
 import scipy as sp
 
 from ..base import FourierOperatorCPU
+from mrinufft._utils import proper_trajectory
 
 
-def get_fourier_matrix(ktraj, shape):
+def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     """Get the NDFT Fourier Matrix."""
+    ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)
     ndim = len(shape)
-    matrix = np.zeros((len(ktraj), n), dtype=complex)
-    r = [np.arange(shape[i]) for i in range(ndim)]
+    matrix = np.zeros((len(ktraj), n), dtype=dtype)
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
     traj_grid = ktraj @ grid_r
-    matrix = np.exp(-2j * np.pi * traj_grid)
+    matrix = np.exp(-2j * np.pi * traj_grid, dtype=dtype)
+    if normalize:
+        matrix /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return matrix
 
 
-def implicit_type2_ndft(ktraj, image, shape):
+def implicit_type2_ndft(ktraj, image, shape, normalize=False):
     """Compute the NDFT using the implicit type 2 (image -> kspace) algorithm."""
-    r = [np.arange(s) for s in shape]
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(
         np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(image.shape))
     )
     res = np.zeros(len(ktraj), dtype=image.dtype)
     for j in range(np.prod(image.shape)):
         res += image[j] * np.exp(-2j * np.pi * ktraj @ grid_r[:, j])
+    if normalize:
+        res /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 
-def implicit_type1_ndft(ktraj, coeffs, shape):
+def implicit_type1_ndft(ktraj, coeffs, shape, normalize=False):
     """Compute the NDFT using the implicit type 1 (kspace -> image) algorithm."""
-    r = [np.arange(s) for s in shape]
+    r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (len(shape), np.prod(shape)))
     res = np.zeros(np.prod(shape), dtype=coeffs.dtype)
     for i in range(len(ktraj)):
         res += coeffs[i] * np.exp(2j * np.pi * ktraj[i] @ grid_r)
+    if normalize:
+        res /= np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape))
     return res
 
 
-def get_implicit_matrix(ktraj, shape):
+def get_implicit_matrix(ktraj, shape, normalize=False):
     """Get the NDFT Fourier Matrix as implicit operator.
 
     This is more memory efficient than the explicit matrix.
     """
     return sp.sparse.linalg.LinearOperator(
         (len(ktraj), np.prod(shape)),
-        matvec=lambda x: implicit_type2_ndft(ktraj, x, shape),
-        rmatvec=lambda x: implicit_type1_ndft(ktraj, x, shape),
+        matvec=lambda x: implicit_type2_ndft(ktraj, x, shape, normalize),
+        rmatvec=lambda x: implicit_type1_ndft(ktraj, x, shape, normalize),
     )
 
 
 class RawNDFT:
     """Implementation of the NUDFT using numpy."""
 
-    def __init__(self, samples, shape, explicit_matrix=True):
+    def __init__(self, samples, shape, explicit_matrix=True, normalize=False):
         self.samples = samples
         self.shape = shape
         self.n_samples = len(samples)
@@ -65,13 +73,17 @@ class RawNDFT:
         if explicit_matrix:
             try:
                 self._fourier_matrix = sp.sparse.linalg.aslinearoperator(
-                    get_fourier_matrix(self.samples, self.shape)
+                    get_fourier_matrix(self.samples, self.shape, normalize=normalize)
                 )
             except MemoryError:
                 warnings.warn("Not enough memory, using an implicit definition anyway")
-                self._fourier_matrix = get_implicit_matrix(self.samples, self.shape)
+                self._fourier_matrix = get_implicit_matrix(
+                    self.samples, self.shape, normalize
+                )
         else:
-            self._fourier_matrix = get_implicit_matrix(self.samples, self.shape)
+            self._fourier_matrix = get_implicit_matrix(
+                self.samples, self.shape, normalize
+            )
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""

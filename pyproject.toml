@@ -16,6 +16,7 @@ cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2", "cython<3.0.0"]
 pynufft = ["pynufft"]
+io = ["pymapvbvd"]
 
 test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
