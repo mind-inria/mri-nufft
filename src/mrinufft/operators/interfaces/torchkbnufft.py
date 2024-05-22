@@ -84,11 +84,11 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.smaps
         else:
             data_d = data
-        return tkbnf.kb_table_nufft(
-            image=data_d,
-            omega=self.samples,
+
+        kb_ob = tkbnf.KbNufft(
             im_size=self.shape[2:],
         )
+        return kb_ob(image=data_d, omega=self.samples, smaps=self.smaps) 
 
     def adj_op(self, data):
         """
@@ -106,9 +106,11 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
-        img = tkbnf.kb_table_nufft_adjoint(
+        adjkb_ob = tkbnf.KbNufftAdjoint(
+            im_size=self.shape[2:],
+        )
+        img = adjkb_ob(
             data=data_d,
-            omega=self.samples,
-            grid_size=self.shape[2:],
+            omega=self.samples
         )
         return torch.sum(img * torch.conj(self.smaps), dim=0)
