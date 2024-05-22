@@ -34,7 +34,7 @@ class MRITorchKbNufft(FourierOperatorBase):
     smaps: Tensor
     """
 
-    backend = "torch"
+    backend = "torchkbnufft"
     available = TORCH_AVAILABLE
 
     def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
@@ -44,10 +44,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.shape = shape
         self.n_coils = n_coils
         self.eps = eps
+        self._tkb_op = torchmri.KbNufft 
+        self._tkb_adj_op = torchmri.KbNufftAdjoint
 
         if density is True:
             self.density = torchmri.calc_density_compensation_function(
-                ktraj=samples, im_size=shape[2:], num_iterations= 15
+                ktraj=samples, im_size=shape[2:], num_iterations=15
             )
             self.uses_density = True
         elif density is False:
@@ -79,20 +81,13 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        if self.uses_sense:
-            data_d = data * self.smaps
-        else:
-            data_d = data
-
-        kb_ob = torchmri.KbNufft(
-            im_size=self.shape[2:],
-        )
-        return kb_ob(image=data_d, omega=self.samples, smaps=self.smaps) 
+        kb_ob = self._tkb_op(im_size=self.shape[2:])
+        return kb_ob(image=data, omega=self.samples, smaps=self.smaps) 
 
     def adj_op(self, data):
         """
         Backward Operation.
-``image`` calculated at scattered Fourier locations.
+        ``image`` calculated at scattered Fourier locations.
         Parameters
         ----------
         data: Tensor
@@ -105,11 +100,11 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
-        adjkb_ob = torchmri.KbNufftAdjoint(
-            im_size=self.shape[2:],
-        )
+        
+        adjkb_ob = self._tkb_adj_op(im_size=self.shape[2:])
         img = adjkb_ob(
             data=data_d,
             omega=self.samples
         )
         return torch.sum(img * torch.conj(self.smaps), dim=0)
+    
