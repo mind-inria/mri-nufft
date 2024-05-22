@@ -6,7 +6,6 @@ TORCH_AVAILABLE = True
 
 try:
     import torchkbnufft as torchmri
-    import torchkbnufft.functional as tkbnf
     import torch
 
 except ImportError:
@@ -85,7 +84,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         else:
             data_d = data
 
-        kb_ob = tkbnf.KbNufft(
+        kb_ob = torchmri.KbNufft(
             im_size=self.shape[2:],
         )
         return kb_ob(image=data_d, omega=self.samples, smaps=self.smaps) 
@@ -106,7 +105,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
-        adjkb_ob = tkbnf.KbNufftAdjoint(
+        adjkb_ob = torchmri.KbNufftAdjoint(
             im_size=self.shape[2:],
         )
         img = adjkb_ob(
