@@ -5,7 +5,7 @@ from ..base import FourierOperatorBase
 TORCH_AVAILABLE = True
 
 try:
-    import torchkbnufft as torchmri
+    import torchkbnufft as torchnufft
     import torch
 
 except ImportError:
@@ -44,11 +44,15 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.shape = shape
         self.n_coils = n_coils
         self.eps = eps
-        self._tkb_op = torchmri.KbNufft 
-        self._tkb_adj_op = torchmri.KbNufftAdjoint
+        self._tkb_op = torchnufft.KbNufft(
+            im_size=self.shape[2:]
+        )
+        self._tkb_adj_op = torchnufft.KbNufftAdjoint(
+            im_size=self.shape[2:]
+        )
 
         if density is True:
-            self.density = torchmri.calc_density_compensation_function(
+            self.density = torchnufft.calc_density_compensation_function(
                 ktraj=samples, im_size=shape[2:], num_iterations=15
             )
             self.uses_density = True
@@ -81,8 +85,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        kb_ob = self._tkb_op(im_size=self.shape[2:])
-        return kb_ob(image=data, omega=self.samples, smaps=self.smaps) 
+        kb_ob = self._tkb_op.forward(image=data, omega=self.samples, smaps=self.smaps)
+        return kb_ob
 
     def adj_op(self, data):
         """
@@ -101,8 +105,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         else:
             data_d = data
         
-        adjkb_ob = self._tkb_adj_op(im_size=self.shape[2:])
-        img = adjkb_ob(
+        img = self._tkb_adj_op.forward(
             data=data_d,
             omega=self.samples
         )
