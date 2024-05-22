@@ -197,7 +197,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         # For now only single precision is supported
         self.samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32)
+            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
         )
         self.dtype = self.samples.dtype
 
@@ -228,7 +228,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 )
                 self.smaps_cached = True
             else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
+                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
         self.raw_op = RawCufinufftPlan(
@@ -782,8 +782,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             squeeze_dims=True,
             **kwargs,
         )
-        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype)
-        x += np.random.random(self.shape).astype(self.cpx_dtype)
+        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+        x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = cp.asarray(x)
         return power_method(

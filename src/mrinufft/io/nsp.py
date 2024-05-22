@@ -165,9 +165,9 @@ def _pop_elements(array, num_elements=1, type="float"):
         Array with elements popped.
     """
     if num_elements == 1:
-        return array[0].astype(type), array[1:]
+        return array[0].astype(type, copy=False), array[1:]
     else:
-        return array[0:num_elements].astype(type), array[num_elements:]
+        return array[0:num_elements].astype(type, copy=False), array[num_elements:]
 
 
 def write_trajectory(
