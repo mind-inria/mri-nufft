@@ -48,7 +48,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         if density is True:
             self.density = torchmri.calc_density_compensation_function(
-                samples, shape, method="pipe", max_iter=15
+                ktraj=samples, im_size=shape[2:], num_iterations= 15
             )
             self.uses_density = True
         elif density is False:
@@ -85,12 +85,9 @@ class MRITorchKbNufft(FourierOperatorBase):
         else:
             data_d = data
         return tkbnf.kb_table_nufft(
-            data_d,
-            self.samples,
-            self.shape,
-            transform_type="type_2",
-            fft_direction="backward",
-            tol=self.eps,
+            image=data_d,
+            omega=self.samples,
+            im_size=self.shape[2:],
         )
 
     def adj_op(self, data):
@@ -109,12 +106,9 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
-        img = tkbnf.kb_table_nufft(
-            data_d,
-            self.samples,
-            self.shape,
-            transform_type="type_1",
-            fft_direction="forward",
-            tol=self.eps,
+        img = tkbnf.kb_table_nufft_adjoint(
+            data=data_d,
+            omega=self.samples,
+            grid_size=self.shape[2:],
         )
         return torch.sum(img * torch.conj(self.smaps), dim=0)
