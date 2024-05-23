@@ -337,6 +337,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+
         if isinstance(backend, str):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
             self.samples = samples2d.reshape(-1, 2)
@@ -348,6 +349,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 n_trans=len(self.z_index),
                 smaps=None,
                 squeeze_dims=True,
+                density=density,
                 **kwargs,
             )
         elif isinstance(backend, FourierOperatorBase):
