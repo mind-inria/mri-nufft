@@ -12,7 +12,6 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-
 class MRITorchKbNufft(FourierOperatorBase):
     """MRI Transform Operator using Torch NUFFT.
 
@@ -39,7 +38,16 @@ class MRITorchKbNufft(FourierOperatorBase):
     backend = "torchkbnufft"
     available = TORCH_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6, squeeze_dims=True):
+    def __init__(
+        self,
+        samples,
+        shape,
+        n_coils=1,
+        density=False,
+        smaps=None,
+        eps=1e-6,
+        squeeze_dims=True,
+    ):
         super().__init__()
 
         self.samples = samples
@@ -47,12 +55,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.n_coils = n_coils
         self.eps = eps
         self.squeeze_dims = squeeze_dims
-        self._tkb_op = torchnufft.KbNufft(
-            im_size=self.shape[2:]
-        )
-        self._tkb_adj_op = torchnufft.KbNufftAdjoint(
-            im_size=self.shape[2:]
-        )
+        self._tkb_op = torchnufft.KbNufft(im_size=self.shape[2:])
+        self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape[2:])
 
         if density is True:
             self.density = torchnufft.calc_density_compensation_function(
@@ -93,8 +97,9 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     def adj_op(self, data):
         """
+
         Backward Operation.
-        ``image`` calculated at scattered Fourier locations.
+
         Parameters
         ----------
         data: Tensor
@@ -107,13 +112,10 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
-        
-        img = self._tkb_adj_op.forward(
-            data=data_d,
-            omega=self.samples
-        )
+
+        img = self._tkb_adj_op.forward(data=data_d, omega=self.samples)
         return torch.sum(img * torch.conj(self.smaps), dim=0)
-    
+
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
         if self.squeeze_dims:
