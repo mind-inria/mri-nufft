@@ -478,7 +478,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, **kwargs):
+    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, normalize=True, **kwargs):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -491,6 +491,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
@@ -506,6 +509,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density_comp = grid_op.impl.operator.estimate_density_comp(
             max_iter=num_iterations
         )
+        if normalize:
+            spike = np.zeros(volume_shape)
+            mid_loc = (v//2 for v in volume_shape)
+            spike[mid_loc] = 1
+            psf = grid_op.adj_op(grid_op.op(spike))
+            density_comp /= np.linalg.norm(psf)
         return density_comp.squeeze()
 
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
