@@ -2,22 +2,12 @@
 
 import numpy as np
 import numpy.linalg as nl
-
-from .maths import (
-    R2D,
-    compute_coprime_factors,
-    is_from_fibonacci_sequence,
-)
-from .utils import (
-    KMAX,
-    initialize_tilt,
-    initialize_algebraic_spiral,
-)
-from .tools import rotate
-from .gradients import patch_center_anomaly
-
 from scipy.interpolate import CubicSpline
 
+from .gradients import patch_center_anomaly
+from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
+from .tools import rotate
+from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 
 #####################
 # CIRCULAR PATTERNS #
@@ -94,7 +84,7 @@ def initialize_2D_spiral(
     # asymptotic behavior around the center, making them
     # irrelevant for MRI or real life applications.
     spiral_power = initialize_algebraic_spiral(spiral)
-    if spiral_power < 0:
+    if spiral_power <= 0:
         raise ValueError(f"Negative spiral definition is invalid (spiral={spiral}).")
 
     # Initialize a first shot in polar coordinates
@@ -135,8 +125,8 @@ def initialize_2D_spiral(
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory[i] = trajectory[i - 1] @ rotation
-
-    return KMAX * trajectory / np.max(np.abs(trajectory))
+    trajectory = KMAX * trajectory / np.max(nl.norm(trajectory, axis=-1))
+    return trajectory
 
 
 def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True):

@@ -1,16 +1,15 @@
 """Functions to initialize 3D trajectories."""
 
+from functools import partial
+
 import numpy as np
 import numpy.linalg as nl
-
-from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .maths import Ry, Rz, Ra, generate_fibonacci_circle, CIRCLE_PACKING_DENSITY
-from .tools import precess, conify, duplicate_along_axes
+from .maths import CIRCLE_PACKING_DENSITY, Ra, Ry, Rz, generate_fibonacci_circle
+from .tools import conify, duplicate_along_axes, precess
 from .trajectory2D import initialize_2D_spiral
-from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
-
+from .utils import KMAX, Packings, initialize_shape_norm, initialize_tilt
 
 ############################
 # FREEFORM 3D TRAJECTORIES #

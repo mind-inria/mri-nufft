@@ -24,7 +24,6 @@ import numpy as np
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.maths as mntm
-
 from mrinufft import display_2D_trajectory
 
 

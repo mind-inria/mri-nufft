@@ -3,10 +3,7 @@
 import numpy as np
 
 from .maths import Rv, Rx, Ry, Rz
-from .utils import (
-    KMAX,
-    initialize_tilt,
-)
+from .utils import KMAX, initialize_tilt
 
 ################
 # DIRECT TOOLS #
