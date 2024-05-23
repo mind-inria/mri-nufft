@@ -42,8 +42,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         self,
         samples,
         shape,
-        n_coils=1,
         density=False,
+        n_coils=1,
+        n_batchs=1,
+        n_trans=1,
         smaps=None,
         eps=1e-6,
         squeeze_dims=True,
@@ -114,7 +116,8 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data
 
         img = self._tkb_adj_op.forward(data=data_d, omega=self.samples)
-        return torch.sum(img * torch.conj(self.smaps), dim=0)
+        img_comb = torch.sum(img * torch.conj(self.smaps), dim=0)
+        return self._safe_squeeze(img_comb)
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
