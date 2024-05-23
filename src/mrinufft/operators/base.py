@@ -253,7 +253,7 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
-    
+
     def compute_smaps(self, method=None):
         """Compute the sensitivity maps and set it.
 
@@ -265,7 +265,7 @@ class FourierOperatorBase(ABC):
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If a callable, it should take the samples and the shape as input.
-            Note that this callable function should also hold the k-space data 
+            Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
         if isinstance(method, np.ndarray):
@@ -287,7 +287,7 @@ class FourierOperatorBase(ABC):
             self.shape,
             density=self.density,
             backend=self.backend,
-            **kwargs
+            **kwargs,
         )
 
     def make_autograd(self, variable="data"):

@@ -87,7 +87,7 @@ def voronoi_unique(traj, *args, **kwargs):
 
     # For edge point (infinite voronoi cells) we extrapolate from neighbours
     # Initial implementation in Jeff Fessler's MIRT
-    rho = np.sum(traj**2, axis=1)
+    rho = np.sum(traj ** 2, axis=1)
     igood = (rho > 0.6 * np.max(rho)) & ~np.isinf(wi)
     if len(igood) < 10:
         print("dubious extrapolation with", len(igood), "points")
