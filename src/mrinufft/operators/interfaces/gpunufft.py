@@ -189,12 +189,14 @@ class RawGpuNUFFT:
         xp = get_array_module(image)
         if direction == "op":
             if self.uses_sense or self.n_coils == 1:
-                return image.reshape((-1, 1), order="F").astype(xp.complex64)
+                return image.reshape((-1, 1), order="F").astype(
+                    xp.complex64, copy=False
+                )
             return xp.asarray([c.ravel(order="F") for c in image], dtype=xp.complex64).T
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return image.squeeze().astype(xp.complex64).T[None]
+                return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
@@ -308,7 +310,7 @@ class RawGpuNUFFT:
             input coefficients.
         """
         C = 1 if self.uses_sense else self.n_coils
-        coeffs = coeffs.astype(cp.complex64)
+        coeffs = coeffs.astype(cp.complex64, copy=False)
         if image is None:
             image = cp.empty(
                 (np.prod(self.shape), C),
@@ -373,7 +375,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
             )
         self.shape = shape
 
-        self.samples = proper_trajectory(samples.astype(np.float32), normalize="unit")
+        self.samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
