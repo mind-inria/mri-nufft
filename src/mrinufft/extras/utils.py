@@ -1,4 +1,5 @@
 """Utils for extras module."""
+
 from mrinufft._utils import MethodRegister
 
 register_smaps = MethodRegister("sensitivity_maps")

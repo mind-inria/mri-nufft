@@ -187,19 +187,19 @@ def Ra(vector, theta):
     return np.array(
         [
             [
-                cos_t + v_x ** 2 * (1 - cos_t),
+                cos_t + v_x**2 * (1 - cos_t),
                 v_x * v_y * (1 - cos_t) + v_z * sin_t,
                 v_x * v_z * (1 - cos_t) - v_y * sin_t,
             ],
             [
                 v_y * v_x * (1 - cos_t) - v_z * sin_t,
-                cos_t + v_y ** 2 * (1 - cos_t),
+                cos_t + v_y**2 * (1 - cos_t),
                 v_y * v_z * (1 - cos_t) + v_x * sin_t,
             ],
             [
                 v_z * v_x * (1 - cos_t) + v_y * sin_t,
                 v_z * v_y * (1 - cos_t) - v_x * sin_t,
-                cos_t + v_z ** 2 * (1 - cos_t),
+                cos_t + v_z**2 * (1 - cos_t),
             ],
         ]
     )

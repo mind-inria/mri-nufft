@@ -1,4 +1,5 @@
 """Siemens specific rawdat reader, wrapper over pymapVBVD."""
+
 import numpy as np
 
 
