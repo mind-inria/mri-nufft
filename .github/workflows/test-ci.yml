@@ -113,7 +113,7 @@ jobs:
 
 
       - name: Install backend
-        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' }}
+        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' || matrix.backend == 'torchkbnufft' }}
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
