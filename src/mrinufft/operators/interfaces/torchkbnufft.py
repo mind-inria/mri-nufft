@@ -57,12 +57,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.n_coils = n_coils
         self.eps = eps
         self.squeeze_dims = squeeze_dims
-        self._tkb_op = torchnufft.KbNufft(im_size=self.shape[2:])
-        self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape[2:])
+        self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
+        self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
 
         if density is True:
             self.density = torchnufft.calc_density_compensation_function(
-                ktraj=samples, im_size=shape[2:], num_iterations=15
+                ktraj=samples, im_size=shape, num_iterations=15
             )
             self.uses_density = True
         elif density is False:
