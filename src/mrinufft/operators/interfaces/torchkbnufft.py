@@ -32,18 +32,21 @@ class MRITorchKbNufft(FourierOperatorBase):
           using the fixed point method.
         - If False, density compensation will not be used.
     smaps: Tensor
+    squeeze_dims: bool, default True
+        If True, will try to remove the singleton dimension for batch and coils.
     """
 
     backend = "torchkbnufft"
     available = TORCH_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
+    def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6, squeeze_dims=True):
         super().__init__()
 
         self.samples = samples
         self.shape = shape
         self.n_coils = n_coils
         self.eps = eps
+        self.squeeze_dims = squeeze_dims
         self._tkb_op = torchnufft.KbNufft(
             im_size=self.shape[2:]
         )
@@ -86,7 +89,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         Tensor
         """
         kb_ob = self._tkb_op.forward(image=data, omega=self.samples, smaps=self.smaps)
-        return kb_ob
+        return self._safe_squeeze(kb_ob)
 
     def adj_op(self, data):
         """
@@ -111,3 +114,15 @@ class MRITorchKbNufft(FourierOperatorBase):
         )
         return torch.sum(img * torch.conj(self.smaps), dim=0)
     
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
