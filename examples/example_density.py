@@ -111,7 +111,7 @@ axs[2].set_title("cell_count density compensation")
 
 # %%
 flat_traj = traj.reshape(-1, 2)
-weights = np.sqrt(np.sum(flat_traj**2, axis=1))
+weights = np.sqrt(np.sum(flat_traj ** 2, axis=1))
 nufft = get_operator("finufft")(traj, shape=mri_2D.shape, density=weights)
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
