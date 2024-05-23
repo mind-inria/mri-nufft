@@ -14,6 +14,7 @@ import pytest
         ("pynfft", "MRInfft"),
         ("numpy", "MRInumpy"),
         ("gpunufft", "MRIGpuNUFFT"),
+        ("torchkbnufft", "MRITorchKbNufft"),
     ],
 )
 def test_get_operator(backend, name):

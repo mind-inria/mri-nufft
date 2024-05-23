@@ -38,7 +38,7 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*nyquist_radial*",
 )
-@parametrize(backend=["gpunufft", "finufft", "cufinufft"])
+@parametrize(backend=["gpunufft", "finufft", "cufinufft", "torchkbnufft"])
 def operator(
     request,
     kspace_locs,

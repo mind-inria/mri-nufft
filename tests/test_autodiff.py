@@ -23,7 +23,7 @@ except ImportError:
 
 
 @fixture(scope="module")
-@parametrize(backend=["cufinufft", "finufft"])
+@parametrize(backend=["cufinufft", "finufft", "torchkbnufft"])
 @parametrize(autograd=["data"])
 @parametrize_with_cases(
     "kspace_loc, shape",

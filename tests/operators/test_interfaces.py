@@ -33,6 +33,7 @@ from helpers import (
         "cufinufft",
         "gpunufft",
         "sigpy",
+        "torchkbnufft",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
