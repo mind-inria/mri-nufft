@@ -3,6 +3,7 @@ from mrinufft._utils import MethodRegister
 
 register_smaps = MethodRegister("sensitivity_maps")
 
+
 def get_smaps(name, *args, **kwargs):
     """Get the density compensation function from its name."""
     try:
