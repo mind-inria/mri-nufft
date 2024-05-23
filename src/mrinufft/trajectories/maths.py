@@ -248,7 +248,7 @@ def get_closest_fibonacci_number(x):
     int
         Closest number from the Fibonacci sequence.
     """
-     # Find the power such that x ~= phi ** power
+    # Find the power such that x ~= phi ** power
     phi = (1 + np.sqrt(5)) / 2
     power = np.ceil(np.log(x) / np.log(phi)) + 1
 
