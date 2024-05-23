@@ -79,10 +79,20 @@ def initialize_2D_spiral(
     -------
     array_like
         2D spiral trajectory
+
+    Raises
+    ------
+    ValueError
+        If `spiral` is negative.
+
+    Notes
+    -----
+    Algebraic spirals with negative powers, like hyperbolic or
+    lithuus spirals, show asymptotic behaviors around the center.
+    It makes them irrelevant for MRI and therefore negative powers
+    are not allowed as an argument.
     """
-    # Negative spirals like hyperbolic or lithuus have
-    # asymptotic behavior around the center, making them
-    # irrelevant for MRI or real life applications.
+    # Check spiral power is not negative
     spiral_power = initialize_algebraic_spiral(spiral)
     if spiral_power <= 0:
         raise ValueError(f"Negative spiral definition is invalid (spiral={spiral}).")

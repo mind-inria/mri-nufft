@@ -214,7 +214,8 @@ def is_from_fibonacci_sequence(n):
     """Check if an integer belongs to the Fibonacci sequence.
 
     An integer belongs to the Fibonacci sequence if either
-    :math:`5*n²+4` or :math:`5*n²-4` is a perfect square.
+    :math:`5*n²+4` or :math:`5*n²-4` is a perfect square
+    (`Wikipedia <https://en.wikipedia.org/wiki/Fibonacci_sequence#Recognizing_Fibonacci_numbers>`_).
 
     Parameters
     ----------
@@ -234,29 +235,28 @@ def is_from_fibonacci_sequence(n):
     return _is_perfect_square(5 * n**2 + 4) or _is_perfect_square(5 * n**2 - 4)
 
 
-def get_closest_fibonacci_number(n):
+def get_closest_fibonacci_number(x):
     """Provide the closest Fibonacci number.
 
     Parameters
     ----------
-    n : int
-        Integer to match.
+    x : float
+        Value to match.
 
     Returns
     -------
     int
         Closest number from the Fibonacci sequence.
     """
-    # Generate Fibonacci number up to n
-    fibonacci_sequence = [0, 1]
-    while fibonacci_sequence[-1] < n:
-        fibonacci_sequence.append(fibonacci_sequence[-2] + fibonacci_sequence[-1])
+     # Find the power such that x ~= phi ** power
+    phi = (1 + np.sqrt(5)) / 2
+    power = np.ceil(np.log(x) / np.log(phi)) + 1
 
     # Check closest between the ones below and above n
-    lower_nf = fibonacci_sequence[-2]
-    upper_nf = fibonacci_sequence[-1]
-    nf = lower_nf if (n - lower_nf) < (upper_nf - n) else upper_nf
-    return nf
+    lower_xf = int(np.around(phi ** (power) / np.sqrt(5)))
+    upper_xf = int(np.around(phi ** (power + 1) / np.sqrt(5)))
+    xf = lower_xf if (x - lower_xf) < (upper_xf - x) else upper_xf
+    return xf
 
 
 def generate_fibonacci_lattice(nb_points, epsilon=0.25):
