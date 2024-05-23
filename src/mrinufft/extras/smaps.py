@@ -2,8 +2,6 @@
 
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import get_array_module
-from skimage.filters import threshold_otsu, gaussian
-from skimage.morphology import convex_hull_image
 from .utils import register_smaps
 import numpy as np
 from typing import Tuple
@@ -148,6 +146,8 @@ def low_frequency(
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
+    from skimage.filters import threshold_otsu, gaussian
+    from skimage.morphology import convex_hull_image
 
     k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,
