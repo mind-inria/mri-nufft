@@ -46,8 +46,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         self.eps = eps
 
         if density is True:
-            self.density = tfmri.estimate_density(
-                samples, shape, method="pipe", max_iter=15
+            self.density = tf.math.reciprocal_no_nan(
+                tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
             )
             self.uses_density = True
         elif density is False:
