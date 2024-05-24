@@ -1,5 +1,6 @@
 """Tensorflow MRI Nufft Operators."""
 
+import numpy as np
 from ..base import FourierOperatorBase
 
 TENSORFLOW_AVAILABLE = True
@@ -37,7 +38,16 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     backend = "tensorflow"
     available = TENSORFLOW_AVAILABLE
 
-    def __init__(self, samples, shape, n_coils=1, density=False, smaps=None, eps=1e-6):
+    def __init__(
+        self,
+        samples,
+        shape,
+        n_coils=1,
+        density=False,
+        smaps=None,
+        eps=1e-6,
+        num_iter=15,
+    ):
         super().__init__()
 
         self.samples = samples
@@ -47,7 +57,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
 
         if density is True:
             self.density = tf.math.reciprocal_no_nan(
-                tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
+                tfmri.estimate_density(samples, shape, method="pipe", max_iter=num_iter)
             )
             self.uses_density = True
         elif density is False:
@@ -136,7 +146,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return self.adj_op(self.op(data) - obs_data)
 
     @classmethod
-    def pipe(samples, shape, n_iter=15):
+    def pipe(samples, shape, n_iter=15, normalize=True):
         """Estimate the density compensation using the pipe method.
 
         Parameters
@@ -154,7 +164,20 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         Tensor
             The estimated density compensation.
         """
-        density = tf.math.reciprocal_no_nan(
-                tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
+        if TENSORFLOW_AVAILABLE is False:
+            raise ValueError(
+                "tensorflow is not available, cannot "
+                "estimate the density compensation"
             )
-        return density
+        grid_op = MRITensorflowNUFFT(samples, shape, density=True, num_iter=n_iter)
+        density_comp = grid_op.density
+        if normalize:
+            spike = np.zeros(shape)
+            mid_loc = tuple(v // 2 for v in shape)
+            spike[mid_loc] = 1
+            psf = grid_op.adj_op(grid_op.op(spike))
+            density_comp /= np.linalg.norm(psf)
+        return density_comp.squeeze()
+
+
+# grid_op.impl.operator.
