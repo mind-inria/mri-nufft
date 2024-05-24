@@ -64,21 +64,19 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.density = torchnufft.calc_density_compensation_function(
                 ktraj=samples, im_size=shape, num_iterations=15
             )
-            # self.uses_density = True
         elif density is False:
             self.density = None
-            # self.uses_density = False
         elif torch.is_tensor(density):
             self.density = density
-            # self.uses_density = True
         else:
             raise ValueError(
                 "argument `density` of type" f"{type(density)} is invalid."
             )
-        if smaps is None:
-            self.uses_sense = False
+        if smaps is True:
+            self.smaps = smaps
+        elif smaps is None:
+            self.smaps = None
         elif torch.is_tensor(smaps):
-            self.uses_sense = True
             self.smaps = smaps
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
@@ -110,10 +108,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        # if self.uses_density:
-        #     data_d = data * self.density
-        # else:
-        data_d = data
+        if self.uses_density:
+            data_d = data * self.density
+        else:
+            data_d = data
 
         img = self._tkb_adj_op.forward(data=data_d, omega=self.samples)
         img_comb = torch.sum(img * torch.conj(self.smaps), dim=0)
