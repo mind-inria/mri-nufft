@@ -14,6 +14,7 @@ from mrinufft._utils import power_method, auto_cast, get_array_module
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 from mrinufft.density import get_density
+from mrinufft.extras import get_smaps
 
 CUPY_AVAILABLE = True
 try:
@@ -252,6 +253,42 @@ class FourierOperatorBase(ABC):
         from ..off_resonnance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
+
+    def compute_smaps(self, method=None):
+        """Compute the sensitivity maps and set it.
+
+        Parameters
+        ----------
+        method: callable or dict or array
+            The method to use to compute the sensitivity maps.
+            If an array, it should be of shape (NCoils,XYZ) and will be used as is.
+            If a dict, it should have a key 'name', to determine which method to use.
+            other items will be used as kwargs.
+            If a callable, it should take the samples and the shape as input.
+            Note that this callable function should also hold the k-space data
+            (use funtools.partial)
+        """
+        if isinstance(method, np.ndarray):
+            self.smaps = method
+            return None
+        if not method:
+            self.smaps = None
+            return None
+        kwargs = {}
+        if isinstance(method, dict):
+            kwargs = method.copy()
+            method = kwargs.pop("name")
+        if isinstance(method, str):
+            method = get_smaps(method)
+        if not callable(method):
+            raise ValueError(f"Unknown smaps method: {method}")
+        self.smaps, self.SOS = method(
+            self.samples,
+            self.shape,
+            density=self.density,
+            backend=self.backend,
+            **kwargs,
+        )
 
     def make_autograd(self, variable="data"):
         """Make a new Operator with autodiff support.
@@ -499,6 +536,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         # Density Compensation Setup
         self.compute_density(density)
+        self.compute_smaps(smaps)
         # Multi Coil Setup
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
