@@ -533,18 +533,17 @@ class FourierOperatorCPU(FourierOperatorBase):
         # we will access the samples by their coordinate first.
         self.samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
-
-        # Density Compensation Setup
-        self.compute_density(density)
-        self.compute_smaps(smaps)
-        # Multi Coil Setup
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
         self.n_coils = n_coils
-        self.smaps = smaps
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+
+        # Density Compensation Setup
+        self.compute_density(density)
+        # Multi Coil Setup
+        self.compute_smaps(smaps)
 
         self.raw_op = raw_op
 
