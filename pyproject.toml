@@ -12,6 +12,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 
 gpunufft = ["gpuNUFFT>=0.7.5", "cupy-cuda11x"]
+torchkbnufft = ["torchkbnufft"]
 cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2", "cython<3.0.0"]
