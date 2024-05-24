@@ -180,4 +180,3 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return density_comp.squeeze()
 
 
-# grid_op.impl.operator.
