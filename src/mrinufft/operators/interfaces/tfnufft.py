@@ -154,4 +154,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         Tensor
             The estimated density compensation.
         """
-        return tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
+        density = tf.math.reciprocal_no_nan(
+                tfmri.estimate_density(samples, shape, method="pipe", max_iter=n_iter)
+            )
+        return density
