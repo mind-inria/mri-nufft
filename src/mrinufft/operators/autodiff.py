@@ -9,9 +9,10 @@ class _NUFFT_OP(torch.autograd.Function):
 
     This class is implemented by an efficient approximation of Jacobian Matrices.
 
-    References:
-    -----------
-    Wang G, Fessler J A. "Efficient approximation of Jacobian matrices involving a non-uniform fast Fourier transform (NUFFT)."
+    References
+    ----------
+    Wang G, Fessler J A. "Efficient approximation of Jacobian matrices involving a
+    non-uniform fast Fourier transform (NUFFT)."
     IEEE Transactions on Computational Imaging, 2023, 9: 43-54.
     """
 
@@ -39,7 +40,7 @@ class _NUFFT_OP(torch.autograd.Function):
                 for i in range(grid_x.size(1))
             ],
             dim=1,
-        )  # Compute A(x * r) for each channel and concatenate along the channel dimension
+        )  # Compute A(x * r) for each channel and concatenate along this dimension
 
         grad_traj = torch.transpose(
             (-1j * torch.conj(dy) * nufft_dx_dom).squeeze(), 0, 1
