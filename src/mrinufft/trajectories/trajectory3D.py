@@ -6,10 +6,79 @@ import numpy.linalg as nl
 from functools import partial
 from scipy.special import ellipj, ellipk
 
-from .maths import Ry, Rz, Ra, generate_fibonacci_circle, CIRCLE_PACKING_DENSITY
+from .maths import (
+    Ry,
+    Rz,
+    Ra,
+    generate_fibonacci_circle,
+    EIGENVECTOR_2D_FIBONACCI,
+    CIRCLE_PACKING_DENSITY,
+)
 from .tools import precess, conify, duplicate_along_axes
 from .trajectory2D import initialize_2D_spiral
 from .utils import initialize_tilt, initialize_shape_norm, KMAX, Packings
+
+
+##############
+# 3D RADIALS #
+##############
+
+
+def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    trajectory = initialize_3D_cones(Nc, Ns, width=0, in_out=in_out)
+    trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns, 3))
+    return trajectory
+
+
+def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
+    m1 = (EIGENVECTOR_2D_FIBONACCI[0] * np.arange(Nc)) % 1
+    m2 = (EIGENVECTOR_2D_FIBONACCI[1] * np.arange(Nc)) % 1
+
+    polar_angle = np.arccos(m1).reshape((-1, 1))
+    azimuthal_angle = (2 * np.pi * m2).reshape((-1, 1))
+
+    radius = np.linspace(-1 * in_out, 1, Ns).reshape((1, -1))
+    sign = 1 if in_out else (-1) ** np.arange(Nc).reshape((-1, 1))
+
+    trajectory = np.zeros((Nc, Ns, 3))
+    trajectory[..., 0] = radius * np.sin(polar_angle) * np.cos(azimuthal_angle)
+    trajectory[..., 1] = radius * np.sin(polar_angle) * np.sin(azimuthal_angle)
+    trajectory[..., 2] = radius * np.cos(polar_angle) * sign
+
+    return KMAX * trajectory
+
+
+def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    N = Nc // nb_interleaves
+    M = nb_interleaves
+
+    points = np.zeros((M, N, 3))
+    points[..., 2] = (
+        (2 - in_out) * np.arange(1, N + 1) - (1 - in_out) * N - 1
+    ).reshape((1, -1)) / N
+
+    planar_radius = np.sqrt(1 - points[..., 2] ** 2)
+    azimuthal_angle = np.sqrt(N * np.pi / M) * np.arcsin(points[..., 2])
+    azimuthal_angle += 2 * np.pi * np.arange(1, M + 1).reshape((-1, 1)) / M
+
+    points[..., 0] = planar_radius * np.cos(azimuthal_angle)
+    points[..., 1] = planar_radius * np.sin(azimuthal_angle)
+    points = points.reshape((Nc, 3))
+
+    trajectory = np.linspace(-points * in_out, points, Ns)
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = KMAX * trajectory / np.max(nl.norm(trajectory, axis=-1))
+    return trajectory
+
+
+def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    trajectory = initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=in_out)
+    trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns, 3))
+    return trajectory
 
 
 ############################
