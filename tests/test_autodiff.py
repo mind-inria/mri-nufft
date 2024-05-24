@@ -23,7 +23,7 @@ except ImportError:
 
 
 @fixture(scope="module")
-@parametrize(backend=["cufinufft", "finufft"])
+@parametrize(backend=["cufinufft", "finufft", "gpunufft"])
 @parametrize(autograd=["data"])
 @parametrize_with_cases(
     "kspace_loc, shape",
@@ -47,7 +47,7 @@ def operator(kspace_loc, shape, backend, autograd):
 
 
 def proper_trajectory_torch(trajectory, normalize="pi"):
-    
+    """Normalize the trajectory to be used by NUFFT operators on device."""
     if not torch.is_tensor(trajectory):
         raise ValueError("trajectory should be a torch.Tensor")
 
@@ -70,37 +70,39 @@ def proper_trajectory_torch(trajectory, normalize="pi"):
 
     return new_traj
 
-# We need the calculation of the NDFT matrix to be done in the GPU/CPU, so I rewrite this function to calculate it on GPU/CPU (it's for grad_traj backpropagation, the
-# whole things about trajectory should be done with required_grad=True which needs everthing to be put on the same device)
+
 def get_fourier_matrix_torch(ktraj, shape, dtype=torch.complex64, normalize=False):
-    """Get the NDFT Fourier Matrix."""
+    """Get the NDFT Fourier Matrix which is calculated on device."""
     device = ktraj.device
     ktraj = proper_trajectory_torch(ktraj, normalize="unit")
     n = np.prod(shape)
     ndim = len(shape)
-    
+
     r = [torch.linspace(-s / 2, s / 2 - 1, s, device=device) for s in shape]
-    
+
     grid_r = torch.meshgrid(r, indexing="ij")
     grid_r = torch.reshape(torch.stack(grid_r), (ndim, n)).to(device)
-    
+
     traj_grid = torch.matmul(ktraj, grid_r)
     matrix = torch.exp(-2j * np.pi * traj_grid).to(dtype).to(device).clone()
-    
+
     if normalize:
-        matrix /= torch.sqrt(torch.tensor(np.prod(shape), device=device)) * torch.pow(torch.sqrt(torch.tensor(2, device=device)), ndim)
-    
+        matrix /= torch.sqrt(torch.tensor(np.prod(shape), device=device)) * torch.pow(
+            torch.sqrt(torch.tensor(2, device=device)), ndim
+        )
+
     return matrix
+
 
 def ndft_matrix_ktraj(operator, k_traj):
     """Get the NDFT matrix from the operator."""
-    return get_fourier_matrix_torch(k_traj, operator.shape, normalize=True) # operator.samples is trajectory
+    return get_fourier_matrix_torch(k_traj, operator.shape, normalize=True)
 
 
 @fixture(scope="module")
 def ndft_matrix(operator):
     """Get the NDFT matrix from the operator."""
-    return get_fourier_matrix(operator.samples, operator.shape, normalize=True) 
+    return get_fourier_matrix(operator.samples, operator.shape, normalize=True)
 
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
@@ -137,33 +139,30 @@ def test_forward_and_grad(operator, interface):
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 
+    ktraj = to_interface(np.copy(operator.samples), interface=interface)
 
-    ktraj = to_interface(np.copy(operator.samples), interface = interface)
-    
-    ksp_data_ref = to_interface(kspace_from_op(operator), interface=interface) #[1, 256]
-    img_data = to_interface(image_from_op(operator), interface=interface) #[1, 16, 16] 1 is num of coil
+    ksp_data_ref = to_interface(kspace_from_op(operator), interface=interface)
+    img_data = to_interface(image_from_op(operator), interface=interface)
 
     img_data.requires_grad = True
     ktraj.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
-        ksp_data = operator.op(img_data, ktraj).reshape(ksp_data_ref.shape) #[1, 1, 256] => [1, 256]
-        ndft_matrix_torch = ndft_matrix_ktraj(operator,ktraj)
-        ksp_data_ndft = (ndft_matrix_torch @ img_data.flatten()).reshape(ksp_data.shape) 
+        ksp_data = operator.op(img_data, ktraj).reshape(ksp_data_ref.shape)
+        ndft_matrix_torch = ndft_matrix_ktraj(operator, ktraj)
+        ksp_data_ndft = (ndft_matrix_torch @ img_data.flatten()).reshape(ksp_data.shape)
         loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
         loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
 
-
     # Check if nufft and ndft w.r.t trajectory are close in the backprop
-    gradient_ndft_ktraj = torch.autograd.grad(loss_ndft, ktraj, retain_graph=True)[0] 
-    gradient_nufft_ktraj= torch.autograd.grad(loss_nufft, ktraj, retain_graph=True)[  #d dy = dL / ksp_data, dy should be [1, 256]
+    gradient_ndft_ktraj = torch.autograd.grad(loss_ndft, ktraj, retain_graph=True)[0]
+    gradient_nufft_ktraj = torch.autograd.grad(loss_nufft, ktraj, retain_graph=True)[  #
         0
     ]
     assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=6e-3)
 
-
     # Check if nufft and ndft are close in the backprop
-    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0] 
+    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
         0
     ]
