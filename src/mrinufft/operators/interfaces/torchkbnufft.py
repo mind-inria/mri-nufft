@@ -1,7 +1,8 @@
 """Pytorch MRI Nufft Operators."""
 
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, with_torch
 import numpy as np
+import cupy as cp
 
 TORCH_AVAILABLE = True
 
@@ -81,18 +82,19 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = None
         elif torch.is_tensor(smaps):
             self.smaps = smaps
-        elif isinstance(smaps, np.ndarray):
-            self.smaps = torch.tensor(smaps)
-            self.smaps = smaps
+        # elif isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
+        #     self.smaps = torch.tensor(smaps)
+        #     self.smaps = smaps
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
-
+        
+    @with_torch
     def op(self, data):
         """Forward operation.
 
         Parameters
         ----------
-        data: Tensor
+        data: np.ndarray or cp.array or torch.array
 
         Returns
         -------
@@ -100,7 +102,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         """
         kb_ob = self._tkb_op.forward(image=data, omega=self.samples, smaps=self.smaps)
         return self._safe_squeeze(kb_ob)
-
+    
+    @with_torch
     def adj_op(self, data):
         """
 

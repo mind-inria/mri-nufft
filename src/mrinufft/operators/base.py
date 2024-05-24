@@ -180,6 +180,40 @@ def with_numpy_cupy(fun):
 
     return wrapper
 
+def with_torch(fun):
+    """Ensure the function works internally with numpy or cupy array."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+
+        if xp.__name__ == "numpy" or xp.__name__ == "cupy":
+            # Move them to torch
+            data_ = torch.tensor(data)
+            output_ = torch.tensor(output) if output is not None else None
+        else:
+            data_ = data
+            output_ = output
+
+        if output_ is not None:
+            if not (
+                (is_host_array(data_) and is_host_array(output_))
+                or (is_cuda_array(data_) and is_cuda_array(output_))
+            ):
+                raise ValueError(
+                    "input data and output should be " "on the same memory space."
+                )
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+
+        if xp.__name__ == "cupy" :
+            return ret_.cpu().numpy()
+        elif xp.__name__ == "numpy":
+            return ret_.numpy()
+
+        return ret_
+
+    return wrapper
+
 
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
