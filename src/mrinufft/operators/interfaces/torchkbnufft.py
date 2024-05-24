@@ -64,13 +64,13 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.density = torchnufft.calc_density_compensation_function(
                 ktraj=samples, im_size=shape, num_iterations=15
             )
-            self.uses_density = True
+            # self.uses_density = True
         elif density is False:
             self.density = None
-            self.uses_density = False
+            # self.uses_density = False
         elif torch.is_tensor(density):
             self.density = density
-            self.uses_density = True
+            # self.uses_density = True
         else:
             raise ValueError(
                 "argument `density` of type" f"{type(density)} is invalid."
@@ -79,7 +79,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.uses_sense = False
         elif torch.is_tensor(smaps):
             self.uses_sense = True
-            self.smaps = smaps
+            self._smaps = smaps
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
 
