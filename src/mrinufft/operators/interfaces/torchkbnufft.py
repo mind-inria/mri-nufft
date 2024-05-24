@@ -1,6 +1,7 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase
+import numpy as np
 
 TORCH_AVAILABLE = True
 
@@ -57,6 +58,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.n_coils = n_coils
         self.eps = eps
         self.squeeze_dims = squeeze_dims
+        self.n_batchs = n_batchs
+        self.dtype = self.samples.dtype
         self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
         self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
 
@@ -77,6 +80,9 @@ class MRITorchKbNufft(FourierOperatorBase):
         elif smaps is None:
             self.smaps = None
         elif torch.is_tensor(smaps):
+            self.smaps = smaps
+        elif isinstance(smaps, np.ndarray):
+            self.smaps = torch.tensor(smaps)
             self.smaps = smaps
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
