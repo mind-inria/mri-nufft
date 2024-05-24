@@ -79,7 +79,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.uses_sense = False
         elif torch.is_tensor(smaps):
             self.uses_sense = True
-            self._smaps = smaps
+            self.smaps = smaps
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
 
@@ -110,10 +110,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        if self.uses_density:
-            data_d = data * self.density
-        else:
-            data_d = data
+        # if self.uses_density:
+        #     data_d = data * self.density
+        # else:
+        data_d = data
 
         img = self._tkb_adj_op.forward(data=data_d, omega=self.samples)
         img_comb = torch.sum(img * torch.conj(self.smaps), dim=0)
