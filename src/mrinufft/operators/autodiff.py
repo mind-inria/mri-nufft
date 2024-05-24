@@ -24,7 +24,7 @@ class _NUFFT_OP(torch.autograd.Function):
     """Autograd support for op nufft function."""
 
     @staticmethod
-    def forward(ctx, x, nufft_op, traj):
+    def forward(ctx, x,  traj, nufft_op): #FIXME： change the position
         """Forward image -> k-space."""
         ctx.save_for_backward(x, traj)
         ctx.nufft_op = nufft_op
@@ -50,7 +50,7 @@ class _NUFFT_OP(torch.autograd.Function):
     
 
 
-        return ctx.nufft_op.adj_op(dy), None, grad_traj     
+        return ctx.nufft_op.adj_op(dy),  grad_traj, None    
 
 
 class _NUFFT_ADJOP(torch.autograd.Function):
@@ -87,7 +87,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def op(self, x, traj):
         r"""Compute the forward image -> k-space."""
-        return _NUFFT_OP.apply(x, self.nufft_op, traj)
+        return _NUFFT_OP.apply(x, traj, self.nufft_op )
 
     def adj_op(self, kspace):
         r"""Compute the adjoint k-space -> image."""
