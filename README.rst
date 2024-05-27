@@ -88,3 +88,22 @@ MRI-nufft is available on Pypi and can be installed with::
   pip install mri-nufft
 
 You will also need to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`_ for more guidance.
+
+
+Benchmark
+---------
+
+A benchmark of NUFFT backend for MRI applications is available in https://github.com/mind-inria/mri-nufft-benchmark
+
+
+Who is using MRI-NUFFT
+----------------------
+
+Here are several project that rely on MRI-NUFFT:
+
+- `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`
+- `snake-fmri <https://github.com/paquiteau/snake-fmri>`
+- `deepinv <https://github.com/deepinv/deepinv`
+
+
+  Add yours by opening a PR !
