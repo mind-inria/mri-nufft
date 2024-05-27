@@ -57,7 +57,7 @@ def auto_cast(array, dtype: DTypeLike):
         return array.astype(dtype)
 
 
-def proper_trajectory(trajectory, normalize="pi"):
+def proper_trajectory(trajectory, normalize="pi"): 
     """Normalize the trajectory to be used by NUFFT operators.
 
     Parameters
@@ -75,6 +75,7 @@ def proper_trajectory(trajectory, normalize="pi"):
         The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
     """
     # flatten to a list of point
+    #FIXME: check if trajectory is torch. get_array_module : torch. Basically output must be torch if input is torch and everything must be done in torch. 
     try:
         new_traj = np.asarray(trajectory).copy()
     except Exception as e:
