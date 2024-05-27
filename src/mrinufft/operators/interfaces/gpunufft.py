@@ -478,7 +478,15 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, normalize=True, **kwargs):
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -511,7 +519,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
         if normalize:
             spike = np.zeros(volume_shape)
-            mid_loc = tuple(v//2 for v in volume_shape)
+            mid_loc = tuple(v // 2 for v in volume_shape)
             spike[mid_loc] = 1
             psf = grid_op.adj_op(grid_op.op(spike))
             density_comp /= np.linalg.norm(psf)
