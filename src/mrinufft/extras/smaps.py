@@ -168,8 +168,8 @@ def low_frequency(
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
     if blurr_factor > 0:
-        Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
-        # Re-normalize the sensitivity maps
+        Smaps = gaussian(np.abs(Smaps), sigma=blurr_factor)*np.exp(1j*np.angle(Smaps))
+    # Re-normalize the sensitivity maps
     if mask or blurr_factor > 0:
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10

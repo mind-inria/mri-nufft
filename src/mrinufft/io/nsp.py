@@ -397,6 +397,8 @@ def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
     squeeze: bool = True,
+    slice_num: Optional[int] = None,
+    contrast_num: Optional[int] = None,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
@@ -409,6 +411,10 @@ def read_arbgrad_rawdat(
         Whether to remove the oversampling, by default False.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
+    slice_num : int, optional
+        The slice to read, by default None. This applies for 2D data.
+    contrast_num: int, optional
+        The contrast to read, by default None. 
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
 
@@ -434,6 +440,8 @@ def read_arbgrad_rawdat(
         filename=filename,
         removeOS=removeOS,
         squeeze=squeeze,
+        slice_num=slice_num,
+        contrast_num=contrast_num,
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
