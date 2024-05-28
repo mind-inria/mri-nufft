@@ -213,7 +213,11 @@ try:
 except FileNotFoundError:
     pass
 
+
 # sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_2D_traj.gif'
+
 
 # %%
 # .. image-sg:: /generated/autoexamples/images/mrinufft_2D_traj.gif

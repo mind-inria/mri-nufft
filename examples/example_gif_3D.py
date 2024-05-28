@@ -294,6 +294,8 @@ except FileNotFoundError:
 
 # sphinx_gallery_end_ignore
 
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_3D_traj.gif'
+
 # %%
 # .. image-sg:: /generated/autoexamples/images/mrinufft_3D_traj.gif
 #    :alt: example density
