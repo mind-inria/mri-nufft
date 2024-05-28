@@ -36,7 +36,7 @@ All MRI-NUFFT operator inherits from :class:`FourierOperatorBase` . The minimum 
             self.compute_smaps(smaps) # setup the smaps
             self.compute_density(density) # setup the density compensation
 
-.. info::
+.. tip::
 
    The precision of the samples  array will determine the precision of the computation. See also :ref:`K-Space Trajectories`
 
