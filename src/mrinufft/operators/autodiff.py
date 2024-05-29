@@ -67,29 +67,6 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         """Backward kspace -> image."""
         (y, traj) = ctx.saved_tensors  # y [1, 256] traj [256, 2]
         grad_traj = None
-        # im_size = dx.size()[2:]
-        # r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
-        # grid_r = torch.meshgrid(*r, indexing="ij")
-        # grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...] #[1, 2, 16, 16]
-
-        # diag_y = torch.diag_embed(y) #[1, 256, 256] 想要to be [1, 256, 16, 16]
-
-        # ifft_diag_y = torch.cat(
-        #     [
-        #         ctx.nufft_op.adj_op(diag_y[:, i : i + 1, :])
-        #         for i in range(diag_y.size(1))
-        #     ],
-        #     dim=1,
-        # ) # [1, 2048, 32, 32]
-
-        # grad_traj = torch.cat(
-        #     [
-        #         (dx * grid_r[:, i : i + 1, :, :] * ifft_diag_y).sum(dim=(2, 3))
-        #         for i in range(grid_r.size(1))
-        #     ]
-        # ).type_as(traj)
-
-        # grad_traj = torch.transpose(grad_traj, 0, 1).type_as(traj)
         return ctx.nufft_op.op(dx), grad_traj, None
 
 

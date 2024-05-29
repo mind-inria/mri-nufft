@@ -75,7 +75,7 @@ def proper_trajectory(trajectory, normalize="pi"):
         The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
     """
     # flatten to a list of point
-    module = get_array_module(trajectory)
+    module = get_array_module(trajectory) # check if the trajectory is a tensor
     try:
         new_traj = (
             trajectory.clone()

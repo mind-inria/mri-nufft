@@ -11,6 +11,7 @@ from mrinufft._utils import proper_trajectory, get_array_module
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     """Get the NDFT Fourier Matrix."""
+    
     module = get_array_module(ktraj)
     ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)
