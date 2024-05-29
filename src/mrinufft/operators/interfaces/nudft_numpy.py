@@ -10,9 +10,7 @@ from mrinufft._utils import proper_trajectory, get_array_module
 
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
-    #FIXME: check if trajectory is torch. get_array_module : torch. Basically output must be torch if input is torch and everything must be done in torch. 
     """Get the NDFT Fourier Matrix."""
-    
     module = get_array_module(ktraj)
     ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)

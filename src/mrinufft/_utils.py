@@ -75,11 +75,7 @@ def proper_trajectory(trajectory, normalize="pi"):
         The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
     """
     # flatten to a list of point
-<<<<<<< HEAD
     module = get_array_module(trajectory) # check if the trajectory is a tensor
-=======
-    #FIXME: check if trajectory is torch. get_array_module : torch. Basically output must be torch if input is torch and everything must be done in torch. 
->>>>>>> origin/autodiff_ktraj
     try:
         new_traj = (
             trajectory.clone()

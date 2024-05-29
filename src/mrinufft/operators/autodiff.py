@@ -87,11 +87,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def op(self, x):
         r"""Compute the forward image -> k-space."""
-<<<<<<< HEAD
         return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
-=======
-        return _NUFFT_OP.apply(x, self.nufft_op)
->>>>>>> origin/autodiff_ktraj
 
     def adj_op(self, kspace):
         r"""Compute the adjoint k-space -> image."""
