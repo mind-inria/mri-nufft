@@ -1,5 +1,5 @@
 """Provides Operator for MR Image processing on GPU."""
-
+import torch
 import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy
@@ -88,6 +88,7 @@ class RawCufinufftPlan:
             dtype=DTYPE_R2C[str(self.samples.dtype)],
             **kwargs,
         )
+        
 
     def _set_pts(self, typ):
         self.plans[typ].setpts(
@@ -178,6 +179,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         verbose=False,
         squeeze_dims=False,
         n_trans=1,
+        grad_traj=False,
         **kwargs,
     ):
         # run the availaility check here to get detailled output.
@@ -200,7 +202,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             proper_trajectory(samples, normalize="pi").astype(np.float32)
         )
         self.dtype = self.samples.dtype
-
         # density compensation support
         if is_cuda_array(density):
             self.density = density

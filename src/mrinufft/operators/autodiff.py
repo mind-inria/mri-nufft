@@ -1,6 +1,7 @@
 """Torch autodifferentiation for MRI-NUFFT."""
 
 import torch
+import numpy as np
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -19,7 +20,7 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, traj, nufft_op):
         """Forward image -> k-space."""
-        ctx.save_for_backward(x, traj)
+        ctx.save_for_backward(x, traj)  # nufft_op.samples => traj
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
 
@@ -55,17 +56,41 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     """Autograd support for adj_op nufft function."""
 
     @staticmethod
-    def forward(ctx, y, nufft_op):
+    def forward(ctx, y, traj, nufft_op):
         """Forward kspace -> image."""
-        ctx.save_for_backward(y)
+        ctx.save_for_backward(y, traj)
         ctx.nufft_op = nufft_op
         return nufft_op.adj_op(y)
 
     @staticmethod
     def backward(ctx, dx):
         """Backward kspace -> image."""
-        (y,) = ctx.saved_tensors
-        return ctx.nufft_op.op(dx), None
+        (y, traj) = ctx.saved_tensors  # y [1, 256] traj [256, 2]
+        grad_traj = None
+        # im_size = dx.size()[2:]
+        # r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
+        # grid_r = torch.meshgrid(*r, indexing="ij")
+        # grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...] #[1, 2, 16, 16]
+
+        # diag_y = torch.diag_embed(y) #[1, 256, 256] 想要to be [1, 256, 16, 16]
+
+        # ifft_diag_y = torch.cat(
+        #     [
+        #         ctx.nufft_op.adj_op(diag_y[:, i : i + 1, :])
+        #         for i in range(diag_y.size(1))
+        #     ],
+        #     dim=1,
+        # ) # [1, 2048, 32, 32]
+
+        # grad_traj = torch.cat(
+        #     [
+        #         (dx * grid_r[:, i : i + 1, :, :] * ifft_diag_y).sum(dim=(2, 3))
+        #         for i in range(grid_r.size(1))
+        #     ]
+        # ).type_as(traj)
+
+        # grad_traj = torch.transpose(grad_traj, 0, 1).type_as(traj)
+        return ctx.nufft_op.op(dx), grad_traj, None
 
 
 class MRINufftAutoGrad(torch.nn.Module):
@@ -83,13 +108,13 @@ class MRINufftAutoGrad(torch.nn.Module):
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
 
-    def op(self, x, traj):
+    def op(self, x):
         r"""Compute the forward image -> k-space."""
-        return _NUFFT_OP.apply(x, traj, self.nufft_op)
+        return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
 
     def adj_op(self, kspace):
         r"""Compute the adjoint k-space -> image."""
-        return _NUFFT_ADJOP.apply(kspace, self.nufft_op)
+        return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
 
     def __getattr__(self, name):
         """Get the attribute from the root operator."""
