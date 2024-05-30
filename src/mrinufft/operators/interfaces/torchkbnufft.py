@@ -1,6 +1,7 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase, with_torch
+from mrinufft._utils import proper_trajectory
 import numpy as np
 import cupy as cp
 
@@ -54,15 +55,26 @@ class MRITorchKbNufft(FourierOperatorBase):
     ):
         super().__init__()
 
-        self.samples = samples
         self.shape = shape
         self.n_coils = n_coils
         self.eps = eps
         self.squeeze_dims = squeeze_dims
         self.n_batchs = n_batchs
-        self.dtype = self.samples.dtype
+        self.dtype = None
+        self._samples = samples
+
         self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
         self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
+
+
+        if isinstance(samples, torch.Tensor):
+            samples = samples.numpy()
+        if not isinstance(samples, torch.Tensor):
+            samples = proper_trajectory(
+                samples.astype(np.float32, copy=False), normalize="unit"
+            )
+            self.samples = samples.transpose(1, 0)
+            self.samples = torch.tensor(samples)
 
         if density is True:
             self.density = torchnufft.calc_density_compensation_function(
@@ -70,26 +82,31 @@ class MRITorchKbNufft(FourierOperatorBase):
             )
         elif density is False:
             self.density = None
-        elif torch.is_tensor(density):
+        elif (
+            torch.is_tensor(density)
+            or isinstance(density, np.ndarray)
+            or isinstance(density, cp.ndarray)
+        ):
             self.density = density
         else:
             raise ValueError(
                 "argument `density` of type" f"{type(density)} is invalid."
             )
-        if smaps is True:
-            self.smaps = smaps
-        elif smaps is None:
+
+        if smaps is None:
             self.smaps = None
-        elif torch.is_tensor(smaps):
+        elif isinstance(smaps, torch.Tensor):
             self.smaps = smaps
-        # elif isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
-        #     self.smaps = torch.tensor(smaps)
-        #     self.smaps = smaps
+        elif (
+            isinstance(smaps, np.ndarray)
+            or isinstance(smaps, cp.ndarray)
+        ):
+            self.smaps = torch.tensor(smaps)
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
-        
+
     @with_torch
-    def op(self, data):
+    def op(self, data, coeffs = None):
         """Forward operation.
 
         Parameters
@@ -98,13 +115,35 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         Returns
         -------
-        Tensor
+        Tensor: Non-uniform Fourier transform of the input image.
         """
-        kb_ob = self._tkb_op.forward(image=data, omega=self.samples, smaps=self.smaps)
-        return self._safe_squeeze(kb_ob)
-    
+        ktraj = self.samples 
+        smaps = self.smaps
+
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        if not B :
+            B = 1
+        if not C :
+            C = 1
+        data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+
+        if not isinstance(ktraj, torch.Tensor) or not isinstance(data, torch.Tensor):
+            raise ValueError("Invalid data or ktraj type, must be tensor.")
+
+        if len(ktraj.shape) == 2:
+            if ktraj.shape[0] != data.shape[0]:
+                ktraj = ktraj.permute(1, 0)
+            if smaps is not None:
+                smaps = smaps.to(data.dtype)
+            kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
+            print(kdata.shape)
+            return self._safe_squeeze(kdata)
+        else : 
+            raise ValueError("Invalid ktraj shape (must be (Nc x Ns , 2 ou 3))", len(ktraj.shape))
+
+
     @with_torch
-    def adj_op(self, data):
+    def adj_op(self, data, coeffs = None):
         """
 
         Backward Operation.
@@ -121,8 +160,13 @@ class MRITorchKbNufft(FourierOperatorBase):
             data_d = data * self.density
         else:
             data_d = data
+        samples = self.samples
 
-        img = self._tkb_adj_op.forward(data=data_d, omega=self.samples)
+        # B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, samples
+        # data_d = data_d.reshape((B, C, *XYZ))
+        # samples = samples.reshape((B, K, *))
+
+        img = self._tkb_adj_op.forward(data=data_d, omega=samples)
         img_comb = torch.sum(img * torch.conj(self.smaps), dim=0)
         return self._safe_squeeze(img_comb)
 
