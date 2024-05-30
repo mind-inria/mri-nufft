@@ -102,7 +102,7 @@ def get_operator(backend_name: str, *args, wrt_data, wrt_traj, **kwargs):
     if args or kwargs:
         operator = operator(*args, **kwargs)
 
-    #if autograd:
+    # if autograd:
     if isinstance(operator, FourierOperatorBase):
         operator = operator.make_autograd(wrt_data, wrt_traj)
     else:  # partial
@@ -273,9 +273,9 @@ class FourierOperatorBase(ABC):
         """
         if not AUTOGRAD_AVAILABLE:
             raise ValueError("Autograd not available, ensure torch is installed.")
-        
-        return MRINufftAutoGrad(self,wrt_data=wrt_data, wrt_traj=wrt_traj)
-        
+
+        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
+
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
 

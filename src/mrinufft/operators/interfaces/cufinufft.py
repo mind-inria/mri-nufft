@@ -89,6 +89,7 @@ class RawCufinufftPlan:
             dtype=DTYPE_R2C[str(self.samples.dtype)],
             **kwargs,
         )
+
     def _make_plan_grad(self, **kwargs):
         self.grad_plan = Plan(
             2,
@@ -96,13 +97,13 @@ class RawCufinufftPlan:
             self.n_trans,
             self.eps,
             dtype=DTYPE_R2C[str(self.samples.dtype)],
-            isign = 1, 
+            isign=1,
             **kwargs,
         )
-        self._set_pts(typ='grad')
+        self._set_pts(typ="grad")
 
     def _set_pts(self, typ):
-        if typ == 'grad':
+        if typ == "grad":
             self.grad_plan.setpts(
                 cp.array(self.samples[:, 0], copy=False),
                 cp.array(self.samples[:, 1], copy=False),
@@ -128,10 +129,11 @@ class RawCufinufftPlan:
     def type2(self, grid_data, coeff_data):
         """Type 2 transform. Uniform to non-uniform."""
         return self.plans[2].execute(grid_data, coeff_data)
-    
+
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
         self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
+
 
 class MRICufiNUFFT(FourierOperatorBase):
     """MRI Transform operator, build around cufinufft.

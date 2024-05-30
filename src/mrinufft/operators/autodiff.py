@@ -70,13 +70,13 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     def backward(ctx, dx):
         """Backward kspace -> image."""
         (y, traj) = ctx.saved_tensors  # y [1, 256] traj [256, 2]
-    
-        grad_data = None 
+
+        grad_data = None
         grad_traj = None
-        print("In AutoGrad") 
-        if ctx.nufft_op._grad_wrt_data: 
+        print("In AutoGrad")
+        if ctx.nufft_op._grad_wrt_data:
             grad_data = ctx.nufft_op.op(dx)
-    
+
         if ctx.nufft_op._grad_wrt_traj:
             print(ctx.nufft_op.raw_op.plans)
             print(ctx.nufft_op.raw_op.grad_plan)
@@ -84,13 +84,12 @@ class _NUFFT_ADJOP(torch.autograd.Function):
 
             print(ctx.nufft_op.raw_op.plans)
             print(ctx.nufft_op.raw_op.grad_plan)
-            
+
             im_size = dx.size()[2:]
             r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...] #[1, 2, 16, 16]
+            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...]  # [1, 2, 16, 16]
 
-        
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
                 [
@@ -102,12 +101,10 @@ class _NUFFT_ADJOP(torch.autograd.Function):
 
             grad_traj = torch.transpose(
                 (1j * y * inufft_dx_dom).squeeze(), 0, 1
-            ).type_as(
-                traj
-            )  
+            ).type_as(traj)
 
             ctx.nufft_op.raw_op.toggle_grad_traj()
-        
+
         return grad_data, grad_traj, None
 
 
@@ -120,8 +117,7 @@ class MRINufftAutoGrad(torch.nn.Module):
     nufft_op: Classic Non differentiable MRI-NUFFT operator.
     """
 
-    def __init__(self, nufft_op, wrt_data= True, wrt_traj=False):
-
+    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
         super().__init__()
         if nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
