@@ -91,21 +91,29 @@ class RawCufinufftPlan:
         )
     def _make_plan_grad(self, **kwargs):
         self.grad_plan = Plan(
-            1,
+            2,
             self.shape,
             self.n_trans,
             self.eps,
             dtype=DTYPE_R2C[str(self.samples.dtype)],
-            isign = -1, 
+            isign = 1, 
             **kwargs,
         )
+        self._set_pts(typ='grad')
 
     def _set_pts(self, typ):
-        self.plans[typ].setpts(
-            cp.array(self.samples[:, 0], copy=False),
-            cp.array(self.samples[:, 1], copy=False),
-            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
-        )
+        if typ == 'grad':
+            self.grad_plan.setpts(
+                cp.array(self.samples[:, 0], copy=False),
+                cp.array(self.samples[:, 1], copy=False),
+                cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
+            )
+        else:
+            self.plans[typ].setpts(
+                cp.array(self.samples[:, 0], copy=False),
+                cp.array(self.samples[:, 1], copy=False),
+                cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
+            )
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
@@ -122,7 +130,8 @@ class RawCufinufftPlan:
         return self.plans[2].execute(grid_data, coeff_data)
     
     def toggle_grad_traj(self):
-        self.plans[1], self.grad_plan = self.grad_plan, self.plans[1]
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
 
 class MRICufiNUFFT(FourierOperatorBase):
     """MRI Transform operator, build around cufinufft.
@@ -191,7 +200,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         verbose=False,
         squeeze_dims=False,
         n_trans=1,
-        grad_traj=False,
         **kwargs,
     ):
         # run the availaility check here to get detailled output.

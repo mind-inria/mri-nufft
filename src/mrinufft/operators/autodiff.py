@@ -72,14 +72,19 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         (y, traj) = ctx.saved_tensors  # y [1, 256] traj [256, 2]
     
         grad_data = None 
-        grad_traj = None 
+        grad_traj = None
+        print("In AutoGrad") 
         if ctx.nufft_op._grad_wrt_data: 
             grad_data = ctx.nufft_op.op(dx)
     
         if ctx.nufft_op._grad_wrt_traj:
-
+            print(ctx.nufft_op.raw_op.plans)
+            print(ctx.nufft_op.raw_op.grad_plan)
             ctx.nufft_op.raw_op.toggle_grad_traj()
 
+            print(ctx.nufft_op.raw_op.plans)
+            print(ctx.nufft_op.raw_op.grad_plan)
+            
             im_size = dx.size()[2:]
             r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
             grid_r = torch.meshgrid(*r, indexing="ij")
@@ -122,6 +127,8 @@ class MRINufftAutoGrad(torch.nn.Module):
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
+        if wrt_traj:
+            self.nufft_op.raw_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
 
     def op(self, x):

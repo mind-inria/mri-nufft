@@ -6,9 +6,6 @@ import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator
-import warnings
-from mrinufft._utils import proper_trajectory
-import matplotlib.pyplot as plt
 
 from helpers import (
     kspace_from_op,
@@ -26,7 +23,6 @@ except ImportError:
 
 @fixture(scope="module")
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
-@parametrize(autograd=["data"])
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
@@ -34,10 +30,15 @@ except ImportError:
         CasesTrajectories.case_nyquist_radial2D,
     ],  # 2D cases only for reduced memory footprint.
 )
-def operator(kspace_loc, shape, backend, autograd):
+def operator(kspace_loc, shape, backend):
     """Create NUFFT operator with autodiff capabilities."""
     kspace_loc = kspace_loc.astype(np.float32)
-    nufft = get_operator(backend_name=backend, wrt_data=True, wrt_traj=True)(
+    wrt_traj = True
+    if backend == "gpunufft":
+        # Gradient wrt to trajectory is not yet supported for gpunufft
+        wrt_traj = False
+        
+    nufft = get_operator(backend_name=backend, wrt_data=True, wrt_traj=wrt_traj)(
         samples=kspace_loc,
         shape=shape,
         smaps=None,
@@ -76,21 +77,20 @@ def test_adjoint_and_grad(operator, interface):
         )
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
-
-    # Check if nufft and ndft w.r.t trajectory are close in the backprop
-    gradient_ndft_ktraj = torch.autograd.grad(
-        loss_ndft, operator.samples, retain_graph=True
-    )[
-        0
-    ] 
-    gradient_nufft_ktraj = torch.autograd.grad(
-        loss_nufft, operator.samples, retain_graph=True
-    )[  
-        0
-    ] 
-
     
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2) 
+    if operator.backend != "gpunufft":
+        # Check if nufft and ndft w.r.t trajectory are close in the backprop
+        gradient_ndft_ktraj = torch.autograd.grad(
+            loss_ndft, operator.samples, retain_graph=True
+        )[
+            0
+        ]
+        gradient_nufft_ktraj = torch.autograd.grad(
+            loss_nufft, operator.samples, retain_graph=True
+        )[  
+            0
+        ] 
+        assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-7) 
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
@@ -128,13 +128,12 @@ def test_forward_and_grad(operator, interface):
         loss_ndft, operator.samples, retain_graph=True
     )[
         0
-    ]  # ktraj就是operator.samples实际上
-    gradient_nufft_ktraj = torch.autograd.grad(
-        loss_nufft, operator.samples, retain_graph=True
-    )[  #
-        0
     ]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-7)
+    if operator.backend != "gpunufft":
+        gradient_nufft_ktraj = torch.autograd.grad(
+            loss_nufft, operator.samples, retain_graph=True
+        )[0]
+        assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-7)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
