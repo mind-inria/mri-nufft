@@ -1,5 +1,4 @@
 """Provides Operator for MR Image processing on GPU."""
-import torch
 import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy
