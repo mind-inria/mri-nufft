@@ -119,7 +119,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
         super().__init__()
-        if nufft_op.squeeze_dims:
+        if wrt_data or wrt_traj and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
