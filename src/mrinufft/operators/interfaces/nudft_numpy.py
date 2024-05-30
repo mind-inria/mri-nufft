@@ -4,7 +4,6 @@ import warnings
 
 import numpy as np
 import scipy as sp
-import torch
 from ..base import FourierOperatorCPU
 from mrinufft._utils import proper_trajectory, get_array_module
 
@@ -17,6 +16,7 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     ndim = len(shape)
 
     if module.__name__ == "torch":
+        torch = module
         device = ktraj.device
         dtype = torch.complex64
         r = [torch.linspace(-s / 2, s / 2 - 1, s, device=device) for s in shape]
@@ -24,7 +24,6 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
         grid_r = torch.reshape(torch.stack(grid_r), (ndim, n)).to(device)
         traj_grid = torch.matmul(ktraj, grid_r)
         matrix = torch.exp(-2j * np.pi * traj_grid).to(dtype).to(device).clone()
-
     else:
         r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
         grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
