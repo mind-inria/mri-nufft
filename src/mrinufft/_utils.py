@@ -52,9 +52,9 @@ def get_array_module(array):
 def auto_cast(array, dtype: DTypeLike):
     module = get_array_module(array)
     if module.__name__ == "torch":
-        return array.to(NP2TORCH[np.dtype(dtype)])
+        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
     else:
-        return array.astype(dtype)
+        return array.astype(dtype, copy=False)
 
 
 def proper_trajectory(trajectory, normalize="pi"):

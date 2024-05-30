@@ -127,8 +127,7 @@ class RawGpuNUFFT:
             raise ValueError(
                 "gpuNUFFT library is not installed, please refer to README"
             )
-        if (n_coils < 1) or not isinstance(n_coils, int):
-            raise ValueError("The number of coils should be an integer >= 1")
+
         self.n_coils = n_coils
         self.shape = shape
         self.samples = samples
@@ -189,12 +188,14 @@ class RawGpuNUFFT:
         xp = get_array_module(image)
         if direction == "op":
             if self.uses_sense or self.n_coils == 1:
-                return image.reshape((-1, 1), order="F").astype(xp.complex64)
+                return image.reshape((-1, 1), order="F").astype(
+                    xp.complex64, copy=False
+                )
             return xp.asarray([c.ravel(order="F") for c in image], dtype=xp.complex64).T
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return image.squeeze().astype(xp.complex64).T[None]
+                return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
@@ -308,7 +309,7 @@ class RawGpuNUFFT:
             input coefficients.
         """
         C = 1 if self.uses_sense else self.n_coils
-        coeffs = coeffs.astype(cp.complex64)
+        coeffs = coeffs.astype(cp.complex64, copy=False)
         if image is None:
             image = cp.empty(
                 (np.prod(self.shape), C),
@@ -373,19 +374,21 @@ class MRIGpuNUFFT(FourierOperatorBase):
             )
         self.shape = shape
 
-        self.samples = proper_trajectory(samples.astype(np.float32), normalize="unit")
+        self.samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
-        self.smaps = smaps
         self.squeeze_dims = squeeze_dims
         self.compute_density(density)
+        self.compute_smaps(smaps)
         self.impl = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
             n_coils=self.n_coils,
             density_comp=self.density,
-            smaps=smaps,
+            smaps=self.smaps,
             kernel_width=kwargs.get("kernel_width", -int(np.log10(eps))),
             **kwargs,
         )
@@ -474,7 +477,15 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return self.impl.uses_sense
 
     @classmethod
-    def pipe(cls, kspace_loc, volume_shape, num_iterations=10, osf=2, **kwargs):
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
         """Compute the density compensation weights for a given set of kspace locations.
 
         Parameters
@@ -487,6 +498,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
@@ -502,6 +516,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density_comp = grid_op.impl.operator.estimate_density_comp(
             max_iter=num_iterations
         )
+        if normalize:
+            spike = np.zeros(volume_shape)
+            mid_loc = tuple(v // 2 for v in volume_shape)
+            spike[mid_loc] = 1
+            psf = grid_op.adj_op(grid_op.op(spike))
+            density_comp /= np.linalg.norm(psf)
         return density_comp.squeeze()
 
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):

@@ -6,6 +6,7 @@ from typing import Tuple, Optional
 import numpy as np
 from datetime import datetime
 from array import array
+from .siemens import read_siemens_rawdat
 
 from mrinufft.trajectories.utils import (
     KMAX,
@@ -165,9 +166,9 @@ def _pop_elements(array, num_elements=1, type="float"):
         Array with elements popped.
     """
     if num_elements == 1:
-        return array[0].astype(type), array[1:]
+        return array[0].astype(type, copy=False), array[1:]
     else:
-        return array[0:num_elements].astype(type), array[num_elements:]
+        return array[0:num_elements].astype(type, copy=False), array[num_elements:]
 
 
 def write_trajectory(
@@ -392,7 +393,7 @@ def read_trajectory(
         return kspace_loc, params
 
 
-def read_siemens_rawdat(
+def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
     squeeze: bool = True,
@@ -429,32 +430,10 @@ def read_siemens_rawdat(
     You can install it using the following command:
         `pip install pymapVBVD`
     """
-    try:
-        from mapvbvd import mapVBVD
-    except ImportError as err:
-        raise ImportError(
-            "The mapVBVD module is not available. Please install it using "
-            "the following command: pip install pymapVBVD"
-        ) from err
-    twixObj = mapVBVD(filename)
-    if isinstance(twixObj, list):
-        twixObj = twixObj[-1]
-    twixObj.image.flagRemoveOS = removeOS
-    twixObj.image.squeeze = squeeze
-    raw_kspace = twixObj.image[""]
-    data = np.moveaxis(raw_kspace, 0, 2)
-    hdr = {
-        "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin),
-        "n_contrasts": int(twixObj.image.NSet),
-        "n_adc_samples": int(twixObj.image.NCol),
-        "n_slices": int(twixObj.image.NSli),
-    }
-    data = data.reshape(
-        hdr["n_coils"],
-        hdr["n_shots"] * hdr["n_adc_samples"],
-        hdr["n_slices"],
-        hdr["n_contrasts"],
+    data, hdr, twixObj = read_siemens_rawdat(
+        filename=filename,
+        removeOS=removeOS,
+        squeeze=squeeze,
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
