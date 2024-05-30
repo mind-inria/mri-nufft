@@ -58,7 +58,7 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, *args, autograd=None, **kwargs):
+def get_operator(backend_name: str, *args, wrt_data, wrt_traj, **kwargs):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
@@ -102,11 +102,11 @@ def get_operator(backend_name: str, *args, autograd=None, **kwargs):
     if args or kwargs:
         operator = operator(*args, **kwargs)
 
-    if autograd:
-        if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(variable=autograd)
-        else:  # partial
-            operator = partial(operator.with_autograd, variable=autograd)
+    #if autograd:
+    if isinstance(operator, FourierOperatorBase):
+        operator = operator.make_autograd(wrt_data, wrt_traj)
+    else:  # partial
+        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
 
@@ -253,12 +253,12 @@ class FourierOperatorBase(ABC):
 
         return MRIFourierCorrected(self, B, C, indices)
 
-    def make_autograd(self, variable="data"):
+    def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
 
         Parameters
         ----------
-        variable: str, default data
+        variable: , default data
             variable on which the gradient is computed with respect to.
 
         Returns
@@ -273,11 +273,9 @@ class FourierOperatorBase(ABC):
         """
         if not AUTOGRAD_AVAILABLE:
             raise ValueError("Autograd not available, ensure torch is installed.")
-        if variable == "data":
-            return MRINufftAutoGrad(self)
-        else:
-            raise ValueError(f"Autodiff with respect to {variable} is not supported.")
-
+        
+        return MRINufftAutoGrad(self,wrt_data=wrt_data, wrt_traj=wrt_traj)
+        
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
 
@@ -448,9 +446,9 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, variable, *args, **kwargs):
+    def with_autograd(cls, wrt_data, wrt_traj, *args, **kwargs):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(variable)
+        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
 
 
 class FourierOperatorCPU(FourierOperatorBase):

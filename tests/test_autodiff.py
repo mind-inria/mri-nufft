@@ -37,7 +37,7 @@ except ImportError:
 def operator(kspace_loc, shape, backend, autograd):
     """Create NUFFT operator with autodiff capabilities."""
     kspace_loc = kspace_loc.astype(np.float32)
-    nufft = get_operator(backend_name=backend, autograd=autograd)(
+    nufft = get_operator(backend_name=backend, wrt_data=True, wrt_traj=True)(
         samples=kspace_loc,
         shape=shape,
         smaps=None,
@@ -90,7 +90,7 @@ def test_adjoint_and_grad(operator, interface):
     ] 
 
     
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2) #FIXME: plot the gradient
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2) 
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]

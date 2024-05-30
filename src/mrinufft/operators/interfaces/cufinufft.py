@@ -66,6 +66,7 @@ class RawCufinufftPlan:
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
         self.plans = [None, None, None]
+        self.grad_plan = None
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
@@ -88,7 +89,16 @@ class RawCufinufftPlan:
             dtype=DTYPE_R2C[str(self.samples.dtype)],
             **kwargs,
         )
-        
+    def _make_plan_grad(self, **kwargs):
+        self.grad_plan = Plan(
+            1,
+            self.shape,
+            self.n_trans,
+            self.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign = -1, 
+            **kwargs,
+        )
 
     def _set_pts(self, typ):
         self.plans[typ].setpts(
@@ -110,7 +120,9 @@ class RawCufinufftPlan:
     def type2(self, grid_data, coeff_data):
         """Type 2 transform. Uniform to non-uniform."""
         return self.plans[2].execute(grid_data, coeff_data)
-
+    
+    def toggle_grad_traj(self):
+        self.plans[1], self.grad_plan = self.grad_plan, self.plans[1]
 
 class MRICufiNUFFT(FourierOperatorBase):
     """MRI Transform operator, build around cufinufft.

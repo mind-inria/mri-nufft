@@ -29,27 +29,31 @@ class _NUFFT_OP(torch.autograd.Function):
         """Backward image -> k-space."""
         (x, traj) = ctx.saved_tensors
 
-        im_size = x.size()[1:]
-        r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
-        grid_r = torch.meshgrid(*r, indexing="ij")
-        grid_r = torch.stack(grid_r, dim=0).type_as(x)[None, ...]
+        if ctx.nufft_op._grad_wrt_data:
+            grad_data = ctx.nufft_op.adj_op(dy)
+        if ctx.nufft_op._grad_wrt_traj:
+            im_size = x.size()[1:]
+            r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
+            grid_r = torch.meshgrid(*r, indexing="ij")
+            grid_r = torch.stack(grid_r, dim=0).type_as(x)[None, ...]
 
-        grid_x = x * grid_r  # Element-wise multiplication: x * r
-        nufft_dx_dom = torch.cat(
-            [
-                ctx.nufft_op.op(grid_x[:, i : i + 1, :, :])
-                for i in range(grid_x.size(1))
-            ],
-            dim=1,
-        )  # Compute A(x * r) for each channel and concatenate along this dimension
+            grid_x = x * grid_r  # Element-wise multiplication: x * r
+            nufft_dx_dom = torch.cat(
+                [
+                    ctx.nufft_op.op(grid_x[:, i : i + 1, :, :])
+                    for i in range(grid_x.size(1))
+                ],
+                dim=1,
+            )  # Compute A(x * r) for each channel and concatenate along this dimension
 
-        grad_traj = torch.transpose(
-            (-1j * torch.conj(dy) * nufft_dx_dom).squeeze(), 0, 1
-        ).type_as(
-            traj
-        )  # Compute gradient with respect to trajectory: -i * dy' * A(x * r)
-
-        return ctx.nufft_op.adj_op(dy), grad_traj, None
+            grad_traj = torch.transpose(
+                (-1j * torch.conj(dy) * nufft_dx_dom).squeeze(), 0, 1
+            ).type_as(
+                traj
+            )  # Compute gradient with respect to trajectory: -i * dy' * A(x * r)
+        else:
+            grad_traj = None
+        return grad_data, grad_traj, None
 
 
 class _NUFFT_ADJOP(torch.autograd.Function):
@@ -66,8 +70,40 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     def backward(ctx, dx):
         """Backward kspace -> image."""
         (y, traj) = ctx.saved_tensors  # y [1, 256] traj [256, 2]
-        grad_traj = None
-        return ctx.nufft_op.op(dx), grad_traj, None
+    
+        grad_data = None 
+        grad_traj = None 
+        if ctx.nufft_op._grad_wrt_data: 
+            grad_data = ctx.nufft_op.op(dx)
+    
+        if ctx.nufft_op._grad_wrt_traj:
+
+            ctx.nufft_op.raw_op.toggle_grad_traj()
+
+            im_size = dx.size()[2:]
+            r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
+            grid_r = torch.meshgrid(*r, indexing="ij")
+            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...] #[1, 2, 16, 16]
+
+        
+            grid_dx = torch.conj(dx) * grid_r
+            inufft_dx_dom = torch.cat(
+                [
+                    ctx.nufft_op.op(grid_dx[:, i : i + 1, :, :])
+                    for i in range(grid_dx.size(1))
+                ],
+                dim=1,
+            )
+
+            grad_traj = torch.transpose(
+                (1j * y * inufft_dx_dom).squeeze(), 0, 1
+            ).type_as(
+                traj
+            )  
+
+            ctx.nufft_op.raw_op.toggle_grad_traj()
+        
+        return grad_data, grad_traj, None
 
 
 class MRINufftAutoGrad(torch.nn.Module):
@@ -79,11 +115,14 @@ class MRINufftAutoGrad(torch.nn.Module):
     nufft_op: Classic Non differentiable MRI-NUFFT operator.
     """
 
-    def __init__(self, nufft_op):
+    def __init__(self, nufft_op, wrt_data= True, wrt_traj=False):
+
         super().__init__()
         if nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
+        self.nufft_op._grad_wrt_traj = wrt_traj
+        self.nufft_op._grad_wrt_data = wrt_data
 
     def op(self, x):
         r"""Compute the forward image -> k-space."""
