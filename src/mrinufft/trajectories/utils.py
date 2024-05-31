@@ -1,4 +1,4 @@
-"""Utility functions for the trajectory design."""
+"""Utility functions in general."""
 
 from enum import Enum, EnumMeta
 from numbers import Real
@@ -66,14 +66,16 @@ class Gammas(FloatEnum):
 
 
 class Spirals(FloatEnum):
-    """Enumerate spiral types."""
+    """Enumerate algebraic spiral types."""
 
     ARCHIMEDES = 1
     ARITHMETIC = ARCHIMEDES
-    FERMAT = 2
+    GALILEAN = 2
+    GALILEO = GALILEAN
+    FERMAT = 0.5
     PARABOLIC = FERMAT
     HYPERBOLIC = -1
-    LITHUUS = -2
+    LITHUUS = -0.5
 
 
 class NormShapes(FloatEnum):
@@ -485,8 +487,8 @@ def initialize_tilt(tilt, nb_partitions=1):
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
 
 
-def initialize_spiral(spiral):
-    """Initialize the spiral type.
+def initialize_algebraic_spiral(spiral):
+    """Initialize the algebraic spiral type.
 
     Parameters
     ----------

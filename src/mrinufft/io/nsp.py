@@ -6,6 +6,7 @@ from typing import Tuple, Optional
 import numpy as np
 from datetime import datetime
 from array import array
+from .siemens import read_siemens_rawdat
 
 from mrinufft.trajectories.utils import (
     KMAX,
@@ -392,10 +393,12 @@ def read_trajectory(
         return kspace_loc, params
 
 
-def read_siemens_rawdat(
+def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
     squeeze: bool = True,
+    slice_num: Optional[int] = None,
+    contrast_num: Optional[int] = None,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
@@ -408,6 +411,10 @@ def read_siemens_rawdat(
         Whether to remove the oversampling, by default False.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
+    slice_num : int, optional
+        The slice to read, by default None. This applies for 2D data.
+    contrast_num: int, optional
+        The contrast to read, by default None.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
 
@@ -429,32 +436,12 @@ def read_siemens_rawdat(
     You can install it using the following command:
         `pip install pymapVBVD`
     """
-    try:
-        from mapvbvd import mapVBVD
-    except ImportError as err:
-        raise ImportError(
-            "The mapVBVD module is not available. Please install it using "
-            "the following command: pip install pymapVBVD"
-        ) from err
-    twixObj = mapVBVD(filename)
-    if isinstance(twixObj, list):
-        twixObj = twixObj[-1]
-    twixObj.image.flagRemoveOS = removeOS
-    twixObj.image.squeeze = squeeze
-    raw_kspace = twixObj.image[""]
-    data = np.moveaxis(raw_kspace, 0, 2)
-    hdr = {
-        "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin),
-        "n_contrasts": int(twixObj.image.NSet),
-        "n_adc_samples": int(twixObj.image.NCol),
-        "n_slices": int(twixObj.image.NSli),
-    }
-    data = data.reshape(
-        hdr["n_coils"],
-        hdr["n_shots"] * hdr["n_adc_samples"],
-        hdr["n_slices"],
-        hdr["n_contrasts"],
+    data, hdr, twixObj = read_siemens_rawdat(
+        filename=filename,
+        removeOS=removeOS,
+        squeeze=squeeze,
+        slice_num=slice_num,
+        contrast_num=contrast_num,
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
