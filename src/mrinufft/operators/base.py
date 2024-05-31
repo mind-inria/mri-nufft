@@ -542,7 +542,6 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         # Density Compensation Setup
         self.compute_density(density)
-        self.compute_smaps(smaps)
         # Multi Coil Setup
         self.compute_smaps(smaps)
 
