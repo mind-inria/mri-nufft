@@ -108,6 +108,7 @@ def get_operator(backend_name: str, wrt_data=False, wrt_traj=False, *args, **kwa
         operator = operator.make_autograd(wrt_data, wrt_traj)
     else:  # partial
         operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+        operator.__name__ = operator.backend
     return operator
 
 
