@@ -82,7 +82,7 @@ def test_adjoint_and_grad(operator, ndft_matrix, interface):
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_forward_and_grad(operator, ndft_matrix, interface):
-    """Test the adjoint and gradient of the operator."""
+    """Test the forward and gradient of the operator."""
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 

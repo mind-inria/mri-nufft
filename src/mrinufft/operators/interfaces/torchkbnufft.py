@@ -107,7 +107,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         Parameters
         ----------
-        data: np.ndarray or cp.array or torch.array
+        data: Tensor
 
         Returns
         -------
@@ -123,21 +123,14 @@ class MRITorchKbNufft(FourierOperatorBase):
             C = 1
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
-        if not isinstance(ktraj, torch.Tensor) or not isinstance(data, torch.Tensor):
-            raise ValueError("Invalid data or ktraj type, must be tensor.")
+        if ktraj.shape[0] != data.shape[0]:
+            ktraj = ktraj.permute(1, 0)
+        if smaps is not None:
+            smaps = smaps.to(data.dtype)
+        kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
 
-        if len(ktraj.shape) == 2:
-            if ktraj.shape[0] != data.shape[0]:
-                ktraj = ktraj.permute(1, 0)
-            if smaps is not None:
-                smaps = smaps.to(data.dtype)
-            kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
-            return self._safe_squeeze(kdata)
-        else:
-            raise ValueError(
-                "Invalid ktraj shape (must be (Nc x Ns , 2 ou 3))", len(ktraj.shape)
-            )
-
+        return self._safe_squeeze(kdata)
+        
     @with_torch
     def adj_op(self, data, coeffs=None):
         """Backward Operation.
@@ -171,6 +164,25 @@ class MRITorchKbNufft(FourierOperatorBase):
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
         return self._safe_squeeze(img)
+
+    @with_torch
+    def data_consistency(self, data, obs_data):
+        """Compute the data consistency.
+
+        Parameters
+        ----------
+        data: Tensor
+            Image data
+        obs_data: Tensor
+            Observed data
+
+        Returns
+        -------
+        Tensor
+            The data consistency error in image space.
+        """
+        return self.adj_op(self.op(data) - obs_data)
+        
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
