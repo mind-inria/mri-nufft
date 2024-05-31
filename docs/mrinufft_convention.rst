@@ -32,8 +32,8 @@ All MRI-NUFFT operator inherits from :class:`FourierOperatorBase` . The minimum 
             self.n_coils = n_coils
             self.n_batchs = n_batchs
 
-            self.compute_smaps(smaps) # setup the smaps
             self.compute_density(density) # setup the density compensation
+            self.compute_smaps(smaps) # setup the smaps
 
 .. tip::
 
