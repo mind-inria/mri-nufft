@@ -96,7 +96,7 @@ Benchmark
 A benchmark of NUFFT backend for MRI applications is available in https://github.com/mind-inria/mri-nufft-benchmark
 
 
-Who is using MRI-NUFFT
+Who is using MRI-NUFFT?
 ----------------------
 
 Here are several project that rely on MRI-NUFFT:
