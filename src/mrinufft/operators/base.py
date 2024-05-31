@@ -59,18 +59,18 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, wrt_data=False, wrt_traj=False, *args, **kwargs):
+def get_operator(backend_name: str, wrt_data: bool=False, wrt_traj: bool=False,
+                 *args, **kwargs):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
     ----------
     backend_name: str
         Backend name
-
-    autograd: str, default None
-        if set to "data" will provide an operator with autodiff capabilities with
-        respect to it.
-
+    wrt_data: bool, default False
+        if set gradients wrt to data and images will be available.
+    wrt_traj: bool, default False
+        if set gradients wrt to trajectory will be available.
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -108,7 +108,6 @@ def get_operator(backend_name: str, wrt_data=False, wrt_traj=False, *args, **kwa
         operator = operator.make_autograd(wrt_data, wrt_traj)
     else:  # partial
         operator = partial(operator.with_autograd, wrt_data, wrt_traj)
-        operator.__name__ = operator.backend
     return operator
 
 

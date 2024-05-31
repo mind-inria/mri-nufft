@@ -33,7 +33,13 @@ class _NUFFT_OP(torch.autograd.Function):
             grad_data = ctx.nufft_op.adj_op(dy)
         if ctx.nufft_op._grad_wrt_traj:
             im_size = x.size()[1:]
-            r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
+            factor = 1
+            if ctx.nufft_op.backend == "gpunufft":
+                factor *= np.pi * 2
+            r = [
+                torch.linspace(-size / 2, size / 2 - 1, size)*factor 
+                for size in im_size
+            ]
             grid_r = torch.meshgrid(*r, indexing="ij")
             grid_r = torch.stack(grid_r, dim=0).type_as(x)[None, ...]
 
@@ -78,15 +84,15 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             grad_data = ctx.nufft_op.op(dx)
 
         if ctx.nufft_op._grad_wrt_traj:
-            print(ctx.nufft_op.raw_op.plans)
-            print(ctx.nufft_op.raw_op.grad_plan)
             ctx.nufft_op.raw_op.toggle_grad_traj()
-
-            print(ctx.nufft_op.raw_op.plans)
-            print(ctx.nufft_op.raw_op.grad_plan)
-
             im_size = dx.size()[2:]
-            r = [torch.linspace(-size / 2, size / 2 - 1, size) for size in im_size]
+            factor = 1
+            if ctx.nufft_op.backend == "gpunufft":
+                factor *= np.pi * 2
+            r = [
+                torch.linspace(-size / 2, size / 2 - 1, size)*factor
+                for size in im_size
+            ]
             grid_r = torch.meshgrid(*r, indexing="ij")
             grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...]  # [1, 2, 16, 16]
 
@@ -119,11 +125,11 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
         super().__init__()
-        if wrt_data or wrt_traj and nufft_op.squeeze_dims:
+        if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
-        if wrt_traj:
+        if wrt_traj and self.nufft_op.backend != 'gpunufft':
             self.nufft_op.raw_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
 

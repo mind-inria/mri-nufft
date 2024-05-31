@@ -183,6 +183,11 @@ class RawGpuNUFFT:
             balance_workload,
         )
 
+    def toggle_grad_traj(self):
+        """Toggle the gradient mode of the operator."""
+        self.operator.toggle_grad_mode()
+        
+        
     def _reshape_image(self, image, direction="op"):
         """Reshape the image to the correct format."""
         xp = get_array_module(image)
@@ -383,7 +388,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         self.compute_density(density)
         self.compute_smaps(smaps)
-        self.impl = RawGpuNUFFT(
+        self.raw_op = RawGpuNUFFT(
             samples=self.samples,
             shape=self.shape,
             n_coils=self.n_coils,
@@ -411,10 +416,10 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
-        op_func = self.impl.op
+        op_func = self.raw_op.op
         if is_cuda_array(data):
-            op_func = self.impl.op_direct
-            if not self.impl.use_gpu_direct:
+            op_func = self.raw_op.op_direct
+            if not self.raw_op.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
@@ -450,10 +455,10 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
-        adj_op_func = self.impl.adj_op
+        adj_op_func = self.raw_op.adj_op
         if is_cuda_array(coeffs):
-            adj_op_func = self.impl.adj_op_direct
-            if not self.impl.use_gpu_direct:
+            adj_op_func = self.raw_op.adj_op_direct
+            if not self.raw_op.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
@@ -474,7 +479,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     @property
     def uses_sense(self):
         """Return True if the Fourier Operator uses the SENSE method."""
-        return self.impl.uses_sense
+        return self.raw_op.uses_sense
 
     @classmethod
     def pipe(
@@ -513,7 +518,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             osf=1,
             **kwargs,
         )
-        density_comp = grid_op.impl.operator.estimate_density_comp(
+        density_comp = grid_op.raw_op.operator.estimate_density_comp(
             max_iter=num_iterations
         )
         if normalize:
@@ -549,7 +554,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             squeeze_dims=True,
             **kwargs,
         )
-        return tmp_op.impl.operator.get_spectral_radius(
+        return tmp_op.raw_op.operator.get_spectral_radius(
             max_iter=max_iter, tolerance=tolerance
         )
 
@@ -604,7 +609,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "but is memory inefficient!"
                 )
             grad_func = super().data_consistency
-            if not self.impl.use_gpu_direct:
+            if not self.raw_op.use_gpu_direct:
                 warnings.warn(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
@@ -623,9 +628,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
         for i in range(B):
             tmp_img.set(image_data_[i])
             obs_data_tmp.set(obs_data_[i])
-            ksp_tmp = self.impl.op_direct(tmp_img)
+            ksp_tmp = self.raw_op.op_direct(tmp_img)
             ksp_tmp -= obs_data_tmp
-            final_img[i] = self.impl.adj_op_direct(ksp_tmp).get()
+            final_img[i] = self.raw_op.adj_op_direct(ksp_tmp).get()
         return final_img
 
     # TODO : For data consistency the workflow is currently:
