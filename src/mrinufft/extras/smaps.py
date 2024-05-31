@@ -107,7 +107,7 @@ def low_frequency(
     threshold: float | Tuple[float, ...] = 0.1,
     density=None,
     window_fun: str = "ellipse",
-    blurr_factor: float = 0,
+    blurr_factor: float | Tuple[float, ...] = 0.0,
     mask: bool = False,
 ):
     """
@@ -134,8 +134,10 @@ def low_frequency(
         If window_fun is a callable, it takes as input the array (n_samples x n_dims)
         of sample positions and returns an array of n_samples weights to be
         applied to the selected k-space values, before the smaps estimation.
-    blurr_factor : float, optional
+    blurr_factor : float or list, optional
         The blurring factor for smoothing the sensitivity maps.
+        Applies a gaussian filter on the Smap images to get smoother Sensitivty maps.
+        By default it is 0.0, i.e. no smoothing is done
     mask: bool, optional default `False`
         Whether the Sensitivity maps must be masked
 
@@ -169,10 +171,14 @@ def low_frequency(
         convex_hull = convex_hull_image(SOS > thresh)
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
-    if blurr_factor > 0:
-        Smaps = gaussian(Smaps, sigma=blurr_factor * np.asarray(shape))
-        # Re-normalize the sensitivity maps
-    if mask or blurr_factor > 0:
+    if np.sum(blurr_factor) > 0:
+        if isinstance(blurr_factor, float):
+            blurr_factor = (blurr_factor,) * SOS.ndim
+        Smaps = gaussian(np.abs(Smaps), sigma=(0,) + blurr_factor) * np.exp(
+            1j * np.angle(Smaps)
+        )
+    # Re-normalize the sensitivity maps
+    if mask or np.sum(blurr_factor) > 0:
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
