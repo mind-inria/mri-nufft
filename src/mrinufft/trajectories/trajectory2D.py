@@ -1,18 +1,13 @@
-"""2D trajectory initializations."""
+"""Functions to initialize 2D trajectories."""
 
 import numpy as np
+import numpy.linalg as nl
+from scipy.interpolate import CubicSpline
 
-from .maths import (
-    R2D,
-    compute_coprime_factors,
-)
-from .utils import (
-    KMAX,
-    initialize_tilt,
-    initialize_spiral,
-)
+from .gradients import patch_center_anomaly
+from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
 from .tools import rotate
-
+from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 
 #####################
 # CIRCULAR PATTERNS #
@@ -47,9 +42,20 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
 
 
 def initialize_2D_spiral(
-    Nc, Ns, tilt="uniform", in_out=False, nb_revolutions=1, spiral="archimedes"
+    Nc,
+    Ns,
+    tilt="uniform",
+    in_out=False,
+    nb_revolutions=1,
+    spiral="archimedes",
+    patch_center=True,
 ):
-    """Initialize a 2D spiral trajectory.
+    """Initialize a 2D algebraic spiral trajectory.
+
+    A generalized function that generates algebraic spirals defined
+    through the :math:`r = a O^n` equality, with :math:`r` the radius,
+    :math:`O` the polar angle and :math:`n` the spiral power.
+    Common algebraic spirals include Archimedes, Fermat and Galilean spirals.
 
     Parameters
     ----------
@@ -64,27 +70,141 @@ def initialize_2D_spiral(
     nb_revolutions : int, optional
         Number of revolutions, by default 1
     spiral : str, float, optional
-        Spiral type, by default "archimedes"
+        Spiral type or algebraic power, by default "archimedes"
+    patch_center : bool, optional
+        Whether the spiral anomaly at the center should be patched
+        or not for spirals with `spiral` :math:`>2`, by default True
 
     Returns
     -------
     array_like
         2D spiral trajectory
-    """
-    # Initialize a first shot in polar coordinates
-    segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
-    radius = KMAX * segment
-    angles = 2 * np.pi * nb_revolutions * (np.abs(segment) ** initialize_spiral(spiral))
 
-    # Convert the first shot to Cartesian coordinates
-    trajectory = np.zeros((Nc, Ns, 2))
-    trajectory[0, :, 0] = radius * np.cos(angles)
-    trajectory[0, :, 1] = radius * np.sin(angles)
+    Raises
+    ------
+    ValueError
+        If `spiral` is negative.
+
+    Notes
+    -----
+    Algebraic spirals with negative powers, like hyperbolic or
+    lithuus spirals, show asymptotic behaviors around the center.
+    It makes them irrelevant for MRI and therefore negative powers
+    are not allowed as an argument.
+    """
+    # Check spiral power is not negative
+    spiral_power = initialize_algebraic_spiral(spiral)
+    if spiral_power <= 0:
+        raise ValueError(f"Negative spiral definition is invalid (spiral={spiral}).")
+
+    # Initialize a first shot in polar coordinates
+    angles = 2 * np.pi * nb_revolutions * np.linspace(-1 if (in_out) else 0, 1, Ns)
+    radius = np.abs(angles) ** spiral_power
+
+    # Algebraic spirals with power coefficients superior to 1
+    # have a non-monotonic gradient norm when varying the angle
+    # over [0, +inf)
+    def _update_shot(angles, radius, *args):
+        shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
+        return np.stack([shot.real, shot.imag], axis=-1)
+
+    def _update_parameters(single_shot, angles, radius, spiral_power):
+        radius = nl.norm(single_shot, axis=-1)
+        angles = np.sign(angles) * np.abs(radius) ** (1 / spiral_power)
+        return angles, radius, spiral_power
+
+    if spiral_power < 1 and patch_center:
+        parameters = (angles, radius, spiral_power)
+        learning_rate = min(
+            1, spiral_power
+        )  # because low spiral power requires higher accuracy
+        _, parameters = patch_center_anomaly(
+            parameters,
+            update_shot=_update_shot,
+            update_parameters=_update_parameters,
+            in_out=in_out,
+            learning_rate=learning_rate,
+        )
+        angles, radius, _ = parameters
+
+    # Convert the first shot from polar to Cartesian coordinates
+    trajectory = np.zeros((Nc, len(angles), 2))
+    trajectory[0, :] = _update_shot(angles, radius)
 
     # Rotate the first shot Nc times
     rotation = R2D(initialize_tilt(tilt, Nc) / (1 + in_out)).T
     for i in range(1, Nc):
         trajectory[i] = trajectory[i - 1] @ rotation
+    trajectory = KMAX * trajectory / np.max(nl.norm(trajectory, axis=-1))
+    return trajectory
+
+
+def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True):
+    """Initialize a 2D Fibonacci spiral trajectory.
+
+    A non-algebraic spiral trajectory based on the Fibonacci sequence,
+    reproducing the proposition from [CA99]_ in order to generate
+    a uniform distribution with center-out shots.
+
+    The number of shots is required to belong to the Fibonacci
+    sequence for the trajectory definition to be relevant.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    spiral_reduction : float, optional
+        Factor used to reduce the automatic spiral length, by default 1
+    patch_center : bool, optional
+        Whether the spiral anomaly at the center should be patched
+        or not, by default True
+
+    Returns
+    -------
+    array_like
+        2D Fibonacci spiral trajectory
+
+    References
+    ----------
+    .. [CA99] Cline, Harvey E., and Thomas R. Anthony.
+       "Uniform k-space sampling with an interleaved
+       Fibonacci spiral acquisition."
+       In Proceedings of the 7th Annual Meeting of ISMRM,
+       Philadelphia, USA, vol. 1657. 1999.
+    """
+    # Check if Nc is in the Fibonacci sequence
+    if not is_from_fibonacci_sequence(Nc):
+        raise ValueError("Nc should belong to the Fibonacci sequence.")
+
+    # Initialize all shots
+    Ns_reduced = int(np.around(Ns / spiral_reduction))
+    inter_range = np.arange(Nc).reshape((-1, 1))
+    intra_range = np.arange(Ns_reduced).reshape((1, -1))
+    phi_bonacci = (np.sqrt(5) - 1) / 2
+    radius = np.sqrt((intra_range + (inter_range / Nc)) / (Nc * Ns_reduced))
+    angles = 2j * np.pi * phi_bonacci * np.around(Nc * intra_range + inter_range)
+    trajectory = radius * np.exp(angles)
+
+    # Put Ns samples along reduced spirals if relevant
+    if spiral_reduction != 1:
+        reduced_x_axis = np.linspace(0, 1, Ns_reduced)
+        normal_x_axis = np.linspace(0, 1, Ns)
+        cbs = CubicSpline(reduced_x_axis, trajectory, axis=1)
+        trajectory = cbs(normal_x_axis)
+
+    # Normalize and reformat trajectory
+    trajectory *= KMAX / np.max(np.abs(trajectory))
+    trajectory = np.stack([trajectory.real, trajectory.imag], axis=-1)
+
+    # Patch center anomaly if requested
+    if patch_center:
+        patched_trajectory = []
+        for i in range(Nc):
+            patched_shot, _ = patch_center_anomaly(trajectory[i], in_out=False)
+            patched_trajectory.append(patched_shot)
+        trajectory = np.array(patched_trajectory)
     return trajectory
 
 

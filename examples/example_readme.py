@@ -6,11 +6,12 @@ This script shows how to use the package to perform a simple NUFFT.
 """
 
 import matplotlib.pyplot as plt
-from scipy.datasets import face
 import numpy as np
+from scipy.datasets import face
+
 import mrinufft
-from mrinufft.trajectories import display
 from mrinufft.density import voronoi
+from mrinufft.trajectories import display
 
 # Create a 2D Radial trajectory for demo
 samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)

@@ -3,6 +3,7 @@
 from .trajectory2D import (
     initialize_2D_radial,
     initialize_2D_spiral,
+    initialize_2D_fibonacci_spiral,
     initialize_2D_cones,
     initialize_2D_sinusoide,
     initialize_2D_propeller,
@@ -40,9 +41,12 @@ from .display import (
     display_3D_trajectory,
 )
 
+from .gradients import patch_center_anomaly
+
 __all__ = [
     "initialize_2D_radial",
     "initialize_2D_spiral",
+    "initialize_2D_fibonacci_spiral",
     "initialize_2D_cones",
     "initialize_2D_sinusoide",
     "initialize_2D_propeller",
@@ -70,4 +74,5 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "patch_center_anomaly",
 ]
