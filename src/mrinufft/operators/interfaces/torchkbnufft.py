@@ -1,7 +1,7 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase, with_torch
-from mrinufft._utils import proper_trajectory, get_array_module
+from mrinufft._utils import proper_trajectory, power_method
 import numpy as np
 import cupy as cp
 
@@ -182,7 +182,40 @@ class MRITorchKbNufft(FourierOperatorBase):
             The data consistency error in image space.
         """
         return self.adj_op(self.op(data) - obs_data)
-        
+
+    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            Number of iteration to perform to estimate the Lipschitz constant.
+        kwargs:
+            Extra kwargs for the cufinufft operator.
+
+        Returns
+        -------
+        float
+            Lipschitz constant of the operator.
+        """
+        # return  self.get_lipschitz_cst(max_iter=max_iter, **kwargs)
+        tmp_op = self.__class__(
+            self.samples,
+            self.shape,
+            density=self.density,
+            n_coils=1,
+            smaps=None,
+            squeeze_dims=True,
+            **kwargs,
+        )
+        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+        x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+
+        x = cp.asarray(x)
+        return power_method(
+            max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
+        )
+
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
