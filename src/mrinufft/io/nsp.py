@@ -414,7 +414,7 @@ def read_arbgrad_rawdat(
     slice_num : int, optional
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
-        The contrast to read, by default None. 
+        The contrast to read, by default None.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
 

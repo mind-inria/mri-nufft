@@ -29,8 +29,8 @@ def read_siemens_rawdat(
     slice_num : int, optional
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
-        The contrast to read, by default None. 
-    
+        The contrast to read, by default None.
+
     Returns
     -------
     data: ndarray
@@ -67,25 +67,25 @@ def read_siemens_rawdat(
         "n_adc_samples": int(twixObj.image.NCol),
         "n_slices": int(twixObj.image.NSli),
     }
-    if slice_num is not None and hdr['n_slices'] < slice_num:
+    if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
-    if contrast_num is not None and hdr['n_contrasts'] < contrast:
+    if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
         raise ValueError("The contrast number is out of bounds.")
     # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
     if slice_num is not None and contrast_num is not None:
         raw_kspace = twixObj.image[
-            (slice(None),)*4 + (slice_num,) + (slice(None),)*4 + (contrast_num,)
+            (slice(None),) * 4 + (slice_num,) + (slice(None),) * 4 + (contrast_num,)
         ]
     elif slice_num is not None:
-        raw_kspace = twixObj.image[(slice(None),)*4 + (slice_num,)]
+        raw_kspace = twixObj.image[(slice(None),) * 4 + (slice_num,)]
     elif contrast_num is not None:
-        raw_kspace = twixObj.image[(slice(None),)*9 + (contrast_num,)]
-    else:  
+        raw_kspace = twixObj.image[(slice(None),) * 9 + (contrast_num,)]
+    else:
         raw_kspace = twixObj.image[""]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
     data = np.moveaxis(raw_kspace, 0, 2)
-    
+
     data = data.reshape(
         hdr["n_coils"],
         hdr["n_shots"] * hdr["n_adc_samples"],
