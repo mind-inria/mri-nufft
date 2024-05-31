@@ -25,7 +25,6 @@ All MRI-NUFFT operator inherits from :class:`FourierOperatorBase` . The minimum 
             n_coils: int = 1,
             n_batchs: int = 1,
             smaps: str | callable | np.ndarray | dict = False,
-            ...
             ):
 
             self.samples = proper_trajectory(samples)
@@ -72,9 +71,11 @@ Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how ot
 K-Space Trajectories
 ====================
 
-The k-space sampling trajectories are generated in the :py:`mrinufft.trajectories` and then use in the differents backends.
+The k-space sampling trajectories are generated in the :py:mod:`mrinufft.trajectories` module and then use in the differents backends.
 They are ``numpy`` arrays with the followings characteristics:
 
 - ``float32`` or ``float64`` precision (this will trigger the use of single or double precision in the computations using this trajectory). ``float32`` precision is recommended for computational efficiency.
 
-- They are row major (C Convention) with the folowing shape: ``(N_shot, N_samples,dimD)`` (where ). A "flatten" version of shape ``(N_shots * N_samples, dim)``
+- They are row major array (C Convention) with the following shape: ``(N_shot, N_samples, dim)`` (where  dim is either 2 or 3). A "flatten" version of shape ``(N_shots * N_samples, dim)`` is also acceptable by operators.
+
+- By convention all k-space coordinate are contains in :math:`[-0.5,0.5)`, They will be rescaled internally by operator if required.
