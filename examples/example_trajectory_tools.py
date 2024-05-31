@@ -28,8 +28,7 @@ import numpy as np
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.tools as tools
-
-from mrinufft import displayConfig, display_2D_trajectory, display_3D_trajectory
+from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
 from mrinufft.trajectories.utils import KMAX
 
 
