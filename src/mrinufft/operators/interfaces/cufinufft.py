@@ -210,7 +210,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.density = cp.array(self.density)
 
         # Smaps support
-        self.smaps = smaps
+        self.compute_smaps(smaps)
         self.smaps_cached = False
         if smaps is not None:
             if not (is_host_array(smaps) or is_cuda_array(smaps)):
