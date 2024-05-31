@@ -1,7 +1,7 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase, with_torch
-from mrinufft._utils import proper_trajectory
+from mrinufft._utils import proper_trajectory, get_array_module
 import numpy as np
 import cupy as cp
 
@@ -66,7 +66,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
         self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
 
-
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
         if not isinstance(samples, torch.Tensor):
@@ -97,16 +96,13 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = None
         elif isinstance(smaps, torch.Tensor):
             self.smaps = smaps
-        elif (
-            isinstance(smaps, np.ndarray)
-            or isinstance(smaps, cp.ndarray)
-        ):
+        elif isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
             self.smaps = torch.tensor(smaps)
         else:
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
 
     @with_torch
-    def op(self, data, coeffs = None):
+    def op(self, data, coeffs=None):
         """Forward operation.
 
         Parameters
@@ -117,13 +113,13 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
-        ktraj = self.samples 
+        ktraj = self.samples
         smaps = self.smaps
 
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        if not B :
+        if not B:
             B = 1
-        if not C :
+        if not C:
             C = 1
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
@@ -136,17 +132,15 @@ class MRITorchKbNufft(FourierOperatorBase):
             if smaps is not None:
                 smaps = smaps.to(data.dtype)
             kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
-            print(kdata.shape)
             return self._safe_squeeze(kdata)
-        else : 
-            raise ValueError("Invalid ktraj shape (must be (Nc x Ns , 2 ou 3))", len(ktraj.shape))
-
+        else:
+            raise ValueError(
+                "Invalid ktraj shape (must be (Nc x Ns , 2 ou 3))", len(ktraj.shape)
+            )
 
     @with_torch
-    def adj_op(self, data, coeffs = None):
-        """
-
-        Backward Operation.
+    def adj_op(self, data, coeffs=None):
+        """Backward Operation.
 
         Parameters
         ----------
@@ -156,19 +150,27 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        if self.uses_density:
-            data_d = data * self.density
-        else:
-            data_d = data
-        samples = self.samples
+        ktraj = self.samples
+        smaps = self.smaps
+        B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
+        if not B:
+            B = 1
+        if not C:
+            C = 1
+        data = data.reshape((B, C, K))
 
-        # B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, samples
-        # data_d = data_d.reshape((B, C, *XYZ))
-        # samples = samples.reshape((B, K, *))
+        if ktraj.shape[0] != data.shape[0]:
+            ktraj = ktraj.permute(1, 0)
+        if self.density:
+            data = data * self.density
 
-        img = self._tkb_adj_op.forward(data=data_d, omega=samples)
-        img_comb = torch.sum(img * torch.conj(self.smaps), dim=0)
-        return self._safe_squeeze(img_comb)
+        if smaps is not None:
+            smaps = smaps.to(data.dtype)
+
+        img = self._tkb_adj_op.forward(data=data, omega=ktraj, smaps=smaps)
+        img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
+
+        return self._safe_squeeze(img)
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
