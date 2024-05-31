@@ -20,6 +20,7 @@
 
    nufft
    trajectory_gradspec
+   mrinufft_convention
 
 .. toctree::
    :hidden:
