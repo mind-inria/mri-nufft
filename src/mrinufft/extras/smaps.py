@@ -105,7 +105,7 @@ def low_frequency(
     threshold: float | Tuple[float, ...] = 0.1,
     density=None,
     window_fun: str = "ellipse",
-    blurr_factor: float = 0,
+    blurr_factor: float | Tuple[float, ...] = 0,
     mask: bool = False,
 ):
     """
@@ -167,10 +167,15 @@ def low_frequency(
         convex_hull = convex_hull_image(SOS > thresh)
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
-    if blurr_factor > 0:
-        Smaps = gaussian(np.abs(Smaps), sigma=blurr_factor)*np.exp(1j*np.angle(Smaps))
+    if np.sum(blurr_factor) > 0:
+        if isinstance(blurr_factor, float):
+            blurr_factor = (blurr_factor,)*SOS.ndim
+        Smaps = gaussian(
+            np.abs(Smaps),
+            sigma=(0, ) + blurr_factor
+        ) * np.exp(1j*np.angle(Smaps))
     # Re-normalize the sensitivity maps
-    if mask or blurr_factor > 0:
+    if mask or np.sum(blurr_factor) > 0:
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
