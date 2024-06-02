@@ -55,7 +55,7 @@ class RawFinufftPlan:
             self.n_trans,
             self.eps,
             dtype="complex64" if self.samples.dtype == "float32" else "complex128",
-            isign = 1,
+            isign=1,
             **kwargs,
         )
         self._set_pts(typ="grad")
@@ -85,10 +85,11 @@ class RawFinufftPlan:
             grid_data = grid_data.reshape(self.shape)
             coeffs_data = coeffs_data.reshape(len(self.samples))
         return self.plans[2].execute(grid_data, coeffs_data)
-    
+
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
         self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
+
 
 class MRIfinufft(FourierOperatorCPU):
     """MRI Transform Operator using finufft.

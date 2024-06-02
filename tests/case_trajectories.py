@@ -50,13 +50,13 @@ class CasesTrajectories:
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
-    
+
     def case_nyquist_radial3D_lowmem(self, Nc=2, Ns=16, Nr=2, N=10):
         """Create a 3D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
-    
+
     def case_grid2D(self, N=16):
         """Create a 2D cartesian grid of frequencies locations."""
         freq_1d = sp.fft.fftfreq(N)

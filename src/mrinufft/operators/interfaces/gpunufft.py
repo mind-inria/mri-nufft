@@ -186,8 +186,7 @@ class RawGpuNUFFT:
     def toggle_grad_traj(self):
         """Toggle the gradient mode of the operator."""
         self.operator.toggle_grad_mode()
-        
-        
+
     def _reshape_image(self, image, direction="op"):
         """Reshape the image to the correct format."""
         xp = get_array_module(image)

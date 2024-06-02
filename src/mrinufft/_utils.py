@@ -35,7 +35,7 @@ else:
     }
 try:
     from tensorflow.experimental import numpy as tnp
-    
+
     ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
 except ImportError:
     pass

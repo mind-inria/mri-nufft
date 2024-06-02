@@ -59,8 +59,9 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, wrt_data: bool=False, wrt_traj: bool=False,
-                 *args, **kwargs):
+def get_operator(
+    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
+):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters

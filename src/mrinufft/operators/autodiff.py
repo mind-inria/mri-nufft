@@ -37,7 +37,7 @@ class _NUFFT_OP(torch.autograd.Function):
             if ctx.nufft_op.backend == "gpunufft":
                 factor *= np.pi * 2
             r = [
-                torch.linspace(-size / 2, size / 2 - 1, size)*factor 
+                torch.linspace(-size / 2, size / 2 - 1, size) * factor
                 for size in im_size
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
@@ -90,7 +90,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             if ctx.nufft_op.backend == "gpunufft":
                 factor *= np.pi * 2
             r = [
-                torch.linspace(-size / 2, size / 2 - 1, size)*factor
+                torch.linspace(-size / 2, size / 2 - 1, size) * factor
                 for size in im_size
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
@@ -129,7 +129,7 @@ class MRINufftAutoGrad(torch.nn.Module):
             raise ValueError("Squeezing dimensions is not " "supported for autodiff.")
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
-        if wrt_traj and self.nufft_op.backend != 'gpunufft':
+        if wrt_traj and self.nufft_op.backend != "gpunufft":
             self.nufft_op.raw_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
 
