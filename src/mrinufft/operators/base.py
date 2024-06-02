@@ -24,7 +24,6 @@ except ImportError:
 
 AUTOGRAD_AVAILABLE = True
 try:
-    import torch
     from mrinufft.operators.autodiff import MRINufftAutoGrad
 except ImportError:
     AUTOGRAD_AVAILABLE = False
