@@ -22,7 +22,7 @@ def pipe(traj, shape, backend="gpunufft", **kwargs):
     # here to avoid circular import
     from mrinufft.operators.base import get_operator
 
-    nufft_class = get_operator(backend)
+    nufft_class = get_operator(backend).func.__self__
     if hasattr(nufft_class, "pipe"):
         return nufft_class.pipe(traj, shape, **kwargs)
     raise ValueError("backend does not have pipe iterations method.")
