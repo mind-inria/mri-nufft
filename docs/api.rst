@@ -6,3 +6,5 @@
     mrinufft.trajectories
     mrinufft.density
     mrinufft.io
+    mrinufft.extras
+    mrinufft._utils

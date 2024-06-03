@@ -195,12 +195,18 @@ for f in image_files:
         continue
 # don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
 try:
-    final_dir = Path(__file__).parent / "docs" / "generated" / "autoexamples" / "images"
+    final_dir = (
+        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
+    )
     shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
 except FileNotFoundError:
     pass
 
+
 # sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_2D_traj.gif'
+
 
 # %%
 # .. image-sg:: /generated/autoexamples/images/mrinufft_2D_traj.gif
