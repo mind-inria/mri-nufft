@@ -66,7 +66,6 @@ class RawFinufftPlan:
             fpts_axes[i] = np.array(self.samples[:, i], dtype=self.samples.dtype)
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
         plan.setpts(*fpts_axes)
-        
 
     def adj_op(self, coeffs_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""

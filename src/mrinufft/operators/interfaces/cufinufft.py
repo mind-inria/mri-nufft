@@ -103,12 +103,12 @@ class RawCufinufftPlan:
         self._set_pts(typ="grad")
 
     def _set_pts(self, typ):
-        plan = self.grad_plan if typ == "grad" else self.plans[typ] 
-        plan.setpts(  
-            cp.array(self.samples[:, 0], copy=False),  
-            cp.array(self.samples[:, 1], copy=False),  
-            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,  
-        )  
+        plan = self.grad_plan if typ == "grad" else self.plans[typ]
+        plan.setpts(
+            cp.array(self.samples[:, 0], copy=False),
+            cp.array(self.samples[:, 1], copy=False),
+            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
+        )
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:

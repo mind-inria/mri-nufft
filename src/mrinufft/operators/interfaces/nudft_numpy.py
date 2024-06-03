@@ -15,8 +15,8 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     n = np.prod(shape)
     ndim = len(shape)
     dtype = module.complex64
-    device = getattr(ktraj, 'device', None)
-    
+    device = getattr(ktraj, "device", None)
+
     r = [module.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     if module.__name__ == "torch":
         r = [x.to(device) for x in r]
@@ -24,16 +24,19 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     grid_r = module.meshgrid(*r, indexing="ij")
     grid_r = module.reshape(module.stack(grid_r), (ndim, n))
     traj_grid = module.matmul(ktraj, grid_r)
-    matrix = module.exp(-2j * module.pi * traj_grid).to(dtype).to(device).clone() if module.__name__ == "torch" else (
-        module.exp(-2j * module.pi * traj_grid, dtype=dtype)
+    matrix = (
+        module.exp(-2j * module.pi * traj_grid).to(dtype).to(device).clone()
+        if module.__name__ == "torch"
+        else (module.exp(-2j * module.pi * traj_grid, dtype=dtype))
     )
-    
+
     if normalize:
         norm_factor = (
-            module.sqrt(module.prod(module.tensor(shape, device=device))) * module.pow(module.sqrt(module.tensor(2, device=device)), ndim) 
-        if module.__name__ == "torch" else (
-            module.sqrt(module.prod(shape)) * module.power(module.sqrt(2), ndim)
-        ))
+            module.sqrt(module.prod(module.tensor(shape, device=device)))
+            * module.pow(module.sqrt(module.tensor(2, device=device)), ndim)
+            if module.__name__ == "torch"
+            else (module.sqrt(module.prod(shape)) * module.power(module.sqrt(2), ndim))
+        )
         matrix /= norm_factor
 
     return matrix

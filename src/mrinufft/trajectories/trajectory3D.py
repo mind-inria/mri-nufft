@@ -239,7 +239,7 @@ def initialize_3D_wave_caipi(
     elif packing == Packings.CIRCLE:
         positions = [[0, 0]]
         counter = 0
-        while len(positions) < side**2:
+        while len(positions) < side ** 2:
             counter += 1
             perimeter = 2 * np.pi * counter
             nb_shots = int(np.trunc(perimeter))
@@ -352,11 +352,11 @@ def initialize_3D_seiffert_spiral(
     """
     # Normalize ellipses integrations by the requested period
     spiral = np.zeros((1, Ns // (1 + in_out), 3))
-    period = 4 * ellipk(curve_index**2)
+    period = 4 * ellipk(curve_index ** 2)
     times = np.linspace(0, nb_revolutions * period, Ns // (1 + in_out), endpoint=False)
 
     # Initialize first shot
-    jacobi = ellipj(times, curve_index**2)
+    jacobi = ellipj(times, curve_index ** 2)
     spiral[0, :, 0] = jacobi[0] * np.cos(curve_index * times)
     spiral[0, :, 1] = jacobi[0] * np.sin(curve_index * times)
     spiral[0, :, 2] = jacobi[1]
@@ -654,7 +654,7 @@ def initialize_3D_seiffert_shells(
         Nc_per_shell[idx] += 1
 
     # Normalize ellipses integrations by the requested period
-    period = 4 * ellipk(curve_index**2)
+    period = 4 * ellipk(curve_index ** 2)
     times = np.linspace(0, nb_revolutions * period, Ns, endpoint=False)
 
     # Create shells one by one
@@ -666,7 +666,7 @@ def initialize_3D_seiffert_shells(
         k0 = radii[i]
 
         # Initialize first shot
-        jacobi = ellipj(times, curve_index**2)
+        jacobi = ellipj(times, curve_index ** 2)
         trajectory[count, :, 0] = k0 * jacobi[0] * np.cos(curve_index * times)
         trajectory[count, :, 1] = k0 * jacobi[0] * np.sin(curve_index * times)
         trajectory[count, :, 2] = k0 * jacobi[1]

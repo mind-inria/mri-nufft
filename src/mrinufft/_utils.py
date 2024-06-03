@@ -95,12 +95,12 @@ def proper_trajectory(trajectory, normalize="pi"):
         warnings.warn(
             "Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)"
         )
-        new_traj *= 2 * xp.pi 
+        new_traj *= 2 * xp.pi
     elif normalize == "unit" and max_abs_val - 1e-4 > 0.5:
         warnings.warn(
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
-        new_traj *= 1 / (2 * xp.pi) 
+        new_traj *= 1 / (2 * xp.pi)
 
     if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
