@@ -21,7 +21,7 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     if module.__name__ == "torch":
         r = [x.to(device) for x in r]
 
-    grid_r = module.meshgrid(r, indexing="ij")
+    grid_r = module.meshgrid(*r, indexing="ij")
     grid_r = module.reshape(module.stack(grid_r), (ndim, n))
     traj_grid = module.matmul(ktraj, grid_r)
     matrix = module.exp(-2j * module.pi * traj_grid).to(dtype).to(device).clone() if module.__name__ == "torch" else (
