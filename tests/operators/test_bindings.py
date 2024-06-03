@@ -18,7 +18,7 @@ import pytest
 )
 def test_get_operator(backend, name):
     """Test the get_operator function."""
-    assert mrinufft.get_operator(backend).func.__self__.__name__ == name
+    assert mrinufft.get_operator(backend).__name__ == name
 
 
 def test_get_operator_fail():

@@ -43,7 +43,6 @@ def operator(kspace_loc, shape, backend):
     return nufft
 
 
-# @fixture(scope="module")
 def ndft_matrix(operator):
     """Get the NDFT matrix from the operator."""
     return get_fourier_matrix(operator.samples, operator.shape, normalize=True)

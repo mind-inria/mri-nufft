@@ -42,11 +42,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
-      
-      - name: Install Torch
-        shell: bash
-        run: |
-          python -m pip install torch --index-url https://download.pytorch.org/whl/cu118
 
       - name: Install pynfft
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}

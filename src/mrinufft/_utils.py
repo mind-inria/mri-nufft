@@ -75,11 +75,11 @@ def proper_trajectory(trajectory, normalize="pi"):
         The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
     """
     # flatten to a list of point
-    module = get_array_module(trajectory)  # check if the trajectory is a tensor
+    xp = get_array_module(trajectory)  # check if the trajectory is a tensor
     try:
         new_traj = (
             trajectory.clone()
-            if module.__name__ == "torch"
+            if xp.__name__ == "torch"
             else np.asarray(trajectory).copy()
         )
     except Exception as e:
@@ -89,24 +89,19 @@ def proper_trajectory(trajectory, normalize="pi"):
 
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
-    max_abs_val = (
-        torch.max(torch.abs(new_traj))
-        if module.__name__ == "torch"
-        else np.max(np.abs(new_traj))
-    )
+    max_abs_val = xp.max(xp.abs(new_traj))
 
     if normalize == "pi" and max_abs_val - 1e-4 < 0.5:
         warnings.warn(
             "Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)"
         )
-        new_traj *= 2 * torch.pi if module.__name__ == "torch" else 2 * np.pi
+        new_traj *= 2 * xp.pi 
     elif normalize == "unit" and max_abs_val - 1e-4 > 0.5:
         warnings.warn(
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
-        new_traj *= (
-            1 / (2 * torch.pi) if module.__name__ == "torch" else 1 / (2 * np.pi)
-        )
+        new_traj *= 1 / (2 * xp.pi) 
+
     if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
     return new_traj

@@ -14,31 +14,27 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)
     ndim = len(shape)
-
+    dtype = module.complex64
+    device = getattr(ktraj, 'device', None)
+    
+    r = [module.linspace(-s / 2, s / 2 - 1, s) for s in shape]
     if module.__name__ == "torch":
-        torch = module
-        device = ktraj.device
-        dtype = torch.complex64
-        r = [torch.linspace(-s / 2, s / 2 - 1, s, device=device) for s in shape]
-        grid_r = torch.meshgrid(r, indexing="ij")
-        grid_r = torch.reshape(torch.stack(grid_r), (ndim, n)).to(device)
-        traj_grid = torch.matmul(ktraj, grid_r)
-        matrix = torch.exp(-2j * np.pi * traj_grid).to(dtype).to(device).clone()
-    else:
-        r = [np.linspace(-s / 2, s / 2 - 1, s) for s in shape]
-        grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
-        traj_grid = ktraj @ grid_r
-        matrix = np.exp(-2j * np.pi * traj_grid, dtype=dtype)
+        r = [x.to(device) for x in r]
 
+    grid_r = module.meshgrid(r, indexing="ij")
+    grid_r = module.reshape(module.stack(grid_r), (ndim, n))
+    traj_grid = module.matmul(ktraj, grid_r)
+    matrix = module.exp(-2j * module.pi * traj_grid).to(dtype).to(device).clone() if module.__name__ == "torch" else (
+        module.exp(-2j * module.pi * traj_grid, dtype=dtype)
+    )
+    
     if normalize:
-        matrix /= (
-            (
-                torch.sqrt(torch.tensor(np.prod(shape), device=device))
-                * torch.pow(torch.sqrt(torch.tensor(2, device=device)), ndim)
-            )
-            if module.__name__ == "torch"
-            else (np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), len(shape)))
-        )
+        norm_factor = (
+            module.sqrt(module.prod(module.tensor(shape, device=device))) * module.pow(module.sqrt(module.tensor(2, device=device)), ndim) 
+        if module.__name__ == "torch" else (
+            module.sqrt(module.prod(shape)) * module.power(module.sqrt(2), ndim)
+        ))
+        matrix /= norm_factor
 
     return matrix
 

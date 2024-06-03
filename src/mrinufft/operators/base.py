@@ -107,7 +107,7 @@ def get_operator(
     # if autograd:
     if isinstance(operator, FourierOperatorBase):
         operator = operator.make_autograd(wrt_data, wrt_traj)
-    else:  # partial
+    elif(wrt_data or wrt_traj):  # partial
         operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 

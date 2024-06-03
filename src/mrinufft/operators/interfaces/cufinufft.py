@@ -103,24 +103,24 @@ class RawCufinufftPlan:
         self._set_pts(typ="grad")
 
     def _set_pts(self, typ):
-        if typ == "grad":
-            self.grad_plan.setpts(
-                cp.array(self.samples[:, 0], copy=False),
-                cp.array(self.samples[:, 1], copy=False),
-                cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
-            )
-        else:
-            self.plans[typ].setpts(
-                cp.array(self.samples[:, 0], copy=False),
-                cp.array(self.samples[:, 1], copy=False),
-                cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
-            )
+        plan = self.grad_plan if typ == "grad" else self.plans[typ] 
+        plan.setpts(  
+            cp.array(self.samples[:, 0], copy=False),  
+            cp.array(self.samples[:, 1], copy=False),  
+            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,  
+        )  
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
             p = self.plans[typ]
             del p
             self.plans[typ] = None
+
+    def _destroy_plan_grad(self):
+        if self.grad_plan is not None:
+            p = self.grad_plan
+            del p
+            self.grad_plan = None
 
     def type1(self, coeff_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
