@@ -192,14 +192,14 @@ class FourierOperatorBase(ABC):
     """
 
     interfaces: dict[str, tuple] = {}
-    
+    autograd_available = False
+
     def __init__(self):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
         self._density = None
         self._n_coils = 1
-        self.autograd_available = False
 
     def __init_subclass__(cls):
         """Register the class in the list of available operators."""

@@ -189,7 +189,8 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     backend = "cufinufft"
     available = CUFINUFFT_AVAILABLE and CUPY_AVAILABLE
-
+    autograd_available = True 
+    
     def __init__(
         self,
         samples,
