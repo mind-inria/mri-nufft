@@ -20,7 +20,7 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, traj, nufft_op):
         """Forward image -> k-space."""
-        ctx.save_for_backward(x, traj)  
+        ctx.save_for_backward(x, traj)
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
 
@@ -28,8 +28,8 @@ class _NUFFT_OP(torch.autograd.Function):
     def backward(ctx, dy):
         """Backward image -> k-space."""
         (x, traj) = ctx.saved_tensors
-        grad_data = None  
-        grad_traj = None  
+        grad_data = None
+        grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
             grad_data = ctx.nufft_op.adj_op(dy)
         if ctx.nufft_op._grad_wrt_traj:
@@ -46,19 +46,14 @@ class _NUFFT_OP(torch.autograd.Function):
 
             grid_x = x * grid_r  # Element-wise multiplication: x * r
             nufft_dx_dom = torch.cat(
-                [
-                    ctx.nufft_op.op(grid_x[:, i, :, :])
-                    for i in range(grid_x.size(1))
-                ],
+                [ctx.nufft_op.op(grid_x[:, i, :, :]) for i in range(grid_x.size(1))],
                 dim=1,
-            )  
+            )
 
             grad_traj = torch.transpose(
                 (-1j * torch.conj(dy) * nufft_dx_dom).squeeze(), 0, 1
-            ).type_as(
-                traj
-            )  
-        
+            ).type_as(traj)
+
         return grad_data, grad_traj, None
 
 
@@ -75,7 +70,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dx):
         """Backward kspace -> image."""
-        (y, traj) = ctx.saved_tensors  
+        (y, traj) = ctx.saved_tensors
         grad_data = None
         grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
@@ -91,14 +86,11 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                 for size in im_size
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...]  
+            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...]
 
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
-                [
-                    ctx.nufft_op.op(grid_dx[:, i , :, :])
-                    for i in range(grid_dx.size(1))
-                ],
+                [ctx.nufft_op.op(grid_dx[:, i, :, :]) for i in range(grid_dx.size(1))],
                 dim=1,
             )
 
@@ -123,11 +115,11 @@ class MRINufftAutoGrad(torch.nn.Module):
     def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
         super().__init__()
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
-            raise ValueError("Squeezing dimensions is not supported for autodiff.")  
+            raise ValueError("Squeezing dimensions is not supported for autodiff.")
 
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
-        if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]: 
+        if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
             self.nufft_op.raw_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
 

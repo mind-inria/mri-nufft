@@ -301,10 +301,10 @@ class FourierOperatorBase(ABC):
             variable on which the gradient is computed with respect to.
 
         wrt_data : bool, optional
-            Whether to compute the gradient with respect to the data, default is True
-        
+            If the gradient with respect to the data is computed, default is true
+
         wrt_traj : bool, optional
-            Whether to compute the gradient with respect to the trajectory, default is False
+            If the gradient with respect to the trajectory is computed, default is false
 
         Returns
         -------
@@ -491,7 +491,7 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):  
+    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
         """Return a Fourier operator with autograd capabilities."""
         return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
 

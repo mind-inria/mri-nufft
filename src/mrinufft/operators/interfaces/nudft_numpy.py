@@ -9,7 +9,7 @@ from mrinufft._utils import proper_trajectory, get_array_module
 
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
-    """Generates a Fourier matrix for non-uniform k-space trajectories.
+    """Get the NDFT Fourier Matrix.
 
     Parameters
     ----------
