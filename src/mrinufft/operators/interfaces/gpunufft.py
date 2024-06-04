@@ -356,7 +356,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
     backend = "gpunufft"
     available = GPUNUFFT_AVAILABLE and CUPY_AVAILABLE
-
+    autograd_available = True
+    
     def __init__(
         self,
         samples,

@@ -117,7 +117,8 @@ class MRIfinufft(FourierOperatorCPU):
 
     backend = "finufft"
     available = FINUFFT_AVAILABLE
-
+    autograd_available = True
+    
     def __init__(
         self,
         samples,
