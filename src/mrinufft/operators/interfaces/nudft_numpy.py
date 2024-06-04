@@ -9,34 +9,48 @@ from mrinufft._utils import proper_trajectory, get_array_module
 
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
-    """Get the NDFT Fourier Matrix."""
-    module = get_array_module(ktraj)
+    """Generates a Fourier matrix for non-uniform k-space trajectories.
+
+    Parameters
+    ----------
+    ktraj : array_like
+        The k-space coordinates for the Fourier transformation.
+    shape : tuple of int
+        The dimensions of the output Fourier matrix.
+    dtype : data-type, optional
+        The data type of the Fourier matrix, default is np.complex64.
+    normalize : bool, optional
+        If True, normalizes the matrix to maintain numerical stability.
+
+    Returns
+    -------
+    matrix
+        The NDFT Fourier Matrix.
+    """
+    xp = get_array_module(ktraj)
     ktraj = proper_trajectory(ktraj, normalize="unit")
     n = np.prod(shape)
     ndim = len(shape)
-    dtype = module.complex64
+    dtype = xp.complex64
     device = getattr(ktraj, "device", None)
 
-    r = [module.linspace(-s / 2, s / 2 - 1, s) for s in shape]
-    if module.__name__ == "torch":
+    r = [xp.linspace(-s / 2, s / 2 - 1, s) for s in shape]
+    if xp.__name__ == "torch":
         r = [x.to(device) for x in r]
 
-    grid_r = module.meshgrid(*r, indexing="ij")
-    grid_r = module.reshape(module.stack(grid_r), (ndim, n))
-    traj_grid = module.matmul(ktraj, grid_r)
+    grid_r = xp.meshgrid(*r, indexing="ij")
+    grid_r = xp.reshape(xp.stack(grid_r), (ndim, n))
+    traj_grid = xp.matmul(ktraj, grid_r)
     matrix = (
-        module.exp(-2j * module.pi * traj_grid).to(dtype).to(device).clone()
-        if module.__name__ == "torch"
-        else (module.exp(-2j * module.pi * traj_grid, dtype=dtype))
+        xp.exp(-2j * xp.pi * traj_grid).to(dtype).to(device).clone()
+        if xp.__name__ == "torch"
+        else (xp.exp(-2j * xp.pi * traj_grid, dtype=dtype))
     )
 
     if normalize:
-        norm_factor = (
-            module.sqrt(module.prod(module.tensor(shape, device=device)))
-            * module.pow(module.sqrt(module.tensor(2, device=device)), ndim)
-            if module.__name__ == "torch"
-            else (module.sqrt(module.prod(shape)) * module.power(module.sqrt(2), ndim))
-        )
+        norm_factor = np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), ndim)
+        if xp.__name__ == "torch":
+            norm_factor = xp.tensor(norm_factor, device=device)
         matrix /= norm_factor
 
     return matrix

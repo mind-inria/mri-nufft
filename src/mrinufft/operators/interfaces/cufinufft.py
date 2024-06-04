@@ -219,6 +219,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
+        self.autograd_available = True
         # For now only single precision is supported
         self.samples = np.asfortranarray(
             proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)

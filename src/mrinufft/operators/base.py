@@ -107,7 +107,7 @@ def get_operator(
     # if autograd:
     if isinstance(operator, FourierOperatorBase):
         operator = operator.make_autograd(wrt_data, wrt_traj)
-    elif wrt_data or wrt_traj:  # partial
+    elif wrt_data or wrt_traj:  # instance will be created later
         operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
@@ -192,13 +192,14 @@ class FourierOperatorBase(ABC):
     """
 
     interfaces: dict[str, tuple] = {}
-
+    
     def __init__(self):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
         self._density = None
         self._n_coils = 1
+        self.autograd_available = False
 
     def __init_subclass__(cls):
         """Register the class in the list of available operators."""
@@ -299,6 +300,12 @@ class FourierOperatorBase(ABC):
         variable: , default data
             variable on which the gradient is computed with respect to.
 
+        wrt_data : bool, optional
+            Whether to compute the gradient with respect to the data, default is True
+        
+        wrt_traj : bool, optional
+            Whether to compute the gradient with respect to the trajectory, default is False
+
         Returns
         -------
         torch.nn.module
@@ -309,7 +316,7 @@ class FourierOperatorBase(ABC):
         ValueError
             If autograd is not available.
         """
-        if not AUTOGRAD_AVAILABLE:
+        if not AUTOGRAD_AVAILABLE or not self.autograd_available:
             raise ValueError("Autograd not available, ensure torch is installed.")
 
         return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
@@ -484,7 +491,7 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data, wrt_traj, *args, **kwargs):
+    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):  
         """Return a Fourier operator with autograd capabilities."""
         return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
 
