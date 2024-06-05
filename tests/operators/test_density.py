@@ -26,11 +26,11 @@ def radial_distance(traj, shape):
         CasesTrajectories.case_nyquist_radial3D,
     ],
 )
-@parametrize(backend=["gpunufft"])
+@parametrize(backend=["gpunufft", "tensorflow"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
     distance = radial_distance(traj, shape)
-    result = pipe(traj, shape, osf=osf, num_iterations=10)
+    result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     if osf != 2:
