@@ -46,7 +46,6 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         density=False,
         smaps=None,
         eps=1e-6,
-        num_iter=15,
     ):
         super().__init__()
 
@@ -55,21 +54,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.eps = eps
 
-        if density is True:
-            self.density = tf.math.reciprocal_no_nan(
-                tfmri.estimate_density(samples, shape, method="pipe", max_iter=num_iter)
-            )
-            self.uses_density = True
-        elif density is False:
-            self.density = None
-            self.uses_density = False
-        elif tf.is_tensor(density):
-            self.density = density
-            self.uses_density = True
-        else:
-            raise ValueError(
-                "argument `density` of type" f"{type(density)} is invalid."
-            )
+        self.compute_density(density)
+
         if smaps is None:
             self.uses_sense = False
         elif tf.is_tensor(smaps):
@@ -166,17 +152,21 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         """
         if TENSORFLOW_AVAILABLE is False:
             raise ValueError(
-                "tensorflow is not available, cannot "
-                "estimate the density compensation"
+                "tensorflow is not available, cannot estimate the density compensation"
             )
-        grid_op = MRITensorflowNUFFT(samples, shape, density=True, num_iter=n_iter)
-        density_comp = grid_op.density
+        
+        density_comp = tf.math.reciprocal_no_nan(
+                tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
+            )
+        
+        grid_op = MRITensorflowNUFFT(samples, shape, num_iter=n_iter)
         if normalize:
             spike = np.zeros(shape)
             mid_loc = tuple(v // 2 for v in shape)
             spike[mid_loc] = 1
             psf = grid_op.adj_op(grid_op.op(spike))
             density_comp /= np.linalg.norm(psf)
+
         return density_comp.squeeze()
 
 
