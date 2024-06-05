@@ -154,11 +154,11 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             raise ValueError(
                 "tensorflow is not available, cannot estimate the density compensation"
             )
-        
+
         density_comp = tf.math.reciprocal_no_nan(
-                tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
-            )
-        
+            tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
+        )
+
         grid_op = MRITensorflowNUFFT(samples, shape, num_iter=n_iter)
         if normalize:
             spike = np.zeros(shape)
@@ -168,5 +168,3 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             density_comp /= np.linalg.norm(psf)
 
         return density_comp.squeeze()
-
-
