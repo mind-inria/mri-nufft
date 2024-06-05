@@ -12,13 +12,12 @@ of the operator roughly equal to 1.
 
 """
 import brainweb_dl as bwdl
-
 import matplotlib.pyplot as plt
 import numpy as np
-from mrinufft import get_density, get_operator, check_backend
+
+from mrinufft import check_backend, get_density, get_operator
 from mrinufft.trajectories import initialize_2D_radial
 from mrinufft.trajectories.display import display_2D_trajectory
-
 
 # %%
 # Create sample data
