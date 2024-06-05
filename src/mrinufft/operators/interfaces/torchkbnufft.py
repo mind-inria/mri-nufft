@@ -68,16 +68,15 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
-        if not isinstance(samples, torch.Tensor):
-            samples = proper_trajectory(
-                samples.astype(np.float32, copy=False), normalize="unit"
-            )
-            self.samples = samples.transpose(1, 0)
-            self.samples = torch.tensor(samples)
+        samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
+        self.samples = samples.transpose(1, 0)
+        self.samples = torch.tensor(samples)
 
         if density is True:
             self.density = torchnufft.calc_density_compensation_function(
-                ktraj=samples, im_size=shape, num_iterations=15
+                ktraj=self.samples, im_size=shape, num_iterations=15
             )
         elif density is False:
             self.density = None
@@ -183,6 +182,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         """
         return self.adj_op(self.op(data) - obs_data)
 
+
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
 
@@ -198,7 +198,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         float
             Lipschitz constant of the operator.
         """
-        # return  self.get_lipschitz_cst(max_iter=max_iter, **kwargs)
         tmp_op = self.__class__(
             self.samples,
             self.shape,
