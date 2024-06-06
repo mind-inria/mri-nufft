@@ -63,18 +63,19 @@ def list_backends(available_only=False):
     ]
 
 
-def get_operator(backend_name: str, *args, autograd=None, **kwargs):
+def get_operator(
+    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
+):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
     ----------
     backend_name: str
         Backend name
-
-    autograd: str, default None
-        if set to "data" will provide an operator with autodiff capabilities with
-        respect to it.
-
+    wrt_data: bool, default False
+        if set gradients wrt to data and images will be available.
+    wrt_traj: bool, default False
+        if set gradients wrt to trajectory will be available.
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -107,11 +108,11 @@ def get_operator(backend_name: str, *args, autograd=None, **kwargs):
     if args or kwargs:
         operator = operator(*args, **kwargs)
 
-    if autograd:
-        if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(variable=autograd)
-        else:  # partial
-            operator = partial(operator.with_autograd, variable=autograd)
+    # if autograd:
+    if isinstance(operator, FourierOperatorBase):
+        operator = operator.make_autograd(wrt_data, wrt_traj)
+    elif wrt_data or wrt_traj:  # instance will be created later
+        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
 
@@ -195,6 +196,7 @@ class FourierOperatorBase(ABC):
     """
 
     interfaces: dict[str, tuple] = {}
+    autograd_available = False
 
     def __init__(self):
         if not self.available:
@@ -294,13 +296,19 @@ class FourierOperatorBase(ABC):
             **kwargs,
         )
 
-    def make_autograd(self, variable="data"):
+    def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
 
         Parameters
         ----------
-        variable: str, default data
+        variable: , default data
             variable on which the gradient is computed with respect to.
+
+        wrt_data : bool, optional
+            If the gradient with respect to the data is computed, default is true
+
+        wrt_traj : bool, optional
+            If the gradient with respect to the trajectory is computed, default is false
 
         Returns
         -------
@@ -314,10 +322,10 @@ class FourierOperatorBase(ABC):
         """
         if not AUTOGRAD_AVAILABLE:
             raise ValueError("Autograd not available, ensure torch is installed.")
-        if variable == "data":
-            return MRINufftAutoGrad(self)
-        else:
-            raise ValueError(f"Autodiff with respect to {variable} is not supported.")
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
+
+        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
@@ -492,9 +500,9 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, variable, *args, **kwargs):
+    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(variable)
+        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
 
 
 class FourierOperatorCPU(FourierOperatorBase):
