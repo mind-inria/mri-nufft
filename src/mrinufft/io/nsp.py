@@ -400,8 +400,8 @@ def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
     squeeze: bool = True,
-    slice_num: Optional[int] = None,
-    contrast_num: Optional[int] = None,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
