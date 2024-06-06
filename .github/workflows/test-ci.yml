@@ -176,7 +176,7 @@ jobs:
         id: cache-restore
         with:
           path: ~/.cache/brainweb
-          key: ${{ runner.os }}-Brainweb}}
+          key: ${{ runner.os }}-Brainweb
 
       - name: Install Python deps
         shell: bash
@@ -196,7 +196,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit != 'true' }}
         with:
           path: ~/.cache/brainweb
-          key: ${{ runner.os }}-Brainweb}}
+          key: ${{ runner.os }}-Brainweb
 
       - name: Upload coverage
         if: success()
