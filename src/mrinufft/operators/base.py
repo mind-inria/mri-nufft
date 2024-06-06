@@ -6,15 +6,18 @@ from https://github.com/CEA-COSMIC/pysap-mri
 :author: Pierre-Antoine Comby
 """
 
+from __future__ import annotations
+
 import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
-import numpy as np
-from mrinufft._utils import power_method, auto_cast, get_array_module
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
+import numpy as np
+
+from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 CUPY_AVAILABLE = True
 try:
@@ -25,6 +28,7 @@ except ImportError:
 AUTOGRAD_AVAILABLE = True
 try:
     import torch
+
     from mrinufft.operators.autodiff import MRINufftAutoGrad
 except ImportError:
     AUTOGRAD_AVAILABLE = False
