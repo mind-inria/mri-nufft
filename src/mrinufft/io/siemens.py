@@ -1,7 +1,8 @@
 """Siemens specific rawdat reader, wrapper over pymapVBVD."""
 
+from __future__ import annotations
+
 import numpy as np
-from typing import Optional
 
 
 def read_siemens_rawdat(
@@ -9,8 +10,8 @@ def read_siemens_rawdat(
     removeOS: bool = False,
     squeeze: bool = True,
     return_twix: bool = True,
-    slice_num: Optional[int] = None,
-    contrast_num: Optional[int] = None,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
 
