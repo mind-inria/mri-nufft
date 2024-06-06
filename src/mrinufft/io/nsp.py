@@ -1,37 +1,40 @@
 """Read/Write trajectory for Neurospin sequences."""
 
-import warnings
+from __future__ import annotations
+
 import os
-from typing import Tuple, Optional
-import numpy as np
-from datetime import datetime
+import warnings
 from array import array
-from .siemens import read_siemens_rawdat
+from datetime import datetime
+
+import numpy as np
 
 from mrinufft.trajectories.utils import (
-    KMAX,
-    DEFAULT_RASTER_TIME,
     DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
     DEFAULT_SMAX,
+    KMAX,
     Gammas,
-    convert_trajectory_to_gradients,
-    convert_gradients_to_slew_rates,
     check_hardware_constraints,
+    convert_gradients_to_slew_rates,
+    convert_trajectory_to_gradients,
 )
+
+from .siemens import read_siemens_rawdat
 
 
 def write_gradients(
     gradients: np.ndarray,
     initial_positions: np.ndarray,
     grad_filename: str,
-    img_size: Tuple[int, ...],
-    FOV: Tuple[float, ...],
+    img_size: tuple[int, ...],
+    FOV: tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
     gamma: float = Gammas.HYDROGEN,
     version: float = 4.2,
     recon_tag: float = 1.1,
-    timestamp: Optional[float] = None,
+    timestamp: float | None = None,
     keep_txt_file: bool = False,
 ):
     """Create gradient file from gradients and initial positions.
@@ -173,8 +176,8 @@ def _pop_elements(array, num_elements=1, type="float"):
 
 def write_trajectory(
     trajectory: np.ndarray,
-    FOV: Tuple[float, ...],
-    img_size: Tuple[int, ...],
+    FOV: tuple[float, ...],
+    img_size: tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
     gamma: float = Gammas.HYDROGEN,
@@ -397,8 +400,8 @@ def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
     squeeze: bool = True,
-    slice_num: Optional[int] = None,
-    contrast_num: Optional[int] = None,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
