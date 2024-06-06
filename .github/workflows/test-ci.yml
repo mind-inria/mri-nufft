@@ -193,7 +193,7 @@ jobs:
 
       - name: Cache brainweb-dl directory
         uses: actions/cache/save@v4
-        if: cache-restore.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-restore.outputs.cache-hit != 'true' }}
         with:
           path: ~/.cache/brainweb
           key: ${{ runner.os }}-Brainweb}}
