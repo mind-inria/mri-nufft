@@ -1,13 +1,11 @@
-"""Specific test for gpunufft."""
+"""Specific test for testing densities specific to backend."""
 
 import numpy as np
-import numpy.testing as npt
 from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
-from mrinufft.density import cell_count, voronoi, pipe
-from mrinufft.density.utils import normalize_weights
+from mrinufft.density import pipe
 from mrinufft._utils import proper_trajectory
 
 
