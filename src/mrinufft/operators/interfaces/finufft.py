@@ -11,6 +11,7 @@ try:
 except ImportError:
     FINUFFT_AVAILABLE = False
 
+DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 class RawFinufftPlan:
     """Light wrapper around the guru interface of finufft."""
@@ -44,7 +45,7 @@ class RawFinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype="complex64" if self.samples.dtype == "float32" else "complex128",
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
             **kwargs,
         )
 
@@ -54,7 +55,7 @@ class RawFinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype="complex64" if self.samples.dtype == "float32" else "complex128",
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
             isign=1,
             **kwargs,
         )
