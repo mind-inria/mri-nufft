@@ -377,9 +377,12 @@ class FourierOperatorBase(ABC):
         minified version of the nufft operator. No coil or B0 compensation is used,
         but includes any computed density.
         """
-        tmp_op = self.__class__(
-            self.samples, self.shape, density=self.density, n_coils=1, **kwargs
-        )
+        if self.n_coils > 1:
+            tmp_op = self.__class__(
+                self.samples, self.shape, density=self.density, n_coils=1, **kwargs
+            )
+        else:
+            tmp_op = self
         return power_method(max_iter, tmp_op)
 
     @property
