@@ -194,7 +194,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.cache/brainweb
-          key: ${{ runner.os }}-${{ hashfiles("~/.cache/brainweb/**.npy") }}
+          key: ${{ runner.os }}-${{ hashfiles('~/.cache/brainweb/**.npy') }}
 
       - name: Upload coverage
         if: success()
