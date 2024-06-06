@@ -41,10 +41,9 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
     grid_r = xp.meshgrid(*r, indexing="ij")
     grid_r = xp.reshape(xp.stack(grid_r), (ndim, n))
     traj_grid = xp.matmul(ktraj, grid_r)
-    matrix = xp.exp(-2j * xp.pi * traj_grid)  
-    if xp.__name__ == "torch":  
-        matrix.to(dtype=dtype, device=device, copy=True)  
-
+    matrix = xp.exp(-2j * xp.pi * traj_grid)
+    if xp.__name__ == "torch":
+        matrix.to(dtype=dtype, device=device, copy=True)
 
     if normalize:
         norm_factor = np.sqrt(np.prod(shape)) * np.power(np.sqrt(2), ndim)

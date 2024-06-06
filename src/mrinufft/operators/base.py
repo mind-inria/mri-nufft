@@ -316,10 +316,10 @@ class FourierOperatorBase(ABC):
         ValueError
             If autograd is not available.
         """
-        if not AUTOGRAD_AVAILABLE:  
-            raise ValueError("Autograd not available, ensure torch is installed.")  
-        if not self.autograd_available:  
-            raise ValueError("Backend does not support auto-differentiation.")  
+        if not AUTOGRAD_AVAILABLE:
+            raise ValueError("Autograd not available, ensure torch is installed.")
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
 
         return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
 

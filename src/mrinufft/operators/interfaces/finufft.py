@@ -13,6 +13,7 @@ except ImportError:
 
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
+
 class RawFinufftPlan:
     """Light wrapper around the guru interface of finufft."""
 
