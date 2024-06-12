@@ -161,6 +161,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         img = self._tkb_adj_op.forward(data=data, omega=ktraj, smaps=smaps)
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        img /= self.norm_factor
 
         return self._safe_squeeze(img)
 
