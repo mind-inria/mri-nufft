@@ -332,19 +332,23 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        method: str or callable or array or dict
+        method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
             If a string, the method should be registered in the density registry.
             If a callable, it should take the samples and the shape as input.
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
+            If a bool, it will enable or disable the density compensation.
         """
-        if isinstance(method, np.ndarray):
-            self.density = method
-            return None
         if not method:
             self.density = None
+            return None
+        if method is True and hasattr(self, "pipe"):
+            method = "pipe"
+
+        if isinstance(method, np.ndarray):
+            self.density = method
             return None
 
         kwargs = {}
