@@ -2,6 +2,8 @@
 
 import numpy as np
 import numpy.linalg as nl
+from .utils import DEFAULT_GMAX, DEFAULT_SMAX, Gammas
+
 
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
 
@@ -340,3 +342,71 @@ def generate_fibonacci_sphere(nb_points, epsilon=0.25):
     fibonacci_sphere[:, 1] = np.sin(theta) * np.sin(phi)
     fibonacci_sphere[:, 2] = np.cos(phi)
     return fibonacci_sphere
+
+
+####################
+# Variable Density #
+####################
+
+
+def findq2r2(
+    r,
+    r1,
+    T,
+    Ts,
+    N,
+    Fcoeff,
+    rmax,
+    smax=DEFAULT_SMAX,
+    gmax=DEFAULT_GMAX,
+    gamma=Gammas.H,
+):
+    """
+    Calculate the second derivative of r and q (theta) for vds spirals.
+
+    slew-limited or FOV-limited r(t) and q(t) waveforms such that
+    :math:`k(t) = r(t)exp(i*q(t))` Where the FOV is a function of k-space radius (r)
+    FOV = Fcoeff(1) + Fcoeff(2)*r/rmax + Fcoeff(3)*(r/rmax)^2 + ... ; F(1) in cm. F(2)
+    in cm^2. F(3) in cm^3, etc.
+    """
+    F = 0  # FOV function value for this r.
+    dFdr = 0  # dFOV/dr for this value of r.
+    for rind in range(len(Fcoeff)):
+        F += Fcoeff[rind] * (r / rmax) ** rind
+        if rind > 0:
+            dFdr += rind * Fcoeff[rind] * (r / rmax) ** (rind - 1) / rmax
+
+    GmaxFOV = 1 / (gamma * F * Ts)  # FOV limit on G
+    Gmax = min(GmaxFOV, gmax)
+
+    maxr1 = np.sqrt((gamma * Gmax) ** 2 / (1 + (2 * np.pi * F * r / N) ** 2))
+
+    if r1 > maxr1:
+        r2 = (maxr1 - r1) / T
+    else:
+        twopiFoN = 2 * np.pi * F / N
+        twopiFoN2 = twopiFoN**2
+
+        # A,B,C are coefficients of the equation which equates
+        # the slew rate calculated from r,r1,r2 with the
+        # maximum gradient slew rate.
+        #
+        # A*r2*r2 + B*r2 + C  =  0
+        #
+        # A,B,C are in terms of F,dF/dr,r,r1, N and smax.
+
+        A = 1 + twopiFoN2 * r**2
+        B = 2 * twopiFoN2 * r * r1**2 + 2 * twopiFoN2 / F * dFdr * r**2 * r1**2
+        C = (
+            twopiFoN2**2 * r**2 * r1**4
+            + 4 * twopiFoN2 * r1**4
+            + (2 * np.pi / N * dFdr) ** 2 * r**2 * r1**4
+            + 4 * twopiFoN2 / F * dFdr * r * r1**4
+            - (gamma) ** 2 * smax**2
+        )
+        # Use the big root
+        r2 = (-B + np.sqrt(B**2 - 4 * A * C)) / (2 * A)
+
+    q2 = 2 * np.pi / N * dFdr * r1**2 + 2 * np.pi * F / N * r2
+
+    return q2, r2
