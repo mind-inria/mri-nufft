@@ -61,7 +61,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         self.n_batchs = n_batchs
         self.dtype = None
-        self._samples = samples
 
         self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
         self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
@@ -69,7 +68,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
         samples = proper_trajectory(
-            samples.astype(np.float32, copy=False), normalize="unit"
+            samples.astype(np.float32, copy=False), normalize="pi"
         )
         self.samples = samples.transpose(1, 0)
         self.samples = torch.tensor(samples)
@@ -101,7 +100,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
 
     @with_torch
-    def op(self, data, coeffs=None):
+    def op(self, data, ksp=None):
         """Forward operation.
 
         Parameters
@@ -127,9 +126,11 @@ class MRITorchKbNufft(FourierOperatorBase):
         if smaps is not None:
             smaps = smaps.to(data.dtype)
         kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
+        kdata /= self.norm_factor
 
         return self._safe_squeeze(kdata)
-        
+
+
     @with_torch
     def adj_op(self, data, coeffs=None):
         """Backward Operation.
@@ -181,40 +182,6 @@ class MRITorchKbNufft(FourierOperatorBase):
             The data consistency error in image space.
         """
         return self.adj_op(self.op(data) - obs_data)
-
-
-    def get_lipschitz_cst(self, max_iter=10, **kwargs):
-        """Return the Lipschitz constant of the operator.
-
-        Parameters
-        ----------
-        max_iter: int
-            Number of iteration to perform to estimate the Lipschitz constant.
-        kwargs:
-            Extra kwargs for the cufinufft operator.
-
-        Returns
-        -------
-        float
-            Lipschitz constant of the operator.
-        """
-        tmp_op = self.__class__(
-            self.samples,
-            self.shape,
-            density=self.density,
-            n_coils=1,
-            smaps=None,
-            squeeze_dims=True,
-            **kwargs,
-        )
-        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
-        x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
-
-        x = cp.asarray(x)
-        return power_method(
-            max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
-        )
-
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
