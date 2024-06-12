@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [ "master" ]
 
+
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   PYTHON_VERSION: "3.10"
@@ -166,6 +171,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
 
+      - name: Restore cached brainweb-dl directory
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        with:
+          path: ~/.cache/brainweb
+          key: ${{ runner.os }}-Brainweb
+
       - name: Install Python deps
         shell: bash
         run: |
@@ -178,6 +190,13 @@ jobs:
         run: |
           export COVERAGE_FILE=coverage_plots
           pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term
+
+      - name: Cache brainweb-dl directory
+        uses: actions/cache/save@v4
+        if: ${{ steps.cache-restore.outputs.cache-hit != 'true' }}
+        with:
+          path: ~/.cache/brainweb
+          key: ${{ runner.os }}-Brainweb
 
       - name: Upload coverage
         if: success()

@@ -288,6 +288,29 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 pass
         return arr
 
+    def get_lipschitz_cst(self, max_iter=10):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            number of iteration to compute the lipschitz constant.
+        **kwargs:
+            Extra arguments givent
+
+        Returns
+        -------
+        float
+            Spectral Radius
+
+        Notes
+        -----
+        This uses the Iterative Power Method to compute the largest singular value of a
+        minified version of the nufft operator. No coil or B0 compensation is used,
+        but includes any computed density.
+        """
+        return self.operator.get_lipschitz_cst(max_iter)
+
 
 class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     """
