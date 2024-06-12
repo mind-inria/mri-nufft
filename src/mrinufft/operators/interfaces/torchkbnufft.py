@@ -6,7 +6,7 @@ import numpy as np
 
 TORCH_AVAILABLE = True
 try:
-    import torchkbnufft as torchnufft
+    import torchkbnufft as tkbn
     import torch
 
 except ImportError:
@@ -67,8 +67,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.n_batchs = n_batchs
         self.dtype = None
 
-        self._tkb_op = torchnufft.KbNufft(im_size=self.shape)
-        self._tkb_adj_op = torchnufft.KbNufftAdjoint(im_size=self.shape)
+        self._tkb_op = tkbn.KbNufft(im_size=self.shape)
+        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape)
 
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
@@ -79,7 +79,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.samples = torch.tensor(samples)
 
         if density is True:
-            self.density = torchnufft.calc_density_compensation_function(
+            self.density = tkbn.calc_density_compensation_function(
                 ktraj=self.samples, im_size=shape, num_iterations=15
             )
         elif density is False:
