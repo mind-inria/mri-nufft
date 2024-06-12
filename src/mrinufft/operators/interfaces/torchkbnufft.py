@@ -78,22 +78,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.samples = samples.transpose(1, 0)
         self.samples = torch.tensor(samples)
 
-        if density is True:
-            self.density = tkbn.calc_density_compensation_function(
-                ktraj=self.samples, im_size=shape, num_iterations=15
-            )
-        elif density is False:
-            self.density = None
-        elif (
-            torch.is_tensor(density)
-            or isinstance(density, np.ndarray)
-            or isinstance(density, cp.ndarray)
-        ):
-            self.density = density
-        else:
-            raise ValueError(
-                "argument `density` of type" f"{type(density)} is invalid."
-            )
+        self.compute_density(density)
 
         if smaps is None:
             self.smaps = None
@@ -200,3 +185,49 @@ class MRITorchKbNufft(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
+
+    @classmethod
+    @with_torch
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
+        """Compute the density compensation weights for a given set of kspace locations.
+
+        Parameters
+        ----------
+        kspace_loc: Tensor
+            the kspace locations
+        volume_shape: tuple
+            the volume shape
+        num_iterations: int default 10
+            the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
+        """
+        volume_shape = (np.array(volume_shape) * osf).astype(int)
+        grid_op = MRITorchKbNufft(
+            samples=kspace_loc,
+            shape=volume_shape,
+            osf=1,
+            **kwargs,
+        )
+        density_comp = tkbn.calc_density_compensation_function(
+                ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
+            )
+        if normalize:
+            spike = torch.zeros(volume_shape, dtype=torch.float32)
+            mid_loc = tuple(v // 2 for v in volume_shape)
+            spike[mid_loc] = 1
+            psf = grid_op.adj_op(grid_op.op(spike))
+            density_comp /= torch.norm(psf)
+        
+        return density_comp.squeeze()
