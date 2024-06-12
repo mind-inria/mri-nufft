@@ -188,7 +188,7 @@ def with_numpy_cupy(fun):
 
 
 def with_torch(fun):
-    """Ensure the function works internally with numpy or cupy array."""
+    """Ensure the function works internally with Torch."""
 
     @wraps(fun)
     def wrapper(self, data, output=None, *args, **kwargs):
