@@ -79,7 +79,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.samples = torch.tensor(samples)
 
         self.compute_density(density)
-        
+
         self.compute_smaps(smaps)
         if isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
             self.smaps = torch.tensor(smaps)
@@ -100,10 +100,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         smaps = self.smaps
 
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        if not B:
-            B = 1
-        if not C:
-            C = 1
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
         if ktraj.shape[0] != data.shape[0]:
@@ -130,10 +126,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         ktraj = self.samples
         smaps = self.smaps
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
-        if not B:
-            B = 1
-        if not C:
-            C = 1
         data = data.reshape((B, C, K))
 
         if ktraj.shape[0] != data.shape[0]:
