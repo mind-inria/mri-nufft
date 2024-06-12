@@ -59,7 +59,7 @@ def ref_backend(request):
 @fixture(scope="module")
 def ref_operator(request, operator, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
-    samples = operator.samples   
+    samples = operator.samples
     if operator.backend == "torchkbnufft":
         # torvchkbnufft has samples as torch tensor.
         samples = samples.cpu().numpy().astype(np.float32)

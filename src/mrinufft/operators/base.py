@@ -186,6 +186,7 @@ def with_numpy_cupy(fun):
 
     return wrapper
 
+
 def with_torch(fun):
     """Ensure the function works internally with numpy or cupy array."""
 
@@ -200,10 +201,10 @@ def with_torch(fun):
         else:
             data_ = data
             output_ = output
-            
+
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
-        if xp.__name__ == "cupy" :
+        if xp.__name__ == "cupy":
             return ret_.cpu().numpy()
         elif xp.__name__ == "numpy":
             return ret_.numpy()

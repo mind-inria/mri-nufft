@@ -130,7 +130,6 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         return self._safe_squeeze(kdata)
 
-
     @with_torch
     def adj_op(self, data, coeffs=None):
         """Backward Operation.
