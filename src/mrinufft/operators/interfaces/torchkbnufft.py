@@ -6,13 +6,18 @@ import numpy as np
 import cupy as cp
 
 TORCH_AVAILABLE = True
-
 try:
     import torchkbnufft as torchnufft
     import torch
 
 except ImportError:
     TORCH_AVAILABLE = False
+
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+except ImportError:
+    CUPY_AVAILABLE = False
 
 
 class MRITorchKbNufft(FourierOperatorBase):
