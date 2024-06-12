@@ -79,15 +79,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.samples = torch.tensor(samples)
 
         self.compute_density(density)
-
-        if smaps is None:
-            self.smaps = None
-        elif isinstance(smaps, torch.Tensor):
-            self.smaps = smaps
-        elif isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
+        
+        self.compute_smaps(smaps)
+        if isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
             self.smaps = torch.tensor(smaps)
-        else:
-            raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
 
     @with_torch
     def op(self, data, ksp=None):
