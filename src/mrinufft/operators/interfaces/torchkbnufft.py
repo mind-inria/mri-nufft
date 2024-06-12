@@ -3,7 +3,6 @@
 from ..base import FourierOperatorBase, with_torch
 from mrinufft._utils import proper_trajectory, power_method
 import numpy as np
-import cupy as cp
 
 TORCH_AVAILABLE = True
 try:
