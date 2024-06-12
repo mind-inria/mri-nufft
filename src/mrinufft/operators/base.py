@@ -301,7 +301,10 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        if isinstance(method, np.ndarray):
+        if isinstance(method, np.ndarray) or (
+            self.backend == 'torchkbnufft' and 
+            isinstance(method, torch.Tensor)
+        ):
             self.smaps = method
             return None
         if not method:

@@ -75,7 +75,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="pi"
         )
-        self.samples = samples.transpose(1, 0)
         self.samples = torch.tensor(samples)
 
         self.compute_density(density)
@@ -96,14 +95,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
-        samples = self.samples
         smaps = self.smaps
 
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
-        if samples.shape[0] != data.shape[0]:
-            samples = samples.permute(1, 0)
+        samples = self.samples.permute(1, 0)
         if smaps is not None:
             smaps = smaps.to(data.dtype)
         kdata = self._tkb_op.forward(image=data, omega=samples, smaps=smaps)
@@ -123,13 +120,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        samples = self.samples
         smaps = self.smaps
+
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
 
-        if samples.shape[0] != data.shape[0]:
-            samples = samples.permute(1, 0)
+        samples = self.samples.permute(1, 0)
         if self.density:
             data = data * self.density
 
