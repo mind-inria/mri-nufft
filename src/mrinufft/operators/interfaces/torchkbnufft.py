@@ -96,17 +96,17 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
-        ktraj = self.samples
+        samples = self.samples
         smaps = self.smaps
 
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
-        if ktraj.shape[0] != data.shape[0]:
-            ktraj = ktraj.permute(1, 0)
+        if samples.shape[0] != data.shape[0]:
+            samples = samples.permute(1, 0)
         if smaps is not None:
             smaps = smaps.to(data.dtype)
-        kdata = self._tkb_op.forward(image=data, omega=ktraj, smaps=smaps)
+        kdata = self._tkb_op.forward(image=data, omega=samples, smaps=smaps)
         kdata /= self.norm_factor
 
         return self._safe_squeeze(kdata)
@@ -123,20 +123,20 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        ktraj = self.samples
+        samples = self.samples
         smaps = self.smaps
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
 
-        if ktraj.shape[0] != data.shape[0]:
-            ktraj = ktraj.permute(1, 0)
+        if samples.shape[0] != data.shape[0]:
+            samples = samples.permute(1, 0)
         if self.density:
             data = data * self.density
 
         if smaps is not None:
             smaps = smaps.to(data.dtype)
 
-        img = self._tkb_adj_op.forward(data=data, omega=ktraj, smaps=smaps)
+        img = self._tkb_adj_op.forward(data=data, omega=samples, smaps=smaps)
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img /= self.norm_factor
 
