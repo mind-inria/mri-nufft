@@ -22,7 +22,7 @@ except ImportError:
 
 
 @fixture(scope="module")
-@parametrize(backend=["cufinufft", "finufft", "gpunufft", "torchkbnufft"])
+@parametrize(backend=["cufinufft", "finufft", "gpunufft"])
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[

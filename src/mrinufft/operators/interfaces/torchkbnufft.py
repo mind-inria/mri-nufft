@@ -44,6 +44,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     backend = "torchkbnufft"
     available = TORCH_AVAILABLE
+    autograd_available = False
 
     def __init__(
         self,
