@@ -1,7 +1,7 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase, with_torch
-from mrinufft._utils import proper_trajectory, power_method
+from mrinufft._utils import proper_trajectory, get_array_module
 import numpy as np
 
 TORCH_AVAILABLE = True
@@ -160,7 +160,21 @@ class MRITorchKbNufft(FourierOperatorBase):
         Tensor
             The data consistency error in image space.
         """
-        return self.adj_op(self.op(data) - obs_data)
+        if not isinstance(obs_data, torch.Tensor):
+            if not obs_data : 
+                obs_data = None
+
+            xp = get_array_module(obs_data)
+            
+            if xp.__name__ == "numpy" :
+                obs_data = torch.from_numpy(obs_data) 
+            elif xp.__name__ == "cupy":
+                obs_data = torch.from_dlpack(obs_data) 
+            else:
+                obs_data = torch.tensor(obs_data)
+        
+        ret = self.adj_op(self.op(data) - obs_data)
+        return ret 
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
