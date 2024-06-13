@@ -341,15 +341,14 @@ class FourierOperatorBase(ABC):
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If a bool, it will enable or disable the density compensation.
         """
-        if not method:
-            self.density = None
-            return None
-        if method is True and hasattr(self, "pipe"):
-            method = "pipe"
-
         if isinstance(method, np.ndarray):
             self.density = method
             return None
+        if not method:
+            self.density = None
+            return None
+        if method is True:
+            method = "pipe"
 
         kwargs = {}
         if isinstance(method, dict):
