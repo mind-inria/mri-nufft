@@ -95,17 +95,20 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
-        smaps = self.smaps
 
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
 
-        samples = self.samples.permute(1, 0)
-        if smaps is not None:
-            smaps = smaps.to(data.dtype)
-        kdata = self._tkb_op.forward(image=data, omega=samples, smaps=smaps)
-        kdata /= self.norm_factor
+        if self.smaps is not None:
+            self.smaps = self.smaps.to(data.dtype, copy=False)
 
+        if self.check_samples_shape():
+            self.samples = torch.transpose(self.samples, 1, 0)
+        kdata = self._tkb_op.forward(image=data, omega=self.samples, smaps=self.smaps)
+        if not self.check_samples_shape():
+            self.samples = torch.transpose(self.samples, 1, 0)
+
+        kdata /= self.norm_factor
         return self._safe_squeeze(kdata)
 
     @with_torch
@@ -120,19 +123,22 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        smaps = self.smaps
 
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
 
-        samples = self.samples.permute(1, 0)
         if self.density:
             data = data * self.density
 
-        if smaps is not None:
-            smaps = smaps.to(data.dtype)
+        if self.smaps is not None:
+            self.smaps = self.smaps.to(data.dtype)
 
-        img = self._tkb_adj_op.forward(data=data, omega=samples, smaps=smaps)
+        if self.check_samples_shape():
+            self.samples = torch.transpose(self.samples, 1, 0)
+        img = self._tkb_adj_op.forward(data=data, omega=self.samples, smaps=self.smaps)
+        if not self.check_samples_shape():
+            self.samples = torch.transpose(self.samples, 1, 0)
+
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img /= self.norm_factor
 
@@ -214,3 +220,16 @@ class MRITorchKbNufft(FourierOperatorBase):
             density_comp /= torch.norm(psf)
         
         return density_comp.squeeze()
+
+    def check_samples_shape(self):
+        """Check the samples shape.
+
+        Returns
+        -------
+        bool : True if the samples shape is (ndim, klength).
+                False if the samples shape is (klength, ndim).
+        
+        """
+        if self.samples.shape[0] == len(self.shape):
+            return False
+        else : return True

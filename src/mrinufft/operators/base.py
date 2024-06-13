@@ -194,10 +194,12 @@ def with_torch(fun):
     def wrapper(self, data, output=None, *args, **kwargs):
         xp = get_array_module(data)
 
-        if xp.__name__ == "numpy" or xp.__name__ == "cupy":
-            # Move them to torch
-            data_ = torch.tensor(data)
-            output_ = torch.tensor(output) if output is not None else None
+        if xp.__name__ == "numpy" :
+            data_ = torch.from_numpy(data)
+            output_ = torch.from_numpy(output) if output is not None else None
+        elif xp.__name__ == "cupy":
+            data_ = torch.from_dlpack(data)
+            output_ = torch.from_dlpack(output) if output is not None else None
         else:
             data_ = data
             output_ = output
@@ -205,9 +207,9 @@ def with_torch(fun):
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
         if xp.__name__ == "cupy":
-            return ret_.cpu().numpy()
+            return cp.from_dlpack(ret_)
         elif xp.__name__ == "numpy":
-            return ret_.numpy()
+            return ret_.to("cpu").numpy()
 
         return ret_
 
