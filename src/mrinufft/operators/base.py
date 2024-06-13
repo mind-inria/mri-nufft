@@ -194,7 +194,7 @@ def with_torch(fun):
     def wrapper(self, data, output=None, *args, **kwargs):
         xp = get_array_module(data)
 
-        if xp.__name__ == "numpy" :
+        if xp.__name__ == "numpy":
             data_ = torch.from_numpy(data)
             output_ = torch.from_numpy(output) if output is not None else None
         elif xp.__name__ == "cupy":
@@ -304,8 +304,7 @@ class FourierOperatorBase(ABC):
             (use funtools.partial)
         """
         if isinstance(method, np.ndarray) or (
-            self.backend == 'torchkbnufft' and 
-            isinstance(method, torch.Tensor)
+            self.backend == "torchkbnufft" and isinstance(method, torch.Tensor)
         ):
             self.smaps = method
             return None

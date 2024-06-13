@@ -161,20 +161,20 @@ class MRITorchKbNufft(FourierOperatorBase):
             The data consistency error in image space.
         """
         if not isinstance(obs_data, torch.Tensor):
-            if not obs_data : 
+            if not obs_data:
                 obs_data = None
 
             xp = get_array_module(obs_data)
-            
-            if xp.__name__ == "numpy" :
-                obs_data = torch.from_numpy(obs_data) 
+
+            if xp.__name__ == "numpy":
+                obs_data = torch.from_numpy(obs_data)
             elif xp.__name__ == "cupy":
-                obs_data = torch.from_dlpack(obs_data) 
+                obs_data = torch.from_dlpack(obs_data)
             else:
                 obs_data = torch.tensor(obs_data)
-        
+
         ret = self.adj_op(self.op(data) - obs_data)
-        return ret 
+        return ret
 
     def _safe_squeeze(self, arr):
         """Squeeze the first two dimensions of shape of the operator."""
@@ -224,15 +224,15 @@ class MRITorchKbNufft(FourierOperatorBase):
             **kwargs,
         )
         density_comp = tkbn.calc_density_compensation_function(
-                ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
-            )
+            ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
+        )
         if normalize:
             spike = torch.zeros(volume_shape, dtype=torch.float32)
             mid_loc = tuple(v // 2 for v in volume_shape)
             spike[mid_loc] = 1
             psf = grid_op.adj_op(grid_op.op(spike))
             density_comp /= torch.norm(psf)
-        
+
         return density_comp.squeeze()
 
     def check_samples_shape(self):
@@ -242,8 +242,9 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         bool : True if the samples shape is (ndim, klength).
                 False if the samples shape is (klength, ndim).
-        
+
         """
         if self.samples.shape[0] == len(self.shape):
             return False
-        else : return True
+        else:
+            return True
