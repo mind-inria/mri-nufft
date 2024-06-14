@@ -133,7 +133,9 @@ class MRITorchKbNufft(FourierOperatorBase):
         samples_adj_op = self.samples
         if self.check_samples_shape(samples_adj_op):
             samples_adj_op = torch.transpose(samples_adj_op, 1, 0)
-        img = self._tkb_adj_op.forward(data=data, omega=samples_adj_op, smaps=self.smaps)
+        img = self._tkb_adj_op.forward(
+            data=data, omega=samples_adj_op, smaps=self.smaps
+        )
 
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img /= self.norm_factor
