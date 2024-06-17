@@ -13,6 +13,7 @@ Here a stack of spiral is used as a demonstration.
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from mrinufft import display_2D_trajectory
 
 plt.rcParams["image.cmap"] = "gray"

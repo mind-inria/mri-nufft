@@ -83,11 +83,15 @@ def image_data(stacked_op):
     """Generate a random image."""
     B, C = stacked_op.n_batchs, stacked_op.n_coils
     if stacked_op.smaps is None:
-        img = np.random.randn(B, C, *stacked_op.shape).astype(stacked_op.cpx_dtype)
+        img = np.random.randn(B, C, *stacked_op.shape).astype(
+            stacked_op.cpx_dtype, copy=False
+        )
     elif stacked_op.smaps is not None and stacked_op.n_coils > 1:
-        img = np.random.randn(B, *stacked_op.shape).astype(stacked_op.cpx_dtype)
+        img = np.random.randn(B, *stacked_op.shape).astype(
+            stacked_op.cpx_dtype, copy=False
+        )
 
-    img += 1j * np.random.randn(*img.shape).astype(stacked_op.cpx_dtype)
+    img += 1j * np.random.randn(*img.shape).astype(stacked_op.cpx_dtype, copy=False)
     return img
 
 
@@ -96,9 +100,11 @@ def kspace_data(stacked_op):
     """Generate a random kspace data."""
     B, C = stacked_op.n_batchs, stacked_op.n_coils
     kspace = (1j * np.random.randn(B, C, stacked_op.n_samples)).astype(
-        stacked_op.cpx_dtype
+        stacked_op.cpx_dtype, copy=False
     )
-    kspace += np.random.randn(B, C, stacked_op.n_samples).astype(stacked_op.cpx_dtype)
+    kspace += np.random.randn(B, C, stacked_op.n_samples).astype(
+        stacked_op.cpx_dtype, copy=False
+    )
     return kspace
 
 

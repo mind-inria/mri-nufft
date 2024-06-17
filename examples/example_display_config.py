@@ -8,16 +8,14 @@ The look of the display trajectories can be tweaked by using :py:class:`displayC
 You can tune these parameters to your own taste and needs.
 """
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 # %%
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 
-from mrinufft import displayConfig, display_2D_trajectory, display_3D_trajectory
-from mrinufft.trajectories import (
-    initialize_2D_spiral,
-    conify,
-)
+from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
+from mrinufft.trajectories import conify, initialize_2D_spiral
 
 # Trajectory parameters
 Nc = 120  # Number of shots

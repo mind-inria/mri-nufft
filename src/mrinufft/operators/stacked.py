@@ -168,17 +168,19 @@ class MRIStackedNUFFT(FourierOperatorBase):
     @staticmethod
     def _fftz(data):
         """Apply FFT on z-axis."""
+        xp = get_array_module(data)
         # sqrt(2) required for normalization
-        return sp.fft.fftshift(
-            sp.fft.fft(sp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
+        return xp.fft.fftshift(
+            xp.fft.fft(xp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
 
     @staticmethod
     def _ifftz(data):
         """Apply IFFT on z-axis."""
         # sqrt(2) required for normalization
-        return sp.fft.fftshift(
-            sp.fft.ifft(sp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
+        xp = get_array_module(data)
+        return xp.fft.fftshift(
+            xp.fft.ifft(xp.fft.ifftshift(data, axes=-1), axis=-1, norm="ortho"), axes=-1
         ) / np.sqrt(2)
 
     @with_numpy_cupy
@@ -193,18 +195,19 @@ class MRIStackedNUFFT(FourierOperatorBase):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
 
+        xp = get_array_module(data)
         if ksp is None:
-            ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
+            ksp = xp.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B, C * NZ, NS))
         data_ = data.reshape(B, *XYZ)
         for b in range(B):
             data_c = data_[b] * self.smaps
             data_c = self._fftz(data_c)
             data_c = data_c.reshape(C, *XYZ)
-            tmp = np.ascontiguousarray(data_c[..., self.z_index])
-            tmp = np.moveaxis(tmp, -1, 1)
+            tmp = xp.ascontiguousarray(data_c[..., self.z_index])
+            tmp = xp.moveaxis(tmp, -1, 1)
             tmp = tmp.reshape(C * NZ, *XYZ[:2])
-            ksp[b, ...] = self.operator.op(np.ascontiguousarray(tmp))
+            ksp[b, ...] = self.operator.op(xp.ascontiguousarray(tmp))
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
@@ -237,36 +240,38 @@ class MRIStackedNUFFT(FourierOperatorBase):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
 
-        imgz = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        xp = get_array_module(coeffs)
+        imgz = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
         coeffs_ = coeffs.reshape((B, C * NZ, NS))
         for b in range(B):
-            tmp = np.ascontiguousarray(coeffs_[b, ...])
+            tmp = xp.ascontiguousarray(coeffs_[b, ...])
             tmp_adj = self.operator.adj_op(tmp)
             # move the z axis back
             tmp_adj = tmp_adj.reshape(C, NZ, *XYZ[:2])
-            tmp_adj = np.moveaxis(tmp_adj, 1, -1)
+            tmp_adj = xp.moveaxis(tmp_adj, 1, -1)
             imgz[b][..., self.z_index] = tmp_adj
         imgc = self._ifftz(imgz)
-        img = img or np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        img = img or xp.empty((B, *XYZ), dtype=self.cpx_dtype)
         for b in range(B):
-            img[b] = np.sum(imgc[b] * self.smaps.conj(), axis=0)
+            img[b] = xp.sum(imgc[b] * self.smaps.conj(), axis=0)
         return img
 
     def _adj_op_calibless(self, coeffs, img):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
 
-        imgz = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        xp = get_array_module(coeffs)
+        imgz = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
         coeffs_ = coeffs.reshape((B, C, NZ, NS))
         coeffs_ = coeffs.reshape((B, C * NZ, NS))
         for b in range(B):
-            t = np.ascontiguousarray(coeffs_[b, ...])
+            t = xp.ascontiguousarray(coeffs_[b, ...])
             adj = self.operator.adj_op(t)
             # move the z axis back
             adj = adj.reshape(C, NZ, *XYZ[:2])
-            adj = np.moveaxis(adj, 1, -1)
-            imgz[b][..., self.z_index] = np.ascontiguousarray(adj)
-        imgz = np.reshape(imgz, (B, C, *XYZ))
+            adj = xp.moveaxis(adj, 1, -1)
+            imgz[b][..., self.z_index] = xp.ascontiguousarray(adj)
+        imgz = xp.reshape(imgz, (B, C, *XYZ))
         img = self._ifftz(imgz)
         return img
 
@@ -282,6 +287,29 @@ class MRIStackedNUFFT(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
+
+    def get_lipschitz_cst(self, max_iter=10):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            number of iteration to compute the lipschitz constant.
+        **kwargs:
+            Extra arguments givent
+
+        Returns
+        -------
+        float
+            Spectral Radius
+
+        Notes
+        -----
+        This uses the Iterative Power Method to compute the largest singular value of a
+        minified version of the nufft operator. No coil or B0 compensation is used,
+        but includes any computed density.
+        """
+        return self.operator.get_lipschitz_cst(max_iter)
 
 
 class MRIStackedNUFFTGPU(MRIStackedNUFFT):
@@ -337,6 +365,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+
         if isinstance(backend, str):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
             self.samples = samples2d.reshape(-1, 2)
@@ -348,6 +377,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 n_trans=len(self.z_index),
                 smaps=None,
                 squeeze_dims=True,
+                density=density,
                 **kwargs,
             )
         elif isinstance(backend, FourierOperatorBase):
