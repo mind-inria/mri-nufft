@@ -340,7 +340,7 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tfnufft`, `gpunufft` or `torchkbnufft`
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft`
         """
         if isinstance(method, np.ndarray):
             self.density = method
@@ -348,7 +348,7 @@ class FourierOperatorBase(ABC):
         if not method:
             self.density = None
             return None
-        if method is True and self.backend in ["tfnufft", "gpunufft", "torchkbnufft"]:
+        if method is True and self.backend in ["tensorflow", "gpunufft", "torchkbnufft"]:
             method = "pipe"
 
         kwargs = {}
