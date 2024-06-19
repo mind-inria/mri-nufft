@@ -348,7 +348,11 @@ class FourierOperatorBase(ABC):
         if not method:
             self.density = None
             return None
-        if method is True and self.backend in ["tensorflow", "gpunufft", "torchkbnufft"]:
+        if method is True and self.backend in [
+            "tensorflow",
+            "gpunufft",
+            "torchkbnufft",
+        ]:
             method = "pipe"
 
         kwargs = {}
