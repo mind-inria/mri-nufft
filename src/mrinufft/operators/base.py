@@ -339,7 +339,8 @@ class FourierOperatorBase(ABC):
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
-            If a bool, it will enable or disable the density compensation.
+            If `True`, the method `pipe` is chosen as default estimation method, if 
+            `backend` is `tfnufft`, `gpunufft` or `torchkbnufft`
         """
         if isinstance(method, np.ndarray):
             self.density = method
