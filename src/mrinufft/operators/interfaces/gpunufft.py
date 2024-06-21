@@ -211,8 +211,10 @@ class RawGpuNUFFT:
             the kspace locations
         density: np.ndarray, optional
             the density compensation
-            if not provided, the density is not updated.
+            if not provided, no density compensation is performed.
         """
+        if density is None:
+            density = np.ones(samples.shape[0])
         self.operator.set_pts(
             np.reshape(samples, samples.shape[::-1], order="F"),
             density,
@@ -397,7 +399,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             )
         self.shape = shape
 
-        self.samples = proper_trajectory(
+        self._samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="unit"
         )
         self.dtype = self.samples.dtype

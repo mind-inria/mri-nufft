@@ -35,7 +35,7 @@ from case_trajectories import CasesTrajectories
 @parametrize_with_cases(
     "kspace_locs, shape",
     cases=CasesTrajectories,
-    glob="*nyquist_radial*",
+    glob="*random*",
 )
 @parametrize(backend=["gpunufft"])
 def operator(
@@ -71,14 +71,14 @@ def operator(
 
 
 def update_operator(operator):
-    """Generate a batch operator with n_batch=1."""
+    """Generate a new operator with updated trajectory."""
     return get_operator(operator.backend)(
         operator.samples,
         operator.shape,
         n_coils=operator.n_coils,
         smaps=operator.smaps,
         squeeze_dims=False,
-        n_trans=1,
+        n_batchs=operator.n_batchs,
     )
 
 
@@ -108,32 +108,19 @@ def test_op(operator, array_interface, image_data):
     """Test the batch type 2 (forward)."""
     image_data = to_interface(image_data, array_interface)
 
-    gitter = np.random.rand(operator.samples.shape).astype(np.float32)
+    gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
     new_operator = update_operator(operator)
     
-    kspace_batched = from_interface(operator.op(image_data), array_interface)
-    if operator.uses_sense:
-        image_flat = image_data.reshape(-1, *operator.shape)
-    else:
-        image_flat = image_data.reshape(-1, operator.n_coils, *operator.shape)
-    kspace_flat = [None] * operator.n_batchs
-    for i in range(len(kspace_flat)):
-        kspace_flat[i] = from_interface(
-            new_operator.op(image_flat[i]), array_interface
-        )
-
-    kspace_flat = np.reshape(
-        np.concatenate(kspace_flat, axis=0),
-        (operator.n_batchs, operator.n_coils, operator.n_samples),
-    )
-
-    npt.assert_array_almost_equal(kspace_batched, kspace_flat)
+    kspace_changed = from_interface(operator.op(image_data), array_interface)
+    kspace_true = from_interface(new_operator.op(image_data), array_interface)
+    
+    npt.assert_array_almost_equal(kspace_changed, kspace_true)
 
 
 @param_array_interface
-def test_batch_adj_op(
+def test_adj_op(
     operator,
     array_interface,
     kspace_data,
@@ -141,33 +128,12 @@ def test_batch_adj_op(
     """Test the batch type 1 (adjoint)."""
     kspace_data = to_interface(kspace_data, array_interface)
     
-    gitter = np.random.rand(operator.samples.shape).astype(np.float32)
+    gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
     new_operator = update_operator(operator)
     
-    kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
-    image_flat = [None] * operator.n_batchs
-    
-    gitter = np.random.rand(operator.samples.shape).astype(np.float32)
-    # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += gitter / 1000
-    
-    for i in range(len(image_flat)):
-        image_flat[i] = from_interface(
-            new_operator.adj_op(kspace_flat[i]), array_interface
-        )
-
-    if operator.uses_sense:
-        shape = (operator.n_batchs, 1, *operator.shape)
-    else:
-        shape = (operator.n_batchs, operator.n_coils, *operator.shape)
-
-    image_flat = np.reshape(
-        np.concatenate(image_flat, axis=0),
-        shape,
-    )
-
-    image_batched = from_interface(operator.adj_op(kspace_data), array_interface)
+    image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
+    image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
-    npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=1e-3)
+    npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
