@@ -40,6 +40,7 @@ class RawFinufftPlan:
             self._make_plan(i, **kwargs)
             self._set_pts(i)
 
+        self._make_plan_grad(**kwargs)
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
             typ,
@@ -150,3 +151,10 @@ class MRIfinufft(FourierOperatorCPU):
             n_trans=n_trans,
             **kwargs,
         )
+
+    @FourierOperatorCPU.samples.setter
+    def samples(self, samples):
+        self._samples = samples
+        for typ in [1, 2, "grad"]:
+            self.raw_op._set_pts(typ)
+        
