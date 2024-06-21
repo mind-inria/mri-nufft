@@ -1,10 +1,11 @@
 """SMaps module for sensitivity maps estimation."""
 
+from __future__ import annotations
+
 from mrinufft.density.utils import flat_traj
 from mrinufft.operators.base import get_array_module
 from .utils import register_smaps
 import numpy as np
-from typing import Tuple
 
 
 def _extract_kspace_center(
@@ -102,10 +103,10 @@ def low_frequency(
     shape,
     kspace_data,
     backend,
-    threshold: float | Tuple[float, ...] = 0.1,
+    threshold: float | tuple[float, ...] = 0.1,
     density=None,
     window_fun: str = "ellipse",
-    blurr_factor: float | Tuple[float, ...] = 0.0,
+    blurr_factor: float | tuple[float, ...] = 0.0,
     mask: bool = False,
 ):
     """

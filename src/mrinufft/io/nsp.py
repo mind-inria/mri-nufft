@@ -47,9 +47,9 @@ def write_gradients(
         Initial positions. Shape (num_shots, dimension).
     grad_filename : str
         Gradient filename.
-    img_size : Tuple[int, ...]
+    img_size : tuple[int, ...]
         Image size.
-    FOV : Tuple[float, ...]
+    FOV : tuple[float, ...]
         Field of view.
     in_out : bool, optional
         Whether it is In-Out trajectory?, by default True
@@ -61,7 +61,7 @@ def write_gradients(
         Trajectory versioning, by default 4.2
     recon_tag : float, optional
         Reconstruction tag for online recon, by default 1.1
-    timestamp : Optional[float], optional
+    timestamp : float, optional
         Timestamp of trajectory, by default None
     keep_txt_file : bool, optional
         Whether to keep the text file used temporarily which holds data pushed to
