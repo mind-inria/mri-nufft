@@ -201,7 +201,7 @@ class RawGpuNUFFT:
                 # Support for one additional dimension
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
-        
+
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
 
@@ -219,8 +219,6 @@ class RawGpuNUFFT:
             np.reshape(samples, samples.shape[::-1], order="F"),
             density,
         )
-        
-        
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
@@ -503,9 +501,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
+        """Set the samples for the Fourier Operator.
+
+        Parameters
+        ----------
+        samples: np.ndarray
+            The samples for the Fourier Operator.
+        """
         self.raw_op.set_pts(samples)
         self._samples = samples
-        
+
     @classmethod
     def pipe(
         cls,
