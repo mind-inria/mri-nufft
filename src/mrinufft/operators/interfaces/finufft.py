@@ -3,7 +3,7 @@
 import numpy as np
 
 from mrinufft._utils import proper_trajectory
-from mrinufft.operators.base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU, FourierOperatorBase
 
 FINUFFT_AVAILABLE = True
 try:
@@ -41,6 +41,7 @@ class RawFinufftPlan:
             self._set_pts(i)
 
         self._make_plan_grad(**kwargs)
+
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
             typ,
@@ -134,6 +135,12 @@ class MRIfinufft(FourierOperatorCPU):
         squeeze_dims=True,
         **kwargs,
     ):
+        self.raw_op = RawFinufftPlan(
+            samples,
+            shape,
+            n_trans=n_trans,
+            **kwargs,
+        )
         super().__init__(
             samples,
             shape,
@@ -142,17 +149,12 @@ class MRIfinufft(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=n_trans,
             smaps=smaps,
+            raw_op=self.raw_op,
             squeeze_dims=squeeze_dims,
         )
 
-        self.raw_op = RawFinufftPlan(
-            samples,
-            shape,
-            n_trans=n_trans,
-            **kwargs,
-        )
 
-    @FourierOperatorCPU.samples.setter
+    @FourierOperatorBase.samples.setter
     def samples(self, samples):
         self._samples = samples
         for typ in [1, 2, "grad"]:
