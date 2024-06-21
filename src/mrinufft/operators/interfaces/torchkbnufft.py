@@ -101,10 +101,9 @@ class MRITorchKbNufft(FourierOperatorBase):
         if self.smaps is not None:
             self.smaps = self.smaps.to(data.dtype, copy=False)
 
-        samples_op = self.samples
-        if self.check_samples_shape(samples_op):
-            samples_op = torch.transpose(samples_op, 1, 0)
-        kdata = self._tkb_op.forward(image=data, omega=samples_op, smaps=self.smaps)
+        kdata = self._tkb_op.forward(
+            image=data, omega=self.samples.t(), smaps=self.smaps
+        )
 
         kdata /= self.norm_factor
         return self._safe_squeeze(kdata)
@@ -130,11 +129,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         if self.smaps is not None:
             self.smaps = self.smaps.to(data.dtype)
 
-        samples_adj_op = self.samples
-        if self.check_samples_shape(samples_adj_op):
-            samples_adj_op = torch.transpose(samples_adj_op, 1, 0)
         img = self._tkb_adj_op.forward(
-            data=data, omega=samples_adj_op, smaps=self.smaps
+            data=data, omega=self.samples.t(), smaps=self.smaps
         )
 
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
@@ -232,17 +228,3 @@ class MRITorchKbNufft(FourierOperatorBase):
             density_comp /= torch.norm(psf)
 
         return density_comp.squeeze()
-
-    def check_samples_shape(self, samples):
-        """Check the samples shape.
-
-        Returns
-        -------
-        bool : True if the samples shape is (ndim, klength).
-                False if the samples shape is (klength, ndim).
-
-        """
-        if samples.shape[0] == len(self.shape):
-            return False
-        else:
-            return True
