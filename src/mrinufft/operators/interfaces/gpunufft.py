@@ -201,6 +201,24 @@ class RawGpuNUFFT:
                 # Support for one additional dimension
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
+        
+    def set_pts(self, samples, density=None):
+        """Update the kspace locations and density compensation.
+
+        Parameters
+        ----------
+        samples: np.ndarray
+            the kspace locations
+        density: np.ndarray, optional
+            the density compensation
+            if not provided, the density is not updated.
+        """
+        self.operator.set_pts(
+            np.reshape(samples, samples.shape[::-1], order="F"),
+            density,
+        )
+        
+        
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
