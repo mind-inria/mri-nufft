@@ -80,7 +80,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.compute_density(density)
 
         self.compute_smaps(smaps)
-        if isinstance(smaps, np.ndarray) or isinstance(smaps, cp.ndarray):
+        if isinstance(smaps, np.ndarray) or (CUPY_AVAILABLE and isinstance(smaps, cp.ndarray)):
             self.smaps = torch.tensor(smaps)
 
     @with_torch
