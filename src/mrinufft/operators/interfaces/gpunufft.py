@@ -499,6 +499,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
 
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        self.raw_op.set_pts(samples)
+        self._samples = samples
+        
     @classmethod
     def pipe(
         cls,
