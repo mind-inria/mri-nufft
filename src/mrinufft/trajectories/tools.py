@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from scipy.interpolate import CubicSpline
+
 from .maths import Rv, Rx, Ry, Rz
 from .utils import KMAX, initialize_tilt
 
@@ -250,6 +252,85 @@ def conify(
         new_trajectory[:, Ns // 2 :, 2] = -new_trajectory[:, Ns // 2 :, 2]
 
     return new_trajectory
+
+
+def epify(trajectory, nb_transition_steps, nb_trains, reverse_odd_shots=False):
+    Nc, Ns, Nd = trajectory.shape
+    if Nc % nb_trains != 0:
+        raise ValueError(
+            "`nb_trains` should divide the number of shots in `trajectory`."
+        )
+    nb_shot_per_group = Nc // nb_trains
+
+    # Reverse odd shots to facilitate concatenation if requested
+    trajectory = np.copy(trajectory)
+    trajectory = trajectory.reshape((nb_trains, -1, Ns, Nd))
+    if reverse_odd_shots:
+        trajectory[:, 1::2] = trajectory[:, 1::2, ::-1]
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate(
+        [
+            np.arange(Ns) + i * (nb_transition_steps + Ns)
+            for i in range(nb_shot_per_group)
+        ]
+    )
+    target_sample_ids = np.arange(
+        nb_shot_per_group * Ns + (nb_shot_per_group - 1) * nb_transition_steps
+    )
+
+    for i_c in range(nb_trains):
+        spline = CubicSpline(source_sample_ids, np.concatenate(trajectory[i_c], axis=0))
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
+
+
+def prewind(trajectory, nb_transition_steps):
+    Nc, Ns, Nd = trajectory.shape
+    if nb_transition_steps < 3:
+        raise ValueError("`nb_transition_steps` should be at least 2.")
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate([[0, 1], nb_transition_steps + np.arange(Ns)])
+    target_sample_ids = np.arange(nb_transition_steps + Ns)
+
+    for i_c in range(Nc):
+        spline = CubicSpline(
+            source_sample_ids,
+            np.concatenate([np.zeros((2, Nd)), trajectory[i_c]], axis=0),
+        )
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
+
+
+def rewind(trajectory, nb_transition_steps):
+    Nc, Ns, Nd = trajectory.shape
+    if nb_transition_steps < 3:
+        raise ValueError("`nb_transition_steps` should be at least 2.")
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate(
+        [np.arange(Ns), Ns + nb_transition_steps - np.arange(3, 1, -1)]
+    )
+    print(source_sample_ids)  # FIXME
+    target_sample_ids = np.arange(nb_transition_steps + Ns)
+
+    for i_c in range(Nc):
+        spline = CubicSpline(
+            source_sample_ids,
+            np.concatenate([trajectory[i_c], np.zeros((2, Nd))], axis=0),
+        )
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
 
 
 ####################

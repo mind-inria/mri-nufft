@@ -6,9 +6,9 @@ import numpy as np
 import numpy.linalg as nl
 from scipy.special import ellipj, ellipk
 
-from .maths import CIRCLE_PACKING_DENSITY, Ra, Ry, Rz, generate_fibonacci_circle
-from .tools import conify, duplicate_along_axes, precess
-from .trajectory2D import initialize_2D_spiral
+from .maths import CIRCLE_PACKING_DENSITY, R2D, Ra, Ry, Rz, generate_fibonacci_circle
+from .tools import stack, conify, duplicate_along_axes, precess, epify
+from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Packings, initialize_shape_norm, initialize_tilt
 
 ############################
@@ -681,3 +681,103 @@ def initialize_3D_seiffert_shells(
         trajectory[count : count + Ms] = trajectory[count : count + Ms] @ rotation
         count += Ms
     return KMAX * trajectory
+
+
+#########################
+# EPI-LIKE TRAJECTORIES #
+#########################
+
+
+def initialize_3D_TURBINE(
+    Nc,
+    Ns_readouts,
+    Ns_transitions,
+    nb_blades,
+    blade_tilt="uniform",
+    nb_trains="auto",
+    in_out=True,
+):
+    # Assess arguments validity
+    if nb_trains == "auto":
+        nb_trains = nb_blades
+    if Nc % nb_blades != 0:
+        raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
+    nb_shot_per_blade = Nc // nb_blades
+
+    # Initialize the first shot of each blade on a plane
+    single_plane = initialize_2D_radial(
+        nb_blades, Ns_readouts, in_out=in_out, tilt=blade_tilt
+    )
+
+    # Stack the blades first shots with tilt to create each full blade
+    trajectory = stack(single_plane, nb_shot_per_blade, z_tilt=0)
+
+    # Re-order the shot to be EPI-compatible
+    trajectory = trajectory.reshape((nb_shot_per_blade, nb_blades, Ns_readouts, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
+
+    # Merge shots into EPI-like multi-readout trains
+    trajectory = epify(
+        trajectory,
+        nb_transition_steps=Ns_transitions,
+        nb_trains=nb_trains,
+        reverse_odd_shots=True,
+    )
+
+    return trajectory
+
+
+def initialize_3D_REPI(
+    Nc,
+    Ns_readouts,
+    Ns_transitions,
+    nb_blades,
+    nb_blade_revolutions=0,
+    blade_tilt="uniform",
+    nb_spiral_revolutions=0,
+    spiral="archimedes",
+    nb_trains="auto",
+    in_out=True,
+):
+    # Assess arguments validity
+    if nb_trains == "auto":
+        nb_trains = nb_blades
+    if Nc % nb_blades != 0:
+        raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
+    nb_shot_per_blade = Nc // nb_blades
+
+    # Initialize trajectory as a stack of single shots
+    single_shot = initialize_2D_spiral(
+        1, Ns_readouts, in_out=in_out, tilt=0, nb_revolutions=nb_spiral_revolutions
+    )
+    shot_tilt = 2 * np.pi * nb_blade_revolutions / Nc
+    trajectory = stack(single_shot, Nc, z_tilt=shot_tilt)
+
+    # Rotate some shots to separate the blades
+    for i_b in range(nb_blades):
+        rotation = R2D(
+            i_b * initialize_tilt(blade_tilt, nb_partitions=nb_blades) / (1 + in_out)
+        ).T
+        trajectory[i_b::nb_blades, ..., :2] = (
+            trajectory[i_b::nb_blades, ..., :2] @ rotation
+        )
+
+    # Re-order the shot to be EPI-compatible
+    trajectory = trajectory.reshape((nb_shot_per_blade, nb_blades, Ns_readouts, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
+
+    # Merge shots into EPI-like multi-readout trains
+    trajectory = epify(
+        trajectory,
+        nb_transition_steps=Ns_transitions,
+        nb_trains=nb_trains,
+        reverse_odd_shots=True,
+    )
+
+    return trajectory
