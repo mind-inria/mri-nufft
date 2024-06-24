@@ -132,6 +132,7 @@ jobs:
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install cython>=3.0.10 numpy>=2.0.0
           pip install pynfft2
 
       - name: Run Tests
