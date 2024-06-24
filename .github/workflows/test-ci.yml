@@ -53,14 +53,14 @@ jobs:
         shell: bash
         run: |
             python -m pip uninstall -y numpy
-            python -m pip uninstall -y cython
+            python -m pip uninstall -y numpy
 
       - name: Install pynfft
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install --upgrade "cython>=3.0.10" "numpy>=2.0.0"
+          python -m pip install "numpy>=2.0.0"
           python -m pip install pynfft2
 
       - name: Install pynufft
