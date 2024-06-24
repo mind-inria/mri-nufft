@@ -265,11 +265,12 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         # Support for concurrent stream and computations.
-        
+
     @FourierOperatorBase.samples.setter
-    def samples(self, samples): 
+    def samples(self, samples):
+        """Update the plans when changing the samples."""
         self._samples = samples
-        for typ in [1, 2, 'grad']:
+        for typ in [1, 2, "grad"]:
             self.raw_op._set_pts(typ)
 
     @with_numpy_cupy

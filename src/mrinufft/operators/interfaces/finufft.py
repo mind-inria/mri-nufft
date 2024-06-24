@@ -153,11 +153,9 @@ class MRIfinufft(FourierOperatorCPU):
             squeeze_dims=squeeze_dims,
         )
 
-
-
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
+        """Update the plans when changing the samples."""
         self._samples = samples
         for typ in [1, 2, "grad"]:
             self.raw_op._set_pts(typ)
-        

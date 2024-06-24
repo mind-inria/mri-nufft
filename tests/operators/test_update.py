@@ -1,4 +1,5 @@
 """Test for update in trajectory and density.
+
 Only finufft, cufinufft and gpunufft support update.
 """
 
@@ -36,8 +37,7 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*random*",
 )
-@parametrize(backend=["finufft" ,"cufinufft", "gpunufft"])
-
+@parametrize(backend=["finufft", "cufinufft", "gpunufft"])
 def operator(
     request,
     kspace_locs,
