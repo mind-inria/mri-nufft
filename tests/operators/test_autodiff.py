@@ -95,7 +95,7 @@ def test_adjoint_and_grad(operator, interface):
         adj_data_ndft = torch.cat(
             [ndft_matrix(operator).conj().T @ ksp_data[i].flatten() for i in range(ksp_data.shape[0])],
             dim = 0,
-        ).reshape(adj_data.shape) #只不过没用plan而已 但也用了operator 所以会到autodiff
+        ).reshape(adj_data.shape) 
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
