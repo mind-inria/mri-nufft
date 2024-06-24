@@ -69,7 +69,7 @@ def operator(
         n_batchs=n_batch,
         n_trans=n_trans,
         squeeze_dims=False,
-        density=density
+        density=density,
     )
 
 
