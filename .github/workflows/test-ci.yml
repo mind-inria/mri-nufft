@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install --upgrade cython>=3.0.10 numpy>=2.0.0
+          python -m pip install --upgrade "cython>=3.0.10" "numpy>=2.0.0"
     
       - name: Install pynfft
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
