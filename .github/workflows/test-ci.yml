@@ -48,20 +48,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
-      - name: UnInstall pynfft dependencies
-        if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
-        shell: bash
-        run: |
-            python -m pip uninstall -y numpy
-            python -m pip uninstall -y numpy
-
       - name: Install pynfft
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install "numpy>=2.0.0"
-          python -m pip install pynfft2
+          python -m pip install pynfft2>=1.4.3
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
