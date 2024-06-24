@@ -52,8 +52,8 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
-          pip install cython>=3.0.10 numpy>=2.0.0
           sudo apt install -y libnfft3-dev
+          python -m pip install cython>=3.0.10 numpy>=2.0.0
           python -m pip install pynfft2
 
       - name: Install pynufft
