@@ -72,6 +72,8 @@ class RawCufinufftPlan:
             self._make_plan(i, **kwargs)
             self._set_pts(i)
 
+        self._make_plan_grad(**kwargs)
+
     @property
     def dtype(self):
         """Return the dtype (precision) of the transform."""
@@ -222,7 +224,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.autograd_available = True
         # For now only single precision is supported
-        self.samples = np.asfortranarray(
+        self._samples = np.asfortranarray(
             proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
         )
         self.dtype = self.samples.dtype
@@ -263,6 +265,12 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         # Support for concurrent stream and computations.
+        
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples): 
+        self._samples = samples
+        for typ in [1, 2, 'grad']:
+            self.raw_op._set_pts(typ)
 
     @with_numpy_cupy
     @nvtx_mark()
