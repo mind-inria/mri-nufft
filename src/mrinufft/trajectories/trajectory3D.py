@@ -6,7 +6,14 @@ import numpy as np
 import numpy.linalg as nl
 from scipy.special import ellipj, ellipk
 
-from .maths import CIRCLE_PACKING_DENSITY, Ra, Ry, Rz, generate_fibonacci_circle
+from .maths import (
+    CIRCLE_PACKING_DENSITY,
+    Ra,
+    Ry,
+    Rz,
+    generate_fibonacci_circle,
+    EIGENVECTOR_2D_FIBONACCI,
+)
 from .tools import conify, duplicate_along_axes, precess
 from .trajectory2D import initialize_2D_spiral
 from .utils import KMAX, Packings, initialize_shape_norm, initialize_tilt
