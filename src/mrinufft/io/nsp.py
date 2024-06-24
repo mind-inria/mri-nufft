@@ -1,36 +1,40 @@
 """Read/Write trajectory for Neurospin sequences."""
 
-import warnings
+from __future__ import annotations
+
 import os
-from typing import Tuple, Optional
-import numpy as np
-from datetime import datetime
+import warnings
 from array import array
+from datetime import datetime
+
+import numpy as np
 
 from mrinufft.trajectories.utils import (
-    KMAX,
-    DEFAULT_RASTER_TIME,
     DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
     DEFAULT_SMAX,
+    KMAX,
     Gammas,
-    convert_trajectory_to_gradients,
-    convert_gradients_to_slew_rates,
     check_hardware_constraints,
+    convert_gradients_to_slew_rates,
+    convert_trajectory_to_gradients,
 )
+
+from .siemens import read_siemens_rawdat
 
 
 def write_gradients(
     gradients: np.ndarray,
     initial_positions: np.ndarray,
     grad_filename: str,
-    img_size: Tuple[int, ...],
-    FOV: Tuple[float, ...],
+    img_size: tuple[int, ...],
+    FOV: tuple[float, ...],
     in_out: bool = True,
     min_osf: int = 5,
     gamma: float = Gammas.HYDROGEN,
     version: float = 4.2,
     recon_tag: float = 1.1,
-    timestamp: Optional[float] = None,
+    timestamp: float | None = None,
     keep_txt_file: bool = False,
 ):
     """Create gradient file from gradients and initial positions.
@@ -43,9 +47,9 @@ def write_gradients(
         Initial positions. Shape (num_shots, dimension).
     grad_filename : str
         Gradient filename.
-    img_size : Tuple[int, ...]
+    img_size : tuple[int, ...]
         Image size.
-    FOV : Tuple[float, ...]
+    FOV : tuple[float, ...]
         Field of view.
     in_out : bool, optional
         Whether it is In-Out trajectory?, by default True
@@ -57,7 +61,7 @@ def write_gradients(
         Trajectory versioning, by default 4.2
     recon_tag : float, optional
         Reconstruction tag for online recon, by default 1.1
-    timestamp : Optional[float], optional
+    timestamp : float, optional
         Timestamp of trajectory, by default None
     keep_txt_file : bool, optional
         Whether to keep the text file used temporarily which holds data pushed to
@@ -165,15 +169,15 @@ def _pop_elements(array, num_elements=1, type="float"):
         Array with elements popped.
     """
     if num_elements == 1:
-        return array[0].astype(type), array[1:]
+        return array[0].astype(type, copy=False), array[1:]
     else:
-        return array[0:num_elements].astype(type), array[num_elements:]
+        return array[0:num_elements].astype(type, copy=False), array[num_elements:]
 
 
 def write_trajectory(
     trajectory: np.ndarray,
-    FOV: Tuple[float, ...],
-    img_size: Tuple[int, ...],
+    FOV: tuple[float, ...],
+    img_size: tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
     gamma: float = Gammas.HYDROGEN,
@@ -253,7 +257,7 @@ def read_trajectory(
     grad_filename: str,
     dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
-    gamma: float = Gammas.HYDROGEN,
+    gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
@@ -390,3 +394,75 @@ def read_trajectory(
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
         return kspace_loc, params
+
+
+def read_arbgrad_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    squeeze: bool = True,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
+    data_type: str = "ARBGRAD_VE11C",
+):  # pragma: no cover
+    """Read raw data from a Siemens MRI file.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the Siemens MRI file.
+    removeOS : bool, optional
+        Whether to remove the oversampling, by default False.
+    squeeze : bool, optional
+        Whether to squeeze the dimensions of the data, by default True.
+    slice_num : int, optional
+        The slice to read, by default None. This applies for 2D data.
+    contrast_num: int, optional
+        The contrast to read, by default None.
+    data_type : str, optional
+        The type of data to read, by default 'ARBGRAD_VE11C'.
+
+    Returns
+    -------
+    data: ndarray
+        Imported data formatted as n_coils X n_samples X n_slices X n_contrasts
+    hdr: dict
+        Extra information about the data parsed from the twix file
+
+    Raises
+    ------
+    ImportError
+        If the mapVBVD module is not available.
+
+    Notes
+    -----
+    This function requires the mapVBVD module to be installed.
+    You can install it using the following command:
+        `pip install pymapVBVD`
+    """
+    data, hdr, twixObj = read_siemens_rawdat(
+        filename=filename,
+        removeOS=removeOS,
+        squeeze=squeeze,
+        slice_num=slice_num,
+        contrast_num=contrast_num,
+    )
+    if "ARBGRAD_VE11C" in data_type:
+        hdr["type"] = "ARBGRAD_GRE"
+        hdr["shifts"] = ()
+        for s in [7, 6, 8]:
+            shift = twixObj.search_header_for_val(
+                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
+            )
+            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
+        hdr["oversampling_factor"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWiPMemBlock", "alFree", "4")
+        )[0]
+        hdr["trajectory_name"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWipMemBlock", "tFree")
+        )[0][1:-1]
+        if hdr["n_contrasts"] > 1:
+            hdr["turboFactor"] = twixObj.search_header_for_val(
+                "Phoenix", ("sFastImaging", "lTurboFactor")
+            )[0]
+            hdr["type"] = "ARBGRAD_MP2RAGE"
+    return data, hdr

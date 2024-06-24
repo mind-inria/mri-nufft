@@ -22,6 +22,19 @@ This python package extends various NUFFT (Non-Uniform Fast Fourier Transform) p
 
 In particular, it provides a unified interface for all the methods, with extra features such as coil sensitivity, density compensated adjoint and off-resonance corrections (for static B0 inhomogeneities).
 
+.. raw:: html 
+   
+   <div align="center">
+
+.. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.svg
+   :width: 700
+   :align: center
+
+Modularity and Integration of MRI-nufft with the python computing libraries.
+
+.. raw:: html 
+   
+   </div>
 
 Usage
 =====
@@ -64,7 +77,7 @@ Want to see more ?
 
 - Check the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
 
-- Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/autoexamples/index.html>`_
+- Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/generated/autoexamples/index.html>`_
 
 
 Installation
@@ -75,3 +88,22 @@ MRI-nufft is available on Pypi and can be installed with::
   pip install mri-nufft
 
 You will also need to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`_ for more guidance.
+
+
+Benchmark
+---------
+
+A benchmark of NUFFT backend for MRI applications is available in https://github.com/mind-inria/mri-nufft-benchmark
+
+
+Who is using MRI-NUFFT?
+----------------------
+
+Here are several project that rely on MRI-NUFFT:
+
+- `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`
+- `snake-fmri <https://github.com/paquiteau/snake-fmri>`
+- `deepinv <https://github.com/deepinv/deepinv`
+
+
+  Add yours by opening a PR !

@@ -80,8 +80,7 @@ def _writecfl(array, cfl_file, hdr_file=None):
     with open(cfl_file, "w+b") as d:
         os.ftruncate(d.fileno(), size)
         mm = mmap.mmap(d.fileno(), size, flags=mmap.MAP_SHARED, prot=mmap.PROT_WRITE)
-        if array.dtype != np.complex64:
-            array = array.astype(np.complex64)
+        array = array.astype(np.complex64, copy=False)
         mm.write(np.ascontiguousarray(array.T))
         mm.close()
 
@@ -107,7 +106,7 @@ def traj2cfl(traj, shape, basename):
         traj_3d[..., :2] = traj_
         traj_ = traj_3d
     else:
-        traj_ = traj_.astype(np.complex64)
+        traj_ = traj_.astype(np.complex64, copy=False)
     traj_ = traj_[None, None, ...]
 
     _writecfl(traj_.T, basename)

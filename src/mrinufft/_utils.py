@@ -9,9 +9,9 @@ from numpy.typing import DTypeLike
 
 ARRAY_LIBS = {
     "numpy": (np, np.ndarray),
-    "cupy": None,
-    "torch": None,
-    "tensorflow": None,
+    "cupy": (None, None),
+    "torch": (None, None),
+    "tensorflow": (None, None),
 }
 try:
     import cupy
@@ -52,9 +52,9 @@ def get_array_module(array):
 def auto_cast(array, dtype: DTypeLike):
     module = get_array_module(array)
     if module.__name__ == "torch":
-        return array.to(NP2TORCH[np.dtype(dtype)])
+        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
     else:
-        return array.astype(dtype)
+        return array.astype(dtype, copy=False)
 
 
 def proper_trajectory(trajectory, normalize="pi"):
@@ -75,25 +75,34 @@ def proper_trajectory(trajectory, normalize="pi"):
         The normalized trajectory of shape (Nc * Ns, dim) or (Ns, dim) in -pi, pi
     """
     # flatten to a list of point
+    xp = get_array_module(trajectory)  # check if the trajectory is a tensor
     try:
-        new_traj = np.asarray(trajectory).copy()
+        new_traj = (
+            trajectory.clone()
+            if xp.__name__ == "torch"
+            else np.asarray(trajectory).copy()
+        )
     except Exception as e:
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"
         ) from e
+
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
-    if normalize == "pi" and np.max(abs(new_traj)) - 1e-4 < 0.5:
+    max_abs_val = xp.max(xp.abs(new_traj))
+
+    if normalize == "pi" and max_abs_val - 1e-4 < 0.5:
         warnings.warn(
             "Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)"
         )
-        new_traj *= 2 * np.pi
-    elif normalize == "unit" and np.max(abs(new_traj)) - 1e-4 > 0.5:
+        new_traj *= 2 * xp.pi
+    elif normalize == "unit" and max_abs_val - 1e-4 > 0.5:
         warnings.warn(
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
-        new_traj /= 2 * np.pi
-    if normalize == "unit" and np.max(new_traj) >= 0.5:
+        new_traj *= 1 / (2 * xp.pi)
+
+    if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
     return new_traj
 

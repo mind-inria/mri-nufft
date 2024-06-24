@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [ "master" ]
 
+
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   PYTHON_VERSION: "3.10"
@@ -48,7 +53,7 @@ jobs:
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install pynfft2
+          python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
@@ -109,7 +114,7 @@ jobs:
           pip install -e mri-nufft[test]
           pip install cupy-cuda11x
           pip install torch --index-url https://download.pytorch.org/whl/cu118
-          pip install finufft
+          pip install finufft "numpy<2.0"
 
 
       - name: Install backend
@@ -121,13 +126,6 @@ jobs:
           export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
           pip install ${{ matrix.backend }}
-
-      - name: Install pynfft
-        if: ${{ matrix.backend == 'pynfft' }}
-        shell: bash
-        run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install pynfft2
 
       - name: Run Tests
         shell: bash
@@ -166,18 +164,32 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
 
+      - name: Restore cached brainweb-dl directory
+        uses: actions/cache/restore@v4
+        id: cache-restore
+        with:
+          path: ~/.cache/brainweb
+          key: ${{ runner.os }}-Brainweb
+
       - name: Install Python deps
         shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test,dev]
-          python -m pip install finufft pooch brainweb-dl
+          python -m pip install finufft pooch brainweb-dl torch
 
       - name: Run examples
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_plots
           pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term
+
+      - name: Cache brainweb-dl directory
+        uses: actions/cache/save@v4
+        if: ${{ steps.cache-restore.outputs.cache-hit != 'true' }}
+        with:
+          path: ~/.cache/brainweb
+          key: ${{ runner.os }}-Brainweb
 
       - name: Upload coverage
         if: success()

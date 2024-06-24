@@ -29,7 +29,6 @@ import numpy as np
 
 # Internal
 import mrinufft as mn
-
 from mrinufft import display_2D_trajectory, display_3D_trajectory
 from utils import show_argument, show_trajectory
 
