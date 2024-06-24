@@ -109,10 +109,12 @@ def get_operator(
         operator = operator(*args, **kwargs)
 
     # if autograd:
-    if isinstance(operator, FourierOperatorBase):
-        operator = operator.make_autograd(wrt_data, wrt_traj)
-    elif wrt_data or wrt_traj:  # instance will be created later
-        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+    if wrt_data or wrt_traj:
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(wrt_data, wrt_traj)
+        else:
+            # instance will be created later
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
 
