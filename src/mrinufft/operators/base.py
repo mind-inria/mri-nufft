@@ -200,7 +200,7 @@ class FourierOperatorBase(ABC):
     interfaces: dict[str, tuple] = {}
     autograd_available = False
     density_method = None
-    
+
     def __init__(self):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
