@@ -209,15 +209,16 @@ class RawGpuNUFFT:
         ----------
         samples: np.ndarray
             the kspace locations
-        density: np.ndarray, optional
+        density: np.ndarray|str, optional
             the density compensation
             if not provided, no density compensation is performed.
+            if "recompute", the density compensation is recomputed.
+            Note the recompute option works only if density compensation was computed
+            at initialization and not provided as ndarray.
         """
-        if density is None:
-            density = np.ones(samples.shape[0])
         self.operator.set_pts(
             np.reshape(samples, samples.shape[::-1], order="F"),
-            density,
+            self.density,
         )
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
@@ -508,7 +509,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
-        self.raw_op.set_pts(samples)
+        if self.density_method is not None:
+            self.compute_density(self.density_method)
+        self.raw_op.set_pts(
+            samples,
+            density=self.density,
+        )
         self._samples = samples
 
     @classmethod

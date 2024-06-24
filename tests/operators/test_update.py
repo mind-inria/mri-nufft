@@ -38,6 +38,7 @@ from case_trajectories import CasesTrajectories
     glob="*random*",
 )
 @parametrize(backend=["gpunufft"])
+@parametrize(density=[False, True])
 def operator(
     request,
     kspace_locs,
@@ -46,6 +47,7 @@ def operator(
     sense=None,
     n_batch=1,
     n_trans=1,
+    density=False,
     backend="finufft",
 ):
     """Generate a batch operator."""
@@ -67,6 +69,7 @@ def operator(
         n_batchs=n_batch,
         n_trans=n_trans,
         squeeze_dims=False,
+        density=density
     )
 
 
@@ -75,6 +78,7 @@ def update_operator(operator):
     return get_operator(operator.backend)(
         operator.samples,
         operator.shape,
+        density=operator.density,
         n_coils=operator.n_coils,
         smaps=operator.smaps,
         squeeze_dims=False,
