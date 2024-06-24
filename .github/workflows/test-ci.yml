@@ -48,12 +48,17 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
-      - name: Install pynfft
+      - name: Install pynfft dependencies
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
           python -m pip install cython>=3.0.10 numpy>=2.0.0
+    
+      - name: Install pynfft
+        if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
+        shell: bash
+        run: |
           python -m pip install pynfft2
 
       - name: Install pynufft
