@@ -64,7 +64,7 @@ def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
        a 3D radial trajectory in MRI."
        Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
     """
-    trajectory = initialize_3D_cones(Nc, Ns, width=0, in_out=in_out)
+    trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
@@ -124,7 +124,7 @@ def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
 
 
 def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
-    """Initialize 3D radial trajectories with spiral structure.
+    """Initialize 3D radial trajectories with a spiral structure.
 
     The radial shots are oriented according to an archimedean spiral
     over a sphere surface, for each interleave.
@@ -182,7 +182,7 @@ def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
 
 
 def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
-    """Initialize 3D radial trajectories with spiral structure.
+    """Initialize 3D radial trajectories with a spiral structure.
 
     The radial shots are oriented according to an archimedean spiral
     over a sphere surface, shared uniformly between all interleaves.

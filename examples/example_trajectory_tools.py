@@ -29,52 +29,8 @@ import numpy as np
 import mrinufft as mn
 import mrinufft.trajectories.tools as tools
 
-from mrinufft import displayConfig, display_2D_trajectory, display_3D_trajectory
 from mrinufft.trajectories.utils import KMAX
-
-
-# Util function to display varying arguments
-def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0, 1)):
-    # Initialize trajectories with varying option
-    trajectories = [function(arg) for arg in arguments]
-
-    # Plot the trajectories side by side
-    fig = plt.figure(
-        figsize=(len(trajectories) * subfigure_size, subfigure_size),
-        constrained_layout=True,
-    )
-    subfigs = fig.subfigures(1, len(trajectories), wspace=0)
-    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        if dim == "3D":
-            ax = display_3D_trajectory(
-                traj,
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-                per_plane=False,
-            )
-        else:
-            ax = display_2D_trajectory(
-                traj[..., axes],
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-            )
-        labels = ["kx", "ky", "kz"]
-        ax.set_xlabel(labels[axes[0]], fontsize=displayConfig.fontsize)
-        ax.set_ylabel(labels[axes[1]], fontsize=displayConfig.fontsize)
-        ax.set_aspect("equal")
-        ax.set_title(str(arg), fontsize=4 * subfigure_size)
-    plt.show()
-
-
-def show_trajectory(trajectory, one_shot, figure_size):
-    ax = display_3D_trajectory(
-        trajectory, size=figure_size, one_shot=one_shot, per_plane=False
-    )
-    plt.tight_layout()
-    plt.subplots_adjust(bottom=0.1)
-    plt.show()
+from utils import show_argument, show_trajectory
 
 
 # %%
