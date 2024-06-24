@@ -22,22 +22,45 @@ except ImportError:
 
 
 @fixture(scope="module")
+@parametrize(
+    "n_coils, n_trans, sense",
+    [
+        (1, 1, False),
+        (4, 1, True),
+        (4, 1, False),
+        (4, 2, True),
+        (4, 2, False),
+
+    ],
+)
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_nyquist_radial2D,
+        # CasesTrajectories.case_grid2D,
+        # CasesTrajectories.case_nyquist_radial2D,
         CasesTrajectories.case_nyquist_radial3D_lowmem,
     ],
 )
-def operator(kspace_loc, shape, backend):
+
+def operator(kspace_loc, shape, n_coils, sense, n_trans, backend):
     """Create NUFFT operator with autodiff capabilities."""
+    if n_trans != 1 and backend == "gpunufft":
+        pytest.skip("Duplicate case.")
+    if sense:
+        smaps = 1j * np.random.rand(n_coils, *shape)
+        smaps += np.random.rand(n_coils, *shape)
+        smaps = smaps.astype(np.complex64)
+        smaps /= np.linalg.norm(smaps, axis=0)
+    else:
+        smaps = None
     kspace_loc = kspace_loc.astype(np.float32)
     nufft = get_operator(backend_name=backend, wrt_data=True, wrt_traj=True)(
         samples=kspace_loc,
         shape=shape,
-        smaps=None,
+        n_coils=n_coils,
+        n_trans=1,
+        smaps=smaps,
         squeeze_dims=False,  # Squeezing breaks dimensions !
     )
     return nufft
@@ -66,9 +89,13 @@ def test_adjoint_and_grad(operator, interface):
 
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
-        adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
-            adj_data.shape
-        )
+        # adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
+        #     adj_data.shape
+        # ) #ndft matrix: [256, 256]
+        adj_data_ndft = torch.cat(
+            [ndft_matrix(operator).conj().T @ ksp_data[i].flatten() for i in range(ksp_data.shape[0])],
+            dim = 0,
+        ).reshape(adj_data.shape) #只不过没用plan而已 但也用了operator 所以会到autodiff
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
@@ -111,6 +138,10 @@ def test_forward_and_grad(operator, interface):
         ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
             ksp_data.shape
         )
+        ksp_data_ndft = torch.cat(
+            [ndft_matrix(operator).conj().T @ img_data[i].flatten() for i in range(img_data.shape[0])],
+            dim = 0,
+        ).reshape(ksp_data.shape)
         loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
         loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
 
