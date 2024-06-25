@@ -53,7 +53,6 @@ class _NUFFT_OP(torch.autograd.Function):
                 [torch.transpose((-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[i]), 0, 1)[None, ...] for i in range(dy.shape[1])],
                 dim=0,
             )
-            print(grad_traj.shape)
             grad_traj = torch.mean(grad_traj, dim=0).type_as(traj)
             # grad_traj = torch.transpose(
             #     (-1j * torch.conj(dy) * nufft_dx_dom).squeeze(), 0, 1
@@ -105,7 +104,6 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                 [torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...] for i in range(y.shape[0])],
                 dim=0,
             )
-            print(grad_traj.shape)
             grad_traj = torch.mean(grad_traj, dim=0).type_as(traj)
             ctx.nufft_op.raw_op.toggle_grad_traj()
 
