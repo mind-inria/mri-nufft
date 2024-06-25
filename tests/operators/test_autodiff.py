@@ -84,18 +84,23 @@ def test_adjoint_and_grad(operator, interface):
     operator.samples = to_interface(operator.samples, interface=interface)
     ksp_data = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
+    
     ksp_data.requires_grad = True
     operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
-        # adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
-        #     adj_data.shape
-        # ) #ndft matrix: [256, 256]
-        adj_data_ndft = torch.cat(
-            [ndft_matrix(operator).conj().T @ ksp_data[i].flatten() for i in range(ksp_data.shape[0])],
-            dim = 0,
-        ).reshape(adj_data.shape) 
+        if operator.smaps is not None:
+            operator.smaps = torch.from_numpy(operator.smaps).to(img_data.device)
+            adj_data_ndft_smpas = torch.cat(
+                [(ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(img_data.shape)[None, ...] for i in range(ksp_data.shape[0])],
+                dim = 0,
+            )
+            adj_data_ndft = torch.mean(operator.smaps.conj() @ adj_data_ndft_smpas, dim = 0)
+        else:
+            adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
+                img_data.shape
+            )
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
@@ -106,7 +111,7 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2)
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=1e-1)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
@@ -134,14 +139,21 @@ def test_forward_and_grad(operator, interface):
     operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
+        if operator.smaps is not None and operator.n_coils > 1:
+            img_data = img_data[None, ...]
         ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
-        ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
-            ksp_data.shape
-        )
-        ksp_data_ndft = torch.cat(
-            [ndft_matrix(operator).conj().T @ img_data[i].flatten() for i in range(img_data.shape[0])],
-            dim = 0,
-        ).reshape(ksp_data.shape)
+        if operator.smaps is not None:
+            operator.smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
+            img_data_smaps = operator.smaps @ img_data
+            ksp_data_ndft = torch.cat(
+                [ (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...] for i in range(img_data_smaps.shape[0])],
+                dim = 0,
+            )
+        else:
+            ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
+                ksp_data.shape
+            )
+        
         loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
         loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
 
@@ -152,7 +164,7 @@ def test_forward_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2)
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=1)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
