@@ -214,17 +214,18 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def _op_calibless(self, data, ksp=None):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self.samples), len(self.z_index)
+        xp = get_array_module(data)
         if ksp is None:
-            ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
+            ksp = xp.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B, C * NZ, NS))
         data_ = data.reshape(B, C, *XYZ)
         ksp_z = self._fftz(data_)
         ksp_z = ksp_z.reshape((B, C, *XYZ))
         for b in range(B):
             tmp = ksp_z[b][..., self.z_index]
-            tmp = np.moveaxis(tmp, -1, 1)
+            tmp = xp.moveaxis(tmp, -1, 1)
             tmp = tmp.reshape(C * NZ, *XYZ[:2])
-            ksp[b, ...] = self.operator.op(np.ascontiguousarray(tmp))
+            ksp[b, ...] = self.operator.op(xp.ascontiguousarray(tmp))
         ksp = ksp.reshape((B, C, NZ, NS))
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
