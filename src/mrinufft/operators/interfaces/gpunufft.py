@@ -217,7 +217,7 @@ class RawGpuNUFFT:
             at initialization and not provided as ndarray.
         """
         if density is None:
-            density = np.ones(samples.shape[0]) 
+            density = np.ones(samples.shape[0])
         self.operator.set_pts(
             np.reshape(samples, samples.shape[::-1], order="F"),
             density,
