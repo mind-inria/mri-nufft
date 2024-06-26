@@ -199,6 +199,7 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
+    density_method = None
 
     def __init__(self):
         if not self.available:
@@ -363,7 +364,11 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-
+        self.density_method = lambda samples, shape: method(
+            samples,
+            shape,
+            **kwargs,
+        )
         self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
