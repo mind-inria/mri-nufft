@@ -22,6 +22,8 @@ except ImportError:
 
 
 @fixture(scope="module")
+@parametrize(backend=["cufinufft", "finufft", "gpunufft"])
+
 @parametrize(
     "n_coils, n_trans, sense",
     [
@@ -30,7 +32,7 @@ except ImportError:
         (4, 2, True),
     ],
 )
-@parametrize(backend=["cufinufft", "finufft", "gpunufft"])
+
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
@@ -38,7 +40,7 @@ except ImportError:
     ],
 )
 
-def operator(kspace_loc, shape, n_coils, sense, n_trans, backend):
+def operator(request, kspace_loc, shape, n_coils, sense, n_trans, backend):
     """Create NUFFT operator with autodiff capabilities."""
     if n_trans != 1 and backend == "gpunufft":
         pytest.skip("Duplicate case.")
@@ -86,12 +88,12 @@ def test_adjoint_and_grad(operator, interface):
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
         if operator.smaps is not None:
-            smaps = torch.from_numpy(operator.smaps).to(img_data.device) # change name
+            smaps = torch.from_numpy(operator.smaps).to(img_data.device) 
             adj_data_ndft_smpas = torch.cat(
                 [(ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(img_data.shape)[None, ...] for i in range(ksp_data.shape[0])],
                 dim = 0,
             )
-            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim = 0) # point-wise multiplication
+            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim = 0) 
         else:
             adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
                 img_data.shape
@@ -113,7 +115,7 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=5e-2)
+    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])    
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
@@ -138,7 +140,7 @@ def test_forward_and_grad(operator, interface):
         ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
         if operator.smaps is not None:
             smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
-            img_data_smaps =  smaps * img_data # point-wise multiplication
+            img_data_smaps =  smaps * img_data 
             ksp_data_ndft = torch.cat(
                 [ (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...] for i in range(img_data_smaps.shape[0])],
                 dim = 0,
@@ -165,4 +167,4 @@ def test_forward_and_grad(operator, interface):
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-2)
+    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
