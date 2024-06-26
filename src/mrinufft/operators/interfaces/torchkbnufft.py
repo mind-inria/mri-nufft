@@ -40,6 +40,8 @@ class MRITorchKbNufft(FourierOperatorBase):
     smaps: Tensor
     squeeze_dims: bool, default True
         If True, will try to remove the singleton dimension for batch and coils.
+    use_gpu: bool, default False
+        Whether to use the GPU
     """
 
     backend = "torchkbnufft"
@@ -69,13 +71,11 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.dtype = None
         self.use_gpu = use_gpu
 
-        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(
-            "cuda" if use_gpu else "cpu"
-        )
+        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to("cuda" if use_gpu else "cpu")
         self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(
             "cuda" if use_gpu else "cpu"
         )
-        
+
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
         samples = proper_trajectory(
@@ -205,6 +205,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         normalize: bool
             Whether to normalize the density compensation.
             We normalize such that the energy of PSF = 1
+        use_gpu: bool, default False
+            Whether to use the GPU
         """
         volume_shape = (np.array(volume_shape) * osf).astype(int)
         grid_op = MRITorchKbNufft(
