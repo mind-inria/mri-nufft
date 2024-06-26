@@ -19,7 +19,7 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
-class MRITorchKbNufft(FourierOperatorBase):
+class RawTorchKbNufft:
     """MRI Transform Operator using Torch NUFFT.
 
     Parameters
@@ -92,7 +92,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = torch.tensor(smaps)
 
     @with_torch
-    def op(self, data):
+    def op(self, data, out=None):
         """Forward operation.
 
         Parameters
@@ -117,7 +117,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         return self._safe_squeeze(kdata)
 
     @with_torch
-    def adj_op(self, data):
+    def adj_op(self, data, out=None):
         """Backward Operation.
 
         Parameters
