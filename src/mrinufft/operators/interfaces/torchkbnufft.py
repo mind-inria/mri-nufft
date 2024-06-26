@@ -56,6 +56,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         n_trans=1,
         smaps=None,
         eps=1e-6,
+        use_gpu=False,
         squeeze_dims=True,
     ):
         super().__init__()
@@ -66,16 +67,21 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         self.n_batchs = n_batchs
         self.dtype = None
+        self.use_gpu = use_gpu
 
-        self._tkb_op = tkbn.KbNufft(im_size=self.shape)
-        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape)
-
+        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(
+            "cuda" if use_gpu else "cpu"
+        )
+        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(
+            "cuda" if use_gpu else "cpu"
+        )
+        
         if isinstance(samples, torch.Tensor):
             samples = samples.numpy()
         samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="pi"
         )
-        self.samples = torch.tensor(samples)
+        self.samples = torch.tensor(samples).to("cuda" if use_gpu else "cpu")
 
         self.compute_density(density)
 
@@ -86,7 +92,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = torch.tensor(smaps)
 
     @with_torch
-    def op(self, data, ksp=None):
+    def op(self, data):
         """Forward operation.
 
         Parameters
@@ -111,7 +117,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         return self._safe_squeeze(kdata)
 
     @with_torch
-    def adj_op(self, data, coeffs=None):
+    def adj_op(self, data):
         """Backward Operation.
 
         Parameters
@@ -156,19 +162,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         Tensor
             The data consistency error in image space.
         """
-        if not isinstance(obs_data, torch.Tensor):
-            if not obs_data:
-                obs_data = None
-
-            xp = get_array_module(obs_data)
-
-            if xp.__name__ == "numpy":
-                obs_data = torch.from_numpy(obs_data)
-            elif xp.__name__ == "cupy":
-                obs_data = torch.from_dlpack(obs_data)
-            else:
-                obs_data = torch.tensor(obs_data)
-
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
 
@@ -194,6 +187,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         num_iterations=10,
         osf=2,
         normalize=True,
+        use_gpu=False,
         **kwargs,
     ):
         """Compute the density compensation weights for a given set of kspace locations.
@@ -217,13 +211,16 @@ class MRITorchKbNufft(FourierOperatorBase):
             samples=kspace_loc,
             shape=volume_shape,
             osf=1,
+            use_gpu=use_gpu,
             **kwargs,
         )
         density_comp = tkbn.calc_density_compensation_function(
             ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
         )
         if normalize:
-            spike = torch.zeros(volume_shape, dtype=torch.float32)
+            spike = torch.zeros(volume_shape, dtype=torch.float32).to(
+                "cuda" if use_gpu else "cpu"
+            )
             mid_loc = tuple(v // 2 for v in volume_shape)
             spike[mid_loc] = 1
             psf = grid_op.adj_op(grid_op.op(spike))
