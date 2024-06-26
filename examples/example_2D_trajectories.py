@@ -225,7 +225,7 @@ function = lambda x: mn.initialize_2D_spiral(
     Ns,
     patch_center=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -271,7 +271,7 @@ function = lambda x: mn.initialize_2D_fibonacci_spiral(
     Ns,
     spiral_reduction=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -297,7 +297,7 @@ function = lambda x: mn.initialize_2D_fibonacci_spiral(
     Ns,
     patch_center=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
