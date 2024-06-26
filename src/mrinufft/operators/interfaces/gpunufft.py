@@ -218,7 +218,7 @@ class RawGpuNUFFT:
         """
         self.operator.set_pts(
             np.reshape(samples, samples.shape[::-1], order="F"),
-            self.density,
+            density,
         )
 
     def op_direct(self, image, kspace=None, interpolate_data=False):
