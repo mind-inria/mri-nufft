@@ -30,7 +30,7 @@ import mrinufft as mn
 import mrinufft.trajectories.tools as tools
 
 from mrinufft.trajectories.utils import KMAX
-from utils import show_argument, show_trajectory
+from .utils import show_argument, show_trajectory
 
 
 # %%
