@@ -23,7 +23,6 @@ except ImportError:
 
 @fixture(scope="module")
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
-
 @parametrize(
     "n_coils, n_trans, sense",
     [
@@ -32,14 +31,12 @@ except ImportError:
         (4, 2, True),
     ],
 )
-
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
         CasesTrajectories.case_nyquist_lowmem_radial3D,
     ],
 )
-
 def operator(request, kspace_loc, shape, n_coils, sense, n_trans, backend):
     """Create NUFFT operator with autodiff capabilities."""
     if n_trans != 1 and backend == "gpunufft":
@@ -81,23 +78,28 @@ def test_adjoint_and_grad(operator, interface):
     operator.samples = to_interface(operator.samples, interface=interface)
     ksp_data = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
-    
+
     ksp_data.requires_grad = True
     operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
         if operator.smaps is not None:
-            smaps = torch.from_numpy(operator.smaps).to(img_data.device) 
+            smaps = torch.from_numpy(operator.smaps).to(img_data.device)
             adj_data_ndft_smpas = torch.cat(
-                [(ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(img_data.shape)[None, ...] for i in range(ksp_data.shape[0])],
-                dim = 0,
+                [
+                    (ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(
+                        img_data.shape
+                    )[None, ...]
+                    for i in range(ksp_data.shape[0])
+                ],
+                dim=0,
             )
-            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim = 0) 
+            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim=0)
         else:
-            adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
-                img_data.shape
-            )
+            adj_data_ndft = (
+                ndft_matrix(operator).conj().T @ ksp_data.flatten()
+            ).reshape(img_data.shape)
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
@@ -117,7 +119,8 @@ def test_adjoint_and_grad(operator, interface):
     ]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
-@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])    
+
+@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_forward_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
@@ -140,16 +143,19 @@ def test_forward_and_grad(operator, interface):
         ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
         if operator.smaps is not None:
             smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
-            img_data_smaps =  smaps * img_data 
+            img_data_smaps = smaps * img_data
             ksp_data_ndft = torch.cat(
-                [ (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...] for i in range(img_data_smaps.shape[0])],
-                dim = 0,
-            ) # fft for each coil
+                [
+                    (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...]
+                    for i in range(img_data_smaps.shape[0])
+                ],
+                dim=0,
+            )  # fft for each coil
         else:
             ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
                 ksp_data.shape
             )
-        
+
         loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
         loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
 
