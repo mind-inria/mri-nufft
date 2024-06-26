@@ -34,7 +34,9 @@ except ImportError:
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
-        CasesTrajectories.case_nyquist_radial3D_lowmem,
+        CasesTrajectories.case_grid2D,
+        CasesTrajectories.case_nyquist_radial2D,
+        CasesTrajectories.case_nyquist_lowmem_radial3D,
     ],
 )
 

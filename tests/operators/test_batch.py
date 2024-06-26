@@ -1,6 +1,6 @@
 """Test for batch computations.
 
-Only finufft and cufinufft support batch computations.
+Only finufft, cufinufft and gpunufft support batch computations.
 """
 
 import numpy as np

@@ -109,10 +109,12 @@ def get_operator(
         operator = operator(*args, **kwargs)
 
     # if autograd:
-    if isinstance(operator, FourierOperatorBase):
-        operator = operator.make_autograd(wrt_data, wrt_traj)
-    elif wrt_data or wrt_traj:  # instance will be created later
-        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+    if wrt_data or wrt_traj:
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(wrt_data, wrt_traj)
+        else:
+            # instance will be created later
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
 
@@ -197,6 +199,7 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
+    density_method = None
 
     def __init__(self):
         if not self.available:
@@ -332,13 +335,15 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        method: str or callable or array or dict
+        method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
             If a string, the method should be registered in the density registry.
             If a callable, it should take the samples and the shape as input.
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
+            If `True`, the method `pipe` is chosen as default estimation method,
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft`
         """
         if isinstance(method, np.ndarray):
             self.density = method
@@ -346,6 +351,8 @@ class FourierOperatorBase(ABC):
         if not method:
             self.density = None
             return None
+        if method is True:
+            method = "pipe"
 
         kwargs = {}
         if isinstance(method, dict):
@@ -357,7 +364,11 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-
+        self.density_method = lambda samples, shape: method(
+            samples,
+            shape,
+            **kwargs,
+        )
         self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
