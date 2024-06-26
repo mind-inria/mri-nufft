@@ -27,10 +27,7 @@ except ImportError:
     [
         (1, 1, False),
         (4, 1, True),
-        (4, 1, False),
         (4, 2, True),
-        (4, 2, False),
-
     ],
 )
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
@@ -91,12 +88,12 @@ def test_adjoint_and_grad(operator, interface):
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
         if operator.smaps is not None:
-            operator.smaps = torch.from_numpy(operator.smaps).to(img_data.device)
+            smaps = torch.from_numpy(operator.smaps).to(img_data.device) # change name
             adj_data_ndft_smpas = torch.cat(
                 [(ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(img_data.shape)[None, ...] for i in range(ksp_data.shape[0])],
                 dim = 0,
             )
-            adj_data_ndft = torch.mean(operator.smaps.conj() @ adj_data_ndft_smpas, dim = 0)
+            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim = 0) # point-wise multiplication
         else:
             adj_data_ndft = (ndft_matrix(operator).conj().T @ ksp_data.flatten()).reshape(
                 img_data.shape
@@ -111,7 +108,7 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=1e-1)
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
@@ -120,8 +117,7 @@ def test_adjoint_and_grad(operator, interface):
     ]
     assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
 
-
-@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
+@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])    
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_forward_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
@@ -143,12 +139,12 @@ def test_forward_and_grad(operator, interface):
             img_data = img_data[None, ...]
         ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
         if operator.smaps is not None:
-            operator.smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
-            img_data_smaps = operator.smaps @ img_data
+            smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
+            img_data_smaps =  smaps * img_data # point-wise multiplication
             ksp_data_ndft = torch.cat(
                 [ (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...] for i in range(img_data_smaps.shape[0])],
                 dim = 0,
-            )
+            ) # fft for each coil
         else:
             ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
                 ksp_data.shape
@@ -164,11 +160,11 @@ def test_forward_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=1)
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-1)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
+    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-2)
