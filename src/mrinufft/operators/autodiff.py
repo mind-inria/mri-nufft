@@ -35,7 +35,7 @@ class _NUFFT_OP(torch.autograd.Function):
         if ctx.nufft_op._grad_wrt_traj:
             im_size = x.size()[1:]
             factor = 1
-            if ctx.nufft_op.backend == "gpunufft":
+            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -49,19 +49,20 @@ class _NUFFT_OP(torch.autograd.Function):
                 [ctx.nufft_op.op(grid_x[:, i, :, :]) for i in range(grid_x.size(1))],
                 dim=0,
             )
-
-            grad_traj = torch.mean(torch.cat(
-                [
-                    torch.transpose(
-                        (-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[:, i, :]), 0, 1
-                    )[None, ...]
-                    for i in range(dy.shape[1])
-                ],
+            grad_traj = torch.mean(
+                torch.cat(
+                    [
+                        torch.transpose(
+                            (-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[:, i, :]),
+                            0,
+                            1
+                        )[None, ...]
+                        for i in range(dy.shape[1])
+                    ],
+                    dim=0,
+                ),
                 dim=0,
-            ), dim=0).type_as(traj)
-        
-            #grad_traj = torch.mean(grad_traj, dim=0).type_as(traj)
-
+            ).type_as(traj)
         return grad_data, grad_traj, None
 
 
@@ -87,7 +88,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             ctx.nufft_op.raw_op.toggle_grad_traj()
             im_size = dx.size()[2:]
             factor = 1
-            if ctx.nufft_op.backend == "gpunufft":
+            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -100,19 +101,18 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                 [ctx.nufft_op.op(grid_dx[:, i, :, :]) for i in range(grid_dx.size(1))],
                 dim=1,
             ).squeeze()
-
             inufft_dx_dom = inufft_dx_dom.reshape(y.shape[0], -1, y.shape[-1])
-
-            grad_traj = torch.mean(torch.cat(
-                [
-                    torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...]
-                    for i in range(y.shape[0])
-                ],
+            grad_traj = torch.mean(
+                torch.cat(
+                    [
+                        torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...]
+                        for i in range(y.shape[0])
+                    ],
+                    dim=0,
+                ),
                 dim=0,
-            ),dim=0, ).type_as(traj)
-            
+            ).type_as(traj)
             ctx.nufft_op.raw_op.toggle_grad_traj()
-
         return grad_data, grad_traj, None
 
 

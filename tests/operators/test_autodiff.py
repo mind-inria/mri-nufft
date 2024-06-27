@@ -1,6 +1,7 @@
 """Test the autodiff functionnality."""
 
 import numpy as np
+from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
@@ -112,14 +113,22 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-1)
+    assert_allclose(
+        gradient_ndft_ktraj.cpu().numpy(),
+        gradient_nufft_ktraj.cpu().numpy(),
+        atol=5e-1
+    )
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=1e-2)
+    assert_allclose(
+        gradient_ndft_kdata.cpu().numpy(),
+        gradient_nufft_kdata.cpu().numpy(),
+        atol=1e-2
+    )
 
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
@@ -168,11 +177,19 @@ def test_forward_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-1)
+    assert_allclose(
+        gradient_ndft_ktraj.cpu().numpy(),
+        gradient_nufft_ktraj.cpu().numpy(),
+        atol=5e-1
+    )
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
+    assert_allclose(
+        gradient_ndft_kdata.cpu().numpy(),
+        gradient_nufft_kdata.cpu().numpy(),
+        atol=6e-3
+    )
