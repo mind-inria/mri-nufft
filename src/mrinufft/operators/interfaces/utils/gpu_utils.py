@@ -1,7 +1,6 @@
 """Utils for GPU."""
 
 import numpy as np
-import torch
 from pathlib import Path
 from hashlib import md5
 from functools import wraps
@@ -12,6 +11,11 @@ try:
 except ImportError:
     CUPY_AVAILABLE = False
 
+TORCH_AVAILABLE = True
+try:
+    import torch
+except ImportError:
+    TORCH_AVAILABLE = False
 
 def get_maxThreadBlock():
     """Get the warp size of the current device."""
