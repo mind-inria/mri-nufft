@@ -30,14 +30,14 @@ class MRITorchKbNufft(FourierOperatorBase):
     Parameters
     ----------
     samples : Tensor
-        The sample locations of shape ``Nsamples x N_dimensions``. 
+        The sample locations of shape ``Nsamples x N_dimensions``.
         It should be C-contiguous.
     shape : tuple
         Shape of the image space.
     density : bool or Tensor, optional
         Density compensation support. Default is False.
         - If a Tensor, it will be used for density.
-        - If True, the density compensation will be automatically estimated 
+        - If True, the density compensation will be automatically estimated
             using the fixed point method.
         - If False, density compensation will not be used.
     n_coils : int, optional
@@ -49,7 +49,7 @@ class MRITorchKbNufft(FourierOperatorBase):
     eps : float, optional
         A small epsilon value for numerical stability. Default is 1e-6.
     squeeze_dims : bool, optional
-        If True, tries to remove singleton dimensions for batch and coils. 
+        If True, tries to remove singleton dimensions for batch and coils.
         Default is True.
     use_gpu : bool, optional
         Whether to use the GPU. Default is False.
@@ -251,8 +251,8 @@ class TorchKbNUFFTcpu(MRITorchKbNufft):
     """
     MRI Transform Operator using Torch NUFFT for CPU.
 
-    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator 
-    specifically optimized for CPU using the torchkbnufft library. It inherits 
+    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator
+    specifically optimized for CPU using the torchkbnufft library. It inherits
     from the MRITorchKbNufft class and sets the use_gpu parameter to False.
 
     """
@@ -267,8 +267,8 @@ class TorchKbNUFFTgpu(MRITorchKbNufft):
     """
     MRI Transform Operator using Torch NUFFT for GPU.
 
-    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator 
-    specifically optimized for GPU using the torchkbnufft library. It inherits 
+    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator
+    specifically optimized for GPU using the torchkbnufft library. It inherits
     from the MRITorchKbNufft class and sets the use_gpu parameter to True.
 
     """
