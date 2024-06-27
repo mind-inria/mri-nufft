@@ -222,7 +222,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.autograd_available = True
         # For now only single precision is supported
-        self.samples = np.asfortranarray(
+        self._samples = np.asfortranarray(
             proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
         )
         self.dtype = self.samples.dtype
@@ -263,6 +263,15 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         # Support for concurrent stream and computations.
+
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        """Update the plans when changing the samples."""
+        self._samples = samples
+        for typ in [1, 2, "grad"]:
+            if typ == "grad" and not self._grad_wrt_traj:
+                continue
+            self.raw_op._set_pts(typ)
 
     @with_numpy_cupy
     @nvtx_mark()
