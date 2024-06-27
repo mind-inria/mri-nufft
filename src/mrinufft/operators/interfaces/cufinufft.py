@@ -72,8 +72,6 @@ class RawCufinufftPlan:
             self._make_plan(i, **kwargs)
             self._set_pts(i)
 
-        self._make_plan_grad(**kwargs)
-
     @property
     def dtype(self):
         """Return the dtype (precision) of the transform."""
@@ -271,6 +269,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         """Update the plans when changing the samples."""
         self._samples = samples
         for typ in [1, 2, "grad"]:
+            if typ == "grad" and not self._grad_wrt_traj:
+                continue
             self.raw_op._set_pts(typ)
 
     @with_numpy_cupy
