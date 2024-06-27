@@ -191,6 +191,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         Tensor
             The data consistency error in image space.
         """
+        if self.use_gpu:
+            obs_data = obs_data.to("cuda", copy=False)
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
 
