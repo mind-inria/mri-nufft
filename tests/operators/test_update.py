@@ -38,6 +38,7 @@ from case_trajectories import CasesTrajectories
     glob="*random*",
 )
 @parametrize(backend=["finufft", "cufinufft", "gpunufft"])
+@parametrize(density=[False, True])
 def operator(
     request,
     kspace_locs,
@@ -46,6 +47,7 @@ def operator(
     sense=None,
     n_batch=1,
     n_trans=1,
+    density=False,
     backend="finufft",
 ):
     """Generate a batch operator."""
@@ -67,6 +69,7 @@ def operator(
         n_batchs=n_batch,
         n_trans=n_trans,
         squeeze_dims=False,
+        density=density,
     )
 
 
@@ -75,6 +78,7 @@ def update_operator(operator):
     return get_operator(operator.backend)(
         operator.samples,
         operator.shape,
+        density=operator.density,
         n_coils=operator.n_coils,
         smaps=operator.smaps,
         squeeze_dims=False,
@@ -106,18 +110,13 @@ def kspace_data(operator):
 @param_array_interface
 def test_op(operator, array_interface, image_data):
     """Test the batch type 2 (forward)."""
-    if operator.backend == "gpunufft":
-        pytest.skip("No update for gpunufft now.")
     image_data = to_interface(image_data, array_interface)
-
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
     new_operator = update_operator(operator)
-
     kspace_changed = from_interface(operator.op(image_data), array_interface)
     kspace_true = from_interface(new_operator.op(image_data), array_interface)
-
     npt.assert_array_almost_equal(kspace_changed, kspace_true)
 
 
@@ -128,15 +127,11 @@ def test_adj_op(
     kspace_data,
 ):
     """Test the batch type 1 (adjoint)."""
-    if operator.backend == "gpunufft":
-        pytest.skip("No update for gpunufft now.")
     kspace_data = to_interface(kspace_data, array_interface)
-
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
     new_operator = update_operator(operator)
-
     image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
