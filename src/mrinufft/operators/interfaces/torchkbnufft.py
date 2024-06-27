@@ -1,14 +1,14 @@
 """Pytorch MRI Nufft Operators."""
 
 from ..base import FourierOperatorBase, with_torch
-from mrinufft._utils import proper_trajectory, get_array_module
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.interfaces.utils import is_cuda_tensor
 import numpy as np
 
 TORCH_AVAILABLE = True
 try:
     import torchkbnufft as tkbn
     import torch
-
 except ImportError:
     TORCH_AVAILABLE = False
 
@@ -19,32 +19,47 @@ except ImportError:
     CUPY_AVAILABLE = False
 
 
-class RawTorchKbNufft:
-    """MRI Transform Operator using Torch NUFFT.
+class MRITorchKbNufft(FourierOperatorBase):
+    """
+    MRI Transform Operator using Torch NUFFT.
+
+    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator
+    for MRI data, utilizing the torchkbnufft library for performing the
+    computations. It supports both CPU and GPU computations.
 
     Parameters
     ----------
-    samples: Tensor
-        The samples location of shape ``Nsamples x N_dimensions``.
+    samples : Tensor
+        The sample locations of shape ``Nsamples x N_dimensions``. 
         It should be C-contiguous.
-    shape: tuple
+    shape : tuple
         Shape of the image space.
-    n_coils: int
-        Number of coils.
-    density: bool or Tensor
-       Density compensation support.
-        - If a Tensor, it will be used for the density.
-        - If True, the density compensation will be automatically estimated,
-          using the fixed point method.
+    density : bool or Tensor, optional
+        Density compensation support. Default is False.
+        - If a Tensor, it will be used for density.
+        - If True, the density compensation will be automatically estimated 
+            using the fixed point method.
         - If False, density compensation will not be used.
-    smaps: Tensor
-    squeeze_dims: bool, default True
-        If True, will try to remove the singleton dimension for batch and coils.
-    use_gpu: bool, default False
-        Whether to use the GPU
+    n_coils : int, optional
+        Number of coils. Default is 1.
+    n_batchs : int, optional
+        Number of batches. Default is 1.
+    smaps : Tensor, optional
+        Sensitivity maps. Default is None.
+    eps : float, optional
+        A small epsilon value for numerical stability. Default is 1e-6.
+    squeeze_dims : bool, optional
+        If True, tries to remove singleton dimensions for batch and coils. 
+        Default is True.
+    use_gpu : bool, optional
+        Whether to use the GPU. Default is False.
+    osf : int, optional
+        Oversampling factor. Default is 2.
+    **kwargs : dict
+        Additional keyword arguments.
+
     """
 
-    backend = "torchkbnufft"
     available = TORCH_AVAILABLE
     autograd_available = False
 
@@ -55,41 +70,42 @@ class RawTorchKbNufft:
         density=False,
         n_coils=1,
         n_batchs=1,
-        n_trans=1,
         smaps=None,
         eps=1e-6,
-        use_gpu=False,
         squeeze_dims=True,
+        use_gpu=False,
+        osf=2,
+        **kwargs,
     ):
         super().__init__()
 
-        self.shape = shape
-        self.n_coils = n_coils
-        self.eps = eps
-        self.squeeze_dims = squeeze_dims
-        self.n_batchs = n_batchs
-        self.dtype = None
         self.use_gpu = use_gpu
-
-        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to("cuda" if use_gpu else "cpu")
-        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(
-            "cuda" if use_gpu else "cpu"
-        )
-
+        self.shape = shape
         if isinstance(samples, torch.Tensor):
+            if is_cuda_tensor(samples):
+                samples = samples.cpu()
             samples = samples.numpy()
         samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="pi"
         )
         self.samples = torch.tensor(samples).to("cuda" if use_gpu else "cpu")
-
+        self.dtype = None
+        # self.dtype = self.samples.dtype
+        self.n_coils = n_coils
+        self.n_batchs = n_batchs
+        self.squeeze_dims = squeeze_dims
+        # self.eps = eps
         self.compute_density(density)
-
         self.compute_smaps(smaps)
         if isinstance(smaps, np.ndarray) or (
             CUPY_AVAILABLE and isinstance(smaps, cp.ndarray)
         ):
-            self.smaps = torch.tensor(smaps)
+            self.smaps = torch.tensor(smaps).to("cuda" if use_gpu else "cpu")
+
+        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to("cuda" if use_gpu else "cpu")
+        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(
+            "cuda" if use_gpu else "cpu"
+        )
 
     @with_torch
     def op(self, data, out=None):
@@ -105,14 +121,15 @@ class RawTorchKbNufft:
         """
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
+        if self.use_gpu:
+            data = data.to("cuda", copy=False)
 
         if self.smaps is not None:
-            self.smaps = self.smaps.to(data.dtype, copy=False)
+            self.smaps = self.smaps.to(data.dtype)
 
         kdata = self._tkb_op.forward(
             image=data, omega=self.samples.t(), smaps=self.smaps
         )
-
         kdata /= self.norm_factor
         return self._safe_squeeze(kdata)
 
@@ -130,21 +147,33 @@ class RawTorchKbNufft:
         """
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
-
-        if self.density:
-            data = data * self.density
+        if self.use_gpu:
+            data = data.to("cuda", copy=False)
 
         if self.smaps is not None:
             self.smaps = self.smaps.to(data.dtype)
+        if self.density:
+            data = data * self.density
 
         img = self._tkb_adj_op.forward(
             data=data, omega=self.samples.t(), smaps=self.smaps
         )
-
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img /= self.norm_factor
-
         return self._safe_squeeze(img)
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
 
     @with_torch
     def data_consistency(self, data, obs_data):
@@ -164,19 +193,6 @@ class RawTorchKbNufft:
         """
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
-
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
 
     @classmethod
     @with_torch
@@ -229,3 +245,35 @@ class RawTorchKbNufft:
             density_comp /= torch.norm(psf)
 
         return density_comp.squeeze()
+
+
+class TorchKbNUFFTcpu(MRITorchKbNufft):
+    """
+    MRI Transform Operator using Torch NUFFT for CPU.
+
+    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator 
+    specifically optimized for CPU using the torchkbnufft library. It inherits 
+    from the MRITorchKbNufft class and sets the use_gpu parameter to False.
+
+    """
+
+    backend = "torchkbnufft-cpu"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, use_gpu=False)
+
+
+class TorchKbNUFFTgpu(MRITorchKbNufft):
+    """
+    MRI Transform Operator using Torch NUFFT for GPU.
+
+    This class provides a Non-Uniform Fast Fourier Transform (NUFFT) operator 
+    specifically optimized for GPU using the torchkbnufft library. It inherits 
+    from the MRITorchKbNufft class and sets the use_gpu parameter to True.
+
+    """
+
+    backend = "torchkbnufft-gpu"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, use_gpu=True)

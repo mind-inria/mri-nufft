@@ -306,7 +306,8 @@ class FourierOperatorBase(ABC):
             (use funtools.partial)
         """
         if isinstance(method, np.ndarray) or (
-            self.backend == "torchkbnufft" and isinstance(method, torch.Tensor)
+            (self.backend == "torchkbnufft-cpu" or self.backend == "torchkbnufft-gpu")
+            and isinstance(method, torch.Tensor)
         ):
             self.smaps = method
             return None
@@ -373,7 +374,8 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft`
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-CPU` 
+                or `torchkbnufft-GPU`.
         """
         if isinstance(method, np.ndarray):
             self.density = method

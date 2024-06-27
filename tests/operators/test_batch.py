@@ -38,7 +38,9 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*nyquist_radial*",
 )
-@parametrize(backend=["gpunufft", "finufft", "cufinufft", "torchkbnufft"])
+@parametrize(
+    backend=["finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"]
+)
 def operator(
     request,
     kspace_locs,
@@ -60,9 +62,6 @@ def operator(
     else:
         smaps = None
     kspace_locs = kspace_locs.astype(np.float32)
-    kwargs = {}
-    if backend == "torchkbnufft":
-        kwargs['use_gpu'] = False
     return get_operator(backend)(
         kspace_locs,
         shape,
@@ -77,9 +76,6 @@ def operator(
 @fixture(scope="module")
 def flat_operator(operator):
     """Generate a batch operator with n_batch=1."""
-    kwargs = {}
-    if operator.backend == 'torchkbnufft':
-        kwargs['use_gpu'] = operator.use_gpu
     return get_operator(operator.backend)(
         operator.samples,
         operator.shape,
@@ -87,7 +83,6 @@ def flat_operator(operator):
         smaps=operator.smaps,
         squeeze_dims=False,
         n_trans=1,
-        **kwargs,
     )
 
 

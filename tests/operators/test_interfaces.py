@@ -33,7 +33,8 @@ from helpers import (
         "cufinufft",
         "gpunufft",
         "sigpy",
-        "torchkbnufft",
+        "torchkbnufft-CPU",
+        "torchkbnufft-GPU",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
@@ -60,7 +61,7 @@ def ref_backend(request):
 def ref_operator(request, operator, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
     samples = operator.samples
-    if operator.backend == "torchkbnufft":
+    if operator.backend == "torchkbnufft-cpu" or operator.backend == "torchkbnufft-gpu":
         # torvchkbnufft has samples as torch tensor.
         samples = samples.cpu().numpy().astype(np.float32)
     return get_operator(ref_backend)(
