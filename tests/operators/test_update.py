@@ -53,6 +53,8 @@ def operator(
     """Generate a batch operator."""
     if n_trans != 1 and backend == "gpunufft":
         pytest.skip("Duplicate case.")
+    if density and backend in ["cufinufft", "finufft"]:
+        pytest.skip("Density estimation not supported for cufinufft and finufft.")
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)
