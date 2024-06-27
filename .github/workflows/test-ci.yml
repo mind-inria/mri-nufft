@@ -125,7 +125,7 @@ jobs:
           export CUDA_BIN_PATH=/usr/local/cuda-11.8/
           export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-          if [[ ${{ matrix.backend }} == "torchkbnufft-cpu" ||  ${{matrix.backend}} == 'torchkbnufft-gpu']]; 
+          if [[ ${{ matrix.backend }} == "torchkbnufft-cpu" ||  ${{matrix.backend}} == 'torchkbnufft-gpu']]
           then
             pip install torchkbnufft
           else
