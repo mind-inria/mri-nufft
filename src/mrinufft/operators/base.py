@@ -730,6 +730,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
+    @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 
