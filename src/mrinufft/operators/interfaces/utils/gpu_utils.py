@@ -17,6 +17,7 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
 
+
 def get_maxThreadBlock():
     """Get the warp size of the current device."""
     if CUPY_AVAILABLE:
