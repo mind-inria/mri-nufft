@@ -55,7 +55,7 @@ class _NUFFT_OP(torch.autograd.Function):
                         torch.transpose(
                             (-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[:, i, :]),
                             0,
-                            1
+                            1,
                         )[None, ...]
                         for i in range(dy.shape[1])
                     ],

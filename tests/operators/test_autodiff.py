@@ -114,9 +114,7 @@ def test_adjoint_and_grad(operator, interface):
         loss_nufft, operator.samples, retain_graph=True
     )[0]
     assert_allclose(
-        gradient_ndft_ktraj.cpu().numpy(),
-        gradient_nufft_ktraj.cpu().numpy(),
-        atol=5e-1
+        gradient_ndft_ktraj.cpu().numpy(), gradient_nufft_ktraj.cpu().numpy(), atol=5e-1
     )
 
     # Check if nufft and ndft are close in the backprop
@@ -125,9 +123,7 @@ def test_adjoint_and_grad(operator, interface):
         0
     ]
     assert_allclose(
-        gradient_ndft_kdata.cpu().numpy(),
-        gradient_nufft_kdata.cpu().numpy(),
-        atol=1e-2
+        gradient_ndft_kdata.cpu().numpy(), gradient_nufft_kdata.cpu().numpy(), atol=1e-2
     )
 
 
@@ -178,9 +174,7 @@ def test_forward_and_grad(operator, interface):
         loss_nufft, operator.samples, retain_graph=True
     )[0]
     assert_allclose(
-        gradient_ndft_ktraj.cpu().numpy(),
-        gradient_nufft_ktraj.cpu().numpy(),
-        atol=5e-1
+        gradient_ndft_ktraj.cpu().numpy(), gradient_nufft_ktraj.cpu().numpy(), atol=5e-1
     )
 
     # Check if nufft and ndft are close in the backprop
@@ -189,7 +183,5 @@ def test_forward_and_grad(operator, interface):
         0
     ]
     assert_allclose(
-        gradient_ndft_kdata.cpu().numpy(),
-        gradient_nufft_kdata.cpu().numpy(),
-        atol=6e-3
+        gradient_ndft_kdata.cpu().numpy(), gradient_nufft_kdata.cpu().numpy(), atol=6e-3
     )

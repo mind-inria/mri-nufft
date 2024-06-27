@@ -88,9 +88,7 @@ def _extract_kspace_center(
                 a_0 = 0.5 if window_fun in ["hann", "hanning"] else 0.53836
                 window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold)
             elif window_fun == "ellipse":
-                window = (
-                    xp.sum(kspace_loc ** 2 / xp.asarray(threshold) ** 2, axis=1) <= 1
-                )
+                window = xp.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
             else:
                 raise ValueError("Unsupported window function.")
         data_thresholded = window * kspace_data
