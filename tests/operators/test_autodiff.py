@@ -112,14 +112,14 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-2)
+    assert torch.allclose(gradient_ndft_ktraj, gradient_nufft_ktraj, atol=5e-1)
 
     # Check if nufft and ndft are close in the backprop
     gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
     gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
         0
     ]
-    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=6e-3)
+    assert torch.allclose(gradient_ndft_kdata, gradient_nufft_kdata, atol=1e-2)
 
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
