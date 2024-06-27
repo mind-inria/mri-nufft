@@ -377,7 +377,7 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-CPU` 
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-CPU`
                 or `torchkbnufft-GPU`.
         """
         if isinstance(method, np.ndarray):
