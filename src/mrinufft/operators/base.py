@@ -200,6 +200,8 @@ class FourierOperatorBase(ABC):
     interfaces: dict[str, tuple] = {}
     autograd_available = False
     density_method = None
+    _grad_wrt_data = False
+    _grad_wrt_traj = False
 
     def __init__(self):
         if not self.available:
