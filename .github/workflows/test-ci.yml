@@ -98,7 +98,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [gpunufft, cufinufft, torchkbnufft-CPU, torchkbnufft-GPU]
+        backend: [gpunufft, cufinufft, torchkbnufft-cpu, torchkbnufft-gpu]
 
     steps:
       - uses: actions/checkout@v3
@@ -118,7 +118,7 @@ jobs:
 
 
       - name: Install backend
-        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' || matrix.backend == 'torchkbnufft-CPU' || matrix.backend == 'torchkbnufft-GPU' }}
+        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' || matrix.backend == 'torchkbnufft-cpu' || matrix.backend == 'torchkbnufft-gpu' }}
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate

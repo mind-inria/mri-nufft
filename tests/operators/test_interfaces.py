@@ -33,8 +33,8 @@ from helpers import (
         "cufinufft",
         "gpunufft",
         "sigpy",
-        "torchkbnufft-CPU",
-        "torchkbnufft-GPU",
+        "torchkbnufft-cpu",
+        "torchkbnufft-gpu",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
