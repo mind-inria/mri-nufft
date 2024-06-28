@@ -21,7 +21,9 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, traj, nufft_op):
         """Forward image -> k-space."""
-        ctx.save_for_backward(x)
+        ctx.save_for_backward(x, traj)
+        # Copy the updated samples to the nufft_op
+        nufft_op.samples = traj.detach().cpu().numpy()
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
 
@@ -136,15 +138,17 @@ class MRINufftAutoGrad(torch.nn.Module):
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
             self.nufft_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
-
+        if wrt_traj:
+            self.samples_torch = torch.nn.Parameter(
+                data=torch.Tensor(self.nufft_op.samples),
+                requires_grad=True,
+            )
+        
     def op(self, x):
         r"""Compute the forward image -> k-space."""
-        return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
+        return _NUFFT_OP.apply(x, self.samples_torch, self.nufft_op)
 
     def adj_op(self, kspace):
         r"""Compute the adjoint k-space -> image."""
-        return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
+        return _NUFFT_ADJOP.apply(kspace, self.samples_torch, self.nufft_op)
 
-    def __getattr__(self, name):
-        """Get the attribute from the root operator."""
-        return getattr(self.nufft_op, name)

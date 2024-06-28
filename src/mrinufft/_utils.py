@@ -86,7 +86,7 @@ def proper_trajectory(trajectory, normalize="pi"):
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"
         ) from e
-
+        
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
     max_abs_val = xp.max(xp.abs(new_traj))
