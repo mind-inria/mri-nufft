@@ -202,6 +202,27 @@ class RawGpuNUFFT:
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
+    def set_pts(self, samples, density=None):
+        """Update the kspace locations and density compensation.
+
+        Parameters
+        ----------
+        samples: np.ndarray
+            the kspace locations
+        density: np.ndarray|str, optional
+            the density compensation
+            if not provided, no density compensation is performed.
+            if "recompute", the density compensation is recomputed.
+            Note the recompute option works only if density compensation was computed
+            at initialization and not provided as ndarray.
+        """
+        if density is None:
+            density = np.ones(samples.shape[0])
+        self.operator.set_pts(
+            np.reshape(samples, samples.shape[::-1], order="F"),
+            density,
+        )
+
     def op_direct(self, image, kspace=None, interpolate_data=False):
         """Compute the masked non-Cartesian Fourier transform.
 
@@ -379,7 +400,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             )
         self.shape = shape
 
-        self.samples = proper_trajectory(
+        self._samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="unit"
         )
         self.dtype = self.samples.dtype
@@ -480,6 +501,22 @@ class MRIGpuNUFFT(FourierOperatorBase):
     def uses_sense(self):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
+
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        """Set the samples for the Fourier Operator.
+
+        Parameters
+        ----------
+        samples: np.ndarray
+            The samples for the Fourier Operator.
+        """
+        self.compute_density(self.density_method)
+        self.raw_op.set_pts(
+            samples,
+            density=self.density,
+        )
+        self._samples = samples
 
     @classmethod
     def pipe(
