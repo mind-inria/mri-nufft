@@ -75,15 +75,14 @@ def test_adjoint_and_grad(operator, interface):
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 
-    if torch.is_tensor(operator.samples):
-        operator.samples = operator.samples.cpu().detach().numpy()
-
-    operator.samples = to_interface(operator.samples, interface=interface)
+    if "gpu" in interface:
+        operator.to("cuda")
+    else:
+        operator.cpu()
     ksp_data = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
 
     ksp_data.requires_grad = True
-    operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
@@ -134,15 +133,13 @@ def test_forward_and_grad(operator, interface):
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 
-    if torch.is_tensor(operator.samples):
-        operator.samples = operator.samples.cpu().detach().numpy()
-
-    operator.samples = to_interface(operator.samples, interface=interface)
+    if "gpu" in interface:
+        operator.to("cuda")
+    else:
+        operator.cpu()
     ksp_data_ref = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
-
     img_data.requires_grad = True
-    operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
         if operator.smaps is not None and operator.n_coils > 1:
