@@ -103,7 +103,7 @@ Here are several project that rely on MRI-NUFFT:
 
 - `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`
 - `snake-fmri <https://github.com/paquiteau/snake-fmri>`
-- `deepinv <https://github.com/deepinv/deepinv`
+- `deepinv <https://github.com/deepinv/deepinv>`
 
 
   Add yours by opening a PR !
