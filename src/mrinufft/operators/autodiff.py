@@ -151,3 +151,11 @@ class MRINufftAutoGrad(torch.nn.Module):
         r"""Compute the adjoint k-space -> image."""
         return _NUFFT_ADJOP.apply(kspace, self.samples_torch, self.nufft_op)
 
+    def __getattr__(self, name):
+        """Get the attribute from the root operator."""
+        if hasattr(self.nufft_op, name):
+            if name == 'samples':
+                return self.samples_torch
+            return getattr(self.nufft_op, name)
+        else:
+            return super().__getattr__(name)
