@@ -101,9 +101,9 @@ Who is using MRI-NUFFT?
 
 Here are several project that rely on MRI-NUFFT:
 
-- `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`
-- `snake-fmri <https://github.com/paquiteau/snake-fmri>`
-- `deepinv <https://github.com/deepinv/deepinv>`
+- `pysap-mri <https://github.com/CEA-COSMIC/pysap-mri>`_
+- `snake-fmri <https://github.com/paquiteau/snake-fmri>`_
+- `deepinv <https://github.com/deepinv/deepinv>`_
 
 
   Add yours by opening a PR !
