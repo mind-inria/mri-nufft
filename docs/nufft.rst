@@ -4,7 +4,7 @@
  The NUFFT Operator
 ====================
 
-This document gives a general overview of the Non-Uniform Fast fourier transform (NUFFT), and its application in MRI.
+This document gives a general overview of the Non-Uniform Fast fourier transform (NUFFT), and its application to MRI.
 
 
 The Non-Uniform Discrete Fourier Transform
@@ -18,13 +18,13 @@ The 1D-NUDFT [1]_ is defined as:
 
 .. math::
 
-    X_k = \sum_{n=0}^{N-1} x(p_n) e^{ -2\pi i p_n \nu_k}
+    X_k = \sum_{n=0}^{N-1} x(p_n) e^{ -2\imath \pi p_n \nu_k}
 
 where :math:`X_k` is the frequency point at :math:`\nu_k`.
 
 The multidimensional cases are derived by using vectorized location e.g :math:`\boldsymbol{p}_n` and  :math:`\boldsymbol{\nu_k}` as for the classical DFT.
 
-There exists 3 types of NUDFT:
+There exist 3 types of NUDFT:
 
 * Type 1: :math:`p_n = n/N` and :math:`\nu_k` are non uniformly spaced
 * Type 2: :math:`p_n` are non uniformly spaced and :math:`\nu_k = k/M`
@@ -38,9 +38,9 @@ Application in MRI
 ==================
 
 In Magnetic Resonance Imaging (MRI) the raw data is acquired in the k-space, ideally corresponding to the Fourier domain.
-Traditional sampling schemes of the k-space usually consist of acquired line in a specific direction, in a Cartesian fashion.
+Traditional sampling schemes of the k-space usually consist of acquired lines in a specific direction, in a Cartesian fashion.
 
-In order to accelerate the acquisition of required data, using a non Cartesian (i.e. non uniformly distributed in *every* direction) sampling scheme offer great opportunity.
+In order to accelerate the acquisition of k-space data, one may use a non-Cartesian (i.e. non uniformly distributed in *every* direction) sampling scheme as the latter offers increased sampling efficiency, i.e. broader k-space coverage in a given time period.
 
 The acquisition model is usually described as:
 
