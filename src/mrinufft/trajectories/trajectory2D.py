@@ -5,9 +5,17 @@ import numpy.linalg as nl
 from scipy.interpolate import CubicSpline
 
 from .gradients import patch_center_anomaly
-from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
+from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence, findq2r2
 from .tools import rotate
-from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
+from .utils import (
+    DEFAULT_GMAX,
+    DEFAULT_SMAX,
+    DEFAULT_RASTER_TIME,
+    KMAX,
+    Gammas,
+    initialize_algebraic_spiral,
+    initialize_tilt,
+)
 
 #####################
 # CIRCULAR PATTERNS #
@@ -205,6 +213,97 @@ def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True
             patched_shot, _ = patch_center_anomaly(trajectory[i], in_out=False)
             patched_trajectory.append(patched_shot)
         trajectory = np.array(patched_trajectory)
+    return trajectory
+
+
+def initialize_2D_vds_spiral(
+    Nc,
+    Fcoeff,
+    res,
+    oversamp=4,
+    raster_time=DEFAULT_RASTER_TIME,
+    gmax=DEFAULT_GMAX,
+    smax=DEFAULT_SMAX,
+    in_out=False,
+    gamma=Gammas.H,
+):
+    """Initialize a 2D variable-density spiral trajectory.
+
+    Based on the MATLAB Implementation of Brian Hargreaves.
+
+    Parameters
+    ----------
+    Nc: int
+        Number of Shots (interleave of the spiral)
+    Ns:
+    """
+    # Compared to the MATLAB Implementation, a few variable have been renamed
+    # MATLAB -> Python
+    # N -> Ncc
+    # T -> raster_time
+
+    To = raster_time / oversamp  # To is the period with oversampling.
+    rmax = 0.5 / res
+
+    q0 = q1 = r0 = r1 = 0.0  # initialize theta, theta', r, r'
+
+    theta = np.zeros(1_000_000)
+    r = np.zeros(1_000_000)
+    time = np.zeros(1_000_000)
+    t = 0.0
+    count = 0
+    Ncc = Nc
+    if in_out:
+        Ncc = Ncc * 2  # create twice center_out trajectories.
+
+    while r0 < rmax and count < 1_000_000 - 1:
+        q2, r2 = findq2r2(
+            r0,
+            r1,
+            To,
+            raster_time,
+            Ncc,
+            Fcoeff,
+            rmax=rmax,
+            smax=smax,
+            gmax=gmax,
+            gamma=gamma,
+        )
+
+        # Integrate for r, r', theta and theta'
+        q1 += q2 * To
+        q0 += q1 * To
+        r1 += r2 * To
+        r0 += r1 * To
+
+        t += To
+
+        # Store
+        count += 1
+        theta[count] = q0
+        r[count] = r0
+        time[count] = t
+
+    # Generate the spiral from r and theta
+    r = r[:count]
+    theta = theta[:count]
+    # Convert to cartesian coordinates
+    #
+    trajectory = r * np.exp(1j * theta)
+    trajectory = np.stack([trajectory.real, trajectory.imag], axis=-1)
+    if in_out:
+        trajectory2 = r * np.exp(1j * (theta + np.pi))
+        trajectory2 = np.stack([trajectory2.real, trajectory2.imag], axis=-1)
+        trajectory = np.concatenate(
+            [trajectory2[::-1], trajectory], axis=0
+        )  # flip and put the center in the middle
+    trajectory = np.repeat(trajectory[None, ...], Nc, axis=0)
+
+    # Rotate the first shot Nc times
+    rotation = R2D(initialize_tilt("uniform", Nc)).T
+    for i in range(1, Nc):
+        trajectory[i] = trajectory[i - 1] @ rotation
+    trajectory = KMAX * trajectory / np.max(nl.norm(trajectory, axis=-1))
     return trajectory
 
 
