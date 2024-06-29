@@ -1,6 +1,7 @@
 """Functions to manipulate/modify trajectories."""
 
 import numpy as np
+from scipy.interpolate import CubicSpline
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import KMAX, initialize_tilt
@@ -250,6 +251,100 @@ def conify(
         new_trajectory[:, Ns // 2 :, 2] = -new_trajectory[:, Ns // 2 :, 2]
 
     return new_trajectory
+
+
+def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
+    Nc, Ns, Nd = trajectory.shape
+    if Nc % nb_trains != 0:
+        raise ValueError(
+            "`nb_trains` should divide the number of shots in `trajectory`."
+        )
+    nb_shot_per_group = Nc // nb_trains
+
+    # Reverse odd shots to facilitate concatenation if requested
+    trajectory = np.copy(trajectory)
+    trajectory = trajectory.reshape((nb_trains, -1, Ns, Nd))
+    if reverse_odd_shots:
+        trajectory[:, 1::2] = trajectory[:, 1::2, ::-1]
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate(
+        [np.arange(Ns) + i * (Ns_transitions + Ns) for i in range(nb_shot_per_group)]
+    )
+    target_sample_ids = np.arange(
+        nb_shot_per_group * Ns + (nb_shot_per_group - 1) * Ns_transitions
+    )
+
+    for i_c in range(nb_trains):
+        spline = CubicSpline(source_sample_ids, np.concatenate(trajectory[i_c], axis=0))
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
+
+
+def unepify(trajectory, Ns_readouts, Ns_transitions):
+    Nc, Ns, Nd = trajectory.shape
+    if Ns % (Ns_readouts + Ns_transitions) != Ns_readouts:
+        raise ValueError(
+            "`trajectory` shape does not match `Ns_readouts` or `Ns_transitions`."
+        )
+
+    readout_mask = np.zeros(Ns).astype(bool)
+    for i in range(1, Ns // (Ns_readouts + Ns_transitions) + 2):
+        readout_mask[
+            (i - 1) * Ns_readouts
+            + (i - 1) * Ns_transitions : i * Ns_readouts
+            + (i - 1) * Ns_transitions
+        ] = True
+    trajectory = trajectory[:, readout_mask, :]
+    trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
+    return trajectory
+
+
+def prewind(trajectory, Ns_transitions):
+    Nc, Ns, Nd = trajectory.shape
+    if Ns_transitions < 3:
+        raise ValueError("`Ns_transitions` should be at least 2.")
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate([[0, 1], Ns_transitions + np.arange(Ns)])
+    target_sample_ids = np.arange(Ns_transitions + Ns)
+
+    for i_c in range(Nc):
+        spline = CubicSpline(
+            source_sample_ids,
+            np.concatenate([np.zeros((2, Nd)), trajectory[i_c]], axis=0),
+        )
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
+
+
+def rewind(trajectory, Ns_transitions):
+    Nc, Ns, Nd = trajectory.shape
+    if Ns_transitions < 3:
+        raise ValueError("`Ns_transitions` should be at least 2.")
+
+    # Assemble shots together per concatenation
+    assembled_trajectory = []
+    source_sample_ids = np.concatenate(
+        [np.arange(Ns), Ns + Ns_transitions - np.arange(3, 1, -1)]
+    )
+    target_sample_ids = np.arange(Ns_transitions + Ns)
+
+    for i_c in range(Nc):
+        spline = CubicSpline(
+            source_sample_ids,
+            np.concatenate([trajectory[i_c], np.zeros((2, Nd))], axis=0),
+        )
+        assembled_trajectory.append(spline(target_sample_ids))
+    assembled_trajectory = np.array(assembled_trajectory)
+
+    return assembled_trajectory
 
 
 ####################
