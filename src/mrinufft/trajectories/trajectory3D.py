@@ -702,7 +702,7 @@ def initialize_3D_TURBINE(
         nb_trains = nb_blades
     if Nc % nb_blades != 0:
         raise ValueError("`nb_blades` should divide `Nc`.")
-    if Nc % nb_trains != 0:
+    if nb_trains and (Nc % nb_trains != 0):
         raise ValueError("`nb_trains` should divide `Nc`.")
     nb_shot_per_blade = Nc // nb_blades
 
@@ -720,12 +720,13 @@ def initialize_3D_TURBINE(
     trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
 
     # Merge shots into EPI-like multi-readout trains
-    trajectory = epify(
-        trajectory,
-        nb_transition_steps=Ns_transitions,
-        nb_trains=nb_trains,
-        reverse_odd_shots=True,
-    )
+    if nb_trains and nb_trains != Nc:
+        trajectory = epify(
+            trajectory,
+            Ns_transitions=Ns_transitions,
+            nb_trains=nb_trains,
+            reverse_odd_shots=True,
+        )
 
     return trajectory
 
@@ -747,7 +748,7 @@ def initialize_3D_REPI(
         nb_trains = nb_blades
     if Nc % nb_blades != 0:
         raise ValueError("`nb_blades` should divide `Nc`.")
-    if Nc % nb_trains != 0:
+    if nb_trains and (Nc % nb_trains != 0):
         raise ValueError("`nb_trains` should divide `Nc`.")
     nb_shot_per_blade = Nc // nb_blades
 
@@ -773,11 +774,12 @@ def initialize_3D_REPI(
     trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
 
     # Merge shots into EPI-like multi-readout trains
-    trajectory = epify(
-        trajectory,
-        nb_transition_steps=Ns_transitions,
-        nb_trains=nb_trains,
-        reverse_odd_shots=True,
-    )
+    if nb_trains and nb_trains != Nc:
+        trajectory = epify(
+            trajectory,
+            Ns_transitions=Ns_transitions,
+            nb_trains=nb_trains,
+            reverse_odd_shots=True,
+        )
 
     return trajectory
