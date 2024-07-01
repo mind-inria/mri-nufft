@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           sudo apt install -y libnfft3-dev
-          python -m pip install pynfft2
+          python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
@@ -114,7 +114,7 @@ jobs:
           pip install -e mri-nufft[test]
           pip install cupy-cuda11x
           pip install torch --index-url https://download.pytorch.org/whl/cu118
-          pip install finufft
+          pip install finufft "numpy<2.0"
 
 
       - name: Install backend
@@ -126,13 +126,6 @@ jobs:
           export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
           pip install ${{ matrix.backend }}
-
-      - name: Install pynfft
-        if: ${{ matrix.backend == 'pynfft' }}
-        shell: bash
-        run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install pynfft2
 
       - name: Run Tests
         shell: bash

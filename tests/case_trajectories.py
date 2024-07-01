@@ -51,7 +51,7 @@ class CasesTrajectories:
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
-    def case_nyquist_radial3D_lowmem(self, Nc=2, Ns=16, Nr=2, N=10):
+    def case_nyquist_lowmem_radial3D(self, Nc=2, Ns=16, Nr=2, N=10):
         """Create a 3D radial trajectory with low memory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = rotate(trajectory, nb_rotations=Nr)
