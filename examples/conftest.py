@@ -12,6 +12,7 @@ https://stackoverflow.com/questions/56807698/how-to-run-script-as-pytest-test
 
 """
 
+import sys
 import runpy
 from pathlib import Path
 
@@ -45,6 +46,7 @@ class ScriptItem(pytest.Item):
 
     def runtest(self):
         """Run the script as a test."""
+        sys.path.insert(0, str(self.path.parent))
         runpy.run_path(str(self.path))
 
     def repr_failure(self, excinfo):

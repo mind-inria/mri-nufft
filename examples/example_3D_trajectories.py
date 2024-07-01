@@ -30,47 +30,7 @@ import numpy as np
 # Internal
 import mrinufft as mn
 from mrinufft import display_2D_trajectory, display_3D_trajectory
-
-
-# Util function to display varying arguments
-def show_argument(function, arguments, one_shot, subfig_size, dim="3D"):
-    # Initialize trajectories with varying option
-    trajectories = [function(arg) for arg in arguments]
-
-    # Plot the trajectories side by side
-    fig = plt.figure(
-        figsize=(len(trajectories) * subfigure_size, subfigure_size),
-        constrained_layout=True,
-    )
-    subfigs = fig.subfigures(1, len(trajectories), wspace=0)
-    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        if dim == "3D":
-            ax = display_3D_trajectory(
-                traj,
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-                per_plane=False,
-            )
-        else:
-            ax = display_2D_trajectory(
-                traj[..., :2],
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-            )
-        ax.set_aspect("equal")
-        ax.set_title(str(arg), fontsize=4 * subfigure_size)
-    plt.show()
-
-
-def show_trajectory(trajectory, one_shot, figure_size):
-    ax = display_3D_trajectory(
-        trajectory, size=figure_size, one_shot=one_shot, per_plane=False
-    )
-    plt.tight_layout()
-    plt.subplots_adjust(bottom=0.1)
-    plt.show()
+from utils import show_argument, show_trajectory
 
 
 # %%
@@ -93,34 +53,34 @@ one_shot = -5  # Highlight one shot in particular
 
 
 # %%
-# Freeform trajectories
-# =====================
+# Radial trajectories
+# ===================
 #
-# In this section are presented trajectories in all kinds of shapes
-# and relying on different principles.
+# In this section are presented trajectories based on radial
+# lines oriented using different methods and structures.
 #
-# 3D Cones
-# --------
+# Phyllotaxis radial
+# ------------------
 #
-# A common pattern composed of 3D cones oriented all over within a sphere.
+# A 3D radial pattern with phyllotactic structure.
+#
+# The radial shots are oriented according to a Fibonacci sphere
+# lattice, supposed to reproduce the phyllotaxis found in nature
+# through flowers, etc. It ensures an almost uniform distribution.
+#
+# This function reproduces the proposition from [Pic+11]_, but the name
+# "spiral phyllotaxis" was changed to avoid confusion with
+# actual spirals.
 #
 # Arguments:
 #
 # - ``Nc (int)``: number of individual shots
 # - ``Ns (int)``: number of samples per shot
-# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
-#   ``(default "uniform")``
 # - ``in_out (bool)``: define whether the shots should travel toward
 #   the center then outside (in-out) or not (center-out). ``(default False)``
-# - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
-#   ``(default 5)``
-# - ``spiral (str, float)``: type of spiral defined through the general
-#   archimedean equation. ``(default "archimedes")``. See 2D spiral
-# - ``width (float)``: cone width factor, normalized to densely cover the k-space
-#   by default. ``(default 1)``
 #
 
-trajectory = mn.initialize_3D_cones(Nc, Ns, in_out=in_out)
+trajectory = mn.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -128,12 +88,12 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # ``Nc (int)``
 # ~~~~~~~~~~~~
 #
-# The number of individual shots, here 3D cones, used to cover the
+# The number of individual shots, here 3D radial lines, used to cover the
 # k-space. More shots means better coverage but also longer acquisitions.
 #
 
 arguments = [Nc // 4, Nc // 2, Nc, Nc * 2]
-function = lambda x: mn.initialize_3D_cones(x, Ns, in_out=in_out)
+function = lambda x: mn.initialize_3D_phyllotaxis_radial(x, Ns, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -141,29 +101,12 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # ``Ns (int)``
 # ~~~~~~~~~~~~
 #
-# The number of samples per shot. More samples means the cones are split
-# into more smaller segments, and therefore either the acquisition window
-# is lengthened or the sampling rate is increased.
+# The number of samples per shot. More samples means that either
+# the acquisition window is lengthened or the sampling rate is increased.
 #
 
 arguments = [10, 25, 40, 100]
-function = lambda x: mn.initialize_3D_cones(Nc, x, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
-
-
-# %%
-# ``tilt (str, float)``
-# ~~~~~~~~~~~~~~~~~~~~~
-#
-# The angle between each consecutive shots, either in radians or as a
-# string defining some default mods such as “uniform” for
-# :math:`2 \pi / N_c`, or “golden” and “mri golden” for the different
-# common definitions of golden angles. The angle is automatically adapted
-# when the ``in_out`` argument is switched to keep the same behavior.
-#
-
-arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
+function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, x, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -186,7 +129,143 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 
 arguments = [True, False]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=x)
+function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=x)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# Golden means radial
+# -------------------
+#
+# A 3D radial pattern with golden means-based structure.
+#
+# The radial shots are oriented using multidimensional golden means,
+# which are derived from modified Fibonacci sequences by an eigenvalue
+# approach, to provide a temporally stable acquisition with widely
+# spread shots at all time.
+#
+# This function reproduces the proposition from [Cha+09]_, with
+# in addition the option to switch between center-out
+# and in-out radial shots.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out).
+#   ``(default False)``. See 3D radial
+#
+
+trajectory = mn.initialize_3D_golden_means_radial(Nc, Ns, in_out=in_out)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# Wong radial
+# -------------------
+#
+# A 3D radial pattern with a spiral structure.
+#
+# The radial shots are oriented according to an archimedean spiral
+# over a sphere surface, for each interleave.
+#
+# This function reproduces the proposition from [WR94]_, with
+# in addition the option to switch between center-out
+# and in-out radial shots.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
+# - ``nb_interleaves (int)``: number of implicit interleaves
+#   defining the shots order for a more structured k-space
+#   distribution over time. ``(default 1)``
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out).
+#   ``(default False)``. See 3D radial
+#
+
+trajectory = mn.initialize_3D_wong_radial(Nc, Ns, in_out=in_out)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# Park radial
+# -------------------
+#
+# A 3D radial pattern with a spiral structure.
+#
+# The radial shots are oriented according to an archimedean spiral
+# over a sphere surface, shared uniformly between all interleaves.
+#
+# This function reproduces the proposition from [Par+16]_,
+# itself based on the work from [WR94]_, with
+# in addition the option to switch between center-out
+# and in-out radial shots.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
+# - ``nb_interleaves (int)``: number of implicit interleaves
+#   defining the shots order for a more structured k-space
+#   distribution over time. ``(default 1)``
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out).
+#   ``(default False)``. See 3D radial
+#
+
+trajectory = mn.initialize_3D_park_radial(Nc, Ns, in_out=in_out)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# Freeform trajectories
+# =====================
+#
+# In this section are presented trajectories in all kinds of shapes
+# and relying on different principles.
+#
+# 3D Cones
+# --------
+#
+# A common pattern composed of 3D cones oriented all over within a sphere.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians).
+#   ``(default "golden")``
+# - ``in_out (bool)``: define whether the shots should travel toward
+#   the center then outside (in-out) or not (center-out).
+#   ``(default False)``. See 3D radial
+# - ``nb_zigzags (float)``: number of revolutions over a center-out shot.
+#   ``(default 5)``
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "archimedes")``. See 2D spiral
+# - ``width (float)``: cone width factor, normalized to densely cover the k-space
+#   by default. ``(default 1)``
+#
+
+trajectory = mn.initialize_3D_cones(Nc, Ns, in_out=in_out)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# The angle between each consecutive shots, either in radians or as a
+# string defining some default mods such as “uniform” for
+# :math:`2 \pi / N_c`, or “golden” and “mri golden” for the different
+# common definitions of golden angles. The angle is automatically adapted
+# when the ``in_out`` argument is switched to keep the same behavior.
+#
+
+arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
+function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -244,11 +323,11 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``in_out (bool)``: define whether the shots should travel toward
 #   the center then outside (in-out) or not (center-out).
-#   ``(default False)``. See 3D cones or 2D spiral
+#   ``(default False)``. See 3D radial
 # - ``nb_revolutions (float)``: number of revolutions performed from the
 #   center. ``(default 1)``. See 2D spiral
 # - ``spiral (str, float)``: type of spiral defined through the general
@@ -315,8 +394,8 @@ show_argument(
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``nb_revolutions (str, float)``: number of revolution of the helices.
 #   ``(default 5)``
 # - ``width (float)``: helix width factor, normalized to densely
@@ -452,8 +531,8 @@ show_argument(
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``curve_index (float)``: Index controlling curvature from 0 (flat) to 1 (curvy).
 #   ``(default 0.3)``
 # - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
@@ -463,7 +542,7 @@ show_argument(
 # - ``spiral_tilt (str, float)``: angle of the spiral within its own axis,
 #   defined from center to its outermost point ``(default "golden")``.
 # - ``in_out (bool)``: define whether the shots should travel toward the center
-#   then outside (in-out) or not (center-out). ``(default False)``. See 3D cones
+#   then outside (in-out) or not (center-out). ``(default False)``. See 3D radial
 #
 
 trajectory = mn.initialize_3D_seiffert_spiral(Nc, Ns, in_out=in_out)
@@ -575,8 +654,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``nb_shells (int)``: number of shells used to partition the k-space.
 #   It should be lower than or equal to ``Nc``.
 # - ``spiral_reduction (float)``: factor to reduce the automatic number of
@@ -667,8 +746,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``nb_shells (int)``: number of shells used to partition the k-space.
 #   It should be lower than or equal to ``Nc``. See helical shells.
 # - ``shell_tilt (str, float)``: angle between each consecutive shell (in radians).
@@ -720,8 +799,8 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 #
 # Arguments:
 #
-# - ``Nc (int)``: number of individual shots. See 3D cones
-# - ``Ns (int)``: number of samples per shot. See 3D cones
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns (int)``: number of samples per shot. See 3D radial
 # - ``curve_index (float)``: Index controlling curvature from 0 (flat) to 1 (curvy).
 #   ``(default 0.3)``. See Seiffert spirals
 # - ``nb_revolutions (float)``: number of revolutions or elliptic periods.
@@ -740,6 +819,10 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # References
 # ==========
 #
+# .. [WR94] Wong, Sam TS, and Mark S. Roos.
+#    "A strategy for sampling on a sphere applied
+#    to 3D selective RF pulse design."
+#    Magnetic Resonance in Medicine 32, no. 6 (1994): 778-784.
 # .. [IN95] Irarrazabal, Pablo, and Dwight G. Nishimura.
 #    "Fast three dimensional magnetic resonance imaging."
 #    Magnetic Resonance in Medicine 33, no. 5 (1995): 656-662.
@@ -752,9 +835,19 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # .. [Br09] Brizard, Alain J.
 #    "A primer on elliptic functions with applications in classical mechanics."
 #    European journal of physics 30, no. 4 (2009): 729.
+# .. [Cha+09] Chan, Rachel W., Elizabeth A. Ramsay,
+#    Charles H. Cunningham, and Donald B. Plewes.
+#    "Temporal stability of adaptive 3D radial MRI
+#    using multidimensional golden means."
+#    Magnetic Resonance in Medicine 61, no. 2 (2009): 354-363.
 # .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
 #    "On sphere-filling ropes."
 #    The American Mathematical Monthly 118, no. 10 (2011): 863-876
+# .. [Pic+11] Piccini, Davide, Arne Littmann,
+#    Sonia Nielles‐Vallespin, and Michael O. Zenge.
+#    "Spiral phyllotaxis: the natural way to construct
+#    a 3D radial trajectory in MRI."
+#    Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
 # .. [Pip+11] Pipe, James G., Nicholas R. Zwart, Eric A. Aboussouan,
 #    Ryan K. Robison, Ajit Devaraj, and Kenneth O. Johnson.
 #    "A new design and rationale for 3D orthogonally
@@ -764,6 +857,12 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #    Jonathan R. Polimeni, P. Ellen Grant, Lawrence L. Wald, and Kawin Setsompop.
 #    "Wave‐CAIPI for highly accelerated 3D imaging."
 #    Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
+# .. [Par+16] Park, Jinil, Taehoon Shin, Soon Ho Yoon,
+#    Jin Mo Goo, and Jang‐Yeon Park.
+#    "A radial sampling strategy for uniform k‐space coverage
+#    with retrospective respiratory gating
+#    in 3D ultrashort‐echo‐time lung imaging."
+#    NMR in Biomedicine 29, no. 5 (2016): 576-587.
 # .. [SMR18] Speidel, Tobias, Patrick Metze, and Volker Rasche.
 #    "Efficient 3D Low-Discrepancy k-Space Sampling
 #    Using Highly Adaptable Seiffert Spirals."
