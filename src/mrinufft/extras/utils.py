@@ -6,12 +6,12 @@ register_smaps = MethodRegister("sensitivity_maps")
 
 
 def get_smaps(name, *args, **kwargs):
-    """Get the density compensation function from its name."""
+    """Get the sensitivity_maps function from its name."""
     try:
         method = register_smaps.registry["sensitivity_maps"][name]
     except KeyError as e:
         raise ValueError(
-            f"Unknown density compensation method {name}. Available methods are \n"
+            f"Unknown sensitivity_maps method {name}. Available methods are \n"
             f"{list(register_smaps.registry['sensitivity_maps'].keys())}"
         ) from e
 
