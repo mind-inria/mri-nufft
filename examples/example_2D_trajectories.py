@@ -25,7 +25,7 @@ import numpy as np
 import mrinufft as mn
 import mrinufft.trajectories.maths as mntm
 from mrinufft import display_2D_trajectory
-from .utils import show_argument, show_trajectory
+from utils import show_argument, show_trajectory
 
 
 # %%
