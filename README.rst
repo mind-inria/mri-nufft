@@ -97,7 +97,7 @@ A benchmark of NUFFT backend for MRI applications is available in https://github
 
 
 Who is using MRI-NUFFT?
-----------------------
+-----------------------
 
 Here are several project that rely on MRI-NUFFT:
 
