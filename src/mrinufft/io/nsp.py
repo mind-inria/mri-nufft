@@ -366,7 +366,7 @@ def read_trajectory(
             else:
                 if q == 0:
                     kspace_loc[:, i + 1, :] = (
-                        (initial_positions + gradients[:, q, :] * r) * gamma * 1e-6
+                        initial_positions + gradients[:, q, :] * r * gamma * 1e-6
                     )
                 else:
                     kspace_loc[:, i + 1, :] = (
