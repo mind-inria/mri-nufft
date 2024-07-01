@@ -1,9 +1,9 @@
-"""Utility functions for the trajectory design."""
-
-import numpy as np
+"""Utility functions in general."""
 
 from enum import Enum, EnumMeta
+from numbers import Real
 
+import numpy as np
 
 #############
 # CONSTANTS #
@@ -66,14 +66,16 @@ class Gammas(FloatEnum):
 
 
 class Spirals(FloatEnum):
-    """Enumerate spiral types."""
+    """Enumerate algebraic spiral types."""
 
     ARCHIMEDES = 1
     ARITHMETIC = ARCHIMEDES
-    FERMAT = 2
+    GALILEAN = 2
+    GALILEO = GALILEAN
+    FERMAT = 0.5
     PARABOLIC = FERMAT
     HYPERBOLIC = -1
-    LITHUUS = -2
+    LITHUUS = -0.5
 
 
 class NormShapes(FloatEnum):
@@ -132,12 +134,14 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     TRIANGLE = "triangle"
     HEXAGON = "hexagon"
     SQUARE = "square"
+    FIBONACCI = "fibonacci"
 
     # Aliases
     CIRCULAR = CIRCLE
     TRIANGULAR = TRIANGLE
     HEXAGONAL = HEXAGON
     UNIFORM = RANDOM
+    SPIRAL = FIBONACCI
 
 
 ###############
@@ -280,7 +284,7 @@ def convert_gradients_to_trajectory(
 
     # Prepare and integrate gradients
     trajectory = gradients * gamma * raster_time
-    trajectory = np.concatenate([initial_positions, trajectory])
+    trajectory = np.concatenate([initial_positions[:, None, :], trajectory], axis=1)
     trajectory = np.cumsum(trajectory, axis=1)
 
     # Normalize the trajectory for NUFFT usage
@@ -346,7 +350,7 @@ def convert_slew_rates_to_gradients(
 
     # Prepare and integrate slew rates
     gradients = slewrates * raster_time
-    gradients = np.concatenate([initial_gradients, gradients])
+    gradients = np.concatenate([initial_gradients[:, None, :], gradients], axis=1)
     gradients = np.cumsum(gradients, axis=1)
     return gradients
 
@@ -435,171 +439,6 @@ def check_hardware_constraints(
     return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
 
 
-###############
-# MATHEMATICS #
-###############
-
-
-def compute_greatest_common_divider(p, q):
-    """Compute the greatest common divider of two integers p and q.
-
-    Parameters
-    ----------
-    p : int
-        First integer.
-    q : int
-        Second integer.
-
-    Returns
-    -------
-    int
-        The greatest common divider of p and q.
-    """
-    while q != 0:
-        p, q = q, p % q
-    return p
-
-
-def compute_coprime_factors(Nc, length, start=1, update=1):
-    """Compute a list of coprime factors of Nc.
-
-    Parameters
-    ----------
-    Nc : int
-        Number to factorize.
-    length : int
-        Number of coprime factors to compute.
-    start : int, optional
-        First number to check. The default is 1.
-    update : int, optional
-        Increment between two numbers to check. The default is 1.
-
-    Returns
-    -------
-    list
-        List of coprime factors of Nc.
-    """
-    count = start
-    coprimes = []
-    while len(coprimes) < length:
-        if compute_greatest_common_divider(Nc, count) == 1:
-            coprimes.append(count)
-        count += update
-    return coprimes
-
-
-#############
-# ROTATIONS #
-#############
-
-
-def R2D(theta):
-    """Initialize 2D rotation matrix.
-
-    Parameters
-    ----------
-    theta : float
-        Rotation angle in rad.
-
-    Returns
-    -------
-    np.ndarray
-        2D rotation matrix.
-    """
-    return np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-
-
-def Rx(theta):
-    """Initialize 3D rotation matrix around x axis.
-
-    Parameters
-    ----------
-    theta : float
-        Rotation angle in rad.
-
-    Returns
-    -------
-    np.ndarray
-        2D rotation matrix.
-    """
-    return np.array(
-        [
-            [1, 0, 0],
-            [0, np.cos(theta), -np.sin(theta)],
-            [0, np.sin(theta), np.cos(theta)],
-        ]
-    )
-
-
-def Ry(theta):
-    """Initialize 3D rotation matrix around y axis.
-
-    Parameters
-    ----------
-    theta : float
-        Rotation angle in rad.
-
-    Returns
-    -------
-    np.ndarray
-        2D rotation matrix.
-    """
-    return np.array(
-        [
-            [np.cos(theta), 0, np.sin(theta)],
-            [0, 1, 0],
-            [-np.sin(theta), 0, np.cos(theta)],
-        ]
-    )
-
-
-def Rz(theta):
-    """Initialize 3D rotation matrix around z axis.
-
-    Parameters
-    ----------
-    theta : float
-        Rotation angle in rad.
-
-    Returns
-    -------
-    np.ndarray
-        2D rotation matrix.
-    """
-    return np.array(
-        [
-            [np.cos(theta), -np.sin(theta), 0],
-            [np.sin(theta), np.cos(theta), 0],
-            [0, 0, 1],
-        ]
-    )
-
-
-def Rv(v1, v2, normalize=True):
-    """Initialize 3D rotation matrix from two vectors.
-
-    Parameters
-    ----------
-    v1 : np.ndarray
-        First vector.
-    v2 : np.ndarray
-        Second vector.
-    normalize : bool, optional
-        Normalize the vectors. The default is True.
-
-    Returns
-    -------
-    np.ndarray
-        3D rotation matrix.
-    """
-    if normalize:
-        v1, v2 = v1 / np.linalg.norm(v1), v2 / np.linalg.norm(v2)
-    cos_theta = np.dot(v1, v2)
-    v3 = np.cross(v1, v2)
-    cross_matrix = np.cross(v3, np.identity(v3.shape[0]) * -1)
-    return np.identity(3) + cross_matrix + cross_matrix @ cross_matrix / (1 + cos_theta)
-
-
 ###########
 # OPTIONS #
 ###########
@@ -630,7 +469,7 @@ def initialize_tilt(tilt, nb_partitions=1):
     Tilts
 
     """
-    if not (isinstance(tilt, str) or tilt is None):
+    if isinstance(tilt, Real):
         return tilt
     elif tilt is None or tilt == Tilts.NONE:
         return 0
@@ -648,8 +487,8 @@ def initialize_tilt(tilt, nb_partitions=1):
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
 
 
-def initialize_spiral(spiral):
-    """Initialize the spiral type.
+def initialize_algebraic_spiral(spiral):
+    """Initialize the algebraic spiral type.
 
     Parameters
     ----------
@@ -661,7 +500,7 @@ def initialize_spiral(spiral):
     float
         Spiral power value.
     """
-    if isinstance(spiral, float):
+    if isinstance(spiral, Real):
         return spiral
     return Spirals[spiral]
 
@@ -679,6 +518,6 @@ def initialize_shape_norm(shape):
     float
         Shape p-norm value.
     """
-    if isinstance(shape, float):
+    if isinstance(shape, Real):
         return shape
     return NormShapes[shape]

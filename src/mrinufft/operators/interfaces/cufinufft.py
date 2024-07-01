@@ -66,6 +66,7 @@ class RawCufinufftPlan:
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
         self.plans = [None, None, None]
+        self.grad_plan = None
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
@@ -89,8 +90,21 @@ class RawCufinufftPlan:
             **kwargs,
         )
 
+    def _make_plan_grad(self, **kwargs):
+        self.grad_plan = Plan(
+            2,
+            self.shape,
+            self.n_trans,
+            self.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self._set_pts(typ="grad")
+
     def _set_pts(self, typ):
-        self.plans[typ].setpts(
+        plan = self.grad_plan if typ == "grad" else self.plans[typ]
+        plan.setpts(
             cp.array(self.samples[:, 0], copy=False),
             cp.array(self.samples[:, 1], copy=False),
             cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
@@ -102,6 +116,12 @@ class RawCufinufftPlan:
             del p
             self.plans[typ] = None
 
+    def _destroy_plan_grad(self):
+        if self.grad_plan is not None:
+            p = self.grad_plan
+            del p
+            self.grad_plan = None
+
     def type1(self, coeff_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
         return self.plans[1].execute(coeff_data, grid_data)
@@ -109,6 +129,10 @@ class RawCufinufftPlan:
     def type2(self, grid_data, coeff_data):
         """Type 2 transform. Uniform to non-uniform."""
         return self.plans[2].execute(grid_data, coeff_data)
+
+    def toggle_grad_traj(self):
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
 
 
 class MRICufiNUFFT(FourierOperatorBase):
@@ -165,6 +189,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
     backend = "cufinufft"
     available = CUFINUFFT_AVAILABLE and CUPY_AVAILABLE
+    autograd_available = True
 
     def __init__(
         self,
@@ -195,12 +220,12 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
+        self.autograd_available = True
         # For now only single precision is supported
-        self.samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32)
+        self._samples = np.asfortranarray(
+            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
         )
         self.dtype = self.samples.dtype
-
         # density compensation support
         if is_cuda_array(density):
             self.density = density
@@ -210,7 +235,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.density = cp.array(self.density)
 
         # Smaps support
-        self.smaps = smaps
+        self.compute_smaps(smaps)
         self.smaps_cached = False
         if smaps is not None:
             if not (is_host_array(smaps) or is_cuda_array(smaps)):
@@ -228,7 +253,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 )
                 self.smaps_cached = True
             else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
+                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
         self.raw_op = RawCufinufftPlan(
@@ -238,6 +263,15 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         # Support for concurrent stream and computations.
+
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        """Update the plans when changing the samples."""
+        self._samples = samples
+        for typ in [1, 2, "grad"]:
+            if typ == "grad" and not self._grad_wrt_traj:
+                continue
+            self.raw_op._set_pts(typ)
 
     @with_numpy_cupy
     @nvtx_mark()
@@ -782,8 +816,8 @@ class MRICufiNUFFT(FourierOperatorBase):
             squeeze_dims=True,
             **kwargs,
         )
-        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype)
-        x += np.random.random(self.shape).astype(self.cpx_dtype)
+        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+        x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = cp.asarray(x)
         return power_method(

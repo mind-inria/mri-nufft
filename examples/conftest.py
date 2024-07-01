@@ -12,11 +12,12 @@ https://stackoverflow.com/questions/56807698/how-to-run-script-as-pytest-test
 
 """
 
-from pathlib import Path
+import sys
 import runpy
-import pytest
-import matplotlib as mpl
+from pathlib import Path
 
+import matplotlib as mpl
+import pytest
 
 mpl.use("agg")
 
@@ -45,6 +46,7 @@ class ScriptItem(pytest.Item):
 
     def runtest(self):
         """Run the script as a test."""
+        sys.path.insert(0, str(self.path.parent))
         runpy.run_path(str(self.path))
 
     def repr_failure(self, excinfo):

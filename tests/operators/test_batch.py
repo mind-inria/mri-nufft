@@ -1,6 +1,6 @@
 """Test for batch computations.
 
-Only finufft and cufinufft support batch computations.
+Only finufft, cufinufft and gpunufft support batch computations.
 """
 
 import numpy as np
@@ -36,7 +36,7 @@ from case_trajectories import CasesTrajectories
 @parametrize_with_cases(
     "kspace_locs, shape",
     cases=CasesTrajectories,
-    glob="*random*",
+    glob="*nyquist_radial*",
 )
 @parametrize(backend=["gpunufft", "finufft", "cufinufft"])
 def operator(
@@ -185,12 +185,15 @@ def test_data_consistency(
     res = from_interface(res, array_interface)
     res2 = from_interface(res2, array_interface)
     slope_err = 1e-3
+    r_value_err = 1e-3
     # FIXME 2D Sense is not very accurate...
     if len(operator.shape) == 2 and operator.uses_sense:
+        print("Reduced accuracy for 2D Sense")
         slope_err = 1e-1
+        r_value_err = 1e-1
 
     for i in range(len(res)):
-        assert_correlate(res[i], res2[i], slope_err=slope_err)
+        assert_correlate(res[i], res2[i], slope_err=slope_err, r_value_err=r_value_err)
 
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):

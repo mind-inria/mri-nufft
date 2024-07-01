@@ -2,9 +2,11 @@
 
 import numpy as np
 from mrinufft.io import read_trajectory, write_trajectory
+from mrinufft.io.utils import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 from pytest_cases import parametrize_with_cases
+from case_trajectories import CasesTrajectories
 
 
 class CasesIO:
@@ -67,3 +69,21 @@ def test_write_n_read(
     np.testing.assert_almost_equal(params["FOV"], FOV, decimal=6)
     np.testing.assert_equal(params["img_size"], img_size)
     np.testing.assert_almost_equal(read_traj, trajectory, decimal=5)
+
+
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[CasesTrajectories.case_random2D, CasesTrajectories.case_random3D],
+)
+def test_add_shift(kspace_loc, shape):
+    """Test the add_phase_to_kspace_with_shifts function."""
+    n_samples = np.prod(kspace_loc.shape[:-1])
+    kspace_data = np.random.randn(n_samples) + 1j * np.random.randn(n_samples)
+    shifts = np.random.rand(kspace_loc.shape[-1])
+
+    shifted_data = add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, shifts)
+
+    assert np.allclose(np.abs(shifted_data), np.abs(kspace_data))
+
+    phase = np.exp(-2 * np.pi * 1j * np.sum(kspace_loc * shifts, axis=-1))
+    np.testing.assert_almost_equal(shifted_data / phase, kspace_data, decimal=5)

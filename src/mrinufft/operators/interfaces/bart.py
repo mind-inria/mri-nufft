@@ -17,9 +17,12 @@ import numpy as np
 from mrinufft.io.cfl import traj2cfl, _writecfl, _readcfl
 
 # available if return code is 0
-BART_AVAILABLE = not subp.call(
-    ["which", "bart"], stdout=subp.DEVNULL, stderr=subp.DEVNULL
-)
+try:
+    BART_AVAILABLE = not subp.call(
+        ["which", "bart"], stdout=subp.DEVNULL, stderr=subp.DEVNULL
+    )
+except Exception:
+    BART_AVAILABLE = False
 
 
 class RawBartNUFFT:

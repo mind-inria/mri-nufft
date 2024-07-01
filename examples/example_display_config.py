@@ -8,17 +8,14 @@ The look of the display trajectories can be tweaked by using :py:class:`displayC
 You can tune these parameters to your own taste and needs.
 """
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 # %%
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 
-from mrinufft import displayConfig, display_2D_trajectory, display_3D_trajectory
-from mrinufft.trajectories import (
-    initialize_2D_radial,
-    initialize_3D_cones,
-    initialize_3D_floret,
-)
+from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
+from mrinufft.trajectories import conify, initialize_2D_spiral
 
 # Trajectory parameters
 Nc = 120  # Number of shots
@@ -54,7 +51,7 @@ def show_traj(traj, name, values, **kwargs):
 # To show case the display parameters of trajectories, we will use the following trajectory
 # The effect of trajectory parameter are explained in the :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` Example.
 
-traj = initialize_3D_floret(Nc, Ns, nb_cones=6)[::-1]
+traj = conify(initialize_2D_spiral(Nc // 6, Ns), nb_cones=6)[::-1]
 
 # %%
 # ``linewidth``

@@ -3,13 +3,15 @@
 import numpy as np
 
 from mrinufft._utils import proper_trajectory
-from mrinufft.operators.base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU, FourierOperatorBase
 
 FINUFFT_AVAILABLE = True
 try:
     from finufft._interfaces import Plan
 except ImportError:
     FINUFFT_AVAILABLE = False
+
+DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
 class RawFinufftPlan:
@@ -32,6 +34,7 @@ class RawFinufftPlan:
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
         self.plans = [None, None, None]
+        self.grad_plan = None
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
@@ -43,15 +46,28 @@ class RawFinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype="complex64" if self.samples.dtype == "float32" else "complex128",
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
             **kwargs,
         )
+
+    def _make_plan_grad(self, **kwargs):
+        self.grad_plan = Plan(
+            2,
+            self.shape,
+            self.n_trans,
+            self.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self._set_pts(typ="grad")
 
     def _set_pts(self, typ):
         fpts_axes = [None, None, None]
         for i in range(self.ndim):
             fpts_axes[i] = np.array(self.samples[:, i], dtype=self.samples.dtype)
-        self.plans[typ].setpts(*fpts_axes)
+        plan = self.grad_plan if typ == "grad" else self.plans[typ]
+        plan.setpts(*fpts_axes)
 
     def adj_op(self, coeffs_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
@@ -66,6 +82,10 @@ class RawFinufftPlan:
             grid_data = grid_data.reshape(self.shape)
             coeffs_data = coeffs_data.reshape(len(self.samples))
         return self.plans[2].execute(grid_data, coeffs_data)
+
+    def toggle_grad_traj(self):
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
 
 
 class MRIfinufft(FourierOperatorCPU):
@@ -99,6 +119,7 @@ class MRIfinufft(FourierOperatorCPU):
 
     backend = "finufft"
     available = FINUFFT_AVAILABLE
+    autograd_available = True
 
     def __init__(
         self,
@@ -112,6 +133,12 @@ class MRIfinufft(FourierOperatorCPU):
         squeeze_dims=True,
         **kwargs,
     ):
+        self.raw_op = RawFinufftPlan(
+            samples,
+            shape,
+            n_trans=n_trans,
+            **kwargs,
+        )
         super().__init__(
             samples,
             shape,
@@ -120,12 +147,15 @@ class MRIfinufft(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=n_trans,
             smaps=smaps,
+            raw_op=self.raw_op,
             squeeze_dims=squeeze_dims,
         )
 
-        self.raw_op = RawFinufftPlan(
-            samples,
-            shape,
-            n_trans=n_trans,
-            **kwargs,
-        )
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        """Update the plans when changing the samples."""
+        self._samples = samples
+        for typ in [1, 2, "grad"]:
+            if typ == "grad" and not self._grad_wrt_traj:
+                continue
+            self.raw_op._set_pts(typ)

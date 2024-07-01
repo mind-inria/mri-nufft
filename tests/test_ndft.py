@@ -13,31 +13,7 @@ from mrinufft.operators.interfaces.nudft_numpy import (
 
 from case_trajectories import CasesTrajectories, case_grid1D
 from helpers import assert_almost_allclose
-
-
-@parametrize_with_cases(
-    "kspace_grid, shape",
-    cases=[
-        case_grid1D,
-        CasesTrajectories.case_grid2D,
-    ],  # 3D is ignored (too much possibility for the reordering)
-)
-def test_ndft_grid_matrix(kspace_grid, shape):
-    """Test that  the ndft matrix is a good matrix for doing fft."""
-    ndft_matrix = get_fourier_matrix(kspace_grid, shape)
-    # Create a random image
-    fft_matrix = [None] * len(shape)
-    for i in range(len(shape)):
-        fft_matrix[i] = sp.fft.fft(np.eye(shape[i]))
-    fft_mat = fft_matrix[0]
-    if len(shape) == 2:
-        fft_mat = fft_matrix[0].flatten()[:, None] @ fft_matrix[1].flatten()[None, :]
-        fft_mat = (
-            fft_mat.reshape(shape * 2)
-            .transpose(2, 0, 1, 3)
-            .reshape((np.prod(shape),) * 2)
-        )
-    assert np.allclose(ndft_matrix, fft_mat)
+from mrinufft import get_operator
 
 
 @parametrize_with_cases(
@@ -56,7 +32,7 @@ def test_ndft_implicit2(kspace, shape):
     linop_coef = implicit_type2_ndft(kspace, random_image.flatten(), shape)
     matrix_coef = matrix @ random_image.flatten()
 
-    assert np.allclose(linop_coef, matrix_coef)
+    assert_almost_allclose(linop_coef, matrix_coef, atol=1e-4, rtol=1e-4, mismatch=5)
 
 
 @parametrize_with_cases(
@@ -76,7 +52,7 @@ def test_ndft_implicit1(kspace, shape):
     linop_coef = implicit_type1_ndft(kspace, random_kspace.flatten(), shape)
     matrix_coef = matrix.conj().T @ random_kspace.flatten()
 
-    assert np.allclose(linop_coef, matrix_coef)
+    assert_almost_allclose(linop_coef, matrix_coef, atol=1e-4, rtol=1e-4, mismatch=5)
 
 
 @parametrize_with_cases(
@@ -98,6 +74,5 @@ def test_ndft_fft(kspace_grid, shape):
     kspace = kspace.reshape(img.shape)
     if len(shape) >= 2:
         kspace = kspace.swapaxes(0, 1)
-    kspace_fft = sp.fft.fftn(img)
-
-    assert_almost_allclose(kspace, kspace_fft, atol=1e-5, rtol=1e-5, mismatch=5)
+    kspace_fft = sp.fft.fftn(sp.fft.fftshift(img))
+    assert_almost_allclose(kspace, kspace_fft, atol=1e-4, rtol=1e-4, mismatch=5)

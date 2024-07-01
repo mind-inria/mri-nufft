@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [ "master" ]
 
+
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   PYTHON_VERSION: "3.10"
@@ -37,4 +42,4 @@ jobs:
 
       - name: ruff Check
         shell: bash
-        run: ruff src
+        run: ruff check src
