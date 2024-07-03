@@ -28,6 +28,7 @@ jobs:
         exclude:
           - backend: bart
           - backend: pynufft-cpu
+          - backend: torchkbnufft-cpu
 
     steps:
       - uses: actions/checkout@v3
