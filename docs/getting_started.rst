@@ -24,12 +24,12 @@ If you want to modifiy the mri-nufft code base
 Choosing a NUFFT Backend
 ========================
 
-In order to performs Non Uniform fast fourier transform you need to install a specific backend library.
+In order to perform Non-Uniform fast Fourier transform you need to install a specific backend library.
 
 Supported Libraries
 -------------------
 
-These libraries needs to be installed separately from this package.
+These libraries need to be installed separately from this package.
 
 .. Don't touch the spacing ! ..
 
@@ -57,11 +57,11 @@ stacked (*)          CPU/GPU      ✔                   single/double    numpy
 .. _bart: https://github.com/mrirecon/bart
 .. _sigpy: https://github.com/sigpy/sigpy
 
-- (*) stacked-nufft allow to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
+- (*) stacked-nufft allows one to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
 
 
-**The NUFFT operation is often not enough to provide good image quality by itself (even with density compensation)**.
-It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
+**The NUFFT operation is often not enough to provide decent image quality by itself (even with density compensation)**.
+For improved image quality, use a Compressed Sensing recon. For doing so, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
 
 .. _pysap-mri: https://github.com/CEA-COSMIC/pysap-mri/
 .. _Modopt: https://github.com/CEA-COSMIC/ModOpt/
@@ -70,12 +70,12 @@ It is best used in a Compress Sensing setup, you can check the pysap-mri_ for MR
 Backend Installations
 ---------------------
 
-To benefit the most from certain backend we recommend to use the following instructions
+To benefit the most from certain backends we recommend to use the following instructions
 
 finufft / cufinufft
 ~~~~~~~~~~~~~~~~~~~
 
-Those are develop by the `flatiron-institute <https://github.com/flatironinstitute/finufft>`_ and are installable with `pip install finufft` and `pip install cufinufft`.
+Those are developed by the `flatiron-institute <https://github.com/flatironinstitute/finufft>`_ and are installable with `pip install finufft` and `pip install cufinufft`.
 
 .. warning::
 
@@ -116,7 +116,7 @@ PyNFFT requires Cython<3.0.0 to work.  and can be installed using
 
 Which backend to use
 --------------------
-[TBA] See the benchmark. Fastest are gpunufft and cufinufft (because they are using gpu). gpunufft is usually more memory efficient also.
+[TBA] See the benchmark. Fastest are gpunufft and cufinufft (because they are using gpu). Additionally, Gunufft is usually more memory efficient.
 
 
 .. note::

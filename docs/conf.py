@@ -77,7 +77,7 @@ sphinx_gallery_conf = {
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
     "filename_pattern": "/example_",
-    "ignore_pattern": r"/(__init__|conftest)\.py",
+    "ignore_pattern": r"/(__init__|conftest|utils)\.py",
     "nested_sections": True,
 }
 
