@@ -150,7 +150,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         """
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
-        data = data.to("cuda", copy=False)
+        data = data.to(self.device, copy=False)
 
         if self.smaps is not None:
             self.smaps = self.smaps.to(data.dtype, copy=False)
