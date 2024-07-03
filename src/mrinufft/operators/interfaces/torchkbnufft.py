@@ -1,6 +1,6 @@
 """Pytorch MRI Nufft Operators."""
 
-from ..base import FourierOperatorBase, with_torch
+from mrinufft.operators.base import FourierOperatorBase, with_torch
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.interfaces.utils import is_cuda_tensor
 import numpy as np
@@ -79,8 +79,10 @@ class MRITorchKbNufft(FourierOperatorBase):
     ):
         super().__init__()
 
-        self.use_gpu = use_gpu
-        self.shape = shape
+        if use_gpu:
+            self.device = "cuda"
+        else:
+            self.device = "cpu"
         if isinstance(samples, torch.Tensor):
             if is_cuda_tensor(samples):
                 samples = samples.cpu()
@@ -88,24 +90,26 @@ class MRITorchKbNufft(FourierOperatorBase):
         samples = proper_trajectory(
             samples.astype(np.float32, copy=False), normalize="pi"
         )
-        self.samples = torch.tensor(samples).to("cuda" if use_gpu else "cpu")
+        self.samples = torch.tensor(samples).to(self.device)
+
         self.dtype = None
         # self.dtype = self.samples.dtype
+        self.shape = shape
         self.n_coils = n_coils
         self.n_batchs = n_batchs
         self.squeeze_dims = squeeze_dims
         # self.eps = eps
         self.compute_density(density)
-        self.compute_smaps(smaps)
-        if isinstance(smaps, np.ndarray) or (
-            CUPY_AVAILABLE and isinstance(smaps, cp.ndarray)
-        ):
-            self.smaps = torch.tensor(smaps).to("cuda" if use_gpu else "cpu")
 
-        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to("cuda" if use_gpu else "cpu")
-        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(
-            "cuda" if use_gpu else "cpu"
-        )
+        if isinstance(smaps, torch.Tensor):
+            self.smaps = smaps
+        else:
+            self.compute_smaps(smaps)
+            if self.smaps is not None:
+                self.smaps = torch.tensor(self.smaps).to(self.device)
+
+        self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(self.device)
+        self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(self.device)
 
     @with_torch
     def op(self, data, out=None):
@@ -121,11 +125,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         """
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
-        if self.use_gpu:
-            data = data.to("cuda", copy=False)
+        data = data.to(self.device, copy=False)
 
         if self.smaps is not None:
-            self.smaps = self.smaps.to(data.dtype)
+            self.smaps = self.smaps.to(data.dtype, copy=False)
 
         kdata = self._tkb_op.forward(
             image=data, omega=self.samples.t(), smaps=self.smaps
@@ -147,11 +150,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         """
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
-        if self.use_gpu:
-            data = data.to("cuda", copy=False)
+        data = data.to("cuda", copy=False)
 
         if self.smaps is not None:
-            self.smaps = self.smaps.to(data.dtype)
+            self.smaps = self.smaps.to(data.dtype, copy=False)
         if self.density:
             data = data * self.density
 
@@ -191,8 +193,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         Tensor
             The data consistency error in image space.
         """
-        if self.use_gpu:
-            obs_data = obs_data.to("cuda", copy=False)
+        obs_data = obs_data.to(self.device, copy=False)
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
 
@@ -238,9 +239,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
         )
         if normalize:
-            spike = torch.zeros(volume_shape, dtype=torch.float32).to(
-                "cuda" if use_gpu else "cpu"
-            )
+            spike = torch.zeros(volume_shape, dtype=torch.float32).to(grid_op.device)
             mid_loc = tuple(v // 2 for v in volume_shape)
             spike[mid_loc] = 1
             psf = grid_op.adj_op(grid_op.op(spike))
