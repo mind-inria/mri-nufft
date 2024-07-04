@@ -271,7 +271,7 @@ def read_trajectory(
     dwell_time : float | str, optional
         Dwell time of ADC in ms, by default 0.01
         It can also be string 'min_osf' to select dwell time
-        based on minimum OSF needed to get Nyquist sampling 
+        based on minimum OSF needed to get Nyquist sampling
         (This is obtained from SPARKLING trajectory header).
     num_adc_samples : int, optional
         Number of ADC samples, by default None
