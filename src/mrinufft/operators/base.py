@@ -189,6 +189,35 @@ def with_numpy_cupy(fun):
     return wrapper
 
 
+def with_torch(fun):
+    """Ensure the function works internally with Torch."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+
+        if xp.__name__ == "numpy":
+            data_ = torch.from_numpy(data)
+            output_ = torch.from_numpy(output) if output is not None else None
+        elif xp.__name__ == "cupy":
+            data_ = torch.from_dlpack(data)
+            output_ = torch.from_dlpack(output) if output is not None else None
+        else:
+            data_ = data
+            output_ = output
+
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+
+        if xp.__name__ == "cupy":
+            return cp.from_dlpack(ret_)
+        elif xp.__name__ == "numpy":
+            return ret_.to("cpu").numpy()
+
+        return ret_
+
+    return wrapper
+
+
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
@@ -345,7 +374,8 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft`
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
+                or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
             self.density = method

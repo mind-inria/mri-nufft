@@ -11,6 +11,12 @@ try:
 except ImportError:
     CUPY_AVAILABLE = False
 
+TORCH_AVAILABLE = True
+try:
+    import torch
+except ImportError:
+    TORCH_AVAILABLE = False
+
 
 def get_maxThreadBlock():
     """Get the warp size of the current device."""
@@ -26,6 +32,11 @@ def is_cuda_array(var):
         return hasattr(var, "__cuda_array_interface__")
     except Exception:
         return False
+
+
+def is_cuda_tensor(var):
+    """Check if var is a CUDA tensor."""
+    return isinstance(var, torch.Tensor) and var.is_cuda
 
 
 def is_host_array(var):
