@@ -450,19 +450,11 @@ def read_arbgrad_rawdat(
         hdr["type"] = "ARBGRAD_GRE"
         hdr["shifts"] = ()
         for s in [7, 6, 8]:
-            shift = twixObj.search_header_for_val(
-                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            )
-            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
-        hdr["oversampling_factor"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWiPMemBlock", "alFree", "4")
-        )[0]
-        hdr["trajectory_name"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWipMemBlock", "tFree")
-        )[0][1:-1]
+            shift = twixObj['hdr']['Phoenix']['sWipMemBlock']['adFree'][s]
+            hdr["shifts"] += (0,) if shift == [] else (shift,)
+        hdr["oversampling_factor"] = float(twixObj['hdr']['Phoenix']['sWipMemBlock']['alFree'][4])
+        hdr["trajectory_name"] = twixObj['hdr']['Phoenix']['sWipMemBlock']['tFree']
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj.search_header_for_val(
-                "Phoenix", ("sFastImaging", "lTurboFactor")
-            )[0]
+            hdr["turboFactor"] = twixObj['hdr']['Phoenix']['sFastImaging']['lTurboFactor']
             hdr["type"] = "ARBGRAD_MP2RAGE"
     return data, hdr
