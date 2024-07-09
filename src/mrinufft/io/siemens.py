@@ -75,12 +75,12 @@ def read_siemens_rawdat(
     # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
     if slice_num is not None and contrast_num is not None:
         raw_kspace = twixObj['image'][
-            (slice(None),) * 4 + (slice_num,) + (slice(None),) * 4 + (contrast_num,)
+            (slice(None),) * (len(twixObj['image'].shape) - 5) + (slice_num,) + (slice(None),) * (len(twixObj['image'].shape) - 5) + (contrast_num,)
         ]
     elif slice_num is not None:
-        raw_kspace = twixObj['image'][(slice(None),) * 4 + (slice_num,)]
+        raw_kspace = twixObj['image'][(slice(None),) * (len(twixObj['image'].shape) - 5)  + (slice_num,)]
     elif contrast_num is not None:
-        raw_kspace = twixObj['image'][(slice(None),) * 9 + (contrast_num,)]
+        raw_kspace = twixObj['image'][(slice(None),) * (len(twixObj['image'].shape) - 10) + (contrast_num,)]
     else:
         raw_kspace = twixObj['image'][:]
     if squeeze:
