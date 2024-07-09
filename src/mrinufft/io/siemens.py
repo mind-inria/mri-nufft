@@ -1,8 +1,12 @@
-"""Siemens specific rawdat reader, wrapper over pymapVBVD."""
+"""Siemens specific rawdat reader, wrapper over twixtools."""
 
 from __future__ import annotations
 
 import numpy as np
+
+
+class TwixObj:
+    
 
 
 def read_siemens_rawdat(
@@ -42,31 +46,31 @@ def read_siemens_rawdat(
     Raises
     ------
     ImportError
-        If the mapVBVD module is not available.
+        If the twixtools module is not available.
 
     Notes
     -----
-    This function requires the mapVBVD module to be installed.
+    This function requires the twixtools module to be installed.
     You can install it using the following command:
-        `pip install pymapVBVD`
+        `pip install gt-twixtools`
     """
     try:
-        from mapvbvd import mapVBVD
+        from twixtools import map_twix, read_twix
     except ImportError as err:
         raise ImportError(
-            "The mapVBVD module is not available. Please install it using "
-            "the following command: pip install pymapVBVD"
+            "The twixtools module is not available. Please install it using "
+            "the following command: pip install gt-twixtools"
         ) from err
-    twixObj = mapVBVD(filename)
+    twixObj = map_twix(read_twix(filename))
     if isinstance(twixObj, list):
         twixObj = twixObj[-1]
-    twixObj.image.flagRemoveOS = removeOS
+    twixObj['image'].flags['remove_os'] = removeOS
     hdr = {
-        "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin),
-        "n_contrasts": int(twixObj.image.NSet),
-        "n_adc_samples": int(twixObj.image.NCol),
-        "n_slices": int(twixObj.image.NSli),
+        "n_coils": int(twixObj['image'].shape[-2]),
+        "n_shots": int(twixObj['image'].shape[-3]),
+        "n_contrasts": int(twixObj['image'].shape[-4]),
+        "n_adc_samples": int(twixObj['image'].shape[-1]),
+        "n_slices": int(int(twixObj['image'].shape[-5])),
     }
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
@@ -74,15 +78,15 @@ def read_siemens_rawdat(
         raise ValueError("The contrast number is out of bounds.")
     # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
     if slice_num is not None and contrast_num is not None:
-        raw_kspace = twixObj.image[
+        raw_kspace = twixObj['image'][
             (slice(None),) * 4 + (slice_num,) + (slice(None),) * 4 + (contrast_num,)
         ]
     elif slice_num is not None:
-        raw_kspace = twixObj.image[(slice(None),) * 4 + (slice_num,)]
+        raw_kspace = twixObj['image'][(slice(None),) * 4 + (slice_num,)]
     elif contrast_num is not None:
-        raw_kspace = twixObj.image[(slice(None),) * 9 + (contrast_num,)]
+        raw_kspace = twixObj['image'][(slice(None),) * 9 + (contrast_num,)]
     else:
-        raw_kspace = twixObj.image[""]
+        raw_kspace = twixObj['image'][:]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
     data = np.moveaxis(raw_kspace, 0, 2)
