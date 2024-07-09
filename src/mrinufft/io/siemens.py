@@ -5,10 +5,6 @@ from __future__ import annotations
 import numpy as np
 
 
-class TwixObj:
-    
-
-
 def read_siemens_rawdat(
     filename: str,
     removeOS: bool = False,
