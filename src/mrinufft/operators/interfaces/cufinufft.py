@@ -745,6 +745,21 @@ class MRICufiNUFFT(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
+    
+    def update_smaps(self,new_smaps):
+            """Update smaps.
+
+            Parameters
+            ----------
+            new_smaps: C-ordered ndarray or a GPUArray.
+
+            """
+            if self.smaps_cached:
+                self.smaps = cp.array(
+                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+                )
+            else:
+                self.smaps[...] = new_smaps.astype(self.cpx_dtype, copy=False)
 
     @property
     def eps(self):

@@ -502,6 +502,19 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
 
+    def update_smaps(self,new_smaps):
+        """Update pinned smaps from new_smaps.
+
+        Parameters
+        ----------
+        new_smaps: np.ndarray
+            the new sensitivity maps
+
+        """
+        smaps_ = new_smaps.T.reshape(-1, new_smaps.shape[0])
+        np.copyto(self.raw_op.pinned_smaps, smaps_)
+        self.smaps = new_smaps
+
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
         """Set the samples for the Fourier Operator.
