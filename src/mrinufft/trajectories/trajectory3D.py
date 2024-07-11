@@ -697,6 +697,47 @@ def initialize_3D_TURBINE(
     nb_trains="auto",
     in_out=True,
 ):
+    """Initialize 3D TURBINE trajectory.
+
+    This is an implementation of the TURBINE (Trajectory Using Radially
+    Batched Internal Navigator Echoes) trajectory proposed in [MGM10]_.
+    It consists of EPI-like multi-echo planes rotated around any axis
+    (here :math:`k_z`-axis) in a radial fashion.
+
+    Note that our implementation also proposes to segment the planes
+    into several shots, instead of just one.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns_readouts : int
+        Number of samples per readout
+    Ns_transitions : int
+        Number of samples per transition between two readouts
+    nb_blades : int
+        Number of line stacks over the kz axis
+    blade_tilt : str, float, optional
+        Tilt between individual blades, by default "uniform"
+    nb_trains : int, str
+        Number of trains dividing the readouts, such that each
+        shot will be composed of `n` readouts with `Nc = n * nb_trains`.
+        If "auto" then `nb_trains` is set to `nb_blades`.
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center
+
+    Returns
+    -------
+    array_like
+        3D TURBINE trajectory
+
+    References
+    ----------
+    .. [MGM10] McNab, Jennifer A., Daniel Gallichan, and Karla L. Miller.
+       "3D steady‐state diffusion‐weighted imaging with trajectory using
+       radially batched internal navigator echoes (TURBINE)."
+       Magnetic Resonance in Medicine 63, no. 1 (2010): 235-242.
+    """
     # Assess arguments validity
     if nb_trains == "auto":
         nb_trains = nb_blades
@@ -743,6 +784,57 @@ def initialize_3D_REPI(
     nb_trains="auto",
     in_out=True,
 ):
+    """Initialize 3D REPI trajectory.
+
+    This is an implementation of the REPI (Radial Echo Planar Imaging)
+    trajectory proposed in [RMS22]_ and officially inspired
+    from TURBINE proposed in [MGM10]_.
+    It consists of multi-echo stacks of lines or spirals rotated around any axis
+    (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
+    shifted over the rotation axis in order to be entangled with the others
+    without redundancy.
+
+    Note that our implementation also proposes to segment the planes/stacks
+    into several shots, instead of just one. Spirals can also be customized
+    beyond the classic Archimedean spiral.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns_readouts : int
+        Number of samples per readout
+    Ns_transitions : int
+        Number of samples per transition between two readouts
+    nb_blades : int
+        Number of line stacks over the kz axis
+    nb_blade_revolutions : float
+        Number of revolutions over lines/spirals within a blade
+        over the kz axis.
+    blade_tilt : str, float, optional
+        Tilt between individual blades, by default "uniform"
+    nb_spiral_revolutions : float, optional
+        Number of revolutions of the spirals over the readouts, by default 0
+    spiral : str, float, optional
+        Spiral type, by default "archimedes"
+    nb_trains : int, str
+        Number of trains dividing the readouts, such that each
+        shot will be composed of `n` readouts with `Nc = n * nb_trains`.
+        If "auto" then `nb_trains` is set to `nb_blades`.
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center
+
+    Returns
+    -------
+    array_like
+        3D REPI trajectory
+
+    References
+    ----------
+    .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
+       "Three dimensional radial echo planar imaging for functional MRI."
+       Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.
+    """
     # Assess arguments validity
     if nb_trains == "auto":
         nb_trains = nb_blades
