@@ -1,6 +1,7 @@
 """Specific test for testing densities specific to backend."""
 
 import numpy as np
+import pytest
 from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
@@ -27,8 +28,14 @@ def radial_distance(traj, shape):
 @parametrize(backend=["gpunufft", "tensorflow"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
+    if backend == "tensorflow" and osf == 1:
+        result = pipe(traj, shape, backend, num_iterations=10)
+    elif backend == "tensorflow" and osf != 1:
+        pytest.skip("Tensorflow does not support OSF != 1")
+    else:
+        result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
+
     distance = radial_distance(traj, shape)
-    result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     if osf != 2:
