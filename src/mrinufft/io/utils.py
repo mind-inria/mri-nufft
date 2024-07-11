@@ -45,7 +45,7 @@ def _siemens_quat_to_orient_mat(q):
     ----------
     q : np.ndarray
         The Siemens TWIX scan quaternion extracted from header.
-    
+
     Returns
     -------
     np.ndarray
@@ -65,7 +65,7 @@ def _siemens_quat_to_orient_mat(q):
     dyy = q[2] * dys
     dyz = q[2] * dzs
     dzz = q[3] * dzs
-    
+
     R = np.zeros((4, 4))
     R[0, 0] = 1.0 - (dyy + dzz)
     R[0, 1] = dxy + dwz
@@ -76,29 +76,27 @@ def _siemens_quat_to_orient_mat(q):
     R[2, 0] = dxz + dwy
     R[2, 1] = dyz - dwx
     R[2, 2] = 1.0 - (dxx + dyy)
-    
-    R[-1,-1] = 1
-        
+
+    R[-1, -1] = 1
+
     return R
 
 
 def get_siemens_twix_orientation_matrix(twix_obj):
     """
     Extract the orientation matrix from Siemens Twix (twixtools) scan object.
-    
+
     Parameters
     ----------
     twix_obj : dict
         The twix object read by twixtools.
-    
+
     Returns
     -------
     np.ndarray
         The orientation matrix.
     """
-    mdb = twix_obj['mdb']
+    mdb = twix_obj["mdb"]
     mdh = mdb[0].mdh
     quat = mdh.SliceData.Quaternion
     return _siemens_quat_to_orient_mat(quat)
-
-

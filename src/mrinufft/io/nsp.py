@@ -448,9 +448,13 @@ def read_arbgrad_rawdat(
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["oversampling_factor"] = float(twixObj['hdr']['Phoenix']['sWipMemBlock']['alFree'][4])
-        hdr["trajectory_name"] = twixObj['hdr']['Phoenix']['sWipMemBlock']['tFree']
+        hdr["oversampling_factor"] = float(
+            twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["alFree"][4]
+        )
+        hdr["trajectory_name"] = twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["tFree"]
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj['hdr']['Phoenix']['sFastImaging']['lTurboFactor']
+            hdr["turboFactor"] = twixObj["hdr"]["Phoenix"]["sFastImaging"][
+                "lTurboFactor"
+            ]
             hdr["type"] = "ARBGRAD_MP2RAGE"
     return data, hdr
