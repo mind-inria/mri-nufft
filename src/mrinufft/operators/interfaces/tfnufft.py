@@ -2,6 +2,7 @@
 
 import numpy as np
 from ..base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
 
 TENSORFLOW_AVAILABLE = True
 
@@ -49,20 +50,22 @@ class MRITensorflowNUFFT(FourierOperatorBase):
     ):
         super().__init__()
 
-        self.samples = samples
         self.shape = shape
         self.n_coils = n_coils
         self.eps = eps
 
         self.compute_density(density)
 
-        if smaps is None:
-            self.uses_sense = False
-        elif tf.is_tensor(smaps):
-            self.uses_sense = True
-            self.smaps = smaps
-        else:
-            raise ValueError("argument `smaps` of type" f"{type(smaps)} is invalid")
+        if isinstance(samples, tf.Tensor):
+            samples = samples.numpy()
+        samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="pi"
+        )
+        self.samples = tf.convert_to_tensor(samples)
+
+        self.compute_smaps(smaps)
+        if not isinstance(smaps, tf):
+            self.smaps = tf.convert_to_tensor(smaps)
 
     def op(self, data):
         """Forward operation.
@@ -132,7 +135,13 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return self.adj_op(self.op(data) - obs_data)
 
     @classmethod
-    def pipe(samples, shape, n_iter=15, normalize=True):
+    def pipe(
+        cls,
+        samples,
+        shape,
+        num_iterations,
+        normalize=True,
+    ):
         """Estimate the density compensation using the pipe method.
 
         Parameters
@@ -159,7 +168,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
         )
 
-        grid_op = MRITensorflowNUFFT(samples, shape, num_iter=n_iter)
+        grid_op = MRITensorflowNUFFT(samples, shape, num_iter=num_iterations)
         if normalize:
             spike = np.zeros(shape)
             mid_loc = tuple(v // 2 for v in shape)
