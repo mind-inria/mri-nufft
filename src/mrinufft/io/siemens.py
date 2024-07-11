@@ -64,11 +64,7 @@ def read_siemens_rawdat(
         twixObj = twixObj[-1]
     twixObj['image'].flags['remove_os'] = removeOS
     hdr = {
-        "n_coils": int(twixObj['image'].shape[-2]),
-        "n_shots": int(twixObj['image'].shape[-3]),
-        "n_contrasts": int(twixObj['image'].shape[-4]),
-        "n_adc_samples": int(twixObj['image'].shape[-1]),
-        "n_slices": int(int(twixObj['image'].shape[-5])),
+k: int(v) for k,v in zip(["n_adc_samples", "n_coils", "n_shots", "n_contrasts", "n_slices"], twixObj["image"].shape[::-1]) 
     }
 
     hdr["shifts"] = ()
