@@ -431,13 +431,13 @@ def read_arbgrad_rawdat(
     Raises
     ------
     ImportError
-        If the mapVBVD module is not available.
+        If the twixtools module is not available.
 
     Notes
     -----
-    This function requires the mapVBVD module to be installed.
+    This function requires the twixtools module to be installed.
     You can install it using the following command:
-        `pip install pymapVBVD`
+        `pip install gt-twixtools`
     """
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
@@ -448,10 +448,6 @@ def read_arbgrad_rawdat(
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["shifts"] = ()
-        for s in [7, 6, 8]:
-            shift = twixObj['hdr']['Phoenix']['sWipMemBlock']['adFree'][s]
-            hdr["shifts"] += (0,) if shift == [] else (shift,)
         hdr["oversampling_factor"] = float(twixObj['hdr']['Phoenix']['sWipMemBlock']['alFree'][4])
         hdr["trajectory_name"] = twixObj['hdr']['Phoenix']['sWipMemBlock']['tFree']
         if hdr["n_contrasts"] > 1:

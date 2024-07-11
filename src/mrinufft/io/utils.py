@@ -37,9 +37,20 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
     return kspace_data * phase
 
 
-def siemens_quat_to_rot_mat(q):
+def _siemens_quat_to_orient_mat(q):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
+
+    Parameters
+    ----------
+    q : np.ndarray
+        The Siemens TWIX scan quaternion extracted from header.
+    
+    Returns
+    -------
+    np.ndarray
+        The orientation matrix.
+
     """
     ds = 2.0 / np.sum(q**2)
     dxs = q[1] * ds
@@ -71,13 +82,23 @@ def siemens_quat_to_rot_mat(q):
     return R
 
 
-def get_siemens_twix_rotation_matrix(twix_obj):
+def get_siemens_twix_orientation_matrix(twix_obj):
     """
     Extract the orientation matrix from Siemens Twix (twixtools) scan object.
+    
+    Parameters
+    ----------
+    twix_obj : dict
+        The twix object read by twixtools.
+    
+    Returns
+    -------
+    np.ndarray
+        The orientation matrix.
     """
-    mdb = twix_obj[-1]['mdb']
+    mdb = twix_obj['mdb']
     mdh = mdb[0].mdh
     quat = mdh.SliceData.Quaternion
-    return siemens_quat_to_rot_mat(quat)
+    return _siemens_quat_to_orient_mat(quat)
 
 

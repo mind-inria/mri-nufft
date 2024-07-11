@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from .utils import get_siemens_twix_orientation_matrix
+
 
 def read_siemens_rawdat(
     filename: str,
@@ -68,11 +70,19 @@ def read_siemens_rawdat(
         "n_adc_samples": int(twixObj['image'].shape[-1]),
         "n_slices": int(int(twixObj['image'].shape[-5])),
     }
+
+    hdr["shifts"] = ()
+    for s in [7, 6, 8]:
+        shift = twixObj['hdr']['Phoenix']['sWipMemBlock']['adFree'][s]
+        hdr["shifts"] += (0,) if shift == [] else (shift,)
+
+    hdr["orientation_matrix"] = get_siemens_twix_orientation_matrix(twixObj)
+
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
         raise ValueError("The contrast number is out of bounds.")
-    # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
+    # Shape : NSet, ...,NPar X NSli X NAve X NLin X NCha X NCol
     if slice_num is not None and contrast_num is not None:
         raw_kspace = twixObj['image'][
             (slice(None),) * (len(twixObj['image'].shape) - 5) + (slice_num,) + (slice(None),) * (len(twixObj['image'].shape) - 5) + (contrast_num,)
