@@ -254,6 +254,29 @@ def conify(
 
 
 def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
+    """Create multi-readout shots from trajectory composed of single-readouts.
+
+    Assemble multiple single-readout shots together by adding transition
+    steps in the trajectory to create EPI-like multi-readout shots.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to extend with rewind gradients.
+    Ns_transitions : int
+        Number of samples/steps between the readouts.
+    nb_trains : int
+        Number of resulting multi-readout shots, or trains.
+    reverse_odd_shots : bool, optional
+        Whether to reverse every odd shots such that, as in most
+        trajectories, even shots end up closer to the start of odd
+        shots.
+
+    Returns
+    -------
+    array_like
+        Trajectory with fewer but longer multi-readout shots.
+    """
     Nc, Ns, Nd = trajectory.shape
     if Nc % nb_trains != 0:
         raise ValueError(
@@ -285,6 +308,25 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
 
 
 def unepify(trajectory, Ns_readouts, Ns_transitions):
+    """Recover single-readout shots from multi-readout trajectory.
+
+    Reformat an EPI-like trajectory with multiple readouts and transitions
+    to more single-readout shots by discarding the transition parts.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to extend with rewind gradients.
+    Ns_readouts : int
+        Number of samples within a single readout.
+    Ns_transitions : int
+        Number of samples/steps between the readouts.
+
+    Returns
+    -------
+    array_like
+        Trajectory with more but shorter single shots.
+    """
     Nc, Ns, Nd = trajectory.shape
     if Ns % (Ns_readouts + Ns_transitions) != Ns_readouts:
         raise ValueError(
@@ -304,6 +346,25 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 
 
 def prewind(trajectory, Ns_transitions):
+    """Add pre-winding/positioning to the trajectory.
+
+    The trajectory is extended to start before the readout 
+    from the k-space center with null gradients and reach
+    each shot position with the required gradient strength.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to extend with rewind gradients.
+    Ns_transitions : int
+        Number of pre-winding/positioning steps used to leave the
+        k-space center and prepare for each shot to start.
+
+    Returns
+    -------
+    array_like
+        Extended trajectory with pre-winding/positioning.
+    """
     Nc, Ns, Nd = trajectory.shape
     if Ns_transitions < 3:
         raise ValueError("`Ns_transitions` should be at least 2.")
@@ -325,6 +386,23 @@ def prewind(trajectory, Ns_transitions):
 
 
 def rewind(trajectory, Ns_transitions):
+    """Add rewinding to the trajectory.
+
+    The trajectory is extended to come back to the k-space center
+    after the readouts with null gradients.
+
+    Parameters
+    ----------
+    trajectory : array_like
+        Trajectory to extend with rewind gradients.
+    Ns_transitions : int
+        Number of rewinding steps used to come back to the k-space center.
+
+    Returns
+    -------
+    array_like
+        Extended trajectory with rewinding.
+    """
     Nc, Ns, Nd = trajectory.shape
     if Ns_transitions < 3:
         raise ValueError("`Ns_transitions` should be at least 2.")
