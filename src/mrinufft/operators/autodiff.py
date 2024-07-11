@@ -22,7 +22,9 @@ class _NUFFT_OP(torch.autograd.Function):
         """Forward image -> k-space."""
         if nufft_op._grad_wrt_data and not nufft_op._grad_wrt_traj:
             ctx.save_for_backward(x)
-        else :
+        elif not nufft_op._grad_wrt_data and nufft_op._grad_wrt_traj:
+            ctx.save_for_backward(traj)
+        else:
             ctx.save_for_backward(x, traj)
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
@@ -32,6 +34,8 @@ class _NUFFT_OP(torch.autograd.Function):
         """Backward image -> k-space."""
         if ctx.nufft_op._grad_wrt_data and not ctx.nufft_op._grad_wrt_traj:
             x = ctx.saved_tensors
+        elif not ctx.nufft_op._grad_wrt_data and ctx.nufft_op._grad_wrt_traj:
+            traj = ctx.saved_tensors
         else:
             (x, traj) = ctx.saved_tensors
         grad_data = None
@@ -80,7 +84,9 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         """Forward kspace -> image."""
         if nufft_op._grad_wrt_data and not nufft_op._grad_wrt_traj:
             ctx.save_for_backward(y)
-        else :
+        elif not nufft_op._grad_wrt_data and nufft_op._grad_wrt_traj:
+            ctx.save_for_backward(traj)
+        else:
             ctx.save_for_backward(y, traj)
         ctx.nufft_op = nufft_op
         return nufft_op.adj_op(y)
@@ -90,6 +96,8 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         """Backward kspace -> image."""
         if ctx.nufft_op._grad_wrt_data and not ctx.nufft_op._grad_wrt_traj:
             y = ctx.saved_tensors
+        elif not ctx.nufft_op._grad_wrt_data and ctx.nufft_op._grad_wrt_traj:
+            traj = ctx.saved_tensors
         else:
             (y, traj) = ctx.saved_tensors
         grad_data = None
