@@ -28,8 +28,8 @@ def radial_distance(traj, shape):
 @parametrize(backend=["gpunufft", "tensorflow"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
-    if backend == "tensorflow" and osf != 1:
-        pytest.skip("Tensorflow does not support OSF != 1")
+    if backend == "tensorflow" and osf != 2:
+        pytest.skip("Tensorflow does not support OSF != 2")
     result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
 
     distance = radial_distance(traj, shape)
