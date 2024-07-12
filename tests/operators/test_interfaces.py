@@ -35,6 +35,7 @@ from helpers import (
         "sigpy",
         "torchkbnufft-cpu",
         "torchkbnufft-gpu",
+        "tensorflow",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
