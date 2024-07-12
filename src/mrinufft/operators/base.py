@@ -531,11 +531,11 @@ class FourierOperatorBase(ABC):
         """Normalization factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
 
-    def check_shape(self, image, init_shape):
+    def check_shape(self, image):
         """Check if the image shape is compatible with the operator's init shape."""
-        if image.shape != init_shape:
+        if image.shape[-len(self.shape):] != self.shape:
             raise ValueError(
-                f"Image shape {image.shape} is not compatible with the operator shape"
+                f"Image shape {image.shape[-len(self.shape):]} and {image.shape} is not compatible with the operator shape"
                 f" {self.shape}"
             )
 
