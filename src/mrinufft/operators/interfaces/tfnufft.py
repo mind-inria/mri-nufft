@@ -140,6 +140,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         samples,
         shape,
         num_iterations,
+        osf=2,
         normalize=True,
     ):
         """Estimate the density compensation using the pipe method.
@@ -163,6 +164,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             raise ValueError(
                 "tensorflow is not available, cannot estimate the density compensation"
             )
+        if osf != 2:
+            raise ValueError("Tensorflow does not support OSF != 2")
 
         density_comp = tf.math.reciprocal_no_nan(
             tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
