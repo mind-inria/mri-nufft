@@ -17,7 +17,7 @@ cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2>=1.4.3", "numpy>=2.0.0"]
 pynufft = ["pynufft"]
-io = ["pymapvbvd"]
+io = ["twixtools @ git+https://github.com/pehses/twixtools.git"]
 smaps = ["scikit-image"]
 autodiff = ["torch"]
 

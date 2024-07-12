@@ -436,13 +436,13 @@ def read_arbgrad_rawdat(
     Raises
     ------
     ImportError
-        If the mapVBVD module is not available.
+        If the twixtools module is not available.
 
     Notes
     -----
-    This function requires the mapVBVD module to be installed.
+    This function requires the twixtools module to be installed.
     You can install it using the following command:
-        `pip install pymapVBVD`
+        `pip install gt-twixtools`
     """
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
@@ -453,21 +453,13 @@ def read_arbgrad_rawdat(
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["shifts"] = ()
-        for s in [7, 6, 8]:
-            shift = twixObj.search_header_for_val(
-                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            )
-            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
-        hdr["oversampling_factor"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWiPMemBlock", "alFree", "4")
-        )[0]
-        hdr["trajectory_name"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWipMemBlock", "tFree")
-        )[0][1:-1]
+        hdr["oversampling_factor"] = float(
+            twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["alFree"][4]
+        )
+        hdr["trajectory_name"] = twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["tFree"]
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj.search_header_for_val(
-                "Phoenix", ("sFastImaging", "lTurboFactor")
-            )[0]
+            hdr["turboFactor"] = twixObj["hdr"]["Phoenix"]["sFastImaging"][
+                "lTurboFactor"
+            ]
             hdr["type"] = "ARBGRAD_MP2RAGE"
     return data, hdr
