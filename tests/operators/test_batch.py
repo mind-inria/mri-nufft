@@ -1,6 +1,6 @@
 """Test for batch computations.
 
-Only finufft and cufinufft support batch computations.
+Only finufft, cufinufft and gpunufft support batch computations.
 """
 
 import numpy as np
@@ -38,7 +38,9 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*nyquist_radial*",
 )
-@parametrize(backend=["gpunufft", "finufft", "cufinufft"])
+@parametrize(
+    backend=["finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"]
+)
 def operator(
     request,
     kspace_locs,

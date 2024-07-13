@@ -14,6 +14,8 @@ import pytest
         ("pynfft", "MRInfft"),
         ("numpy", "MRInumpy"),
         ("gpunufft", "MRIGpuNUFFT"),
+        ("torchkbnufft-cpu", "TorchKbNUFFTcpu"),
+        ("torchkbnufft-gpu", "TorchKbNUFFTgpu"),
     ],
 )
 def test_get_operator(backend, name):

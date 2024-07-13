@@ -4,6 +4,7 @@ import numpy as np
 import numpy.linalg as nl
 
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
+EIGENVECTOR_2D_FIBONACCI = (0.4656, 0.6823, 1)
 
 
 ##########
@@ -167,7 +168,7 @@ def Ra(vector, theta):
     """Initialize 3D rotation matrix around an arbitrary vector.
 
     Initialize a 3D rotation matrix to rotate around `vector` by an angle `theta`.
-    It corresponds to the generalized formula, while `Rx`, `Ry` and `Rz` are subcases.
+    It corresponds to a generalized formula with `Rx`, `Ry` and `Rz` as subcases.
 
     Parameters
     ----------

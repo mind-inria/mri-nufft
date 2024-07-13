@@ -109,10 +109,12 @@ def get_operator(
         operator = operator(*args, **kwargs)
 
     # if autograd:
-    if isinstance(operator, FourierOperatorBase):
-        operator = operator.make_autograd(wrt_data, wrt_traj)
-    elif wrt_data or wrt_traj:  # instance will be created later
-        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+    if wrt_data or wrt_traj:
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(wrt_data, wrt_traj)
+        else:
+            # instance will be created later
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
     return operator
 
 
@@ -187,6 +189,35 @@ def with_numpy_cupy(fun):
     return wrapper
 
 
+def with_torch(fun):
+    """Ensure the function works internally with Torch."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+
+        if xp.__name__ == "numpy":
+            data_ = torch.from_numpy(data)
+            output_ = torch.from_numpy(output) if output is not None else None
+        elif xp.__name__ == "cupy":
+            data_ = torch.from_dlpack(data)
+            output_ = torch.from_dlpack(output) if output is not None else None
+        else:
+            data_ = data
+            output_ = output
+
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+
+        if xp.__name__ == "cupy":
+            return cp.from_dlpack(ret_)
+        elif xp.__name__ == "numpy":
+            return ret_.to("cpu").numpy()
+
+        return ret_
+
+    return wrapper
+
+
 class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
@@ -197,6 +228,9 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
+    density_method = None
+    _grad_wrt_data = False
+    _grad_wrt_traj = False
 
     def __init__(self):
         if not self.available:
@@ -332,13 +366,16 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        method: str or callable or array or dict
+        method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
             If a string, the method should be registered in the density registry.
             If a callable, it should take the samples and the shape as input.
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
+            If `True`, the method `pipe` is chosen as default estimation method,
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
+                or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
             self.density = method
@@ -346,6 +383,8 @@ class FourierOperatorBase(ABC):
         if not method:
             self.density = None
             return None
+        if method is True:
+            method = "pipe"
 
         kwargs = {}
         if isinstance(method, dict):
@@ -357,7 +396,11 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-
+        self.density_method = lambda samples, shape: method(
+            samples,
+            shape,
+            **kwargs,
+        )
         self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
@@ -684,6 +727,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
+    @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 

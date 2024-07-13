@@ -82,6 +82,7 @@ def pytest_generate_tests(metafunc):
                     pytest.mark.skip(f"Backend {backend} not available.")
                 )
             if backend == metafunc.config.getoption("ref"):
+                # FIXME: This is skipping most tests on finufft, #140
                 callspec.marks.append(
                     pytest.mark.skip("Not testing ref backend with self.")
                 )
