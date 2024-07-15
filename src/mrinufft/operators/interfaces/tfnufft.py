@@ -195,7 +195,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             spike = np.zeros(shape)
             mid_loc = tuple(v // 2 for v in shape)
             spike[mid_loc] = 1
-            psf = fourier_op.adj_op(fourier_op.op(spike))
+            psf = fourier_op.adj_op(fourier_op.op(spike.astype(np.complex64)))
             density_comp /= np.linalg.norm(psf)
 
         return np.squeeze(density_comp)
