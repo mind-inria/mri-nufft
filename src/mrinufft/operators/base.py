@@ -589,7 +589,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = samples.reshape(-1, len(shape))
+        self._samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")

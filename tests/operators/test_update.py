@@ -114,8 +114,8 @@ def test_op(operator, array_interface, image_data):
     """Test the batch type 2 (forward)."""
     image_data = to_interface(image_data, array_interface)
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
-    # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += gitter / 1000
+    # Add very little noise to the trajectory, variance of 1e3
+    operator.samples += gitter / 100
     new_operator = update_operator(operator)
     kspace_changed = from_interface(operator.op(image_data), array_interface)
     kspace_true = from_interface(new_operator.op(image_data), array_interface)
