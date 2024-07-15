@@ -155,6 +155,7 @@ def with_tensorflow(fun):
     @wraps(fun)
     def wrapper(self, data, *args, **kwargs):
         import tensorflow as tf
+
         xp = get_array_module(data)
         if xp.__name__ == "torch":
             data_ = tf.convert_to_tensor(data.cpu())
