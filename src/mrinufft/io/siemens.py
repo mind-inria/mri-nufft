@@ -59,21 +59,22 @@ def read_siemens_rawdat(
             "The twixtools module is not available. Please install it using "
             "the following command: pip install gt-twixtools"
         ) from err
-    twixObj = map_twix(read_twix(filename))
+    twixObj = read_twix(filename)
     if isinstance(twixObj, list):
         twixObj = twixObj[-1]
-    twixObj["image"].flags["remove_os"] = removeOS
+    twix = map_twix(twixObj)
+    twix["image"].flags["remove_os"] = removeOS
     hdr = {
         k: int(v)
         for k, v in zip(
             ["n_adc_samples", "n_coils", "n_shots", "n_contrasts", "n_slices"],
-            twixObj["image"].shape[::-1],
+            twix["image"].shape[::-1],
         )
     }
 
     hdr["shifts"] = ()
     for s in [7, 6, 8]:
-        shift = twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["adFree"][s]
+        shift = twix["hdr"]["Phoenix"]["sWipMemBlock"]["adFree"][s]
         hdr["shifts"] += (0,) if shift == [] else (shift,)
 
     hdr["orientation_matrix"] = get_siemens_twix_orientation_matrix(twixObj)
@@ -84,22 +85,22 @@ def read_siemens_rawdat(
         raise ValueError("The contrast number is out of bounds.")
     # Shape : NSet, ...,NPar X NSli X NAve X NLin X NCha X NCol
     if slice_num is not None and contrast_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 5)
+        raw_kspace = twix["image"][
+            (slice(None),) * (len(twix["image"].shape) - 5)
             + (slice_num,)
-            + (slice(None),) * (len(twixObj["image"].shape) - 5)
+            + (slice(None),) * (len(twix["image"].shape) - 5)
             + (contrast_num,)
         ]
     elif slice_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 5) + (slice_num,)
+        raw_kspace = twix["image"][
+            (slice(None),) * (len(twix["image"].shape) - 5) + (slice_num,)
         ]
     elif contrast_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 10) + (contrast_num,)
+        raw_kspace = twix["image"][
+            (slice(None),) * (len(twix["image"].shape) - 10) + (contrast_num,)
         ]
     else:
-        raw_kspace = twixObj["image"][:]
+        raw_kspace = twix["image"][:]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
     data = np.moveaxis(raw_kspace, 0, 2)
