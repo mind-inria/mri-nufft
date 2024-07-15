@@ -1,7 +1,7 @@
 """Tensorflow MRI Nufft Operators."""
 
 import numpy as np
-from ..base import FourierOperatorBase, with_numpy_cupy
+from ..base import FourierOperatorBase, with_tensorflow
 from mrinufft._utils import proper_trajectory
 
 TENSORFLOW_AVAILABLE = True
@@ -67,7 +67,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         if self.smaps is not None and not isinstance(self.smaps, tf.Tensor):
             self.smaps = tf.convert_to_tensor(self.smaps)
 
-    @with_numpy_cupy
+    @with_tensorflow
     def op(self, data):
         """Forward operation.
 
@@ -83,16 +83,18 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             data_d = data * self.smaps
         else:
             data_d = data
-        return tfnufft.nufft(
+        coeff = tfnufft.nufft(
             data_d,
             self.samples,
             self.shape,
             transform_type="type_2",
-            fft_direction="backward",
+            fft_direction="forward",
             tol=self.eps,
         )
+        coeff /= self.norm_factor
+        return coeff
 
-    @with_numpy_cupy
+    @with_tensorflow
     def adj_op(self, data):
         """
         Backward Operation.
@@ -114,15 +116,21 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             self.samples,
             self.shape,
             transform_type="type_1",
-            fft_direction="forward",
+            fft_direction="backward",
             tol=self.eps,
         )
+        img /= self.norm_factor
         if self.uses_sense:
             return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
         else:
             return img
 
-    @with_numpy_cupy
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
+
+    @with_tensorflow
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
 

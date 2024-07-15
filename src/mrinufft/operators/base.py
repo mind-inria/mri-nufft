@@ -11,6 +11,7 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
+from inspect import signature
 
 import numpy as np
 
@@ -142,6 +143,32 @@ def with_numpy(fun):
             return xp.from_numpy(ret_).to(data.device)
         elif xp.__name__ == "cupy":
             return xp.array(ret_)
+        else:
+            return ret_
+
+    return wrapper
+
+
+def with_tensorflow(fun):
+    """Ensure the function works internally with tensorflow array."""
+    import tensorflow as tf
+
+    @wraps(fun)
+    def wrapper(self, data, *args, **kwargs):
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = tf.experimental.dlpack.from_dlpack(xp.to_dlpack(data))
+        elif xp.__name__ == "cupy":
+            data_ = tf.experimental.dlpack.from_dlpack(data.toDlPack())
+        else:
+            data_ = tf.convert_to_tensor(data)
+
+        ret_ = fun(self, data_, *args, **kwargs)
+
+        if xp.__name__ in ["torch", "cupy"]:
+            xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
+        elif xp.__name__ == "numpy":
+            return ret_.numpy()
         else:
             return ret_
 
