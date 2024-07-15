@@ -151,22 +151,22 @@ def with_numpy(fun):
 
 def with_tensorflow(fun):
     """Ensure the function works internally with tensorflow array."""
-    import tensorflow as tf
 
     @wraps(fun)
     def wrapper(self, data, *args, **kwargs):
+        import tensorflow as tf
         xp = get_array_module(data)
         if xp.__name__ == "torch":
-            data_ = tf.experimental.dlpack.from_dlpack(xp.to_dlpack(data))
+            data_ = tf.convert_to_tensor(data.cpu())
         elif xp.__name__ == "cupy":
-            data_ = tf.experimental.dlpack.from_dlpack(data.toDlPack())
+            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
         else:
             data_ = tf.convert_to_tensor(data)
 
         ret_ = fun(self, data_, *args, **kwargs)
 
         if xp.__name__ in ["torch", "cupy"]:
-            xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
+            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
         elif xp.__name__ == "numpy":
             return ret_.numpy()
         else:
