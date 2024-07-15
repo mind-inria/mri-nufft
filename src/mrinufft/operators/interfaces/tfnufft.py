@@ -62,7 +62,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             samples.astype(np.float32, copy=False), normalize="pi"
         )
         self.samples = tf.convert_to_tensor(samples)
-
+        self.dtype = samples.dtype
         self.compute_smaps(smaps)
         if self.smaps is not None and not isinstance(self.smaps, tf.Tensor):
             self.smaps = tf.convert_to_tensor(self.smaps)
