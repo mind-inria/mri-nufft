@@ -64,8 +64,8 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         self.samples = tf.convert_to_tensor(samples)
 
         self.compute_smaps(smaps)
-        if not isinstance(smaps, tf):
-            self.smaps = tf.convert_to_tensor(smaps)
+        if self.smaps is not None and not isinstance(self.smaps, tf.Tensor):
+            self.smaps = tf.convert_to_tensor(self.smaps)
 
     def op(self, data):
         """Forward operation.
@@ -115,7 +115,10 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             fft_direction="forward",
             tol=self.eps,
         )
-        return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
+        if self.uses_sense:
+            return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
+        else:
+            return img
 
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
@@ -139,7 +142,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         cls,
         samples,
         shape,
-        num_iterations,
+        num_iterations=10,
         osf=2,
         normalize=True,
     ):
@@ -168,15 +171,20 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             raise ValueError("Tensorflow does not support OSF != 2")
 
         density_comp = tf.math.reciprocal_no_nan(
-            tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
+            tfmri.estimate_density(
+                samples.astype(np.float32),
+                shape,
+                method="pipe",
+                max_iter=num_iterations,
+            )
         )
 
-        grid_op = MRITensorflowNUFFT(samples, shape, num_iter=num_iterations)
         if normalize:
+            fourier_op = MRITensorflowNUFFT(samples, shape)
             spike = np.zeros(shape)
             mid_loc = tuple(v // 2 for v in shape)
             spike[mid_loc] = 1
-            psf = grid_op.adj_op(grid_op.op(spike))
+            psf = fourier_op.adj_op(fourier_op.op(spike))
             density_comp /= np.linalg.norm(psf)
 
-        return density_comp.squeeze()
+        return np.squeeze(density_comp)
