@@ -1,7 +1,7 @@
 """Tensorflow MRI Nufft Operators."""
 
 import numpy as np
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory
 
 TENSORFLOW_AVAILABLE = True
@@ -67,6 +67,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         if self.smaps is not None and not isinstance(self.smaps, tf.Tensor):
             self.smaps = tf.convert_to_tensor(self.smaps)
 
+    @with_numpy_cupy
     def op(self, data):
         """Forward operation.
 
@@ -91,6 +92,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             tol=self.eps,
         )
 
+    @with_numpy_cupy
     def adj_op(self, data):
         """
         Backward Operation.
@@ -120,6 +122,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         else:
             return img
 
+    @with_numpy_cupy
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
 
