@@ -83,7 +83,7 @@ def pytest_generate_tests(metafunc):
                 )
             if metafunc.config.getoption(
                 "backend"
-            ) != [] and backend != metafunc.config.getoption("backend"):
+            ) != [] and backend != metafunc.config.getoption("backend")[0]:
                 # Skip tests if the backend does not match what we want to test.
                 callspec.marks.append(
                     pytest.mark.skip(f"Not testing {backend} as not requested")
