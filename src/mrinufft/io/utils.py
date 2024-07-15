@@ -96,7 +96,7 @@ def get_siemens_twix_orientation_matrix(twix_obj):
     np.ndarray
         The orientation matrix.
     """
-    mdb = twix_obj["mdb"]
+    mdb = twix_obj['image'].mdb_list
     mdh = mdb[0].mdh
     quat = mdh.SliceData.Quaternion
     return _siemens_quat_to_orient_mat(quat)
