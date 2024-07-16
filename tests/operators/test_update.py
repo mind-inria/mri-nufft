@@ -132,7 +132,7 @@ def test_adj_op(
     kspace_data = to_interface(kspace_data, array_interface)
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += gitter / 1000
+    operator.samples += gitter / 100
     new_operator = update_operator(operator)
     image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
