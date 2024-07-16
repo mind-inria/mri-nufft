@@ -59,7 +59,7 @@ class RawFinufftPlan:
             isign=1,
             **kwargs,
         )
-        self._set_pts(typ="grad")
+        self._set_pts(typ="grad", samples=samples)
 
     def _set_pts(self, typ, samples):
         fpts_axes = [None, None, None]

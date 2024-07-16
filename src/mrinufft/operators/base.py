@@ -781,7 +781,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
+        grad = np.zeros_like(dataf)
 
         coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)
