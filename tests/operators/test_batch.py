@@ -193,8 +193,9 @@ def test_data_consistency(
         print("Reduced accuracy for 2D Sense")
         atol = 1e-1
         atol = 1e-1
-    
+
     npt.assert_allclose(res, res2, atol=atol, rtol=rtol)
+
 
 def test_data_consistency_readonly(operator, image_data, kspace_data):
     """Test that the data consistency does not modify the input parameters data."""
