@@ -103,7 +103,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [cufinufft, torchkbnufft-gpu, tensorflow]
+        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
 
     steps:
       - uses: actions/checkout@v3
