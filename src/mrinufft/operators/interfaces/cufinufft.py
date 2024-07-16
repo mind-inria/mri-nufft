@@ -95,7 +95,7 @@ class RawCufinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype=DTYPE_R2C[str(self.dtype)],
+            dtype=DTYPE_R2C[str(self._dtype)],
             isign=1,
             **kwargs,
         )
