@@ -89,18 +89,6 @@ class RawCufinufftPlan:
             **kwargs,
         )
 
-    def _make_plan_grad(self, samples, **kwargs):
-        self.grad_plan = Plan(
-            2,
-            self.shape,
-            self.n_trans,
-            self.eps,
-            dtype=DTYPE_R2C[str(self._dtype)],
-            isign=1,
-            **kwargs,
-        )
-        self._set_pts(typ="grad", samples=samples)
-
     def _set_pts(self, typ, samples):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
         plan.setpts(
@@ -266,7 +254,9 @@ class MRICufiNUFFT(FourierOperatorBase):
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
         """Update the plans when changing the samples."""
-        self._samples = samples
+        self._samples = np.asfortranarray(
+            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+        )
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
@@ -790,6 +780,18 @@ class MRICufiNUFFT(FourierOperatorBase):
             f"  eps:{self.raw_op.eps:.0e}\n"
             ")"
         )
+
+    def _make_plan_grad(self, **kwargs):
+        self.raw_op.grad_plan = Plan(
+            2,
+            self.shape,
+            self.n_trans,
+            self.raw_op.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self.raw_op._set_pts(typ="grad", samples=self.samples)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

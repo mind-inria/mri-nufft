@@ -133,7 +133,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
-            self.nufft_op.raw_op._make_plan_grad(self.nufft_op.samples)
+            self.nufft_op._make_plan_grad(self.nufft_op.samples)
         self.nufft_op._grad_wrt_data = wrt_data
 
     def op(self, x):

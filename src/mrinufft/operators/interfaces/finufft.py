@@ -49,18 +49,6 @@ class RawFinufftPlan:
             **kwargs,
         )
 
-    def _make_plan_grad(self, samples, **kwargs):
-        self.grad_plan = Plan(
-            2,
-            self.shape,
-            self.n_trans,
-            self.eps,
-            dtype=DTYPE_R2C[str(samples.dtype)],
-            isign=1,
-            **kwargs,
-        )
-        self._set_pts(typ="grad", samples=samples)
-
     def _set_pts(self, typ, samples):
         fpts_axes = [None, None, None]
         for i in range(self.ndim):
@@ -154,9 +142,23 @@ class MRIfinufft(FourierOperatorCPU):
     @FourierOperatorBase.samples.setter
     def samples(self, new_samples):
         """Update the plans when changing the samples."""
-        self._samples = new_samples
+        self._samples = proper_trajectory(
+            np.asfortranarray(new_samples), normalize="pi"
+        )
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
             self.raw_op._set_pts(typ, new_samples)
         self.compute_density(self.density_method)
+
+    def _make_plan_grad(self, **kwargs):
+        self.raw_op.grad_plan = Plan(
+            2,
+            self.raw_op.shape,
+            self.raw_op.n_trans,
+            self.raw_op.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self.raw_op._set_pts(typ="grad", samples=self.samples)

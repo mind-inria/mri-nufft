@@ -168,6 +168,9 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             Shape of the image space.
         n_iter: int
             Number of iterations.
+        osf: int, default 2
+            Currently, we support only OSF=2 and this value cannot be changed.
+            Changing will raise an error.
 
         Returns
         -------

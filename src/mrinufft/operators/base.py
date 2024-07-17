@@ -11,7 +11,6 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from functools import partial, wraps
-from inspect import signature
 
 import numpy as np
 
