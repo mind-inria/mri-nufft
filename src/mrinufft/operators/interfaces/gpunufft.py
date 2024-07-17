@@ -518,7 +518,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         # It could help to have access to directly dorted arrays from gpuNUFFT.
         self.compute_density(self.density_method)
         self.raw_op.set_pts(
-            samples,
+            self._samples,
             density=self.density,
         )
 
