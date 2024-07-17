@@ -47,6 +47,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         density=False,
         smaps=None,
         eps=1e-6,
+        **kwargs,
     ):
         super().__init__()
 
@@ -64,7 +65,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         self.samples = tf.convert_to_tensor(samples)
 
         self.compute_smaps(smaps)
-        if not isinstance(smaps, tf):
+        if not isinstance(smaps, tf.Tensor) and smaps is not None:
             self.smaps = tf.convert_to_tensor(smaps)
 
     def op(self, data):
@@ -78,7 +79,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         -------
         Tensor
         """
-        if self.uses_sense:
+        if self.smaps is not None:
             data_d = data * self.smaps
         else:
             data_d = data
@@ -115,7 +116,9 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             fft_direction="forward",
             tol=self.eps,
         )
-        return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
+        if self.smaps is not None:
+            return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
+        return tf.math.reduce_sum(img, axis=0)
 
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
