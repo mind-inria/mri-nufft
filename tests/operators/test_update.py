@@ -39,6 +39,7 @@ from case_trajectories import CasesTrajectories
 )
 @parametrize(backend=["finufft", "cufinufft", "gpunufft"])
 @parametrize(density=[False, True])
+@parametrize(smaps_cached=[False, True])
 def operator(
     request,
     kspace_locs,
@@ -49,6 +50,7 @@ def operator(
     n_trans=1,
     density=False,
     backend="finufft",
+    smaps_cached=False,
 ):
     """Generate a batch operator."""
     if n_trans != 1 and backend == "gpunufft":
@@ -63,29 +65,39 @@ def operator(
     else:
         smaps = None
     kspace_locs = kspace_locs.astype(np.float32)
-    return get_operator(backend)(
-        kspace_locs,
-        shape,
-        n_coils=n_coils,
-        smaps=smaps,
-        n_batchs=n_batch,
-        n_trans=n_trans,
-        squeeze_dims=False,
-        density=density,
-    )
+    op_args = {
+        "samples": kspace_locs,
+        "shape": shape,
+        "n_coils": n_coils,
+        "n_batchs": n_batch,
+        "squeeze_dims": False,
+        "density": density,
+        "smaps": smaps,
+    }
+    if backend in ["cufinufft"]:
+        op_args.update([("smaps_cached", smaps_cached)])
+    else:
+        if smaps_cached:
+            pytest.skip(f"Skip test cause we dont have smaps_cached in {backend}")
+    return get_operator(backend)(**op_args)
 
 
 def update_operator(operator):
     """Generate a new operator with updated trajectory."""
-    return get_operator(operator.backend)(
-        operator.samples,
-        operator.shape,
-        density=operator.density,
-        n_coils=operator.n_coils,
-        smaps=operator.smaps,
-        squeeze_dims=False,
-        n_batchs=operator.n_batchs,
-    )
+    op_args = {
+        "samples": operator.samples,
+        "shape": operator.shape,
+        "n_coils": operator.n_coils,
+        "n_batchs": operator.n_batchs,
+        "squeeze_dims": False,
+        "density": operator.density,
+        "smaps": operator.smaps,
+    }
+    if operator.backend == "cufinufft":
+        op_args.update([("smaps_cached", operator.smaps_cached)])
+        if operator.smaps is not None and not isinstance(operator.smaps, np.ndarray):
+            op_args["smaps"] = operator.smaps.get()
+    return get_operator(operator.backend)(**op_args)
 
 
 @fixture(scope="module")
@@ -109,6 +121,16 @@ def kspace_data(operator):
     return kspace
 
 
+@fixture(scope="module")
+def new_smaps(operator):
+    """Generate a random new smaps."""
+    smaps = 1j * np.random.rand(operator.n_coils, *operator.shape)
+    smaps += np.random.rand(operator.n_coils, *operator.shape)
+    smaps = smaps.astype(np.complex64)
+    smaps /= np.linalg.norm(smaps, axis=0)
+    return smaps
+
+
 @param_array_interface
 def test_op(
     operator,
@@ -120,12 +142,6 @@ def test_op(
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
-    if operator.smaps is not None and operator.backend in ['cufinufft', 'gpunufft']:
-        # Add noise to sensitivity maps
-        noise = np.random.rand(*operator.smaps.shape).astype(np.float32)
-        new_smaps = operator.smaps + noise
-        new_smaps /= np.linalg.norm(new_smaps, axis=0)
-        operator.update_smaps(new_smaps)
     new_operator = update_operator(operator)
     kspace_changed = from_interface(operator.op(image_data), array_interface)
     kspace_true = from_interface(new_operator.op(image_data), array_interface)
@@ -143,14 +159,44 @@ def test_adj_op(
     gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
     operator.samples += gitter / 1000
-    if operator.smaps is not None and operator.backend in ['cufinufft', 'gpunufft']:
-        # Add noise to sensitivity maps
-        noise = np.random.rand(*operator.smaps.shape).astype(np.float32)
-        new_smaps = operator.smaps + noise
-        new_smaps /= np.linalg.norm(new_smaps, axis=0)
-        operator.update_smaps(new_smaps)
     new_operator = update_operator(operator)
     image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
     npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
+
+
+@param_array_interface
+def test_op_smaps_update(
+    operator,
+    array_interface,
+    image_data,
+    new_smaps,
+):
+    """Test the batch type 2 (forward)."""
+    image_data = to_interface(image_data, array_interface)
+    if operator.smaps is None:
+        pytest.skip("Skipping as we dont have smaps")
+    operator.smaps = new_smaps
+    new_operator = update_operator(operator)
+    kspace_changed = from_interface(operator.op(image_data), array_interface)
+    kspace_true = from_interface(new_operator.op(image_data), array_interface)
+    npt.assert_array_almost_equal(kspace_changed, kspace_true)
+
+
+@param_array_interface
+def test_adj_op_smaps_update(
+    operator,
+    array_interface,
+    kspace_data,
+    new_smaps,
+):
+    """Test the batch type 1 (adjoint)."""
+    kspace_data = to_interface(kspace_data, array_interface)
+    if operator.smaps is None:
+        pytest.skip("Skipping as we dont have smaps")
+    operator.smaps = new_smaps
+    new_operator = update_operator(operator)
+    image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
+    image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
+    npt.assert_allclose(image_changed, image_true, atol=1e-4, rtol=1e-4)

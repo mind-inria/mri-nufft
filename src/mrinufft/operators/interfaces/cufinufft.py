@@ -248,12 +248,12 @@ class MRICufiNUFFT(FourierOperatorBase):
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )
-                self.smaps = cp.array(
+                self._smaps = cp.array(
                     smaps, order="C", copy=False, dtype=self.cpx_dtype
                 )
                 self.smaps_cached = True
             else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
+                self._smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
         self.raw_op = RawCufinufftPlan(
@@ -263,6 +263,22 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         # Support for concurrent stream and computations.
+
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update smaps.
+
+        Parameters
+        ----------
+        new_smaps: C-ordered ndarray or a GPUArray.
+
+        """
+        if self.smaps_cached:
+            self._smaps = cp.array(
+                new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+            )
+        else:
+            self._smaps = new_smaps.astype(self.cpx_dtype, copy=False)
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
@@ -745,21 +761,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
-    
-    def update_smaps(self,new_smaps):
-            """Update smaps.
-
-            Parameters
-            ----------
-            new_smaps: C-ordered ndarray or a GPUArray.
-
-            """
-            if self.smaps_cached:
-                self.smaps = cp.array(
-                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
-                )
-            else:
-                self.smaps[...] = new_smaps.astype(self.cpx_dtype, copy=False)
 
     @property
     def eps(self):

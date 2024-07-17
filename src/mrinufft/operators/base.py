@@ -309,10 +309,10 @@ class FourierOperatorBase(ABC):
             (use funtools.partial)
         """
         if isinstance(method, np.ndarray):
-            self.smaps = method
+            self._smaps = method
             return None
         if not method:
-            self.smaps = None
+            self._smaps = None
             return None
         kwargs = {}
         if isinstance(method, dict):
@@ -322,7 +322,7 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not callable(method):
             raise ValueError(f"Unknown smaps method: {method}")
-        self.smaps, self.SOS = method(
+        self._smaps, self.SOS = method(
             self.samples,
             self.shape,
             density=self.density,

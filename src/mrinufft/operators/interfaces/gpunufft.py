@@ -202,6 +202,18 @@ class RawGpuNUFFT:
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
+    def set_smaps(self, smaps):
+        """Update the smaps
+
+        Parameters
+        ----------
+        smaps: np.ndarray[np.complex64])
+            sensittivity maps
+        """
+        smaps_ = smaps.T.reshape(-1, smaps.shape[0])
+        np.copyto(self.pinned_smaps, smaps_)
+        self.operator.set_smaps(self.pinned_smaps)
+
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
 
@@ -502,7 +514,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
 
-    def update_smaps(self,new_smaps):
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
         """Update pinned smaps from new_smaps.
 
         Parameters
@@ -511,9 +524,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the new sensitivity maps
 
         """
-        smaps_ = new_smaps.T.reshape(-1, new_smaps.shape[0])
-        np.copyto(self.raw_op.pinned_smaps, smaps_)
-        self.smaps = new_smaps
+        self.raw_op.set_smaps(smaps=new_smaps)
+        self._smaps = new_smaps
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
