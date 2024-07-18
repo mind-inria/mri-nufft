@@ -511,12 +511,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
+        self._samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
+        # TODO: gpuNUFFT needs to sort the points twice in this case.
+        # It could help to have access to directly dorted arrays from gpuNUFFT.
         self.compute_density(self.density_method)
         self.raw_op.set_pts(
-            samples,
+            self._samples,
             density=self.density,
         )
-        self._samples = samples
 
     @classmethod
     def pipe(
