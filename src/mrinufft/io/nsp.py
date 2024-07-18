@@ -255,7 +255,7 @@ def write_trajectory(
 
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float | str = DEFAULT_RASTER_TIME,
+    dwell_time: float = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
     gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
@@ -268,11 +268,8 @@ def read_trajectory(
     ----------
     grad_filename : str
         Gradient filename.
-    dwell_time : float | str, optional
+    dwell_time : float, optional
         Dwell time of ADC in ms, by default 0.01
-        It can also be string 'min_osf' to select dwell time
-        based on minimum OSF needed to get Nyquist sampling
-        (This is obtained from SPARKLING trajectory header).
     num_adc_samples : int, optional
         Number of ADC samples, by default None
     gamma : float, optional
@@ -291,6 +288,8 @@ def read_trajectory(
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
+    dwell_time_ns = dwell_time * 1e6
+    gradient_raster_time_ns = raster_time * 1e6
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
@@ -305,8 +304,6 @@ def read_trajectory(
             min_osf, data = _pop_elements(data, type="int")
             gamma, data = _pop_elements(data)
             gamma = gamma / 1000
-            if dwell_time == "min_osf":
-                dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if num_adc_samples is None:
             if read_shots:
@@ -326,8 +323,6 @@ def read_trajectory(
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
-        dwell_time_ns = dwell_time * 1e6
-        gradient_raster_time_ns = raster_time * 1e6
         if version < 4.1:
             grad_max, data = _pop_elements(data)
         gradients, data = _pop_elements(
@@ -436,13 +431,13 @@ def read_arbgrad_rawdat(
     Raises
     ------
     ImportError
-        If the twixtools module is not available.
+        If the mapVBVD module is not available.
 
     Notes
     -----
-    This function requires the twixtools module to be installed.
+    This function requires the mapVBVD module to be installed.
     You can install it using the following command:
-        `pip install gt-twixtools`
+        `pip install pymapVBVD`
     """
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
@@ -453,13 +448,21 @@ def read_arbgrad_rawdat(
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["oversampling_factor"] = float(
-            twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["alFree"][4]
-        )
-        hdr["trajectory_name"] = twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["tFree"]
+        hdr["shifts"] = ()
+        for s in [7, 6, 8]:
+            shift = twixObj.search_header_for_val(
+                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
+            )
+            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
+        hdr["oversampling_factor"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWiPMemBlock", "alFree", "4")
+        )[0]
+        hdr["trajectory_name"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWipMemBlock", "tFree")
+        )[0][1:-1]
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj["hdr"]["Phoenix"]["sFastImaging"][
-                "lTurboFactor"
-            ]
+            hdr["turboFactor"] = twixObj.search_header_for_val(
+                "Phoenix", ("sFastImaging", "lTurboFactor")
+            )[0]
             hdr["type"] = "ARBGRAD_MP2RAGE"
     return data, hdr

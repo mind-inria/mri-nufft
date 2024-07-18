@@ -12,12 +12,11 @@ dynamic = ["version"]
 [project.optional-dependencies]
 
 gpunufft = ["gpuNUFFT>=0.8.1", "cupy-cuda11x"]
-torchkbnufft = ["torchkbnufft", "cupy-cuda11x"]
 cufinufft = ["cufinufft", "cupy-cuda11x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2>=1.4.3", "numpy>=2.0.0"]
 pynufft = ["pynufft"]
-io = ["twixtools @ git+https://github.com/pehses/twixtools.git"]
+io = ["pymapvbvd"]
 smaps = ["scikit-image"]
 autodiff = ["torch"]
 
