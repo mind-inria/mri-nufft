@@ -203,7 +203,7 @@ class RawGpuNUFFT:
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def set_smaps(self, smaps):
-        """Update the smaps
+        """Update the smaps.
 
         Parameters
         ----------
