@@ -28,7 +28,7 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dy):
         """Backward image -> k-space."""
-        x = ctx.saved_tensors
+        x = ctx.saved_tensors[0]
         grad_data = None
         grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
@@ -81,7 +81,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dx):
         """Backward kspace -> image."""
-        y = ctx.saved_tensors
+        y = ctx.saved_tensors[0]
         grad_data = None
         grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
