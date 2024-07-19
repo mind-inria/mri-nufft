@@ -1,4 +1,4 @@
-"""Test for update in trajectory,density, and sensitivity maps.
+"""Test for update in trajectory, density, and sensitivity maps.
 
 Only finufft, cufinufft and gpunufft support update.
 """
