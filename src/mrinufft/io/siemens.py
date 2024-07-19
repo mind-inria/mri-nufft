@@ -71,7 +71,7 @@ def read_siemens_rawdat(
         "n_contrasts": int(twixObj.image.NSet),
         "n_adc_samples": int(twixObj.image.NCol),
         "n_slices": int(twixObj.image.NSli),
-        "n_average": int(twixObj.image.NAve)
+        "n_average": int(twixObj.image.NAve),
     }
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
