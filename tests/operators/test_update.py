@@ -94,7 +94,7 @@ def update_operator(operator):
         "smaps": operator.smaps,
     }
     if operator.backend == "cufinufft":
-        op_args.update([("smaps_cached", operator.smaps_cached)])
+        op_args["smaps_cached"] = operator.smaps_cached
         if operator.smaps is not None and not isinstance(operator.smaps, np.ndarray):
             op_args["smaps"] = operator.smaps.get()
     return get_operator(operator.backend)(**op_args)
