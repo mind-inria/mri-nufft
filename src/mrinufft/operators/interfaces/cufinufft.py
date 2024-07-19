@@ -58,11 +58,10 @@ class RawCufinufftPlan:
         **kwargs,
     ):
         self.shape = shape
-        self.samples = samples
         self.ndim = len(shape)
         self.eps = float(eps)
         self.n_trans = n_trans
-
+        self._dtype = samples.dtype
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
         self.plans = [None, None, None]
@@ -70,7 +69,7 @@ class RawCufinufftPlan:
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i)
+            self._set_pts(i, samples)
 
     @property
     def dtype(self):
@@ -78,7 +77,7 @@ class RawCufinufftPlan:
         try:
             return self.plans[1].dtype
         except AttributeError:
-            return DTYPE_R2C[str(self.samples.dtype)]
+            return DTYPE_R2C[str(self._dtype)]
 
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
@@ -86,28 +85,16 @@ class RawCufinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            dtype=DTYPE_R2C[str(self._dtype)],
             **kwargs,
         )
 
-    def _make_plan_grad(self, **kwargs):
-        self.grad_plan = Plan(
-            2,
-            self.shape,
-            self.n_trans,
-            self.eps,
-            dtype=DTYPE_R2C[str(self.samples.dtype)],
-            isign=1,
-            **kwargs,
-        )
-        self._set_pts(typ="grad")
-
-    def _set_pts(self, typ):
+    def _set_pts(self, typ, samples):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
         plan.setpts(
-            cp.array(self.samples[:, 0], copy=False),
-            cp.array(self.samples[:, 1], copy=False),
-            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
+            cp.array(samples[:, 0], copy=False),
+            cp.array(samples[:, 1], copy=False),
+            cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None,
         )
 
     def _destroy_plan(self, typ):
@@ -283,11 +270,13 @@ class MRICufiNUFFT(FourierOperatorBase):
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
         """Update the plans when changing the samples."""
-        self._samples = samples
+        self._samples = np.asfortranarray(
+            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+        )
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ)
+            self.raw_op._set_pts(typ, samples)
 
     @with_numpy_cupy
     @nvtx_mark()
@@ -807,6 +796,18 @@ class MRICufiNUFFT(FourierOperatorBase):
             f"  eps:{self.raw_op.eps:.0e}\n"
             ")"
         )
+
+    def _make_plan_grad(self, **kwargs):
+        self.raw_op.grad_plan = Plan(
+            2,
+            self.shape,
+            self.n_trans,
+            self.raw_op.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self.raw_op._set_pts(typ="grad", samples=self.samples)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

@@ -1,4 +1,4 @@
-"""Test for update in trajectory,density, and sensitivity maps.
+"""Test for update in trajectory, density, and sensitivity maps.
 
 Only finufft, cufinufft and gpunufft support update.
 """
@@ -94,7 +94,7 @@ def update_operator(operator):
         "smaps": operator.smaps,
     }
     if operator.backend == "cufinufft":
-        op_args.update([("smaps_cached", operator.smaps_cached)])
+        op_args["smaps_cached"] = operator.smaps_cached
         if operator.smaps is not None and not isinstance(operator.smaps, np.ndarray):
             op_args["smaps"] = operator.smaps.get()
     return get_operator(operator.backend)(**op_args)
@@ -139,9 +139,9 @@ def test_op(
 ):
     """Test the batch type 2 (forward)."""
     image_data = to_interface(image_data, array_interface)
-    gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
+    jitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += gitter / 1000
+    operator.samples += jitter / 100
     new_operator = update_operator(operator)
     kspace_changed = from_interface(operator.op(image_data), array_interface)
     kspace_true = from_interface(new_operator.op(image_data), array_interface)
@@ -156,9 +156,9 @@ def test_adj_op(
 ):
     """Test the batch type 1 (adjoint)."""
     kspace_data = to_interface(kspace_data, array_interface)
-    gitter = np.random.rand(*operator.samples.shape).astype(np.float32)
+    jitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += gitter / 1000
+    operator.samples += jitter / 100
     new_operator = update_operator(operator)
     image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
