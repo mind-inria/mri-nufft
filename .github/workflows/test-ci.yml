@@ -103,7 +103,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [gpunufft, cufinufft, torchkbnufft-gpu]
+        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
 
     steps:
       - uses: actions/checkout@v3
@@ -123,19 +123,19 @@ jobs:
 
 
       - name: Install backend
-        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' || matrix.backend == 'torchkbnufft-gpu' }}
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
           export CUDA_BIN_PATH=/usr/local/cuda-11.8/
-          export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+          export PATH=/usr/local/cuda-11.8/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64/:${LD_LIBRARY_PATH}
           if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
             pip install torchkbnufft
+          elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
+            pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
           else
             pip install ${{ matrix.backend }}
           fi
-
 
       - name: Run Tests
         shell: bash
