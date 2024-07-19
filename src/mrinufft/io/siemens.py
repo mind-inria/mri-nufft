@@ -8,6 +8,7 @@ import numpy as np
 def read_siemens_rawdat(
     filename: str,
     removeOS: bool = False,
+    doAverage: bool = True,
     squeeze: bool = True,
     return_twix: bool = True,
     slice_num: int | None = None,
@@ -21,6 +22,8 @@ def read_siemens_rawdat(
         The path to the Siemens MRI file.
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
+    doAverage : bool, option
+        Whether to average the data acquired along NAvg dimension.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     data_type : str, optional
@@ -61,12 +64,14 @@ def read_siemens_rawdat(
     if isinstance(twixObj, list):
         twixObj = twixObj[-1]
     twixObj.image.flagRemoveOS = removeOS
+    twixObj.image.flagDoAverage = doAverage
     hdr = {
         "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin),
+        "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
         "n_contrasts": int(twixObj.image.NSet),
         "n_adc_samples": int(twixObj.image.NCol),
         "n_slices": int(twixObj.image.NSli),
+        "n_average": int(twixObj.image.NAve)
     }
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
@@ -92,6 +97,7 @@ def read_siemens_rawdat(
         hdr["n_shots"] * hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
         hdr["n_contrasts"] if contrast_num is None else 1,
+        hdr["n_average"] if n_average > 1 and not doAverage else 1,
     )
     if return_twix:
         return data, hdr, twixObj
