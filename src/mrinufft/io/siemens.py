@@ -23,7 +23,7 @@ def read_siemens_rawdat(
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
     doAverage : bool, option
-        Whether to average the data acquired along NAvg dimension.
+        Whether to average the data acquired along NAve dimension.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     data_type : str, optional
@@ -97,7 +97,7 @@ def read_siemens_rawdat(
         hdr["n_shots"] * hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
         hdr["n_contrasts"] if contrast_num is None else 1,
-        hdr["n_average"] if n_average > 1 and not doAverage else 1,
+        hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
     )
     if return_twix:
         return data, hdr, twixObj

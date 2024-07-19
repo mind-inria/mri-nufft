@@ -404,6 +404,7 @@ def read_trajectory(
 def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
+    doAverage: bool = True,
     squeeze: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
@@ -417,6 +418,8 @@ def read_arbgrad_rawdat(
         The path to the Siemens MRI file.
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
+    doAverage : bool, optional
+        Whether to average the data acquired along NAve dimension, by default True.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     slice_num : int, optional
@@ -447,6 +450,7 @@ def read_arbgrad_rawdat(
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
         removeOS=removeOS,
+        doAverage=doAverage,
         squeeze=squeeze,
         slice_num=slice_num,
         contrast_num=contrast_num,
