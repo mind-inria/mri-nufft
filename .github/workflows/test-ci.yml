@@ -53,7 +53,6 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
-          sudo apt install -y libnfft3-dev
           python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
