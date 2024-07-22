@@ -75,7 +75,7 @@ def operator(
         "smaps": smaps,
     }
     if backend in ["cufinufft"]:
-        op_args.update([("smaps_cached", smaps_cached)])
+        op_args["smaps_cached"] = smaps_cached
     else:
         if smaps_cached:
             pytest.skip(f"Skip test cause we dont have smaps_cached in {backend}")
