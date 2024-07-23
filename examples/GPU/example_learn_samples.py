@@ -102,7 +102,7 @@ plot_state(axs, mri_2D, init_traj, recon)
 losses = []
 imgs = []
 model.train()
-with tqdm(range(100), unit="steps") as tqdms:
+with tqdm(range(2), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_2D)
         loss = torch.norm(out - mri_2D[None])
@@ -138,7 +138,6 @@ imgs[0].save(
     duration=100,
     loop=0,
 )
-
 # sphinx_gallery_start_ignore
 # cleanup
 import os
@@ -152,9 +151,8 @@ for f in range(100):
     except OSError:
         continue
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
-try:
-    final_dir = (
-        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
+final_dir = (
+        Path(os.getcwd()).parent.parent / "docs" / "generated" / "autoexamples" / "images"
     )
     shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
 except FileNotFoundError:
@@ -162,12 +160,12 @@ except FileNotFoundError:
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_learn_traj.gif'
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_traj.gif'
 
 # %%
-# .. image-sg:: /generated/autoexamples/images/mrinufft_learn_traj.gif
+# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
 #    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/images/mrinufft_learn_traj.gif
+#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
 #    :class: sphx-glr-single-img
 
 # %%
