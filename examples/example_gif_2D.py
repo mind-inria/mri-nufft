@@ -193,7 +193,7 @@ for f in image_files:
         os.remove(f)
     except OSError:
         continue
-# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
         Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"

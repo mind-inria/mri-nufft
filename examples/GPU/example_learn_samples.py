@@ -1,18 +1,15 @@
 # %%
 """
-====================================
-A simple example to learn trajectory
-====================================
+======================
+Learn Sampling pattern
+======================
 
 A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
 wrt to k-space trajectory in mri-nufft.
 
-NOTE: This example only showcases the autodiff capabilities, the learned sampling 
-pattern is not scanner compliant as the scanner gradients required to implement it
-violate the hardware constraints. In practice, a projection into the scanner constraints
-set is recommended. This is implemented in the proprietary SPARKLING package.
-Users are encouraged to contact the authors if they want to use it.
+.. warning::
+    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
 """
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
@@ -154,7 +151,7 @@ for f in range(100):
         os.remove(f)
     except OSError:
         continue
-# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
         Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
@@ -165,7 +162,7 @@ except FileNotFoundError:
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_traj_traj.gif'
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_learn_traj.gif'
 
 # %%
 # .. image-sg:: /generated/autoexamples/images/mrinufft_learn_traj.gif
