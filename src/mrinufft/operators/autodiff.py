@@ -138,24 +138,33 @@ class MRINufftAutoGrad(torch.nn.Module):
             self.nufft_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
         if wrt_traj:
-            self.samples_torch = torch.nn.Parameter(
-                data=torch.Tensor(self.nufft_op.samples),
-                requires_grad=True,
-            )
+            # We initialize the samples as a torch tensor purely for autodiff purposes.
+            # It can also be converted later to nn.Parameter, in which case it is 
+            # used for update also.
+            self._samples_torch = torch.Tensor(self.nufft_op.samples)
+            self._samples_torch.requires_grad = True
         
     def op(self, x):
         r"""Compute the forward image -> k-space."""
-        return _NUFFT_OP.apply(x, self.samples_torch, self.nufft_op)
+        return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
 
     def adj_op(self, kspace):
         r"""Compute the adjoint k-space -> image."""
-        return _NUFFT_ADJOP.apply(kspace, self.samples_torch, self.nufft_op)
+        return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
 
+    @property
+    def samples(self):
+        try:
+            return self._samples_torch 
+        except AttributeError:
+            return self.nufft_op.samples
+
+    @samples.setter
+    def samples(self, value):
+        self._samples_torch = value
+        self.nufft_op.samples = value.detach().cpu().numpy()
+    
+    
     def __getattr__(self, name):
-        """Get the attribute from the root operator."""
-        if hasattr(self.nufft_op, name):
-            if name == 'samples':
-                return self.samples_torch
-            return getattr(self.nufft_op, name)
-        else:
-            return super().__getattr__(name)
+        return getattr(self.nufft_op, name)
+    
