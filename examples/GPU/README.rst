@@ -1,3 +1,5 @@
+.. _gpu_examples:
+
 GPU Examples
 ============
 

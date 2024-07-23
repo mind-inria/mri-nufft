@@ -79,6 +79,7 @@ sphinx_gallery_conf = {
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest|utils)\.py",
     "nested_sections": True,
+    "parallel": 3,
 }
 
 intersphinx_mapping = {

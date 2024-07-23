@@ -102,7 +102,7 @@ plot_state(axs, mri_2D, init_traj, recon)
 losses = []
 imgs = []
 model.train()
-with tqdm(range(2), unit="steps") as tqdms:
+with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_2D)
         loss = torch.norm(out - mri_2D[None])
