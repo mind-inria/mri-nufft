@@ -148,6 +148,33 @@ def with_numpy(fun):
     return wrapper
 
 
+def with_tensorflow(fun):
+    """Ensure the function works internally with tensorflow array."""
+
+    @wraps(fun)
+    def wrapper(self, data, *args, **kwargs):
+        import tensorflow as tf
+
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = tf.convert_to_tensor(data.cpu())
+        elif xp.__name__ == "cupy":
+            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
+        else:
+            data_ = tf.convert_to_tensor(data)
+
+        ret_ = fun(self, data_, *args, **kwargs)
+
+        if xp.__name__ in ["torch", "cupy"]:
+            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
+        elif xp.__name__ == "numpy":
+            return ret_.numpy()
+        else:
+            return ret_
+
+    return wrapper
+
+
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
 
@@ -183,6 +210,35 @@ def with_numpy_cupy(fun):
             if data.is_cpu:
                 return xp.from_numpy(ret_)
             return xp.from_numpy(ret_).to(data.device)
+
+        return ret_
+
+    return wrapper
+
+
+def with_torch(fun):
+    """Ensure the function works internally with Torch."""
+
+    @wraps(fun)
+    def wrapper(self, data, output=None, *args, **kwargs):
+        xp = get_array_module(data)
+
+        if xp.__name__ == "numpy":
+            data_ = torch.from_numpy(data)
+            output_ = torch.from_numpy(output) if output is not None else None
+        elif xp.__name__ == "cupy":
+            data_ = torch.from_dlpack(data)
+            output_ = torch.from_dlpack(output) if output is not None else None
+        else:
+            data_ = data
+            output_ = output
+
+        ret_ = fun(self, data_, output_, *args, **kwargs)
+
+        if xp.__name__ == "cupy":
+            return cp.from_dlpack(ret_)
+        elif xp.__name__ == "numpy":
+            return ret_.to("cpu").numpy()
 
         return ret_
 
@@ -345,7 +401,8 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
             If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft`
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
+                or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
             self.density = method
@@ -559,7 +616,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = samples.reshape(-1, len(shape))
+        self._samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
@@ -723,7 +780,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
+        grad = np.zeros_like(dataf)
 
         coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)

@@ -255,7 +255,7 @@ def write_trajectory(
 
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float = DEFAULT_RASTER_TIME,
+    dwell_time: float | str = DEFAULT_RASTER_TIME,
     num_adc_samples: int = None,
     gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
@@ -268,8 +268,11 @@ def read_trajectory(
     ----------
     grad_filename : str
         Gradient filename.
-    dwell_time : float, optional
+    dwell_time : float | str, optional
         Dwell time of ADC in ms, by default 0.01
+        It can also be string 'min_osf' to select dwell time
+        based on minimum OSF needed to get Nyquist sampling
+        (This is obtained from SPARKLING trajectory header).
     num_adc_samples : int, optional
         Number of ADC samples, by default None
     gamma : float, optional
@@ -288,8 +291,6 @@ def read_trajectory(
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
-    dwell_time_ns = dwell_time * 1e6
-    gradient_raster_time_ns = raster_time * 1e6
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
@@ -304,6 +305,8 @@ def read_trajectory(
             min_osf, data = _pop_elements(data, type="int")
             gamma, data = _pop_elements(data)
             gamma = gamma / 1000
+            if dwell_time == "min_osf":
+                dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if num_adc_samples is None:
             if read_shots:
@@ -323,6 +326,8 @@ def read_trajectory(
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
+        dwell_time_ns = dwell_time * 1e6
+        gradient_raster_time_ns = raster_time * 1e6
         if version < 4.1:
             grad_max, data = _pop_elements(data)
         gradients, data = _pop_elements(
@@ -366,7 +371,7 @@ def read_trajectory(
             else:
                 if q == 0:
                     kspace_loc[:, i + 1, :] = (
-                        (initial_positions + gradients[:, q, :] * r) * gamma * 1e-6
+                        initial_positions + gradients[:, q, :] * r * gamma * 1e-6
                     )
                 else:
                     kspace_loc[:, i + 1, :] = (
@@ -399,6 +404,7 @@ def read_trajectory(
 def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
+    doAverage: bool = True,
     squeeze: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
@@ -412,6 +418,8 @@ def read_arbgrad_rawdat(
         The path to the Siemens MRI file.
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
+    doAverage : bool, optional
+        Whether to average the data acquired along NAve dimension, by default True.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     slice_num : int, optional
@@ -442,6 +450,7 @@ def read_arbgrad_rawdat(
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
         removeOS=removeOS,
+        doAverage=doAverage,
         squeeze=squeeze,
         slice_num=slice_num,
         contrast_num=contrast_num,

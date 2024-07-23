@@ -37,7 +37,7 @@ class _NUFFT_OP(torch.autograd.Function):
         if ctx.nufft_op._grad_wrt_traj:
             im_size = x.size()[1:]
             factor = 1
-            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
+            if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -90,7 +90,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             ctx.nufft_op.raw_op.toggle_grad_traj()
             im_size = dx.size()[2:]
             factor = 1
-            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
+            if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -135,7 +135,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
-            self.nufft_op.raw_op._make_plan_grad()
+            self.nufft_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
         if wrt_traj:
             self.samples_torch = torch.nn.Parameter(
