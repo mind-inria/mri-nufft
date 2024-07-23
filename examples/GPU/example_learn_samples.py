@@ -151,8 +151,13 @@ for f in range(100):
     except OSError:
         continue
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
-final_dir = (
-        Path(os.getcwd()).parent.parent / "docs" / "generated" / "autoexamples" / "images"
+try:
+    final_dir = (
+        Path(os.getcwd()).parent.parent
+        / "docs"
+        / "generated"
+        / "autoexamples"
+        / "images"
     )
     shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
 except FileNotFoundError:
