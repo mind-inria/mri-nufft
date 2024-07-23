@@ -173,7 +173,7 @@ def test_op_smaps_update(
     image_data,
     new_smaps,
 ):
-    """Test the batch type 2 (forward)."""
+    """Test the batch type 2 (forward) with smaps."""
     image_data = to_interface(image_data, array_interface)
     if operator.smaps is None:
         pytest.skip("Skipping as we dont have smaps")
