@@ -6,13 +6,20 @@ A simple example to learn trajectory
 
 A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
-wrt to k-space trajectory in mri-nufft
+wrt to k-space trajectory in mri-nufft.
+
+NOTE: This example only showcases the autodiff capabilities, the learned sampling 
+pattern is not scanner compliant as the scanner gradients required to implement it
+violate the hardware constraints. In practice, a projection into the scanner constraints
+set is recommended. This is implemented in the proprietary SPARKLING package.
+Users are encouraged to contact the authors if they want to use it.
 """
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from tqdm import tqdm
+from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
@@ -42,8 +49,12 @@ class Model(torch.nn.Module):
         adjoint = self.operator.adj_op(kspace)
         return adjoint / torch.linalg.norm(adjoint)
         
+# %%
+# Util function to plot the state of the model
+# --------------------------------------------
 
-def plot_state(axs, mri_2D, traj, recon, loss=None):
+
+def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=None):
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D[0]), cmap='gray')
     axs[0].axis('off')
@@ -56,20 +67,25 @@ def plot_state(axs, mri_2D, traj, recon, loss=None):
     if loss is not None:
         axs[3].plot(loss)
         axs[3].set_title("Loss")
-    plt.show()
+    if save_name is not None:
+        plt.savefig(save_dir + save_name, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
 
 # %%
 # Setup model and optimizer
 # -------------------------
-init_traj = initialize_2D_radial(32, 512).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_radial(16, 512).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(
     optimizer,
     start_factor=1,
-    end_factor=0.01,
-    total_iters=1000
+    end_factor=0.1,
+    total_iters=100
 )
+
 # %%
 # Setup data
 # ----------
@@ -87,8 +103,9 @@ plot_state(axs, mri_2D, init_traj, recon)
 # Start training loop
 # -------------------
 losses = []
+imgs = []
 model.train()
-with tqdm(range(1000), unit='steps') as tqdms:
+with tqdm(range(100), unit='steps') as tqdms:
     for i in tqdms:
         out = model(mri_2D)
         loss = torch.norm(out - mri_2D[None])
@@ -98,8 +115,63 @@ with tqdm(range(1000), unit='steps') as tqdms:
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        with torch.no_grad():
+            # Clamp the value of trajectory between [-0.5, 0.5]
+            for param in model.parameters():
+                param.clamp_(-0.5, 0.5)
         schedulder.step()
+        # Generate images for gif
+        fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+        plot_state(
+            axs,
+            mri_2D,
+            model.trajectory.detach().cpu().numpy(),
+            out,
+            losses,
+            save_name=f"{i}.png",
+        )
+        imgs.append(Image.open(f"/tmp/{i}.png"))
+        
+# Make a GIF of all images.
+imgs[0].save(
+    "mrinufft_learn_traj.gif",
+    save_all=True,
+    append_images=imgs[1:],
+    optimize=False,
+    duration=100,
+    loop=0,
+)
 
+# sphinx_gallery_start_ignore
+# cleanup
+import os
+import shutil
+from pathlib import Path
+
+for f in range(100):
+    f = f"/tmp/{f}.png"
+    try:
+        os.remove(f)
+    except OSError:
+        continue
+# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+try:
+    final_dir = (
+        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
+    )
+    shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
+except FileNotFoundError:
+    pass
+
+# sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_traj_traj.gif'
+
+# %%
+# .. image-sg:: /generated/autoexamples/images/mrinufft_learn_traj.gif
+#    :alt: example learn_samples
+#    :srcset: /generated/autoexamples/images/mrinufft_learn_traj.gif
+#    :class: sphx-glr-single-img
 
 # %%
 # Trained trajectory
