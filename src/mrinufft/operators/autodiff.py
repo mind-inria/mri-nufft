@@ -22,7 +22,6 @@ class _NUFFT_OP(torch.autograd.Function):
         """Forward image -> k-space."""
         ctx.save_for_backward(x)
         ctx.nufft_op = nufft_op
-        ctx.dtype = traj.dtype
         return nufft_op.op(x)
 
     @staticmethod
@@ -63,7 +62,7 @@ class _NUFFT_OP(torch.autograd.Function):
                     dim=0,
                 ),
                 dim=0,
-            ).to(ctx.dtype)
+            ).to(ctx.nufft_op.dtype)
         return grad_data, grad_traj, None
 
 
@@ -75,7 +74,6 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         """Forward kspace -> image."""
         ctx.save_for_backward(y)
         ctx.nufft_op = nufft_op
-        ctx.dtype = traj.dtype
         return nufft_op.adj_op(y)
 
     @staticmethod
@@ -113,7 +111,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                     dim=0,
                 ),
                 dim=0,
-            ).to(ctx.dtype)
+            ).to(ctx.nufft_op.dtype)
             ctx.nufft_op.raw_op.toggle_grad_traj()
         return grad_data, grad_traj, None
 
