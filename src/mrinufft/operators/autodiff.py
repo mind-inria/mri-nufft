@@ -140,11 +140,11 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op._grad_wrt_data = wrt_data
         if wrt_traj:
             # We initialize the samples as a torch tensor purely for autodiff purposes.
-            # It can also be converted later to nn.Parameter, in which case it is 
+            # It can also be converted later to nn.Parameter, in which case it is
             # used for update also.
             self._samples_torch = torch.Tensor(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
-        
+
     def op(self, x):
         r"""Compute the forward image -> k-space."""
         return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
@@ -156,7 +156,7 @@ class MRINufftAutoGrad(torch.nn.Module):
     @property
     def samples(self):
         try:
-            return self._samples_torch 
+            return self._samples_torch
         except AttributeError:
             return self.nufft_op.samples
 
@@ -164,8 +164,6 @@ class MRINufftAutoGrad(torch.nn.Module):
     def samples(self, value):
         self._samples_torch = value
         self.nufft_op.samples = value.detach().cpu().numpy()
-    
-    
+
     def __getattr__(self, name):
         return getattr(self.nufft_op, name)
-    

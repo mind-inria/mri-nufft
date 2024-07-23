@@ -29,6 +29,7 @@ from mrinufft.trajectories import initialize_2D_radial
 # Setup a simple class to learn trajectory
 # ----------------------------------------
 
+
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory):
         super(Model, self).__init__()
@@ -48,7 +49,8 @@ class Model(torch.nn.Module):
         kspace = self.operator.op(x)
         adjoint = self.operator.adj_op(kspace)
         return adjoint / torch.linalg.norm(adjoint)
-        
+
+
 # %%
 # Util function to plot the state of the model
 # --------------------------------------------
@@ -56,13 +58,13 @@ class Model(torch.nn.Module):
 
 def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=None):
     axs = axs.flatten()
-    axs[0].imshow(np.abs(mri_2D[0]), cmap='gray')
-    axs[0].axis('off')
+    axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
+    axs[0].axis("off")
     axs[0].set_title("MR Image")
     axs[1].scatter(*traj.T, s=1)
     axs[1].set_title("Trajectory")
-    axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap='gray')
-    axs[2].axis('off')
+    axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
+    axs[2].axis("off")
     axs[2].set_title("Reconstruction")
     if loss is not None:
         axs[3].plot(loss)
@@ -73,6 +75,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=
     else:
         plt.show()
 
+
 # %%
 # Setup model and optimizer
 # -------------------------
@@ -80,19 +83,16 @@ init_traj = initialize_2D_radial(16, 512).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(
-    optimizer,
-    start_factor=1,
-    end_factor=0.1,
-    total_iters=100
+    optimizer, start_factor=1, end_factor=0.1, total_iters=100
 )
 
 # %%
 # Setup data
 # ----------
 
-mri_2D = torch.Tensor(np.flipud(
-    bwdl.get_mri(4, "T1")[80, ...]
-).astype(np.complex64))[None]
+mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
+    None
+]
 mri_2D = mri_2D / torch.linalg.norm(mri_2D)
 model.eval()
 recon = model(mri_2D)
@@ -105,7 +105,7 @@ plot_state(axs, mri_2D, init_traj, recon)
 losses = []
 imgs = []
 model.train()
-with tqdm(range(100), unit='steps') as tqdms:
+with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_2D)
         loss = torch.norm(out - mri_2D[None])
@@ -131,7 +131,7 @@ with tqdm(range(100), unit='steps') as tqdms:
             save_name=f"{i}.png",
         )
         imgs.append(Image.open(f"/tmp/{i}.png"))
-        
+
 # Make a GIF of all images.
 imgs[0].save(
     "mrinufft_learn_traj.gif",
