@@ -84,15 +84,8 @@ def operator(
 
 def update_operator(operator):
     """Generate a new operator with updated trajectory."""
-    op_args = {
-        "samples": operator.samples,
-        "shape": operator.shape,
-        "n_coils": operator.n_coils,
-        "n_batchs": operator.n_batchs,
-        "squeeze_dims": False,
-        "density": operator.density,
-        "smaps": operator.smaps,
-    }
+   op_args = {k: getattr(operator, k) for k in ["samples", "shape", "n_coils", "n_batchs", "density", "smaps"]}
+   op_args["squeeze_dims"] = False
     if operator.backend == "cufinufft":
         op_args["smaps_cached"] = operator.smaps_cached
         if operator.smaps is not None and not isinstance(operator.smaps, np.ndarray):
