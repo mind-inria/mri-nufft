@@ -524,6 +524,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the new sensitivity maps
 
         """
+        if new_smaps.shape != (self.n_coils, *self.shape):
+            raise ValueError(
+                "Invalid shape for new smaps. "
+                f"Expected shape: {(self.n_coils, *self.shape)}, "
+                f"but got shape: {new_smaps.shape}."
+            )
         self.raw_op.set_smaps(smaps=new_smaps)
         self._smaps = new_smaps
 
