@@ -235,12 +235,12 @@ class MRICufiNUFFT(FourierOperatorBase):
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )
-                self._smaps = cp.array(
-                    smaps, order="C", copy=False, dtype=self.cpx_dtype
-                )
+                smaps = cp.array(smaps, order="C", copy=False, dtype=self.cpx_dtype)
+                FourierOperatorBase.smaps.__set__(self, smaps)
                 self.smaps_cached = True
             else:
-                self._smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
+                smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
+                FourierOperatorBase.smaps.__set__(self, smaps)
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
         self.raw_op = RawCufinufftPlan(
@@ -260,6 +260,12 @@ class MRICufiNUFFT(FourierOperatorBase):
         new_smaps: C-ordered ndarray or a GPUArray.
 
         """
+        if new_smaps.shape != (self.n_coils, *self.shape):
+            raise ValueError(
+                "Invalid shape for new smaps. "
+                f"Expected shape: {(self.n_coils, *self.shape)}, "
+                f"but got shape: {new_smaps.shape}."
+            )
         if self.smaps_cached:
             self._smaps = cp.array(
                 new_smaps, order="C", copy=False, dtype=self.cpx_dtype
