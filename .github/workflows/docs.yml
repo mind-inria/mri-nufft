@@ -2,7 +2,7 @@ name: Docs
 
 on:
   workflow_run:
-    workflows: [Style checking]
+    workflows: Style
     types:
       - completed
 
