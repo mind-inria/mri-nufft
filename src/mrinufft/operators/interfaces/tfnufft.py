@@ -1,7 +1,7 @@
 """Tensorflow MRI Nufft Operators."""
 
 import numpy as np
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, with_tensorflow
 from mrinufft._utils import proper_trajectory
 
 TENSORFLOW_AVAILABLE = True
@@ -63,11 +63,12 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             samples.astype(np.float32, copy=False), normalize="pi"
         )
         self.samples = tf.convert_to_tensor(samples)
-
+        self.dtype = samples.dtype
         self.compute_smaps(smaps)
-        if not isinstance(smaps, tf.Tensor) and smaps is not None:
-            self.smaps = tf.convert_to_tensor(smaps)
+        if self.smaps is not None and not isinstance(self.smaps, tf.Tensor):
+            self.smaps = tf.convert_to_tensor(self.smaps)
 
+    @with_tensorflow
     def op(self, data):
         """Forward operation.
 
@@ -83,15 +84,18 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             data_d = data * self.smaps
         else:
             data_d = data
-        return tfnufft.nufft(
+        coeff = tfnufft.nufft(
             data_d,
             self.samples,
             self.shape,
             transform_type="type_2",
-            fft_direction="backward",
+            fft_direction="forward",
             tol=self.eps,
         )
+        coeff /= self.norm_factor
+        return coeff
 
+    @with_tensorflow
     def adj_op(self, data):
         """
         Backward Operation.
@@ -113,13 +117,21 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             self.samples,
             self.shape,
             transform_type="type_1",
-            fft_direction="forward",
+            fft_direction="backward",
             tol=self.eps,
         )
+        img /= self.norm_factor
         if self.smaps is not None:
             return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
-        return tf.math.reduce_sum(img, axis=0)
+        else:
+            return img
 
+    @property
+    def norm_factor(self):
+        """Norm factor of the operator."""
+        return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
+
+    @with_tensorflow
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
 
@@ -142,7 +154,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         cls,
         samples,
         shape,
-        num_iterations,
+        num_iterations=10,
         osf=2,
         normalize=True,
     ):
@@ -157,6 +169,9 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             Shape of the image space.
         n_iter: int
             Number of iterations.
+        osf: int, default 2
+            Currently, we support only OSF=2 and this value cannot be changed.
+            Changing will raise an error.
 
         Returns
         -------
@@ -171,15 +186,20 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             raise ValueError("Tensorflow does not support OSF != 2")
 
         density_comp = tf.math.reciprocal_no_nan(
-            tfmri.estimate_density(samples, shape, method="pipe", max_iter=15)
+            tfmri.estimate_density(
+                samples.astype(np.float32),
+                shape,
+                method="pipe",
+                max_iter=num_iterations,
+            )
         )
 
-        grid_op = MRITensorflowNUFFT(samples, shape, num_iter=num_iterations)
         if normalize:
+            fourier_op = MRITensorflowNUFFT(samples, shape)
             spike = np.zeros(shape)
             mid_loc = tuple(v // 2 for v in shape)
             spike[mid_loc] = 1
-            psf = grid_op.adj_op(grid_op.op(spike))
+            psf = fourier_op.adj_op(fourier_op.op(spike.astype(np.complex64)))
             density_comp /= np.linalg.norm(psf)
 
-        return density_comp.squeeze()
+        return np.squeeze(density_comp)

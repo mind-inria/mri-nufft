@@ -1,15 +1,14 @@
-"""Siemens specific rawdat reader, wrapper over twixtools."""
+"""Siemens specific rawdat reader, wrapper over pymapVBVD."""
 
 from __future__ import annotations
 
 import numpy as np
 
-from .utils import get_siemens_twix_orientation_matrix
-
 
 def read_siemens_rawdat(
     filename: str,
     removeOS: bool = False,
+    doAverage: bool = True,
     squeeze: bool = True,
     return_twix: bool = True,
     slice_num: int | None = None,
@@ -23,6 +22,8 @@ def read_siemens_rawdat(
         The path to the Siemens MRI file.
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
+    doAverage : bool, option
+        Whether to average the data acquired along NAve dimension.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     data_type : str, optional
@@ -44,62 +45,49 @@ def read_siemens_rawdat(
     Raises
     ------
     ImportError
-        If the twixtools module is not available.
+        If the mapVBVD module is not available.
 
     Notes
     -----
-    This function requires the twixtools module to be installed.
+    This function requires the mapVBVD module to be installed.
     You can install it using the following command:
-        `pip install gt-twixtools`
+        `pip install pymapVBVD`
     """
     try:
-        from twixtools import map_twix, read_twix
+        from mapvbvd import mapVBVD
     except ImportError as err:
         raise ImportError(
-            "The twixtools module is not available. Please install it using "
-            "the following command: pip install gt-twixtools"
+            "The mapVBVD module is not available. Please install it using "
+            "the following command: pip install pymapVBVD"
         ) from err
-    twixObj = map_twix(read_twix(filename))
+    twixObj = mapVBVD(filename)
     if isinstance(twixObj, list):
         twixObj = twixObj[-1]
-    twixObj["image"].flags["remove_os"] = removeOS
+    twixObj.image.flagRemoveOS = removeOS
+    twixObj.image.flagDoAverage = doAverage
     hdr = {
-        k: int(v)
-        for k, v in zip(
-            ["n_adc_samples", "n_coils", "n_shots", "n_contrasts", "n_slices"],
-            twixObj["image"].shape[::-1],
-        )
+        "n_coils": int(twixObj.image.NCha),
+        "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
+        "n_contrasts": int(twixObj.image.NSet),
+        "n_adc_samples": int(twixObj.image.NCol),
+        "n_slices": int(twixObj.image.NSli),
+        "n_average": int(twixObj.image.NAve),
     }
-
-    hdr["shifts"] = ()
-    for s in [7, 6, 8]:
-        shift = twixObj["hdr"]["Phoenix"]["sWipMemBlock"]["adFree"][s]
-        hdr["shifts"] += (0,) if shift == [] else (shift,)
-
-    hdr["orientation_matrix"] = get_siemens_twix_orientation_matrix(twixObj)
-
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
         raise ValueError("The contrast number is out of bounds.")
-    # Shape : NSet, ...,NPar X NSli X NAve X NLin X NCha X NCol
+    # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
     if slice_num is not None and contrast_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 5)
-            + (slice_num,)
-            + (slice(None),) * (len(twixObj["image"].shape) - 5)
-            + (contrast_num,)
+        raw_kspace = twixObj.image[
+            (slice(None),) * 4 + (slice_num,) + (slice(None),) * 4 + (contrast_num,)
         ]
     elif slice_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 5) + (slice_num,)
-        ]
+        raw_kspace = twixObj.image[(slice(None),) * 4 + (slice_num,)]
     elif contrast_num is not None:
-        raw_kspace = twixObj["image"][
-            (slice(None),) * (len(twixObj["image"].shape) - 10) + (contrast_num,)
-        ]
+        raw_kspace = twixObj.image[(slice(None),) * 9 + (contrast_num,)]
     else:
-        raw_kspace = twixObj["image"][:]
+        raw_kspace = twixObj.image[""]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
     data = np.moveaxis(raw_kspace, 0, 2)
@@ -109,6 +97,7 @@ def read_siemens_rawdat(
         hdr["n_shots"] * hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
         hdr["n_contrasts"] if contrast_num is None else 1,
+        hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
     )
     if return_twix:
         return data, hdr, twixObj

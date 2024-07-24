@@ -28,14 +28,19 @@ def radial_distance(traj, shape):
 @parametrize(backend=["gpunufft", "tensorflow"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
-    if backend == "tensorflow" and osf != 2:
-        pytest.skip("Tensorflow does not support OSF != 2")
+    distance = radial_distance(traj, shape)
+    if osf != 2 and backend == "tensorflow":
+        pytest.skip("OSF < 2 not supported for tensorflow.")
     result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
 
     distance = radial_distance(traj, shape)
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
-    if osf != 2:
+    if backend == "tensorflow":
+        # If tensorflow, we dont perfectly estimate, but we still want to ensure
+        # we can get density
+        assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.5)
+    elif osf != 2:
         # If OSF < 2, we dont perfectly estimate
         assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.2)
     else:
