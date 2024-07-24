@@ -135,7 +135,7 @@ imgs[0].save(
     save_all=True,
     append_images=imgs[1:],
     optimize=False,
-    duration=100,
+    duration=2,
     loop=0,
 )
 # sphinx_gallery_start_ignore
@@ -157,6 +157,7 @@ try:
         / "docs"
         / "generated"
         / "autoexamples"
+        / "GPU"
         / "images"
     )
     shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
