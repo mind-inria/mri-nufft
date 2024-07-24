@@ -33,7 +33,6 @@ def test_pipe(backend, traj, shape, osf):
         pytest.skip("OSF < 2 not supported for tensorflow.")
     result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
 
-    distance = radial_distance(traj, shape)
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     if backend == "tensorflow":
