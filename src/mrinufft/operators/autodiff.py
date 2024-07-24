@@ -155,6 +155,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     @property
     def samples(self):
+        """Get the samples."""
         try:
             return self._samples_torch
         except AttributeError:
@@ -166,4 +167,5 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op.samples = value.detach().cpu().numpy()
 
     def __getattr__(self, name):
+        """Forward all other attributes to the nufft_op."""
         return getattr(self.nufft_op, name)
