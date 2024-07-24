@@ -17,18 +17,16 @@ env:
   PYTHON_VERSION: "3.10"
   ref_backend: "finufft"
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: read
-  issues: write
-  pull-requests: write
-  id-token: write
-
 jobs:
   makedocs:
     name: Deploy API Documentation
     runs-on: gpu
+    permissions:
+        contents: read
+        pages: read
+        issues: write
+        pull-requests: write
+        id-token: write
     if: ${{ !contains(github.event.head_commit.message, 'docs_build')}}
     steps:
       
