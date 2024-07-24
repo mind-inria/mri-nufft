@@ -31,14 +31,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Get history and tags for SCM versioning to work
         run: |
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+          
       - name: Install dependencies
         shell: bash -l {0}
         run: |
