@@ -51,6 +51,8 @@ jobs:
           export CUDA_BIN_PATH=/usr/local/cuda-11.8/
           export PATH=/usr/local/cuda-11.8/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda11x
+          pip install torch --index-url https://download.pytorch.org/whl/cu118
           python -m pip install gpuNUFFT cufinufft
 
       - name: Build API documentation
