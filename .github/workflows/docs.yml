@@ -31,6 +31,12 @@ jobs:
     runs-on: gpu
     if: ${{ !contains(github.event.head_commit.message, 'docs_build')}}
     steps:
+      
+      - name: Create Comment with link
+        uses: mshick/add-pr-comment@v2
+        with:
+            message: Docs are generated, see here
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -75,11 +81,3 @@ jobs:
           # Upload entire repository
           path: 'docs_build'
           retention-days: 10
-
-      - name: Create Comment with link
-        run: |
-            # Use GitHub API to create a comment on the PR
-            COMMENT="Docs are generated, see [here](${{ steps.artifact-upload-step.outputs.artifact-url }})"
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-            COMMENT_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-            curl -s -H "Authorization: token ${GITHUB_TOKEN}" -X POST $COMMENT_URL -d "{\"body\":\"$COMMENT\"}"
