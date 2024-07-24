@@ -20,7 +20,9 @@ env:
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
+  pages: read
+  issues: write
+  pull-requests: write
   id-token: write
 
 jobs:
@@ -81,4 +83,3 @@ jobs:
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
             COMMENT_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
             curl -s -H "Authorization: token ${GITHUB_TOKEN}" -X POST $COMMENT_URL -d "{\"body\":\"$COMMENT\"}"
-
