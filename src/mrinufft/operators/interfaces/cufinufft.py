@@ -260,18 +260,14 @@ class MRICufiNUFFT(FourierOperatorBase):
         new_smaps: C-ordered ndarray or a GPUArray.
 
         """
-        if new_smaps.shape != (self.n_coils, *self.shape):
-            raise ValueError(
-                "Invalid shape for new smaps. "
-                f"Expected shape: {(self.n_coils, *self.shape)}, "
-                f"but got shape: {new_smaps.shape}."
-            )
-        if self.smaps_cached:
-            self._smaps = cp.array(
-                new_smaps, order="C", copy=False, dtype=self.cpx_dtype
-            )
-        else:
-            self._smaps = new_smaps.astype(self.cpx_dtype, copy=False)
+        super(MRICufiNUFFT, self.__class__).smaps.fset(self, new_smaps)
+        if self._smaps is not None:
+            if self.smaps_cached:
+                self._smaps = cp.array(
+                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+                )
+            else:
+                self._smaps = new_smaps.astype(self.cpx_dtype, copy=False)
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
