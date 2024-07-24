@@ -32,7 +32,7 @@ jobs:
       - name: Get the docs_build artifact
         uses: actions/download-artifact@v4
         with:
-          name: docs
+          name: docs_final
           path: docs_build
           run-id: ${{ github.event.workflow_run.id }}
           
