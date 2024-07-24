@@ -336,11 +336,11 @@ class FourierOperatorBase(ABC):
             (use funtools.partial)
         """
         if isinstance(method, np.ndarray):
-            FourierOperatorBase.smaps.__set__(self, method)
-            return None
+            self.smaps = method
+            return
         if not method:
-            FourierOperatorBase.smaps.__set__(self, None)
-            return None
+            self.smaps = None
+            return
         kwargs = {}
         if isinstance(method, dict):
             kwargs = method.copy()
@@ -349,14 +349,13 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not callable(method):
             raise ValueError(f"Unknown smaps method: {method}")
-        smaps, self.SOS = method(
+        self.smaps, self.SOS = method(
             self.samples,
             self.shape,
             density=self.density,
             backend=self.backend,
             **kwargs,
         )
-        FourierOperatorBase.smaps.__set__(self, smaps)
 
     def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
