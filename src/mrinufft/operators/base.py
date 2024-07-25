@@ -500,7 +500,7 @@ class FourierOperatorBase(ABC):
         return self._smaps
 
     @smaps.setter
-    def smaps(self, smaps):
+    def smaps(self, smaps, check_only=False):
         if smaps is None:
             self._smaps = None
         elif len(smaps) != self.n_coils:
@@ -508,7 +508,7 @@ class FourierOperatorBase(ABC):
                 f"Number of sensitivity maps ({len(smaps)})"
                 f"should be equal to n_coils ({self.n_coils})"
             )
-        else:
+        elif not check_only:
             self._smaps = smaps
 
     @property
