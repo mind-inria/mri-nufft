@@ -21,9 +21,7 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, traj, nufft_op):
         """Forward image -> k-space."""
-        ctx.save_for_backward(x, traj)
-        # Copy the updated samples to the nufft_op
-        nufft_op.samples = traj.detach().cpu().numpy()
+        ctx.save_for_backward(x)
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
 
