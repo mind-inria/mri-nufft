@@ -102,7 +102,10 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
-        backend: [tensorflow]
+        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
+        exclude:
+            # There is an issue with tensorflow and cupy. This was working. See #156
+          - backend: tensorflow
 
     steps:
       - uses: actions/checkout@v3
