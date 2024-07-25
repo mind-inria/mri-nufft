@@ -168,7 +168,6 @@ jobs:
           rm -rf finufft
           rm -rf gpuNUFFT
           rm -rf venv
-          rm -rf mri-nufft
 
   test-examples:
     runs-on: cpu
