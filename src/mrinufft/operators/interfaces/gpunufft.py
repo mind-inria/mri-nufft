@@ -212,7 +212,6 @@ class RawGpuNUFFT:
         """
         smaps_ = smaps.T.reshape(-1, smaps.shape[0])
         np.copyto(self.pinned_smaps, smaps_)
-        self.operator.set_smaps(self.pinned_smaps)
 
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
@@ -524,14 +523,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the new sensitivity maps
 
         """
-        if new_smaps.shape != (self.n_coils, *self.shape):
-            raise ValueError(
-                "Invalid shape for new smaps. "
-                f"Expected shape: {(self.n_coils, *self.shape)}, "
-                f"but got shape: {new_smaps.shape}."
-            )
-        self.raw_op.set_smaps(smaps=new_smaps)
-        self._smaps = new_smaps
+        # We need this complex way to call the property setter from
+        # the parent class.
+        # See: https://stackoverflow.com/questions/1021464/how-to-call-a-property-of-the-base-class-if-this-property-is-being-overwritten-i
+        super(MRIGpuNUFFT, self.__class__).smaps.fset(self, new_smaps)
+        if self._smaps is not None and hasattr(self, "raw_op"):
+            self.raw_op.set_smaps(smaps=new_smaps)
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
