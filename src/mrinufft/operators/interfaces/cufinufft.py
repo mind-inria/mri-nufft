@@ -222,32 +222,18 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.density = cp.array(self.density)
 
         # Smaps support
-        self.compute_smaps(smaps)
+        if smaps is not None and (not (is_host_array(smaps) or is_cuda_array(smaps))):
+            raise ValueError(
+                "Smaps should be either a C-ordered ndarray, or a GPUArray."
+            )
         self.smaps_cached = smaps_cached
-        if smaps is not None:
-            if not (is_host_array(smaps) or is_cuda_array(smaps)):
-                raise ValueError(
-                    "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
-                )
-            if smaps_cached:
-                warnings.warn(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
-                    "used on gpu for smaps."
-                )
-                self.smaps = cp.array(
-                    smaps, order="C", copy=False, dtype=self.cpx_dtype
-                )
-            else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
-                self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-
+        self.compute_smaps(smaps)
         self.raw_op = RawCufinufftPlan(
             self.samples,
             tuple(shape),
             n_trans=n_trans,
             **kwargs,
         )
-        # Support for concurrent stream and computations.
 
     @FourierOperatorBase.smaps.setter
     def smaps(self, new_smaps):
@@ -258,14 +244,27 @@ class MRICufiNUFFT(FourierOperatorBase):
         new_smaps: C-ordered ndarray or a GPUArray.
 
         """
+        # This is a complicated way to call the setter of the parent class.
+        # See: https://stackoverflow.com/questions/1021464/how-to-call-a-property-of-the-base-class-if-this-property-is-being-overwritten-i
         super(MRICufiNUFFT, self.__class__).smaps.fset(self, new_smaps, check_only=True)
         if new_smaps is not None and hasattr(self, "smaps_cached"):
             if self.smaps_cached:
+                warnings.warn(
+                    f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
+                    "used on gpu for smaps."
+                )
                 self._smaps = cp.array(
                     new_smaps, order="C", copy=False, dtype=self.cpx_dtype
                 )
             else:
-                np.copyto(self._smaps, new_smaps.astype(self.cpx_dtype, copy=False))
+                if self._smaps is None:
+                    self._smaps = pin_memory(
+                        new_smaps.astype(self.cpx_dtype, copy=False)
+                    )
+                    self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
+                else:
+                    # copy the array to pinned memory
+                    np.copyto(self._smaps, new_smaps.astype(self.cpx_dtype, copy=False))
         else:
             self._smaps = new_smaps
 

@@ -523,8 +523,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the new sensitivity maps
 
         """
-        # We need this complex way to call the property setter from
-        # the parent class.
+        # This is a complicated way to call the setter of the parent class.
         # See: https://stackoverflow.com/questions/1021464/how-to-call-a-property-of-the-base-class-if-this-property-is-being-overwritten-i
         super(MRIGpuNUFFT, self.__class__).smaps.fset(self, new_smaps)
         if self._smaps is not None and hasattr(self, "raw_op"):
