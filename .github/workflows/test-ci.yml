@@ -162,7 +162,10 @@ jobs:
         run: |
           cd $RUNNER_WORKSPACE
           ls -al
-          rm -rf finufft gpuNUFFT venv mri-nufft
+          rm -rf finufft
+          rm -rf gpuNUFFT
+          rm -rf venv
+          rm -rf mri-nufft
 
   test-examples:
     runs-on: cpu
