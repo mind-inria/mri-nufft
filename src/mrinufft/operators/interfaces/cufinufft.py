@@ -246,9 +246,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         new_smaps: C-ordered ndarray or a GPUArray.
 
         """
-        # This is a complicated way to call the setter of the parent class.
-        # See: https://stackoverflow.com/questions/1021464/how-to-call-a-property-of-the-base-class-if-this-property-is-being-overwritten-i
-        super(MRICufiNUFFT, self.__class__).smaps.fset(self, new_smaps, check_only=True)
+        self._check_smaps_shape(new_smaps)
         if new_smaps is not None and hasattr(self, "smaps_cached"):
             if self.smaps_cached:
                 warnings.warn(

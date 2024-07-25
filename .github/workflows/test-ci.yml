@@ -117,9 +117,14 @@ jobs:
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
           pip install cupy-cuda11x
-          pip install torch --index-url https://download.pytorch.org/whl/cu118
           pip install finufft "numpy<2.0"
 
+      - name: Install torch with CUDA 11.8
+        shell: bash
+        if: ${{ matrix.backend != 'tensorflow'}}
+        run: |
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install torch --index-url https://download.pytorch.org/whl/cu118
 
       - name: Install backend
         shell: bash
