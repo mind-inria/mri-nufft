@@ -1,6 +1,8 @@
 """Tensorflow MRI Nufft Operators."""
 
 import numpy as np
+
+from mrinufft.operators.interfaces.utils import check_shape
 from ..base import FourierOperatorBase, with_tensorflow
 from mrinufft._utils import proper_trajectory
 
@@ -79,6 +81,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         -------
         Tensor
         """
+        check_shape(self.shape, data)
         if self.uses_sense:
             data_d = data * self.smaps
         else:

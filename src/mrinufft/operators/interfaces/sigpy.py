@@ -8,6 +8,7 @@ import warnings
 import numpy as np
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
+from mrinufft.operators.interfaces.utils import check_shape
 
 
 SIGPY_AVAILABLE = True
@@ -65,6 +66,7 @@ class RawSigpyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
+        check_shape(self.shape, grid_data)
         grid_data_ = grid_data.reshape(self.n_trans, *self.shape)
         ret = sgf.nufft(
             grid_data_,
