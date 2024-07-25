@@ -228,7 +228,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             not (is_host_array(self.smaps) or is_cuda_array(self.smaps))
         ):
             raise ValueError(
-                "Smaps should be either a C-ordered ndarray, or a GPUArray."
+                "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
             )
         self.raw_op = RawCufinufftPlan(
             self.samples,
