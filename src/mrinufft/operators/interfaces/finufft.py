@@ -4,6 +4,7 @@ import numpy as np
 
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU, FourierOperatorBase
+from mrinufft.operators.interfaces.utils import check_shape
 
 FINUFFT_AVAILABLE = True
 try:
@@ -65,6 +66,7 @@ class RawFinufftPlan:
 
     def op(self, coeffs_data, grid_data):
         """Type 2 transform. Uniform to non-uniform."""
+        check_shape(self.shape, grid_data)
         if self.n_trans == 1:
             grid_data = grid_data.reshape(self.shape)
             coeffs_data = coeffs_data.reshape(self.n_samples)

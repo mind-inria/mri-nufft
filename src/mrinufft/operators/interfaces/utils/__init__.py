@@ -4,6 +4,7 @@ from .utils import (
     check_error,
     check_size,
     sizeof_fmt,
+    check_shape
 )
 
 from .gpu_utils import (
@@ -19,6 +20,7 @@ from .gpu_utils import (
 __all__ = [
     "check_error",
     "check_size",
+    "check_shape",
     "sizeof_fmt",
     "get_maxThreadBlock",
     "CUPY_AVAILABLE",
