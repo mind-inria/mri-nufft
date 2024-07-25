@@ -235,7 +235,9 @@ class MRICufiNUFFT(FourierOperatorBase):
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )
-                self.smaps = cp.array(smaps, order="C", copy=False, dtype=self.cpx_dtype)
+                self.smaps = cp.array(
+                    smaps, order="C", copy=False, dtype=self.cpx_dtype
+                )
                 self.smaps_cached = True
             else:
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
