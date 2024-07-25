@@ -223,13 +223,12 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # Smaps support
         self.compute_smaps(smaps)
-        self.smaps_cached = False
+        self.smaps_cached = smaps_cached
         if smaps is not None:
             if not (is_host_array(smaps) or is_cuda_array(smaps)):
                 raise ValueError(
                     "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
                 )
-            self.smaps_cached = False
             if smaps_cached:
                 warnings.warn(
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
@@ -238,7 +237,6 @@ class MRICufiNUFFT(FourierOperatorBase):
                 self.smaps = cp.array(
                     smaps, order="C", copy=False, dtype=self.cpx_dtype
                 )
-                self.smaps_cached = True
             else:
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
