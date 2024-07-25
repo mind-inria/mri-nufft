@@ -500,16 +500,19 @@ class FourierOperatorBase(ABC):
         return self._smaps
 
     @smaps.setter
-    def smaps(self, smaps, check_only=False):
+    def smaps(self, smaps):
+        self._check_smaps_shape(smaps)
+        self._smaps = smaps
+
+    def _check_smaps_shape(self, smaps):
+        """Check the shape of the sensitivity maps."""
         if smaps is None:
             self._smaps = None
-        elif len(smaps) != self.n_coils:
+        elif smaps.shape != (self.n_coils, *self.shape):
             raise ValueError(
-                f"Number of sensitivity maps ({len(smaps)})"
-                f"should be equal to n_coils ({self.n_coils})"
+                f"smaps shape is {smaps.shape}, it should be"
+                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
-        elif not check_only:
-            self._smaps = smaps
 
     @property
     def density(self):
