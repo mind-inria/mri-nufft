@@ -107,8 +107,8 @@ def param_array_interface(func):
         if array_interface in ["torch-cpu", "numpy"]:
             if op.backend in ["torchkbnufft-gpu"]:
                 pytest.skip("Uncompatible backend and array")
-        if 'torch' in array_interface and op.backend in ['tensorflow']:
-            pytest.skip("Uncompatible backend and array")    
+        if "torch" in array_interface and op.backend in ["tensorflow"]:
+            pytest.skip("Uncompatible backend and array")
         return func(operator, array_interface, *args, **kwargs)
 
     return _param_array_interface(wrapper)

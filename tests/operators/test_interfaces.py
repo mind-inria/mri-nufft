@@ -148,4 +148,3 @@ def test_interface_lipschitz(operator):
             img2_data - img_data
         )
     assert np.mean(L) < 1.1 * spec_rad
- 
