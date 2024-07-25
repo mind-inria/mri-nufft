@@ -221,13 +221,15 @@ class MRICufiNUFFT(FourierOperatorBase):
             if is_host_array(self.density):
                 self.density = cp.array(self.density)
 
+        self.smaps_cached = smaps_cached
+        self.compute_smaps(smaps)
         # Smaps support
-        if smaps is not None and (not (is_host_array(smaps) or is_cuda_array(smaps))):
+        if self.smaps is not None and (
+            not (is_host_array(self.smaps) or is_cuda_array(self.smaps))
+        ):
             raise ValueError(
                 "Smaps should be either a C-ordered ndarray, or a GPUArray."
             )
-        self.smaps_cached = smaps_cached
-        self.compute_smaps(smaps)
         self.raw_op = RawCufinufftPlan(
             self.samples,
             tuple(shape),
