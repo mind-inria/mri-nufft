@@ -498,7 +498,7 @@ class FourierOperatorBase(ABC):
     def smaps(self):
         """Sensitivity maps of the operator."""
         return self._smaps
-    
+
     @smaps.setter
     def smaps(self, smaps):
         self._check_smaps_shape(smaps)
@@ -512,7 +512,7 @@ class FourierOperatorBase(ABC):
             raise ValueError(
                 f"smaps shape is {smaps.shape}, it should be"
                 f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
-            )   
+            )
 
     @property
     def density(self):
