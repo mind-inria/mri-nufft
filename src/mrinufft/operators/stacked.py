@@ -325,7 +325,12 @@ class MRIStackedNUFFT(FourierOperatorBase):
         for i, idx in enumerate(self.z_index):
             z_coord = idx / self.shape[-1] - 0.5
             samples[i] = np.concatenate(
-                [self._samples2d, z_coord * np.ones(len(self._samples2d), 1)], axis=1
+                [
+                    self._samples2d,
+                    z_coord
+                    * np.ones((len(self._samples2d), 1), dtype=self._samples2d.dtype),
+                ],
+                axis=1,
             )
 
     @samples.setter
