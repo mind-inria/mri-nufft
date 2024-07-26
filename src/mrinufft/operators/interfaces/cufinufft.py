@@ -411,8 +411,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        if img_d is not None:
+            check_shape(self.shape, img_d)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
-        check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device

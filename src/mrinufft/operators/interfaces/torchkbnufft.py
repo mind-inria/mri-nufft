@@ -150,6 +150,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
+        check_shape(self.shape, data)
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
         data = data.to(self.device, copy=False)

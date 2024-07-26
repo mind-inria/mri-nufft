@@ -110,6 +110,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         -------
         Tensor
         """
+        check_shape(self.shape, data)
         if self.uses_density:
             data_d = data * self.density
         else:

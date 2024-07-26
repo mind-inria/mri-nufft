@@ -492,6 +492,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
+        if data is not None:
+            check_shape(self.shape, data)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         adj_op_func = self.raw_op.adj_op

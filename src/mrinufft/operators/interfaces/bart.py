@@ -142,6 +142,8 @@ class MRIBartNUFFT(FourierOperatorCPU):
             else:
                 kwargs["extra_adj_op_args"] = ["-i"]
 
+        self.raw_op = RawBartNUFFT(samples_, shape, **kwargs)
+
         super().__init__(
             samples_,
             shape,
@@ -150,10 +152,9 @@ class MRIBartNUFFT(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=1,
             smaps=smaps,
+            raw_op=self.raw_op,
             squeeze_dims=squeeze_dims,
         )
-
-        self.raw_op = RawBartNUFFT(samples_, shape, **kwargs)
 
     @property
     def norm_factor(self):
