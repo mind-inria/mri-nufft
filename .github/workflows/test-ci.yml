@@ -340,6 +340,7 @@ jobs:
         with:
           name: docs
           path: docs_build
+          overwrite: true
     
       - name: Get the badge from CI
         uses: actions/download-artifact@v4
