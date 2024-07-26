@@ -841,3 +841,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         return power_method(
             max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )
+
+    def toggle_grad_traj(self):
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()
