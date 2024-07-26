@@ -127,7 +127,6 @@ class MRISigpyNUFFT(FourierOperatorCPU):
             squeeze_dims=squeeze_dims,
         )
 
-
     @property
     def norm_factor(self):
         """Normalization factor of the operator."""
