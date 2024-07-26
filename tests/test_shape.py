@@ -66,7 +66,9 @@ def test_check_shape_fail(self_shape, image_shape):
     pytest.raises: If check_shape does not raise a ValueError with the expected message.
     """
     image = np.random.rand(*image_shape)
-    expected_message =f"Image shape {image.shape[-len(self_shape):]} is not compatible "
-    f"with the operator shape {self_shape}"
+    expected_message = (
+        f"Image shape {image.shape[-len(self_shape):]} is not compatible "
+        f"with the operator shape {self_shape}"
+    )
     with pytest.raises(ValueError, match=re.escape(expected_message)):
         check_shape(self_shape, image)
