@@ -222,35 +222,52 @@ class MRICufiNUFFT(FourierOperatorBase):
             if is_host_array(self.density):
                 self.density = cp.array(self.density)
 
-        # Smaps support
+        self.smaps_cached = smaps_cached
         self.compute_smaps(smaps)
-        self.smaps_cached = False
-        if smaps is not None:
-            if not (is_host_array(smaps) or is_cuda_array(smaps)):
-                raise ValueError(
-                    "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
-                )
-            self.smaps_cached = False
-            if smaps_cached:
-                warnings.warn(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
-                    "used on gpu for smaps."
-                )
-                self.smaps = cp.array(
-                    smaps, order="C", copy=False, dtype=self.cpx_dtype
-                )
-                self.smaps_cached = True
-            else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
-                self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-
+        # Smaps support
+        if self.smaps is not None and (
+            not (is_host_array(self.smaps) or is_cuda_array(self.smaps))
+        ):
+            raise ValueError(
+                "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
+            )
         self.raw_op = RawCufinufftPlan(
             self.samples,
             tuple(shape),
             n_trans=n_trans,
             **kwargs,
         )
-        # Support for concurrent stream and computations.
+
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update smaps.
+
+        Parameters
+        ----------
+        new_smaps: C-ordered ndarray or a GPUArray.
+
+        """
+        self._check_smaps_shape(new_smaps)
+        if new_smaps is not None and hasattr(self, "smaps_cached"):
+            if self.smaps_cached:
+                warnings.warn(
+                    f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
+                    "used on gpu for smaps."
+                )
+                self._smaps = cp.array(
+                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+                )
+            else:
+                if self._smaps is None:
+                    self._smaps = pin_memory(
+                        new_smaps.astype(self.cpx_dtype, copy=False)
+                    )
+                    self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
+                else:
+                    # copy the array to pinned memory
+                    np.copyto(self._smaps, new_smaps.astype(self.cpx_dtype, copy=False))
+        else:
+            self._smaps = new_smaps
 
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
