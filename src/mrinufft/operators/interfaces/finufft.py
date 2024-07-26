@@ -162,3 +162,9 @@ class MRIfinufft(FourierOperatorCPU):
             **kwargs,
         )
         self.raw_op._set_pts(typ="grad", samples=self.samples)
+
+    def toggle_grad_traj(self):
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()

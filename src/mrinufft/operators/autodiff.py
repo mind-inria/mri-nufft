@@ -50,19 +50,11 @@ class _NUFFT_OP(torch.autograd.Function):
                 [ctx.nufft_op.op(grid_x[:, i, :, :]) for i in range(grid_x.size(1))],
                 dim=0,
             )
-            grad_traj = torch.mean(
-                torch.cat(
-                    [
-                        torch.transpose(
-                            (-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[:, i, :]),
-                            0,
-                            1,
-                        )[None, ...]
-                        for i in range(dy.shape[1])
-                    ],
-                    dim=0,
-                ),
-                dim=0,
+            grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
+            grad_traj = torch.transpose(
+                torch.sum(grad_traj, dim=1),
+                0,
+                1,
             ).to(NP2TORCH[ctx.nufft_op.dtype])
         return grad_data, grad_traj, None
 
@@ -86,7 +78,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         if ctx.nufft_op._grad_wrt_data:
             grad_data = ctx.nufft_op.op(dx)
         if ctx.nufft_op._grad_wrt_traj:
-            ctx.nufft_op.raw_op.toggle_grad_traj()
+            ctx.nufft_op.toggle_grad_traj()
             im_size = dx.size()[2:]
             factor = 1
             if ctx.nufft_op.backend in ["gpunufft"]:
@@ -100,20 +92,13 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
                 [ctx.nufft_op.op(grid_dx[:, i, :, :]) for i in range(grid_dx.size(1))],
-                dim=1,
-            ).squeeze()
-            inufft_dx_dom = inufft_dx_dom.reshape(y.shape[0], -1, y.shape[-1])
-            grad_traj = torch.mean(
-                torch.cat(
-                    [
-                        torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...]
-                        for i in range(y.shape[0])
-                    ],
-                    dim=0,
-                ),
                 dim=0,
-            ).to(NP2TORCH[ctx.nufft_op.dtype])
-            ctx.nufft_op.raw_op.toggle_grad_traj()
+            )
+            grad_traj = 1j * y * inufft_dx_dom
+            grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
+                NP2TORCH[ctx.nufft_op.dtype]
+            )
+            ctx.nufft_op.toggle_grad_traj()
         return grad_data, grad_traj, None
 
 

@@ -708,3 +708,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
+
+    def toggle_grad_traj(self):
+        """Toggle the gradient trajectory of the operator."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()
