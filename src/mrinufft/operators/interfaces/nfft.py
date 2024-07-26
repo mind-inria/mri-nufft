@@ -2,8 +2,6 @@
 
 import numpy as np
 
-from mrinufft.operators.interfaces.utils import check_shape
-
 from ..base import FourierOperatorCPU
 
 PYNFFT_AVAILABLE = True
@@ -40,7 +38,6 @@ class RawPyNFFT:
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""
-        check_shape(self.shape, image)
         self.plan.f_hat = image
         np.copyto(coeffs, self.plan.trafo())
         return coeffs

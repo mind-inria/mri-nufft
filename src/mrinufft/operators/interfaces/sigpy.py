@@ -8,7 +8,6 @@ import warnings
 import numpy as np
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
-from mrinufft.operators.interfaces.utils import check_shape
 
 
 SIGPY_AVAILABLE = True
@@ -66,7 +65,6 @@ class RawSigpyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
-        check_shape(self.shape, grid_data)
         grid_data_ = grid_data.reshape(self.n_trans, *self.shape)
         ret = sgf.nufft(
             grid_data_,
@@ -115,6 +113,7 @@ class MRISigpyNUFFT(FourierOperatorCPU):
         **kwargs,
     ):
         samples_ = proper_trajectory(samples, normalize="unit")
+        self.raw_op = RawSigpyNUFFT(samples_, shape, n_trans=n_trans, **kwargs)
 
         super().__init__(
             samples_,
@@ -124,10 +123,10 @@ class MRISigpyNUFFT(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=n_trans,
             smaps=smaps,
+            raw_op=self.raw_op,
             squeeze_dims=squeeze_dims,
         )
 
-        self.raw_op = RawSigpyNUFFT(samples_, shape, n_trans=n_trans, **kwargs)
 
     @property
     def norm_factor(self):
