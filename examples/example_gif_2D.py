@@ -11,7 +11,7 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageSequence
-
+import time
 import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory2D as mtt
 from mrinufft.trajectories.display import displayConfig
@@ -158,7 +158,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     )
 
     # Save figure
-    hashed = joblib.hash((index, name, arg))
+    hashed = joblib.hash((index, name, arg, time.time()))
     filename = save_dir + f"{hashed}.png"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()

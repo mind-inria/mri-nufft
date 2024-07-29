@@ -7,6 +7,7 @@ A collection of 3D trajectories are generated and saved as a gif.
 
 """
 
+import time
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -163,7 +164,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     )
 
     # Save figure
-    hashed = joblib.hash((index, name, arg))
+    hashed = joblib.hash((index, name, arg, time.time()))
     filename = save_dir + f"{hashed}.png"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
