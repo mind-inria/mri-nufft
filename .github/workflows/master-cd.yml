@@ -35,6 +35,7 @@ jobs:
           name: docs_final
           path: docs_build
           run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Display structure of docs
         run: ls -R docs_build/
