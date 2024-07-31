@@ -91,10 +91,10 @@ jobs:
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
           pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
       - name: Upload coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
-          path: coverage_${{ matrix.backend}}
+          name: coverage_${{ matrix.backend }}
+          path: coverage_${{ matrix.backend }}
 
   test-gpu:
     runs-on: gpu
@@ -153,9 +153,9 @@ jobs:
 
       - name: Upload coverage
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
+          name: coverage_${{ matrix.backend }}
           path: coverage_${{ matrix.backend }}
 
       - name: Cleanup
@@ -219,7 +219,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
+          name: coverage_plots
           path: coverage_plots
 
   coverage:
@@ -232,6 +232,10 @@ jobs:
 
       - name: Collect Coverages
         uses: actions/download-artifact@v4
+        with:
+          path: coverage_data
+          pattern: coverage_*
+          merge-multiple: true
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
