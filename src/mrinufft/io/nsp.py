@@ -445,7 +445,7 @@ def read_arbgrad_rawdat(
     -----
     This function requires the mapVBVD module to be installed.
     You can install it using the following command:
-        `pip install pymapVBVD`
+    `pip install pymapVBVD`
     """
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
