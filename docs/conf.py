@@ -85,8 +85,8 @@ sphinx_gallery_conf = {
         "branch": "gh-pages",
         "binderhub_url": "https://mybinder.org",
         "dependencies": [
-            "docs/binder/apt.txt",
-            "docs/binder/environment.yml",
+            "./binder/apt.txt",
+            "./binder/environment.yml",
         ],
         "notebooks_dir": "examples",
         "use_jupyter_lab": True,
