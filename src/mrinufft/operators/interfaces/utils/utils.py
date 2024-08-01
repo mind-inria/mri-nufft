@@ -40,6 +40,6 @@ def check_shape(self_shape, image):
     """Check if the image shape is compatible with the operator's init shape."""
     if image.shape[-len(self_shape) :] != self_shape:
         raise ValueError(
-            f"Image shape {image.shape[-len(self_shape):]} is not compatible"
+            f"Image shape {image.shape[-len(self_shape):]} is not compatible "
             f"with the operator shape {self_shape}"
         )
