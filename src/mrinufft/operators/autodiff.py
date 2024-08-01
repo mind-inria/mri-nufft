@@ -2,6 +2,7 @@
 
 import torch
 import numpy as np
+from .._utils import NP2TORCH
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -20,14 +21,14 @@ class _NUFFT_OP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, traj, nufft_op):
         """Forward image -> k-space."""
-        ctx.save_for_backward(x, traj)
+        ctx.save_for_backward(x)
         ctx.nufft_op = nufft_op
         return nufft_op.op(x)
 
     @staticmethod
     def backward(ctx, dy):
         """Backward image -> k-space."""
-        (x, traj) = ctx.saved_tensors
+        x = ctx.saved_tensors[0]
         grad_data = None
         grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
@@ -35,7 +36,7 @@ class _NUFFT_OP(torch.autograd.Function):
         if ctx.nufft_op._grad_wrt_traj:
             im_size = x.size()[1:]
             factor = 1
-            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
+            if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -49,20 +50,12 @@ class _NUFFT_OP(torch.autograd.Function):
                 [ctx.nufft_op.op(grid_x[:, i, :, :]) for i in range(grid_x.size(1))],
                 dim=0,
             )
-            grad_traj = torch.mean(
-                torch.cat(
-                    [
-                        torch.transpose(
-                            (-1j * torch.conj(dy[:, i, :]) * nufft_dx_dom[:, i, :]),
-                            0,
-                            1,
-                        )[None, ...]
-                        for i in range(dy.shape[1])
-                    ],
-                    dim=0,
-                ),
-                dim=0,
-            ).type_as(traj)
+            grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
+            grad_traj = torch.transpose(
+                torch.sum(grad_traj, dim=1),
+                0,
+                1,
+            ).to(NP2TORCH[ctx.nufft_op.dtype])
         return grad_data, grad_traj, None
 
 
@@ -72,23 +65,23 @@ class _NUFFT_ADJOP(torch.autograd.Function):
     @staticmethod
     def forward(ctx, y, traj, nufft_op):
         """Forward kspace -> image."""
-        ctx.save_for_backward(y, traj)
+        ctx.save_for_backward(y)
         ctx.nufft_op = nufft_op
         return nufft_op.adj_op(y)
 
     @staticmethod
     def backward(ctx, dx):
         """Backward kspace -> image."""
-        (y, traj) = ctx.saved_tensors
+        y = ctx.saved_tensors[0]
         grad_data = None
         grad_traj = None
         if ctx.nufft_op._grad_wrt_data:
             grad_data = ctx.nufft_op.op(dx)
         if ctx.nufft_op._grad_wrt_traj:
-            ctx.nufft_op.raw_op.toggle_grad_traj()
+            ctx.nufft_op.toggle_grad_traj()
             im_size = dx.size()[2:]
             factor = 1
-            if ctx.nufft_op.backend in ["gpunufft", "finufft"]:
+            if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
                 torch.linspace(-size / 2, size / 2 - 1, size) * factor
@@ -99,20 +92,13 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
                 [ctx.nufft_op.op(grid_dx[:, i, :, :]) for i in range(grid_dx.size(1))],
-                dim=1,
-            ).squeeze()
-            inufft_dx_dom = inufft_dx_dom.reshape(y.shape[0], -1, y.shape[-1])
-            grad_traj = torch.mean(
-                torch.cat(
-                    [
-                        torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...]
-                        for i in range(y.shape[0])
-                    ],
-                    dim=0,
-                ),
                 dim=0,
-            ).type_as(traj)
-            ctx.nufft_op.raw_op.toggle_grad_traj()
+            )
+            grad_traj = 1j * y * inufft_dx_dom
+            grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
+                NP2TORCH[ctx.nufft_op.dtype]
+            )
+            ctx.nufft_op.toggle_grad_traj()
         return grad_data, grad_traj, None
 
 
@@ -133,8 +119,14 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
-            self.nufft_op.raw_op._make_plan_grad()
+            self.nufft_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
+        if wrt_traj:
+            # We initialize the samples as a torch tensor purely for autodiff purposes.
+            # It can also be converted later to nn.Parameter, in which case it is
+            # used for update also.
+            self._samples_torch = torch.Tensor(self.nufft_op.samples)
+            self._samples_torch.requires_grad = True
 
     def op(self, x):
         r"""Compute the forward image -> k-space."""
@@ -144,6 +136,19 @@ class MRINufftAutoGrad(torch.nn.Module):
         r"""Compute the adjoint k-space -> image."""
         return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
 
+    @property
+    def samples(self):
+        """Get the samples."""
+        try:
+            return self._samples_torch
+        except AttributeError:
+            return self.nufft_op.samples
+
+    @samples.setter
+    def samples(self, value):
+        self._samples_torch = value
+        self.nufft_op.samples = value.detach().cpu().numpy()
+
     def __getattr__(self, name):
-        """Get the attribute from the root operator."""
+        """Forward all other attributes to the nufft_op."""
         return getattr(self.nufft_op, name)

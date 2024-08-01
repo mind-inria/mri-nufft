@@ -77,7 +77,7 @@ sphinx_gallery_conf = {
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
     "filename_pattern": "/example_",
-    "ignore_pattern": r"/(__init__|conftest|utils)\.py",
+    "ignore_pattern": r"(__init__|conftest|utils).py",
     "nested_sections": True,
     "binder": {
         "org": "mind-inria",
@@ -90,7 +90,8 @@ sphinx_gallery_conf = {
         ],
         "notebooks_dir": "examples",
         "use_jupyter_lab": True,
-    }
+    },
+    "parallel": 3,
 }
 
 intersphinx_mapping = {

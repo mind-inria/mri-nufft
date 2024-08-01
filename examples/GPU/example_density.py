@@ -23,7 +23,7 @@ from mrinufft.trajectories.display import display_2D_trajectory
 # Create sample data
 # ------------------
 
-mri_2D = bwdl.get_mri(4, "T1")[80, ...].astype(np.float32)
+mri_2D = np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32)
 
 print(mri_2D.shape)
 
@@ -136,18 +136,16 @@ axs[2].set_title("manual density compensation")
 #    The Pipe method is currently only implemented for gpuNUFFT.
 
 # %%
-if check_backend("gpunufft"):
-    flat_traj = traj.reshape(-1, 2)
-    nufft = get_operator("gpunufft")(
-        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
-    )
-    adjoint_manual = nufft.adj_op(kspace)
-    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-    axs[0].imshow(abs(mri_2D))
-    axs[0].set_title("Ground Truth")
-    axs[1].imshow(abs(adjoint))
-    axs[1].set_title("no density compensation")
-    axs[2].imshow(abs(adjoint_manual))
-    axs[2].set_title("Pipe density compensation")
-
-    print(nufft.density)
+flat_traj = traj.reshape(-1, 2)
+nufft = get_operator("gpunufft")(
+    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+)
+adjoint_manual = nufft.adj_op(kspace)
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+axs[0].imshow(abs(mri_2D))
+axs[0].set_title("Ground Truth")
+axs[1].imshow(abs(adjoint))
+axs[1].set_title("no density compensation")
+axs[2].imshow(abs(adjoint_manual))
+axs[2].set_title("Pipe density compensation")
+print(nufft.density)
