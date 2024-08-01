@@ -79,6 +79,18 @@ sphinx_gallery_conf = {
     "filename_pattern": "/example_",
     "ignore_pattern": r"/(__init__|conftest|utils)\.py",
     "nested_sections": True,
+    "binder": {
+        "org": "mind-inria",
+        "repo": "mri-nufft",
+        "branch": "gh-pages",
+        "binderhub_url": "https://mybinder.org",
+        "dependencies": [
+            "docs/binder/apt.txt",
+            "docs/binder/environment.yml",
+        ],
+        "notebooks_dir": "examples",
+        "use_jupyter_lab": True,
+    }
 }
 
 intersphinx_mapping = {
