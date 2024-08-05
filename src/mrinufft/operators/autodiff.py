@@ -47,7 +47,7 @@ class _NUFFT_OP(torch.autograd.Function):
             grid_x = x * grid_r  # Element-wise multiplication: x * r
 
             nufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_x[i, :, :, :]) for i in range(grid_x.size(0))],
+                [ctx.nufft_op.op(grid_x[i, ...]) for i in range(grid_x.size(0))],
                 dim=0,
             )
             grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
