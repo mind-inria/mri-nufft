@@ -43,11 +43,11 @@ class _NUFFT_OP(torch.autograd.Function):
                 for size in im_size
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(x)[None, ...]
+            grid_r = torch.stack(grid_r, dim=0).type_as(x)[:, None]
             grid_x = x * grid_r  # Element-wise multiplication: x * r
 
             nufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_x[:, i, :, :]) for i in range(grid_x.size(1))],
+                [ctx.nufft_op.op(grid_x[i, ...]) for i in range(grid_x.size(0))],
                 dim=0,
             )
             grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
@@ -88,10 +88,10 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                 for size in im_size
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[None, ...]
+            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None]
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_dx[:, i, :, :]) for i in range(grid_dx.size(1))],
+                [ctx.nufft_op.op(grid_dx[i, ...]) for i in range(grid_dx.size(0))],
                 dim=0,
             )
             grad_traj = 1j * y * inufft_dx_dom
