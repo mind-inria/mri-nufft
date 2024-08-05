@@ -171,7 +171,7 @@ def low_frequency(
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
     if np.sum(blurr_factor) > 0:
-        if isinstance(blurr_factor, float) or isinstance(blurr_factor, int):
+        if isinstance(blurr_factor, (float, int)):
             blurr_factor = (blurr_factor,) * SOS.ndim
         Smaps = gaussian(np.abs(Smaps), sigma=(0,) + blurr_factor) * np.exp(
             1j * np.angle(Smaps)
