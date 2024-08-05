@@ -2,6 +2,7 @@
 
 from .asserts import assert_almost_allclose, assert_correlate
 from .factories import (
+    wrong_image_from_op,
     kspace_from_op,
     image_from_op,
     to_interface,
@@ -14,6 +15,7 @@ from .factories import (
 __all__ = [
     "assert_almost_allclose",
     "assert_correlate",
+    "wrong_image_from_op",
     "kspace_from_op",
     "image_from_op",
     "to_interface",

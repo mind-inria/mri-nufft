@@ -1,74 +1,72 @@
 """Test for the check_shape function."""
 
-import re
-import pytest
 import numpy as np
-from pytest_cases import parametrize
+import pytest
+from pytest_cases import parametrize_with_cases, parametrize, fixture
+from mrinufft import get_operator
+from case_trajectories import CasesTrajectories
 
-# from mrinufft.operators.interfaces.utils.utils import check_shape
+from mrinufft.operators.interfaces.utils.utils import check_shape_op
 
+from helpers import (
+    wrong_image_from_op,
+    kspace_from_op,
+    image_from_op,
+    to_interface,
+    from_interface,
+    param_array_interface,
+)
 
-def check_shape(self_shape, image):
-    """Check if the image shape is compatible with the operator's init shape."""
-    image_shape_comparaison = image.shape[-len(self_shape) :]
-    if image_shape_comparaison != self_shape:
-        raise ValueError(
-            f"Image shape {image.shape[-len(self_shape):]} is not compatible "
-            f"with the operator shape {self_shape}"
-        )
-
-
+@fixture(scope="module")
 @parametrize(
-    "self_shape, image_shape",
+    "backend",
     [
-        ((256, 256), (16, 10, 256, 256)),
-        ((256, 256, 176), (16, 10, 256, 256, 176)),
+        "pynfft",
+        "torchkbnufft-gpu",
     ],
 )
-def test_check_shape_pass(self_shape, image_shape):
-    """
-    Test function for check_shape to ensure it passes with valid shapes.
+@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
+def operator(
+    request,
+    backend="pynfft",
+    kspace_locs=None,
+    shape=None,
+    n_coils=1,
+):
+    """Generate an operator."""
+    if backend in ["pynfft", "sigpy"] and kspace_locs.shape[-1] == 3:
+        pytest.skip("3D for slow cpu is not tested")
+    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
 
-    Parameters
-    ----------
-    self_shape (tuple): The expected shape to check against.
-    image_shape (tuple): The shape of the image to be generated and tested.
 
-    Raises
-    ------
-    pytest.fail: If check_shape raises a ValueError unexpectedly.
-    """
-    image = np.random.rand(*image_shape)
+@fixture(scope="module")
+def image_data(operator):
+    """Generate a random image. Remains constant for the module."""
+    return image_from_op(operator)
+
+@param_array_interface
+def test_check_shape_pass(
+    operator, array_interface, image_data
+):
+    """Compare the interface to the raw NUDFT implementation."""
+    image_data_ = to_interface(image_data, array_interface)
     try:
-        check_shape(self_shape, image)
+        check_shape_op(operator, image_data_)
     except ValueError:
         pytest.fail("Unexpected ValueError raised")
 
 
-@parametrize(
-    "self_shape, image_shape",
-    [
-        ((256, 256), (16, 10, 256, 254)),
-        ((256, 256, 176), (16, 10, 256, 256)),
-    ],
-)
-def test_check_shape_fail(self_shape, image_shape):
-    """
-    Test function for check_shape to ensure it raises a ValueError with invalid shapes.
 
-    Parameters
-    ----------
-    self_shape (tuple): The expected shape to check against.
-    image_shape (tuple): The shape of the image to be generated and tested.
+@fixture(scope="module")
+def wrong_image_data(operator):
+    """Generate a random image. Remains constant for the module."""
+    return wrong_image_from_op(operator)
 
-    Raises
-    ------
-    pytest.raises: If check_shape does not raise a ValueError with the expected message.
-    """
-    image = np.random.rand(*image_shape)
-    expected_message = (
-        f"Image shape {image.shape[-len(self_shape):]} is not compatible "
-        f"with the operator shape {self_shape}"
-    )
-    with pytest.raises(ValueError, match=re.escape(expected_message)):
-        check_shape(self_shape, image)
+@param_array_interface
+def test_check_shape_fail(
+    operator, array_interface, wrong_image_data
+):
+    """Compare the interface to the raw NUDFT implementation."""
+    image_data_ = to_interface(wrong_image_data, array_interface)
+    with pytest.raises(ValueError):
+        check_shape_op(operator, image_data_)

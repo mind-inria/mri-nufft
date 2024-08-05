@@ -29,6 +29,16 @@ def image_from_op(operator):
     img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
     return img
 
+def wrong_image_from_op(operator):
+    """Generate an incorrect image with intentional dimension errors."""
+    wrong_shape = (operator.shape[0] + 10, operator.shape[1] + 1)
+    if operator.smaps is None:
+        img = np.random.randn(operator.n_coils, *wrong_shape).astype(operator.cpx_dtype)
+    elif operator.smaps is not None and operator.n_coils > 1:
+        img = np.random.randn(*wrong_shape).astype(operator.cpx_dtype)
+    img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
+    return img
+
 
 def kspace_from_op(operator):
     """Generate a random kspace data."""
