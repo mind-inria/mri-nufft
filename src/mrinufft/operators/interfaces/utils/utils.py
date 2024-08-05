@@ -36,10 +36,63 @@ def check_size(array_like, shape):
         raise ValueError(f"Expected array with {shape}, got {array_like.shape}.")
 
 
-def check_shape(self_shape, image):
-    """Check if the image shape is compatible with the operator's init shape."""
-    if image.shape[-len(self_shape) :] != self_shape:
+def check_shape_op(self_, image):
+    """
+    Validates that the shape of the provided image matches the expected shape 
+    defined by the operator during initialization.
+
+    Parameters
+    ----------
+    image : np.ndarray or Tensor
+
+    Returns
+    -------
+    None
+        This function does not return any value. It raises a ValueError if the 
+        image shape does not match the expected shape.
+    """
+    
+    image_batchs = image.shape[0]
+    # image_coils = image.shape[1:-len(self_.shape)]
+    image_shape = image.shape[-len(self_.shape):]
+
+    if image_batchs == self_.n_batchs:
+        if image_shape != self_.shape:
+            raise ValueError(
+                f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
+                f"with the operator shape {self_.shape}"
+            )
+    else :
         raise ValueError(
-            f"Image shape {image.shape[-len(self_shape):]} is not compatible "
-            f"with the operator shape {self_shape}"
+            f"n_batchs {image_batchs} is not compatible "
+            f"with the operator shape {self_.n_batchs}"
+        )
+
+
+def check_shape_adj_op(self_, image):
+    """
+    Validates that the shape of the provided image matches the expected shape 
+    defined by the operator during initialization.
+
+    Parameters
+    ----------
+    image : np.ndarray or Tensor
+
+    Returns
+    -------
+    None
+        This function does not return any value. It raises a ValueError if the 
+        image shape does not match the expected shape.
+    """
+
+    if image.shape[-1] == self_.n_samples :
+        if image.shape[0] != self_.n_batchs:
+            raise ValueError(
+                f"n_batchs {image.shape[0]} is not compatible "
+                f"with the operator shape {self_.n_batchs}"
+            )
+    else :
+        raise ValueError(
+            f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
+            f"with the operator shape {self_.n_samples}"
         )
