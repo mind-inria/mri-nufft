@@ -52,7 +52,6 @@ def check_shape_op(self_, image):
         image shape does not match the expected shape.
 
     """
-    image_params = image.shape[: -len(self_.shape)]
     image_shape = image.shape[-len(self_.shape) :]
 
     if image_shape != self_.shape:
@@ -77,9 +76,7 @@ def check_shape_adj_op(self_, image):
         This function does not return any value. It raises a ValueError if the
         image shape does not match the expected shape.
     """
-
     image_samples = image.shape[-1]
-    image_batchs = image.shape[:-1]
 
     if image_samples != self_.n_samples:
         raise ValueError(
