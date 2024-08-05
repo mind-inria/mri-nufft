@@ -62,7 +62,6 @@ def check_shape_op(self_, image):
         )
 
 
-
 def check_shape_adj_op(self_, image):
     """Validate that the shape of the provided image matches the expected shape.
 
