@@ -492,7 +492,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
-        check_shape_op(self.shape, data)
+        check_shape_op(self, data)
         # Dispatch to special case.
         data = auto_cast(data, self.cpx_dtype)
 
