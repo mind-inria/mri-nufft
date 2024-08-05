@@ -91,18 +91,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None]
             grid_dx = torch.conj(dx) * grid_r
             inufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_dx[i, :, :, :]) for i in range(grid_dx.size(0))],
-                dim=1,
-            ).squeeze()
-            inufft_dx_dom = inufft_dx_dom.reshape(y.shape[0], -1, y.shape[-1])
-            grad_traj = torch.mean(
-                torch.cat(
-                    [
-                        torch.transpose((1j * y[i] * inufft_dx_dom[i]), 0, 1)[None, ...]
-                        for i in range(y.shape[0])
-                    ],
-                    dim=0,
-                ),
+                [ctx.nufft_op.op(grid_dx[i, ...]) for i in range(grid_dx.size(0))],
                 dim=0,
             )
             grad_traj = 1j * y * inufft_dx_dom
