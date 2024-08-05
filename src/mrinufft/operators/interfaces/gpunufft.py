@@ -542,7 +542,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
         # TODO: gpuNUFFT needs to sort the points twice in this case.
         # It could help to have access to directly dorted arrays from gpuNUFFT.
-        self.compute_density(self.density_method)
+        self.compute_density(self._density_method)
         self.raw_op.set_pts(
             self._samples,
             density=self.density,
