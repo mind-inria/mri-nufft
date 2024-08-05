@@ -50,6 +50,18 @@ def kspace_from_op(operator):
     )
     return kspace
 
+def wrong_kspace_from_op(operator):
+    """Generate incorrect kspace data with intentional dimension errors."""
+    wrong_n_samples = operator.n_samples + 10
+    kspace = (1j * np.random.randn(operator.n_coils, wrong_n_samples)).astype(
+        operator.cpx_dtype
+    )
+    kspace += np.random.randn(operator.n_coils, wrong_n_samples).astype(
+        operator.cpx_dtype
+    )
+    return kspace
+
+
 
 def to_interface(data, interface):
     """Make DATA an array from INTERFACE."""
