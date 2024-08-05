@@ -35,6 +35,7 @@ from helpers import (
         "sigpy",
         "torchkbnufft-cpu",
         "torchkbnufft-gpu",
+        "tensorflow",
     ],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
@@ -128,7 +129,6 @@ def test_interfaces_autoadjoint(operator, array_interface):
             from_interface(image, array_interface),
         )
         reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
-    print(reldiff)
     assert np.mean(reldiff) < 5e-5
 
 
@@ -147,5 +147,4 @@ def test_interface_lipschitz(operator):
         L[i] = np.linalg.norm(AHA(img2_data) - AHA(img_data)) / np.linalg.norm(
             img2_data - img_data
         )
-
     assert np.mean(L) < 1.1 * spec_rad

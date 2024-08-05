@@ -40,8 +40,9 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
         try:
             npt.assert_allclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
         except AssertionError as e:
-            e.message += "\nMismatched elements: "
-            e.message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
+            message = getattr(e, "message", "")
+            message += "\nMismatched elements: "
+            message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
             raise e
 
 
