@@ -52,7 +52,7 @@ def check_shape_op(self_, image):
         image shape does not match the expected shape.
 
     """
-    image_batchs = image.shape[:-len(self_.shape)]
+    image_batchs = image.shape[: -len(self_.shape)]
     image_shape = image.shape[-len(self_.shape) :]
 
     if image_shape != self_.shape:
@@ -61,7 +61,7 @@ def check_shape_op(self_, image):
             f"with the operator shape {self_.shape}"
         )
 
-    if not image_batchs or image_batchs == None :
+    if not image_batchs or image_batchs == None:
         pass
     else : 
         if image_batchs[0] != self_.n_batchs:
@@ -91,14 +91,14 @@ def check_shape_adj_op(self_, image):
     image_batchs = image.shape[:-1]
 
     if image_samples != self_.n_samples:
-       raise ValueError(
+        raise ValueError(
             f"Image shape {image_samples} is not compatible "
             f"with the operator shape {self_.n_samples}"
         )
     
-    if not image_batchs or image_batchs == None :
+    if not image_batchs or image_batchs == None:
         pass
-    else :
+    else:
         if image_batchs[0] != self_.n_batchs:
             raise ValueError(
                 f"n_batchs {image_batchs} is not compatible "
