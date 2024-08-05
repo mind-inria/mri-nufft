@@ -97,8 +97,7 @@ def test_adjoint_and_grad(operator, interface):
             adj_data_ndft = torch.sum(smaps.conj() * adj_data_ndft_smaps, dim=0)
         else:
             adj_data_ndft = torch.matmul(
-                ndft_matrix(operator).conj().T,
-                ksp_data.T
+                ndft_matrix(operator).conj().T, ksp_data.T
             ).T.reshape(img_data.shape)
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
@@ -167,7 +166,7 @@ def test_forward_and_grad(operator, interface):
             )  # fft for each coil
         else:
             ksp_data_ndft = torch.matmul(
-                ndft_matrix(operator), 
+                ndft_matrix(operator),
                 img_data.reshape(operator.n_coils, -1).squeeze().T,
             ).T.reshape(ksp_data.shape)
 
