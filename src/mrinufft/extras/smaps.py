@@ -106,7 +106,7 @@ def low_frequency(
     threshold: float | tuple[float, ...] = 0.1,
     density=None,
     window_fun: str = "ellipse",
-    blurr_factor: int| float | tuple[float, ...] = 0.0,
+    blurr_factor: int | float | tuple[float, ...] = 0.0,
     mask: bool = False,
 ):
     """
