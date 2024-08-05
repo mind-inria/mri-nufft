@@ -232,12 +232,8 @@ def with_torch(fun):
             data_ = torch.from_numpy(data)
             output_ = torch.from_numpy(output) if output is not None else None
         elif xp.__name__ == "cupy":
-            data_ = torch.utils.dlpack.from_dlpack(data.toDlpack())
-            output_ = (
-                torch.utils.dlpack.from_dlpack(output.toDlpack())
-                if output is not None
-                else None
-            )
+            data_ = torch.from_dlpack(data)
+            output_ = torch.from_dlpack(output) if output is not None else None
         else:
             data_ = data
             output_ = output
@@ -245,9 +241,9 @@ def with_torch(fun):
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
         if xp.__name__ == "cupy":
-            return xp.from_dlpack(ret_.to_dlpack())
+            return cp.from_dlpack(ret_)
         elif xp.__name__ == "numpy":
-            return ret_.cpu().numpy()
+            return ret_.to("cpu").numpy()
 
         return ret_
 

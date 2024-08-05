@@ -61,6 +61,7 @@ def check_shape_op(self_, image):
             f"with the operator shape {self_.shape}"
         )
 
+
     # if not image_params or image_params == None:
     #     pass
     # else : 
@@ -101,6 +102,7 @@ def check_shape_adj_op(self_, image):
             f"Image shape {image_samples} is not compatible "
             f"with the operator shape {self_.n_samples}"
         )
+
     
     # if not image_batchs or image_batchs == None:
     #     pass
