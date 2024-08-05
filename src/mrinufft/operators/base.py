@@ -255,7 +255,7 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
-    density_method = None
+    _density_method = None
     _grad_wrt_data = False
     _grad_wrt_traj = False
 
@@ -423,8 +423,8 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-        if self.density_method is None:
-            self.density_method = lambda samples, shape: method(
+        if self._density_method is None:
+            self._density_method = lambda samples, shape: method(
                 samples,
                 shape,
                 **kwargs,
