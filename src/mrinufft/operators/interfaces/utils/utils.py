@@ -52,21 +52,23 @@ def check_shape_op(self_, image):
         image shape does not match the expected shape.
 
     """
-    image_batchs = image.shape[0]
-    # image_coils = image.shape[1:-len(self_.shape)]
+    image_batchs = image.shape[:-len(self_.shape)]
     image_shape = image.shape[-len(self_.shape) :]
 
-    if image_batchs == self_.n_batchs:
-        if image_shape != self_.shape:
-            raise ValueError(
-                f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
-                f"with the operator shape {self_.shape}"
-            )
-    else:
+    if image_shape != self_.shape:
         raise ValueError(
-            f"n_batchs {image_batchs} is not compatible "
-            f"with the operator shape {self_.n_batchs}"
+            f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
+            f"with the operator shape {self_.shape}"
         )
+
+    if not image_batchs or image_batchs == None :
+        pass
+    else : 
+        if image_batchs[0] != self_.n_batchs:
+            raise ValueError(
+                f"n_batchs {image_batchs} is not compatible "
+                f"with the operator shape {self_.n_batchs}"
+            )
 
 
 def check_shape_adj_op(self_, image):
@@ -84,14 +86,22 @@ def check_shape_adj_op(self_, image):
         This function does not return any value. It raises a ValueError if the
         image shape does not match the expected shape.
     """
-    if image.shape[-1] == self_.n_samples:
-        if image.shape[0] != self_.n_batchs:
-            raise ValueError(
-                f"n_batchs {image.shape[0]} is not compatible "
-                f"with the operator shape {self_.n_batchs}"
-            )
-    else:
-        raise ValueError(
-            f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
+
+    image_samples = image.shape[-1]
+    image_batchs = image.shape[:-1]
+
+    if image_samples != self_.n_samples:
+       raise ValueError(
+            f"Image shape {image_samples} is not compatible "
             f"with the operator shape {self_.n_samples}"
         )
+    
+    if not image_batchs or image_batchs == None :
+        pass
+    else :
+        if image_batchs[0] != self_.n_batchs:
+            raise ValueError(
+                f"n_batchs {image_batchs} is not compatible "
+                f"with the operator shape {self_.n_batchs}"
+            )
+    
