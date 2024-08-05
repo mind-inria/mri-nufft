@@ -2,7 +2,7 @@
 
 from mrinufft.operators.base import FourierOperatorBase, with_torch
 from mrinufft._utils import proper_trajectory
-from mrinufft.operators.interfaces.utils import is_cuda_tensor, check_shape
+from mrinufft.operators.interfaces.utils import is_cuda_tensor, check_shape_op, check_shape_adj_op
 import numpy as np
 
 
@@ -124,7 +124,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
-        check_shape(self.shape, data)
+        check_shape_op(self, data)
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         data = data.to(self.device, copy=False)
@@ -150,7 +150,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        check_shape(self.shape, data)
+        check_shape_adj_op(self, data)
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
         data = data.to(self.device, copy=False)

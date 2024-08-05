@@ -20,7 +20,8 @@ from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
-    check_shape,
+    check_shape_op,
+    check_shape_adj_op,
 )
 
 CUPY_AVAILABLE = True
@@ -220,19 +221,47 @@ def with_numpy_cupy(fun):
     return wrapper
 
 
+# def with_torch(fun):
+#     """Ensure the function works internally with Torch."""
+
+#     @wraps(fun)
+#     def wrapper(self, data, output=None, *args, **kwargs):
+#         xp = get_array_module(data)
+
+#         if xp.__name__ == "numpy":
+#             data_ = torch.from_numpy(data)
+#             output_ = torch.from_numpy(output) if output is not None else None
+#         elif xp.__name__ == "cupy":
+#             data_ = torch.from_dlpack(data)
+#             output_ = torch.from_dlpack(output) if output is not None else None
+#         else:
+#             data_ = data
+#             output_ = output
+
+#         ret_ = fun(self, data_, output_, *args, **kwargs)
+
+#         if xp.__name__ == "cupy":
+#             return cp.from_dlpack(ret_)
+#         elif xp.__name__ == "numpy":
+#             return ret_.to("cpu").numpy()
+
+#         return ret_
+
+#     return wrapper
+
 def with_torch(fun):
     """Ensure the function works internally with Torch."""
 
     @wraps(fun)
     def wrapper(self, data, output=None, *args, **kwargs):
         xp = get_array_module(data)
-
+        
         if xp.__name__ == "numpy":
             data_ = torch.from_numpy(data)
             output_ = torch.from_numpy(output) if output is not None else None
         elif xp.__name__ == "cupy":
-            data_ = torch.from_dlpack(data)
-            output_ = torch.from_dlpack(output) if output is not None else None
+            data_ = torch.utils.dlpack.from_dlpack(data.toDlpack())
+            output_ = torch.utils.dlpack.from_dlpack(output.toDlpack()) if output is not None else None
         else:
             data_ = data
             output_ = output
@@ -240,9 +269,9 @@ def with_torch(fun):
         ret_ = fun(self, data_, output_, *args, **kwargs)
 
         if xp.__name__ == "cupy":
-            return cp.from_dlpack(ret_)
+            return xp.from_dlpack(ret_.to_dlpack())
         elif xp.__name__ == "numpy":
-            return ret_.to("cpu").numpy()
+            return ret_.cpu().numpy()
 
         return ret_
 
@@ -657,7 +686,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        check_shape(self.shape, data)
+        check_shape_op(self, data)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -716,7 +745,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if img is not None:
-            check_shape(self.shape, img)
+            check_shape_adj_op(self, img)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
