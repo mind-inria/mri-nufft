@@ -62,21 +62,6 @@ def check_shape_op(self_, image):
         )
 
 
-    # if not image_params or image_params == None:
-    #     pass
-    # else : 
-    #     if len(image_params) > 1:
-    #         if image_params[1] != self_.n_coils:
-    #             raise ValueError(
-    #                 f"n_coils {image_params[1]} is not compatible "
-    #                 f"with the operator shape {self_.n_coils}"
-    #             )
-    #     if image_params[0] != self_.n_batchs:
-    #         raise ValueError(
-    #             f"n_batchs {image_params[0]} is not compatible "
-    #             f"with the operator shape {self_.n_batchs}"
-    #         )
-
 
 def check_shape_adj_op(self_, image):
     """Validate that the shape of the provided image matches the expected shape.
@@ -102,13 +87,3 @@ def check_shape_adj_op(self_, image):
             f"Image shape {image_samples} is not compatible "
             f"with the operator shape {self_.n_samples}"
         )
-
-    
-    # if not image_batchs or image_batchs == None:
-    #     pass
-    # else:
-    #     if image_batchs[0] != self_.n_batchs:
-    #         raise ValueError(
-    #             f"n_batchs {image_batchs} is not compatible "
-    #             f"with the operator shape {self_.n_batchs}"
-    #         )
