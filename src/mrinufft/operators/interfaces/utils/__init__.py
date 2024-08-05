@@ -1,6 +1,12 @@
 """Utilities for interfaces."""
 
-from .utils import check_error, check_size, sizeof_fmt, check_shape_op, check_shape_adj_op
+from .utils import (
+    check_error,
+    check_size,
+    sizeof_fmt,
+    check_shape_op,
+    check_shape_adj_op,
+)
 
 from .gpu_utils import (
     get_maxThreadBlock,

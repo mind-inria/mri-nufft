@@ -29,6 +29,7 @@ def image_from_op(operator):
     img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
     return img
 
+
 def wrong_image_from_op(operator):
     """Generate an incorrect image with intentional dimension errors."""
     wrong_shape = (operator.shape[0] + 10, operator.shape[1] + 1)
@@ -50,6 +51,7 @@ def kspace_from_op(operator):
     )
     return kspace
 
+
 def wrong_kspace_from_op(operator):
     """Generate incorrect kspace data with intentional dimension errors."""
     wrong_n_samples = operator.n_samples + 10
@@ -60,7 +62,6 @@ def wrong_kspace_from_op(operator):
         operator.cpx_dtype
     )
     return kspace
-
 
 
 def to_interface(data, interface):

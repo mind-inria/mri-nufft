@@ -18,7 +18,7 @@ from mrinufft.operators.interfaces.utils import (
     pin_memory,
     sizeof_fmt,
     check_shape_op,
-    check_shape_adj_op
+    check_shape_adj_op,
 )
 
 CUPY_AVAILABLE = True

@@ -142,8 +142,7 @@ def test_batch_adj_op(
     """Test the batch type 1 (adjoint)."""
     kspace_data = to_interface(kspace_data, array_interface)
 
-    # kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
-    kspace_flat = kspace_data.reshape(operator.n_batchs, -1, operator.n_coils, *operator.shape)
+    kspace_flat = kspace_data.reshape(-1, operator.n_coils, operator.n_samples)
 
     image_flat = [None] * operator.n_batchs
     for i in range(len(image_flat)):
