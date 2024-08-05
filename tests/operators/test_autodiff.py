@@ -29,7 +29,9 @@ except ImportError:
     [
         (1, 1, False),
         (4, 1, True),
+        (4, 1, False),
         (4, 2, True),
+        (4, 2, False),
     ],
 )
 @parametrize_with_cases(
@@ -100,9 +102,10 @@ def test_adjoint_and_grad(operator, interface):
             )
             adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim=0)
         else:
-            adj_data_ndft = (
-                ndft_matrix(operator).conj().T @ ksp_data.flatten()
-            ).reshape(img_data.shape)
+            adj_data_ndft = torch.matmul(
+                ndft_matrix(operator).conj().T,
+                ksp_data.T
+            ).T.reshape(img_data.shape)
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
 
@@ -159,7 +162,8 @@ def test_forward_and_grad(operator, interface):
                 dim=0,
             )  # fft for each coil
         else:
-            ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
+            img_data = img_data.reshape(operator.n_coils, -1).squeeze()
+            ksp_data_ndft = torch.matmul(ndft_matrix(operator), img_data.T).T.reshape(
                 ksp_data.shape
             )
 
