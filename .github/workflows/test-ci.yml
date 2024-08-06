@@ -285,8 +285,10 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Get history and tags for SCM versioning to work
+        env:
+            GITHUB_EVENT: ${{ toJson(github.event) }}
         run: |
-          echo " Commit message : ${{ toJson(github.event) }}"
+          echo "Commit message : $GITHUB_EVENT"
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
