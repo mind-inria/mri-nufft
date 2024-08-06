@@ -436,7 +436,7 @@ def check_hardware_constraints(
     """
     max_grad = np.max(np.linalg.norm(gradients, axis=-1, ord=order))
     max_slew = np.max(np.linalg.norm(slewrates, axis=-1, ord=order))
-    return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
+    return (max_grad > gmax) and (max_slew > smax), max_grad, max_slew
 
 
 ###########
