@@ -280,7 +280,7 @@ jobs:
   BuildDocs:
     name: Build API Documentation
     runs-on: gpu
-    if: ${{ contains(github.event.head_commit.message, 'docs_build') || (github.ref == 'refs/heads/master') }}
+    if: ${{ contains(github.event.head_commit.message, 'docs_build') || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
