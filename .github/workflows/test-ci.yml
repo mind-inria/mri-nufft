@@ -276,4 +276,80 @@ jobs:
         with:
           name: coverage_badge
           path: coverage_badge.svg
-          
+
+  BuildDocs:
+    name: Build API Documentation
+    runs-on: gpu
+    if: ${{ contains(github.event.head_commit.message, 'docs_build') || github.ref == 'refs/heads/master' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Get history and tags for SCM versioning to work
+        run: |
+          git fetch --prune --unshallow
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+        
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[doc]
+          python -m pip install finufft
+      
+      - name: Install GPU related interfaces
+        run: |
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda12x torch
+          python -m pip install gpuNUFFT cufinufft
+      
+      - name: Build API documentation
+        run: |
+          python -m sphinx docs docs_build
+      
+      - name: Display data
+        run: ls -R
+        working-directory: docs_build/_static
+      
+      - name: Upload artifact
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v4
+        with:
+          # Upload the docs
+          name: docs
+          path: 'docs_build'
+          retention-days: 5
+    
+  CompileDocs:
+    name: Compile the coverage badge in docs
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: [BuildDocs, coverage]
+    steps:
+      - name: Get the docs_build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
+          path: docs_build
+          overwrite: true
+    
+      - name: Get the badge from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage_badge
+          path: docs_build/_static
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: ReUpload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs_final
+          retention-days: 20
+          path: docs_build
