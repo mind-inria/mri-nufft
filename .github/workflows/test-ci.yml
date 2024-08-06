@@ -286,7 +286,7 @@ jobs:
       
       - name: Get history and tags for SCM versioning to work
         run: |
-          echo ${{github.event.head_commit.message}}
+          echo ${{ github.event.head_commit.message }}
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
