@@ -18,7 +18,7 @@ jobs:
   BuildDocs:
     name: Build API Documentation
     runs-on: gpu
-    if: ${{ containts(needs.linter-check.outputs.commit_message, 'docs_build') || github.ref == 'refs/heads/master' }}
+    if: ${{ contains(needs.linter-check.outputs.commit_message, 'docs_build') || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
