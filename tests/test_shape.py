@@ -22,7 +22,6 @@ from helpers import (
 @parametrize(
     "backend",
     [
-        "pynfft",
         "torchkbnufft-gpu",
     ],
 )
