@@ -279,14 +279,14 @@ jobs:
           
   BuildDocs:
     name: Build API Documentation
-    runs-on: gpu
-    if: ${{ contains(github.event.head_commit.message, 'docs_build') || github.ref == 'refs/heads/master' }}
+    runs-on: cpu
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       
       - name: Get history and tags for SCM versioning to work
         run: |
+          echo ${{github.event.head_commit.message}}
           git fetch --prune --unshallow
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
