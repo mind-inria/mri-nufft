@@ -43,18 +43,3 @@ jobs:
       - name: ruff Check
         shell: bash
         run: ruff check src
-
-      - name: Save the commit message
-        id: get_commit_message
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          else
-            COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-          fi
-          echo "commit_message=$COMMIT_MESSAGE"
-          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_ENV
-
-    outputs:
-        commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
-
