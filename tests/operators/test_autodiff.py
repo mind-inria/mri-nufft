@@ -8,11 +8,7 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator
 
-from helpers import (
-    kspace_from_op,
-    image_from_op,
-    to_interface,
-)
+from helpers import kspace_from_op, image_from_op, to_interface, assert_almost_allclose
 
 
 TORCH_AVAILABLE = True
@@ -29,7 +25,9 @@ except ImportError:
     [
         (1, 1, False),
         (4, 1, True),
+        (4, 1, False),
         (4, 2, True),
+        (4, 2, False),
     ],
 )
 @parametrize_with_cases(
@@ -75,21 +73,19 @@ def test_adjoint_and_grad(operator, interface):
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 
-    if torch.is_tensor(operator.samples):
-        operator.samples = operator.samples.cpu().detach().numpy()
-
-    operator.samples = to_interface(operator.samples, interface=interface)
+    if "gpu" in interface:
+        operator.samples = operator.samples.to("cuda")
+    else:
+        operator.samples = operator.samples.cpu()
     ksp_data = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
 
     ksp_data.requires_grad = True
-    operator.samples.requires_grad = True
-
     with torch.autograd.set_detect_anomaly(True):
         adj_data = operator.adj_op(ksp_data).reshape(img_data.shape)
         if operator.smaps is not None:
             smaps = torch.from_numpy(operator.smaps).to(img_data.device)
-            adj_data_ndft_smpas = torch.cat(
+            adj_data_ndft_smaps = torch.cat(
                 [
                     (ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(
                         img_data.shape
@@ -98,13 +94,21 @@ def test_adjoint_and_grad(operator, interface):
                 ],
                 dim=0,
             )
-            adj_data_ndft = torch.mean(smaps.conj() * adj_data_ndft_smpas, dim=0)
+            adj_data_ndft = torch.sum(smaps.conj() * adj_data_ndft_smaps, dim=0)
         else:
-            adj_data_ndft = (
-                ndft_matrix(operator).conj().T @ ksp_data.flatten()
-            ).reshape(img_data.shape)
+            adj_data_ndft = torch.matmul(
+                ndft_matrix(operator).conj().T, ksp_data.T
+            ).T.reshape(img_data.shape)
         loss_nufft = torch.mean(torch.abs(adj_data - img_data) ** 2)
         loss_ndft = torch.mean(torch.abs(adj_data_ndft - img_data) ** 2)
+
+    assert_almost_allclose(
+        adj_data.cpu().detach(),
+        adj_data_ndft.cpu().detach(),
+        atol=1e-1,
+        rtol=1e-1,
+        mismatch=20,
+    )
 
     # Check if nufft and ndft w.r.t trajectory are close in the backprop
     gradient_ndft_ktraj = torch.autograd.grad(
@@ -113,8 +117,12 @@ def test_adjoint_and_grad(operator, interface):
     gradient_nufft_ktraj = torch.autograd.grad(
         loss_nufft, operator.samples, retain_graph=True
     )[0]
-    assert_allclose(
-        gradient_ndft_ktraj.cpu().numpy(), gradient_nufft_ktraj.cpu().numpy(), atol=5e-1
+    assert_almost_allclose(
+        gradient_ndft_ktraj.cpu().numpy(),
+        gradient_nufft_ktraj.cpu().numpy(),
+        atol=1e-2,
+        rtol=1e-2,
+        mismatch=20,
     )
 
     # Check if nufft and ndft are close in the backprop
@@ -134,15 +142,13 @@ def test_forward_and_grad(operator, interface):
     if operator.backend == "finufft" and "gpu" in interface:
         pytest.skip("GPU not supported for finufft backend")
 
-    if torch.is_tensor(operator.samples):
-        operator.samples = operator.samples.cpu().detach().numpy()
-
-    operator.samples = to_interface(operator.samples, interface=interface)
+    if "gpu" in interface:
+        operator.samples = operator.samples.to("cuda")
+    else:
+        operator.samples = operator.samples.cpu()
     ksp_data_ref = to_interface(kspace_from_op(operator), interface=interface)
     img_data = to_interface(image_from_op(operator), interface=interface)
-
     img_data.requires_grad = True
-    operator.samples.requires_grad = True
 
     with torch.autograd.set_detect_anomaly(True):
         if operator.smaps is not None and operator.n_coils > 1:
@@ -159,12 +165,22 @@ def test_forward_and_grad(operator, interface):
                 dim=0,
             )  # fft for each coil
         else:
-            ksp_data_ndft = (ndft_matrix(operator) @ img_data.flatten()).reshape(
-                ksp_data.shape
-            )
+            ksp_data_ndft = torch.matmul(
+                ndft_matrix(operator),
+                img_data.reshape(operator.n_coils, -1).squeeze().T,
+            ).T.reshape(ksp_data.shape)
 
         loss_nufft = torch.mean(torch.abs(ksp_data - ksp_data_ref) ** 2)
         loss_ndft = torch.mean(torch.abs(ksp_data_ndft - ksp_data_ref) ** 2)
+
+    # FIXME: This check can be tighter for Nyquist cases
+    assert_almost_allclose(
+        ksp_data.cpu().detach(),
+        ksp_data_ndft.cpu().detach(),
+        atol=1e-1,
+        rtol=1e-1,
+        mismatch=20,
+    )
 
     # Check if nufft and ndft w.r.t trajectory are close in the backprop
     gradient_ndft_ktraj = torch.autograd.grad(

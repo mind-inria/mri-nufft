@@ -202,6 +202,17 @@ class RawGpuNUFFT:
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
+    def set_smaps(self, smaps):
+        """Update the smaps.
+
+        Parameters
+        ----------
+        smaps: np.ndarray[np.complex64])
+            sensittivity maps
+        """
+        smaps_ = smaps.T.reshape(-1, smaps.shape[0])
+        np.copyto(self.pinned_smaps, smaps_)
+
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
 
@@ -502,6 +513,21 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
 
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update pinned smaps from new_smaps.
+
+        Parameters
+        ----------
+        new_smaps: np.ndarray
+            the new sensitivity maps
+
+        """
+        self._check_smaps_shape(new_smaps)
+        self._smaps = new_smaps
+        if self._smaps is not None and hasattr(self, "raw_op"):
+            self.raw_op.set_smaps(smaps=new_smaps)
+
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
         """Set the samples for the Fourier Operator.
@@ -511,12 +537,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
+        self._samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
+        # TODO: gpuNUFFT needs to sort the points twice in this case.
+        # It could help to have access to directly dorted arrays from gpuNUFFT.
         self.compute_density(self.density_method)
         self.raw_op.set_pts(
-            samples,
+            self._samples,
             density=self.density,
         )
-        self._samples = samples
 
     @classmethod
     def pipe(
@@ -678,3 +708,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
+
+    def toggle_grad_traj(self):
+        """Toggle the gradient trajectory of the operator."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()

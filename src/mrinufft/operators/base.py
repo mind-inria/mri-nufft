@@ -148,6 +148,33 @@ def with_numpy(fun):
     return wrapper
 
 
+def with_tensorflow(fun):
+    """Ensure the function works internally with tensorflow array."""
+
+    @wraps(fun)
+    def wrapper(self, data, *args, **kwargs):
+        import tensorflow as tf
+
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = tf.convert_to_tensor(data.cpu())
+        elif xp.__name__ == "cupy":
+            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
+        else:
+            data_ = tf.convert_to_tensor(data)
+
+        ret_ = fun(self, data_, *args, **kwargs)
+
+        if xp.__name__ in ["torch", "cupy"]:
+            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
+        elif xp.__name__ == "numpy":
+            return ret_.numpy()
+        else:
+            return ret_
+
+    return wrapper
+
+
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
 
@@ -310,10 +337,10 @@ class FourierOperatorBase(ABC):
         """
         if isinstance(method, np.ndarray):
             self.smaps = method
-            return None
+            return
         if not method:
             self.smaps = None
-            return None
+            return
         kwargs = {}
         if isinstance(method, dict):
             kwargs = method.copy()
@@ -474,15 +501,18 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, smaps):
+        self._check_smaps_shape(smaps)
+        self._smaps = smaps
+
+    def _check_smaps_shape(self, smaps):
+        """Check the shape of the sensitivity maps."""
         if smaps is None:
             self._smaps = None
-        elif len(smaps) != self.n_coils:
+        elif smaps.shape != (self.n_coils, *self.shape):
             raise ValueError(
-                f"Number of sensitivity maps ({len(smaps)})"
-                f"should be equal to n_coils ({self.n_coils})"
+                f"smaps shape is {smaps.shape}, it should be"
+                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
-        else:
-            self._smaps = smaps
 
     @property
     def density(self):
@@ -589,7 +619,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = samples.reshape(-1, len(shape))
+        self._samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
@@ -753,7 +783,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
+        grad = np.zeros_like(dataf)
 
         coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)
