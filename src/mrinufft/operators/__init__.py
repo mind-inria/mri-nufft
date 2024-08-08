@@ -10,7 +10,7 @@ from .base import (
     list_backends,
     check_backend,
 )
-from .off_resonnance import MRIFourierCorrected
+from .off_resonance import MRIFourierCorrected
 from .stacked import MRIStackedNUFFT
 
 #
