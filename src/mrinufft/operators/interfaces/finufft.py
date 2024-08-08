@@ -149,7 +149,7 @@ class MRIfinufft(FourierOperatorCPU):
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
             self.raw_op._set_pts(typ, new_samples)
-        self.compute_density(self.density_method)
+        self.compute_density(self._density_method)
 
     def _make_plan_grad(self, **kwargs):
         self.raw_op.grad_plan = Plan(
