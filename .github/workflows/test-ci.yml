@@ -118,23 +118,22 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
-          pip install cupy-cuda11x
-          pip install finufft "numpy<2.0"
+          pip install cupy-cuda12x finufft "numpy<2.0"
 
-      - name: Install torch with CUDA 11.8
+      - name: Install torch with CUDA 12.1
         shell: bash
         if: ${{ matrix.backend != 'tensorflow'}}
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install torch --index-url https://download.pytorch.org/whl/cu118
+          pip install torch
 
       - name: Install backend
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8/
-          export PATH=/usr/local/cuda-11.8/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64/:${LD_LIBRARY_PATH}
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
             pip install torchkbnufft
           elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
@@ -195,11 +194,10 @@ jobs:
         
       - name: Install GPU related interfaces
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8/
-          export PATH=/usr/local/cuda-11.8/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64/:${LD_LIBRARY_PATH}
-          pip install cupy-cuda11x
-          pip install torch --index-url https://download.pytorch.org/whl/cu118
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda12x torch
           python -m pip install gpuNUFFT cufinufft
 
       - name: Run examples
@@ -282,7 +280,7 @@ jobs:
   BuildDocs:
     name: Build API Documentation
     runs-on: gpu
-    if: ${{ (contains(github.event.head_commit.message, 'docs_build')) || (github.ref == 'refs/heads/master')}}
+    if: ${{ contains(github.event.head_commit.message, 'docs_build') || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -306,11 +304,10 @@ jobs:
       
       - name: Install GPU related interfaces
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8/
-          export PATH=/usr/local/cuda-11.8/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64/:${LD_LIBRARY_PATH}
-          pip install cupy-cuda11x
-          pip install torch --index-url https://download.pytorch.org/whl/cu118
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda12x torch
           python -m pip install gpuNUFFT cufinufft
       
       - name: Build API documentation

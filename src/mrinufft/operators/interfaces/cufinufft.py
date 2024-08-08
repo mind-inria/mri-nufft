@@ -278,6 +278,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
             self.raw_op._set_pts(typ, samples)
+        self.compute_density(self._density_method)
 
     @with_numpy_cupy
     @nvtx_mark()
