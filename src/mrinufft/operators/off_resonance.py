@@ -31,9 +31,11 @@ def get_interpolators_from_fieldmap(
 ):
     r"""Create B and C matrices to approximate ``exp(-2j*pi*fieldmap*t)``.
 
-    Here, B has shape ``(n_time_segments, len(t))`` and C has shape ``(n_time_segments, *fieldmap.shape)``.
+    Here, B has shape ``(n_time_segments, len(t))``
+    and C has shape ``(n_time_segments, *fieldmap.shape)``.
 
-    From Sigpy: https://github.com/mikgroup/sigpy and MIRT (mri_exp_approx.m): https://web.eecs.umich.edu/~fessler/code/
+    From Sigpy: https://github.com/mikgroup/sigpy
+    and MIRT (mri_exp_approx.m): https://web.eecs.umich.edu/~fessler/code/
 
     Parameters
     ----------
@@ -43,13 +45,13 @@ def get_interpolators_from_fieldmap(
         If ``zmap`` is real, assume ``zmap = B0_map``.
         Expected shape is ``(nz, ny, nx)``.
     t : np.ndarray or GPUarray
-        Readout time in ``[s]`` of shape ``(npts,)``.
+        Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
     n_bins : int | Sequence[int] optional
         Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``
-        If it is a scalar, assume ``n_bins = (n_bins, 10)``. For real fieldmap (B0 only),
-        ``n_bins[1]`` is ignored.
+        If it is a scalar, assume ``n_bins = (n_bins, 10)``.
+        For real fieldmap (B0 only), ``n_bins[1]`` is ignored.
     mask : np.ndarray or GPUarray, optional
         Boolean mask to avoid histogram of background values.
         The default is ``None`` (use the whole map).
@@ -79,7 +81,7 @@ def get_interpolators_from_fieldmap(
 
     # move t to backend
     fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
-    t = xp.asarray(t, dtype=xp.float32)
+    t = xp.asarray(t, dtype=xp.float32).ravel()
 
     # default
     if isinstance(n_bins, (list, tuple)) is False:
@@ -133,10 +135,8 @@ def get_interpolators_from_fieldmap(
     zk = zk.ravel()
 
     # generate time for each segment
-    tl = (
-        xp.linspace(0, n_time_segments, n_time_segments, dtype=xp.float32)
-        / n_time_segments
-        * t[-1]
+    tl = xp.linspace(
+        t.min(), t.max(), n_time_segments, dtype=xp.float32
     )  # time seg centers in [s]
 
     # prepare for basis calculation
@@ -194,16 +194,48 @@ class MRIFourierCorrected(FourierOperatorBase):
     ----------
     fourier_op: object of class FourierBase
         the fourier operator to wrap
-    B: numpy.ndarray
-    C: numpy.ndarray
-    indices: numpy.ndarray
-    backend: str, default 'cpu'
-        the backend to use for computations. Either 'cpu' or 'gpu'.
+    fieldmap : np.ndarray or GPUarray, optional
+        Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
+        ``*_map`` and ``t`` should have reciprocal units.
+        If ``zmap`` is real, assume ``zmap = B0_map``.
+        Expected shape is ``(nz, ny, nx)``.
+    t : np.ndarray or GPUarray, optional
+        Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+    n_time_segments : int, optional
+        Number of time segments. The default is ``6``.
+    n_bins : int | Sequence[int] optional
+        Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``
+        If it is a scalar, assume ``n_bins = (n_bins, 10)``.
+        For real fieldmap (B0 only), ``n_bins[1]`` is ignored.
+    mask : np.ndarray or GPUarray, optional
+        Boolean mask to avoid histogram of background values.
+        The default is ``None`` (use the whole map).
+    B : np.ndarray or GPUarray, optional
+        Temporal interpolator of shape ``(n_time_segments, len(t))``.
+    C : np.ndarray or GPUarray, optional
+        Off-resonance phase map at each time segment center of shape
+        ``(n_time_segments, *fieldmap.shape)``.
+    backend: str, optional
+        The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
+        The default is `cpu`.
     """
 
-    def __init__(self, fourier_op, B, C, mask, backend="cpu"):
+    def __init__(
+        self,
+        fourier_op,
+        fieldmap=None,
+        t=None,
+        n_time_segments=6,
+        n_bins=(40, 10),
+        mask=None,
+        B=None,
+        C=None,
+        backend="cpu",
+    ):
         if backend == "gpu" and not CUPY_AVAILABLE:
             raise RuntimeError("Cupy is required for gpu computations.")
+        if backend == "torch":
+            self.xp = torch
         if backend == "gpu":
             self.xp = cp
         elif backend == "cpu":
@@ -212,16 +244,25 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
         self._fourier_op = fourier_op
 
-        if not fourier_op.uses_sense:
-            raise ValueError("please use smaps.")
+        # if not fourier_op.uses_sense:
+        # raise ValueError("please use smaps.")
 
-        self.n_samples = fourier_op.n_samples
+        # self.n_samples = fourier_op.n_samples
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
-        self.n_interpolators = len(C)
-        self.B = self.xp.asarray(B)
-        self.C = self.xp.asarray(C)
+
+        if B is not None and C is not None:
+            self.B = self.xp.asarray(B)
+            self.C = self.xp.asarray(C)
+        else:
+            fieldmap = self.xp.asarray(fieldmap)
+            self.B, self.C = get_interpolators_from_fieldmap(
+                fieldmap, t, n_time_segments, n_bins, mask
+            )
+        if self.B is None or self.C is None:
+            raise ValueError("Please either provide fieldmap and t or B and C")
+        self.n_interpolators = len(self.C)
 
     def op(self, data, *args):
         """Compute Forward Operation with off-resonance effect.
@@ -240,9 +281,8 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = self.xp.asarray(data)
         for idx in range(self.n_interpolators):
             y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
-        if self.xp.__name__ == "cupy" and is_cuda_array(data):
-            return y
-        return y.get()
+
+        return y
 
     def adj_op(self, coeffs, *args):
         """
@@ -260,12 +300,11 @@ class MRIFourierCorrected(FourierOperatorBase):
         y = 0.0
         coeffs_d = self.xp.array(coeffs)
         for idx in range(self.n_interpolators):
-            y += cp.conj(self.C[idx]) * self._fourier_op.adj_op(
-                cp.conj(self.B[idx]) * coeffs_d, *args
+            y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
+                self.xp.conj(self.B[idx]) * coeffs_d, *args
             )
-        if self.xp.__name__ == "cupy" and is_cuda_array(coeffs):
-            return y
-        return y.get()
+
+        return y
 
     def get_grad(self, image_data, obs_data):
         """Compute the data consistency error.
