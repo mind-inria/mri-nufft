@@ -228,13 +228,13 @@ def write_trajectory(
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
-        violation, maxG, maxS = check_hardware_constraints(
+        valid, maxG, maxS = check_hardware_constraints(
             gradients=gradients,
             slewrates=slewrates,
             gmax=gmax,
             smax=smax,
         )
-        if violation:
+        if not valid:
             warnings.warn(
                 "Hard constraints violated! "
                 f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
