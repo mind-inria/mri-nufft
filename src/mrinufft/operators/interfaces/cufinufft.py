@@ -9,6 +9,7 @@ from mrinufft._utils import (
     auto_cast,
     power_method,
 )
+from mrinufft.operators.interfaces.utils import check_shape_op, check_shape_adj_op
 
 from .utils import (
     CUPY_AVAILABLE,
@@ -299,11 +300,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        # monocoil
-        if self.uses_sense:
-            check_size(data, (self.n_batchs, *self.shape))
-        else:
-            check_size(data, (self.n_batchs, self.n_coils, *self.shape))
+        check_shape_op(self, data)
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
@@ -415,8 +412,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        if img_d is not None:
+            check_shape_adj_op(self, img_d)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
-        check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device

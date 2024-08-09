@@ -17,7 +17,12 @@ import numpy as np
 from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from mrinufft.operators.interfaces.utils import (
+    is_cuda_array,
+    is_host_array,
+    check_shape_op,
+    check_shape_adj_op,
+)
 
 CUPY_AVAILABLE = True
 try:
@@ -654,6 +659,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        check_shape_op(self, data)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -711,6 +717,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        if img is not None:
+            check_shape_adj_op(self, img)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)

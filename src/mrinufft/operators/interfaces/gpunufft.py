@@ -2,9 +2,16 @@
 
 import numpy as np
 import warnings
+
 from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array, check_size
+from mrinufft.operators.interfaces.utils import (
+    is_cuda_array,
+    is_host_array,
+    check_size,
+    check_shape_op,
+    check_shape_adj_op,
+)
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -446,6 +453,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
+        check_shape_op(self, data)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         op_func = self.raw_op.op
@@ -485,6 +493,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
+        if data is not None:
+            check_shape_adj_op(self, data)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         adj_op_func = self.raw_op.adj_op
