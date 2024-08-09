@@ -31,7 +31,7 @@ if CUPY_AVAILABLE:
 if TORCH_AVAILABLE:
     params.extend([(2, "torch", "cpu"), (3, "torch", "cpu")])
 
-if TORCH_AVAILABLE and torch.cuda.is_available():
+if TORCH_AVAILABLE and CUPY_AVAILABLE:
     params.extend([(2, "torch", "cuda"), (3, "torch", "cuda")])
 
 
