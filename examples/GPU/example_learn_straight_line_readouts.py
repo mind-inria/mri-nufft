@@ -5,12 +5,16 @@ Learn Sampling pattern
 ======================
 
 A small pytorch example to showcase learning k-space sampling patterns.
-This example showcases the auto-diff capabilities of the NUFFT operator 
-wrt to k-space trajectory in mri-nufft.
+In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
+straiht line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
+The resolution of the image is reduced to reduce computation time.
 
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
 """
+import time
+import joblib
+
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,8 +60,11 @@ class Model(torch.nn.Module):
             squeeze_dims=False,
         )
         
-    def get_trajectory(self):
-        return self._get_3D_points(self.get_2D_points())
+    def get_trajectory(self, get_as_shot=False):
+        samples = self._get_3D_points(self.get_2D_points())
+        if not get_as_shot:
+            return samples
+        return samples.reshape(-1, self.num_samples_per_shot, 3)
         
     def get_2D_points(self):
         return torch.vstack([self.central_points, self.non_center_points])
@@ -71,7 +78,7 @@ class Model(torch.nn.Module):
                 samples2D[:, 1].repeat(self.num_samples_per_shot, 1).T, 
             ], 
             dim=-1,
-        ).permute(1, 0, 2).reshape(-1, 3)
+        ).reshape(-1, 3)
 
     def forward(self, x):
         self.operator.samples = self.get_trajectory()
@@ -85,12 +92,29 @@ class Model(torch.nn.Module):
 # --------------------------------------------
 
 
-def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=None):
+def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
+    fig_grid = (2, 2)
+    if loss is None:
+        fig_grid = (1, 3)
+    fig, axs = plt.subplots(*fig_grid, figsize=tuple(i*5 for i in fig_grid[::-1]))
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("MR Image")
-    axs[1].scatter(*traj.T, s=10)
+    if traj.shape[-1] == 3:
+        if i is not None and i>50:
+            axs[1].scatter(*traj.T[1:3, 0], s=10, color='blue')
+        else:
+            kwargs = {}
+            if i is not None:
+                kwargs["azim"], kwargs["elev"] = i/50*60-60, 30-i/50*30
+            axs[1].remove()
+            axs[1] = fig.add_subplot(*fig_grid, 2, projection='3d', **kwargs)
+            for shot in traj:
+                axs[1].plot(*shot.T, alpha=0.2, color='blue')
+                
+    else:
+        axs[1].scatter(*traj.T, s=10)
     axs[1].set_title("Trajectory")
     axs[2].imshow(np.abs(recon[0][0][..., 11].detach().cpu().numpy()), cmap="gray")
     axs[2].axis("off")
@@ -99,7 +123,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=
         axs[3].plot(loss)
         axs[3].set_title("Loss")
     if save_name is not None:
-        plt.savefig(save_dir + save_name, bbox_inches="tight")
+        plt.savefig(save_name, bbox_inches="tight")
         plt.close()
     else:
         plt.show()
@@ -111,7 +135,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_dir="/tmp/", save_name=
 
 cart_data = np.flipud(bwdl.get_mri(4, "T1")).T[::8, ::8, ::8].astype(np.complex64)
 model = Model(253, cart_data.shape)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 # %%
 # Setup data
 # ----------
@@ -120,13 +144,12 @@ mri_3D = torch.Tensor(cart_data)[None]
 mri_3D = mri_3D / torch.linalg.norm(mri_3D)
 model.eval()
 recon = model(mri_3D)
-fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-plot_state(axs, mri_3D, model.get_2D_points().detach().cpu().numpy(), recon)
+plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon)
 # %%
 # Start training loop
 # -------------------
 losses = []
-imgs = []
+image_files = []
 model.train()
 with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
@@ -144,19 +167,22 @@ with tqdm(range(100), unit="steps") as tqdms:
                 param.clamp_(-0.5, 0.5)
         # Generate images for gif
         fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+        hashed = joblib.hash((i, "learn_line", time.time()))
+        filename = "/tmp/" + f"{hashed}.png"
         plot_state(
-            axs,
             mri_3D,
-            model.get_2D_points().detach().cpu().numpy(), 
+            model.get_trajectory(True).detach().cpu().numpy(), 
             out,
             losses,
-            save_name=f"{i}.png",
+            save_name=filename,
+            i=i,
         )
-        imgs.append(Image.open(f"/tmp/{i}.png"))
+        image_files.append(filename)
 
 # Make a GIF of all images.
+imgs = [Image.open(img) for img in image_files]
 imgs[0].save(
-    "mrinufft_learn_traj.gif",
+    "mrinufft_learn_2d_sampling_pattern.gif",
     save_all=True,
     append_images=imgs[1:],
     optimize=False,
@@ -169,8 +195,7 @@ import os
 import shutil
 from pathlib import Path
 
-for f in range(100):
-    f = f"/tmp/{f}.png"
+for f in image_files:
     try:
         os.remove(f)
     except OSError:
@@ -185,18 +210,18 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
+    shutil.copyfile("mrinufft_learn_2d_sampling_pattern.gif", final_dir / "mrinufft_learn_2d_sampling_pattern.gif")
 except FileNotFoundError:
     pass
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_traj.gif'
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif'
 
 # %%
-# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
+# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
 #    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
+#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
 #    :class: sphx-glr-single-img
 
 # %%
@@ -204,6 +229,5 @@ except FileNotFoundError:
 # ------------------
 model.eval()
 recon = model(mri_3D)
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-plot_state(axs, mri_3D, model.trajectory.detach().cpu().numpy(), recon, losses)
+plot_state(mri_3D, model.trajectory.detach().cpu().numpy(), recon, losses)
 plt.show()

@@ -11,6 +11,9 @@ wrt to k-space trajectory in mri-nufft.
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
 """
+import time
+import joblib
+
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -100,7 +103,7 @@ plot_state(axs, mri_2D, init_traj, recon)
 # Start training loop
 # -------------------
 losses = []
-imgs = []
+image_files = []
 model.train()
 with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
@@ -118,6 +121,8 @@ with tqdm(range(100), unit="steps") as tqdms:
                 param.clamp_(-0.5, 0.5)
         schedulder.step()
         # Generate images for gif
+        hashed = joblib.hash((i, "learn_traj", time.time()))
+        filename = "/tmp/" + f"{hashed}.png"
         fig, axs = plt.subplots(2, 2, figsize=(10, 10))
         plot_state(
             axs,
@@ -125,11 +130,13 @@ with tqdm(range(100), unit="steps") as tqdms:
             model.trajectory.detach().cpu().numpy(),
             out,
             losses,
-            save_name=f"{i}.png",
+            save_name=filename,
         )
-        imgs.append(Image.open(f"/tmp/{i}.png"))
+        image_files.append(filename)
+        
 
 # Make a GIF of all images.
+imgs = [Image.open(img) for img in image_files]
 imgs[0].save(
     "mrinufft_learn_traj.gif",
     save_all=True,
@@ -144,8 +151,7 @@ import os
 import shutil
 from pathlib import Path
 
-for f in range(100):
-    f = f"/tmp/{f}.png"
+for f in image_files:
     try:
         os.remove(f)
     except OSError:
