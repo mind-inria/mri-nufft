@@ -251,6 +251,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
+        self.autograd_available = fourier_op.autograd_available
 
         if B is not None and C is not None:
             self.B = self.xp.asarray(B)
