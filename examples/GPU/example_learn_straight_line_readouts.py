@@ -83,7 +83,7 @@ class Model(torch.nn.Module):
     def forward(self, x):
         self.operator.samples = self.get_trajectory()
         kspace = self.operator.op(x)
-        adjoint = self.operator.adj_op(kspace)
+        adjoint = self.operator.adj_op(kspace).abs()
         return adjoint / torch.linalg.norm(adjoint)
 
 
@@ -105,14 +105,16 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
         if i is not None and i>50:
             axs[1].scatter(*traj.T[1:3, 0], s=10, color='blue')
         else:
-            kwargs = {}
+            fig_kwargs = {}
+            plt_kwargs = {"s": 1, "alpha": 0.2}
             if i is not None:
-                kwargs["azim"], kwargs["elev"] = i/50*60-60, 30-i/50*30
+                fig_kwargs["azim"], fig_kwargs["elev"] = i/50*60-60, 30-i/50*30
+                plt_kwargs["alpha"] = 0.2 + 0.8*i/50
+                plt_kwargs["s"] = 1 + 9*i/50
             axs[1].remove()
-            axs[1] = fig.add_subplot(*fig_grid, 2, projection='3d', **kwargs)
+            axs[1] = fig.add_subplot(*fig_grid, 2, projection='3d', **fig_kwargs)
             for shot in traj:
-                axs[1].plot(*shot.T, alpha=0.2, color='blue')
-                
+                axs[1].scatter(*shot.T, color='blue', **plt_kwargs)
     else:
         axs[1].scatter(*traj.T, s=10)
     axs[1].set_title("Trajectory")
@@ -121,6 +123,7 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
     axs[2].set_title("Reconstruction")
     if loss is not None:
         axs[3].plot(loss)
+        axs[3].grid("on")
         axs[3].set_title("Loss")
     if save_name is not None:
         plt.savefig(save_name, bbox_inches="tight")
@@ -135,7 +138,7 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
 
 cart_data = np.flipud(bwdl.get_mri(4, "T1")).T[::8, ::8, ::8].astype(np.complex64)
 model = Model(253, cart_data.shape)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 # %%
 # Setup data
 # ----------

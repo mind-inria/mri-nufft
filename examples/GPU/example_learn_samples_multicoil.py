@@ -22,8 +22,9 @@ from tqdm import tqdm
 from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
+from mrinufft.extras import get_smaps
 from mrinufft.trajectories import initialize_2D_radial
-
+from sigpy.mri import birdcage_maps
 
 # %%
 # Setup a simple class to learn trajectory
@@ -31,7 +32,7 @@ from mrinufft.trajectories import initialize_2D_radial
 
 
 class Model(torch.nn.Module):
-    def __init__(self, inital_trajectory):
+    def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
         super(Model, self).__init__()
         self.trajectory = torch.nn.Parameter(
             data=torch.Tensor(inital_trajectory),
@@ -39,15 +40,36 @@ class Model(torch.nn.Module):
         )
         self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
             self.trajectory.detach().cpu().numpy(),
-            shape=(256, 256),
-            density=True,
+            shape=img_size,
+            n_coils=n_coils,
             squeeze_dims=False,
         )
+        self.sense_op = get_operator("gpunufft", wrt_data=True, wrt_traj=False)(
+            self.trajectory.detach().cpu().numpy(),
+            shape=img_size,
+            density=True,
+            n_coils=n_coils,
+            smaps=np.ones((n_coils, *img_size)), # Dummy smaps, this is updated in forward pass
+            squeeze_dims=False,
+        )
+        self.img_size = img_size
 
     def forward(self, x):
         self.operator.samples = self.trajectory.clone()
+        # Simulate the acquisition process
         kspace = self.operator.op(x)
-        adjoint = self.operator.adj_op(kspace)
+
+        # Reconstruction using the sense operator
+        self.sense_op.samples = self.trajectory.clone()
+        self.sense_op.smaps, _ = get_smaps("low_frequency")(
+            self.trajectory.detach().numpy(),
+            self.img_size,
+            kspace.detach(),
+            backend="gpunufft",
+            density=self.sense_op.density,
+            blurr_factor=20,
+        )
+        adjoint = self.sense_op.adj_op(kspace).abs()
         return adjoint / torch.linalg.norm(adjoint)
 
 
@@ -58,7 +80,7 @@ class Model(torch.nn.Module):
 
 def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
     axs = axs.flatten()
-    axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
+    axs[0].imshow(np.abs(mri_2D), cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("MR Image")
     axs[1].scatter(*traj.T, s=1)
@@ -79,9 +101,10 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
 # %%
 # Setup model and optimizer
 # -------------------------
+n_coils = 6
 init_traj = initialize_2D_radial(16, 512).reshape(-1, 2).astype(np.float32)
-model = Model(init_traj)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+model = Model(init_traj, n_coils=n_coils, img_size=(256, 256))
+optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
 schedulder = torch.optim.lr_scheduler.LinearLR(
     optimizer, start_factor=1, end_factor=0.1, total_iters=100
 )
@@ -89,13 +112,12 @@ schedulder = torch.optim.lr_scheduler.LinearLR(
 # %%
 # Setup data
 # ----------
-
-mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
-    None
-]
+mri_2D = torch.from_numpy(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))
 mri_2D = mri_2D / torch.linalg.norm(mri_2D)
+smaps_simulated = torch.from_numpy(birdcage_maps((n_coils, *mri_2D.shape)))
+mcmri_2D = mri_2D[None] * smaps_simulated
 model.eval()
-recon = model(mri_2D)
+recon = model(mcmri_2D)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 plot_state(axs, mri_2D, init_traj, recon)
 
@@ -107,8 +129,8 @@ image_files = []
 model.train()
 with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
-        out = model(mri_2D)
-        loss = torch.norm(out - mri_2D[None])
+        out = model(mcmri_2D)
+        loss = torch.norm(out - mri_2D[None, None])
         numpy_loss = loss.detach().cpu().numpy()
         tqdms.set_postfix({"loss": numpy_loss})
         losses.append(numpy_loss)
@@ -138,7 +160,7 @@ with tqdm(range(100), unit="steps") as tqdms:
 # Make a GIF of all images.
 imgs = [Image.open(img) for img in image_files]
 imgs[0].save(
-    "mrinufft_learn_traj.gif",
+    "mrinufft_learn_traj_mc.gif",
     save_all=True,
     append_images=imgs[1:],
     optimize=False,
@@ -166,25 +188,25 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_traj.gif", final_dir / "mrinufft_learn_traj.gif")
+    shutil.copyfile("mrinufft_learn_traj_mc.gif", final_dir / "mrinufft_learn_traj_mc.gif")
 except FileNotFoundError:
     pass
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_traj.gif'
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_traj_mc.gif'
 
 # %%
-# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
+# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_traj_mc.gif
 #    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_traj.gif
+#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_traj_mc.gif
 #    :class: sphx-glr-single-img
 
 # %%
 # Trained trajectory
 # ------------------
 model.eval()
-recon = model(mri_2D)
+recon = model(mcmri_2D)
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 plot_state(axs, mri_2D, model.trajectory.detach().cpu().numpy(), recon, losses)
 plt.show()
