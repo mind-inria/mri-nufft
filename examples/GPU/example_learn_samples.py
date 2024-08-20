@@ -69,6 +69,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
     if loss is not None:
         axs[3].plot(loss)
         axs[3].set_title("Loss")
+        axs[3].grid("on")
     if save_name is not None:
         plt.savefig(save_name, bbox_inches="tight")
         plt.close()

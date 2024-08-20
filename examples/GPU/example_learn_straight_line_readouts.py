@@ -127,6 +127,7 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
         axs[3].set_title("Loss")
     if save_name is not None:
         plt.savefig(save_name, bbox_inches="tight")
+        plt.pause(0.5)
         plt.close()
     else:
         plt.show()
@@ -138,7 +139,7 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
 
 cart_data = np.flipud(bwdl.get_mri(4, "T1")).T[::8, ::8, ::8].astype(np.complex64)
 model = Model(253, cart_data.shape)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
 # %%
 # Setup data
 # ----------
