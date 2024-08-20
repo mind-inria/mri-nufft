@@ -1,8 +1,8 @@
 # %%
 """
-======================
-Learn Sampling pattern
-======================
+=========================================
+Learn Sampling pattern for multi-coil MRI
+=========================================
 
 A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
@@ -78,8 +78,6 @@ class Model(torch.nn.Module):
 # %%
 # Util function to plot the state of the model
 # --------------------------------------------
-
-
 def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D), cmap="gray")
