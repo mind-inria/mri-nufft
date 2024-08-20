@@ -37,7 +37,7 @@ class Model(torch.nn.Module):
         cart_del = 1 / img_size[0]
         num_cart_points = np.round(np.sqrt(factor_cartesian * num_shots)).astype(int)
         edge_center = cart_del * num_cart_points / 2
-        
+
         self.central_points = torch.nn.Parameter(
             data=torch.stack(
                 torch.meshgrid(
@@ -50,33 +50,44 @@ class Model(torch.nn.Module):
             requires_grad=False,
         )
         self.non_center_points = torch.nn.Parameter(
-            data=torch.Tensor(np.random.random((num_shots-self.central_points.shape[0], 2))-0.5),
+            data=torch.Tensor(
+                np.random.random((num_shots - self.central_points.shape[0], 2)) - 0.5
+            ),
             requires_grad=True,
         )
         self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
-            np.random.random((self.get_2D_points().shape[0]*self.num_samples_per_shot, 3))-0.5,
+            np.random.random(
+                (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
+            )
+            - 0.5,
             shape=img_size,
             density=True,
             squeeze_dims=False,
         )
-        
+
     def get_trajectory(self, get_as_shot=False):
         samples = self._get_3D_points(self.get_2D_points())
         if not get_as_shot:
             return samples
         return samples.reshape(-1, self.num_samples_per_shot, 3)
-        
+
     def get_2D_points(self):
         return torch.vstack([self.central_points, self.non_center_points])
-    
+
     def _get_3D_points(self, samples2D):
-        line = torch.linspace(-0.5, 0.5, self.num_samples_per_shot, device=samples2D.device, dtype=samples2D.dtype)
+        line = torch.linspace(
+            -0.5,
+            0.5,
+            self.num_samples_per_shot,
+            device=samples2D.device,
+            dtype=samples2D.dtype,
+        )
         return torch.stack(
             [
                 line.repeat(samples2D.shape[0], 1),
                 samples2D[:, 0].repeat(self.num_samples_per_shot, 1).T,
-                samples2D[:, 1].repeat(self.num_samples_per_shot, 1).T, 
-            ], 
+                samples2D[:, 1].repeat(self.num_samples_per_shot, 1).T,
+            ],
             dim=-1,
         ).reshape(-1, 3)
 
@@ -84,7 +95,7 @@ class Model(torch.nn.Module):
         self.operator.samples = self.get_trajectory()
         kspace = self.operator.op(x)
         adjoint = self.operator.adj_op(kspace).abs()
-        return adjoint / torch.linalg.norm(adjoint)
+        return adjoint / torch.mean(adjoint)
 
 
 # %%
@@ -96,25 +107,28 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
     fig_grid = (2, 2)
     if loss is None:
         fig_grid = (1, 3)
-    fig, axs = plt.subplots(*fig_grid, figsize=tuple(i*5 for i in fig_grid[::-1]))
+    fig, axs = plt.subplots(*fig_grid, figsize=tuple(i * 5 for i in fig_grid[::-1]))
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("MR Image")
     if traj.shape[-1] == 3:
-        if i is not None and i>50:
-            axs[1].scatter(*traj.T[1:3, 0], s=10, color='blue')
+        if i is not None and i > 50:
+            axs[1].scatter(*traj.T[1:3, 0], s=10, color="blue")
         else:
             fig_kwargs = {}
             plt_kwargs = {"s": 1, "alpha": 0.2}
             if i is not None:
-                fig_kwargs["azim"], fig_kwargs["elev"] = i/50*60-60, 30-i/50*30
-                plt_kwargs["alpha"] = 0.2 + 0.8*i/50
-                plt_kwargs["s"] = 1 + 9*i/50
+                fig_kwargs["azim"], fig_kwargs["elev"] = (
+                    i / 50 * 60 - 60,
+                    30 - i / 50 * 30,
+                )
+                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 50
+                plt_kwargs["s"] = 1 + 9 * i / 50
             axs[1].remove()
-            axs[1] = fig.add_subplot(*fig_grid, 2, projection='3d', **fig_kwargs)
+            axs[1] = fig.add_subplot(*fig_grid, 2, projection="3d", **fig_kwargs)
             for shot in traj:
-                axs[1].scatter(*shot.T, color='blue', **plt_kwargs)
+                axs[1].scatter(*shot.T, color="blue", **plt_kwargs)
     else:
         axs[1].scatter(*traj.T, s=10)
     axs[1].set_title("Trajectory")
@@ -127,7 +141,6 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
         axs[3].set_title("Loss")
     if save_name is not None:
         plt.savefig(save_name, bbox_inches="tight")
-        plt.pause(0.5)
         plt.close()
     else:
         plt.show()
@@ -139,13 +152,13 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
 
 cart_data = np.flipud(bwdl.get_mri(4, "T1")).T[::8, ::8, ::8].astype(np.complex64)
 model = Model(253, cart_data.shape)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 # %%
 # Setup data
 # ----------
 
 mri_3D = torch.Tensor(cart_data)[None]
-mri_3D = mri_3D / torch.linalg.norm(mri_3D)
+mri_3D = mri_3D / torch.mean(mri_3D)
 model.eval()
 recon = model(mri_3D)
 plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon)
@@ -158,7 +171,7 @@ model.train()
 with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_3D)
-        loss = torch.norm(out - mri_3D[None])
+        loss = torch.nn.functional.mse_loss(out, mri_3D[None])
         numpy_loss = loss.detach().cpu().numpy()
         tqdms.set_postfix({"loss": numpy_loss})
         losses.append(numpy_loss)
@@ -175,7 +188,7 @@ with tqdm(range(100), unit="steps") as tqdms:
         filename = "/tmp/" + f"{hashed}.png"
         plot_state(
             mri_3D,
-            model.get_trajectory(True).detach().cpu().numpy(), 
+            model.get_trajectory(True).detach().cpu().numpy(),
             out,
             losses,
             save_name=filename,
@@ -214,7 +227,10 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_2d_sampling_pattern.gif", final_dir / "mrinufft_learn_2d_sampling_pattern.gif")
+    shutil.copyfile(
+        "mrinufft_learn_2d_sampling_pattern.gif",
+        final_dir / "mrinufft_learn_2d_sampling_pattern.gif",
+    )
 except FileNotFoundError:
     pass
 

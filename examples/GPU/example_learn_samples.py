@@ -134,7 +134,7 @@ with tqdm(range(100), unit="steps") as tqdms:
             save_name=filename,
         )
         image_files.append(filename)
-        
+
 
 # Make a GIF of all images.
 imgs = [Image.open(img) for img in image_files]

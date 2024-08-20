@@ -50,15 +50,17 @@ class Model(torch.nn.Module):
             shape=img_size,
             density=True,
             n_coils=n_coils,
-            smaps=np.ones((n_coils, *img_size)), # Dummy smaps, this is updated in forward pass
+            smaps=np.ones(
+                (n_coils, *img_size)
+            ),  # Dummy smaps, this is updated in forward pass
             squeeze_dims=False,
         )
         self.img_size = img_size
-         
+
     def forward(self, x):
         self.operator.samples = self.trajectory.clone()
         self.sense_op.samples = self.trajectory.clone()
-        
+
         # Simulate the acquisition process
         kspace = self.operator.op(x)
 
@@ -107,7 +109,10 @@ init_traj = initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2)
 model = Model(init_traj, n_coils=n_coils, img_size=(256, 256))
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(
-    optimizer, start_factor=1, end_factor=0.1, total_iters=100,
+    optimizer,
+    start_factor=1,
+    end_factor=0.1,
+    total_iters=100,
 )
 # %%
 # Setup data
@@ -128,7 +133,7 @@ losses = []
 image_files = []
 model.train()
 
-with tqdm(range(100), unit="steps") as tqdms:
+with tqdm(range(20), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mcmri_2D)
         loss = torch.nn.functional.mse_loss(out, mri_2D[None, None])
@@ -157,7 +162,7 @@ with tqdm(range(100), unit="steps") as tqdms:
             save_name=filename,
         )
         image_files.append(filename)
-        
+
 
 # Make a GIF of all images.
 imgs = [Image.open(img) for img in image_files]
@@ -190,7 +195,9 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_traj_mc.gif", final_dir / "mrinufft_learn_traj_mc.gif")
+    shutil.copyfile(
+        "mrinufft_learn_traj_mc.gif", final_dir / "mrinufft_learn_traj_mc.gif"
+    )
 except FileNotFoundError:
     pass
 
