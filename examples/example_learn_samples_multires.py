@@ -121,8 +121,6 @@ def upsample_optimizer(optimizer, new_optimizer, factor=2):
     """Upsample the optimizer."""
     for old_group, new_group in zip(optimizer.param_groups, new_optimizer.param_groups):
         for old_param, new_param in zip(old_group["params"], new_group["params"]):
-            # Interpolate the weights
-            old_weight = old_param.data
             # Interpolate optimizer states
             if old_param in optimizer.state:
                 for key in optimizer.state[old_param].keys():
@@ -132,7 +130,7 @@ def upsample_optimizer(optimizer, new_optimizer, factor=2):
                             new_state = old_state
                         else:
                             new_state = torch.nn.functional.interpolate(
-                                old_state.moveaxis(1, -1), scale_factor=2, mode="linear"
+                                old_state.moveaxis(1, -1), scale_factor=factor, mode="linear"
                             ).moveaxis(-1, 1)
                         new_optimizer.state[new_param][key] = new_state
                     else:

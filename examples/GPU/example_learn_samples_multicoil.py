@@ -133,7 +133,7 @@ losses = []
 image_files = []
 model.train()
 
-with tqdm(range(20), unit="steps") as tqdms:
+with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mcmri_2D)
         loss = torch.nn.functional.mse_loss(out, mri_2D[None, None])
