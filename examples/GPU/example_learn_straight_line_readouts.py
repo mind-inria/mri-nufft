@@ -249,5 +249,5 @@ except FileNotFoundError:
 # ------------------
 model.eval()
 recon = model(mri_3D)
-plot_state(mri_3D, model.trajectory.detach().cpu().numpy(), recon, losses)
+plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon, losses)
 plt.show()

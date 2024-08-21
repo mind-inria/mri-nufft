@@ -23,9 +23,7 @@ from tqdm import tqdm
 from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
-from mrinufft.extras import get_smaps
 from mrinufft.trajectories import initialize_2D_radial
-from sigpy.mri import birdcage_maps
 
 # %%
 # Setup a simple class to learn trajectory
