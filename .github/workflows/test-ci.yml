@@ -197,7 +197,7 @@ jobs:
           export PATH=/usr/local/cuda-12.1/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT cufinufft sigpy
+          python -m pip install gpuNUFFT cufinufft sigpy scikit-image
 
       - name: Run examples
         shell: bash
