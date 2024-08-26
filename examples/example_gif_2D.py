@@ -11,7 +11,7 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageSequence
-
+import time
 import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory2D as mtt
 from mrinufft.trajectories.display import displayConfig
@@ -158,7 +158,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     )
 
     # Save figure
-    hashed = joblib.hash((index, name, arg))
+    hashed = joblib.hash((index, name, arg, time.time()))
     filename = save_dir + f"{hashed}.png"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
@@ -193,7 +193,7 @@ for f in image_files:
         os.remove(f)
     except OSError:
         continue
-# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
         Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
