@@ -26,7 +26,7 @@ def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0,
             ax = display_3D_trajectory(
                 traj,
                 size=subfig_size,
-                one_shot=one_shot,
+                one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
                 per_plane=False,
             )
@@ -34,7 +34,7 @@ def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0,
             ax = display_2D_trajectory(
                 traj[..., axes],
                 size=subfig_size,
-                one_shot=one_shot,
+                one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
             )
         labels = ["kx", "ky", "kz"]
@@ -47,13 +47,13 @@ def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0,
 
 def show_trajectory(trajectory, one_shot, figure_size):
     if trajectory.shape[-1] == 2:
-        ax = display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
+        ax = display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot % trajectory.shape[0])
         ax.set_aspect("equal")
         plt.tight_layout()
         plt.show()
     else:
         ax = display_3D_trajectory(
-            trajectory, size=figure_size, one_shot=one_shot, per_plane=False
+            trajectory, size=figure_size, one_shot=one_shot % trajectory.shape[0], per_plane=False
         )
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.1)
