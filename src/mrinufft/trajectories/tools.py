@@ -352,7 +352,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 def prewind(trajectory, Ns_transitions):
     """Add pre-winding/positioning to the trajectory.
 
-    The trajectory is extended to start before the readout 
+    The trajectory is extended to start before the readout
     from the k-space center with null gradients and reach
     each shot position with the required gradient strength.
 

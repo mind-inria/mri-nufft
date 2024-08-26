@@ -8,7 +8,7 @@ from scipy.special import ellipj, ellipk
 
 from .maths import (
     CIRCLE_PACKING_DENSITY,
-    R2D, 
+    R2D,
     Ra,
     Ry,
     Rz,
