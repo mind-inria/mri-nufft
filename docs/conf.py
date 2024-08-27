@@ -82,7 +82,7 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "mind-inria",
         "repo": "mri-nufft",
-        "branch": "master",
+        "branch": "gh-pages",
         "binderhub_url": "https://mybinder.org",
         "dependencies": [
             "./binder/apt.txt",
