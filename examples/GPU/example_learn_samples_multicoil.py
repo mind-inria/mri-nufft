@@ -8,8 +8,22 @@ A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
 wrt to k-space trajectory in mri-nufft.
 
+Briefly, in this example we try to learn the k-space samples :math:`\mathbf{K}` for the following cost function:
+
+.. math::
+
+    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} x_\ell - \mathbf{x}_{sos} ||_2^2 
+    
+where :math:`S_\ell` is the sensitivity map for the :math:`\ell`-th coil, :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}_\ell` is the image for the :math:`\ell`-th coil, and :math:`\mathbf{x}_{sos} = \sqrt{\sum_{\ell=1}^L x_\ell^2}` is the sum-of-squares image as target image to be reconstructed.
+
+In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is implemented with `model.operator` while the SENSE operator :math:`model.sense_op` models the term :math:`\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}`.
+For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and the sensitivity maps are simulated using the `birdcage_maps` function from `sigpy.mri`.
+
+.. note::
+    To showcase the features of `mri-nufft`, we use `finufft` backend for `model.operator` without density compensation and `gpunufft` backend for `model.sense_op` with density compensation. 
+    
 .. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
+    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 import time
 import joblib
@@ -29,7 +43,9 @@ from sigpy.mri import birdcage_maps
 # %%
 # Setup a simple class to learn trajectory
 # ----------------------------------------
-
+# .. note::
+#     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
+#     See [Projector]_ for more details.
 
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
@@ -39,12 +55,14 @@ class Model(torch.nn.Module):
             requires_grad=True,
         )
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        # A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.
+        self.operator = get_operator("finufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             n_coils=n_coils,
             squeeze_dims=False,
         )
+        # A simple density compensated adjoint SENSE operator with sensitivity maps `smaps`.
         self.sense_op = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
@@ -58,13 +76,16 @@ class Model(torch.nn.Module):
         self.img_size = img_size
 
     def forward(self, x):
+        """Forward pass of the model."""
+        # Update the trajectory in the NUFFT operator.
+        # Note that the re-computation of density compensation happens internally.
         self.operator.samples = self.trajectory.clone()
         self.sense_op.samples = self.trajectory.clone()
 
         # Simulate the acquisition process
         kspace = self.operator.op(x)
 
-        # Reconstruction using the sense operator
+        # Recompute the sensitivity maps for the updated trajectory.
         self.sense_op.smaps, _ = get_smaps("low_frequency")(
             self.trajectory.detach().numpy(),
             self.img_size,
@@ -73,6 +94,7 @@ class Model(torch.nn.Module):
             density=self.sense_op.density,
             blurr_factor=20,
         )
+        # Reconstruction using the sense operator
         adjoint = self.sense_op.adj_op(kspace).abs()
         return adjoint / torch.mean(adjoint)
 
@@ -188,7 +210,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent
+        Path(__file__).parent.parent
         / "docs"
         / "generated"
         / "autoexamples"
@@ -219,3 +241,21 @@ recon = model(mcmri_2D)
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 plot_state(axs, mri_2D, model.trajectory.detach().cpu().numpy(), recon, losses)
 plt.show()
+
+
+# %%
+# References
+# ==========
+#
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+#           doi: 10.1109/TMI.2016.2544251.
+# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+#           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
+#           through Projection" Bioengineering 10, no. 2: 158. 
+#           https://doi.org/10.3390/bioengineering10020158

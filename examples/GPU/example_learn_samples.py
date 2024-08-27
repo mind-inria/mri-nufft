@@ -8,8 +8,15 @@ A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
 wrt to k-space trajectory in mri-nufft.
 
+In this example, we solve the following optimization problem:
+.. math::
+
+    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
+    
+where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
+
 .. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
+    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 import time
 import joblib
@@ -28,6 +35,9 @@ from mrinufft.trajectories import initialize_2D_radial
 # %%
 # Setup a simple class to learn trajectory
 # ----------------------------------------
+# .. note::
+#     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
+#     See [Projector]_ for more details.
 
 
 class Model(torch.nn.Module):
@@ -45,8 +55,14 @@ class Model(torch.nn.Module):
         )
 
     def forward(self, x):
+        # Update the trajectory in the NUFFT operator.
+        # Note that the re-computation of density compensation happens internally.
         self.operator.samples = self.trajectory.clone()
+        
+        # A simple acquisition model simulated with a forward NUFFT operator
         kspace = self.operator.op(x)
+        
+        # A simple density compensated adjoint operator
         adjoint = self.operator.adj_op(kspace)
         return adjoint / torch.linalg.norm(adjoint)
 
@@ -160,7 +176,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent
+        Path(__file__).parent.parent
         / "docs"
         / "generated"
         / "autoexamples"
@@ -189,3 +205,20 @@ recon = model(mri_2D)
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 plot_state(axs, mri_2D, model.trajectory.detach().cpu().numpy(), recon, losses)
 plt.show()
+
+# %%
+# References
+# ==========
+#
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+#           doi: 10.1109/TMI.2016.2544251.
+# .. [Sparks] Chaithya GR, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+#           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
+#           through Projection" Bioengineering 10, no. 2: 158. 
+#           https://doi.org/10.3390/bioengineering10020158

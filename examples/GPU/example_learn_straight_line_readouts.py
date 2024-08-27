@@ -1,8 +1,8 @@
 # %%
 """
-======================
-Learn Sampling pattern
-======================
+===================================
+Learn Straight line readout pattern
+===================================
 
 A small pytorch example to showcase learning k-space sampling patterns.
 In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
@@ -10,7 +10,7 @@ straiht line readouts. This example showcases the auto-diff capabilities of the 
 The resolution of the image is reduced to reduce computation time.
 
 .. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
+    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 import time
 import joblib
@@ -28,7 +28,9 @@ from mrinufft import get_operator
 # %%
 # Setup a simple class to learn trajectory
 # ----------------------------------------
-
+# .. note::
+#     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
+#     See [Projector]_ for more details.
 
 class Model(torch.nn.Module):
     def __init__(self, num_shots, img_size, factor_cartesian=0.3):
@@ -55,13 +57,12 @@ class Model(torch.nn.Module):
             ),
             requires_grad=True,
         )
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
             )
             - 0.5,
             shape=img_size,
-            density=True,
             squeeze_dims=False,
         )
 
@@ -220,7 +221,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent
+        Path(__file__).parent.parent
         / "docs"
         / "generated"
         / "autoexamples"
@@ -251,3 +252,20 @@ model.eval()
 recon = model(mri_3D)
 plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon, losses)
 plt.show()
+
+# %%
+# References
+# ==========
+#
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+#           doi: 10.1109/TMI.2016.2544251.
+# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+#           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
+#           through Projection" Bioengineering 10, no. 2: 158. 
+#           https://doi.org/10.3390/bioengineering10020158

@@ -165,10 +165,22 @@ jobs:
           rm -rf finufft
           rm -rf gpuNUFFT
           rm -rf venv
+ 
+  get-commit-message:
+    runs-on: ubuntu-latest
+    steps:
+       - uses: actions/checkout@v3
+       - name: Get commit message
+         id: get_commit_message
+         run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output message=$COMMIT_MESSAGE"
 
   test-examples:
     runs-on: gpu
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, 'style')}}
 
     steps:
       - uses: actions/checkout@v3
@@ -279,7 +291,8 @@ jobs:
   BuildDocs:
     name: Build API Documentation
     runs-on: gpu
-    if: ${{ contains(github.event.head_commit.message, 'docs_build') || github.ref == 'refs/heads/master' }}
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, 'docs_build') || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

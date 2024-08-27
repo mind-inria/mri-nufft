@@ -7,10 +7,21 @@ Learn Sampling pattern with multi-resolution
 A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
 wrt to k-space trajectory in mri-nufft.
-This example can run on a binder instance as it is purely CPU based backend (finufft).
+
+In this example we learn the k-space samples :math:`\mathbf{K}` for the following cost function:
+
+.. math::
+    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
+    
+where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
+
+Additionally, in-order to converge faster, we also learn the trajectory in a multi-resolution fashion. This is done by upscaling the trajectory by a factor of 2 and interpolating the control points. This is done for 5 iterations in this example.
+
+.. note::
+    This example can run on a binder instance as it is purely CPU based backend (finufft).
 
 .. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection into the scanner constraints set is recommended. This is implemented in the proprietary SPARKLING package. Users are encouraged to contact the authors if they want to use it.
+    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 import time
 import joblib
@@ -28,7 +39,9 @@ from mrinufft.trajectories import initialize_2D_radial
 # %%
 # Setup a simple class to learn trajectory
 # ----------------------------------------
-
+# .. note::
+#     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
+#     See [Projector]_ for more details.
 
 class Model(torch.nn.Module):
     def __init__(
@@ -64,6 +77,7 @@ class Model(torch.nn.Module):
         ).moveaxis(-1, 1)
 
     def get_trajectory(self):
+        """Function to get trajectory, which is interpolated version of control points."""
         traj = self.control.clone()
         for i in range(np.log2(self.current_decim).astype(int)):
             traj = self._interpolate(traj)
@@ -71,7 +85,9 @@ class Model(torch.nn.Module):
         return traj.reshape(-1, traj.shape[-1])
 
     def upscale(self, factor=2):
-        """Upscaling the model."""
+        """Upscaling the model.
+        In this step, the number of control points are doubled and interpolated.
+        """
         self.control = torch.nn.Parameter(
             data=self._interpolate(self.control),
             requires_grad=True,
@@ -130,7 +146,9 @@ def upsample_optimizer(optimizer, new_optimizer, factor=2):
                             new_state = old_state
                         else:
                             new_state = torch.nn.functional.interpolate(
-                                old_state.moveaxis(1, -1), scale_factor=factor, mode="linear"
+                                old_state.moveaxis(1, -1),
+                                scale_factor=factor,
+                                mode="linear",
                             ).moveaxis(-1, 1)
                         new_optimizer.state[new_param][key] = new_state
                     else:
@@ -230,7 +248,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent
+        Path(__file__).parent.parent
         / "docs"
         / "generated"
         / "autoexamples"
@@ -268,3 +286,20 @@ plot_state(
     losses,
 )
 plt.show()
+
+# %%
+# References
+# ==========
+#
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+#           doi: 10.1109/TMI.2016.2544251.
+# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+#           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
+#           through Projection" Bioengineering 10, no. 2: 158. 
+#           https://doi.org/10.3390/bioengineering10020158
