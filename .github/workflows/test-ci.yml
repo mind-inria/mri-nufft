@@ -170,6 +170,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
        - uses: actions/checkout@v3
+         with:
+           ref: ${{ github.event.pull_request.head.sha }}
        - name: Get commit message
          id: get_commit_message
          run: |
