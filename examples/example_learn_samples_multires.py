@@ -249,7 +249,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent
+        Path(os.getcwd()).parent
         / "docs"
         / "generated"
         / "autoexamples"
