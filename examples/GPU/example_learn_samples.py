@@ -58,10 +58,10 @@ class Model(torch.nn.Module):
         # Update the trajectory in the NUFFT operator.
         # Note that the re-computation of density compensation happens internally.
         self.operator.samples = self.trajectory.clone()
-        
+
         # A simple acquisition model simulated with a forward NUFFT operator
         kspace = self.operator.op(x)
-        
+
         # A simple density compensated adjoint operator
         adjoint = self.operator.adj_op(kspace)
         return adjoint / torch.linalg.norm(adjoint)
@@ -210,15 +210,15 @@ plt.show()
 # References
 # ==========
 #
-# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
-#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
-#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016,
 #           doi: 10.1109/TMI.2016.2544251.
-# .. [Sparks] Chaithya GR, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
-#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
-#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+# .. [Sparks] Chaithya GR, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu,
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8,
 #           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
-# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
-#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
-#           through Projection" Bioengineering 10, no. 2: 158. 
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging
+#           through Projection" Bioengineering 10, no. 2: 158.
 #           https://doi.org/10.3390/bioengineering10020158

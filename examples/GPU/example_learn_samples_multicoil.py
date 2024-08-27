@@ -47,6 +47,7 @@ from sigpy.mri import birdcage_maps
 #     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
 #     See [Projector]_ for more details.
 
+
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
         super(Model, self).__init__()
@@ -247,15 +248,15 @@ plt.show()
 # References
 # ==========
 #
-# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for 
-#           Gradient Waveforms Design in Magnetic Resonance Imaging," in 
-#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016, 
+# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for
+#           Gradient Waveforms Design in Magnetic Resonance Imaging," in
+#           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016,
 #           doi: 10.1109/TMI.2016.2544251.
-# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu, 
-#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic 
-#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8, 
+# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu,
+#           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic
+#           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8,
 #           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
-# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian 
-#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging 
-#           through Projection" Bioengineering 10, no. 2: 158. 
+# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian
+#           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging
+#           through Projection" Bioengineering 10, no. 2: 158.
 #           https://doi.org/10.3390/bioengineering10020158
