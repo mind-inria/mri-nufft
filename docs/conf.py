@@ -16,6 +16,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
@@ -77,7 +78,7 @@ sphinx_gallery_conf = {
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
-    "filename_pattern": "/example_",
+    "filename_pattern": "/ee",
     "ignore_pattern": r"(__init__|conftest|utils).py",
     "nested_sections": True,
     "binder": {

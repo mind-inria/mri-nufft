@@ -60,7 +60,7 @@ class Model(torch.nn.Module):
         self.current_decim = start_decim
         self.interpolation_mode = interpolation_mode
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("finufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             density=True,
@@ -111,14 +111,15 @@ class Model(torch.nn.Module):
 # --------------------------------------------
 
 
-def plot_state(axs, mri_2D, traj, control_points, recon, loss=None, save_name=None):
+def plot_state(axs, mri_2D, traj, recon, control_points=None, loss=None, save_name=None):
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("MR Image")
     axs[1].scatter(*traj.T, s=0.5)
-    axs[1].scatter(*control_points.T, s=1, color="r")
-    axs[1].legend(["Trajectory", "Control Points"])
+    if control_points is not None:
+        axs[1].scatter(*control_points.T, s=1, color="r")
+        axs[1].legend(["Trajectory", "Control Points"])
     axs[1].set_title("Trajectory")
     axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
     axs[2].axis("off")
@@ -175,7 +176,7 @@ mri_2D = mri_2D / torch.mean(mri_2D)
 model.eval()
 recon = model(mri_2D)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-plot_state(axs, mri_2D, init_traj, model.control.detach().cpu().numpy(), recon)
+plot_state(axs, mri_2D, init_traj, recon, model.control.detach().cpu().numpy())
 
 # %%
 # Start training loop
@@ -210,8 +211,8 @@ while model.current_decim >= 1:
                 axs,
                 mri_2D,
                 model.get_trajectory().detach().cpu().numpy(),
-                model.control.detach().cpu().numpy(),
                 out,
+                model.control.detach().cpu().numpy(),
                 losses,
                 save_name=filename,
             )
@@ -282,7 +283,6 @@ plot_state(
     axs,
     mri_2D,
     model.get_trajectory().detach().cpu().numpy(),
-    model.control.detach().cpu().numpy(),
     recon,
     losses,
 )

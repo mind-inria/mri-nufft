@@ -4,6 +4,8 @@
 Learn Straight line readout pattern
 ===================================
 
+.. collab-link::
+
 A small pytorch example to showcase learning k-space sampling patterns.
 In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
 straiht line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
@@ -58,12 +60,13 @@ class Model(torch.nn.Module):
             ),
             requires_grad=True,
         )
-        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
             )
             - 0.5,
             shape=img_size,
+            density=True,
             squeeze_dims=False,
         )
 

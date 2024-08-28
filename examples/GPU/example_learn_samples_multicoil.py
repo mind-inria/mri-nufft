@@ -4,6 +4,8 @@
 Learn Sampling pattern for multi-coil MRI
 =========================================
 
+.. colab-link::
+
 A small pytorch example to showcase learning k-space sampling patterns.
 This example showcases the auto-diff capabilities of the NUFFT operator 
 wrt to k-space trajectory in mri-nufft.
@@ -20,7 +22,7 @@ In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is im
 For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and the sensitivity maps are simulated using the `birdcage_maps` function from `sigpy.mri`.
 
 .. note::
-    To showcase the features of `mri-nufft`, we use `finufft` backend for `model.operator` without density compensation and `gpunufft` backend for `model.sense_op` with density compensation. 
+    To showcase the features of `mri-nufft`, we use `cufinufft` backend for `model.operator` without density compensation and `gpunufft` backend for `model.sense_op` with density compensation. 
     
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
@@ -57,7 +59,7 @@ class Model(torch.nn.Module):
         )
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
         # A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.
-        self.operator = get_operator("finufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             n_coils=n_coils,
