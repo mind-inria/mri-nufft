@@ -298,11 +298,11 @@ class FourierOperatorBase(ABC):
 
         if image_shape != self.shape:
             raise ValueError(
-                f"Image shape {image.shape[-len(self.shape):]} is not compatible "
+                f"Image shape {image_shape} is not compatible "
                 f"with the operator shape {self.shape}"
             )
 
-    def check_shape_adj_op(self, image):
+    def check_shape_adj_op(self, image, ksp=None):
         """Validate that the shape of the provided image matches the expected shape.
 
         This validation is defined by the operator during initialization.
@@ -317,12 +317,14 @@ class FourierOperatorBase(ABC):
             This function does not return any value. It raises a ValueError if the
             image shape does not match the expected shape.
         """
-        image_samples = image.shape[-1]
+        image_samples = (
+            image.n_samples if hasattr(image, "n_samples") else image.shape[-1]
+        )
 
         if image_samples != self.n_samples:
             raise ValueError(
-                f"Image shape {image_samples} is not compatible "
-                f"with the operator shape {self.n_samples}"
+                f"Image samples {image_samples} is not compatible "
+                f"with the operator samples {self.n_samples}"
             )
 
     @abstractmethod
