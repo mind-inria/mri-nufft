@@ -92,7 +92,7 @@ sphinx_gallery_conf = {
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
-    "filename_pattern": "/exam1ple_",
+    "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
     "nested_sections": True,
     "binder": {
