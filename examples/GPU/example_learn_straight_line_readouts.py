@@ -197,7 +197,6 @@ with tqdm(range(100), unit="steps") as tqdms:
             for param in model.parameters():
                 param.clamp_(-0.5, 0.5)
         # Generate images for gif
-        fig, axs = plt.subplots(2, 2, figsize=(10, 10))
         hashed = joblib.hash((i, "learn_line", time.time()))
         filename = "/tmp/" + f"{hashed}.png"
         plot_state(

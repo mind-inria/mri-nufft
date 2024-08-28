@@ -32,7 +32,6 @@ from PIL import Image, ImageSequence
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
 
-
 # %%
 # Setup a simple class to learn trajectory
 # ----------------------------------------
