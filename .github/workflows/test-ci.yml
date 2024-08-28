@@ -20,7 +20,7 @@ env:
 jobs:
   test-cpu:
     runs-on: cpu
-    if: ${{ contains(github.event.head_commit.message, 'style')}}
+    if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu]
@@ -100,7 +100,7 @@ jobs:
 
   test-gpu:
     runs-on: gpu
-    if: ${{ contains(github.event.head_commit.message, 'style')}}
+    if: ${{ !contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
@@ -190,7 +190,7 @@ jobs:
   test-examples:
     runs-on: gpu
     needs: get-commit-message
-    if: ${{ contains(needs.get-commit-message.outputs.message, 'style')}}
+    if: ${{ !contains(needs.get-commit-message.outputs.message, 'style')}}
 
     steps:
       - uses: actions/checkout@v3
@@ -302,7 +302,7 @@ jobs:
     name: Build API Documentation
     runs-on: gpu
     needs: get-commit-message
-    if: ${{ !contains(needs.get-commit-message.outputs.message, 'docs_build') || github.ref == 'refs/heads/master' }}
+    if: ${{ contains(needs.get-commit-message.outputs.message, 'docs_build') || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
