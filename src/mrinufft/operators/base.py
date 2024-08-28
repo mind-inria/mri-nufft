@@ -20,7 +20,6 @@ from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
-    check_shape_op,
     check_shape_adj_op,
 )
 
@@ -279,6 +278,30 @@ class FourierOperatorBase(ABC):
             available = available()
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
+    
+    def check_shape_op(self, image, ksp=None):
+        """Validate that the shape of the provided image matches the expected shape.
+
+        This validation is defined by the operator during initialization.
+
+        Parameters
+        ----------
+        image : np.ndarray or Tensor
+
+        Returns
+        -------
+        None
+            This function does not return any value. It raises a ValueError if the
+            image shape does not match the expected shape.
+
+        """
+        image_shape = image.shape[-len(self.shape) :]
+
+        if image_shape != self.shape:
+            raise ValueError(
+                f"Image shape {image.shape[-len(self.shape):]} is not compatible "
+                f"with the operator shape {self.shape}"
+            )
 
     @abstractmethod
     def op(self, data):
@@ -659,7 +682,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        check_shape_op(self, data)
+        self.check_shape_op(self, data)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 

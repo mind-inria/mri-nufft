@@ -36,31 +36,6 @@ def check_size(array_like, shape):
         raise ValueError(f"Expected array with {shape}, got {array_like.shape}.")
 
 
-def check_shape_op(self_, image):
-    """Validate that the shape of the provided image matches the expected shape.
-
-    This validation is defined by the operator during initialization.
-
-    Parameters
-    ----------
-    image : np.ndarray or Tensor
-
-    Returns
-    -------
-    None
-        This function does not return any value. It raises a ValueError if the
-        image shape does not match the expected shape.
-
-    """
-    image_shape = image.shape[-len(self_.shape) :]
-
-    if image_shape != self_.shape:
-        raise ValueError(
-            f"Image shape {image.shape[-len(self_.shape):]} is not compatible "
-            f"with the operator shape {self_.shape}"
-        )
-
-
 def check_shape_adj_op(self_, image):
     """Validate that the shape of the provided image matches the expected shape.
 

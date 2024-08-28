@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from mrinufft.operators.interfaces.utils import check_shape_op, check_shape_adj_op
+from mrinufft.operators.interfaces.utils import check_shape_adj_op
 from ..base import FourierOperatorBase, with_tensorflow
 from mrinufft._utils import proper_trajectory
 
@@ -81,7 +81,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         -------
         Tensor
         """
-        check_shape_op(self, data)
+        self.check_shape_op(self, data)
         if self.uses_sense:
             data_d = data * self.smaps
         else:

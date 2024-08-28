@@ -17,7 +17,6 @@ from mrinufft.operators.interfaces.utils import (
     is_host_array,
     pin_memory,
     sizeof_fmt,
-    check_shape_op,
     check_shape_adj_op,
 )
 
@@ -494,7 +493,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
-        check_shape_op(self, data)
+        self.check_shape_op(self, data)
         # Dispatch to special case.
         data = auto_cast(data, self.cpx_dtype)
 

@@ -9,7 +9,7 @@ from mrinufft._utils import (
     auto_cast,
     power_method,
 )
-from mrinufft.operators.interfaces.utils import check_shape_op, check_shape_adj_op
+from mrinufft.operators.interfaces.utils import check_shape_adj_op
 
 from .utils import (
     CUPY_AVAILABLE,
@@ -300,7 +300,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        check_shape_op(self, data)
+        self.check_shape_op(self, data)
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):

@@ -113,7 +113,7 @@ class MRISigpyNUFFT(FourierOperatorCPU):
         **kwargs,
     ):
         samples_ = proper_trajectory(samples, normalize="unit")
-        self.raw_op = RawSigpyNUFFT(samples_, shape, n_trans=n_trans, **kwargs)
+        raw_op = RawSigpyNUFFT(samples_, shape, n_trans=n_trans, **kwargs)
 
         super().__init__(
             samples_,
@@ -123,7 +123,7 @@ class MRISigpyNUFFT(FourierOperatorCPU):
             n_batchs=n_batchs,
             n_trans=n_trans,
             smaps=smaps,
-            raw_op=self.raw_op,
+            raw_op=raw_op,
             squeeze_dims=squeeze_dims,
         )
 

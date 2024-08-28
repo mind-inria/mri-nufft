@@ -9,7 +9,6 @@ from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
     check_size,
-    check_shape_op,
     check_shape_adj_op,
 )
 
@@ -453,7 +452,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        check_shape_op(self, data)
+        self.check_shape_op(self, data)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         op_func = self.raw_op.op
