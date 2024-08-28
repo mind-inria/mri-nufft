@@ -307,9 +307,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Get the commit message
-        run: echo ${{needs.get-commit-message.outputs.message}}
-
       - name: Get history and tags for SCM versioning to work
         run: |
           git fetch --prune --unshallow
