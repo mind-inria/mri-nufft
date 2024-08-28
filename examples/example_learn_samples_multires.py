@@ -302,8 +302,9 @@ plot_state(
     axs,
     mri_2D,
     model.get_trajectory().detach().cpu().numpy(),
-    recon,
-    losses,
+    recon=recon,
+    control_points=None,
+    loss=losses,
 )
 plt.show()
 

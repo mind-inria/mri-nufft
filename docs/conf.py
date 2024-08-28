@@ -15,6 +15,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
+import coverage
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
@@ -24,6 +25,19 @@ sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this
 project = "mri-nufft"
 copyright = "2022, MRI-NUFFT Contributors"
 author = "MRI-NUFFT Contributors"
+
+cov = coverage.Coverage()
+cov.start()
+
+
+# Add a build-finished event to stop coverage and generate a report
+def coverage_report(app, exception):
+    """Coverage report after the build is finished."""
+    cov.stop()
+    cov.save()
+    cov.html_report()
+    print("\nCoverage Summary:\n")
+    cov.report()
 
 
 # -- General configuration ---------------------------------------------------
@@ -78,7 +92,7 @@ sphinx_gallery_conf = {
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
-    "filename_pattern": "/example_",
+    "filename_pattern": "/exam1ple_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
     "nested_sections": True,
     "binder": {
@@ -128,3 +142,8 @@ html_theme_options = {
 html_logo = "_static/logos/mri-nufft.png"
 html_favicon = "_static/logos/mri-nufft-icon.png"
 html_title = "MRI-nufft Documentation"
+
+
+def setup(app):
+    """Run the coverage report after the build is finished."""
+    app.connect("build-finished", coverage_report)
