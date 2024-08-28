@@ -20,7 +20,7 @@ The image resolution is kept small to reduce computation time.
 #    !pip install mri-nufft[gpunufft]
 
 
-# %% 
+# %%
 # Imports
 # -------
 import time

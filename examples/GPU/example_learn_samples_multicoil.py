@@ -32,7 +32,7 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 #
 #    !pip install mri-nufft[gpunufft] cufinufft sigpy scikit-image
 
-# %% 
+# %%
 # Imports
 # -------
 import time
