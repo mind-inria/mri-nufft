@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
        message: ${{ steps.get_commit_message.outputs.message }}
-   steps:
+    steps:
        - uses: actions/checkout@v3
          with:
            ref: ${{ github.event.pull_request.head.sha }}
