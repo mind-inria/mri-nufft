@@ -9,9 +9,10 @@ This example showcases the auto-diff capabilities of the NUFFT operator
 wrt to k-space trajectory in mri-nufft.
 
 In this example, we solve the following optimization problem:
+
 .. math::
 
-    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
+    \mathbf{\hat{K}} =  \mathrm{arg} \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
     
 where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
 
@@ -36,7 +37,7 @@ from mrinufft.trajectories import initialize_2D_radial
 # Setup a simple class to learn trajectory
 # ----------------------------------------
 # .. note::
-#     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
+#     While we are only learning the NUFFT operator, we still need the gradient ``wrt_data=True`` to be setup in ``get_operator`` to have all the gradients computed correctly.
 #     See [Projector]_ for more details.
 
 

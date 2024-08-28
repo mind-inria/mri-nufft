@@ -7,7 +7,7 @@ Learn Straight line readout pattern
 A small pytorch example to showcase learning k-space sampling patterns.
 In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
 straiht line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
-The resolution of the image is reduced to reduce computation time.
+The image resolution is kept small to reduce computation time.
 
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.

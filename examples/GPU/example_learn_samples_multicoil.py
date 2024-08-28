@@ -20,7 +20,8 @@ In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is im
 For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and the sensitivity maps are simulated using the `birdcage_maps` function from `sigpy.mri`.
 
 .. note::
-    To showcase the features of `mri-nufft`, we use `finufft` backend for `model.operator` without density compensation and `gpunufft` backend for `model.sense_op` with density compensation. 
+    To showcase the features of ``mri-nufft``, we use ``
+    "finufft"`` backend for ``model.operator`` without density compensation and ``"gpunufft"`` backend for ``model.sense_op`` with density compensation. 
     
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
