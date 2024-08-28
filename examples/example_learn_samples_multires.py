@@ -18,7 +18,7 @@ where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_
 Additionally, in-order to converge faster, we also learn the trajectory in a multi-resolution fashion. This is done by upscaling the trajectory by a factor of 2 and interpolating the control points. This is done for 5 iterations in this example.
 
 .. note::
-    This example can run on a binder instance as it is purely CPU based backend (finufft).
+    This example can run on a binder instance as it is purely CPU based backend (finufft), and is restricted to a 2D single coil toy case.
 
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
@@ -111,7 +111,9 @@ class Model(torch.nn.Module):
 # --------------------------------------------
 
 
-def plot_state(axs, mri_2D, traj, recon, control_points=None, loss=None, save_name=None):
+def plot_state(
+    axs, mri_2D, traj, recon, control_points=None, loss=None, save_name=None
+):
     axs = axs.flatten()
     axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
     axs[0].axis("off")
@@ -161,19 +163,31 @@ def upsample_optimizer(optimizer, new_optimizer, factor=2):
 
 
 # %%
-# Setup model and optimizer
-# -------------------------
+# Setup Inputs (models, trajectory and image)
+# -------------------------------------------
+# First we create the model with a simple radial trajectory (32 shots of 256 points)
+
 init_traj = initialize_2D_radial(32, 256).astype(np.float32)
 model = Model(init_traj, img_size=(256, 256))
+model.eval()
 
 # %%
-# Setup data
-# ----------
+# The image on which we are going to train.
+# .. note ::
+#    In practise we would use instead a dataset (e.g. fastMRI)
+#
+
 mri_2D = torch.from_numpy(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32))[
     None
 ]
 mri_2D = mri_2D / torch.mean(mri_2D)
-model.eval()
+
+
+# Initialisation
+# --------------
+# Before training, here is the simple reconstruction we have using a
+# density compensated adjoint.
+
 recon = model(mri_2D)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 plot_state(axs, mri_2D, init_traj, recon, model.control.detach().cpu().numpy())
@@ -250,11 +264,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent
-        / "docs"
-        / "generated"
-        / "autoexamples"
-        / "images"
+        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
     )
     shutil.copyfile(
         "mrinufft_learn_traj_multires.gif",
