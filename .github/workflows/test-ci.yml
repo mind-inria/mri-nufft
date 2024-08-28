@@ -183,8 +183,9 @@ jobs:
          run: |
             COMMIT_MESSAGE=$(git log -1 --pretty=%B)
             echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output message=$COMMIT_MESSAGE"
     outputs:
-        message: $COMMIT_MESSAGE
+        message: ${{ steps.get_commit_message.outputs.message }}
 
   test-examples:
     runs-on: gpu
