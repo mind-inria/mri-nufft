@@ -15,7 +15,7 @@ In this example we learn the k-space samples :math:`\mathbf{K}` for the followin
     
 where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
 
-Additionally, in-order to converge faster, we also learn the trajectory in a multi-resolution fashion. This is done by upscaling the trajectory by a factor of 2 and interpolating the control points. This is done for 5 iterations in this example.
+Additionally, in-order to converge faster, we also learn the trajectory in a multi-resolution fashion. This is done by first optimizing a 8 times decimated trajectory locations, called control points. After a fixed number of iterations (5 in this example), these control points are upscaled by a factor of 2. However, note that the NUFFT operator always holds linearly interpolated version of the control points as k-space sampling trajectory.
 
 .. note::
     This example can run on a binder instance as it is purely CPU based backend (finufft), and is restricted to a 2D single coil toy case.
