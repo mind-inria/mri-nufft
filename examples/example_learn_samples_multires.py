@@ -23,6 +23,16 @@ Additionally, in-order to converge faster, we also learn the trajectory in a mul
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
+# %%
+# .. colab-link::
+#    :needs_gpu: 0
+#
+#    !pip install mri-nufft[finufft]
+
+# %% 
+# Imports
+# -------
+
 import time
 import joblib
 
@@ -174,7 +184,7 @@ model.eval()
 # %%
 # The image on which we are going to train.
 # .. note ::
-#    In practise we would use instead a dataset (e.g. fastMRI)
+#    In practice we would use instead a dataset (e.g. fastMRI)
 #
 
 mri_2D = torch.from_numpy(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32))[

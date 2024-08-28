@@ -16,7 +16,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
@@ -43,6 +43,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
+    "sphinx_add_colab_link",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
