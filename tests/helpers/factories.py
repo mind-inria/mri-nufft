@@ -125,6 +125,7 @@ def param_array_interface(func):
                 "gpunufft",
                 "torchkbnufft-gpu",
                 "tensorflow",
+                "stacked-cufinufft",
             ]:
                 pytest.skip("Uncompatible backend and array")
         if array_interface in ["torch-cpu", "numpy"]:

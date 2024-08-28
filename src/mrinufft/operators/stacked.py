@@ -42,7 +42,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
     shape: tuple
         Shape of the image.
     z_index: array-like
-        Cartesian z index of masked plan.
+        Cartesian z index of masked plan. if "auto" the z_index is computed from the
+        samples, if they are 3D, using the last coordinate.
     backend: str or FourierOperatorBase
         Backend to use.
         If str, a NUFFT operator is initialized with str being a registered backend.
@@ -76,9 +77,9 @@ class MRIStackedNUFFT(FourierOperatorBase):
         self,
         samples,
         shape,
-        z_index,
         backend,
         smaps,
+        z_index="auto",
         n_coils=1,
         n_batchs=1,
         squeeze_dims=False,
@@ -355,7 +356,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     shape: tuple
         Shape of the image.
     z_index: array-like
-        Cartesian z index of masked plan.
+        Cartesian z index of masked plan. if "auto" the z_index is computed from the
+        samples, if they are 3D, using the last coordinate.
     smaps: array-like
         Sensitivity maps.
     n_coils: int
@@ -373,11 +375,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self,
         samples,
         shape,
-        z_index,
         smaps,
         n_coils=1,
         n_batchs=1,
         n_trans=1,
+        z_index="auto",
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
