@@ -29,7 +29,9 @@ author = "MRI-NUFFT Contributors"
 # Initialize coverage with multiprocessing support
 coverage_data_file = os.path.join(os.getcwd(), ".coverage-examples")
 config_file = os.path.join(os.getcwd(), ".coveragerc-examples")
-cov = coverage.Coverage(data_file=coverage_data_file, concurrency="multiprocessing", config_file=config_file)
+cov = coverage.Coverage(
+    data_file=coverage_data_file, concurrency="multiprocessing", config_file=config_file
+)
 cov.start()
 
 
@@ -38,7 +40,7 @@ def coverage_report(app, exception):
     """Coverage report after the build is finished."""
     cov.stop()
     cov.save()
-    
+
     cov.combine()
     cov.html_report()
     print("\nCoverage Summary:\n")
