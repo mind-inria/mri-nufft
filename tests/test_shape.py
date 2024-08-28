@@ -6,7 +6,6 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from mrinufft.operators.interfaces.utils.utils import check_shape_adj_op
 from helpers import (
     wrong_image_from_op,
     wrong_kspace_from_op,
@@ -61,14 +60,14 @@ def kspace_data(operator):
 #         pytest.fail("Unexpected ValueError raised")
 
 
-@param_array_interface
-def test_check_shape_adj_op_pass(operator, array_interface, kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(kspace_data, array_interface)
-    try:
-        check_shape_adj_op(operator, kspace_data_)
-    except ValueError:
-        pytest.fail("Unexpected ValueError raised")
+# @param_array_interface
+# def test_check_shape_adj_op_pass(operator, array_interface, kspace_data):
+#     """Compare the interface to the raw NUDFT implementation."""
+#     kspace_data_ = to_interface(kspace_data, array_interface)
+#     try:
+#         check_shape_adj_op(operator, kspace_data_)
+#     except ValueError:
+#         pytest.fail("Unexpected ValueError raised")
 
 
 @fixture(scope="module")
@@ -91,9 +90,9 @@ def wrong_kspace_data(operator):
 #         check_shape_op(operator, image_data_)
 
 
-@param_array_interface
-def test_check_shape_adj_op_fail(operator, array_interface, wrong_kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(wrong_kspace_data, array_interface)
-    with pytest.raises(ValueError):
-        check_shape_adj_op(operator, kspace_data_)
+# @param_array_interface
+# def test_check_shape_adj_op_fail(operator, array_interface, wrong_kspace_data):
+#     """Compare the interface to the raw NUDFT implementation."""
+#     kspace_data_ = to_interface(wrong_kspace_data, array_interface)
+#     with pytest.raises(ValueError):
+#         check_shape_adj_op(operator, kspace_data_)

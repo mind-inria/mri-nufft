@@ -9,7 +9,6 @@ from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
     check_size,
-    check_shape_adj_op,
 )
 
 GPUNUFFT_AVAILABLE = True
@@ -493,7 +492,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             Inverse discrete Fourier transform of the input coefficients.
         """
         if data is not None:
-            check_shape_adj_op(self, data)
+            self.check_shape_adj_op(self, data)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         adj_op_func = self.raw_op.adj_op

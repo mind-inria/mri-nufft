@@ -4,7 +4,6 @@ from mrinufft.operators.base import FourierOperatorBase, with_torch
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.interfaces.utils import (
     is_cuda_tensor,
-    check_shape_adj_op,
 )
 import numpy as np
 
@@ -153,7 +152,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor
         """
-        check_shape_adj_op(self, data)
+        self.check_shape_adj_op(self, data)
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
         data = data.reshape((B, C, K))
         data = data.to(self.device, copy=False)

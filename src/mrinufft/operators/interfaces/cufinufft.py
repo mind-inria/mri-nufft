@@ -9,7 +9,6 @@ from mrinufft._utils import (
     auto_cast,
     power_method,
 )
-from mrinufft.operators.interfaces.utils import check_shape_adj_op
 
 from .utils import (
     CUPY_AVAILABLE,
@@ -413,7 +412,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if img_d is not None:
-            check_shape_adj_op(self, img_d)
+            self.check_shape_adj_op(self, img_d)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):

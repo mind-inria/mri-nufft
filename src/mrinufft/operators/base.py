@@ -20,7 +20,6 @@ from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
     is_host_array,
-    check_shape_adj_op,
 )
 
 CUPY_AVAILABLE = True
@@ -301,6 +300,29 @@ class FourierOperatorBase(ABC):
             raise ValueError(
                 f"Image shape {image.shape[-len(self.shape):]} is not compatible "
                 f"with the operator shape {self.shape}"
+            )
+
+    def check_shape_adj_op(self_, image):
+        """Validate that the shape of the provided image matches the expected shape.
+
+        This validation is defined by the operator during initialization.
+
+        Parameters
+        ----------
+        image : np.ndarray or Tensor
+
+        Returns
+        -------
+        None
+            This function does not return any value. It raises a ValueError if the
+            image shape does not match the expected shape.
+        """
+        image_samples = image.shape[-1]
+
+        if image_samples != self_.n_samples:
+            raise ValueError(
+                f"Image shape {image_samples} is not compatible "
+                f"with the operator shape {self_.n_samples}"
             )
 
     @abstractmethod
@@ -741,7 +763,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         if img is not None:
-            check_shape_adj_op(self, img)
+            self.check_shape_adj_op(self, img)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
