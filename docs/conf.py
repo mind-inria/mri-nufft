@@ -43,7 +43,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
-    "sphinx_add_colab_link",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -78,7 +77,7 @@ sphinx_gallery_conf = {
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
     "gallery_dirs": ["generated/autoexamples"],
-    "filename_pattern": "/ee",
+    "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
     "nested_sections": True,
     "binder": {
