@@ -20,7 +20,7 @@ env:
 jobs:
   test-cpu:
     runs-on: cpu
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    if: ${{ contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu]
@@ -100,7 +100,7 @@ jobs:
 
   test-gpu:
     runs-on: gpu
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    if: ${{ contains(github.event.head_commit.message, 'style')}}
     strategy:
       matrix:
         backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
