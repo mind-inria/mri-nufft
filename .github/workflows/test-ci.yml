@@ -28,6 +28,9 @@ jobs:
           - backend: bart
           - backend: pynufft-cpu
           - backend: torchkbnufft-cpu
+          - backend: sigpy
+          - backend: finufft
+          - backend: pynfft
 
     steps:
       - uses: actions/checkout@v3
@@ -104,6 +107,9 @@ jobs:
         exclude:
             # There is an issue with tensorflow and cupy. This was working. See #156
           - backend: tensorflow
+          - backend: cufinufft
+          - backend: gpunufft
+          - backend: torchkbnufft-gpu
 
     steps:
       - uses: actions/checkout@v3
@@ -301,7 +307,7 @@ jobs:
       
       - name: Get the commit message
         run: echo ${{ needs.get-commit-message.outputs.message }}
-        
+
       - name: Get history and tags for SCM versioning to work
         run: |
           git fetch --prune --unshallow
