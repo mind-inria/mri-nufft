@@ -277,7 +277,7 @@ class FourierOperatorBase(ABC):
             available = available()
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
-    
+
     def check_shape_op(self, image, ksp=None):
         """Validate that the shape of the provided image matches the expected shape.
 
