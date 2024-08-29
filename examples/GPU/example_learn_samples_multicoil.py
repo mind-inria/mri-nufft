@@ -67,6 +67,7 @@ class Model(torch.nn.Module):
         )
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
         # A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.
+        # The trajectory is scaled by 2*pi for cufinufft backend.
         self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
             sample_points*2*np.pi,
             shape=img_size,
@@ -88,7 +89,8 @@ class Model(torch.nn.Module):
 
     def forward(self, x):
         """Forward pass of the model."""
-        # Update the trajectory in the NUFFT operator.
+        # Update the trajectory in the NUFFT operator. 
+        # The trajectory is scaled by 2*pi for cufinufft backend.
         # Note that the re-computation of density compensation happens internally.
         self.operator.samples = self.trajectory.clone()*2*np.pi
         self.sense_op.samples = self.trajectory.clone()
