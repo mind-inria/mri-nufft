@@ -299,7 +299,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        self.check_shape_op(self, data)
+        self.check_shape(image=data, ksp=ksp_d)
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
@@ -411,8 +411,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if img_d is not None:
-            self.check_shape_adj_op(self, img_d)
+        self.check_shape(image=img_d, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):

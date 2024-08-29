@@ -451,7 +451,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
-        self.check_shape_op(self, data)
+        self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         op_func = self.raw_op.op
@@ -491,8 +491,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
-        if data is not None:
-            self.check_shape_adj_op(self, data)
+        self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         adj_op_func = self.raw_op.adj_op

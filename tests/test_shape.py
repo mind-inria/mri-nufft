@@ -57,7 +57,7 @@ def test_check_shape_op_pass(operator, array_interface, image_data):
     """Compare the interface to the raw NUDFT implementation."""
     image_data_ = to_interface(image_data, array_interface)
     try:
-        FourierOperatorBase.check_shape_op(operator, image_data_)
+        FourierOperatorBase.check_shape(operator, image_data_)
     except ValueError:
         pytest.fail("Unexpected ValueError raised")
 
@@ -67,7 +67,7 @@ def test_check_shape_adj_op_pass(operator, array_interface, kspace_data):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_data_ = to_interface(kspace_data, array_interface)
     try:
-        FourierOperatorBase.check_shape_adj_op(operator, kspace_data_)
+        FourierOperatorBase.check_shape(operator, ksp=kspace_data_)
     except ValueError:
         pytest.fail("Unexpected ValueError raised")
 
@@ -89,7 +89,7 @@ def test_check_shape_op_fail(operator, array_interface, wrong_image_data):
     """Compare the interface to the raw NUDFT implementation."""
     image_data_ = to_interface(wrong_image_data, array_interface)
     with pytest.raises(ValueError):
-        FourierOperatorBase.check_shape_op(operator, image_data_)
+        FourierOperatorBase.check_shape(operator, image=image_data_)
 
 
 @param_array_interface
@@ -97,4 +97,4 @@ def test_check_shape_adj_op_fail(operator, array_interface, wrong_kspace_data):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_data_ = to_interface(wrong_kspace_data, array_interface)
     with pytest.raises(ValueError):
-        FourierOperatorBase.check_shape_adj_op(operator, kspace_data_)
+        FourierOperatorBase.check_shape(operator, ksp=kspace_data_)

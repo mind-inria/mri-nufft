@@ -278,54 +278,40 @@ class FourierOperatorBase(ABC):
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
 
-    def check_shape_op(self, image, ksp=None):
-        """Validate that the shape of the provided image matches the expected shape.
-
-        This validation is defined by the operator during initialization.
+    def check_shape(self, image=None, ksp=None):
+        """
+        Validate the shapes of the image or k-space data against operator shapes.
 
         Parameters
         ----------
-        image : np.ndarray or Tensor
+        image : np.ndarray, optional
+            In "op" function, the image data will be checked.
 
-        Returns
-        -------
-        None
-            This function does not return any value. It raises a ValueError if the
-            image shape does not match the expected shape.
+        ksp : np.ndarray or object, optional
+            In "adj_op" function, the k-space data will be checked.
 
+        Raises
+        ------
+        ValueError
+            If the shape of the provided image does not match the expected operator
+            shape, or if the number of k-space samples does not match the expected
+            number of samples.
         """
-        image_shape = image.shape[-len(self.shape) :]
+        if image is not None:
+            image_shape = image.shape[-len(self.shape) :]
+            if image_shape != self.shape:
+                raise ValueError(
+                    f"Image shape {image_shape} is not compatible "
+                    f"with the operator shape {self.shape}"
+                )
 
-        if image_shape != self.shape:
-            raise ValueError(
-                f"Image shape {image_shape} is not compatible "
-                f"with the operator shape {self.shape}"
-            )
-
-    def check_shape_adj_op(self, image, ksp=None):
-        """Validate that the shape of the provided image matches the expected shape.
-
-        This validation is defined by the operator during initialization.
-
-        Parameters
-        ----------
-        image : np.ndarray or Tensor
-
-        Returns
-        -------
-        None
-            This function does not return any value. It raises a ValueError if the
-            image shape does not match the expected shape.
-        """
-        image_samples = (
-            image.n_samples if hasattr(image, "n_samples") else image.shape[-1]
-        )
-
-        if image_samples != self.n_samples:
-            raise ValueError(
-                f"Image samples {image_samples} is not compatible "
-                f"with the operator samples {self.n_samples}"
-            )
+        if ksp is not None:
+            kspace_shape = ksp.shape[-1]
+            if kspace_shape != self.n_samples:
+                raise ValueError(
+                    f"Kspace samples {kspace_shape} is not compatible "
+                    f"with the operator samples {self.n_samples}"
+                )
 
     @abstractmethod
     def op(self, data):
@@ -706,7 +692,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        self.check_shape_op(self, data)
+        self.check_shape(image=data, ksp=ksp)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -764,8 +750,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
-        if img is not None:
-            self.check_shape_adj_op(self, img)
+        self.check_shape(image=img, ksp=coeffs)
+
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
