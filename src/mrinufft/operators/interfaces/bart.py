@@ -143,7 +143,6 @@ class MRIBartNUFFT(FourierOperatorCPU):
                 kwargs["extra_adj_op_args"] = ["-i"]
 
         self.raw_op = RawBartNUFFT(samples_, shape, **kwargs)
-
         super().__init__(
             samples_,
             shape,
