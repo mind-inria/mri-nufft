@@ -6,7 +6,7 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from mrinufft.operators.base import FourierOperatorBase
+from mrinufft.operators.base import FourierOperatorBase, with_numpy
 
 from helpers import (
     wrong_image_from_op,
@@ -51,21 +51,12 @@ def kspace_data(operator):
 
 
 @param_array_interface
-def test_check_shape_op_pass(operator, array_interface, image_data):
+def test_check_shape_pass(operator, array_interface, image_data, kspace_data):
     """Compare the interface to the raw NUDFT implementation."""
     image_data_ = to_interface(image_data, array_interface)
     try:
-        FourierOperatorBase.check_shape(operator, image_data_)
-    except ValueError:
-        pytest.fail("Unexpected ValueError raised")
-
-
-@param_array_interface
-def test_check_shape_adj_op_pass(operator, array_interface, kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(kspace_data, array_interface)
-    try:
-        FourierOperatorBase.check_shape(operator, ksp=kspace_data_)
+        FourierOperatorBase.check_shape(operator, image=image_data_)
+        FourierOperatorBase.check_shape(operator, ksp=kspace_data)
     except ValueError:
         pytest.fail("Unexpected ValueError raised")
 
@@ -83,16 +74,13 @@ def wrong_kspace_data(operator):
 
 
 @param_array_interface
-def test_check_shape_op_fail(operator, array_interface, wrong_image_data):
+def test_check_shape_fail(
+    operator, array_interface, wrong_image_data, wrong_kspace_data
+):
     """Compare the interface to the raw NUDFT implementation."""
     image_data_ = to_interface(wrong_image_data, array_interface)
+    kspace_data_ = to_interface(wrong_kspace_data, array_interface)
     with pytest.raises(ValueError):
         FourierOperatorBase.check_shape(operator, image=image_data_)
-
-
-@param_array_interface
-def test_check_shape_adj_op_fail(operator, array_interface, wrong_kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(wrong_kspace_data, array_interface)
     with pytest.raises(ValueError):
         FourierOperatorBase.check_shape(operator, ksp=kspace_data_)
