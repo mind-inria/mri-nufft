@@ -313,7 +313,7 @@ plt.show()
 #   The above learned trajectory is not that good because:
 #    - The trajectory is trained only for 5 iterations per decimation level, resulting in a suboptimal trajectory.
 #    - In order to make the example CPU compliant, we had to resort to preventing density compensation, hence the reconstructor is not good.
-# 
+#
 # Users are requested to checkout :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` for example with density compensation.
 
 # %%
