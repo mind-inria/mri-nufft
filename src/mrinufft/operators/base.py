@@ -285,7 +285,7 @@ class FourierOperatorBase(ABC):
         Parameters
         ----------
         image : np.ndarray, optional
-            In "op" function, the image data will be checked.
+            If passed, the shape of image data will be checked.
 
         ksp : np.ndarray or object, optional
             In "adj_op" function, the k-space data will be checked.
