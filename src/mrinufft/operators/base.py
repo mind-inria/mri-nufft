@@ -460,6 +460,7 @@ class FourierOperatorBase(ABC):
             tmp_op = self
         return power_method(max_iter, tmp_op)
 
+    @with_numpy
     def cg(self, kspace_data, x_init=None, num_iter=10, tol=1e-4):
         """
         Perform conjugate gradient (CG) optimization for image reconstruction.
@@ -494,10 +495,10 @@ class FourierOperatorBase(ABC):
         velocity = np.zeros_like(image)
 
         for _ in range(num_iter):
-            if np.real(np.dot(image, kspace_data)) <= 0:
+            if (np.real(np.dot(image, image.T)) <= 0).any():
                 break
 
-            if np.sqrt(image) < tol:
+            if (np.sqrt(image) < tol).any():
                 break
 
             grad = self.data_consistency(image, kspace_data)
