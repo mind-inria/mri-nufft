@@ -40,15 +40,15 @@ jobs:
       - name: Display structure of docs
         run: ls -R docs_build/
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: 'docs_build'
-
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_build
+          destination_dir: .  # Ensure you deploy to the root of the gh-pages branch
+          publish_branch: gh-pages
+          keep_files: false
+    
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to TestPyPI
     runs-on: ubuntu-latest
