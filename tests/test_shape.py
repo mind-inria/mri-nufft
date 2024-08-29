@@ -22,9 +22,7 @@ from helpers import (
 @fixture(scope="module")
 @parametrize(
     "backend",
-    [
-        "torchkbnufft-gpu",
-    ],
+    ["finufft","pynfft" ,"sigpy" ,"cufinufft", "gpunufft", "torchkbnufft-gpu"]
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(
