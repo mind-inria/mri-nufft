@@ -751,7 +751,6 @@ class FourierOperatorCPU(FourierOperatorBase):
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
         self.check_shape(image=img, ksp=coeffs)
-
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
