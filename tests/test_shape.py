@@ -6,8 +6,6 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from mrinufft.operators.base import FourierOperatorBase, with_numpy
-
 from helpers import (
     wrong_image_from_op,
     wrong_kspace_from_op,
@@ -55,8 +53,8 @@ def test_check_shape_pass(operator, array_interface, image_data, kspace_data):
     """Compare the interface to the raw NUDFT implementation."""
     image_data_ = to_interface(image_data, array_interface)
     try:
-        FourierOperatorBase.check_shape(operator, image=image_data_)
-        FourierOperatorBase.check_shape(operator, ksp=kspace_data)
+        operator.check_shape(operator, image=image_data_)
+        operator.check_shape(operator, ksp=kspace_data)
     except ValueError:
         pytest.fail("Unexpected ValueError raised")
 
@@ -81,6 +79,6 @@ def test_check_shape_fail(
     image_data_ = to_interface(wrong_image_data, array_interface)
     kspace_data_ = to_interface(wrong_kspace_data, array_interface)
     with pytest.raises(ValueError):
-        FourierOperatorBase.check_shape(operator, image=image_data_)
+        operator.check_shape(operator, image=image_data_)
     with pytest.raises(ValueError):
-        FourierOperatorBase.check_shape(operator, ksp=kspace_data_)
+        operator.check_shape(operator, ksp=kspace_data_)
