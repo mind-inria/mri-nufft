@@ -275,7 +275,7 @@ class FourierOperatorBase(ABC):
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
 
-    def check_shape(self, image=None, ksp=None):
+    def check_shape(self, *, image=None, ksp=None):
         """
         Validate the shapes of the image or k-space data against operator shapes.
 
