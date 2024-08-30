@@ -205,7 +205,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test,dev]
-          python -m pip install finufft pooch brainweb-dl torch phantominator
+          python -m pip install finufft pooch brainweb-dl torch
         
       - name: Install GPU related interfaces
         run: |
