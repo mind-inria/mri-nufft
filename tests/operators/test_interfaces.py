@@ -82,6 +82,31 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
+@fixture(scope="module")
+def wrong_kspace_data(operator):
+    """Generate a random image. Remains constant for the module."""
+    wrong_n_samples = operator.n_samples + 10
+    kspace = (1j * np.random.randn(operator.n_coils, wrong_n_samples)).astype(
+        operator.cpx_dtype
+    )
+    kspace += np.random.randn(operator.n_coils, wrong_n_samples).astype(
+        operator.cpx_dtype
+    )
+    return kspace
+
+
+@fixture(scope="module")
+def wrong_image_data(operator):
+    """Generate a random image. Remains constant for the module."""
+    wrong_shape = (operator.shape[0] + 10, operator.shape[1] + 1)
+    if operator.smaps is None:
+        img = np.random.randn(operator.n_coils, *wrong_shape).astype(operator.cpx_dtype)
+    elif operator.smaps is not None and operator.n_coils > 1:
+        img = np.random.randn(*wrong_shape).astype(operator.cpx_dtype)
+    img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
+    return img
+
+
 @param_array_interface
 def test_interfaces_accuracy_forward(
     operator, array_interface, image_data, ref_operator
@@ -148,3 +173,35 @@ def test_interface_lipschitz(operator):
             img2_data - img_data
         )
     assert np.mean(L) < 1.1 * spec_rad
+
+
+@param_array_interface
+def test_check_shape_pass(operator, array_interface, image_data, kspace_data):
+    """Compare the interface to the raw NUDFT implementation."""
+    image_data_ = to_interface(image_data, array_interface)
+    try:
+        operator.check_shape(image=image_data_)
+        operator.check_shape(ksp=kspace_data)
+    except ValueError:
+        pytest.fail("Unexpected ValueError raised")
+
+
+######################
+# Check shape tests  #
+######################
+
+
+@param_array_interface
+def test_check_shape_fail_image(operator, array_interface, wrong_image_data):
+    """Compare the interface to the raw NUDFT implementation."""
+    image_data_ = to_interface(wrong_image_data, array_interface)
+    with pytest.raises(ValueError):
+        operator.check_shape(image=image_data_)
+
+
+@param_array_interface
+def test_check_shape_fail_kspace(operator, array_interface, wrong_kspace_data):
+    """Compare the interface to the raw NUDFT implementation."""
+    kspace_data_ = to_interface(wrong_kspace_data, array_interface)
+    with pytest.raises(ValueError):
+        operator.check_shape(ksp=kspace_data_)
