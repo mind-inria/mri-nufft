@@ -15,7 +15,9 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
+import coverage
 
+sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
@@ -23,7 +25,6 @@ sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this
 project = "mri-nufft"
 copyright = "2022, MRI-NUFFT Contributors"
 author = "MRI-NUFFT Contributors"
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -42,6 +43,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_gallery.gen_gallery",
+    "sphinx_add_colab_link",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -82,7 +84,7 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "mind-inria",
         "repo": "mri-nufft",
-        "branch": "master",
+        "branch": "gh-pages",
         "binderhub_url": "https://mybinder.org",
         "dependencies": [
             "./binder/apt.txt",
@@ -91,7 +93,7 @@ sphinx_gallery_conf = {
         "notebooks_dir": "examples",
         "use_jupyter_lab": True,
     },
-    "parallel": 3,
+    "parallel": 5,
 }
 
 intersphinx_mapping = {
