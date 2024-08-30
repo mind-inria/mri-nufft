@@ -17,10 +17,7 @@ import numpy as np
 from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_array,
-    is_host_array,
-)
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 CUPY_AVAILABLE = True
 try:
