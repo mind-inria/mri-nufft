@@ -309,8 +309,9 @@ class FourierOperatorBase(ABC):
                     f"Kspace samples {kspace_shape} is not compatible "
                     f"with the operator samples {self.n_samples}"
                 )
-        if image is None and ksp is None: 
+        if image is None and ksp is None:
             raise ValueError("Nothing to check, provides image or ksp arguments")
+
     @abstractmethod
     def op(self, data):
         """Compute operator transform.
