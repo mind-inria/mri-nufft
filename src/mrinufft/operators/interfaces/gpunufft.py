@@ -6,6 +6,7 @@ import warnings
 from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from mrinufft.operators.interfaces.utils import check_size
 
 GPUNUFFT_AVAILABLE = True
 try:
