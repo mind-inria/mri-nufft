@@ -28,9 +28,3 @@ def sizeof_fmt(num, suffix="B"):
             return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
-
-
-def check_size(array_like, shape):
-    """Check if array_like has a matching shape."""
-    if np.prod(array_like.shape) != np.prod(shape):
-        raise ValueError(f"Expected array with {shape}, got {array_like.shape}.")

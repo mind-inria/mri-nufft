@@ -492,6 +492,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
+        self.check_shape(image=data, ksp=ksp)
         # Dispatch to special case.
         data = auto_cast(data, self.cpx_dtype)
 
@@ -646,6 +647,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
+        if img is not None:
+            self.check_shape(image=img, ksp=coeffs)
         # Dispatch to special case.
         coeffs = auto_cast(coeffs, self.cpx_dtype)
 
