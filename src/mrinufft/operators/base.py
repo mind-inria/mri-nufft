@@ -17,10 +17,7 @@ import numpy as np
 from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_array,
-    is_host_array,
-)
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 CUPY_AVAILABLE = True
 try:
@@ -278,7 +275,7 @@ class FourierOperatorBase(ABC):
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
 
-    def check_shape(self, image=None, ksp=None):
+    def check_shape(self, *, image=None, ksp=None):
         """
         Validate the shapes of the image or k-space data against operator shapes.
 
@@ -312,7 +309,8 @@ class FourierOperatorBase(ABC):
                     f"Kspace samples {kspace_shape} is not compatible "
                     f"with the operator samples {self.n_samples}"
                 )
-
+        if image is None and ksp is None: 
+            raise ValueError("Nothing to check, provides image or ksp arguments")
     @abstractmethod
     def op(self, data):
         """Compute operator transform.
