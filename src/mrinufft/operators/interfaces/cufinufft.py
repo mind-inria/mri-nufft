@@ -12,7 +12,6 @@ from mrinufft._utils import (
 
 from .utils import (
     CUPY_AVAILABLE,
-    check_size,
     is_cuda_array,
     is_host_array,
     nvtx_mark,
@@ -572,14 +571,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data = auto_cast(obs_data, self.cpx_dtype)
         image_data = auto_cast(image_data, self.cpx_dtype)
 
-        B, C = self.n_batchs, self.n_coils
-        K, XYZ = self.n_samples, self.shape
-
-        check_size(obs_data, (B, C, K))
-        if self.uses_sense:
-            check_size(image_data, (B, *XYZ))
-        else:
-            check_size(image_data, (B, C, *XYZ))
+        self.check_shape(image=image_data, ksp=obs_data)
 
         if self.uses_sense and is_host_array(image_data):
             grad_func = self._dc_sense_host

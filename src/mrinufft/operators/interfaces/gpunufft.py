@@ -6,7 +6,6 @@ import warnings
 from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
-from mrinufft.operators.interfaces.utils import check_size
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -662,14 +661,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         image_data = auto_cast(image_data, self.cpx_dtype)
 
         B, C = self.n_batchs, self.n_coils
-        K, XYZ = self.n_samples, self.shape
 
-        check_size(obs_data, (B, C, K))
-        if self.uses_sense:
-            check_size(image_data, (B, *XYZ))
-        else:
-            check_size(image_data, (B, C, *XYZ))
-
+        self.check_shape(image=image_data, ksp=obs_data)
         # dispatch
         if is_host_array(image_data) and is_host_array(obs_data):
             grad_func = self._dc_host
