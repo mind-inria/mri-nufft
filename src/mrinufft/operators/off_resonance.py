@@ -307,19 +307,3 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         return y
 
-    def get_grad(self, image_data, obs_data):
-        """Compute the data consistency error.
-
-        Parameters
-        ----------
-        image_data: numpy.ndarray or cupy.ndarray
-            N-D input image
-        obs_data: numpy.ndarray or cupy.ndarray
-            N-D observed k-space
-
-        Returns
-        -------
-        numpy.ndarray or cupy.ndarray
-            data consistency error in image space.
-        """
-        return self.adj_op(self.op(image_data) - obs_data)
