@@ -1,6 +1,7 @@
 """Tensorflow MRI Nufft Operators."""
 
 import numpy as np
+
 from ..base import FourierOperatorBase, with_tensorflow
 from mrinufft._utils import proper_trajectory
 
@@ -79,6 +80,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         -------
         Tensor
         """
+        self.check_shape(image=data)
         if self.uses_sense:
             data_d = data * self.smaps
         else:
@@ -95,24 +97,25 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return coeff
 
     @with_tensorflow
-    def adj_op(self, data):
+    def adj_op(self, coeffs):
         """
         Backward Operation.
 
         Parameters
         ----------
-        data: Tensor
+        coeffs: Tensor
 
         Returns
         -------
         Tensor
         """
+        self.check_shape(ksp=coeffs)
         if self.uses_density:
-            data_d = data * self.density
+            coeffs_d = coeffs * self.density
         else:
-            data_d = data
+            coeffs_d = coeffs
         img = tfnufft.nufft(
-            data_d,
+            coeffs_d,
             self.samples,
             self.shape,
             transform_type="type_1",

@@ -2,8 +2,11 @@
 
 from mrinufft.operators.base import FourierOperatorBase, with_torch
 from mrinufft._utils import proper_trajectory
-from mrinufft.operators.interfaces.utils import is_cuda_tensor
+from mrinufft.operators.interfaces.utils import (
+    is_cuda_tensor,
+)
 import numpy as np
+
 
 TORCH_AVAILABLE = True
 try:
@@ -123,6 +126,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         -------
         Tensor: Non-uniform Fourier transform of the input image.
         """
+        self.check_shape(image=data, ksp=out)
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         data = data.to(self.device, copy=False)
@@ -137,28 +141,29 @@ class MRITorchKbNufft(FourierOperatorBase):
         return self._safe_squeeze(kdata)
 
     @with_torch
-    def adj_op(self, data, out=None):
+    def adj_op(self, coeffs, out=None):
         """Backward Operation.
 
         Parameters
         ----------
-        data: Tensor
+        coeffs: Tensor
 
         Returns
         -------
         Tensor
         """
+        self.check_shape(image=out, ksp=coeffs)
         B, C, K, XYZ = self.n_batchs, self.n_coils, self.n_samples, self.shape
-        data = data.reshape((B, C, K))
-        data = data.to(self.device, copy=False)
+        coeffs = coeffs.reshape((B, C, K))
+        coeffs = coeffs.to(self.device, copy=False)
 
         if self.smaps is not None:
-            self.smaps = self.smaps.to(data.dtype, copy=False)
+            self.smaps = self.smaps.to(coeffs.dtype, copy=False)
         if self.density:
-            data = data * self.density
+            coeffs = coeffs * self.density
 
         img = self._tkb_adj_op.forward(
-            data=data, omega=self.samples.t(), smaps=self.smaps
+            data=coeffs, omega=self.samples.t(), smaps=self.smaps
         )
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img /= self.norm_factor

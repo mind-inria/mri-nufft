@@ -275,6 +275,43 @@ class FourierOperatorBase(ABC):
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
 
+    def check_shape(self, *, image=None, ksp=None):
+        """
+        Validate the shapes of the image or k-space data against operator shapes.
+
+        Parameters
+        ----------
+        image : np.ndarray, optional
+            If passed, the shape of image data will be checked.
+
+        ksp : np.ndarray or object, optional
+            If passed, the shape of the k-space data will be checked.
+
+        Raises
+        ------
+        ValueError
+            If the shape of the provided image does not match the expected operator
+            shape, or if the number of k-space samples does not match the expected
+            number of samples.
+        """
+        if image is not None:
+            image_shape = image.shape[-len(self.shape) :]
+            if image_shape != self.shape:
+                raise ValueError(
+                    f"Image shape {image_shape} is not compatible "
+                    f"with the operator shape {self.shape}"
+                )
+
+        if ksp is not None:
+            kspace_shape = ksp.shape[-1]
+            if kspace_shape != self.n_samples:
+                raise ValueError(
+                    f"Kspace samples {kspace_shape} is not compatible "
+                    f"with the operator samples {self.n_samples}"
+                )
+        if image is None and ksp is None:
+            raise ValueError("Nothing to check, provides image or ksp arguments")
+
     @abstractmethod
     def op(self, data):
         """Compute operator transform.
@@ -654,6 +691,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        self.check_shape(image=data, ksp=ksp)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -711,6 +749,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        self.check_shape(image=img, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
