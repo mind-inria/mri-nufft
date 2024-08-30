@@ -9,25 +9,17 @@ import numpy as np
 
 from .._utils import get_array_module
 
-from .base import FourierOperatorBase
-from .interfaces.utils import is_cuda_array
+from .base import FourierOperatorBase, CUPY_AVAILABLE, AUTOGRAD_AVAILABLE
 
-CUPY_AVAILABLE = True
-try:
+if CUPY_AVAILABLE:
     import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
 
-
-TORCH_AVAILABLE = True
-try:
+if AUTOGRAD_AVAILABLE:
     import torch
-except ImportError:
-    TORCH_AVAILABLE = False
 
 
 def get_interpolators_from_fieldmap(
-    fieldmap, t, n_time_segments=6, n_bins=(40, 10), mask=None
+    fieldmap, readout_time, n_time_segments=6, n_bins=(40, 10), mask=None
 ):
     r"""Create B and C matrices to approximate ``exp(-2j*pi*fieldmap*t)``.
 
@@ -44,7 +36,7 @@ def get_interpolators_from_fieldmap(
         ``*_map`` and ``t`` should have reciprocal units.
         If ``zmap`` is real, assume ``zmap = B0_map``.
         Expected shape is ``(nz, ny, nx)``.
-    t : np.ndarray or GPUarray
+    readout_time : np.ndarray or GPUarray
         Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
@@ -64,31 +56,43 @@ def get_interpolators_from_fieldmap(
         Off-resonance phase map at each time segment center of shape
         ``(n_time_segments, *fieldmap.shape)``.
     """
-    # get backend and device
-    xp = get_array_module(fieldmap)
-
-    if xp.__name__ == "torch":
-        is_torch = True
-        if fieldmap.device.type == "cpu":
-            xp = np
-            fieldmap = fieldmap.numpy(force=True)
-        else:
-            assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
-            xp = cp
-            fieldmap = cp.from_dlpack(fieldmap)
-    else:
-        is_torch = False
-
-    # move t to backend
-    fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
-    t = xp.asarray(t, dtype=xp.float32).ravel()
-
     # default
     if isinstance(n_bins, (list, tuple)) is False:
         n_bins = (n_bins, 10)
 
     # transform to list
     n_bins = list(n_bins)
+
+    # get backend and device
+    xp = get_array_module(fieldmap)
+
+    # enforce complex field
+    fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
+
+    # cast arrays to backend
+    if xp.__name__ == "torch":
+        is_torch = True
+        if fieldmap.device.type == "cpu":
+            xp = np
+            fieldmap = fieldmap.numpy(force=True)
+            if mask is not None:
+                mask = mask.numpy(force=True)
+            readout_time = readout_time.numpy(force=True)
+        else:
+            assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
+            xp = cp
+            fieldmap = cp.from_dlpack(fieldmap)
+            if mask is not None:
+                mask = cp.from_dlpack(mask)
+            readout_time = cp.from_dlpack(readout_time)
+    else:
+        is_torch = False
+
+    readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
+    if mask is None:
+        mask = xp.ones_like(fieldmap, dtype=bool)
+    else:
+        mask = xp.asarray(mask, dtype=bool)
 
     # get field map
     if xp.isreal(fieldmap).all().item():
@@ -98,10 +102,6 @@ def get_interpolators_from_fieldmap(
     else:
         r2star = fieldmap.real
         b0 = fieldmap.imag
-
-    # default mask
-    if mask is None:
-        mask = xp.ones_like(fieldmap, dtype=bool)
 
     # Hz to radians / s
     fieldmap = 2 * math.pi * fieldmap
@@ -136,7 +136,7 @@ def get_interpolators_from_fieldmap(
 
     # generate time for each segment
     tl = xp.linspace(
-        t.min(), t.max(), n_time_segments, dtype=xp.float32
+        readout_time.min(), readout_time.max(), n_time_segments, dtype=xp.float32
     )  # time seg centers in [s]
 
     # prepare for basis calculation
@@ -145,7 +145,7 @@ def get_interpolators_from_fieldmap(
     p = xp.linalg.pinv(w @ _transpose(ch)) @ w
 
     # actual temporal basis calculation
-    B = p @ xp.exp(-zk[:, None, ...] * t[None, ...])
+    B = p @ xp.exp(-zk[:, None, ...] * readout_time[None, ...])
     B = B.astype(xp.complex64)
 
     # get spatial coeffs
@@ -199,7 +199,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         ``*_map`` and ``t`` should have reciprocal units.
         If ``zmap`` is real, assume ``zmap = B0_map``.
         Expected shape is ``(nz, ny, nx)``.
-    t : np.ndarray or GPUarray, optional
+    readout_time : np.ndarray or GPUarray, optional
         Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
@@ -224,7 +224,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         self,
         fourier_op,
         fieldmap=None,
-        t=None,
+        readout_time=None,
         n_time_segments=6,
         n_bins=(40, 10),
         mask=None,
@@ -244,10 +244,6 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
         self._fourier_op = fourier_op
 
-        # if not fourier_op.uses_sense:
-        # raise ValueError("please use smaps.")
-
-        # self.n_samples = fourier_op.n_samples
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
@@ -259,7 +255,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         else:
             fieldmap = self.xp.asarray(fieldmap)
             self.B, self.C = get_interpolators_from_fieldmap(
-                fieldmap, t, n_time_segments, n_bins, mask
+                fieldmap, readout_time, n_time_segments, n_bins, mask
             )
         if self.B is None or self.C is None:
             raise ValueError("Please either provide fieldmap and t or B and C")
@@ -306,4 +302,3 @@ class MRIFourierCorrected(FourierOperatorBase):
             )
 
         return y
-

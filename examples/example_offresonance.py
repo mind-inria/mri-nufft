@@ -21,13 +21,14 @@ plt.rcParams["image.cmap"] = "gray"
 # %%
 # Data Generation
 # ===============
-# As example, 2D shepp-logan will be used.
-# installable using ``pip install phantominator``
+# For realistic 2D image we will use a slice from the brainweb dataset.
+# installable using ``pip install brainweb-dl``
 
-from phantominator import ct_shepp_logan
+from brainweb_dl import get_mri
 
-mri_data = ct_shepp_logan(256)
-plt.imshow(mri_data), plt.axis("off")
+mri_data = get_mri(44, "T1")
+mri_data = mri_data[::-1, ...][90]
+plt.imshow(mri_data), plt.axis("off"), plt.title("ground truth")
 
 # %%
 # Field Generation
@@ -79,9 +80,10 @@ b0map = make_b0map(mri_data)
 
 from mrinufft import initialize_2D_spiral
 from mrinufft.density import voronoi
+from mrinufft.trajectories.utils import DEFAULT_RASTER_TIME
 
-samples = initialize_2D_spiral(Nc=16, Ns=2000, nb_revolutions=10)
-t_read = np.arange(samples.shape[1]) * 4e-6  # 1us raster time
+samples = initialize_2D_spiral(Nc=48, Ns=600, nb_revolutions=10)
+t_read = np.arange(samples.shape[1]) * DEFAULT_RASTER_TIME * 1e-3
 t_read = np.repeat(t_read[None, ...], samples.shape[0], axis=0)
 density = voronoi(samples)
 
@@ -91,11 +93,11 @@ display_2D_trajectory(samples)
 # Setup the Operator
 # ==================
 
-import mrinufft
+from mrinufft import get_operator
 from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 # Generate standard NUFFT operator
-NufftOperator = mrinufft.get_operator("finufft")
+NufftOperator = get_operator("finufft")
 nufft = NufftOperator(
     samples=samples,
     shape=mri_data.shape,
@@ -103,21 +105,20 @@ nufft = NufftOperator(
 )
 
 # Generate Fourier Corrected operator
-mfi_nufft = MRIFourierCorrected(nufft, fieldmap=b0map, t=t_read, mask=mri_data != 0)
+mfi_nufft = MRIFourierCorrected(
+    nufft, fieldmap=b0map, readout_time=t_read, mask=mri_data != 0
+)
 
 # Generate K-Space
 kspace = mfi_nufft.op(mri_data)
-print(kspace.shape)
 
 # Reconstruct without field correction
 mri_data_adj = nufft.adj_op(kspace)
 mri_data_adj = np.squeeze(abs(mri_data_adj))
-print(mri_data_adj.shape)
 
 # Reconstruct with field correction
 mri_data_adj_mfi = mfi_nufft.adj_op(kspace)
 mri_data_adj_mfi = np.squeeze(abs(mri_data_adj_mfi))
-print(mri_data_adj_mfi.shape)
 
 fig2, ax2 = plt.subplots(1, 2)
 ax2[0].imshow(mri_data_adj), ax2[0].axis("off"), ax2[0].set_title("w/o correction")
