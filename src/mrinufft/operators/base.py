@@ -491,21 +491,19 @@ class FourierOperatorBase(ABC):
             The reconstructed image after the optimization process.
         """
         Lipschitz_cst = self.get_lipschitz_cst()
-        image = np.zeros(self.shape) if x_init is None else x_init
+        image = np.zeros(self.shape, dtype=type(kspace_data[0])) if x_init is None else x_init 
         velocity = np.zeros_like(image)
 
         for _ in range(num_iter):
-            if (np.real(np.dot(image, image.T)) <= 0).any():
-                break
-
-            if (np.sqrt(image) < tol).any():
-                break
-
             grad = self.data_consistency(image, kspace_data)
             velocity = tol * velocity + grad * Lipschitz_cst
+
+            if np.linalg.norm(grad) < tol:
+                break
             image = image - velocity
         return image
-    
+
+
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""
