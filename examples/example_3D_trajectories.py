@@ -850,7 +850,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #   ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
 #   to ``nb_blades``.
 # - ``skip_factor (int)``: factor defining the way different blades alternate
-#   to skip lines, forming groups of `skip_factor` non-redundant blades.
+#   to skip lines, forming groups of ``skip_factor`` non-redundant blades.
 #   ``(default 1)``
 # - ``in_out (bool)``: define whether the shots should travel toward the center
 #   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
@@ -950,11 +950,12 @@ show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size
 # ~~~~~~~~~~~~~~~~~~~~~
 #
 # Factor defining the way different blades alternate to skip lines,
-# forming groups of `skip_factor` non-redundant blades.
+# forming groups of ``skip_factor`` non-redundant blades.
 #
 # This enables the in-plane acceleration proposed by [GMC22]_ by
 # increasing ``skip_factor`` and ``nb_blades`` together by a same
-# factor.
+# factor. Note that using ``skip_factor`` superior to ``nb_blades``
+# as below results in k-space areas being not covered by any blade.
 #
 
 arguments = [1, 2, 4, nb_blades + 2]
@@ -977,6 +978,101 @@ show_argument(
     dim="2D",
     axes=(1, 2),
 )
+
+
+# %%
+#
+# REPI
+# ----
+#
+# The REPI (Radial Echo Planar Imaging) trajectory proposed in [RMS22]_
+# and officially inspired from TURBINE proposed in [MGM10]_.
+# It consists of multi-echo stacks of lines or spirals rotated around any axis
+# (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
+# shifted along the rotation axis in order to be entangled with the others
+# without redundancy. This feature is similar to choosing ``skip_factor``
+# equal to ``nb_blades`` in TURBINE.
+#
+# Note that our implementation also proposes to segment the planes/stacks
+# into several shots, instead of just one. Spirals can also be customized
+# beyond the classic Archimedean spiral.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns_readouts (int)``: number of samples per readout. See 3D radial
+# - ``Ns_transitions (int)``: number of samples per transition between
+#   two readouts. See TURBINE
+# - ``nb_blades (int)``: number of blades used to group readouts into
+#   and partition the k-space. It should be lower than ``Nc`` and divide it.
+#   See TURBINE
+# - ``nb_blade_revolutions (float)``: number of revolutions over
+#   lines/spirals within a blade over the :math:`k_z` axis. See TURBINE
+# - ``blade_tilt (str, float)``: angle between each consecutive blades
+#   over the :math:`k_z`-axis (in radians).
+#   ``(default "uniform")``. See TURBINE
+# - ``nb_trains (int)``: number of resulting shots, or readout trains,
+#   such that each of them will be composed of :math:`n` readouts with
+#   ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
+#   to ``nb_blades``. See TURBINE
+# - ``nb_spiral_revolutions (float)``: number of revolutions performed
+#   from the center. ``(default 1)``. See 2D spiral
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "archimedes")``. See 2D spiral
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
+#
+
+trajectory = mn.initialize_3D_repi(
+    Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=nb_revolutions,
+    nb_spiral_revolutions=nb_revolutions,
+)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``nb_blade_revolutions (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of revolutions over lines/spirals within a blade
+# over the :math:`k_z` axis.
+#
+# Note that increasing it also tends to increase the distance
+# between consecutive lines/spirals, requiring higher gradients
+# and slew rates.
+#
+
+arguments = [0, 0.5, 1, 2]
+function = lambda x: mn.initialize_3D_repi(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=x,
+    nb_spiral_revolutions=0,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+#
+# Same but with a spiral pattern instead of radial.
+#
+
+arguments = [0, 0.5, 1, 2]
+function = lambda x: mn.initialize_3D_repi(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=x,
+    nb_spiral_revolutions=nb_revolutions,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -1041,3 +1137,6 @@ show_argument(
 # .. [GMC22] Graedel, Nadine N., Karla L. Miller, and Mark Chiew.
 #    "Ultrahigh resolution fMRI at 7T using radial‐cartesian TURBINE sampling."
 #    Magnetic Resonance in Medicine 88, no. 5 (2022): 2058-2073.
+# .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
+#    "Three dimensional radial echo planar imaging for functional MRI."
+#    Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.

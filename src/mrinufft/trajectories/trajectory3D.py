@@ -971,6 +971,8 @@ def initialize_3D_turbine(
         raise ValueError("`skip_factor` must be an integer.")
     if Nc % nb_blades != 0:
         raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
     if nb_trains and (Nc % nb_trains != 0):
         raise ValueError("`nb_trains` should divide `Nc`.")
     nb_shot_per_blade = Nc // nb_blades
@@ -1030,7 +1032,8 @@ def initialize_3D_repi(
     It consists of multi-echo stacks of lines or spirals rotated around any axis
     (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
     shifted along the rotation axis in order to be entangled with the others
-    without redundancy.
+    without redundancy. This feature is similar to choosing ``skip_factor``
+    equal to ``nb_blades`` in TURBINE.
 
     Note that our implementation also proposes to segment the planes/stacks
     into several shots, instead of just one. Spirals can also be customized
@@ -1083,6 +1086,7 @@ def initialize_3D_repi(
     if nb_trains % nb_blades != 0:
         raise ValueError("`nb_trains` should divide `nb_blades`.")
     nb_shot_per_blade = Nc // nb_blades
+    nb_spiral_revolutions = max(nb_spiral_revolutions, 1e-5)
 
     # Initialize trajectory as a stack of single shots
     single_shot = initialize_2D_spiral(
