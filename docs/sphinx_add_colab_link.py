@@ -73,6 +73,7 @@ class ColabLinkDirective(SphinxDirective):
         idx = self.find_index_of_colab_link(notebook)
         code_lines = ["# Install libraries"]
         code_lines.append(commands)
+        code_lines.append("pip install brainweb-dl # For sample data")
         dummy_notebook_content = {"cells": []}
         add_code_cell(
             dummy_notebook_content,
