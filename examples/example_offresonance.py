@@ -26,7 +26,7 @@ plt.rcParams["image.cmap"] = "gray"
 
 from brainweb_dl import get_mri
 
-mri_data = get_mri(44, "T1")
+mri_data = get_mri(0, "T1")
 mri_data = mri_data[::-1, ...][90]
 plt.imshow(mri_data), plt.axis("off"), plt.title("ground truth")
 
