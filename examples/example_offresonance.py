@@ -31,48 +31,28 @@ mri_data = mri_data[::-1, ...][90]
 plt.imshow(mri_data), plt.axis("off"), plt.title("ground truth")
 
 # %%
+# Masking
+# ===============
+# Here, we generate a binary mask to exclude the background.
+# We perform a simple binary threshold; in real-world application,
+# it is advised to use other tools (e.g., FSL-BET).
+
+brain_mask = mri_data > 0.1 * mri_data.max()
+plt.imshow(brain_mask), plt.axis("off"), plt.title("brain mask")
+
+# %%
 # Field Generation
 # ===============
 # Here, we generate a radial B0 field with the same shape of
 # the input Shepp-Logan phantom
 
-
-def make_b0map(obj, b0range=(-300, 300)):
-    """Make radial B0 field.
-
-    Parameters
-    ----------
-    obj : np.ndarray
-        Input object of shape (ny, nx).
-    b0range : tuple, optional
-        B0 field range in [Hz]. The default is (-300, 300).
-
-    Returns
-    -------
-    b0map : np.ndarray
-        Field inhomogeneities map of shape (ny, nx)
-    """
-    # calculate grid
-    ny, nx = obj.shape
-    yy, xx = np.mgrid[:ny, :nx]
-    yy, xx = yy - ny // 2, xx - nx // 2
-    yy, xx = yy / ny, xx / nx
-
-    # radius
-    rr = (xx**2 + yy**2) ** 0.5
-
-    # mask
-    mask = (obj != 0).astype(np.float32)
-    b0map = mask * rr
-
-    # rescale
-    b0map = (b0range[1] - b0range[0]) * b0map / b0map.max() + b0range[0]  # Hz
-
-    return b0map * mask
-
+from mrinufft.extras import make_b0map
 
 # generate field
-b0map = make_b0map(mri_data)
+b0map, _ = make_b0map(mri_data.shape, b0range=(-200, 200), mask=brain_mask)
+plt.imshow(brain_mask * b0map, cmap="bwr", vmin=-200, vmax=200), plt.axis(
+    "off"
+), plt.colorbar(), plt.title("B0 map [Hz]")
 
 # %%
 # Generate a Spiral trajectory
@@ -106,7 +86,7 @@ nufft = NufftOperator(
 
 # Generate Fourier Corrected operator
 mfi_nufft = MRIFourierCorrected(
-    nufft, fieldmap=b0map, readout_time=t_read, mask=mri_data != 0
+    nufft, fieldmap=b0map, readout_time=t_read, mask=brain_mask
 )
 
 # Generate K-Space

@@ -10,6 +10,7 @@ import numpy as np
 from .._utils import get_array_module
 
 from .base import FourierOperatorBase, CUPY_AVAILABLE, AUTOGRAD_AVAILABLE
+from .interfaces.utils import is_cuda_array
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -31,30 +32,35 @@ def get_interpolators_from_fieldmap(
 
     Parameters
     ----------
-    fieldmap : np.ndarray or GPUarray
+    fieldmap : np.ndarray
         Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
         ``*_map`` and ``t`` should have reciprocal units.
         If ``zmap`` is real, assume ``zmap = B0_map``.
+        Also supports Cupy arrays and Torch tensors.
         Expected shape is ``(nz, ny, nx)``.
-    readout_time : np.ndarray or GPUarray
+    readout_time : np.ndarray
         Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+        Also supports Cupy arrays and Torch tensors.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
     n_bins : int | Sequence[int] optional
         Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``
         If it is a scalar, assume ``n_bins = (n_bins, 10)``.
         For real fieldmap (B0 only), ``n_bins[1]`` is ignored.
-    mask : np.ndarray or GPUarray, optional
+    mask : np.ndarray, optional
         Boolean mask to avoid histogram of background values.
         The default is ``None`` (use the whole map).
+        Also supports Cupy arrays and Torch tensors.
 
     Returns
     -------
-    B : np.ndarray or GPUarray
+    B : np.ndarray
         Temporal interpolator of shape ``(n_time_segments, len(t))``.
-    C : np.ndarray or GPUarray
+        Array module is the same as input fieldmap.
+    C : np.ndarray
         Off-resonance phase map at each time segment center of shape
         ``(n_time_segments, *fieldmap.shape)``.
+        Array module is the same as input fieldmap.
     """
     # default
     if isinstance(n_bins, (list, tuple)) is False:
@@ -69,24 +75,23 @@ def get_interpolators_from_fieldmap(
     # enforce complex field
     fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
 
-    # cast arrays to backend
+    # cast arrays to fieldmap backend
     if xp.__name__ == "torch":
         is_torch = True
-        if fieldmap.device.type == "cpu":
-            xp = np
-            fieldmap = fieldmap.numpy(force=True)
-            if mask is not None:
-                mask = mask.numpy(force=True)
-            readout_time = readout_time.numpy(force=True)
-        else:
-            assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
-            xp = cp
-            fieldmap = cp.from_dlpack(fieldmap)
-            if mask is not None:
-                mask = cp.from_dlpack(mask)
-            readout_time = cp.from_dlpack(readout_time)
     else:
         is_torch = False
+
+    if is_cuda_array(fieldmap):
+        assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
+        xp = cp
+        fieldmap = _to_cupy(fieldmap)
+        readout_time = _to_cupy(readout_time)
+        mask = _to_cupy(mask)
+    else:
+        xp = np
+        fieldmap = _to_numpy(fieldmap)
+        readout_time = _to_numpy(readout_time)
+        mask = _to_numpy(mask)
 
     readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
     if mask is None:
@@ -142,7 +147,7 @@ def get_interpolators_from_fieldmap(
     # prepare for basis calculation
     ch = xp.exp(-tl[:, None, ...] @ zk[None, ...])
     w = xp.diag(hk**0.5)
-    p = xp.linalg.pinv(w @ _transpose(ch)) @ w
+    p = xp.linalg.pinv(w @ ch.T) @ w
 
     # actual temporal basis calculation
     B = p @ xp.exp(-zk[:, None, ...] * readout_time[None, ...])
@@ -159,12 +164,8 @@ def get_interpolators_from_fieldmap(
 
     # back to torch if required
     if is_torch:
-        if xp.__name__ == "cupy":
-            B = torch.from_dlpack(B)
-            C = torch.from_dlpack(C)
-        else:
-            B = torch.from_numpy(B)
-            C = torch.from_numpy(C)
+        B = _to_torch(B)
+        C = _to_torch(C)
 
     return B, C
 
@@ -176,12 +177,34 @@ def _outer_sum(xx, yy):
     return ss
 
 
-def _transpose(input):
+# TODO: /* refactor with_* decorators
+def _to_numpy(input):
     xp = get_array_module(input)
+
     if xp.__name__ == "torch":
-        return input.mT
+        return input.numpy(force=True)
+    elif xp.__name__ == "cupy":
+        return input.get()
     else:
-        return input.T
+        return input
+
+
+def _to_cupy(input):
+    return cp.asarray(input)
+
+
+def _to_torch(input):
+    xp = get_array_module(input)
+
+    if xp.__name__ == "numpy":
+        return torch.from_numpy(input)
+    elif xp.__name__ == "cupy":
+        return torch.from_dlpack(input)
+    else:
+        return input
+
+
+# */
 
 
 class MRIFourierCorrected(FourierOperatorBase):
@@ -194,13 +217,15 @@ class MRIFourierCorrected(FourierOperatorBase):
     ----------
     fourier_op: object of class FourierBase
         the fourier operator to wrap
-    fieldmap : np.ndarray or GPUarray, optional
+    fieldmap : np.ndarray, optional
         Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
         ``*_map`` and ``t`` should have reciprocal units.
         If ``zmap`` is real, assume ``zmap = B0_map``.
+        Also supports Cupy arrays and Torch tensors.
         Expected shape is ``(nz, ny, nx)``.
     readout_time : np.ndarray or GPUarray, optional
         Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+        Also supports Cupy arrays and Torch tensors.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
     n_bins : int | Sequence[int] optional
@@ -210,9 +235,10 @@ class MRIFourierCorrected(FourierOperatorBase):
     mask : np.ndarray or GPUarray, optional
         Boolean mask to avoid histogram of background values.
         The default is ``None`` (use the whole map).
-    B : np.ndarray or GPUarray, optional
+        Also supports Cupy arrays and Torch tensors.
+    B : np.ndarray, optional
         Temporal interpolator of shape ``(n_time_segments, len(t))``.
-    C : np.ndarray or GPUarray, optional
+    C : np.ndarray, optional
         Off-resonance phase map at each time segment center of shape
         ``(n_time_segments, *fieldmap.shape)``.
     backend: str, optional
