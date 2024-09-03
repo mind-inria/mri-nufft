@@ -4,10 +4,14 @@ import math
 
 import numpy as np
 
+import pytest
 from pytest_cases import parametrize_with_cases
+
 
 import mrinufft
 from mrinufft._utils import get_array_module
+from mrinufft.operators.base import CUPY_AVAILABLE
+
 
 from helpers import to_interface, assert_allclose
 from helpers.factories import _param_array_interface
@@ -39,6 +43,9 @@ def calculate_approx_offresonance_term(B, C):
 @parametrize_with_cases("b0map, mask", cases=CasesB0maps)
 def test_b0map_coeff(b0map, mask, array_interface):
     """Test exponential approximation for B0 field only."""
+    if array_interface == "torch-gpu" and not CUPY_AVAILABLE:
+        pytest.skip("GPU computations requires cupy")
+
     # Generate readout times
     tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
 
@@ -62,6 +69,10 @@ def test_b0map_coeff(b0map, mask, array_interface):
 @_param_array_interface
 @parametrize_with_cases("zmap, mask", cases=CasesZmaps)
 def test_zmap_coeff(zmap, mask, array_interface):
+    """Test exponential approximation for complex Z = R2* + 1j *B0 field."""
+    if array_interface == "torch-gpu" and CUPY_AVAILABLE is False:
+        pytest.skip("GPU computations requires cupy")
+
     # Generate readout times
     tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
 
