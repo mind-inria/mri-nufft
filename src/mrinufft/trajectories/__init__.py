@@ -26,6 +26,8 @@ from .trajectory3D import (
     initialize_3D_helical_shells,
     initialize_3D_annular_shells,
     initialize_3D_seiffert_shells,
+    initialize_3D_turbine,
+    initialize_3D_repi,
 )
 
 from .tools import (
@@ -71,6 +73,8 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "initialize_3D_seiffert_shells",
+    "initialize_3D_turbine",
+    "initialize_3D_repi",
     "stack",
     "rotate",
     "precess",
