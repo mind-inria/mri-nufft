@@ -6,6 +6,7 @@ import scipy as sp
 
 from .factories import from_interface
 
+
 def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
     """Assert allclose with a tolerance on the number of mismatched elements.
 

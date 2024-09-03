@@ -11,7 +11,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpuNUFFT>=0.9.0", "cupy-cuda12x"]
+gpunufft = ["gpuNUFFT>=0.10.0", "cupy-cuda12x"]
 torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
 cufinufft = ["cufinufft", "cupy-cuda12x"]
 finufft = ["finufft"]
