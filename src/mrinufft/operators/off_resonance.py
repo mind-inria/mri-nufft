@@ -9,8 +9,12 @@ import numpy as np
 
 from .._utils import get_array_module
 
-from .base import FourierOperatorBase, CUPY_AVAILABLE, AUTOGRAD_AVAILABLE
-from .interfaces.utils import is_cuda_array
+from .base import (
+    FourierOperatorBase,
+    CUPY_AVAILABLE,
+    AUTOGRAD_AVAILABLE,
+    with_numpy_cupy,
+)
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -19,6 +23,7 @@ if AUTOGRAD_AVAILABLE:
     import torch
 
 
+@with_numpy_cupy
 def get_interpolators_from_fieldmap(
     fieldmap, readout_time, n_time_segments=6, n_bins=(40, 10), mask=None
 ):
@@ -72,27 +77,8 @@ def get_interpolators_from_fieldmap(
     # get backend and device
     xp = get_array_module(fieldmap)
 
-    # enforce complex field
+    # enforce data types
     fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
-
-    # cast arrays to fieldmap backend
-    if xp.__name__ == "torch":
-        is_torch = True
-    else:
-        is_torch = False
-
-    if is_cuda_array(fieldmap):
-        assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
-        xp = cp
-        fieldmap = _to_cupy(fieldmap)
-        readout_time = _to_cupy(readout_time)
-        mask = _to_cupy(mask)
-    else:
-        xp = np
-        fieldmap = _to_numpy(fieldmap)
-        readout_time = _to_numpy(readout_time)
-        mask = _to_numpy(mask)
-
     readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
     if mask is None:
         mask = xp.ones_like(fieldmap, dtype=bool)
@@ -162,11 +148,6 @@ def get_interpolators_from_fieldmap(
     # clean-up of spatial coeffs
     C = xp.nan_to_num(C, nan=0.0, posinf=0.0, neginf=0.0)
 
-    # back to torch if required
-    if is_torch:
-        B = _to_torch(B)
-        C = _to_torch(C)
-
     return B, C
 
 
@@ -175,36 +156,6 @@ def _outer_sum(xx, yy):
     yy = yy[None, ...]  # add a singleton dimension at axis 0
     ss = xx + yy  # compute the outer sum
     return ss
-
-
-# TODO: /* refactor with_* decorators
-def _to_numpy(input):
-    xp = get_array_module(input)
-
-    if xp.__name__ == "torch":
-        return input.numpy(force=True)
-    elif xp.__name__ == "cupy":
-        return input.get()
-    else:
-        return input
-
-
-def _to_cupy(input):
-    return cp.asarray(input)
-
-
-def _to_torch(input):
-    xp = get_array_module(input)
-
-    if xp.__name__ == "numpy":
-        return torch.from_numpy(input)
-    elif xp.__name__ == "cupy":
-        return torch.from_dlpack(input)
-    else:
-        return input
-
-
-# */
 
 
 class MRIFourierCorrected(FourierOperatorBase):

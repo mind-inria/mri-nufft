@@ -9,6 +9,8 @@ from https://github.com/CEA-COSMIC/pysap-mri
 from __future__ import annotations
 
 import warnings
+import inspect
+
 from abc import ABC, abstractmethod
 from functools import partial, wraps
 
@@ -17,7 +19,7 @@ import numpy as np
 from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from mrinufft.operators.interfaces.utils import is_cuda_array
 
 CUPY_AVAILABLE = True
 try:
@@ -120,129 +122,283 @@ def get_operator(
 
 def with_numpy(fun):
     """Ensure the function works internally with numpy array."""
+    if _ismethod(fun):
+        data_arg_idx = 1
+    else:
+        data_arg_idx = 0
 
     @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        if hasattr(data, "__cuda_array_interface__"):
-            warnings.warn("data is on gpu, it will be moved to CPU.")
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = data.to("cpu").numpy()
-        elif xp.__name__ == "cupy":
-            data_ = data.get()
-        elif xp.__name__ == "numpy":
-            data_ = data
-        else:
-            raise ValueError(f"Array library {xp} not supported.")
-        ret_ = fun(self, data_, *args, **kwargs)
+    def wrapper(*args, **kwargs):
+        xp = get_array_module(args[data_arg_idx])
 
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-        elif xp.__name__ == "cupy":
-            return xp.array(ret_)
+        # get device
+        if is_cuda_array(args[data_arg_idx]):
+            device = args[data_arg_idx].device
         else:
-            return ret_
+            device = None
+
+        # convert all to numpy
+        args, kwargs = _to_numpy(*args, **kwargs)
+
+        # run function
+        ret_ = fun(*args, **kwargs)
+
+        # convert output to original array module and device
+        return _to_interface(ret_, xp, device)
 
     return wrapper
 
 
 def with_tensorflow(fun):
     """Ensure the function works internally with tensorflow array."""
+    if _ismethod(fun):
+        data_arg_idx = 1
+    else:
+        data_arg_idx = 0
 
     @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        import tensorflow as tf
+    def wrapper(*args, **kwargs):
+        xp = get_array_module(args[data_arg_idx])
 
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = tf.convert_to_tensor(data.cpu())
-        elif xp.__name__ == "cupy":
-            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
-        else:
-            data_ = tf.convert_to_tensor(data)
+        # convert all to tensorflow
+        args, kwargs = _to_tensorflow(*args, **kwargs)
 
-        ret_ = fun(self, data_, *args, **kwargs)
+        # run function
+        ret_ = fun(*args, **kwargs)
 
-        if xp.__name__ in ["torch", "cupy"]:
-            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
-        elif xp.__name__ == "numpy":
-            return ret_.numpy()
-        else:
-            return ret_
+        # convert output to original array module and device
+        return _to_interface(ret_, xp)
 
     return wrapper
 
 
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
+    if _ismethod(fun):
+        data_arg_idx = 1
+    else:
+        data_arg_idx = 0
 
     @wraps(fun)
-    def wrapper(self, data, output=None, *args, **kwargs):
-        xp = get_array_module(data)
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            # Move them to cupy
-            data_ = cp.from_dlpack(data)
-            output_ = cp.from_dlpack(output) if output is not None else None
-        elif xp.__name__ == "torch":
-            # Move to numpy
-            data_ = data.to("cpu").numpy()
-            output_ = output.to("cpu").numpy() if output is not None else None
+    def wrapper(*args, **kwargs):
+        xp = get_array_module(args[data_arg_idx])
+
+        # convert all to cupy / numpy according to data arg device
+        if is_cuda_array(args[data_arg_idx]) and CUPY_AVAILABLE:
+            args, kwargs = _to_cupy(*args, **kwargs)
         else:
-            data_ = data
-            output_ = output
+            args, kwargs = _to_numpy(*args, **kwargs)
 
-        if output_ is not None:
-            if not (
-                (is_host_array(data_) and is_host_array(output_))
-                or (is_cuda_array(data_) and is_cuda_array(output_))
-            ):
-                raise ValueError(
-                    "input data and output should be " "on the same memory space."
-                )
-        ret_ = fun(self, data_, output_, *args, **kwargs)
+        # run function
+        ret_ = fun(*args, **kwargs)
 
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            return xp.as_tensor(ret_, device=data.device)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-
-        return ret_
+        # convert output to original array module and device
+        return _to_interface(ret_, xp)
 
     return wrapper
 
 
 def with_torch(fun):
     """Ensure the function works internally with Torch."""
+    if _ismethod(fun):
+        data_arg_idx = 1
+    else:
+        data_arg_idx = 0
 
     @wraps(fun)
-    def wrapper(self, data, output=None, *args, **kwargs):
-        xp = get_array_module(data)
+    def wrapper(*args, **kwargs):
+        xp = get_array_module(args[data_arg_idx])
 
-        if xp.__name__ == "numpy":
-            data_ = torch.from_numpy(data)
-            output_ = torch.from_numpy(output) if output is not None else None
-        elif xp.__name__ == "cupy":
-            data_ = torch.from_dlpack(data)
-            output_ = torch.from_dlpack(output) if output is not None else None
-        else:
-            data_ = data
-            output_ = output
+        # convert all to tensorflow
+        args, kwargs = _to_torch(*args, **kwargs)
 
-        ret_ = fun(self, data_, output_, *args, **kwargs)
+        # run function
+        ret_ = fun(*args, **kwargs)
 
-        if xp.__name__ == "cupy":
-            return cp.from_dlpack(ret_)
-        elif xp.__name__ == "numpy":
-            return ret_.to("cpu").numpy()
-
-        return ret_
+        # convert output to original array module and device
+        return _to_interface(ret_, xp)
 
     return wrapper
+
+
+def _ismethod(fun):  # ismethod works on instance methods, not classes (always False)
+    first_arg = list(inspect.signature(fun).parameters)[0]
+    if first_arg in ["self", "cls"]:
+        return True
+    else:
+        return False
+
+
+def _to_numpy(*args, **kwargs):
+
+    # enforce mutable
+    args = list(args)
+
+    # convert positional arguments
+    for n in range(len(args)):
+        _arg = args[n]
+        if hasattr(_arg, "__array__"):
+            if is_cuda_array(_arg):
+                warnings.warn("data is on gpu, it will be moved to CPU.")
+            xp = get_array_module(_arg)
+            if xp.__name__ == "torch":
+                _arg = _arg.numpy(force=True)
+            elif xp.__name__ == "cupy":
+                _arg = _arg.get()
+        args[n] = _arg
+
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _kwarg = kwargs[key]
+        if hasattr(_kwarg, "__array__"):
+            if is_cuda_array(_kwarg):
+                warnings.warn("data is on gpu, it will be moved to CPU.")
+            xp = get_array_module(_kwarg)
+            if xp.__name__ == "torch":
+                _kwarg = _kwarg.numpy(force=True)
+            elif xp.__name__ == "cupy":
+                _kwarg = _kwarg.get()
+        kwargs[key] = _kwarg
+
+    return args, kwargs
+
+
+def _to_cupy(*args, **kwargs):
+
+    # enforce mutable
+    args = list(args)
+
+    # get device
+    device = kwargs.get("device", None)
+    kwargs.pop("device", None)
+
+    for n in range(len(args)):
+        _arg = args[n]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                with cp.cuda.Device(device):
+                    _arg = cp.asarray(_arg)
+            elif xp.__name__ == "torch":
+                if _arg.is_cpu:
+                    _arg = cp.asarray(_arg)
+                else:
+                    _arg = cp.from_dlpack(_arg)
+        args[n] = _arg
+
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _kwarg = kwargs[key]
+        if hasattr(_kwarg, "__array__"):
+            xp = get_array_module(_kwarg)
+            if xp.__name__ == "numpy":
+                with cp.cuda.Device(device):
+                    _kwarg = cp.asarray(_kwarg)
+            elif xp.__name__ == "torch":
+                if _kwarg.is_cpu:
+                    _kwarg = cp.asarray(_kwarg)
+                else:
+                    _kwarg = cp.from_dlpack(_kwarg)
+        kwargs[key] = _kwarg
+
+    return args, kwargs
+
+
+def _to_torch(*args, **kwargs):
+
+    # enforce mutable
+    args = list(args)
+
+    # get device
+    device = kwargs.get("device", None)
+    kwargs.pop("device", None)
+
+    for n in range(len(args)):
+        _arg = args[n]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                _arg = torch.as_tensor(_arg, device=device)
+            elif xp.__name__ == "cupy":
+                _arg = torch.from_dlpack(_arg)
+        args[n] = _arg
+
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _kwarg = kwargs[key]
+        if hasattr(_kwarg, "__array__"):
+            xp = get_array_module(_kwarg)
+            if xp.__name__ == "numpy":
+                _kwarg = torch.as_tensor(_kwarg, device=device)
+            elif xp.__name__ == "cupy":
+                _kwarg = torch.from_dlpack(_kwarg)
+        kwargs[key] = _kwarg
+
+    return args, kwargs
+
+
+def _to_tensorflow(*args, **kwargs):
+    import tensorflow as tf
+
+    # enforce mutable
+    args = list(args)
+
+    for n in range(len(args)):
+        _arg = args[n]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                _arg = tf.convert_to_tensor(_arg)
+            elif xp.__name__ == "cupy":
+                _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
+            elif xp.__name__ == "torch":
+                if _arg.is_cpu:
+                    _arg = tf.convert_to_tensor(_arg)
+                else:
+                    _arg = tf.experimental.dlpack.from_dlpack(
+                        torch.utils.dlpack.to_dlpack(_arg)
+                    )
+        args[n] = _arg
+
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _kwarg = kwargs[key]
+        if hasattr(_kwarg, "__array__"):
+            xp = get_array_module(_kwarg)
+            if xp.__name__ == "numpy":
+                _kwarg = tf.convert_to_tensor(_kwarg)
+            elif xp.__name__ == "cupy":
+                _kwarg = tf.experimental.dlpack.from_dlpack(_kwarg.toDlpack())
+            elif xp.__name__ == "torch":
+                if _kwarg.is_cpu:
+                    _kwarg = tf.convert_to_tensor(_kwarg)
+                else:
+                    _kwarg = tf.experimental.dlpack.from_dlpack(
+                        torch.utils.dlpack.to_dlpack(_kwarg)
+                    )
+        kwargs[key] = _kwarg
+
+    return args, kwargs
+
+
+def _to_interface(args, array_interface, device=None):
+
+    # enforce iterable
+    if isinstance(args, (list, tuple)) is False:
+        args = [args]
+
+    # convert to target interface
+    if array_interface.__name__ == "numpy":
+        args, _ = _to_numpy(*args)
+    elif array_interface.__name__ == "cupy":
+        args, _ = _to_cupy(*args, device=device)
+    elif array_interface.__name__ == "torch":
+        args, _ = _to_torch(*args, device=device)
+
+    if len(args) == 1:
+        return args[0]
+
+    return tuple(args)
 
 
 class FourierOperatorBase(ABC):
