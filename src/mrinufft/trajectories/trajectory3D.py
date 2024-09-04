@@ -899,18 +899,19 @@ def initialize_3D_seiffert_shells(
     return KMAX * trajectory
 
 
-#########################
-# EPI-LIKE TRAJECTORIES #
-#########################
+#####################
+# fMRI TRAJECTORIES #
+#####################
 
 
-def initialize_3D_TURBINE(
+def initialize_3D_turbine(
     Nc,
     Ns_readouts,
     Ns_transitions,
     nb_blades,
     blade_tilt="uniform",
     nb_trains="auto",
+    skip_factor=1,
     in_out=True,
 ):
     """Initialize 3D TURBINE trajectory.
@@ -921,7 +922,9 @@ def initialize_3D_TURBINE(
     (here :math:`k_z`-axis) in a radial fashion.
 
     Note that our implementation also proposes to segment the planes
-    into several shots, instead of just one.
+    into several shots instead of just one, and includes the proposition
+    from [GMC22]_ to also accelerate within the blades by skipping lines
+    but while alternating them between blades.
 
     Parameters
     ----------
@@ -932,13 +935,17 @@ def initialize_3D_TURBINE(
     Ns_transitions : int
         Number of samples per transition between two readouts
     nb_blades : int
-        Number of line stacks over the kz axis
+        Number of line stacks over the :math:`k_z`-axis axis
     blade_tilt : str, float, optional
         Tilt between individual blades, by default "uniform"
-    nb_trains : int, str
-        Number of trains dividing the readouts, such that each
-        shot will be composed of `n` readouts with `Nc = n * nb_trains`.
-        If "auto" then `nb_trains` is set to `nb_blades`.
+    nb_trains : int, str, optional
+        Number of resulting shots, or readout trains, such that each of
+        them will be composed of :math:`n` readouts with
+        ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
+        to ``nb_blades``.
+    skip_factor : int, optional
+        Factor defining the way different blades alternate to skip lines,
+        forming groups of `skip_factor` non-redundant blades.
     in_out : bool, optional
         Whether the curves are going in-and-out or start from the center
 
@@ -953,12 +960,19 @@ def initialize_3D_TURBINE(
        "3D steady‐state diffusion‐weighted imaging with trajectory using
        radially batched internal navigator echoes (TURBINE)."
        Magnetic Resonance in Medicine 63, no. 1 (2010): 235-242.
+    .. [GMC22] Graedel, Nadine N., Karla L. Miller, and Mark Chiew.
+       "Ultrahigh resolution fMRI at 7T using radial‐cartesian TURBINE sampling."
+       Magnetic Resonance in Medicine 88, no. 5 (2022): 2058-2073.
     """
     # Assess arguments validity
     if nb_trains == "auto":
         nb_trains = nb_blades
+    if not isinstance(skip_factor, int):
+        raise ValueError("`skip_factor` must be an integer.")
     if Nc % nb_blades != 0:
         raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
     if nb_trains and (Nc % nb_trains != 0):
         raise ValueError("`nb_trains` should divide `Nc`.")
     nb_shot_per_blade = Nc // nb_blades
@@ -969,12 +983,22 @@ def initialize_3D_TURBINE(
     )
 
     # Stack the blades first shots with tilt to create each full blade
-    trajectory = stack(single_plane, nb_shot_per_blade, z_tilt=0)
+    trajectory = stack(single_plane, nb_shot_per_blade * skip_factor, z_tilt=0)
 
     # Re-order the shot to be EPI-compatible
-    trajectory = trajectory.reshape((nb_shot_per_blade, nb_blades, Ns_readouts, 3))
+    trajectory = trajectory.reshape(
+        (nb_shot_per_blade * skip_factor, nb_blades, Ns_readouts, 3)
+    )
     trajectory = np.swapaxes(trajectory, 0, 1)
-    trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
+    trajectory = trajectory.reshape((Nc * skip_factor, Ns_readouts, 3))
+
+    # Skip lines but alternate which ones between blades
+    skip_mask = (
+        np.arange(nb_blades)[:, None]
+        + np.arange(nb_shot_per_blade * skip_factor)[None, :]
+    )
+    skip_mask = ((skip_mask % skip_factor) == 0).astype(bool).flatten()
+    trajectory = trajectory[skip_mask]
 
     # Merge shots into EPI-like multi-readout trains
     if nb_trains and nb_trains != Nc:
@@ -988,7 +1012,7 @@ def initialize_3D_TURBINE(
     return trajectory
 
 
-def initialize_3D_REPI(
+def initialize_3D_repi(
     Nc,
     Ns_readouts,
     Ns_transitions,
@@ -1007,8 +1031,9 @@ def initialize_3D_REPI(
     from TURBINE proposed in [MGM10]_.
     It consists of multi-echo stacks of lines or spirals rotated around any axis
     (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
-    shifted over the rotation axis in order to be entangled with the others
-    without redundancy.
+    shifted along the rotation axis in order to be entangled with the others
+    without redundancy. This feature is similar to choosing ``skip_factor``
+    equal to ``nb_blades`` in TURBINE.
 
     Note that our implementation also proposes to segment the planes/stacks
     into several shots, instead of just one. Spirals can also be customized
@@ -1056,9 +1081,12 @@ def initialize_3D_REPI(
         nb_trains = nb_blades
     if Nc % nb_blades != 0:
         raise ValueError("`nb_blades` should divide `Nc`.")
-    if nb_trains and (Nc % nb_trains != 0):
+    if Nc % nb_trains != 0:
         raise ValueError("`nb_trains` should divide `Nc`.")
+    if nb_trains % nb_blades != 0:
+        raise ValueError("`nb_trains` should divide `nb_blades`.")
     nb_shot_per_blade = Nc // nb_blades
+    nb_spiral_revolutions = max(nb_spiral_revolutions, 1e-5)
 
     # Initialize trajectory as a stack of single shots
     single_shot = initialize_2D_spiral(
