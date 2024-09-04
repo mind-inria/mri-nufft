@@ -528,7 +528,11 @@ class FourierOperatorBase(ABC):
             The reconstructed image after the optimization process.
         """
         Lipschitz_cst = self.get_lipschitz_cst()
-        image = np.zeros(self.shape, dtype=type(kspace_data[0])) if x_init is None else x_init 
+        image = (
+            np.zeros(self.shape, dtype=type(kspace_data[0]))
+            if x_init is None
+            else x_init
+        )
         velocity = np.zeros_like(image)
 
         for _ in range(num_iter):
@@ -539,7 +543,6 @@ class FourierOperatorBase(ABC):
                 break
             image = image - velocity
         return image
-
 
     @property
     def uses_sense(self):

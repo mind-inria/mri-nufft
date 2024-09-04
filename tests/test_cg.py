@@ -10,7 +10,7 @@ from helpers import (
     image_from_op,
     param_array_interface,
 )
-from tests.helpers.asserts import assert_almost_allclose
+from helpers import assert_almost_allclose
 
 
 @fixture(scope="module")
