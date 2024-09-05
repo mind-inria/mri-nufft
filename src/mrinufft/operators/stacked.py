@@ -40,7 +40,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
     shape: tuple
         Shape of the image.
     z_index: array-like
-        Cartesian z index of masked plan.
+        Cartesian z index of masked plan. if "auto" the z_index is computed from the
+        samples, if they are 3D, using the last coordinate.
     backend: str or FourierOperatorBase
         Backend to use.
         If str, a NUFFT operator is initialized with str being a registered backend.
@@ -74,9 +75,9 @@ class MRIStackedNUFFT(FourierOperatorBase):
         self,
         samples,
         shape,
-        z_index,
         backend,
         smaps,
+        z_index="auto",
         n_coils=1,
         n_batchs=1,
         squeeze_dims=False,
@@ -90,10 +91,10 @@ class MRIStackedNUFFT(FourierOperatorBase):
         self.smaps = smaps
         if isinstance(backend, str):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
-            self.samples = samples2d.reshape(-1, 2)
+            self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
             self.operator = get_operator(backend)(
-                self.samples,
+                self._samples2d,
                 shape[:-1],
                 n_coils=self.n_coils * len(self.z_index),
                 smaps=None,
@@ -106,7 +107,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 raise ValueError("Backend operator should have compatible shape")
 
             samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
-            self.samples = samples2d.reshape(-1, 2)
+            self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
 
             if backend.n_coils != self.n_coils * (len(z_index_)):
@@ -163,7 +164,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
     @property
     def n_samples(self):
         """Return number of samples."""
-        return len(self.samples) * len(self.z_index)
+        return len(self._samples2d) * len(self.z_index)
 
     @staticmethod
     def _fftz(data):
@@ -193,7 +194,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         xp = get_array_module(data)
         if ksp is None:
@@ -213,7 +214,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _op_calibless(self, data, ksp=None):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         xp = get_array_module(data)
         if ksp is None:
             ksp = xp.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
@@ -239,7 +240,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _adj_op_sense(self, coeffs, img):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         xp = get_array_module(coeffs)
         imgz = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
@@ -259,7 +260,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _adj_op_calibless(self, coeffs, img):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         xp = get_array_module(coeffs)
         imgz = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
@@ -312,6 +313,33 @@ class MRIStackedNUFFT(FourierOperatorBase):
         """
         return self.operator.get_lipschitz_cst(max_iter)
 
+    @property
+    def samples(self):
+        """Return samples as a N_slice x N_samples x 3 array.
+
+        Built from the 2D samples and the z_index normalized to [-0.5, 0.5).
+        """
+        samples = np.zeros(
+            (len(self.z_index), len(self._samples2d), 3), dtype=self._samples2d.dtype
+        )
+
+        for i, idx in enumerate(self.z_index):
+            z_coord = idx / self.shape[-1] - 0.5
+            samples[i] = np.concatenate(
+                [
+                    self._samples2d,
+                    z_coord
+                    * np.ones((len(self._samples2d), 1), dtype=self._samples2d.dtype),
+                ],
+                axis=1,
+            )
+
+    @samples.setter
+    def samples(self, samples):
+        """Set samples."""
+        self._samples2d, self.z_index = self._init_samples(samples, "auto", self.shape)
+        self.operator.samples = self._samples2d
+
 
 class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     """
@@ -326,7 +354,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     shape: tuple
         Shape of the image.
     z_index: array-like
-        Cartesian z index of masked plan.
+        Cartesian z index of masked plan. if "auto" the z_index is computed from the
+        samples, if they are 3D, using the last coordinate.
     smaps: array-like
         Sensitivity maps.
     n_coils: int
@@ -344,11 +373,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self,
         samples,
         shape,
-        z_index,
         smaps,
         n_coils=1,
         n_batchs=1,
         n_trans=1,
+        z_index="auto",
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
@@ -369,10 +398,10 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
         if isinstance(backend, str):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
-            self.samples = samples2d.reshape(-1, 2)
+            self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
             self.operator = get_operator(backend)(
-                self.samples,
+                self._samples2d,
                 shape[:-1],
                 n_coils=self.n_trans * len(self.z_index),
                 n_trans=len(self.z_index),
@@ -387,7 +416,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 raise ValueError("Backend operator should have compatible shape")
 
             samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
-            self.samples = samples2d.reshape(-1, 2)
+            self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
 
             if backend.n_coils != self.n_trans * len(z_index_):
@@ -463,6 +492,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def op(self, data, ksp=None):
         """Forward operator."""
+        self.check_shape(image=data, ksp=ksp)
         # Dispatch to special case.
         data = auto_cast(data, self.cpx_dtype)
 
@@ -480,7 +510,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _op_sense_host(self, data, ksp=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         dataf = data.reshape((B, *XYZ))
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -518,7 +548,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _op_sense_device(self, data, ksp):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         data = cp.asarray(data)
         dataf = data.reshape((B, *XYZ))
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -557,7 +587,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _op_calibless_host(self, data, ksp=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         ksp_batched = cp.empty((T, NZ * NS), dtype=self.dtype)
@@ -586,7 +616,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _op_calibless_device(self, data, ksp=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         data = cp.asarray(data)
 
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -617,6 +647,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     @with_numpy_cupy
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
+        if img is not None:
+            self.check_shape(image=img, ksp=coeffs)
         # Dispatch to special case.
         coeffs = auto_cast(coeffs, self.cpx_dtype)
 
@@ -635,7 +667,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _adj_op_sense_host(self, coeffs, img_d=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
 
         coeffs_f = coeffs.reshape(B * C, NZ * NS)
         # Allocate Memory
@@ -670,7 +702,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _adj_op_sense_device(self, coeffs, img):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.reshape(B * C, NZ * NS)
         # Allocate Memory
@@ -704,7 +736,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _adj_op_calibless_host(self, coeffs, img=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs_f = coeffs.reshape(B, C, NZ * NS)
         coeffs_f = coeffs_f.reshape(B * C, NZ, NS)
         coeffs_f = coeffs_f.reshape(B * C * NZ, NS)
@@ -731,7 +763,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
     def _adj_op_calibless_device(self, coeffs, img):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
-        NS, NZ = len(self.samples), len(self.z_index)
+        NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.reshape(B, C, NZ * NS)
         coeffs_f = coeffs_f.reshape(B * C, NZ, NS)

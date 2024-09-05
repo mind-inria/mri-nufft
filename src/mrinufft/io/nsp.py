@@ -228,13 +228,13 @@ def write_trajectory(
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
-        violation, maxG, maxS = check_hardware_constraints(
+        valid, maxG, maxS = check_hardware_constraints(
             gradients=gradients,
             slewrates=slewrates,
             gmax=gmax,
             smax=smax,
         )
-        if violation:
+        if not valid:
             warnings.warn(
                 "Hard constraints violated! "
                 f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
@@ -404,6 +404,7 @@ def read_trajectory(
 def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
+    doAverage: bool = True,
     squeeze: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
@@ -417,6 +418,8 @@ def read_arbgrad_rawdat(
         The path to the Siemens MRI file.
     removeOS : bool, optional
         Whether to remove the oversampling, by default False.
+    doAverage : bool, optional
+        Whether to average the data acquired along NAve dimension, by default True.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     slice_num : int, optional
@@ -442,11 +445,12 @@ def read_arbgrad_rawdat(
     -----
     This function requires the mapVBVD module to be installed.
     You can install it using the following command:
-        `pip install pymapVBVD`
+    `pip install pymapVBVD`
     """
     data, hdr, twixObj = read_siemens_rawdat(
         filename=filename,
         removeOS=removeOS,
+        doAverage=doAverage,
         squeeze=squeeze,
         slice_num=slice_num,
         contrast_num=contrast_num,

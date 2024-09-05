@@ -816,6 +816,266 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
 # %%
+# fMRI trajectories
+# =================
+#
+# In this section are presented long trajectories designed for
+# functional MRI to cover the k-space in a few shots, often composed
+# of multiple readouts.
+#
+# TURBINE
+# -------
+#
+# The TURBINE (Trajectory Using Radially Batched Internal Navigator Echoes)
+# trajectory as proposed in [MGM10]_. It consists of EPI-like multi-echo
+# planes rotated around any axis (here :math:`k_z`-axis) in a radial fashion.
+#
+# Note that our implementation also proposes to segment the planes
+# into several shots instead of just one, and includes the proposition
+# from [GMC22]_ to also accelerate within the blades by skipping lines
+# but while alternating them between blades.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns_readouts (int)``: number of samples per readout. See 3D radial
+# - ``Ns_transitions (int)``: number of samples per transition between
+#   two readouts.
+# - ``nb_blades (int)``: number of blades used to group readouts into
+#   and partition the k-space. It should be lower than ``Nc`` and divide it.
+# - ``blade_tilt (str, float)``: angle between each consecutive blades
+#   over the :math:`k_z`-axis (in radians). ``(default "uniform")``
+# - ``nb_trains (int)``: number of resulting shots, or readout trains,
+#   such that each of them will be composed of :math:`n` readouts with
+#   ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
+#   to ``nb_blades``.
+# - ``skip_factor (int)``: factor defining the way different blades alternate
+#   to skip lines, forming groups of ``skip_factor`` non-redundant blades.
+#   ``(default 1)``
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
+#
+
+nb_blades = Nc // 15
+trajectory = mn.initialize_3D_turbine(
+    Nc, Ns_readouts=Ns, Ns_transitions=Ns // 10, nb_blades=nb_blades
+)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``Ns_transitions (int)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of samples per transition between two readouts.
+# Smoother transitions are achieved with more points, but it means longer
+# waiting times between readouts if they are split during acquisition.
+#
+
+arguments = [1, 50, 100, 200]
+function = lambda x: mn.initialize_3D_turbine(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=x,
+    nb_blades=nb_blades,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``nb_blades (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# Number of blades used to group readouts into
+# and partition the k-space. More blades means fewer lines per blade.
+# It should be lower than ``Nc`` and divide it.
+#
+
+arguments = [Nc // 5, Nc // 15, Nc // 30, Nc // 60]
+function = lambda x: mn.initialize_3D_turbine(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``blade_tilt (str, float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
+#
+
+arguments = ["uniform", "golden"]
+function = lambda x: mn.initialize_3D_turbine(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    blade_tilt=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# ``nb_trains (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# Number of resulting shots, or readout trains, such that each of them
+# will be composed of :math:`n` readouts with ``Nc = n * nb_trains``.
+# If ``"auto"`` then ``nb_trains`` is set to ``nb_blades``.
+#
+
+arguments = [nb_blades, 3 * nb_blades, 5 * nb_blades, 15 * nb_blades]
+function = lambda x: mn.initialize_3D_turbine(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_trains=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``skip_factor (int)``
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# Factor defining the way different blades alternate to skip lines,
+# forming groups of ``skip_factor`` non-redundant blades.
+#
+# This enables the in-plane acceleration proposed by [GMC22]_ by
+# increasing ``skip_factor`` and ``nb_blades`` together by a same
+# factor. Note that using ``skip_factor`` superior to ``nb_blades``
+# as below results in k-space areas being not covered by any blade.
+#
+
+arguments = [1, 2, 4, nb_blades + 2]
+function = lambda x: mn.initialize_3D_turbine(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    skip_factor=x,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function,
+    arguments,
+    one_shot=one_shot,
+    subfig_size=subfigure_size,
+    dim="2D",
+    axes=(1, 2),
+)
+
+
+# %%
+#
+# REPI
+# ----
+#
+# The REPI (Radial Echo Planar Imaging) trajectory proposed in [RMS22]_
+# and officially inspired from TURBINE proposed in [MGM10]_.
+# It consists of multi-echo stacks of lines or spirals rotated around any axis
+# (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
+# shifted along the rotation axis in order to be entangled with the others
+# without redundancy. This feature is similar to choosing ``skip_factor``
+# equal to ``nb_blades`` in TURBINE.
+#
+# Note that our implementation also proposes to segment the planes/stacks
+# into several shots, instead of just one. Spirals can also be customized
+# beyond the classic Archimedean spiral.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See 3D radial
+# - ``Ns_readouts (int)``: number of samples per readout. See 3D radial
+# - ``Ns_transitions (int)``: number of samples per transition between
+#   two readouts. See TURBINE
+# - ``nb_blades (int)``: number of blades used to group readouts into
+#   and partition the k-space. It should be lower than ``Nc`` and divide it.
+#   See TURBINE
+# - ``nb_blade_revolutions (float)``: number of revolutions over
+#   lines/spirals within a blade over the :math:`k_z` axis. See TURBINE
+# - ``blade_tilt (str, float)``: angle between each consecutive blades
+#   over the :math:`k_z`-axis (in radians).
+#   ``(default "uniform")``. See TURBINE
+# - ``nb_trains (int)``: number of resulting shots, or readout trains,
+#   such that each of them will be composed of :math:`n` readouts with
+#   ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
+#   to ``nb_blades``. See TURBINE
+# - ``nb_spiral_revolutions (float)``: number of revolutions performed
+#   from the center. ``(default 1)``. See 2D spiral
+# - ``spiral (str, float)``: type of spiral defined through the general
+#   archimedean equation. ``(default "archimedes")``. See 2D spiral
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
+#
+
+trajectory = mn.initialize_3D_repi(
+    Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=nb_revolutions,
+    nb_spiral_revolutions=nb_revolutions,
+)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``nb_blade_revolutions (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of revolutions over lines/spirals within a blade
+# over the :math:`k_z` axis.
+#
+# Note that increasing it also tends to increase the distance
+# between consecutive lines/spirals, requiring higher gradients
+# and slew rates.
+#
+
+arguments = [0, 0.5, 1, 2]
+function = lambda x: mn.initialize_3D_repi(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=x,
+    nb_spiral_revolutions=0,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+#
+# Same but with a spiral pattern instead of radial.
+#
+
+arguments = [0, 0.5, 1, 2]
+function = lambda x: mn.initialize_3D_repi(
+    Nc=Nc,
+    Ns_readouts=Ns,
+    Ns_transitions=Ns // 10,
+    nb_blades=nb_blades,
+    nb_blade_revolutions=x,
+    nb_spiral_revolutions=nb_revolutions,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
 # References
 # ==========
 #
@@ -840,6 +1100,10 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #    "Temporal stability of adaptive 3D radial MRI
 #    using multidimensional golden means."
 #    Magnetic Resonance in Medicine 61, no. 2 (2009): 354-363.
+# .. [MGM10] McNab, Jennifer A., Daniel Gallichan, and Karla L. Miller.
+#    "3D steady‐state diffusion‐weighted imaging with trajectory using
+#    radially batched internal navigator echoes (TURBINE)."
+#    Magnetic Resonance in Medicine 63, no. 1 (2010): 235-242.
 # .. [HM11] Gerlach, Henryk, and Heiko von der Mosel.
 #    "On sphere-filling ropes."
 #    The American Mathematical Monthly 118, no. 10 (2011): 863-876
@@ -870,3 +1134,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # .. [SB21] Stobbe, Robert W., and Christian Beaulieu.
 #    "Three‐dimensional Yarnball k‐space acquisition for accelerated MRI."
 #    Magnetic Resonance in Medicine 85, no. 4 (2021): 1840-1854.
+# .. [GMC22] Graedel, Nadine N., Karla L. Miller, and Mark Chiew.
+#    "Ultrahigh resolution fMRI at 7T using radial‐cartesian TURBINE sampling."
+#    Magnetic Resonance in Medicine 88, no. 5 (2022): 2058-2073.
+# .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
+#    "Three dimensional radial echo planar imaging for functional MRI."
+#    Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.

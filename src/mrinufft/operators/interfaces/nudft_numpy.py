@@ -13,11 +13,11 @@ def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):
 
     Parameters
     ----------
-    ktraj : array_like
+    ktraj: array_like
         The k-space coordinates for the Fourier transformation.
-    shape : tuple of int
+    shape: tuple of int
         The dimensions of the output Fourier matrix.
-    dtype : data-type, optional
+    dtype: data-type, optional
         The data type of the Fourier matrix, default is np.complex64.
     normalize : bool, optional
         If True, normalizes the matrix to maintain numerical stability.

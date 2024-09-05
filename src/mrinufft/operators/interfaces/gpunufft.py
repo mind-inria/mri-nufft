@@ -2,9 +2,10 @@
 
 import numpy as np
 import warnings
+
 from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array, check_size
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -201,6 +202,17 @@ class RawGpuNUFFT:
                 # Support for one additional dimension
                 return image.squeeze().astype(xp.complex64, copy=False).T[None]
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
+
+    def set_smaps(self, smaps):
+        """Update the smaps.
+
+        Parameters
+        ----------
+        smaps: np.ndarray[np.complex64])
+            sensittivity maps
+        """
+        smaps_ = smaps.T.reshape(-1, smaps.shape[0])
+        np.copyto(self.pinned_smaps, smaps_)
 
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
@@ -435,6 +447,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Masked Fourier transform of the input image.
         """
+        self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         op_func = self.raw_op.op
@@ -474,6 +487,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         np.ndarray
             Inverse discrete Fourier transform of the input coefficients.
         """
+        self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
 
         adj_op_func = self.raw_op.adj_op
@@ -502,6 +516,21 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """Return True if the Fourier Operator uses the SENSE method."""
         return self.raw_op.uses_sense
 
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update pinned smaps from new_smaps.
+
+        Parameters
+        ----------
+        new_smaps: np.ndarray
+            the new sensitivity maps
+
+        """
+        self._check_smaps_shape(new_smaps)
+        self._smaps = new_smaps
+        if self._smaps is not None and hasattr(self, "raw_op"):
+            self.raw_op.set_smaps(smaps=new_smaps)
+
     @FourierOperatorBase.samples.setter
     def samples(self, samples):
         """Set the samples for the Fourier Operator.
@@ -511,12 +540,16 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
-        self.compute_density(self.density_method)
+        self._samples = proper_trajectory(
+            samples.astype(np.float32, copy=False), normalize="unit"
+        )
+        # TODO: gpuNUFFT needs to sort the points twice in this case.
+        # It could help to have access to directly dorted arrays from gpuNUFFT.
+        self.compute_density(self._density_method)
         self.raw_op.set_pts(
-            samples,
+            self._samples,
             density=self.density,
         )
-        self._samples = samples
 
     @classmethod
     def pipe(
@@ -628,14 +661,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
         image_data = auto_cast(image_data, self.cpx_dtype)
 
         B, C = self.n_batchs, self.n_coils
-        K, XYZ = self.n_samples, self.shape
 
-        check_size(obs_data, (B, C, K))
-        if self.uses_sense:
-            check_size(image_data, (B, *XYZ))
-        else:
-            check_size(image_data, (B, C, *XYZ))
-
+        self.check_shape(image=image_data, ksp=obs_data)
         # dispatch
         if is_host_array(image_data) and is_host_array(obs_data):
             grad_func = self._dc_host
@@ -678,3 +705,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
+
+    def toggle_grad_traj(self):
+        """Toggle the gradient trajectory of the operator."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()

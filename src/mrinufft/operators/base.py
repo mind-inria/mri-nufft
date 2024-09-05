@@ -148,6 +148,33 @@ def with_numpy(fun):
     return wrapper
 
 
+def with_tensorflow(fun):
+    """Ensure the function works internally with tensorflow array."""
+
+    @wraps(fun)
+    def wrapper(self, data, *args, **kwargs):
+        import tensorflow as tf
+
+        xp = get_array_module(data)
+        if xp.__name__ == "torch":
+            data_ = tf.convert_to_tensor(data.cpu())
+        elif xp.__name__ == "cupy":
+            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
+        else:
+            data_ = tf.convert_to_tensor(data)
+
+        ret_ = fun(self, data_, *args, **kwargs)
+
+        if xp.__name__ in ["torch", "cupy"]:
+            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
+        elif xp.__name__ == "numpy":
+            return ret_.numpy()
+        else:
+            return ret_
+
+    return wrapper
+
+
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
 
@@ -228,7 +255,7 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
-    density_method = None
+    _density_method = None
     _grad_wrt_data = False
     _grad_wrt_traj = False
 
@@ -247,6 +274,43 @@ class FourierOperatorBase(ABC):
             available = available()
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
+
+    def check_shape(self, *, image=None, ksp=None):
+        """
+        Validate the shapes of the image or k-space data against operator shapes.
+
+        Parameters
+        ----------
+        image : np.ndarray, optional
+            If passed, the shape of image data will be checked.
+
+        ksp : np.ndarray or object, optional
+            If passed, the shape of the k-space data will be checked.
+
+        Raises
+        ------
+        ValueError
+            If the shape of the provided image does not match the expected operator
+            shape, or if the number of k-space samples does not match the expected
+            number of samples.
+        """
+        if image is not None:
+            image_shape = image.shape[-len(self.shape) :]
+            if image_shape != self.shape:
+                raise ValueError(
+                    f"Image shape {image_shape} is not compatible "
+                    f"with the operator shape {self.shape}"
+                )
+
+        if ksp is not None:
+            kspace_shape = ksp.shape[-1]
+            if kspace_shape != self.n_samples:
+                raise ValueError(
+                    f"Kspace samples {kspace_shape} is not compatible "
+                    f"with the operator samples {self.n_samples}"
+                )
+        if image is None and ksp is None:
+            raise ValueError("Nothing to check, provides image or ksp arguments")
 
     @abstractmethod
     def op(self, data):
@@ -310,10 +374,10 @@ class FourierOperatorBase(ABC):
         """
         if isinstance(method, np.ndarray):
             self.smaps = method
-            return None
+            return
         if not method:
             self.smaps = None
-            return None
+            return
         kwargs = {}
         if isinstance(method, dict):
             kwargs = method.copy()
@@ -396,11 +460,12 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-        self.density_method = lambda samples, shape: method(
-            samples,
-            shape,
-            **kwargs,
-        )
+        if self._density_method is None:
+            self._density_method = lambda samples, shape: method(
+                samples,
+                shape,
+                **kwargs,
+            )
         self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
@@ -474,15 +539,18 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, smaps):
+        self._check_smaps_shape(smaps)
+        self._smaps = smaps
+
+    def _check_smaps_shape(self, smaps):
+        """Check the shape of the sensitivity maps."""
         if smaps is None:
             self._smaps = None
-        elif len(smaps) != self.n_coils:
+        elif smaps.shape != (self.n_coils, *self.shape):
             raise ValueError(
-                f"Number of sensitivity maps ({len(smaps)})"
-                f"should be equal to n_coils ({self.n_coils})"
+                f"smaps shape is {smaps.shape}, it should be"
+                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
-        else:
-            self._smaps = smaps
 
     @property
     def density(self):
@@ -589,7 +657,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = samples.reshape(-1, len(shape))
+        self._samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
@@ -623,6 +691,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        self.check_shape(image=data, ksp=ksp)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -680,6 +749,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        self.check_shape(image=img, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
@@ -753,7 +823,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
+        grad = np.zeros_like(dataf)
 
         coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)
