@@ -213,7 +213,7 @@ class MRIFourierCorrected(FourierOperatorBase):
     Parameters
     ----------
     fourier_op: object of class FourierBase
-        the fourier operator to wrap
+        the Fourier operator to wrap
     fieldmap : np.ndarray, optional
         Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
         ``*_map`` and ``t`` should have reciprocal units.
