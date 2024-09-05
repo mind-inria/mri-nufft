@@ -36,6 +36,7 @@ def write_gradients(
     recon_tag: float = 1.1,
     timestamp: float | None = None,
     keep_txt_file: bool = False,
+    final_positions: np.ndarray | None = None,
 ):
     """Create gradient file from gradients and initial positions.
 
@@ -66,6 +67,8 @@ def write_gradients(
     keep_txt_file : bool, optional
         Whether to keep the text file used temporarily which holds data pushed to
         binary file, by default False
+    final_positions : np.ndarray, optional
+        Final positions. Shape (num_shots, dimension), by default None
 
     """
     num_shots = gradients.shape[0]
@@ -125,6 +128,18 @@ def write_gradients(
         )
         + "\n"
     )
+    if version >= 5:
+        if final_positions is None:
+            warnings.warn("Final positions not provided for version >= 5,"
+                          "calculating final positions from gradients")
+            final_positions = initial_positions + np.sum(gradients, axis=1) 
+        file.write(
+            "\n".join(
+                " ".join([f"{iter2:5.4f}" for iter2 in iter1])
+                for iter1 in final_positions
+            )
+            + "\n"
+        )
     if version < 4.1:
         # Write the maximum Gradient
         file.write(str(max_grad) + "\n")
@@ -217,12 +232,13 @@ def write_trajectory(
         These are arguments passed to write_gradients function above.
     """
     # Convert normalized trajectory to gradients
-    gradients, initial_positions = convert_trajectory_to_gradients(
+    gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
         trajectory,
         norm_factor=norm_factor,
         resolution=np.asarray(FOV) / np.asarray(img_size),
         raster_time=raster_time,
         gamma=gamma,
+        get_final_positions=True,
     )
 
     # Check constraints if requested
