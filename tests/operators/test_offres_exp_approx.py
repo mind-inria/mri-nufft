@@ -11,6 +11,7 @@ from pytest_cases import parametrize_with_cases
 import mrinufft
 from mrinufft._utils import get_array_module
 from mrinufft.operators.base import CUPY_AVAILABLE
+from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 
 from helpers import to_interface, assert_allclose
@@ -50,8 +51,13 @@ def test_b0map_coeff(b0map, mask, array_interface):
     tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
 
     # Generate coefficients
-    B, C = mrinufft.get_interpolators_from_fieldmap(
+    B, tl = mrinufft.get_interpolators_from_fieldmap(
         to_interface(b0map, array_interface), tread, mask=mask, n_time_segments=100
+    )
+
+    # Calculate spatial coefficients
+    C = MRIFourierCorrected.get_spatial_coefficients(
+        to_interface(2 * math.pi * 1j * b0map, array_interface), tl
     )
 
     # Assert properties
@@ -77,8 +83,17 @@ def test_zmap_coeff(zmap, mask, array_interface):
     tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
 
     # Generate coefficients
-    B, C = mrinufft.get_interpolators_from_fieldmap(
-        to_interface(zmap, array_interface), tread, mask=mask, n_time_segments=100
+    B, tl = mrinufft.get_interpolators_from_fieldmap(
+        to_interface(zmap.imag, array_interface),
+        tread,
+        mask=mask,
+        r2star_map=to_interface(zmap.real, array_interface),
+        n_time_segments=100,
+    )
+
+    # Calculate spatial coefficients
+    C = MRIFourierCorrected.get_spatial_coefficients(
+        to_interface(2 * math.pi * zmap, array_interface), tl
     )
 
     # Assert properties
