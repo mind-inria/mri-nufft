@@ -130,9 +130,11 @@ def write_gradients(
     )
     if version >= 5:
         if final_positions is None:
-            warnings.warn("Final positions not provided for version >= 5,"
-                          "calculating final positions from gradients")
-            final_positions = initial_positions + np.sum(gradients, axis=1) 
+            warnings.warn(
+                "Final positions not provided for version >= 5,"
+                "calculating final positions from gradients"
+            )
+            final_positions = initial_positions + np.sum(gradients, axis=1)
         file.write(
             "\n".join(
                 " ".join([f"{iter2:5.4f}" for iter2 in iter1])
