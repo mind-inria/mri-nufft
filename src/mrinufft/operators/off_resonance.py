@@ -76,10 +76,7 @@ def get_interpolators_from_fieldmap(
     fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
 
     # cast arrays to fieldmap backend
-    if xp.__name__ == "torch":
-        is_torch = True
-    else:
-        is_torch = False
+    is_torch = xp.__name__ == "torch"
 
     if is_cuda_array(fieldmap):
         assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
