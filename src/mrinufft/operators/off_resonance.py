@@ -25,26 +25,27 @@ if AUTOGRAD_AVAILABLE:
 
 @with_numpy_cupy
 def get_interpolators_from_fieldmap(
-    fieldmap, readout_time, n_time_segments=6, n_bins=(40, 10), mask=None
+    b0_map, readout_time, n_time_segments=6, n_bins=(40, 10), mask=None, r2star_map=None
 ):
-    r"""Create B and C matrices to approximate ``exp(-2j*pi*fieldmap*t)``.
+    r"""Approximate ``exp(-2j*pi*fieldmap*readout_time) ≈ Σ B_n(t)C_n(r)``.
 
-    Here, B has shape ``(n_time_segments, len(t))``
-    and C has shape ``(n_time_segments, *fieldmap.shape)``.
+    Here, B_n(t) are n_time_segments temporal coefficients and C_n(r)
+    are n_time_segments temporal spatial coefficients.
+
+    The matrix B has shape ``(n_time_segments, len(readout_time))``
+    and C has shape ``(n_time_segments, *b0_map.shape)``.
 
     From Sigpy: https://github.com/mikgroup/sigpy
     and MIRT (mri_exp_approx.m): https://web.eecs.umich.edu/~fessler/code/
 
     Parameters
     ----------
-    fieldmap : np.ndarray
-        Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
-        ``*_map`` and ``t`` should have reciprocal units.
-        If ``zmap`` is real, assume ``zmap = B0_map``.
+    b0_map : np.ndarray
+        Static field inhomogeneities map.
+        ``b0_map`` and ``readout_time`` should have reciprocal units.
         Also supports Cupy arrays and Torch tensors.
-        Expected shape is ``(nz, ny, nx)``.
     readout_time : np.ndarray
-        Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots * n_pts,)``.
         Also supports Cupy arrays and Torch tensors.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
@@ -53,53 +54,76 @@ def get_interpolators_from_fieldmap(
         If it is a scalar, assume ``n_bins = (n_bins, 10)``.
         For real fieldmap (B0 only), ``n_bins[1]`` is ignored.
     mask : np.ndarray, optional
-        Boolean mask to avoid histogram of background values.
+        Boolean mask of the region of interest
+        (e.g., corresponding to the imaged object).
+        This is used to exclude the background fieldmap values
+        from histogram computation. Must have same shape as ``b0_map``.
         The default is ``None`` (use the whole map).
         Also supports Cupy arrays and Torch tensors.
+    r2star_map : np.ndarray, optional
+        Effective transverse relaxation map (R2*).
+        ``r2star_map`` and ``readout_time`` should have reciprocal units.
+        Must have same shape as ``b0_map``.
+        The default is ``None`` (purely imaginary field).
+        Also supports Cupy arrays and Torch tensors.
+
+    Notes
+    -----
+    The total field map used to calculate the field coefficients is
+    ``field_map = R2*_map + 1j * B0_map``. If R2* is not provided,
+    the field is purely immaginary: ``field_map = 1j * B0_map``.
 
     Returns
     -------
     B : np.ndarray
         Temporal interpolator of shape ``(n_time_segments, len(t))``.
-        Array module is the same as input fieldmap.
-    C : np.ndarray
-        Off-resonance phase map at each time segment center of shape
-        ``(n_time_segments, *fieldmap.shape)``.
-        Array module is the same as input fieldmap.
+        Array module is the same as input field_map.
+    tl : np.ndarray
+        Time segment centers of shape ``(n_time_segments,)``.
+        Array module is the same as input field_map.
+
     """
     # default
     if isinstance(n_bins, (list, tuple)) is False:
         n_bins = (n_bins, 10)
-
-    # transform to list
     n_bins = list(n_bins)
 
     # get backend and device
-    xp = get_array_module(fieldmap)
+    xp = get_array_module(b0_map)
 
-    # enforce data types
-    fieldmap = xp.asarray(fieldmap, dtype=xp.complex64)
+    # cast arrays to fieldmap backend
+    is_torch = xp.__name__ == "torch"
+
+    if is_cuda_array(b0_map):
+        assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
+        xp = cp
+        b0_map = _to_cupy(b0_map)
+        readout_time = _to_cupy(readout_time)
+        mask = _to_cupy(mask)
+        r2star_map = _to_cupy(r2star_map)
+    else:
+        xp = np
+        b0_map = _to_numpy(b0_map)
+        readout_time = _to_numpy(readout_time)
+        mask = _to_numpy(mask)
+        r2star_map = _to_numpy(r2star_map)
+
     readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
     if mask is None:
-        mask = xp.ones_like(fieldmap, dtype=bool)
+        mask = xp.ones_like(b0_map, dtype=bool)
     else:
         mask = xp.asarray(mask, dtype=bool)
 
-    # get field map
-    if xp.isreal(fieldmap).all().item():
-        r2star = None
-        b0 = fieldmap
-        fieldmap = 0.0 + 1j * b0
-    else:
-        r2star = fieldmap.real
-        b0 = fieldmap.imag
-
     # Hz to radians / s
-    fieldmap = 2 * math.pi * fieldmap
+    field_map = _get_complex_fieldmap(b0_map, r2star_map)
+
+    # enforce precision
+    field_map = xp.asarray(field_map, dtype=xp.complex64)
 
     # create histograms
-    if r2star is not None:
-        z = fieldmap[mask].ravel()
+    z = field_map[mask].ravel()
+
+    if r2star_map is not None:
         z = xp.stack((z.imag, z.real), axis=1)
         hk, ze = xp.histogramdd(z, bins=n_bins)
         ze = list(ze)
@@ -112,14 +136,13 @@ def get_interpolators_from_fieldmap(
         zk = zk.T
         hk = hk.T
     else:
-        z = fieldmap[mask].ravel()
         hk, ze = xp.histogram(z.imag, bins=n_bins[0])
 
         # get bin centers
         zc = ze[1:] - (ze[1] - ze[0]) / 2
 
         # complexify
-        zk = 0 + 1j * zc  # [K 1]
+        zk = 1j * zc  # [K 1]
 
     # flatten histogram values and centers
     hk = hk.ravel()
@@ -139,16 +162,12 @@ def get_interpolators_from_fieldmap(
     B = p @ xp.exp(-zk[:, None, ...] * readout_time[None, ...])
     B = B.astype(xp.complex64)
 
-    # get spatial coeffs
-    C = xp.exp(-tl * fieldmap[..., None])
-    C = C[None, ...].swapaxes(0, -1)[
-        ..., 0
-    ]  # (..., n_time_segments) -> (n_time_segments, ...)
+    # back to torch if required
+    if is_torch:
+        B = _to_torch(B)
+        tl = _to_torch(tl)
 
-    # clean-up of spatial coeffs
-    C = xp.nan_to_num(C, nan=0.0, posinf=0.0, neginf=0.0)
-
-    return B, C
+    return B, tl
 
 
 def _outer_sum(xx, yy):
@@ -158,24 +177,54 @@ def _outer_sum(xx, yy):
     return ss
 
 
+# TODO: /* refactor with_* decorators
+def _to_numpy(input):
+    if input is None:
+        return input
+    xp = get_array_module(input)
+
+    if xp.__name__ == "torch":
+        return input.numpy(force=True)
+    elif xp.__name__ == "cupy":
+        return input.get()
+    else:
+        return input
+
+
+def _to_cupy(input):
+    if input is None:
+        return input
+    return cp.asarray(input)
+
+
+def _to_torch(input):
+    xp = get_array_module(input)
+
+    if xp.__name__ == "numpy":
+        return torch.from_numpy(input)
+    elif xp.__name__ == "cupy":
+        return torch.from_dlpack(input)
+    else:
+        return input
+
+
+# */
+
+
 class MRIFourierCorrected(FourierOperatorBase):
     """Fourier Operator with B0 Inhomogeneities compensation.
 
     This is a wrapper around the Fourier Operator to compensate for the
-    B0 inhomogeneities  in the  k-space.
+    B0 inhomogeneities in  the k-space.
 
     Parameters
     ----------
-    fourier_op: object of class FourierBase
-        the fourier operator to wrap
-    fieldmap : np.ndarray, optional
-        Rate map defined as ``fieldmap = R2*_map + 1j * B0_map``.
-        ``*_map`` and ``t`` should have reciprocal units.
-        If ``zmap`` is real, assume ``zmap = B0_map``.
+    b0_map : np.ndarray
+        Static field inhomogeneities map.
+        ``b0_map`` and ``readout_time`` should have reciprocal units.
         Also supports Cupy arrays and Torch tensors.
-        Expected shape is ``(nz, ny, nx)``.
-    readout_time : np.ndarray or GPUarray, optional
-        Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+    readout_time : np.ndarray
+        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots * n_pts,)``.
         Also supports Cupy arrays and Torch tensors.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
@@ -183,30 +232,47 @@ class MRIFourierCorrected(FourierOperatorBase):
         Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``
         If it is a scalar, assume ``n_bins = (n_bins, 10)``.
         For real fieldmap (B0 only), ``n_bins[1]`` is ignored.
-    mask : np.ndarray or GPUarray, optional
-        Boolean mask to avoid histogram of background values.
+    mask : np.ndarray, optional
+        Boolean mask of the region of interest
+        (e.g., corresponding to the imaged object).
+        This is used to exclude the background fieldmap values
+        from histogram computation.
         The default is ``None`` (use the whole map).
         Also supports Cupy arrays and Torch tensors.
     B : np.ndarray, optional
-        Temporal interpolator of shape ``(n_time_segments, len(t))``.
-    C : np.ndarray, optional
-        Off-resonance phase map at each time segment center of shape
-        ``(n_time_segments, *fieldmap.shape)``.
+        Temporal interpolator of shape ``(n_time_segments, len(readout_time))``.
+    tl : np.ndarray, optional
+        Time segment centers of shape ``(n_time_segments,)``.
+        Also supports Cupy arrays and Torch tensors.
+    r2star_map : np.ndarray, optional
+        Effective transverse relaxation map (R2*).
+        ``r2star_map`` and ``readout_time`` should have reciprocal units.
+        Must have same shape as ``b0_map``.
+        The default is ``None`` (purely imaginary field).
+        Also supports Cupy arrays and Torch tensors.
     backend: str, optional
         The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
         The default is `cpu`.
+
+    Notes
+    -----
+    The total field map used to calculate the field coefficients is
+    ``field_map = R2*_map + 1j * B0_map``. If R2* is not provided,
+    the field is purely immaginary: ``field_map = 1j * B0_map``.
+
     """
 
     def __init__(
         self,
         fourier_op,
-        fieldmap=None,
+        b0_map=None,
         readout_time=None,
         n_time_segments=6,
         n_bins=(40, 10),
         mask=None,
+        r2star_map=None,
         B=None,
-        C=None,
+        tl=None,
         backend="cpu",
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
@@ -226,35 +292,57 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.smaps = fourier_op.smaps
         self.autograd_available = fourier_op.autograd_available
 
-        if B is not None and C is not None:
+        if B is not None and tl is not None:
             self.B = self.xp.asarray(B)
-            self.C = self.xp.asarray(C)
+            self.tl = self.xp.asarray(tl)
         else:
-            fieldmap = self.xp.asarray(fieldmap)
-            self.B, self.C = get_interpolators_from_fieldmap(
-                fieldmap, readout_time, n_time_segments, n_bins, mask
+            b0_map = self.xp.asarray(b0_map)
+            self.B, self.tl = get_interpolators_from_fieldmap(
+                b0_map,
+                readout_time,
+                n_time_segments,
+                n_bins,
+                mask,
+                r2star_map,
             )
-        if self.B is None or self.C is None:
-            raise ValueError("Please either provide fieldmap and t or B and C")
-        self.n_interpolators = len(self.C)
+        if self.B is None or self.tl is None:
+            raise ValueError("Please either provide fieldmap and t or B and tl")
+        self.n_interpolators = self.B.shape[0]
+
+        # create spatial interpolator
+        field_map = _get_complex_fieldmap(b0_map, r2star_map)
+        if is_cuda_array(b0_map):
+            self.C = None
+            self.field_map = field_map
+        else:
+            self.C = _get_spatial_coefficients(field_map, self.tl)
+            self.field_map = None
 
     def op(self, data, *args):
         """Compute Forward Operation with off-resonance effect.
 
         Parameters
         ----------
-        x: numpy.ndarray or cupy.ndarray
-            N-D input image
+        x: numpy.ndarray
+            N-D input image.
+            Also supports Cupy arrays and Torch tensors.
 
         Returns
         -------
-        numpy.ndarray or cupy.ndarray
-            masked distorded N-D k-space
+        numpy.ndarray
+            Masked distorted N-D k-space.
+            Array module is the same as input data.
+
         """
         y = 0.0
         data_d = self.xp.asarray(data)
-        for idx in range(self.n_interpolators):
-            y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
+        if self.C is not None:
+            for idx in range(self.n_interpolators):
+                y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
+        else:
+            for idx in range(self.n_interpolators):
+                C = self.xp.exp(-self.field_map * self.tl[idx].item())
+                y += self.B[idx] * self._fourier_op.op(C * data_d, *args)
 
         return y
 
@@ -264,18 +352,82 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         Parameters
         ----------
-        x: numpy.ndarray or cupy.ndarray
-            masked distorded N-D k-space
+        x: numpy.ndarray
+            Masked distorted N-D k-space.
+            Also supports Cupy arrays and Torch tensors.
+
 
         Returns
         -------
-            inverse Fourier transform of the distorded input k-space.
+        numpy.ndarray
+            Inverse Fourier transform of the distorted input k-space.
+            Array module is the same as input coeffs.
+
         """
         y = 0.0
         coeffs_d = self.xp.array(coeffs)
-        for idx in range(self.n_interpolators):
-            y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
-                self.xp.conj(self.B[idx]) * coeffs_d, *args
-            )
+        if self.C is not None:
+            for idx in range(self.n_interpolators):
+                y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
+                    self.xp.conj(self.B[idx]) * coeffs_d, *args
+                )
+        else:
+            for idx in range(self.n_interpolators):
+                C = self.xp.exp(-self.field_map * self.tl[idx].item())
+                y += self.xp.conj(C) * self._fourier_op.adj_op(
+                    self.xp.conj(self.B[idx]) * coeffs_d, *args
+                )
 
         return y
+
+    @staticmethod
+    def get_spatial_coefficients(field_map, tl):
+        """Compute spatial coefficients for field approximation.
+
+        Parameters
+        ----------
+        field_map : np.ndarray
+            Total field map used to calculate the field coefficients is
+            ``field_map = R2*_map + 1j * B0_map``.
+            Also supports Cupy arrays and Torch tensors.
+        tl : np.ndarray
+            Time segment centers of shape ``(n_time_segments,)``.
+            Also supports Cupy arrays and Torch tensors.
+
+        Returns
+        -------
+        C : np.ndarray
+            Off-resonance phase map at each time segment center of shape
+            ``(n_time_segments, *field_map.shape)``.
+            Array module is the same as input field_map.
+
+        """
+        return _get_spatial_coefficients(field_map, tl)
+
+
+def _get_complex_fieldmap(b0_map, r2star_map=None):
+    xp = get_array_module(b0_map)
+
+    if r2star_map is not None:
+        r2star_map = xp.asarray(r2star_map, dtype=xp.float32)
+        field_map = 2 * math.pi * (r2star_map + 1j * b0_map)
+    else:
+        field_map = 2 * math.pi * 1j * b0_map
+
+    return field_map
+
+
+def _get_spatial_coefficients(field_map, tl):
+    xp = get_array_module(field_map)
+
+    # get spatial coeffs
+    C = xp.exp(-tl * field_map[..., None])
+    C = C[None, ...].swapaxes(0, -1)[
+        ..., 0
+    ]  # (..., n_time_segments) -> (n_time_segments, ...)
+    C = xp.asarray(C, dtype=xp.complex64)
+
+    # clean-up of spatial coeffs
+    C = xp.nan_to_num(C, nan=0.0, posinf=0.0, neginf=0.0)
+
+    return C

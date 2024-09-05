@@ -77,8 +77,7 @@ from mrinufft import get_operator
 from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 # Generate standard NUFFT operator
-NufftOperator = get_operator("finufft")
-nufft = NufftOperator(
+nufft = get_operator("finufft")(
     samples=samples,
     shape=mri_data.shape,
     density=density,
@@ -86,7 +85,7 @@ nufft = NufftOperator(
 
 # Generate Fourier Corrected operator
 mfi_nufft = MRIFourierCorrected(
-    nufft, fieldmap=b0map, readout_time=t_read, mask=brain_mask
+    nufft, b0_map=b0map, readout_time=t_read, mask=brain_mask
 )
 
 # Generate K-Space
