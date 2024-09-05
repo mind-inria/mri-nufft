@@ -200,6 +200,7 @@ def write_trajectory(
     check_constraints: bool = True,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
+    version: float = 5,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -227,6 +228,8 @@ def write_trajectory(
         Maximum gradient magnitude in T/m, by default 0.04
     smax : float, optional
         Maximum slew rate in T/m/ms, by default 0.1
+    version: float, optional
+        Trajectory versioning, by default 5
     kwargs : dict, optional
         Additional arguments for writing the gradient file.
         These are arguments passed to write_gradients function above.
@@ -266,6 +269,7 @@ def write_trajectory(
         img_size=img_size,
         FOV=FOV,
         gamma=gamma,
+        version=version,
         **kwargs,
     )
 
