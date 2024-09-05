@@ -42,7 +42,16 @@ class CasesIO:
 )
 @parametrize("version", [4.2, 5.0])
 def test_write_n_read(
-    name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag, tmp_path, version,
+    name,
+    trajectory,
+    FOV,
+    img_size,
+    in_out,
+    min_osf,
+    gamma,
+    recon_tag,
+    tmp_path,
+    version,
 ):
     """Test function which writes the trajectory and reads it back."""
     write_trajectory(
