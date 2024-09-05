@@ -208,7 +208,7 @@ class MRIFourierCorrected(FourierOperatorBase):
     """Fourier Operator with B0 Inhomogeneities compensation.
 
     This is a wrapper around the Fourier Operator to compensate for the
-    B0 inhomogeneities  in the  k-space.
+    B0 inhomogeneities in  the k-space.
 
     Parameters
     ----------
