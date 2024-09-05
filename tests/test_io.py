@@ -5,7 +5,7 @@ from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.io.utils import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
-from pytest_cases import parametrize_with_cases
+from pytest_cases import parametrize, parametrize_with_cases
 from case_trajectories import CasesTrajectories
 
 
@@ -40,8 +40,9 @@ class CasesIO:
     "name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag",
     cases=CasesIO,
 )
+@parametrize("version", [4.2, 5.0])
 def test_write_n_read(
-    name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag, tmp_path
+    name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag, tmp_path, version,
 ):
     """Test function which writes the trajectory and reads it back."""
     write_trajectory(
@@ -51,7 +52,7 @@ def test_write_n_read(
         check_constraints=True,
         grad_filename=str(tmp_path / name),
         in_out=in_out,
-        version=4.2,
+        version=version,
         min_osf=min_osf,
         recon_tag=recon_tag,
         gamma=gamma,
@@ -59,7 +60,7 @@ def test_write_n_read(
     read_traj, params = read_trajectory(
         str((tmp_path / name).with_suffix(".bin")), gamma=gamma, read_shots=True
     )
-    assert params["version"] == 4.2
+    assert params["version"] == version
     assert params["num_shots"] == trajectory.shape[0]
     assert params["num_samples_per_shot"] == trajectory.shape[1] - 1
     assert params["TE"] == (0.5 if in_out else 0)

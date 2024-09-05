@@ -261,6 +261,7 @@ def write_trajectory(
     write_gradients(
         gradients=gradients,
         initial_positions=initial_positions,
+        final_positions=final_positions,
         grad_filename=grad_filename,
         img_size=img_size,
         FOV=FOV,
@@ -342,6 +343,9 @@ def read_trajectory(
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
+        if version >= 5:
+            final_positions, data = _pop_elements(data, dimension * num_shots)
+            final_positions = np.reshape(final_positions, (num_shots, dimension))
         dwell_time_ns = dwell_time * 1e6
         gradient_raster_time_ns = raster_time * 1e6
         if version < 4.1:
