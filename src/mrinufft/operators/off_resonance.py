@@ -221,7 +221,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         Also supports Cupy arrays and Torch tensors.
         Expected shape is ``(nz, ny, nx)``.
     readout_time : np.ndarray or GPUarray, optional
-        Readout time in ``[s]`` of shape ``(nshots, npts)`` or ``(nshots * npts,)``.
+        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots * n_pts,)``.
         Also supports Cupy arrays and Torch tensors.
     n_time_segments : int, optional
         Number of time segments. The default is ``6``.
