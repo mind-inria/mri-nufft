@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import shutil
 import brainweb_dl as bwdl
-from torchvision import transforms
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -52,12 +51,8 @@ def plot_state(axs, mri_2D, img, recon, loss=None, save_name=None):
 class Model(torch.nn.Module):
     def __init__(self, initial_trajectory):
         super(Model, self).__init__()
-        self.trajectory = torch.nn.Parameter(
-            data=torch.Tensor(initial_trajectory),
-            requires_grad=True,
-        )
         self.operator = get_operator("gpunufft", wrt_data=True)(
-            self.trajectory.detach().cpu().numpy(),
+            initial_trajectory,
             shape=(256, 256),
             density=True,
             squeeze_dims=False,
@@ -65,7 +60,6 @@ class Model(torch.nn.Module):
         self.unet = Unet(in_chans=1, out_chans=1, chans=32, num_pool_layers=4)
 
     def forward(self, kspace):
-        self.operator.samples = self.trajectory.clone()
         image = self.operator.adj_op(kspace)
         recon = self.unet(image.float())
         return recon
@@ -76,8 +70,8 @@ model = Model(init_traj)
 
 # Initialize optimizer and learning rate scheduler
 optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
-schedulder = torch.optim.lr_scheduler.StepLR(
-    optimizer, step_size=40, gamma=0.1
+scheduler = torch.optim.lr_scheduler.StepLR(
+    optimizer, step_size=40, gamma=0.01
 )
 
 # Load and preprocess MRI data
@@ -107,12 +101,7 @@ with tqdm(range(100), unit="steps") as tqdms:
         optimizer.zero_grad() # Zero gradients
         loss.backward() # Backward pass
         optimizer.step() # Update weights
-
-        with torch.no_grad():
-            # Clamp the value of trajectory between [-0.5, 0.5]
-            for param in model.parameters():
-                param.clamp_(-0.5, 0.5)
-        schedulder.step() # Update learning rate
+        scheduler.step() # Update learning rate
 
         # Generate images for gif
         hashed = joblib.hash((i, "learn_traj", time.time()))
@@ -166,11 +155,6 @@ except FileNotFoundError:
 model.eval()
 kspace_mri_2D = model.operator.op(mri_2D)
 new_recon = model(kspace_mri_2D)
-
-transform = transforms.ToPILImage()
-pil_image = transform(new_recon[0][0])
-pil_image.save("output_image.png")
-
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 plot_state(axs, mri_2D, old_recon, new_recon, losses)
 plt.show()
