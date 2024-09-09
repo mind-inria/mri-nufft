@@ -207,6 +207,7 @@ def convert_trajectory_to_gradients(
     resolution=DEFAULT_RESOLUTION,
     raster_time=DEFAULT_RASTER_TIME,
     gamma=Gammas.HYDROGEN,
+    get_final_positions=False,
 ):
     """Derive a normalized trajectory over time to provide gradients.
 
@@ -227,6 +228,9 @@ def convert_trajectory_to_gradients(
     gamma : float, optional
         Gyromagnetic ratio of the selected nucleus in kHz/T
         The default is Gammas.HYDROGEN.
+    get_final_positions : bool, optional
+        If `True`, return the final positions in k-space.
+        The default is `False`.
 
     Returns
     -------
@@ -239,6 +243,8 @@ def convert_trajectory_to_gradients(
     # Compute gradients and starting positions
     gradients = np.diff(trajectory, axis=1) / gamma / raster_time
     initial_positions = trajectory[:, 0, :]
+    if get_final_positions:
+        return gradients, initial_positions, trajectory[:, -1, :]
     return gradients, initial_positions
 
 
