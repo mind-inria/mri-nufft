@@ -253,7 +253,7 @@ def conify(
     return new_trajectory
 
 
-def epify(trajectory, Nc_trains, Ns_transitions, reverse_odd_shots=False):
+def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
     """Create multi-readout shots from trajectory composed of single-readouts.
 
     Assemble multiple single-readout shots together by adding transition
@@ -263,10 +263,10 @@ def epify(trajectory, Nc_trains, Ns_transitions, reverse_odd_shots=False):
     ----------
     trajectory : array_like
         Trajectory to change by prolonging and merging the shots.
-    Nc_trains : int
-        Number of resulting multi-readout shots, or trains.
     Ns_transitions : int
         Number of samples/steps between the merged readouts.
+    nb_trains : int
+        Number of resulting multi-readout shots, or trains.
     reverse_odd_shots : bool, optional
         Whether to reverse every odd shots such that, as in most
         trajectories, even shots end up closer to the start of odd
@@ -278,15 +278,15 @@ def epify(trajectory, Nc_trains, Ns_transitions, reverse_odd_shots=False):
         Trajectory with fewer but longer multi-readout shots.
     """
     Nc, Ns, Nd = trajectory.shape
-    if Nc % Nc_trains != 0:
+    if Nc % nb_trains != 0:
         raise ValueError(
-            "`Nc_trains` should divide the number of shots in `trajectory`."
+            "`nb_trains` should divide the number of shots in `trajectory`."
         )
-    nb_shot_per_train = Nc // Nc_trains
+    nb_shot_per_train = Nc // nb_trains
 
     # Reverse odd shots to facilitate concatenation if requested
     trajectory = np.copy(trajectory)
-    trajectory = trajectory.reshape((Nc_trains, -1, Ns, Nd))
+    trajectory = trajectory.reshape((nb_trains, -1, Ns, Nd))
     if reverse_odd_shots:
         trajectory[:, 1::2] = trajectory[:, 1::2, ::-1]
 
@@ -299,7 +299,7 @@ def epify(trajectory, Nc_trains, Ns_transitions, reverse_odd_shots=False):
         nb_shot_per_train * Ns + (nb_shot_per_train - 1) * Ns_transitions
     )
 
-    for i_c in range(Nc_trains):
+    for i_c in range(nb_trains):
         spline = CubicSpline(source_sample_ids, np.concatenate(trajectory[i_c], axis=0))
         assembled_trajectory.append(spline(target_sample_ids))
     assembled_trajectory = np.array(assembled_trajectory)

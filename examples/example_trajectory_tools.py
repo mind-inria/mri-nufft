@@ -661,10 +661,10 @@ show_argument(
 #
 # - ``trajectory (array_like)``: trajectory to change by prolonging
 #   and merging the shots together.
-# - ``Nc_trains (int)``: number of resulting multi-readout shots,
-#   or trains.
 # - ``Ns_transitions (int)``: number of samples/steps between the
 #   merged readouts.
+# - ``nb_trains (int)``: number of resulting multi-readout shots,
+#   or trains.
 # - ``reverse_odd_shots (bool)``: Whether to reverse every odd shots
 #   such that, as in most trajectories, even shots end up closer to
 #   the start of odd shots.
@@ -672,8 +672,8 @@ show_argument(
 
 trajectory = tools.epify(
     planar_trajectories["Radial"],
-    Nc_trains=Nc_planes // 2,
     Ns_transitions=Ns // 10,
+    nb_trains=Nc_planes // 2,
     reverse_odd_shots=True,
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -689,33 +689,14 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.epify(
     planar_trajectories[x],
-    Nc_trains=Nc_planes // 2,
     Ns_transitions=Ns // 10,
+    nb_trains=Nc_planes // 2,
     reverse_odd_shots=True,
 )
 show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 
-show_argument(
-    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
-)
-
-
-# %%
-# ``Nc_trains (int)``
-# ~~~~~~~~~~~~~~~~~~~
-#
-# Number of resulting multi-readout shots, or trains.
-#
-
-arguments = [Nc_planes, Nc_planes // 2, Nc_planes // 4, 1]
-function = lambda x: tools.epify(
-    planar_trajectories["Radial"],
-    Nc_trains=x,
-    Ns_transitions=50,
-    reverse_odd_shots=True,
-)
 show_argument(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
@@ -733,8 +714,27 @@ show_argument(
 arguments = [25, 50, 75, 100]
 function = lambda x: tools.epify(
     planar_trajectories["2D Cones"],
-    Nc_trains=Nc_planes // 2,
     Ns_transitions=x,
+    nb_trains=Nc_planes // 2,
+    reverse_odd_shots=True,
+)
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# ``nb_trains (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# Number of resulting multi-readout shots, or trains.
+#
+
+arguments = [Nc_planes, Nc_planes // 2, Nc_planes // 4, 1]
+function = lambda x: tools.epify(
+    planar_trajectories["Radial"],
+    Ns_transitions=50,
+    nb_trains=x,
     reverse_odd_shots=True,
 )
 show_argument(
@@ -753,8 +753,8 @@ show_argument(
 arguments = [True, False]
 function = lambda x: tools.epify(
     planar_trajectories["Radial"],
-    Nc_trains=Nc_planes // 2,
     Ns_transitions=100,
+    nb_trains=Nc_planes // 2,
     reverse_odd_shots=x,
 )
 show_argument(
