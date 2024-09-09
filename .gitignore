@@ -21,3 +21,4 @@ docs/generated/
 docs_build/
 
 src/mrinufft/_version.py
+mrinufft_learn_unet.gif
