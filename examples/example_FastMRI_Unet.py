@@ -67,7 +67,7 @@ class Model(torch.nn.Module):
         return recon
 
 # Initialize the U-Net model for MRI reconstruction
-init_traj = initialize_2D_radial(64, 512).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_radial(64, 256).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 
 # Initialize optimizer and learning rate scheduler
