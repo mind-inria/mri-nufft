@@ -61,11 +61,13 @@ class Model(torch.nn.Module):
 
     def forward(self, kspace):
         image = self.operator.adj_op(kspace)
+        # plt.imshow((image[0][0].detach().float()), cmap="gray")
+        # plt.show()
         recon = self.unet(image.float())
         return recon
 
 # Initialize the U-Net model for MRI reconstruction
-init_traj = initialize_2D_radial(16, 512).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_radial(64, 512).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 
 # Initialize optimizer and learning rate scheduler
