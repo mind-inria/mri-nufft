@@ -79,7 +79,7 @@ def get_interpolators_from_fieldmap(
 
     """
     # default
-    if isinstance(n_bins, (list, tuple)) is False:
+    if not isinstance(n_bins, (list, tuple)):
         n_bins = (n_bins, 10)
     n_bins = list(n_bins)
 
