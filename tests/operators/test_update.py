@@ -191,7 +191,7 @@ def test_adj_op_density(
         image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
         npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
 
-        
+
 @param_array_interface
 def test_op_smaps_update(
     operator,
