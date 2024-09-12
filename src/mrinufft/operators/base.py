@@ -442,10 +442,10 @@ class FourierOperatorBase(ABC):
                 or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
-            self.density = method
+            self._density = method
             return None
         if not method:
-            self.density = None
+            self._density = None
             return None
         if method is True:
             method = "pipe"
@@ -466,7 +466,7 @@ class FourierOperatorBase(ABC):
                 shape,
                 **kwargs,
             )
-        self.density = method(self.samples, self.shape, **kwargs)
+        self._density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

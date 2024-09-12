@@ -550,6 +550,21 @@ class MRIGpuNUFFT(FourierOperatorBase):
             self._samples,
             density=self.density,
         )
+    
+    @FourierOperatorBase.density.setter
+    def density(self, density):
+        """Set the density for the Fourier Operator.
+
+        Parameters
+        ----------
+        density: np.ndarray
+            The density for the Fourier Operator.
+        """
+        self._density = density
+        self.raw_op.set_pts(
+            self._samples,
+            density=density,
+        )
 
     @classmethod
     def pipe(
