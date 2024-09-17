@@ -13,7 +13,7 @@ dynamic = ["version"]
 
 gpunufft = ["gpuNUFFT>=0.10.0", "cupy-cuda12x"]
 torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
-cufinufft = ["cufinufft", "cupy-cuda12x"]
+cufinufft = ["cufinufft<2.3", "cupy-cuda12x"]
 finufft = ["finufft"]
 pynfft = ["pynfft2>=1.4.3", "numpy>=2.0.0"]
 pynufft = ["pynufft"]
