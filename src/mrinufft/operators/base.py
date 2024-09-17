@@ -352,9 +352,9 @@ class FourierOperatorBase(ABC):
         """
         return self.adj_op(self.op(image) - obs_data)
 
-    def with_off_resonnance_correction(self, B, C, indices):
+    def with_off_resonance_correction(self, B, C, indices):
         """Return a new operator with Off Resonnance Correction."""
-        from ..off_resonnance import MRIFourierCorrected
+        from ..off_resonance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
 

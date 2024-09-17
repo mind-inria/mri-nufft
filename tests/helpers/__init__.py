@@ -1,6 +1,6 @@
 """Helper functions for testing the operators."""
 
-from .asserts import assert_almost_allclose, assert_correlate
+from .asserts import assert_almost_allclose, assert_correlate, assert_allclose
 from .factories import (
     kspace_from_op,
     image_from_op,
@@ -14,7 +14,7 @@ from .factories import (
 __all__ = [
     "assert_almost_allclose",
     "assert_correlate",
-    "kspace_from_op",
+    "assert_allclose" "kspace_from_op",
     "image_from_op",
     "to_interface",
     "from_interface",
