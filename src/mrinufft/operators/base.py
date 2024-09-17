@@ -19,7 +19,7 @@ import numpy as np
 from mrinufft._utils import auto_cast, get_array_module, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import is_cuda_array
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_cuda_tensor
 
 CUPY_AVAILABLE = True
 try:
@@ -117,7 +117,7 @@ def get_operator(
         else:
             # instance will be created later
             operator = partial(operator.with_autograd, wrt_data, wrt_traj)
-            
+
     return operator
 
 
@@ -131,15 +131,10 @@ def with_numpy(fun):
     @wraps(fun)
     def wrapper(*args, **kwargs):
         args = _get_args(fun, args, kwargs)
-    
-        # get array module from non-self argument  
-        xp = _get_array_module(args[data_arg_idx])
 
-        # get device
-        if is_cuda_array(args[data_arg_idx]):
-            device = args[data_arg_idx].device
-        else:
-            device = None
+        # get array module and device from non-self argument
+        xp = _get_array_module(args[data_arg_idx])
+        device = _get_device(args[data_arg_idx])
 
         # convert all to numpy
         args = _to_numpy(*args)
@@ -163,8 +158,8 @@ def with_tensorflow(fun):
     @wraps(fun)
     def wrapper(*args, **kwargs):
         args = _get_args(fun, args, kwargs)
-    
-        # get array module from non-self argument  
+
+        # get array module from non-self argument
         xp = _get_array_module(args[data_arg_idx])
 
         # convert all to tensorflow
@@ -189,15 +184,12 @@ def with_numpy_cupy(fun):
     @wraps(fun)
     def wrapper(*args, **kwargs):
         args = _get_args(fun, args, kwargs)
-    
-        # get array module from non-self argument  
+
+        # get array module from non-self argument
         xp = _get_array_module(args[data_arg_idx])
 
         # convert all to cupy / numpy according to data arg device
-        if is_cuda_array(args[data_arg_idx]) and CUPY_AVAILABLE:
-            args = _to_cupy(*args)
-        else:
-            args = _to_numpy(*args)
+        args = _to_numpy_cupy(args, data_arg_idx)
 
         # run function
         ret_ = fun(*args)
@@ -218,8 +210,8 @@ def with_torch(fun):
     @wraps(fun)
     def wrapper(*args, **kwargs):
         args = _get_args(fun, args, kwargs)
-    
-        # get array module from non-self argument        
+
+        # get array module from non-self argument
         xp = _get_array_module(args[data_arg_idx])
 
         # convert all to tensorflow
@@ -242,16 +234,23 @@ def _ismethod(fun):  # ismethod works on instance methods, not classes (always F
         return False
 
 
-def _get_array_module(input): # handle native Python case
+def _get_array_module(input):  # handle native Python case
     try:
         return get_array_module(input)
     except Exception:
         return np
 
 
+def _get_device(input):
+    if is_cuda_array(input) or is_cuda_tensor(input):
+        return input.device
+    else:
+        return None
+
+
 def _get_args(func, args, kwargs):
     signature = inspect.signature(func)
-    
+
     # Get number of arguments
     n_args = len(args)
 
@@ -262,14 +261,14 @@ def _get_args(func, args, kwargs):
             _kwargs[k] = v.default
         else:
             _kwargs[k] = None
-    
+
     # Merge the default keyword arguments with the provided kwargs
     for k in kwargs.keys():
         _kwargs[k] = kwargs[k]
-        
+
     # Replace args
     _args = list(_kwargs.values())
-        
+
     return list(args) + _args[n_args:]
 
 
@@ -291,7 +290,6 @@ def _to_numpy(*args):
                 _arg = _arg.get()
         args[n] = _arg
 
-
     return args
 
 
@@ -309,6 +307,8 @@ def _to_cupy(*args, device=None):
                 with cp.cuda.Device(device):
                     _arg = cp.asarray(_arg)
             elif xp.__name__ == "torch":
+                if _arg.requires_grad:
+                    _arg = _arg.detach()
                 if _arg.is_cpu:
                     _arg = cp.asarray(_arg)
                 else:
@@ -318,11 +318,20 @@ def _to_cupy(*args, device=None):
     return args
 
 
+def _to_numpy_cupy(args, data_arg_idx):
+    if is_cuda_array(args[data_arg_idx]) and CUPY_AVAILABLE:
+        return _to_cupy(*args)
+    elif is_cuda_tensor(args[data_arg_idx]) and CUPY_AVAILABLE:
+        return _to_cupy(*args)
+    else:
+        return _to_numpy(*args)
+
+
 def _to_torch(*args, device=None):
 
     # enforce mutable
     args = list(args)
-    
+
     # convert positional arguments
     for n in range(len(args)):
         _arg = args[n]
@@ -353,6 +362,8 @@ def _to_tensorflow(*args):
             elif xp.__name__ == "cupy":
                 _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
             elif xp.__name__ == "torch":
+                if _arg.requires_grad:
+                    _arg = _arg.detach()
                 if _arg.is_cpu:
                     _arg = tf.convert_to_tensor(_arg)
                 else:
