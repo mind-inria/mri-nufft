@@ -228,10 +228,7 @@ def with_torch(fun):
 
 def _ismethod(fun):  # ismethod works on instance methods, not classes (always False)
     first_arg = list(inspect.signature(fun).parameters)[0]
-    if first_arg in ["self", "cls"]:
-        return True
-    else:
-        return False
+    return first_arg in ["self", "cls"]:
 
 
 def _get_array_module(input):  # handle native Python case
