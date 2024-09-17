@@ -9,7 +9,12 @@ import numpy as np
 
 from .._utils import get_array_module
 
-from .base import FourierOperatorBase, CUPY_AVAILABLE, AUTOGRAD_AVAILABLE
+from .base import (
+    FourierOperatorBase,
+    CUPY_AVAILABLE,
+    AUTOGRAD_AVAILABLE,
+    with_numpy_cupy,
+)
 from .interfaces.utils import is_cuda_array
 
 if CUPY_AVAILABLE:
@@ -19,6 +24,7 @@ if AUTOGRAD_AVAILABLE:
     import torch
 
 
+@with_numpy_cupy
 def get_interpolators_from_fieldmap(
     b0_map, readout_time, n_time_segments=6, n_bins=(40, 10), mask=None, r2star_map=None
 ):
@@ -86,28 +92,15 @@ def get_interpolators_from_fieldmap(
     # get backend and device
     xp = get_array_module(b0_map)
 
-    # cast arrays to fieldmap backend
-    is_torch = xp.__name__ == "torch"
-
-    if is_cuda_array(b0_map):
-        assert CUPY_AVAILABLE, "GPU computation requires Cupy!"
-        xp = cp
-        b0_map = _to_cupy(b0_map)
-        readout_time = _to_cupy(readout_time)
-        mask = _to_cupy(mask)
-        r2star_map = _to_cupy(r2star_map)
-    else:
-        xp = np
-        b0_map = _to_numpy(b0_map)
-        readout_time = _to_numpy(readout_time)
-        mask = _to_numpy(mask)
-        r2star_map = _to_numpy(r2star_map)
-
+    # enforce data types
+    b0_map = xp.asarray(b0_map, dtype=xp.float32)
     readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
     if mask is None:
         mask = xp.ones_like(b0_map, dtype=bool)
     else:
         mask = xp.asarray(mask, dtype=bool)
+    if r2star_map is not None:
+        r2star_map = xp.asarray(r2star_map, dtype=xp.float32)
 
     # Hz to radians / s
     field_map = _get_complex_fieldmap(b0_map, r2star_map)
@@ -157,11 +150,6 @@ def get_interpolators_from_fieldmap(
     B = p @ xp.exp(-zk[:, None, ...] * readout_time[None, ...])
     B = B.astype(xp.complex64)
 
-    # back to torch if required
-    if is_torch:
-        B = _to_torch(B)
-        tl = _to_torch(tl)
-
     return B, tl
 
 
@@ -170,40 +158,6 @@ def _outer_sum(xx, yy):
     yy = yy[None, ...]  # add a singleton dimension at axis 0
     ss = xx + yy  # compute the outer sum
     return ss
-
-
-# TODO: /* refactor with_* decorators
-def _to_numpy(input):
-    if input is None:
-        return input
-    xp = get_array_module(input)
-
-    if xp.__name__ == "torch":
-        return input.numpy(force=True)
-    elif xp.__name__ == "cupy":
-        return input.get()
-    else:
-        return input
-
-
-def _to_cupy(input):
-    if input is None:
-        return input
-    return cp.asarray(input)
-
-
-def _to_torch(input):
-    xp = get_array_module(input)
-
-    if xp.__name__ == "numpy":
-        return torch.from_numpy(input)
-    elif xp.__name__ == "cupy":
-        return torch.from_dlpack(input)
-    else:
-        return input
-
-
-# */
 
 
 class MRIFourierCorrected(FourierOperatorBase):
