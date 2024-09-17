@@ -61,8 +61,6 @@ class Model(torch.nn.Module):
 
     def forward(self, kspace):
         image = self.operator.adj_op(kspace)
-        # plt.imshow((image[0][0].detach().float()), cmap="gray")
-        # plt.show()
         recon = self.unet(image.float())
         return recon
 
@@ -71,9 +69,10 @@ init_traj = initialize_2D_radial(64, 256).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 
 # Initialize optimizer and learning rate scheduler
+epoch = 100
 optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
 scheduler = torch.optim.lr_scheduler.StepLR(
-    optimizer, step_size=40, gamma=0.01
+    optimizer, step_size=50, gamma=0.1
 )
 
 # Load and preprocess MRI data
@@ -92,7 +91,7 @@ losses = [] # Store the loss values and create an animation
 image_files = [] # Store the images to create a gif
 model.train()
 
-with tqdm(range(100), unit="steps") as tqdms:
+with tqdm(range(epoch), unit="steps") as tqdms:
     for i in tqdms:
         out = model(kspace_mri_2D) # Forward pass
 
