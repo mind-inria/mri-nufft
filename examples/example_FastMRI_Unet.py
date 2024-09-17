@@ -1,3 +1,5 @@
+"""Simple UNet model."""
+
 import os
 from pathlib import Path
 import shutil
@@ -14,8 +16,10 @@ from fastmri.models import Unet
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
 
+
 def plot_state(axs, mri_2D, img, recon, loss=None, save_name=None):
-    """
+    """Graphique.
+
     Plot the original MRI image, the pre-training image, the reconstructed image,
     and the loss curve (if provided). Saves the plot if a filename is provided.
 
@@ -48,9 +52,12 @@ def plot_state(axs, mri_2D, img, recon, loss=None, save_name=None):
     else:
         plt.show()
 
+
 class Model(torch.nn.Module):
+    """Model for MRI reconstruction using a U-Net."""
+
     def __init__(self, initial_trajectory):
-        super(Model, self).__init__()
+        super().__init__()
         self.operator = get_operator("gpunufft", wrt_data=True)(
             initial_trajectory,
             shape=(256, 256),
@@ -60,9 +67,11 @@ class Model(torch.nn.Module):
         self.unet = Unet(in_chans=1, out_chans=1, chans=32, num_pool_layers=4)
 
     def forward(self, kspace):
+        """Forward pass of the model."""
         image = self.operator.adj_op(kspace)
         recon = self.unet(image.float())
         return recon
+
 
 # Initialize the U-Net model for MRI reconstruction
 init_traj = initialize_2D_radial(64, 256).reshape(-1, 2).astype(np.float32)
@@ -71,9 +80,7 @@ model = Model(init_traj)
 # Initialize optimizer and learning rate scheduler
 epoch = 100
 optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
-scheduler = torch.optim.lr_scheduler.StepLR(
-    optimizer, step_size=50, gamma=0.1
-)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
 
 # Load and preprocess MRI data
 mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
@@ -87,22 +94,22 @@ model.eval()
 old_recon = model(kspace_mri_2D)
 
 #  Train the model
-losses = [] # Store the loss values and create an animation
-image_files = [] # Store the images to create a gif
+losses = []  # Store the loss values and create an animation
+image_files = []  # Store the images to create a gif
 model.train()
 
 with tqdm(range(epoch), unit="steps") as tqdms:
     for i in tqdms:
-        out = model(kspace_mri_2D) # Forward pass
+        out = model(kspace_mri_2D)  # Forward pass
 
-        loss = torch.nn.functional.l1_loss(out, mri_2D[None]) # Compute loss
-        tqdms.set_postfix({"loss": loss.item()}) # Update progress bar
-        losses.append(loss.item()) # Store loss value
+        loss = torch.nn.functional.l1_loss(out, mri_2D[None])  # Compute loss
+        tqdms.set_postfix({"loss": loss.item()})  # Update progress bar
+        losses.append(loss.item())  # Store loss value
 
-        optimizer.zero_grad() # Zero gradients
-        loss.backward() # Backward pass
-        optimizer.step() # Update weights
-        scheduler.step() # Update learning rate
+        optimizer.zero_grad()  # Zero gradients
+        loss.backward()  # Backward pass
+        optimizer.step()  # Update weights
+        scheduler.step()  # Update learning rate
 
         # Generate images for gif
         hashed = joblib.hash((i, "learn_traj", time.time()))
