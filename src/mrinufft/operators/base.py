@@ -497,53 +497,6 @@ class FourierOperatorBase(ABC):
             tmp_op = self
         return power_method(max_iter, tmp_op)
 
-    @with_numpy
-    def cg(self, kspace_data, x_init=None, num_iter=10, tol=1e-4):
-        """
-        Perform conjugate gradient (CG) optimization for image reconstruction.
-
-        The image is updated using the gradient of a data consistency term,
-        and a velocity vector is used to accelerate convergence.
-
-        Parameters
-        ----------
-        kspace_data : numpy.ndarray
-            The k-space data to be used for image reconstruction.
-
-        x_init : numpy.ndarray, optional
-            An initial guess for the image. If None, an image of zeros with the same
-            shape as the expected output is used. Default is None.
-
-        num_iter : int, optional
-            The maximum number of iterations to perform. Default is 10.
-
-        tol : float, optional
-            The tolerance for convergence. If the norm of the gradient falls below this
-            value or the dot product between the image and k-space data is non-positive,
-            the iterations stop. Default is 1e-4.
-
-        Returns
-        -------
-        image : numpy.ndarray
-            The reconstructed image after the optimization process.
-        """
-        Lipschitz_cst = self.get_lipschitz_cst()
-        image = (
-            np.zeros(self.shape, dtype=type(kspace_data[0]))
-            if x_init is None
-            else x_init
-        )
-        velocity = np.zeros_like(image)
-
-        for _ in range(num_iter):
-            grad = self.data_consistency(image, kspace_data)
-            velocity = tol * velocity + grad * Lipschitz_cst
-
-            if np.linalg.norm(grad) < tol:
-                break
-            image = image - velocity
-        return image
-
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""

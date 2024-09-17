@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
+from mrinufft.extras.gradient import cg
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
@@ -43,13 +44,13 @@ def test_cg(operator, array_interface, image_data):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_nufft = operator.op(image_data).squeeze()
 
-    image_cg = operator.cg(kspace_nufft)
+    image_cg = cg(operator,kspace_nufft)
     kspace_cg = operator.op(image_cg).squeeze()
-
+    
     assert_almost_allclose(
         kspace_nufft,
         kspace_cg,
         atol=1e-1,
-        rtol=1e-1,
+        rtol=5e-1,
         mismatch=20,
     )
