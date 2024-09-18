@@ -278,7 +278,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 continue
             self.raw_op._set_pts(typ, samples)
         self.compute_density(self._density_method)
-        
+
     @FourierOperatorBase.density.setter
     def density(self, new_density):
         """Update the density compensation."""
