@@ -171,8 +171,6 @@ def test_adj_op_density(
     """Test the batch type 1 (adjoint)."""
     kspace_data = to_interface(kspace_data, array_interface)
     jitter = np.random.rand(operator.samples.shape[0]).astype(np.float32)
-    if operator.backend == "cufinufft":
-        jitter = to_interface(jitter, "cupy")
     # Add very little noise to the trajectory, variance of 1e-3
     if operator.uses_density:
         # Test density can be updated
