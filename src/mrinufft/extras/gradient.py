@@ -43,11 +43,20 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
     )
     velocity = np.zeros_like(image)
 
+    grad = operator.data_consistency(image, kspace_data)
+    velocity = tol * velocity + grad / Lipschitz_cst
+    image = image - velocity
+
     for _ in range(num_iter):
-        grad = operator.data_consistency(image, kspace_data)
-        velocity = tol * velocity + grad * Lipschitz_cst
-        if np.linalg.norm(grad) < tol:
+        grad_new = operator.data_consistency(image, kspace_data)
+        if np.linalg.norm(grad_new) <= tol:
             break
-        image = image - velocity
+
+        beta = np.dot(grad_new.flatten(), grad_new.flatten()) / np.dot(
+            grad.flatten(), grad.flatten()
+        )
+        velocity = grad_new + beta * velocity
+
+        image = image - velocity / Lipschitz_cst
 
     return image

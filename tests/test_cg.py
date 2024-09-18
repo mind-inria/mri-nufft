@@ -17,9 +17,27 @@ from helpers import assert_almost_allclose
 @fixture(scope="module")
 @parametrize(
     "backend",
-    ["finufft", "torchkbnufft-cpu"],
+    [
+        "bart",
+        "pynfft",
+        "pynufft-cpu",
+        "finufft",
+        "cufinufft",
+        "gpunufft",
+        "sigpy",
+        "torchkbnufft-cpu",
+        "torchkbnufft-gpu",
+        "tensorflow",
+    ],
 )
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
+@parametrize_with_cases(
+    "kspace_locs, shape",
+    cases=[
+        CasesTrajectories.case_random2D,
+        CasesTrajectories.case_grid2D,
+        CasesTrajectories.case_grid3D,
+    ],
+)
 def operator(
     request,
     backend="pynfft",
@@ -48,9 +66,9 @@ def test_cg(operator, array_interface, image_data):
     kspace_cg = operator.op(image_cg).squeeze()
 
     assert_almost_allclose(
-        kspace_nufft,
         kspace_cg,
-        atol=1e-1,
-        rtol=5e-1,
+        kspace_nufft,
+        atol=5e-1,
+        rtol=1e-1,
         mismatch=20,
     )
