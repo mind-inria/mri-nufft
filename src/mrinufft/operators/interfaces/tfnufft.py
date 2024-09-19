@@ -15,6 +15,7 @@ try:
 except ImportError:
     TENSORFLOW_AVAILABLE = False
 
+
 class MRITensorflowNUFFT(FourierOperatorBase):
     """MRI Transform Operator using Tensorflow NUFFT.
 
