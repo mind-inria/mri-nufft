@@ -125,7 +125,7 @@ def with_torch(fun):
         xp = get_array_module(args[data_arg_idx])
         device = _get_device(args[data_arg_idx])
 
-        # convert all to tensorflow
+        # convert all arrays to torch
         args = _to_torch(*args)
 
         # run function
