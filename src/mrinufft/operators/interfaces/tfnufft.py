@@ -2,19 +2,18 @@
 
 import numpy as np
 
-from ..base import FourierOperatorBase, with_tensorflow
+from ..base import FourierOperatorBase
+from mrinufft._array_compat import with_tensorflow, TENSORFLOW_AVAILABLE
 from mrinufft._utils import proper_trajectory
 
-TENSORFLOW_AVAILABLE = True
+if TENSORFLOW_AVAILABLE:
+    import tensorflow as tf
 
 try:
     import tensorflow_nufft as tfnufft
     import tensorflow_mri as tfmri
-    import tensorflow as tf
-
 except ImportError:
     TENSORFLOW_AVAILABLE = False
-
 
 class MRITensorflowNUFFT(FourierOperatorBase):
     """MRI Transform Operator using Tensorflow NUFFT.

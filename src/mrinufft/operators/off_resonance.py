@@ -7,14 +7,11 @@ https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wr
 import math
 import numpy as np
 
+from .._array_compat import CUPY_AVAILABLE, AUTOGRAD_AVAILABLE, with_numpy_cupy
 from .._utils import get_array_module
 
-from .base import (
-    FourierOperatorBase,
-    CUPY_AVAILABLE,
-    AUTOGRAD_AVAILABLE,
-    with_numpy_cupy,
-)
+from .base import FourierOperatorBase
+
 from .interfaces.utils import is_cuda_array
 
 if CUPY_AVAILABLE:
