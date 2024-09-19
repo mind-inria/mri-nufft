@@ -85,8 +85,6 @@ def with_tensorflow(fun):
         ret_ = fun(*args)
 
         # convert output to original array module and device
-        print(xp.__name__)
-        print(device)
         return _to_interface(ret_, xp, device)
 
     return wrapper
