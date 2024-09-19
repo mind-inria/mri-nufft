@@ -16,7 +16,7 @@ from mrinufft._array_compat import (
     CUPY_AVAILABLE,
     AUTOGRAD_AVAILABLE,
     TENSORFLOW_AVAILABLE,
-    tf_cuda_is_available,
+    TF_CUDA_AVAILABLE,
 )
 
 from helpers import to_interface
@@ -29,7 +29,7 @@ torch_cuda_is_available = False
 if AUTOGRAD_AVAILABLE:
     import torch
 
-    torch_cuda_is_available = torch.cuda.is_available()
+    TORCH_CUDA_AVAILABLE = torch.cuda.is_available()
 
 if TENSORFLOW_AVAILABLE:
     import tensorflow as tf
@@ -74,67 +74,84 @@ def test_decorators_outcome(decorator_factory, array_interface):
 
 
 @_param_array_interface
-def test_internal_conversions(decorator_factory, array_interface):
-    decorated_function, decorator = decorator_factory
-
-    if decorator.__name__ == "with_tensorflow" and TENSORFLOW_AVAILABLE is False:
-        pytest.skip("tensorflow not available")
+def test_numpy_conversion(array_interface):
 
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
 
     # Execute function and monitor internal conversion
-    if decorator.__name__ == "with_numpy":
-        if array_interface == "cupy":
-            with patch("cupy.asnumpy", wraps=cp.asnumpy) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
-        if array_interface in ["torch-cpu", "torch-gpu"]:
-            array.numpy = MagicMock(wraps=array.numpy)
-            _ = decorated_function(array, array, array, 1.0, "a string")
-            assert array.numpy.call_count == 3
+    if array_interface == "cupy":
+        with patch("cupy.asnumpy", wraps=cp.asnumpy) as mock_fun:
+            _ = with_numpy(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+    if array_interface in ["torch-cpu", "torch-gpu"]:
+        array.numpy = MagicMock(wraps=array.numpy)
+        _ = with_numpy(dummy_func)(array, array, array, 1.0, "a string")
+        assert array.numpy.call_count == 3
 
-    elif decorator.__name__ == "with_numpy_cupy":
-        if array_interface == "torch-cpu":
-            array.numpy = MagicMock(wraps=array.numpy)
-            _ = decorated_function(array, array, array, 1.0, "a string")
-            assert array.numpy.call_count == 3
-        if array_interface == "torch-gpu":
-            with patch("cupy.from_dlpack", wraps=cp.from_dlpack) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
 
-    elif decorator.__name__ == "with_torch":
-        if array_interface == "numpy":
-            with patch("torch.as_tensor", wraps=torch.as_tensor) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
-        if array_interface == "cupy" and torch_cuda_is_available:
-            with patch("torch.from_dlpack", wraps=torch.from_dlpack) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
-        if array_interface == "cupy" and not torch_cuda_is_available:
-            with patch("torch.as_tensor", wraps=torch.as_tensor) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
+@_param_array_interface
+def test_numpy_cupy_conversion(array_interface):
 
-    elif decorator.__name__ == "with_tensorflow":
-        if array_interface in ["numpy", "torch-cpu"]:
-            with patch(
-                "tensorflow.convert_to_tensor", wraps=tf.convert_to_tensor
-            ) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
-        if array_interface in ["cupy", "torch-gpu"] and tf_cuda_is_available:
-            with patch(
-                "tensorflow.experimental.dlpack.from_dlpack",
-                wraps=tf.experimental.dlpack.from_dlpack,
-            ) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
-        if array_interface in ["cupy", "torch-gpu"] and not tf_cuda_is_available:
-            with patch(
-                "tensorflow.convert_to_tensor", wraps=tf.convert_to_tensor
-            ) as mock_fun:
-                _ = decorated_function(array, array, array, 1.0, "a string")
-                assert mock_fun.call_count == 3
+    # Create input array
+    array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
+
+    # Execute function and monitor internal conversion
+    if array_interface == "torch-cpu":
+        array.numpy = MagicMock(wraps=array.numpy)
+        _ = with_numpy_cupy(dummy_func)(array, array, array, 1.0, "a string")
+        assert array.numpy.call_count == 3
+    if array_interface == "torch-gpu":
+        with patch("cupy.from_dlpack", wraps=cp.from_dlpack) as mock_fun:
+            _ = with_numpy_cupy(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+
+
+@_param_array_interface
+def test_torch_conversion(array_interface):
+
+    # Create input array
+    array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
+
+    # Execute function and monitor internal conversion
+    if array_interface == "numpy":
+        with patch("torch.as_tensor", wraps=torch.as_tensor) as mock_fun:
+            _ = with_torch(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+    if array_interface == "cupy" and TORCH_CUDA_AVAILABLE:
+        with patch("torch.from_dlpack", wraps=torch.from_dlpack) as mock_fun:
+            _ = with_torch(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+    if array_interface == "cupy" and not TORCH_CUDA_AVAILABLE:
+        with patch("torch.as_tensor", wraps=torch.as_tensor) as mock_fun:
+            _ = with_torch(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+
+
+@pytest.mark.skipif(TENSORFLOW_AVAILABLE is False, reason="tensorflow not available")
+@_param_array_interface
+def test_tensorflow_conversion(array_interface):
+
+    # Create input array
+    array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
+
+    # Execute function and monitor internal conversion
+    if array_interface in ["numpy", "torch-cpu"]:
+        with patch(
+            "tensorflow.convert_to_tensor", wraps=tf.convert_to_tensor
+        ) as mock_fun:
+            _ = with_tensorflow(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+    if array_interface in ["cupy", "torch-gpu"] and TF_CUDA_AVAILABLE:
+        with patch(
+            "tensorflow.experimental.dlpack.from_dlpack",
+            wraps=tf.experimental.dlpack.from_dlpack,
+        ) as mock_fun:
+            _ = with_tensorflow(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3
+    if array_interface in ["cupy", "torch-gpu"] and not TF_CUDA_AVAILABLE:
+        with patch(
+            "tensorflow.convert_to_tensor", wraps=tf.convert_to_tensor
+        ) as mock_fun:
+            _ = with_tensorflow(dummy_func)(array, array, array, 1.0, "a string")
+            assert mock_fun.call_count == 3

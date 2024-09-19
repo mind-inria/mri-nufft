@@ -1,9 +1,10 @@
 """Array libraries compatibility utils."""
 
 import warnings
-import inspect
 
 from functools import wraps
+
+import numpy as np
 
 from mrinufft._utils import get_array_module
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_cuda_tensor
@@ -44,21 +45,20 @@ TF_CUDA_AVAILABLE = _tf_cuda_is_available()
 
 def with_numpy(fun):
     """Ensure the function works internally with numpy array."""
-    data_arg_idx = _ismethod(fun)
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        args = _get_args(fun, args, kwargs)
+        leading_arg = _get_leading_argument(args, kwargs)
 
-        # get array module and device from non-self argument
-        xp = get_array_module(args[data_arg_idx])
-        device = _get_device(args[data_arg_idx])
+        # get array module from leading argument
+        xp = get_array_module(leading_arg)
+        device = _get_device(leading_arg)
 
         # convert all to numpy
-        args = _to_numpy(*args)
+        args, kwargs = _to_numpy(*args, **kwargs)
 
         # run function
-        ret_ = fun(*args)
+        ret_ = fun(*args, **kwargs)
 
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
@@ -68,21 +68,20 @@ def with_numpy(fun):
 
 def with_tensorflow(fun):
     """Ensure the function works internally with tensorflow array."""
-    data_arg_idx = _ismethod(fun)
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        args = _get_args(fun, args, kwargs)
+        leading_arg = _get_leading_argument(args, kwargs)
 
-        # get array module from non-self argument
-        xp = get_array_module(args[data_arg_idx])
-        device = _get_device(args[data_arg_idx])
+        # get array module from leading argument
+        xp = get_array_module(leading_arg)
+        device = _get_device(leading_arg)
 
         # convert all to tensorflow
-        args = _to_tensorflow(*args)
+        args, kwargs = _to_tensorflow(*args, **kwargs)
 
         # run function
-        ret_ = fun(*args)
+        ret_ = fun(*args, **kwargs)
 
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
@@ -92,20 +91,19 @@ def with_tensorflow(fun):
 
 def with_numpy_cupy(fun):
     """Ensure the function works internally with numpy or cupy array."""
-    data_arg_idx = _ismethod(fun)
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        args = _get_args(fun, args, kwargs)
+        leading_arg = _get_leading_argument(args, kwargs)
 
-        # get array module from non-self argument
-        xp = get_array_module(args[data_arg_idx])
+        # get array module from leading argument
+        xp = get_array_module(leading_arg)
 
         # convert all to cupy / numpy according to data arg device
-        args = _to_numpy_cupy(args, data_arg_idx)
+        args, kwargs = _to_numpy_cupy(args, kwargs, leading_arg)
 
         # run function
-        ret_ = fun(*args)
+        ret_ = fun(*args, **kwargs)
 
         # convert output to original array module and device
         return _to_interface(ret_, xp)
@@ -115,32 +113,25 @@ def with_numpy_cupy(fun):
 
 def with_torch(fun):
     """Ensure the function works internally with Torch."""
-    data_arg_idx = _ismethod(fun)
 
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        args = _get_args(fun, args, kwargs)
+        leading_arg = _get_leading_argument(args, kwargs)
 
-        # get array module from non-self argument
-        xp = get_array_module(args[data_arg_idx])
-        device = _get_device(args[data_arg_idx])
+        # get array module from leading argument
+        xp = get_array_module(leading_arg)
+        device = _get_device(leading_arg)
 
         # convert all arrays to torch
-        args = _to_torch(*args)
+        args, kwargs = _to_torch(*args, device=device, **kwargs)
 
         # run function
-        ret_ = fun(*args)
+        ret_ = fun(*args, **kwargs)
 
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
 
     return wrapper
-
-
-def _ismethod(fun):
-    """Determine whether input fun is instance-/classmethod or not."""
-    first_arg = list(inspect.signature(fun).parameters)[0]
-    return first_arg in ["self", "cls"]
 
 
 def _get_device(input):
@@ -151,35 +142,24 @@ def _get_device(input):
         return "cpu"
 
 
-def _get_args(func, args, kwargs):
-    """Convert input args/kwargs mix to a list of positional arguments.
-
-    This automatically fills missing kwargs with default values.
-    """
-    signature = inspect.signature(func)
-
-    # Get number of arguments
-    n_args = len(args)
-
-    # Create a dictionary of keyword arguments and their default values
-    _kwargs = {}
-    for k, v in signature.parameters.items():
-        if v.default is not inspect.Parameter.empty:
-            _kwargs[k] = v.default
-        else:
-            _kwargs[k] = None
-
-    # Merge the default keyword arguments with the provided kwargs
-    for k in kwargs.keys():
-        _kwargs[k] = kwargs[k]
-
-    # Replace args
-    _args = list(_kwargs.values())
-
-    return list(args) + _args[n_args:]
+def _get_leading_argument(args, kwargs):
+    """Find first array argument."""
+    for arg in args:
+        try:
+            get_array_module(arg)
+            return arg
+        except Exception:
+            pass
+    for arg in kwargs.values():
+        try:
+            get_array_module(arg)
+            return arg
+        except Exception:
+            pass
+    return np.asarray(0.0)  # by default, use dummy numpy leading arg
 
 
-def _to_numpy(*args):
+def _to_numpy(*args, **kwargs):
     """Convert a sequence of arguments to numpy.
 
     Non-arrays are ignored.
@@ -201,12 +181,31 @@ def _to_numpy(*args):
                 _arg = cp.asnumpy(_arg)
             elif "tensorflow" in xp.__name__:
                 _arg = _arg.numpy()
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_numpy(*_arg)
         args[n] = _arg
 
-    return args
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _arg = kwargs[key]
+        if hasattr(_arg, "__array__"):
+            if is_cuda_array(_arg):
+                warnings.warn("data is on gpu, it will be moved to CPU.")
+            xp = get_array_module(_arg)
+            if xp.__name__ == "torch":
+                _arg = _arg.numpy(force=True)
+            elif xp.__name__ == "cupy":
+                _arg = cp.asnumpy(_arg)
+            elif "tensorflow" in xp.__name__:
+                _arg = _arg.numpy()
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_numpy(*_arg)
+        kwargs[key] = _arg
+
+    return args, kwargs
 
 
-def _to_cupy(*args, device=None):
+def _to_cupy(*args, device=None, **kwargs):
     """Convert a sequence of arguments to cupy.
 
     Non-arrays are ignored.
@@ -238,13 +237,42 @@ def _to_cupy(*args, device=None):
                         _arg = cp.asarray(_arg.numpy())
                 else:
                     _arg = cp.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_cupy(*_arg, device=device)
 
         args[n] = _arg
 
-    return args
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _arg = kwargs[key]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                with cp.cuda.Device(device):
+                    _arg = cp.asarray(_arg)
+            elif xp.__name__ == "torch":
+                if _arg.requires_grad:
+                    _arg = _arg.detach()
+                if _arg.is_cpu:
+                    with cp.cuda.Device(device):
+                        _arg = cp.asarray(_arg.numpy())
+                else:
+                    _arg = cp.from_dlpack(_arg)
+            elif "tensorflow" in xp.__name__:
+                if "CPU" in _arg.device:
+                    with cp.cuda.Device(device):
+                        _arg = cp.asarray(_arg.numpy())
+                else:
+                    _arg = cp.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_cupy(*_arg, device=device)
+
+        kwargs[key] = _arg
+
+    return args, kwargs
 
 
-def _to_numpy_cupy(args, data_arg_idx):
+def _to_numpy_cupy(args, kwargs, leading_argument):
     """Convert a sequence of arguments to numpy or cupy.
 
     Non-arrays are ignored.
@@ -252,15 +280,15 @@ def _to_numpy_cupy(args, data_arg_idx):
     This avoid transfers between different devices
     (e.g., CPU->GPU, GPU->CPU or different GPUs).
     """
-    if is_cuda_array(args[data_arg_idx]) and CUPY_AVAILABLE:
-        return _to_cupy(*args)
-    elif is_cuda_tensor(args[data_arg_idx]) and CUPY_AVAILABLE:
-        return _to_cupy(*args)
+    if is_cuda_array(leading_argument) and CUPY_AVAILABLE:
+        return _to_cupy(*args, **kwargs)
+    elif is_cuda_tensor(leading_argument) and CUPY_AVAILABLE:
+        return _to_cupy(*args, **kwargs)
     else:
-        return _to_numpy(*args)
+        return _to_numpy(*args, **kwargs)
 
 
-def _to_torch(*args, device=None):
+def _to_torch(*args, device=None, **kwargs):
     """Convert a sequence of arguments to Pytorch Tensors.
 
     Non-arrays are ignored.
@@ -289,13 +317,38 @@ def _to_torch(*args, device=None):
                     _arg = torch.as_tensor(_arg.numpy(), device=device)
                 else:
                     _arg = torch.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_torch(*_arg, device=device)
 
         args[n] = _arg
 
-    return args
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _arg = kwargs[key]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                _arg = torch.as_tensor(_arg, device=device)
+            elif xp.__name__ == "cupy":
+                if torch.cuda.is_available():
+                    _arg = torch.from_dlpack(_arg)
+                else:
+                    warnings.warn("data is on gpu, it will be moved to CPU.")
+                    _arg = torch.as_tensor(cp.asnumpy(_arg))
+            elif "tensorflow" in xp.__name__:
+                if "CPU" in _arg.device:
+                    _arg = torch.as_tensor(_arg.numpy(), device=device)
+                else:
+                    _arg = torch.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_torch(*_arg, device=device)
+
+        kwargs[key] = _arg
+
+    return args, kwargs
 
 
-def _to_tensorflow(*args):
+def _to_tensorflow(*args, **kwargs):
     """Convert a sequence of arguments to Tensorflow tensors.
 
     Non-arrays are ignored.
@@ -315,7 +368,7 @@ def _to_tensorflow(*args):
                 with tf.device("CPU"):
                     _arg = tf.convert_to_tensor(_arg)
             elif xp.__name__ == "cupy":
-                if tf_cuda_is_available:
+                if TF_CUDA_AVAILABLE:
                     _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
                 else:
                     warnings.warn("data is on gpu, it will be moved to CPU.")
@@ -325,15 +378,48 @@ def _to_tensorflow(*args):
                     _arg = _arg.detach()
                 if _arg.is_cpu:
                     _arg = tf.convert_to_tensor(_arg)
-                elif tf_cuda_is_available:
+                elif TF_CUDA_AVAILABLE:
                     _arg = tf.experimental.dlpack.from_dlpack(
                         torch.utils.dlpack.to_dlpack(_arg)
                     )
                 else:
                     _arg = tf.convert_to_tensor(_arg.numpy(force=True))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_tensorflow(*_arg)
+
         args[n] = _arg
 
-    return args
+    # convert keyworded arguments
+    for key in kwargs.keys():
+        _arg = kwargs[key]
+        if hasattr(_arg, "__array__"):
+            xp = get_array_module(_arg)
+            if xp.__name__ == "numpy":
+                with tf.device("CPU"):
+                    _arg = tf.convert_to_tensor(_arg)
+            elif xp.__name__ == "cupy":
+                if TF_CUDA_AVAILABLE:
+                    _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
+                else:
+                    warnings.warn("data is on gpu, it will be moved to CPU.")
+                    _arg = tf.convert_to_tensor(cp.asnumpy(_arg))
+            elif xp.__name__ == "torch":
+                if _arg.requires_grad:
+                    _arg = _arg.detach()
+                if _arg.is_cpu:
+                    _arg = tf.convert_to_tensor(_arg)
+                elif TF_CUDA_AVAILABLE:
+                    _arg = tf.experimental.dlpack.from_dlpack(
+                        torch.utils.dlpack.to_dlpack(_arg)
+                    )
+                else:
+                    _arg = tf.convert_to_tensor(_arg.numpy(force=True))
+        if isinstance(_arg, (tuple, list)):
+            _arg, _ = _to_tensorflow(*_arg)
+
+        kwargs[key] = _arg
+
+    return args, kwargs
 
 
 def _to_interface(args, array_interface, device=None):
@@ -365,11 +451,11 @@ def _to_interface(args, array_interface, device=None):
 
     # convert to target interface
     if array_interface.__name__ == "numpy":
-        args = _to_numpy(*args)
+        args, _ = _to_numpy(*args)
     elif array_interface.__name__ == "cupy":
-        args = _to_cupy(*args, device=device)
+        args, _ = _to_cupy(*args, device=device)
     elif array_interface.__name__ == "torch":
-        args = _to_torch(*args, device=device)
+        args, _ = _to_torch(*args, device=device)
 
     if len(args) == 1:
         return args[0]
