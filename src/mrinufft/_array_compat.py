@@ -147,7 +147,7 @@ def _get_device(input):
     """Determine computational device from input array."""
     try:
         return input.device
-    except Exception:
+    except AttributeError:
         return "cpu"
 
 
