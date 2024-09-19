@@ -39,7 +39,7 @@ def _tf_cuda_is_available():
         return False
 
 
-tf_cuda_is_available = _tf_cuda_is_available()
+TF_CUDA_AVAILABLE = _tf_cuda_is_available()
 
 
 def with_numpy(fun):
