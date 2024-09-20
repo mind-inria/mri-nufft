@@ -13,20 +13,16 @@ A collection of 2D non-Cartesian trajectories with analytical definitions.
 # are redundant across the different patterns, some of the documentation
 # will refer to previous patterns for explanation.
 #
-# Note that most sources have not been added yet, but will be in the near
-# future.
-#
 
 # External
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import show_argument, show_trajectory
 
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.maths as mntm
 from mrinufft import display_2D_trajectory
-from utils import show_argument, show_trajectory
-
 
 # %%
 # Script options
