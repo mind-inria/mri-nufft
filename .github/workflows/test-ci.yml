@@ -137,6 +137,9 @@ jobs:
             pip install torchkbnufft
           elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
             pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
+          elif [[ ${{ matrix.backend }} == "cufinufft" ]]; then
+            git clone https://github.com/chaithyagr/finufft --branch fix_spreadinterponly
+            pip install finufft/python/cufinufft
           else
             pip install ${{ matrix.backend }}
           fi
@@ -213,7 +216,9 @@ jobs:
           export PATH=/usr/local/cuda-12.1/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT cufinufft sigpy scikit-image
+          python -m pip install gpuNUFFT sigpy scikit-image
+          git clone https://github.com/chaithyagr/finufft --branch fix_spreadinterponly
+          pip install finufft/python/cufinufft
 
       - name: Run examples
         shell: bash
@@ -324,8 +329,10 @@ jobs:
           export PATH=/usr/local/cuda-12.1/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT cufinufft
-      
+          python -m pip install gpuNUFFT 
+          git clone https://github.com/chaithyagr/finufft --branch fix_spreadinterponly
+          pip install finufft/python/cufinufft
+          
       - name: Build API documentation
         run: |
           python -m sphinx docs docs_build
