@@ -40,11 +40,6 @@ OPTS_FIELD_DECODE = {
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
-def _error_check(ier, msg):
-    if ier != 0:
-        raise RuntimeError(msg)
-
-
 class RawCufinufftPlan:
     """Light wrapper around the guru interface of finufft."""
 
@@ -836,3 +831,52 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.uses_sense:
             self.smaps = self.smaps.conj()
         self.raw_op.toggle_grad_traj()
+
+
+    @classmethod
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
+        """Compute the density compensation weights for a given set of kspace locations.
+
+        Parameters
+        ----------
+        kspace_loc: np.ndarray
+            the kspace locations
+        volume_shape: np.ndarray
+            the volume shape
+        num_iterations: int default 10
+            the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
+        """
+        if CUFINUFFT_AVAILABLE is False:
+            raise ValueError(
+                "gpuNUFFT is not available, cannot " "estimate the density compensation"
+            )
+        volume_shape = np.array([int(osf * i) for i in volume_shape])
+        grid_op = MRICufiNUFFT(
+            samples=kspace_loc,
+            shape=volume_shape,
+            upsampfac=1,
+            gpu_spreadinterponly=1, 
+            gpu_kerevalmeth=0,
+            **kwargs,
+        )
+        density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
+        for _ in range(num_iterations):
+            density_comp /= cp.abs(
+                grid_op.op(
+                    grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
+                ).squeeze()
+            )
+        return density_comp.squeeze()

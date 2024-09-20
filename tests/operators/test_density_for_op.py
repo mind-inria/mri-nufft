@@ -25,21 +25,28 @@ def radial_distance(traj, shape):
         CasesTrajectories.case_nyquist_radial3D,
     ],
 )
-@parametrize(backend=["gpunufft", "tensorflow"])
+@parametrize(backend=["gpunufft", "tensorflow", "cufinufft"])
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
     distance = radial_distance(traj, shape)
     if osf != 2 and backend == "tensorflow":
         pytest.skip("OSF < 2 not supported for tensorflow.")
-    result = pipe(traj, shape, backend, osf=osf, num_iterations=10)
+    result = pipe(traj, shape, backend=backend, osf=osf, num_iterations=10)
+    if backend == "cufinufft":
+        result = result.get()
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
-    if backend == "tensorflow":
-        # If tensorflow, we dont perfectly estimate, but we still want to ensure
-        # we can get density
-        assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.5)
-    elif osf != 2:
-        # If OSF < 2, we dont perfectly estimate
-        assert_correlate(result, distance, slope=1, slope_err=None, r_value_err=0.2)
-    else:
-        assert_correlate(result, distance, slope=1, slope_err=0.1, r_value_err=0.1)
+    r_err = 0.2
+    slope_err = None
+    if osf == 2:
+        r_err = 0.1
+        slope_err = 0.1
+    if backend == "cufinufft":
+        r_err *= 2
+        slope_err = slope_err * 2 if slope_err is not None else None
+        if len(shape)==3:
+            r_err *= 2
+            slope_err = slope_err * 2 if slope_err is not None else None
+    elif backend == "tensorflow":
+        r_err = 0.5
+    assert_correlate(result, distance, slope=1, slope_err=slope_err, r_value_err=r_err)

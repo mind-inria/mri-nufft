@@ -75,7 +75,7 @@ class Model(torch.nn.Module):
             squeeze_dims=False,
         )
         # A simple density compensated adjoint SENSE operator with sensitivity maps `smaps`.
-        self.sense_op = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.sense_op = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             density=True,
