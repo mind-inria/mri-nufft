@@ -832,7 +832,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.smaps = self.smaps.conj()
         self.raw_op.toggle_grad_traj()
 
-
     @classmethod
     def pipe(
         cls,
@@ -868,7 +867,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             samples=kspace_loc,
             shape=volume_shape,
             upsampfac=1,
-            gpu_spreadinterponly=1, 
+            gpu_spreadinterponly=1,
             gpu_kerevalmeth=0,
             **kwargs,
         )

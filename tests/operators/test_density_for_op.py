@@ -44,7 +44,7 @@ def test_pipe(backend, traj, shape, osf):
     if backend == "cufinufft":
         r_err *= 2
         slope_err = slope_err * 2 if slope_err is not None else None
-        if len(shape)==3:
+        if len(shape) == 3:
             r_err *= 2
             slope_err = slope_err * 2 if slope_err is not None else None
     elif backend == "tensorflow":
