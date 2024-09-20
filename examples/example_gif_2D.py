@@ -1,22 +1,26 @@
 """
-=======================
-2D Trajectories display
-=======================
+========================
+Animated 2D trajectories
+========================
 
-A collection of 2D trajectories are generated and saved as a gif.
+An animation to show 2D trajectory customization.
 
 """
+
+import time
 
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageSequence
-import time
+
 import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory2D as mtt
 from mrinufft.trajectories.display import displayConfig
 
-# Options
+# %%
+# Script options
+# ==============
 
 Nc = 16
 Ns = 200
@@ -29,7 +33,9 @@ nb_frames = 3
 duration = 150  # seconds
 
 
-# Generation
+# %%
+# Trajectory generation
+# =====================
 
 # Initialize trajectory function
 functions = [
@@ -124,6 +130,10 @@ arguments = [
     [None] * nb_frames,  # None
 ]
 
+
+# %%
+# Animation rendering
+# ===================
 
 frame_setup = [
     (f, i, name, arg)

@@ -1,13 +1,14 @@
 """
-=======================
-3D Trajectories display
-=======================
+========================
+Animated 3D trajectories
+========================
 
-A collection of 3D trajectories are generated and saved as a gif.
+An animation to show 3D trajectory customization.
 
 """
 
 import time
+
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +18,9 @@ import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory3D as mtt
 from mrinufft.trajectories.display import displayConfig
 
-# Options
+# %%
+# Script options
+# ==============
 
 Nc = 8 * 8
 Ns = 200
@@ -30,7 +33,9 @@ nb_frames = 3
 duration = 150  # seconds
 
 
-# Generation
+# %%
+# Trajectory generation
+# =====================
 
 # Initialize trajectory function
 functions = [
@@ -133,6 +138,10 @@ arguments = [
     [None] * nb_frames,  # None
 ]
 
+
+# %%
+# Animation rendering
+# ===================
 
 frame_setup = [
     (f, i, name, arg)

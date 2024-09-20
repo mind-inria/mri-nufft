@@ -1,27 +1,37 @@
 # %%
 """
-===============================================
-Learn Sampling pattern with multi-resolution
-===============================================
+=========================================
+Learning sampling pattern with decimation
+=========================================
 
-A small pytorch example to showcase learning k-space sampling patterns.
-This example showcases the auto-diff capabilities of the NUFFT operator 
-wrt to k-space trajectory in mri-nufft.
+An example using PyTorch to showcase learning k-space sampling patterns with decimation.
 
-In this example we learn the k-space samples :math:`\mathbf{K}` for the following cost function:
+This example showcases the auto-differentiation capabilities of the NUFFT operator
+with respect to the k-space trajectory in MRI-nufft.
+
+Hereafter we learn the k-space sample locations :math:`\mathbf{K}` using the following cost function:
 
 .. math::
     \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
     
-where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
+where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator,
+:math:`D_\mathbf{K}` is the density compensator for trajectory :math:`\mathbf{K}`,
+and :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
 
-Additionally, in-order to converge faster, we also learn the trajectory in a multi-resolution fashion. This is done by first optimizing a 8 times decimated trajectory locations, called control points. After a fixed number of iterations (5 in this example), these control points are upscaled by a factor of 2. However, note that the NUFFT operator always holds linearly interpolated version of the control points as k-space sampling trajectory.
+Additionally, in order to converge faster, we also learn the trajectory in a multi-resolution fashion.
+This is done by first optimizing x8 times decimated trajectory locations, called control points.
+After a fixed number of iterations (5 in this example), these control points are upscaled by a factor of 2.
+Note that the NUFFT operator always holds linearly interpolated version of the control points as k-space sampling trajectory.
 
 .. note::
     This example can run on a binder instance as it is purely CPU based backend (finufft), and is restricted to a 2D single coil toy case.
 
 .. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
+    This example only showcases the auto-differentiation capabilities, the learned sampling pattern
+    is not scanner compliant as the gradients required to implement it violate the hardware constraints.
+    In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` onto the scanner constraints set :math:`\mathcal{Q}` is recommended
+    (see [Cha+16]_). This is implemented in the proprietary SPARKLING package [Cha+22]_.
+    Users are encouraged to contact the authors if they want to use it.
 """
 # %%
 # .. colab-link::
@@ -29,29 +39,28 @@ Additionally, in-order to converge faster, we also learn the trajectory in a mul
 #
 #    !pip install mri-nufft[finufft]
 
-# %%
-# Imports
-# -------
-
 import time
-import joblib
 
 import brainweb_dl as bwdl
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from tqdm import tqdm
 from PIL import Image, ImageSequence
+from tqdm import tqdm
 
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
 
 # %%
-# Setup a simple class to learn trajectory
-# ----------------------------------------
+# Utils
+# =====
+#
+# Model class
+# -----------
 # .. note::
 #     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
-#     See [Projector]_ for more details.
+#     See [GRC23]_ for more details.
 
 
 class Model(torch.nn.Module):
@@ -116,34 +125,54 @@ class Model(torch.nn.Module):
 
 
 # %%
-# Util function to plot the state of the model
-# --------------------------------------------
+# State plotting
+# --------------
 
 
-def plot_state(
-    axs, mri_2D, traj, recon, control_points=None, loss=None, save_name=None
-):
+def plot_state(axs, image, traj, recon, control_points=None, loss=None, save_name=None):
     axs = axs.flatten()
-    axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
+    # Upper left reference image
+    axs[0].imshow(np.abs(image[0]), cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("MR Image")
+
+    # Upper right trajectory
     axs[1].scatter(*traj.T, s=0.5)
     if control_points is not None:
         axs[1].scatter(*control_points.T, s=1, color="r")
-        axs[1].legend(["Trajectory", "Control Points"])
+        axs[1].legend(
+            ["Trajectory", "Control points"], loc="right", bbox_to_anchor=(2, 0.6)
+        )
+    axs[1].grid(True)
     axs[1].set_title("Trajectory")
+    axs[1].set_xlim(-0.5, 0.5)
+    axs[1].set_ylim(-0.5, 0.5)
+    axs[1].set_aspect("equal")
+
+    # Down left reconstructed image
     axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
     axs[2].axis("off")
     axs[2].set_title("Reconstruction")
+
+    # Down right loss evolution
     if loss is not None:
         axs[3].plot(loss)
+        axs[3].set_ylim(0, None)
         axs[3].grid("on")
         axs[3].set_title("Loss")
+        plt.subplots_adjust(hspace=0.3)
+
+    # Save & close
     if save_name is not None:
         plt.savefig(save_name, bbox_inches="tight")
         plt.close()
     else:
         plt.show()
+
+
+# %%
+# Optimizer upscaling
+# -------------------
 
 
 def upsample_optimizer(optimizer, new_optimizer, factor=2):
@@ -172,47 +201,61 @@ def upsample_optimizer(optimizer, new_optimizer, factor=2):
 
 
 # %%
-# Setup Inputs (models, trajectory and image)
-# -------------------------------------------
-# First we create the model with a simple radial trajectory (32 shots of 256 points)
-
-init_traj = initialize_2D_radial(32, 256).astype(np.float32)
-model = Model(init_traj, img_size=(256, 256))
-model.eval()
-
-# %%
-# The image on which we are going to train.
-# .. note ::
-#    In practice we would use instead a dataset (e.g. fastMRI)
+# Data preparation
+# ================
+#
+# A single image to train the model over. Note that in practice
+# we would use a whole dataset instead (e.g. fastMRI).
 #
 
-mri_2D = torch.from_numpy(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32))[
-    None
-]
-mri_2D = mri_2D / torch.mean(mri_2D)
-
-
-# Initialisation
-# --------------
-# Before training, here is the simple reconstruction we have using a
-# density compensated adjoint.
-
-recon = model(mri_2D)
-fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-plot_state(axs, mri_2D, init_traj, recon, model.control.detach().cpu().numpy())
+volume = np.flip(bwdl.get_mri(4, "T1"), axis=(0, 1, 2))
+image = torch.from_numpy(volume[-80, ...].astype(np.float32))[None]
+image = image / torch.mean(image)
 
 # %%
-# Start training loop
-# -------------------
+# A basic radial trajectory with an acceleration factor of 8.
+
+AF = 8
+initial_traj = initialize_2D_radial(image.shape[1] // AF, image.shape[2]).astype(
+    np.float32
+)
+
+
+# %%
+# Trajectory learning
+# ===================
+#
+# Initialisation
+# --------------
+
+model = Model(initial_traj, img_size=image.shape[1:])
+model = model.eval()
+
+# %%
+# The image obtained before learning the sampling pattern
+# is highly degraded because of the acceleration factor and simplicity
+# of the trajectory.
+
+initial_recons = model(image)
+
+fig, axs = plt.subplots(1, 3, figsize=(9, 3))
+plot_state(axs, image, initial_traj, initial_recons)
+
+
+# %%
+# Training loop
+# -------------
+
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+model.train()
+
 losses = []
 image_files = []
-model.train()
 while model.current_decim >= 1:
     with tqdm(range(30), unit="steps") as tqdms:
         for i in tqdms:
-            out = model(mri_2D)
-            loss = torch.nn.functional.mse_loss(out, mri_2D[None, None])
+            out = model(image)
+            loss = torch.nn.functional.mse_loss(out, image[None, None])
             numpy_loss = (loss.detach().cpu().numpy(),)
 
             tqdms.set_postfix({"loss": numpy_loss})
@@ -232,7 +275,7 @@ while model.current_decim >= 1:
             fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
             plot_state(
                 axs,
-                mri_2D,
+                image,
                 model.get_trajectory().detach().cpu().numpy(),
                 out,
                 model.control.detach().cpu().numpy(),
@@ -248,6 +291,7 @@ while model.current_decim >= 1:
                 optimizer, torch.optim.Adam(model.parameters(), lr=1e-3)
             )
 
+# %%
 
 # Make a GIF of all images.
 imgs = [Image.open(img) for img in image_files]
@@ -259,6 +303,7 @@ imgs[0].save(
     duration=2,
     loop=0,
 )
+
 # sphinx_gallery_start_ignore
 # cleanup
 import os
@@ -284,8 +329,6 @@ except FileNotFoundError:
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_learn_traj_multires.gif'
-
 # %%
 # .. image-sg:: /generated/autoexamples/images/mrinufft_learn_traj_multires.gif
 #    :alt: example learn_samples
@@ -293,42 +336,43 @@ except FileNotFoundError:
 #    :class: sphx-glr-single-img
 
 # %%
-# Trained trajectory
-# ------------------
+# Results
+# -------
+
 model.eval()
-recon = model(mri_2D)
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-plot_state(
-    axs,
-    mri_2D,
-    model.get_trajectory().detach().cpu().numpy(),
-    recon=recon,
-    control_points=None,
-    loss=losses,
-)
+final_recons = model(image)
+final_traj = model.get_trajectory().detach().cpu().numpy()
+
+# %%
+
+fig, axs = plt.subplots(1, 3, figsize=(9, 3))
+plot_state(axs, image, final_traj, final_recons)
 plt.show()
 
 # %%
-# .. note::
-#   The above learned trajectory is not that good because:
-#    - The trajectory is trained only for 5 iterations per decimation level, resulting in a suboptimal trajectory.
-#    - In order to make the example CPU compliant, we had to resort to preventing density compensation, hence the reconstructor is not good.
 #
-# Users are requested to checkout :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` for example with density compensation.
+# The learned trajectory above improves the reconstruction quality as compared to
+# the initial trajectory shown above. Note of course that the reconstructed
+# image is far from perfect because of the documentation rendering constraints.
+# In order to improve the results one can start by training it for more than
+# just 5 iterations per decimation level. Also density compensation should be used,
+# even though it was avoided here for CPU compliance. Check out
+# :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` to know more.
+
 
 # %%
 # References
 # ==========
 #
-# .. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for
+# .. [Cha+16] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for
 #           Gradient Waveforms Design in Magnetic Resonance Imaging," in
 #           IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016,
 #           doi: 10.1109/TMI.2016.2544251.
-# .. [Sparks] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu,
+# .. [Cha+22] G. R. Chaithya, P. Weiss, G. Daval-Frérot, A. Massire, A. Vignaud and P. Ciuciu,
 #           "Optimizing Full 3D SPARKLING Trajectories for High-Resolution Magnetic
 #           Resonance Imaging," in IEEE Transactions on Medical Imaging, vol. 41, no. 8,
 #           pp. 2105-2117, Aug. 2022, doi: 10.1109/TMI.2022.3157269.
-# .. [Projector] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian
+# .. [GRC23] Chaithya GR, and Philippe Ciuciu. 2023. "Jointly Learning Non-Cartesian
 #           k-Space Trajectories and Reconstruction Networks for 2D and 3D MR Imaging
 #           through Projection" Bioengineering 10, no. 2: 158.
 #           https://doi.org/10.3390/bioengineering10020158
