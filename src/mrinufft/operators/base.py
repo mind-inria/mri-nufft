@@ -372,7 +372,7 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        if isinstance(method, np.ndarray):
+        if is_host_array(method) or is_cuda_array(method):
             self.smaps = method
             return
         if not method:
