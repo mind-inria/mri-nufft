@@ -75,10 +75,12 @@ As the sampling locations $\Omega$ are non-uniform and the image locations $\bol
 Similarly the adjoint operator is a Type 1 NUFFT:
 
 : Correspondance Table between NUFFT and MRI acquisition model.
-| NUFFT Type | Operation | MRI Transform      | Operator               |
-|:-----------|:----------|:-------------------|:-----------------------|
-| Type 1     | Adjoint   | Kspace $\to$ Image | $\mathcal{F}_\Omega^*$ |
-| Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
+
+    | NUFFT Type | Operation | MRI Transform      | Operator               |
+    |:-----------|:----------|:-------------------|:-----------------------|
+    | Type 1     | Adjoint   | Kspace $\to$ Image | $\mathcal{F}_\Omega^*$ |
+    | Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
+
 
 ### Extension of the Acquisition Model
 #### Parallel Imaging Model
