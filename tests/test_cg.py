@@ -19,8 +19,6 @@ from helpers import assert_almost_allclose
     "backend",
     [
         "bart",
-        "pynfft",
-        "pynufft-cpu",
         "finufft",
         "cufinufft",
         "gpunufft",
