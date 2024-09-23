@@ -279,6 +279,15 @@ class MRICufiNUFFT(FourierOperatorBase):
             self.raw_op._set_pts(typ, samples)
         self.compute_density(self._density_method)
 
+    @FourierOperatorBase.density.setter
+    def density(self, new_density):
+        """Update the density compensation."""
+        xp = get_array_module(new_density)
+        if xp.__name__ == "numpy":
+            self._density = cp.array(new_density)
+        elif xp.__name__ == "cupy":
+            self._density = new_density
+
     @with_numpy_cupy
     @nvtx_mark()
     def op(self, data, ksp_d=None):
