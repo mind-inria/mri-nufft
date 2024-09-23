@@ -51,10 +51,27 @@ MRI-NUFFT is a python package that provides a universal interface to various Non
 # Statement of Need 
 MRI is an non-invasive biomedical imaging technique, where raw data is sampled in the spatial frequency domain (k-space) and final images are  obtained by applying a (fast) fourier transform on this data.
 Traditionnaly, the data is sampled on a cartesian grid, potentially with skipping lines (to accelerate the acquisition)  and reconstructed using FFT-based algorithms. 
+However, the cartesian grid is not always the best choice for sampling the data, and non-cartesian sampling schemes have been proposed to improve the image quality, reduce the acquisition time or to enable new imaging modalities. The reconstruction of non-cartesian data is more complex than the cartesian case, and requires the use of non-uniform fast fourier transform (NUFFT) algorithms. 
+Several NUFFT libraries have been developed in the past years, but they are not always easy to use, and they are not always implementing the specificities of MRI data acquisition (e.g. multi-coil acquisition, static-field inhomogeneities, density compensation, etc.). Also their performances can vary a lot depending on the specific use-case (2D vs 3D data, number of coils, etc.). 
+
+Moreover, the use of non-cartesian sampling in MRI is still an active research field, with new sampling patterns being proposed regularly. It is important for researchers to be able to easily experiment with these new patterns, and to compare them with existing ones. Recently there has been a growing interest in using deep learning for MRI acquisition and reconstruction, and using those new methods for Non-Cartesian Data requires to be able to compute the gradients of the reconstruction with respect to the data and/or the sampling locations. Some attemps have been made, but their implementation remains either slow, wrong or lack documentation. 
 
 
-# Main Characteristic of MRI-NUFFT 
 
+# Features 
+
+
+## Extended Fourier Model 
+
+
+
+## NUFFT libraries compatibility
+
+## Trajectories generation and expansions 
+
+## Density compensation estimation
+
+## Autodifferentiation
 
 
 # References
