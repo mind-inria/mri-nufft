@@ -9,9 +9,9 @@ tags:
   - Torch 
 authors:
   - name: Pierre-Antoine Comby
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-6998-232X
     corresponding: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: "1, 2"
   - name: Guillaume Daval-Frérot
     affiliation: 3
   - name: Asma Tanaben
@@ -23,13 +23,13 @@ authors:
   - name: Mattheo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
-    affiliation: 1
+    affiliation: "1,2"
   - name: Chaithya GR
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 1
+    corresponding: true 
+    affiliation: "1,2"
     
 affiliations:
- - name: MIND 
+ - name: MIND, Inria
    index: 1
  - name: Université Paris-Saclay / CEA 
    index: 2
@@ -58,10 +58,10 @@ Several NUFFT libraries have been developed in the past years, but they are not 
 Moreover, the use of non-cartesian sampling in MRI is still an active research field, with new sampling patterns being proposed regularly. It is important for researchers to be able to easily experiment with these new patterns, and to compare them with existing ones. Recently there has been a growing interest in using deep learning for MRI acquisition and reconstruction, and using those new methods for Non-Cartesian Data requires to be able to compute the gradients of the reconstruction with respect to the data and/or the sampling locations. Some attemps have been made, but their implementation remains either slow, wrong or lack documentation. 
 
 # Features 
-The main features of MRI-NUFFT are: 
-
 ## NUFFT Library compatibility 
-MRI-NUFFT is compatible with the following NUFFT librairies: finufft, cufinuff, gpunufft, torchkbnufft, pynfft, sigpy and BART. Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration.
+MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration. MRI-NUFFT supports as well  standard array libraries (numpy, cupy, torch, tensorflow, etc.) and optimizes data copies, relying on the array-api standard. 
+On top of these NUFFT backend, it provides several enhancements, notably an optimized 2.5D NUFFT (for stack of 2D non uniform trajectory, a common pattern in MRI), and a data-consistency term for iterative reeconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$) that can be used in iterative reconstruction algorithms.
+
 
 ## Extended Fourier Model 
 MRI-NUFFT provides a physical model of the MRI acquisition processus, including multi-coil acquisition and static-field inhomogeneities. This model is compatible with the NUFFT libraries, and can be used to simulate the acquisition of MRI data, or to reconstruct data from a given set of measurements. Namely we provide a linear operator that encapsulates the forward and adjoint NUFFT operators, the coil sensitivity maps and (optionnaly) the static field inhomogeneities. The forward model is described by the following equation:
@@ -84,9 +84,8 @@ Similarly the adjoint operator is a Type 1 NUFFT:
 
 ### Extension of the Acquisition Model
 #### Parallel Imaging Model
-In MRI the acquired signal can be received by multiple antennas
-(\"coils\"). Each coil possesses a specific sensitivity profile (i.e.
-each sees the object differently due to its physical layout).
+In MRI the acquired signal can be received by multiple antennas (\"coils\"). 
+Each coil possesses a specific sensitivity profile (i.e. each sees the object differently due to its physical layout).
 
 
 $$\begin{aligned}
@@ -119,12 +118,8 @@ The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n)
 ## Trajectories generation and expansions 
 MRI-NUFFT comes with a wide variety of Non Cartesian trajectory generation routines, that have been gathered from the literature. It also provides ways of expanding existing trajectories. It is also able to export to specific formats, to be used in other toolboxes and on MRI hardware.
 
-## Density compensation estimation
-
 ## Autodifferentiation
 Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available.
-
-
 
 # References
 
