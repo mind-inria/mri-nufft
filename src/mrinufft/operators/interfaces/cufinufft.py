@@ -247,7 +247,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         self._check_smaps_shape(new_smaps)
         if new_smaps is not None and hasattr(self, "smaps_cached"):
-            if self.smaps_cached:
+            if self.smaps_cached or is_cuda_array(new_smaps):
+                self.smaps_cached = True
                 warnings.warn(
                     f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
