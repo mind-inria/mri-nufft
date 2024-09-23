@@ -40,6 +40,32 @@ OPTS_FIELD_DECODE = {
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
+def _next235beven(n, b):
+    """Find the next even integer not less than n.
+
+    This function finds the next even integer not less than n, with prime factors no
+    larger than 5, and is a multiple of b (where b is a number that only
+    has prime factors 2, 3, and 5).
+    It is used in particular with `pipe` density compensation estimation.
+    """
+    if n <= 2:
+        return 2
+    if n % 2 == 1:
+        n += 1  # make it even
+    nplus = n - 2  # to cancel out the +=2 at start of loop
+    numdiv = 2  # a dummy that is >1
+    while numdiv > 1 or nplus % b != 0:
+        nplus += 2  # stays even
+        numdiv = nplus
+        while numdiv % 2 == 0:
+            numdiv //= 2  # remove all factors of 2, 3, 5...
+        while numdiv % 3 == 0:
+            numdiv //= 3
+        while numdiv % 5 == 0:
+            numdiv //= 5
+    return nplus
+
+
 class RawCufinufftPlan:
     """Light wrapper around the guru interface of finufft."""
 
@@ -862,7 +888,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
-        volume_shape = np.array([int(osf * i) for i in volume_shape])
+        volume_shape = np.array([_next235beven(int(osf * i), 1) for i in volume_shape])
         grid_op = MRICufiNUFFT(
             samples=kspace_loc,
             shape=volume_shape,
