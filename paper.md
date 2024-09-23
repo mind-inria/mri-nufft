@@ -59,11 +59,11 @@ Moreover, the use of non-cartesian sampling in MRI is still an active research f
 
 # Features 
 The main features of MRI-NUFFT are: 
+
 ## NUFFT Library compatibility 
 MRI-NUFFT is compatible with the following NUFFT librairies: finufft, cufinuff, gpunufft, torchkbnufft, pynfft, sigpy and BART. Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration.
 
 ## Extended Fourier Model 
-
 MRI-NUFFT provides a physical model of the MRI acquisition processus, including multi-coil acquisition and static-field inhomogeneities. This model is compatible with the NUFFT libraries, and can be used to simulate the acquisition of MRI data, or to reconstruct data from a given set of measurements. Namely we provide a linear operator that encapsulates the forward and adjoint NUFFT operators, the coil sensitivity maps and (optionnaly) the static field inhomogeneities. The forward model is described by the following equation:
 $$y(\boldsymbol{\nu}_i) = \sum_{j=1}^N x(\boldsymbol{u}_j) e^{-2\imath\pi\boldsymbol{u}_j\cdot\boldsymbol{\nu_i}} + n_i, \quad i=1,\dots,M$$
 Where:
@@ -74,13 +74,14 @@ This can also be formulated using the operator notation $\boldsymbol{y} = \mathc
 As the sampling locations $\Omega$ are non-uniform and the image locations $\boldsymbol{u}_j$ are uniform, $\mathcal{F}_\Omega$ is a NUDFT operator, and the equation above describe a Type 2 NUDFT.
 Similarly the adjoint operator is a Type 1 NUFFT:
 
-+------------+-----------+--------------------+------------------------+
++============+===========+====================+========================+
 | NUFFT Type | Operation | MRI Transform      | Operator               |
-+------------+-----------+--------------------+------------------------+
++============+===========+====================+========================+
 | Type 1     | Adjoint   | Kspace $\to$ Image | $\mathcal{F}_\Omega^*$ |
-| Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
 +------------+-----------+--------------------+------------------------+
- Correspondance Table between NUFFT and MRI acquisition model.
+| Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
++============+===========+====================+========================+
+Correspondance Table between NUFFT and MRI acquisition model.
 
 ### Extension of the Acquisition Model
 #### Parallel Imaging Model
