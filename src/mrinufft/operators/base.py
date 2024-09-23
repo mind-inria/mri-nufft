@@ -441,7 +441,9 @@ class FourierOperatorBase(ABC):
             if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
                 or `torchkbnufft-gpu`.
         """
-        if isinstance(method, np.ndarray):
+        if isinstance(method, np.ndarray) or (
+            CUPY_AVAILABLE and isinstance(method, cp.ndarray)
+        ):
             self.density = method
             return None
         if not method:
