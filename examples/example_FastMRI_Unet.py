@@ -1,5 +1,8 @@
+# %%
 """Simple UNet model."""
 
+# %%
+# Imports
 import os
 from pathlib import Path
 import shutil
@@ -16,42 +19,8 @@ from fastmri.models import Unet
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_spiral
 
-
-def plot_state(axs, mri_2D, img, recon, loss=None, save_name=None):
-    """Graphique.
-
-    Plot the original MRI image, the pre-training image, the reconstructed image,
-    and the loss curve (if provided). Saves the plot if a filename is provided.
-
-    Parameters
-    ----------
-    axs (numpy array): Array of matplotlib axes to plot on.
-    mri_2D (torch.Tensor): Original MRI image.
-    img (torch.Tensor): Image before training.
-    recon (torch.Tensor): Reconstructed image after training.
-    loss (list, optional): List of loss values to plot. Defaults to None.
-    save_name (str, optional): Filename to save the plot. Defaults to None.
-    """
-    axs = axs.flatten()
-    axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
-    axs[0].axis("off")
-    axs[0].set_title("Objectif image")
-    axs[1].imshow(np.abs(img[0][0].detach().numpy()), cmap="gray")
-    axs[1].axis("off")
-    axs[1].set_title("Image pre trainning")
-    axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
-    axs[2].axis("off")
-    axs[2].set_title("Reconstruction")
-    if loss is not None:
-        axs[3].plot(loss)
-        axs[3].set_title("Loss")
-        axs[3].grid("on")
-    if save_name is not None:
-        plt.savefig(save_name, bbox_inches="tight")
-        plt.close()
-    else:
-        plt.show()
-
+# %%
+# Setup a simple class for the U-Net model
 
 class Model(torch.nn.Module):
     """Model for MRI reconstruction using a U-Net."""
@@ -73,26 +42,70 @@ class Model(torch.nn.Module):
         recon /= torch.mean(recon)
         return recon
 
-# Initialize the U-Net model for MRI reconstruction
+# %%
+# Util function to plot the state of the model
+def plot_state(
+    axs, mri_2D, traj, recon, loss=None, save_name=None
+):
+    """Graphique.
+
+    Plot the original MRI image, the trajectory, the reconstructed image,
+    and the loss curve (if provided). Saves the plot if a filename is provided.
+
+    Parameters
+    ----------
+    axs (numpy array): Array of matplotlib axes to plot on.
+    mri_2D (torch.Tensor): Original MRI image.
+    traj : Trajectory.
+    recon (torch.Tensor): Reconstructed image after training.
+    loss (list, optional): List of loss values to plot. Defaults to None.
+    save_name (str, optional): Filename to save the plot. Defaults to None.
+    """
+    axs = axs.flatten()
+    axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
+    axs[0].axis("off")
+    axs[0].set_title("MR Image")
+    axs[1].scatter(*traj.T, s=0.5)
+    axs[1].set_title("Trajectory")
+    axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
+    axs[2].axis("off")
+    axs[2].set_title("Reconstruction")
+    if loss is not None:
+        axs[3].plot(loss)
+        axs[3].grid("on")
+        axs[3].set_title("Loss")
+    if save_name is not None:
+        plt.savefig(save_name, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
+
+
+# %%
+# Setup Inputs (models, trajectory and image)
 init_traj = initialize_2D_spiral(64, 256).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
+model.eval()
 
-# Initialize optimizer and learning rate scheduler
-epoch = 100
-optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
-
-# Load and preprocess MRI data
+# %%
+# The image on which we are going to train.
 mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
     None
 ]
 mri_2D = mri_2D / torch.mean(mri_2D)
 kspace_mri_2D = model.operator.op(mri_2D)
 
-# Perform a forward pass to obtain the initial reconstruction before training
-model.eval()
+# Before training, here is the simple reconstruction we have using a
+# density compensated adjoint.
 old_recon = model(kspace_mri_2D)
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+plot_state(axs, mri_2D, init_traj, old_recon)
 
-#  Train the model
+
+# %%
+# Start training loop
+epoch = 100
+optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
 model.train()
@@ -116,7 +129,7 @@ with tqdm(range(epoch), unit="steps") as tqdms:
         plot_state(
             axs,
             mri_2D,
-            old_recon,
+            init_traj,
             out,
             losses,
             save_name=filename,
@@ -157,10 +170,11 @@ try:
 except FileNotFoundError:
     pass
 
-# Perform a final evaluation of the model after training
+# %%
+# Trained trajectory
 model.eval()
 kspace_mri_2D = model.operator.op(mri_2D)
 new_recon = model(kspace_mri_2D)
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-plot_state(axs, mri_2D, old_recon, new_recon, losses)
+plot_state(axs, mri_2D, init_traj, new_recon, losses)
 plt.show()
