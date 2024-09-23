@@ -15,11 +15,11 @@ authors:
   - name: Guillaume Daval-Frérot
     affiliation: 3
   - name: Asma Tanaben
-    affiliation: 1 
+    affiliation: "1,2,5" 
   - name: Caini Pan 
-    affiliation: 1 
+    affiliation: "1, 2"
   - name: Lena Oudjema 
-    affiliation: 1
+    affiliation: 1,2
   - name: Mattheo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
@@ -37,6 +37,8 @@ affiliations:
    index: 3
  - name: University Pisa 
    index: 4 
+ - name: Siemens Healthineers 
+   index: 5
    
 date: 20 September 2024
 bibliography: paper.bib
