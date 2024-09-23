@@ -1,5 +1,32 @@
 # %%
-"""Simple UNet model."""
+"""
+Simple UNet model.
+
+This model is a simplified version of the U-Net architecture, which is widely used for image segmentation tasks. 
+The U-Net model consists of an encoder (downsampling path) and a decoder (upsampling path) with skip connections 
+between corresponding layers in the encoder and decoder. These skip connections help in retaining spatial information 
+that is lost during the downsampling process.
+
+The primary purpose of this model is to perform image reconstruction tasks, specifically for MRI images. 
+It takes an input MRI image and reconstructs it to improve the image quality or to recover missing parts of the image.
+
+This implementation of the UNet model was pulled from the FastMRI Facebook repository, which is a collaborative 
+research project aimed at advancing the field of medical imaging using machine learning techniques.
+
+References:
+- FastMRI Facebook repository: https://github.com/facebookresearch/fastMRI
+@misc{zbontar2018fastMRI,
+    title={{fastMRI}: An Open Dataset and Benchmarks for Accelerated {MRI}},
+    author={Jure Zbontar and Florian Knoll and Anuroop Sriram and Tullie Murrell and Zhengnan Huang and Matthew J. Muckley and Aaron Defazio and Ruben Stern and Patricia Johnson and Mary Bruno and Marc Parente and Krzysztof J. Geras and Joe Katsnelson and Hersh Chandarana and Zizhao Zhang and Michal Drozdzal and Adriana Romero and Michael Rabbat and Pascal Vincent and Nafissa Yakubova and James Pinkerton and Duo Wang and Erich Owens and C. Lawrence Zitnick and Michael P. Recht and Daniel K. Sodickson and Yvonne W. Lui},
+    journal = {ArXiv e-prints},
+    archivePrefix = "arXiv",
+    eprint = {1811.08839},
+    year={2018}
+}
+
+.. warning::
+    The training process is make on one image, so the training is not optimal.
+"""
 
 # %%
 # Imports
@@ -47,7 +74,7 @@ class Model(torch.nn.Module):
 # %%
 # Util function to plot the state of the model
 def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
-    """Graphique.
+    """Image plotting function.
 
     Plot the original MRI image, the trajectory, the reconstructed image,
     and the loss curve (if provided). Saves the plot if a filename is provided.
