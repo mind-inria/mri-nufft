@@ -78,3 +78,24 @@
   langid = {english},
   file = {/volatile/home/pc266769/Zotero/storage/4NDF5834/fessler_nonuniform_2003.pdf}
 }
+
+@article{wang_efficient_2023,
+  title = {Efficient Approximation of {{Jacobian}} Matrices Involving a Non-Uniform Fast {{Fourier}} Transform ({{NUFFT}})},
+  author = {Wang, Guanhua and Fessler, Jeffrey A.},
+  date = {2023},
+  journaltitle = {IEEE Transactions on Computational Imaging},
+  shortjournal = {IEEE Trans. Comput. Imaging},
+  volume = {9},
+  eprint = {2111.02912},
+  eprinttype = {arXiv},
+  eprintclass = {eess},
+  pages = {43--54},
+  issn = {2333-9403, 2334-0118, 2573-0436},
+  doi = {10.1109/TCI.2023.3240081},
+  url = {http://arxiv.org/abs/2111.02912},
+  urldate = {2024-04-11},
+  abstract = {There is growing interest in learning k-space sampling patterns for MRI using optimization approaches [1], [2], [3], [4]. For non-Cartesian sampling patterns, reconstruction methods typically involve non-uniform FFT (NUFFT) operations. A typical NUFFT method contains frequency domain interpolation using Kaiser-Bessel kernel values that are retrieved by nearest neighbor look-up in a finely tabulated kernel [5]. That look-up operation is not differentiable with respect to the sampling pattern, complicating auto-differentiation routines for backpropagation (stochastic gradient descent) for sampling pattern optimization. This paper describes an efficient and accurate approach for computing approximate gradients with respect to the sampling pattern for learning k-space sampling. Various numerical experiments validate the accuracy of the proposed approximation. We also showcase the trajectories optimized for different iterative reconstruction algorithms, including smooth convex regularized reconstruction and compressed sensing-based reconstruction.},
+  langid = {english},
+  keywords = {Electrical Engineering and Systems Science - Image and Video Processing,Electrical Engineering and Systems Science - Signal Processing},
+  file = {/volatile/home/pc266769/Zotero/storage/HU6FNVQU/Wang et Fessler - 2023 - Efficient approximation of Jacobian matrices invol.pdf}
+}

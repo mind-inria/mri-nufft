@@ -59,6 +59,8 @@ Moreover, the use of non-cartesian sampling in MRI is still an active research f
 
 # Features 
 The main features of MRI-NUFFT are: 
+## NUFFT Library compatibility 
+MRI-NUFFT is compatible with the following NUFFT librairies: finufft, cufinuff, gpunufft, torchkbnufft, pynfft, sigpy and BART. Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration.
 
 ## Extended Fourier Model 
 
@@ -72,12 +74,12 @@ This can also be formulated using the operator notation $\boldsymbol{y} = \mathc
 As the sampling locations $\Omega$ are non-uniform and the image locations $\boldsymbol{u}_j$ are uniform, $\mathcal{F}_\Omega$ is a NUDFT operator, and the equation above describe a Type 2 NUDFT.
 Similarly the adjoint operator is a Type 1 NUFFT:
 
-|----------------------------------------------------------------------|
++------------+-----------+--------------------+------------------------+
 | NUFFT Type | Operation | MRI Transform      | Operator               |
-|------------|-----------|--------------------|------------------------|
++------------+-----------+--------------------+------------------------+
 | Type 1     | Adjoint   | Kspace $\to$ Image | $\mathcal{F}_\Omega^*$ |
 | Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
-|------------|-----------|--------------------|------------------------|
++------------+-----------+--------------------+------------------------+
  Correspondance Table between NUFFT and MRI acquisition model.
 
 ### Extension of the Acquisition Model
@@ -107,31 +109,21 @@ Fortunately, this inhomogeneity map can be acquired separatly or estimated and i
 $$y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}$$
 
 where $t_i$ is the time at which the frequency $\nu_i$ is acquired.
-Similarly at the reconstruction we have
-
-$$x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}$$
-
 With these mixed-domain field pertubations, the Fourier model does not hold anymore and the FFT algorithm cannot be used any longer. 
-The main approach [@sutton_fast_2003] is to approximate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}$:
-
-$$e^{i\Delta\omega(\boldsymbol{u_n}) t_m} = \sum_{\ell=1}^L b_{m, \ell}\, c_{\ell, n}$$
-
-Yielding the following model, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
+The main approach [@sutton_fast_2003] is to approximate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
 
 $$x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}$$
-The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be (optimally) estimated for any given $L$ by solving the following matrix factorisation problem:
 
-$$\hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2$$
-
-Where $E_mn = e^i\Delta\omega_0(u_n)t_m$.
-
-## NUFFT libraries compatibility
+The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be (optimally) estimated within MRI-NUFFT.
 
 ## Trajectories generation and expansions 
+MRI-NUFFT comes with a wide variety of Non Cartesian trajectory generation routines, that have been gathered from the literature. It also provides ways of expanding existing trajectories. It is also able to export to specific formats, to be used in other toolboxes and on MRI hardware.
 
 ## Density compensation estimation
 
 ## Autodifferentiation
+Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available.
+
 
 
 # References
