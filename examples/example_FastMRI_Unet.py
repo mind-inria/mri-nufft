@@ -14,7 +14,7 @@ from PIL import Image
 
 from fastmri.models import Unet
 from mrinufft import get_operator
-from mrinufft.trajectories import initialize_2D_radial
+from mrinufft.trajectories import initialize_2D_spiral
 
 
 def plot_state(axs, mri_2D, img, recon, loss=None, save_name=None):
@@ -69,24 +69,23 @@ class Model(torch.nn.Module):
     def forward(self, kspace):
         """Forward pass of the model."""
         image = self.operator.adj_op(kspace)
-        recon = self.unet(image.float())
+        recon = self.unet(image.float()).abs()
+        recon /= torch.mean(recon)
         return recon
 
-
 # Initialize the U-Net model for MRI reconstruction
-init_traj = initialize_2D_radial(64, 256).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_spiral(64, 256).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 
 # Initialize optimizer and learning rate scheduler
 epoch = 100
 optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
 
 # Load and preprocess MRI data
 mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
     None
 ]
-mri_2D = mri_2D / torch.linalg.norm(mri_2D)
+mri_2D = mri_2D / torch.mean(mri_2D)
 kspace_mri_2D = model.operator.op(mri_2D)
 
 # Perform a forward pass to obtain the initial reconstruction before training
@@ -109,7 +108,6 @@ with tqdm(range(epoch), unit="steps") as tqdms:
         optimizer.zero_grad()  # Zero gradients
         loss.backward()  # Backward pass
         optimizer.step()  # Update weights
-        scheduler.step()  # Update learning rate
 
         # Generate images for gif
         hashed = joblib.hash((i, "learn_traj", time.time()))
