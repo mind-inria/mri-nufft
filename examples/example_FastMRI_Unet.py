@@ -22,6 +22,7 @@ from mrinufft.trajectories import initialize_2D_spiral
 # %%
 # Setup a simple class for the U-Net model
 
+
 class Model(torch.nn.Module):
     """Model for MRI reconstruction using a U-Net."""
 
@@ -42,11 +43,10 @@ class Model(torch.nn.Module):
         recon /= torch.mean(recon)
         return recon
 
+
 # %%
 # Util function to plot the state of the model
-def plot_state(
-    axs, mri_2D, traj, recon, loss=None, save_name=None
-):
+def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
     """Graphique.
 
     Plot the original MRI image, the trajectory, the reconstructed image,
