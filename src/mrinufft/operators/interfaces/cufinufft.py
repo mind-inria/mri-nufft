@@ -283,6 +283,9 @@ class MRICufiNUFFT(FourierOperatorBase):
     @FourierOperatorBase.density.setter
     def density(self, new_density):
         """Update the density compensation."""
+        if new_density is None:
+            self._density = None
+            return
         xp = get_array_module(new_density)
         if xp.__name__ == "numpy":
             self._density = cp.array(new_density)
