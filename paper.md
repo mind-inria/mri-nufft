@@ -1,4 +1,4 @@
-#---
+---
 title: 'MRI-NUFFT: Doing Non Cartesian MRI has never been easier'
 tags:
   - Python
@@ -42,7 +42,6 @@ affiliations:
    
 date: 20 September 2024
 bibliography: paper.bib
-
 ---
 
 
