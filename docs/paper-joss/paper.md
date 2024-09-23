@@ -1,5 +1,5 @@
 ---
-title: 'MRI-NUFFT: Doing Non Cartesian MRI has never been easier'
+title: 'MRI-NUFFT: Doing non-Cartesian MRI has never been easier'
 tags:
   - Python
   - MRI
@@ -46,20 +46,27 @@ bibliography: paper.bib
 
 
 # Summary 
-MRI-NUFFT is a python package that provides a universal interface to various Non-Uniform Fast Fourier Transforms libraries running on CPU or GPU (gpunufft, finufft, cufinufft, pynfft), adding compabitily with standard array library (numpy, cupy, torch, tensorflow, etc.) On top of these librairies it extends the existing NUFFT operations to provides a physical model of the MRI acquisition processus (e.g. multi-coil acquisition and static-field inhomogeneities). Moreover it also provides a wide variety of non-Cartesian Sampling trajectories generation and expansion, as well as density-compensation estimation methods for those trajectories. It also implements optimized autodifferentiation with respect to the data and the sampling locations. With MRI-NUFFT one can experiment with non-cartesian sampling in MRI, get access to the latest advances in the field and state-of-the art sampling patterns.
+MRI-NUFFT is a python package that provides a universal interface to various Non-Uniform Fast Fourier Transforms libraries running on CPU or GPU (gpunufft, finufft, cufinufft, pynfft), adding compatibily with standard array library (numpy, cupy, torch, tensorflow, etc.) On top of these libraries it extends the existing NUFFT operations to provide a physical model of the MRI acquisition process (e.g. multi-coil acquisition and static-field inhomogeneities). Moreover, it also provides a wide variety of non-Cartesian Sampling trajectories generation and expansion, as well as density-compensation estimation methods for those trajectories. It also implements optimized auto-differentiation with respect to the data and the sampling locations. With MRI-NUFFT one can experiment with non-cartesian sampling in MRI, get access to the latest advances in the field and state-of-the art sampling patterns.
 
 
 # Statement of Need 
 MRI is an non-invasive biomedical imaging technique, where raw data is sampled in the spatial frequency domain (k-space) and final images are  obtained by applying a (fast) fourier transform on this data.
-Traditionnaly, the data is sampled on a cartesian grid, potentially with skipping lines (to accelerate the acquisition)  and reconstructed using FFT-based algorithms. 
-However, the cartesian grid is not always the best choice for sampling the data, and non-cartesian sampling schemes have been proposed to improve the image quality, reduce the acquisition time or to enable new imaging modalities. The reconstruction of non-cartesian data is more complex than the cartesian case, and requires the use of non-uniform fast fourier transform (NUFFT) algorithms. 
-Several NUFFT libraries have been developed in the past years, but they are not always easy to use, and they are not always implementing the specificities of MRI data acquisition (e.g. multi-coil acquisition, static-field inhomogeneities, density compensation, etc.). Also their performances can vary a lot depending on the specific use-case (2D vs 3D data, number of coils, etc.). 
+Traditionnaly, the data is sampled on a Cartesian grid, potentially with skipping lines (to accelerate the acquisition)  and reconstructed using FFT-based algorithms. 
+However, the Cartesian grid is not always the best choice for sampling the data, and non-cartesian sampling schemes have been proposed to improve the image quality, reduce the acquisition time or to enable new imaging modalities. The reconstruction of non-cartesian data is more complex than the cartesian case, and requires the use of non-uniform fast Fourier transform (NUFFT) algorithms. 
+Several NUFFT libraries have been developed in the past years, but they are not always easy to use or implementing the specificity of MRI data acquisition (e.g. multi-coil acquisition, static-field inhomogeneities, density compensation, etc.). Also their performances can vary a lot depending on the specific use-cases (2D vs 3D data, number of coils, etc.). 
 
-Moreover, the use of non-cartesian sampling in MRI is still an active research field, with new sampling patterns being proposed regularly. It is important for researchers to be able to easily experiment with these new patterns, and to compare them with existing ones. Recently there has been a growing interest in using deep learning for MRI acquisition and reconstruction, and using those new methods for Non-Cartesian Data requires to be able to compute the gradients of the reconstruction with respect to the data and/or the sampling locations. Some attemps have been made, but their implementation remains either slow, wrong or lack documentation. 
+Moreover, the use of non-cartesian sampling in MRI is still an active research field, with new sampling patterns being proposed regularly. With MRI-NUFFT one can  easily experiment with these new patterns, and compare them with existing one.
+Furthermore, there has been a growing interest in using deep learning for MRI acquisition and reconstruction, and using those new methods for Non-Cartesian Data requires to be able to compute the gradients of the reconstruction with respect to the data and/or the sampling locations.
 
 # Features 
+
+
+![MRI-NUFFT as an interface for Non Cartesian MRI](../_static/mri-nufft-scheme.svg)
+
+
 ## NUFFT Library compatibility 
-MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration. MRI-NUFFT supports as well  standard array libraries (numpy, cupy, torch, tensorflow, etc.) and optimizes data copies, relying on the array-api standard. 
+MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
+Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determined which implementations of the NUFFT provides the best performances (both in term of computation time and memory footprint). As the time of writing cufinufft and gpunufft provides the best performances, by leveraging CUDA acceleration. MRI-NUFFT supports as well  standard array libraries (numpy, cupy, torch, tensorflow, etc.) and optimizes data copies, relying on the array-api standard. 
 On top of these NUFFT backend, it provides several enhancements, notably an optimized 2.5D NUFFT (for stack of 2D non uniform trajectory, a common pattern in MRI), and a data-consistency term for iterative reeconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$) that can be used in iterative reconstruction algorithms.
 
 
@@ -82,11 +89,9 @@ Similarly the adjoint operator is a Type 1 NUFFT:
 | Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
 
 
-### Extension of the Acquisition Model
-#### Parallel Imaging Model
+### Parallel Imaging Model
 In MRI the acquired signal can be received by multiple antennas (\"coils\"). 
 Each coil possesses a specific sensitivity profile (i.e. each sees the object differently due to its physical layout).
-
 
 $$\begin{aligned}
 \tilde{\boldsymbol{y}} = \begin{bmatrix}
@@ -100,10 +105,10 @@ $$\begin{aligned}
 Where $S_1, \dots, S_L$ are the sensitivity maps of each coil. 
 Such sensitivity maps can be acquired separetely by acquiring low frequency of the kspace, or estimated from the data.
 
-#### Off-resonance correction model
+### Off-resonance correction model
 The constant magnetic field applied in a MRI machine $B0$ (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at tissue interfaces with owing to different magnetic susceptibilities (such as air-tissue interfaces in the nose and ear canals). 
 Those field perturbations introduce a spatially varying phase shift in the frequencies acquired (noted $\Delta\omega_0$), making the acquisition model deviating from the convenient Fourier model. 
-Fortunately, this inhomogeneity map can be acquired separatly or estimated and integrated in the model as:
+Fortunately, this inhomogeneity map can be acquired separately or estimated and integrated in the model as:
 
 $$y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}$$
 
@@ -120,6 +125,11 @@ MRI-NUFFT comes with a wide variety of Non Cartesian trajectory generation routi
 
 ## Autodifferentiation
 Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available.
+
+
+# MRI-NUFFT Utilization
+MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI, deepinv and PySAP-MRI 
+
 
 # References
 
