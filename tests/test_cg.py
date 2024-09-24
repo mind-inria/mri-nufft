@@ -66,7 +66,7 @@ def test_cg(operator, array_interface, image_data):
     assert_almost_allclose(
         kspace_cg,
         kspace_nufft,
-        atol=5e-1,
+        atol=2e-1,
         rtol=1e-1,
         mismatch=20,
     )
