@@ -13,6 +13,7 @@ from helpers import (
     from_interface,
 )
 from mrinufft import get_operator
+from mrinufft._utils import get_array_module
 from case_trajectories import CasesTrajectories
 
 
@@ -174,7 +175,9 @@ def test_adj_op_density(
     # Add very little noise to the trajectory, variance of 1e-3
     if operator.uses_density:
         # Test density can be updated
-        operator.density += jitter / 100
+        xp = get_array_module(operator.density)
+
+        operator.density += xp.array(jitter) / 100
     else:
         # Test that operator can handle density added later
         operator.density = 1e-2 + jitter / 100
