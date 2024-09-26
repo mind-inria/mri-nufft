@@ -40,7 +40,28 @@ def dummy_func(*args):
 
 
 @fixture(scope="module")
-@parametrize("decorator", [with_numpy, with_numpy_cupy, with_torch, with_tensorflow])
+@parametrize(
+    "decorator",
+    [
+        with_numpy,
+        pytest.param(
+            with_numpy_cupy,
+            marks=pytest.mark.skipif(not CUPY_AVAILABLE, reason="cupy not available"),
+        ),
+        pytest.param(
+            with_torch,
+            marks=pytest.mark.skipif(
+                not AUTOGRAD_AVAILABLE, reason="torch not available"
+            ),
+        ),
+        pytest.param(
+            with_tensorflow,
+            marks=pytest.mark.skipif(
+                not TENSORFLOW_AVAILABLE, reason="tensorflow not available"
+            ),
+        ),
+    ],
+)
 def decorator_factory(request, decorator):
     @decorator
     def test_func(*args):

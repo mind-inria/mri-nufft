@@ -17,6 +17,7 @@ from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILAB
 from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
+from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 if AUTOGRAD_AVAILABLE:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
