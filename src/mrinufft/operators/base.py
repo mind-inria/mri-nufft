@@ -234,7 +234,7 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        if isinstance(method, np.ndarray):
+        if is_host_array(method) or is_cuda_array(method):
             self.smaps = method
             return
         if not method:
@@ -304,10 +304,10 @@ class FourierOperatorBase(ABC):
                 or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
-            self.density = method
+            self._density = method
             return None
         if not method:
-            self.density = None
+            self._density = None
             return None
         if method is True:
             method = "pipe"
@@ -328,7 +328,7 @@ class FourierOperatorBase(ABC):
                 shape,
                 **kwargs,
             )
-        self.density = method(self.samples, self.shape, **kwargs)
+        self._density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
