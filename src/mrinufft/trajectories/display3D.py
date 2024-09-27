@@ -1,3 +1,5 @@
+"""Utils for displaying 3D trajectories."""
+
 from mrinufft import get_operator, get_density
 from mrinufft.trajectories.utils import (
     convert_trajectory_to_gradients,
