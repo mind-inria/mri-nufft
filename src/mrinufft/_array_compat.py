@@ -242,32 +242,10 @@ def _to_cupy(*args, device=None, **kwargs):
 
         args[n] = _arg
 
-    # convert keyworded arguments
-    for key in kwargs.keys():
-        _arg = kwargs[key]
-        if hasattr(_arg, "__array__"):
-            xp = get_array_module(_arg)
-            if xp.__name__ == "numpy":
-                with cp.cuda.Device(device):
-                    _arg = cp.asarray(_arg)
-            elif xp.__name__ == "torch":
-                if _arg.requires_grad:
-                    _arg = _arg.detach()
-                if _arg.is_cpu:
-                    with cp.cuda.Device(device):
-                        _arg = cp.asarray(_arg.numpy())
-                else:
-                    _arg = cp.from_dlpack(_arg)
-            elif "tensorflow" in xp.__name__:
-                if "CPU" in _arg.device:
-                    with cp.cuda.Device(device):
-                        _arg = cp.asarray(_arg.numpy())
-                else:
-                    _arg = cp.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
-        if isinstance(_arg, (tuple, list)):
-            _arg, _ = _to_cupy(*_arg, device=device)
+    # convert keyworded 
+    process_kwargs_vals = _to_cupy(*kwargs.values())
 
-        kwargs[key] = _arg
+    kwargs = {k: v for k,v in zip(kwargs.keys(), process_kwargs_vals}
 
     return args, kwargs
 
