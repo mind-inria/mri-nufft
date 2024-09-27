@@ -67,12 +67,12 @@ def decorator_factory(request, decorator):
     def test_func(*args):
         return dummy_func(*args)
 
-    return test_func, decorator
+    return test_func
 
 
 @_param_array_interface
 def test_decorators_outcome(decorator_factory, array_interface):
-    decorated_function, _ = decorator_factory
+    decorated_function = decorator_factory
 
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)

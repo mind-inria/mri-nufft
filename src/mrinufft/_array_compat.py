@@ -185,22 +185,10 @@ def _to_numpy(*args, **kwargs):
             _arg, _ = _to_numpy(*_arg)
         args[n] = _arg
 
-    # convert keyworded arguments
-    for key in kwargs.keys():
-        _arg = kwargs[key]
-        if hasattr(_arg, "__array__"):
-            if is_cuda_array(_arg):
-                warnings.warn("data is on gpu, it will be moved to CPU.")
-            xp = get_array_module(_arg)
-            if xp.__name__ == "torch":
-                _arg = _arg.numpy(force=True)
-            elif xp.__name__ == "cupy":
-                _arg = cp.asnumpy(_arg)
-            elif "tensorflow" in xp.__name__:
-                _arg = _arg.numpy()
-        if isinstance(_arg, (tuple, list)):
-            _arg, _ = _to_numpy(*_arg)
-        kwargs[key] = _arg
+    # convert keyworded
+    if kwargs:
+        process_kwargs_vals, _ = _to_numpy(*kwargs.values())
+        kwargs = {k: v for k, v in zip(kwargs.keys(), process_kwargs_vals)}
 
     return args, kwargs
 
@@ -242,10 +230,10 @@ def _to_cupy(*args, device=None, **kwargs):
 
         args[n] = _arg
 
-    # convert keyworded 
-    process_kwargs_vals = _to_cupy(*kwargs.values())
-
-    kwargs = {k: v for k,v in zip(kwargs.keys(), process_kwargs_vals}
+    # convert keyworded
+    if kwargs:
+        process_kwargs_vals, _ = _to_cupy(*kwargs.values(), device)
+        kwargs = {k: v for k, v in zip(kwargs.keys(), process_kwargs_vals)}
 
     return args, kwargs
 
@@ -300,28 +288,10 @@ def _to_torch(*args, device=None, **kwargs):
 
         args[n] = _arg
 
-    # convert keyworded arguments
-    for key in kwargs.keys():
-        _arg = kwargs[key]
-        if hasattr(_arg, "__array__"):
-            xp = get_array_module(_arg)
-            if xp.__name__ == "numpy":
-                _arg = torch.as_tensor(_arg, device=device)
-            elif xp.__name__ == "cupy":
-                if torch.cuda.is_available():
-                    _arg = torch.from_dlpack(_arg)
-                else:
-                    warnings.warn("data is on gpu, it will be moved to CPU.")
-                    _arg = torch.as_tensor(cp.asnumpy(_arg))
-            elif "tensorflow" in xp.__name__:
-                if "CPU" in _arg.device:
-                    _arg = torch.as_tensor(_arg.numpy(), device=device)
-                else:
-                    _arg = torch.from_dlpack(tf.experimental.dlpack.to_dlpack(_arg))
-        if isinstance(_arg, (tuple, list)):
-            _arg, _ = _to_torch(*_arg, device=device)
-
-        kwargs[key] = _arg
+    # convert keyworded
+    if kwargs:
+        process_kwargs_vals, _ = _to_torch(*kwargs.values(), device)
+        kwargs = {k: v for k, v in zip(kwargs.keys(), process_kwargs_vals)}
 
     return args, kwargs
 
@@ -367,35 +337,10 @@ def _to_tensorflow(*args, **kwargs):
 
         args[n] = _arg
 
-    # convert keyworded arguments
-    for key in kwargs.keys():
-        _arg = kwargs[key]
-        if hasattr(_arg, "__array__"):
-            xp = get_array_module(_arg)
-            if xp.__name__ == "numpy":
-                with tf.device("CPU"):
-                    _arg = tf.convert_to_tensor(_arg)
-            elif xp.__name__ == "cupy":
-                if TF_CUDA_AVAILABLE:
-                    _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
-                else:
-                    warnings.warn("data is on gpu, it will be moved to CPU.")
-                    _arg = tf.convert_to_tensor(cp.asnumpy(_arg))
-            elif xp.__name__ == "torch":
-                if _arg.requires_grad:
-                    _arg = _arg.detach()
-                if _arg.is_cpu:
-                    _arg = tf.convert_to_tensor(_arg)
-                elif TF_CUDA_AVAILABLE:
-                    _arg = tf.experimental.dlpack.from_dlpack(
-                        torch.utils.dlpack.to_dlpack(_arg)
-                    )
-                else:
-                    _arg = tf.convert_to_tensor(_arg.numpy(force=True))
-        if isinstance(_arg, (tuple, list)):
-            _arg, _ = _to_tensorflow(*_arg)
-
-        kwargs[key] = _arg
+    # convert keyworded
+    if kwargs:
+        process_kwargs_vals, _ = _to_tensorflow(*kwargs.values())
+        kwargs = {k: v for k, v in zip(kwargs.keys(), process_kwargs_vals)}
 
     return args, kwargs
 
