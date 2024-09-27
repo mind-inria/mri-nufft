@@ -60,9 +60,7 @@ Furthermore, there has been a growing interest in using deep learning for MRI ac
 
 # Features 
 
-
 ![MRI-NUFFT as an interface for Non Cartesian MRI](../_static/mri-nufft-scheme.svg)
-
 
 ## NUFFT Library compatibility 
 MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
@@ -118,18 +116,17 @@ The main approach [@sutton_fast_2003] is to approximate the mixed-domain exponen
 
 $$x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}$$
 
-The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be (optimally) estimated within MRI-NUFFT.
+The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be optimally estimated within MRI-NUFFT.
 
 ## Trajectories generation and expansions 
 MRI-NUFFT comes with a wide variety of Non Cartesian trajectory generation routines, that have been gathered from the literature. It also provides ways of expanding existing trajectories. It is also able to export to specific formats, to be used in other toolboxes and on MRI hardware.
 
-## Autodifferentiation
-Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available.
+## Autodifferentiation for data and sampling pattern
 
+Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available. This allows for efficient backpropagation throught the NUFFT operators, and sustains research on learned sampling pattern and image reconstruction network.
 
 # MRI-NUFFT Utilization
-MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI, deepinv and PySAP-MRI 
-
+MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI [@comby_snake-fmri_2024], deepinv [@tachella_deepinverse_2023] and PySAP-MRI [@farrens_pysap_2020]
 
 # References
 
