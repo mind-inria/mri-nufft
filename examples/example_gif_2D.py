@@ -12,6 +12,7 @@ import time
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
+import tempfile as tmp
 from PIL import Image, ImageSequence
 
 import mrinufft.trajectories.display as mtd
@@ -142,7 +143,7 @@ frame_setup = [
 ]
 
 
-def draw_frame(func, index, name, arg, save_dir="/tmp/"):
+def draw_frame(func, index, name, arg):
     """Draw a single frame of the gif and save it to a tmp file."""
     trajectory = func(arg)
     # General configuration
@@ -168,8 +169,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     )
 
     # Save figure
-    hashed = joblib.hash((index, name, arg, time.time()))
-    filename = save_dir + f"{hashed}.png"
+    filename = f"{tmp.NamedTemporaryFile().name}.png"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
     return filename
