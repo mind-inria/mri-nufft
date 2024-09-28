@@ -45,6 +45,7 @@ import brainweb_dl as bwdl
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
+import tempfile as tmp
 import torch
 from PIL import Image, ImageSequence
 from tqdm import tqdm
@@ -269,8 +270,7 @@ while model.current_decim >= 1:
                 for param in model.parameters():
                     param.clamp_(-0.5, 0.5)
             # Generate images for gif
-            hashed = joblib.hash((i, "learn_traj", time.time()))
-            filename = "/tmp/" + f"{hashed}.png"
+            filename = f"{tmp.NamedTemporaryFile().name}.png"
             plt.clf()
             fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
             plot_state(
