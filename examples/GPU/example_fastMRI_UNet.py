@@ -142,7 +142,7 @@ plot_state(axs, mri_2D, init_traj, dc_adjoint)
 # %%
 # Start training loop
 epoch = 100
-optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-3)
+optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-4)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
 model.train()
