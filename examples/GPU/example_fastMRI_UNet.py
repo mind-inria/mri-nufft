@@ -1,9 +1,14 @@
 # %%
-"""
+r"""
+==================
 Simple UNet model.
+==================
 
 This model is a simplified version of the U-Net architecture, 
 which is widely used for image segmentation tasks.  
+This is implemented in the proprietary FASTMRI package [fastmri]_.  
+Users are encouraged to contact the authors if they want to use it.  
+
 The U-Net model consists of an encoder (downsampling path) and 
 a decoder (upsampling path) with skip connections between corresponding 
 layers in the encoder and decoder. 
@@ -19,12 +24,18 @@ This implementation of the UNet model was pulled from the FastMRI Facebook
 repository, which is a collaborative research project aimed at advancing 
 the field of medical imaging using machine learning techniques.
 
-References
-----------
-- [source Unet] FastMRI Facebook: https://github.com/facebookresearch/fastMRI/blob/main/fastmri/models/unet.py
+.. math::
+
+    \mathbf{\hat{x}} = \mathrm{arg} \min_{\mathbf{x}} || \mathcal{U}_\mathbf{\theta}(\mathbf{y}) - \mathbf{x} ||_2^2
+
+where:
+- \( \mathbf{\hat{x}} \) is the reconstructed MRI image,
+- \( \mathbf{x} \) is the ground truth image,
+- \( \mathbf{y} \) is the input MRI image (e.g., k-space data),
+- \( \mathcal{U}_\mathbf{\theta} \) is the U-Net model parameterized by \( \theta \).
 
 .. warning::
-    The training process is make on one image, so the training is not optimal.
+    We train on a single image here. In practice, this should be done on a database like fastMRI [fastmri]_.
 """
 
 # %%
@@ -71,7 +82,7 @@ class Model(torch.nn.Module):
 
 
 # %%
-# Util function to plot the state of the model
+# Utility function to plot the state of the model
 def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
     """Image plotting function.
 
@@ -114,7 +125,7 @@ model = Model(init_traj)
 model.eval()
 
 # %%
-# The image on which we are going to train.
+# Get the image on which we will train our U-Net Model
 mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))[
     None
 ]
@@ -123,9 +134,9 @@ kspace_mri_2D = model.operator.op(mri_2D)
 
 # Before training, here is the simple reconstruction we have using a
 # density compensated adjoint.
-old_recon = model(kspace_mri_2D)
+dc_adjoint = model.operator.adj_op(kspace_mri_2D)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-plot_state(axs, mri_2D, init_traj, old_recon)
+plot_state(axs, mri_2D, init_traj, dc_adjoint)
 
 
 # %%
@@ -173,7 +184,7 @@ imgs[0].save(
     duration=2,
     loop=0,
 )
-
+# sphinx_gallery_start_ignore
 # Cleanup
 for f in image_files:
     try:
@@ -195,12 +206,21 @@ try:
     shutil.copyfile("mrinufft_learn_unet.gif", final_dir / "mrinufft_learn_unet.gif")
 except FileNotFoundError:
     pass
-
+# sphinx_gallery_end_ignore
 # %%
-# Trained trajectory
+# Reconstruction from partially trained U-Net model
 model.eval()
-kspace_mri_2D = model.operator.op(mri_2D)
 new_recon = model(kspace_mri_2D)
 fig, axs = plt.subplots(2, 2, figsize=(10, 10))
 plot_state(axs, mri_2D, init_traj, new_recon, losses)
 plt.show()
+
+# %%
+# References
+# ==========
+#
+# .. [fastmri] O. Ronneberger, P. Fischer, and Thomas Brox. U-net: Convolutional networks
+#           for biomedical image segmentation. In International Conference on Medical
+#           image computing and computer-assisted intervention, pages 234–241.
+#           Springer, 2015.
+#           https://github.com/facebookresearch/fastMRI/blob/main/fastmri/models/unet.py
