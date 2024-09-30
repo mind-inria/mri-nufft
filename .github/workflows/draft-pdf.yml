@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - docs/paper-joss/paper.md
+permissions:
+  pull-requests: write
 
 jobs:
   paper:
@@ -25,3 +27,8 @@ jobs:
           # PDF. Note, this should be the same directory as the input
           # paper.md
           path: docs/paper-joss/paper.pdf
+
+      - name: add link to PR
+        uses: PicoCentauri/comment-artifact@v1
+        with:
+          name: paper
