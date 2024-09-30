@@ -9,8 +9,8 @@ from pytest_cases import parametrize_with_cases
 
 
 import mrinufft
+from mrinufft._array_compat import CUPY_AVAILABLE
 from mrinufft._utils import get_array_module
-from mrinufft.operators.base import CUPY_AVAILABLE
 from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 

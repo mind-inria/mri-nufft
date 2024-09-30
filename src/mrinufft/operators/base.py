@@ -8,30 +8,19 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
-from functools import partial, wraps
+from functools import partial
 
 import numpy as np
 
-from mrinufft._utils import auto_cast, get_array_module, power_method
+from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE
+from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-AUTOGRAD_AVAILABLE = True
-try:
-    import torch
-
+if AUTOGRAD_AVAILABLE:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
-except ImportError:
-    AUTOGRAD_AVAILABLE = False
 
 
 # Mapping between numpy float and complex types.
@@ -115,134 +104,8 @@ def get_operator(
         else:
             # instance will be created later
             operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+
     return operator
-
-
-def with_numpy(fun):
-    """Ensure the function works internally with numpy array."""
-
-    @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        if hasattr(data, "__cuda_array_interface__"):
-            warnings.warn("data is on gpu, it will be moved to CPU.")
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = data.to("cpu").numpy()
-        elif xp.__name__ == "cupy":
-            data_ = data.get()
-        elif xp.__name__ == "numpy":
-            data_ = data
-        else:
-            raise ValueError(f"Array library {xp} not supported.")
-        ret_ = fun(self, data_, *args, **kwargs)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-        elif xp.__name__ == "cupy":
-            return xp.array(ret_)
-        else:
-            return ret_
-
-    return wrapper
-
-
-def with_tensorflow(fun):
-    """Ensure the function works internally with tensorflow array."""
-
-    @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        import tensorflow as tf
-
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = tf.convert_to_tensor(data.cpu())
-        elif xp.__name__ == "cupy":
-            data_ = tf.experimental.dlpack.from_dlpack(data.toDlpack())
-        else:
-            data_ = tf.convert_to_tensor(data)
-
-        ret_ = fun(self, data_, *args, **kwargs)
-
-        if xp.__name__ in ["torch", "cupy"]:
-            return xp.from_dlpack(tf.experimental.dlpack.to_dlpack(ret_))
-        elif xp.__name__ == "numpy":
-            return ret_.numpy()
-        else:
-            return ret_
-
-    return wrapper
-
-
-def with_numpy_cupy(fun):
-    """Ensure the function works internally with numpy or cupy array."""
-
-    @wraps(fun)
-    def wrapper(self, data, output=None, *args, **kwargs):
-        xp = get_array_module(data)
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            # Move them to cupy
-            data_ = cp.from_dlpack(data)
-            output_ = cp.from_dlpack(output) if output is not None else None
-        elif xp.__name__ == "torch":
-            # Move to numpy
-            data_ = data.to("cpu").numpy()
-            output_ = output.to("cpu").numpy() if output is not None else None
-        else:
-            data_ = data
-            output_ = output
-
-        if output_ is not None:
-            if not (
-                (is_host_array(data_) and is_host_array(output_))
-                or (is_cuda_array(data_) and is_cuda_array(output_))
-            ):
-                raise ValueError(
-                    "input data and output should be " "on the same memory space."
-                )
-        ret_ = fun(self, data_, output_, *args, **kwargs)
-
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            return xp.as_tensor(ret_, device=data.device)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-
-        return ret_
-
-    return wrapper
-
-
-def with_torch(fun):
-    """Ensure the function works internally with Torch."""
-
-    @wraps(fun)
-    def wrapper(self, data, output=None, *args, **kwargs):
-        xp = get_array_module(data)
-
-        if xp.__name__ == "numpy":
-            data_ = torch.from_numpy(data)
-            output_ = torch.from_numpy(output) if output is not None else None
-        elif xp.__name__ == "cupy":
-            data_ = torch.from_dlpack(data)
-            output_ = torch.from_dlpack(output) if output is not None else None
-        else:
-            data_ = data
-            output_ = output
-
-        ret_ = fun(self, data_, output_, *args, **kwargs)
-
-        if xp.__name__ == "cupy":
-            return cp.from_dlpack(ret_)
-        elif xp.__name__ == "numpy":
-            return ret_.to("cpu").numpy()
-
-        return ret_
-
-    return wrapper
 
 
 class FourierOperatorBase(ABC):
