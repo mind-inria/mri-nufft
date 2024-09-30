@@ -2,7 +2,9 @@ name: Draft PDF
 on: 
   push:
     paths:
-      - docs/paper-joss/paper.md
+      - docs/paper-joss/*
+      - .github/workflows/draft-pdf.yml*
+
 permissions:
   pull-requests: write
 
@@ -28,7 +30,13 @@ jobs:
           # paper.md
           path: docs/paper-joss/paper.pdf
 
-      - name: add link to PR
-        uses: PicoCentauri/comment-artifact@v1
+  link:
+    needs: paper # make sure the artifacts are uploaded first
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write # for commenting on your commit
+        pull-requests: write # for commenting on your pr
+    steps:
+      - uses: beni69/artifact-link@v1
         with:
-          name: paper
+          token: ${{ github.token }}
