@@ -1,106 +1,75 @@
-"""Field map generator module."""
+"""Data generator module."""
 
 import numpy as np
 
 
-def make_b0map(shape, b0range=(-300, 300), mask=None):
-    """
-    Make radial B0 map.
+def get_brainweb_map(sub_id: int) -> np.ndarray:
+    """Get MRI parametric maps from a brainweb crisp segmentation.
+
+    Output maps have the same shape as the tissue segmentation.
 
     Parameters
     ----------
-    shape : tuple[int]
-        Matrix size. Only supports isotropic matrices.
-    b0range : tuple[float], optional
-        Frequency shift range in [Hz]. The default is (-300, 300).
-    mask : np.ndarray
-        Spatial support of the objec. If not provided,
-        build a radial mask with radius = 0.3 * shape
+    sub_id : int
+        Subject ID.
+
+    Raises
+    ------
+    ImportError
+        If brainweb-dl is not installed.
 
     Returns
     -------
-    np.ndarray
-        B0 map of shape (*shape) in [Hz],
-        with values included in (*b0range).
-    mask : np.ndarray, optional
-        Spatial support binary mask.
+    M0 : np.ndarray
+        Proton Density map. For sub_id > 0,
+        it is a binary mask.
+    T1 : np.ndarray
+        T1 map map in [ms].
+    T2 : np.ndarray
+        T2 map map in [ms].
 
     """
-    assert np.unique(shape).size, ValueError("Only isotropic matriex are supported.")
-    ndim = len(shape)
-    if ndim == 2:
-        radial_mask, fieldmap = _make_disk(shape)
-    elif ndim == 3:
-        radial_mask, fieldmap = _make_sphere(shape)
-    if mask is None:
-        mask = radial_mask
+    try:
+        import brainweb_dl
+    except ImportError as err:
+        raise ImportError(
+            "The brainweb-dl module is not available. Please install it using "
+            "the following command: pip install brainweb-dl"
+        ) from err
 
-    # build map
-    fieldmap *= mask
-    fieldmap = (b0range[1] - b0range[0]) * fieldmap / fieldmap.max() + b0range[0]  # Hz
-    fieldmap *= mask
+    # get segmentation
+    segmentation = brainweb_dl.get_mri(sub_id, "crisp") / 455
+    segmentation = segmentation.astype(int)
 
-    # remove nan
-    fieldmap = np.nan_to_num(fieldmap, neginf=0.0, posinf=0.0)
+    # get properties
+    model = brainweb_dl._brainweb.BrainWebTissueMap
+    if sub_id == 0:
+        properties = brainweb_dl._brainweb._load_tissue_map(model.v1)
+    else:
+        properties = brainweb_dl._brainweb._load_tissue_map(model.v2)
 
-    return fieldmap.astype(np.float32), mask
+    # initialize maps
+    if sub_id == 0:
+        M0 = np.zeros_like(segmentation, dtype=np.float32)
+    T1 = np.zeros_like(segmentation, dtype=np.float32)
+    T2 = np.zeros_like(segmentation, dtype=np.float32)
 
+    # fill maps
+    for tissue in properties:
+        idx = segmentation == int(tissue["Label"])
+        if sub_id == 0:
+            M0 += float(tissue["PD (ms)"]) * idx
+        T1 += float(tissue["T1 (ms)"]) * idx
+        T2 += float(tissue["T2 (ms)"]) * idx
 
-def make_t2smap(shape, t2svalue=15.0, mask=None):
-    """
-    Make homogeneous T2* map.
+    if sub_id != 0:
+        M0 = (segmentation != 0).astype(np.float32)
 
-    Parameters
-    ----------
-    shape : tuple[int]
-        Matrix size.
-    t2svalue : float, optional
-        Object T2* in [ms]. The default is 15.0.
-    mask : np.ndarray
-        Spatial support of the objec. If not provided,
-        build a radial mask with radius = 0.3 * shape
+    # pad to square
+    pad_width = segmentation.shape[1] - segmentation.shape[2]
+    pad = ((0, 0), (0, 0), (int(pad_width // 2), int(pad_width // 2)))
+    M0 = np.pad(M0, pad)
+    T1 = np.pad(T1, pad)
+    T2 = np.pad(T2, pad)
 
-    Returns
-    -------
-    np.ndarray
-        T2* map of shape (*shape) in [ms].
-    mask : np.ndarray, optional
-        Spatial support binary mask.
-
-    """
-    assert np.unique(shape).size, ValueError("Only isotropic matriex are supported.")
-    ndim = len(shape)
-    if ndim == 2:
-        radial_mask, fieldmap = _make_disk(shape)
-    elif ndim == 3:
-        radial_mask, fieldmap = _make_sphere(shape)
-    if mask is None:
-        mask = radial_mask
-
-    # build map
-    fieldmap = t2svalue * mask  # ms
-
-    # remove nan
-    fieldmap = np.nan_to_num(fieldmap, neginf=0.0, posinf=0.0)
-
-    return fieldmap.astype(np.float32), mask
-
-
-def _make_disk(shape, frac_radius=0.3):
-    """Make circular binary mask."""
-    ny, nx = shape
-    yy, xx = np.mgrid[:ny, :nx]
-    yy, xx = yy - ny // 2, xx - nx // 2
-    yy, xx = yy / ny, xx / nx
-    rr = (xx**2 + yy**2) ** 0.5
-    return rr < frac_radius, rr
-
-
-def _make_sphere(shape, frac_radius=0.3):
-    """Make spherical binary mask."""
-    nz, ny, nx = shape
-    zz, yy, xx = np.mgrid[:nz, :ny, :nx]
-    zz, yy, xx = zz - nz // 2, yy - ny // 2, xx - nx // 2
-    zz, yy, xx = zz / nz, yy / ny, xx / nx
-    rr = (xx**2 + yy**2 + zz**2) ** 0.5
-    return rr < frac_radius, rr
+    return M0, T1, T2
