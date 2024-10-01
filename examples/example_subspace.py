@@ -5,7 +5,7 @@ Subspace NUFFT Operator
 
 An example to show how to setup a subspace NUFFT operator.
 
-This examples shows how to use the Subspace NUFFT operator to acquire 
+This example shows how to use the Subspace NUFFT operator to acquire 
 and reconstruct data while projecting onto a low rank spatiotemporal subspace.
 This can be useful e.g., for dynamic multi-contrast MRI.
 Hereafter a 2D spiral trajectory is used for demonstration.
