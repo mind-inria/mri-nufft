@@ -20,7 +20,7 @@ authors:
     affiliation: "1, 2"
   - name: Lena Oudjema 
     affiliation: 1,2
-  - name: Mattheo Cencini
+  - name: Matteo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
     affiliation: "1,2"
@@ -35,7 +35,7 @@ affiliations:
    index: 2
  - name: Chipiron
    index: 3
- - name: University Pisa 
+ - name: INFN, Pisa Division 
    index: 4 
  - name: Siemens Healthineers 
    index: 5
