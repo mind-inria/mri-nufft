@@ -94,7 +94,7 @@ class MRISubspace(FourierOperatorBase):
 
     def adj_op(self, coeffs, *args):
         """
-        Compute Adjoint Operation with susbpace projection.
+        Compute Adjoint Operation with subspace projection.
 
         Parameters
         ----------

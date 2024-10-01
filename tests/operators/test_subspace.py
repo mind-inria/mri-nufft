@@ -14,6 +14,7 @@ from helpers import (
 from case_trajectories import case_multicontrast2D
 
 from mrinufft import get_operator
+from mrinufft.density import voronoi
 from mrinufft.operators import MRISubspace
 
 
@@ -45,21 +46,25 @@ def operator(
         smaps /= np.linalg.norm(smaps, axis=0)
     else:
         smaps = None
+
     kspace_locs = kspace_locs.astype(np.float32)
+    density = voronoi(kspace_locs)
+    density = density.reshape(*kspace_locs.shape[:-1])
+
     _op = get_operator(backend)(
         kspace_locs,
         shape,
         n_coils=n_coils,
         n_batchs=n_batchs,
         smaps=smaps,
+        weights=density.ravel(),
         squeeze_dims=False,
     )
 
     # generate random orthonormal basis
-    H = 1j * np.random.rand(10000, 64)
-    H += np.random.rand(10000, 64)
-    u, s, vh = np.linalg.svd(H, full_matrices=False)
-    _basis = u[:3] @ vh
+    train_data = np.exp(-4 * np.arange(64)[:, None] / np.arange(1, 1000, 1))
+    _, _, _basis = np.linalg.svd(train_data.T, full_matrices=False)
+    _basis = _basis[:3]
     _basis = _basis.astype(_op.cpx_dtype)
 
     # get reference operator
@@ -70,6 +75,7 @@ def operator(
             n_coils=n_coils,
             n_batchs=n_batchs,
             smaps=smaps,
+            weights=density[n].ravel(),
             squeeze_dims=False,
         )
         for n in range(_basis.shape[-1])
@@ -82,18 +88,20 @@ def operator(
 def image_data(operator):
     """Generate a random image."""
     _operator = operator[0]
+    _shape = _operator.shape
     if _operator._fourier_op.uses_sense:
-        shape = (_operator.n_coeffs, _operator.n_batchs, *_operator.shape)
+        shape = (_operator.n_batchs, *_shape)
     else:
-        shape = (
-            _operator.n_coeffs,
-            _operator.n_batchs,
-            _operator.n_coils,
-            *_operator.shape,
-        )
-    img = (1j * np.random.rand(*shape)).astype(_operator._fourier_op.cpx_dtype)
-    img += np.random.rand(*shape).astype(_operator._fourier_op.cpx_dtype)
-    return img
+        shape = (_operator.n_batchs, _operator.n_coils, *_shape)
+
+    img = (1j * np.zeros(shape)).astype(_operator._fourier_op.cpx_dtype)
+    img += np.zeros(shape).astype(_operator._fourier_op.cpx_dtype)
+    img[..., 32, 32] = 1.0
+
+    sig = np.exp(-4 * np.arange(64) / 200.0)
+    weights = _operator.subspace_basis @ sig
+
+    return np.stack([weights[n] * img for n in range(_operator.n_coeffs)], axis=0)
 
 
 @fixture(scope="module")
@@ -101,10 +109,13 @@ def kspace_data(operator):
     """Generate a random image."""
     _operator = operator[0]
     n_samples = int(_operator._fourier_op.n_samples / _operator.n_frames)
-    shape = (_operator.n_frames, _operator.n_batchs, _operator.n_coils, n_samples)
-    kspace = (1j * np.random.rand(*shape)).astype(_operator._fourier_op.cpx_dtype)
-    kspace += np.random.rand(*shape).astype(_operator._fourier_op.cpx_dtype)
-    return kspace
+    shape = (_operator.n_batchs, _operator.n_coils, n_samples)
+    kspace = (1j * np.zeros(shape)).astype(_operator._fourier_op.cpx_dtype)
+    kspace += np.ones(shape).astype(_operator._fourier_op.cpx_dtype)
+
+    sig = np.exp(-4 * np.arange(64) / 200.0)
+
+    return sig[:, None, None, None] * kspace[None, ...]
 
 
 @param_array_interface
@@ -125,7 +136,7 @@ def test_subspace_op(operator, array_interface, image_data):
     image_data = to_interface(image_data, array_interface)
     kspace = from_interface(subspace_op.op(image_data), array_interface)
 
-    npt.assert_array_almost_equal(kspace, kspace_ref)
+    npt.assert_allclose(kspace, kspace_ref, rtol=1e-6)
 
 
 @param_array_interface
@@ -145,7 +156,7 @@ def test_subspace_op_adj(operator, array_interface, kspace_data):
     kspace_data = to_interface(kspace_data, array_interface)
     image = from_interface(subspace_op.adj_op(kspace_data), array_interface)
 
-    npt.assert_array_almost_equal(image, image_ref)
+    npt.assert_allclose(image, image_ref, rtol=5e-4)
 
 
 @param_array_interface

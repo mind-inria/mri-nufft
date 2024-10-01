@@ -157,13 +157,11 @@ samples = initialize_2D_spiral(
 # assume trajectory is reordered as (ncontrasts, nshots_per_contrast, nsamples_per_shot, ndims)
 samples = samples.reshape(16, ETL, *samples.shape[1:])
 
-# flatten ncontrasts and nshots_per_contrast axes
-samples = samples.reshape(-1, *samples.shape[2:])
-
 # compute density compensation
 density = voronoi(samples)
+density = density.reshape(16, ETL, samples.shape[-2])
 
-display_2D_trajectory(samples)
+display_2D_trajectory(samples.reshape(-1, *samples.shape[2:]))
 
 # %%
 # Operator setup
@@ -176,7 +174,7 @@ from mrinufft.operators import MRISubspace
 nufft = get_operator("finufft")(
     samples=samples,
     shape=mri_data.shape[-2:],
-    density=density,
+    density=density.ravel(),
 )
 
 # Generate subspace-projected NUFFT operator
