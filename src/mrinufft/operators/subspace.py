@@ -134,7 +134,7 @@ class MRISubspace(FourierOperatorBase):
 
 def _get_arraylib_from_operator(
     fourier_op, use_gpu
-):  # maybe that is usefull for MRIFourierCorrected constructor? Shall we move it in array_compat?
+):  # maybe that is usefull for MRIFourierCorrected constructor?
     LUT = {
         "MRIBartNUFFT": ("numpy", "numpy"),
         "MRICufiNUFFT": ("cupy", "cupy"),
