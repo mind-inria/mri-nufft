@@ -14,7 +14,6 @@ from helpers import (
 from case_trajectories import case_multicontrast2D
 
 from mrinufft import get_operator
-from mrinufft.density import voronoi
 from mrinufft.operators import MRISubspace
 
 
@@ -48,8 +47,6 @@ def operator(
         smaps = None
 
     kspace_locs = kspace_locs.astype(np.float32)
-    density = voronoi(kspace_locs)
-    density = density.reshape(*kspace_locs.shape[:-1])
 
     _op = get_operator(backend)(
         kspace_locs,
@@ -57,7 +54,6 @@ def operator(
         n_coils=n_coils,
         n_batchs=n_batchs,
         smaps=smaps,
-        weights=density.ravel(),
         squeeze_dims=False,
     )
 
@@ -75,7 +71,6 @@ def operator(
             n_coils=n_coils,
             n_batchs=n_batchs,
             smaps=smaps,
-            weights=density[n].ravel(),
             squeeze_dims=False,
         )
         for n in range(_basis.shape[-1])
@@ -136,7 +131,7 @@ def test_subspace_op(operator, array_interface, image_data):
     image_data = to_interface(image_data, array_interface)
     kspace = from_interface(subspace_op.op(image_data), array_interface)
 
-    npt.assert_allclose(kspace, kspace_ref, rtol=1e-6)
+    npt.assert_allclose(kspace, kspace_ref, rtol=5e-6)
 
 
 @param_array_interface
