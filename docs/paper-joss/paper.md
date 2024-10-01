@@ -18,7 +18,7 @@ authors:
     affiliation: "1,2,5" 
   - name: Caini Pan 
     affiliation: "1, 2"
-  - name: Lena Oudjema 
+  - name: Léna Oudjman
     affiliation: 1,2
   - name: Matteo Cencini
     affiliation: 4
