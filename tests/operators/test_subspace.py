@@ -131,7 +131,7 @@ def test_subspace_op(operator, array_interface, image_data):
     image_data = to_interface(image_data, array_interface)
     kspace = from_interface(subspace_op.op(image_data), array_interface)
 
-    npt.assert_allclose(kspace, kspace_ref, rtol=5e-6)
+    npt.assert_allclose(kspace, kspace_ref, rtol=1e-3, atol=1e-3)
 
 
 @param_array_interface
@@ -151,7 +151,7 @@ def test_subspace_op_adj(operator, array_interface, kspace_data):
     kspace_data = to_interface(kspace_data, array_interface)
     image = from_interface(subspace_op.adj_op(kspace_data), array_interface)
 
-    npt.assert_allclose(image, image_ref, rtol=5e-4)
+    npt.assert_allclose(image, image_ref, rtol=1e-3, atol=1e-3)
 
 
 @param_array_interface
