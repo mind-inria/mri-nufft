@@ -14,10 +14,10 @@ authors:
     affiliation: "1, 2"
   - name: Guillaume Daval-Frérot
     affiliation: 3
-  - name: Asma Tanaben
-    affiliation: "1,2,5" 
   - name: Caini Pan 
     affiliation: "1, 2"
+  - name: Asma Tanaben
+    affiliation: "1,2,5" 
   - name: Léna Oudjman
     affiliation: 1,2
   - name: Matteo Cencini
