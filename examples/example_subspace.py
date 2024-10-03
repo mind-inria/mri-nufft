@@ -1,7 +1,7 @@
 """
-======================
+=======================
 Subspace NUFFT Operator
-======================
+=======================
 
 An example to show how to setup a subspace NUFFT operator.
 

@@ -10,7 +10,7 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
     Parameters
     ----------
     shape : tuple[int]
-        Matrix size. Only supports isotropic matrices.
+        Matrix size.
     b0range : tuple[float], optional
         Frequency shift range in [Hz]. The default is (-300, 300).
     mask : np.ndarray
@@ -26,9 +26,6 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
         Spatial support binary mask.
 
     """
-    if np.unique(shape).size != 1:
-        raise ValueError("Only isotropic matriex are supported.")
-
     ndim = len(shape)
     if ndim == 2:
         radial_mask, fieldmap = _make_disk(shape)
@@ -70,9 +67,6 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
         Spatial support binary mask.
 
     """
-    if np.unique(shape).size != 1:
-        raise ValueError("Only isotropic matriex are supported.")
-
     ndim = len(shape)
     if ndim == 2:
         radial_mask, fieldmap = _make_disk(shape)
