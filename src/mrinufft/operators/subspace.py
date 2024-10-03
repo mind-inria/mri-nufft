@@ -167,6 +167,7 @@ class MRISubspace(FourierOperatorBase):
 
     @property
     def n_samples(self):
+        """Return the number of samples used by the operator."""
         return self._fourier_op.n_samples
 
 
