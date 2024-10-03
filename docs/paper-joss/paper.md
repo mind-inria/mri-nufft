@@ -60,7 +60,7 @@ Furthermore, there has been a growing interest in using deep learning to jointly
 
 # Features 
 
-![MRI-NUFFT as an interface for non-Cartesian MRI](../_static/mri-nufft-scheme.svg)
+![MRI-NUFFT as an interface for non-Cartesian MRI](../_static/mri-nufft-scheme.svg){width=10cm}
 
 ## NUFFT Library compatibility 
 MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
