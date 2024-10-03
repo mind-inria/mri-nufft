@@ -11,32 +11,31 @@ class MRISubspace(FourierOperatorBase):
     """Fourier Operator with subspace projection.
 
     This is a wrapper around the Fourier Operator to project
-    data on a low-rank subspace (e.g., dynamic and multi-contrast MRI).
+    data onto a low-rank subspace (e.g., dynamic and multi-contrast MRI).
 
     Parameters
     ----------
     fourier_op: object of class FourierBase
         the fourier operator to wrap
     subspace_basis : np.ndarray
-        Low rank subspace basis of shape (K, T),
+        Low rank subspace basis of shape ``(K, T)``,
         where K is the rank of the subspace and T is the number
         of time frames or contrasts in the original image series.
         Also supports Cupy arrays and Torch tensors.
     use_gpu : bool, optional
         Whether to use the GPU. Default is False.
-        Ignored if the fourier operator internally use only GPU (e.g., cupy)
-        or CPU (e.g., numpy)
+        Ignored if the Fourier operator internally use only GPU (e.g., Cupy)
+        or CPU (e.g., Numpy)
 
     Notes
     -----
-    This extension add an axis on the leftmost position for both
-    image and k-space data:
+    This extension adds a new axis for both image and k-space data:
 
-    * Image: ``(B, C, XYZ)`` -> ``(T, B, C, XYZ)``
-    * K-Space: ``(B, C, K)`` -> ``(T, B, C, K)``
+    * Image: ``(B, C, XYZ)`` -> ``(B, S, C, XYZ)``
+    * K-Space: ``(B, C, K)`` -> ``(B, T, C, K)``
 
-    with ``T`` representing time domain or contrast space (for dynamic and m
-    multi-contrast MRI, respectively).
+    with ``S`` representing the subspace index and ``T`` representing time
+    domain or contrast space (for dynamic and multi-contrast MR, respectively).
 
     Similarly, k-space trajectory is expected to have the following shape:
     ``(<N_frames or N_contrasts>, N_shots, N_samples, dim)``. The flatten
@@ -76,6 +75,18 @@ class MRISubspace(FourierOperatorBase):
         device = _get_device(data)
         subspace_basis = _to_interface(self.subspace_basis, xp, device)
 
+        # if required, move subspace index axis to leftmost position
+        if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
+            data_d = data.swapaxes(0, 1)
+        else:
+            data_d = data
+
+        # enforce data contiguity
+        if xp.__name__ == "torch":
+            data_d = data_d.contiguous()
+        else:
+            data_d = xp.ascontiguousarray(data_d)
+
         # perform computation
         y = 0.0
         for idx in range(self.n_coeffs):
@@ -84,13 +95,19 @@ class MRISubspace(FourierOperatorBase):
             basis_element = subspace_basis[idx]
 
             # actual transform
-            _y = self._fourier_op.op(data[idx], *args)
+            _y = self._fourier_op.op(data_d[idx], *args)
             _y = _y.reshape(*_y.shape[:-1], self.n_frames, -1)
 
             # back-project on time domain
             y += basis_element.conj() * _y.swapaxes(-2, -1)
 
-        return y[None, ...].swapaxes(0, -1)[..., 0]  # bring back time domain in front
+        y = y[None, ...].swapaxes(0, -1)[..., 0]
+
+        # bring back time/contrast axis to original position (B, T, ...)
+        if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
+            y = y.swapaxes(0, 1)
+
+        return y
 
     def adj_op(self, coeffs, *args):
         """
@@ -110,7 +127,14 @@ class MRISubspace(FourierOperatorBase):
         xp = get_array_module(coeffs)
         device = _get_device(coeffs)
         subspace_basis = _to_interface(self.subspace_basis, xp, device)
-        coeffs_d = coeffs[..., None].swapaxes(0, -1)[0, ...]
+
+        # if required, move time/contrast axis to leftmost position
+        if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
+            coeffs_d = coeffs.swapaxes(0, 1)
+        else:
+            coeffs_d = coeffs
+
+        coeffs_d = coeffs_d[..., None].swapaxes(0, -1)[0, ...]
 
         # perform computation
         y = []
@@ -123,13 +147,27 @@ class MRISubspace(FourierOperatorBase):
             _coeffs_d = basis_element * coeffs_d
             _coeffs_d = _coeffs_d.swapaxes(-2, -1).reshape(*coeffs_d.shape[:-2], -1)
 
+            # enforce data contiguity
+            if xp.__name__ == "torch":
+                _coeffs_d = _coeffs_d.contiguous()
+            else:
+                _coeffs_d = xp.ascontiguousarray(_coeffs_d)
+
             # actual transform
             y.append(self._fourier_op.adj_op(_coeffs_d, *args))
 
         # stack coefficients
         y = xp.stack(y, axis=0)
 
+        # bring back subspace index to original position (B, S, ...)
+        if self.n_batchs != 1 or coeffs.shape[0] == 1:
+            y = y.swapaxes(0, 1)
+
         return y
+
+    @property
+    def n_samples(self):
+        return self._fourier_op.n_samples
 
 
 def _get_arraylib_from_operator(

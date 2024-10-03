@@ -14,7 +14,7 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
     b0range : tuple[float], optional
         Frequency shift range in [Hz]. The default is (-300, 300).
     mask : np.ndarray
-        Spatial support of the objec. If not provided,
+        Spatial support of the object. If not provided,
         build a radial mask with radius = 0.3 * shape
 
     Returns
@@ -26,7 +26,9 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
         Spatial support binary mask.
 
     """
-    assert np.unique(shape).size, ValueError("Only isotropic matriex are supported.")
+    if np.unique(shape).size != 1:
+        raise ValueError("Only isotropic matriex are supported.")
+
     ndim = len(shape)
     if ndim == 2:
         radial_mask, fieldmap = _make_disk(shape)
@@ -57,7 +59,7 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
     t2svalue : float, optional
         Object T2* in [ms]. The default is 15.0.
     mask : np.ndarray
-        Spatial support of the objec. If not provided,
+        Spatial support of the object. If not provided,
         build a radial mask with radius = 0.3 * shape
 
     Returns
@@ -68,7 +70,9 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
         Spatial support binary mask.
 
     """
-    assert np.unique(shape).size, ValueError("Only isotropic matriex are supported.")
+    if np.unique(shape).size != 1:
+        raise ValueError("Only isotropic matriex are supported.")
+
     ndim = len(shape)
     if ndim == 2:
         radial_mask, fieldmap = _make_disk(shape)

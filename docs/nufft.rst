@@ -168,7 +168,7 @@ Where :math:`E_mn = e^i\Delta\omega_0(u_n)t_m`.
 
 Subspace Projection Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-In several MRI applications, such as dynamic or quantitative MRI, a single acquisition provides a stack of images, each representing a single time frame (for dynamic MRI) or a single contrast (for quantitative MRI).
+In several MRI applications, such as dynamic or quantitative MRI, a single acquisition provides a stack of two- or three-dimensional images, each representing a single time frame (for dynamic MRI) or a single contrast (for quantitative MRI).
 To achieve a clinically feasible scan time, each frame or contrast is acquired with a different aggressively undersampled k-space trajectory. In this context, the single-coil acquisition model becomes:
 
 .. math::
@@ -216,7 +216,7 @@ the projection operator :math:`\boldsymbol{\Phi}` commutes with the Fourier tran
 
    \tilde{\boldsymbol{y}} = \Phi \mathcal{F}_Omega(\boldsymbol{\alpha}) + \boldsymbol{n}
 
-that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed levaraging efficient NUFFT implementations for conventional static MRI.
+that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.
 
 The Non Uniform Fast Fourier Transform
 ======================================

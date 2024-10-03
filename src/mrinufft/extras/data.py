@@ -4,7 +4,8 @@ import numpy as np
 
 
 def get_brainweb_map(sub_id: int) -> np.ndarray:
-    """Get MRI parametric maps from a brainweb crisp segmentation.
+    """
+    Get M0, T1 and T2 parametric maps from a brainweb crisp segmentation.
 
     Output maps have the same shape as the tissue segmentation.
 

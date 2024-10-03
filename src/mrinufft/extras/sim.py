@@ -15,8 +15,8 @@ def fse_simulation(
     """Perform simple analytical Fast Spin Echo simulation.
 
     Assume that refocusing angles are 180° and
-    k-space center is sampled for echo in the Echo Train
-    (e.g., spiral or radial trajectory).
+    k-space center is sampled for each echo in the Echo Train
+    (e.g., as in spiral or radial imaging).
 
     Parameters
     ----------

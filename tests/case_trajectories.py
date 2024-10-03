@@ -80,7 +80,7 @@ def case_grid1D(N=256):
 
 # multicontrast is only use once, so we don't want to include systematically
 # in the cases collection.
-def case_multicontrast2D(Nt=64, Nc=10, Ns=500, N=64):
+def case_multicontrast2D(Nt=48, Nc=10, Ns=500, N=64):
     """Create a 2D radial trajectory."""
     trajectory = initialize_2D_radial(Nc * Nt, Ns, tilt="mri-golden")
     return trajectory.reshape(Nt, Nc, Ns, 2), (N, N)

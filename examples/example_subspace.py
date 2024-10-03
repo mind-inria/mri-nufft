@@ -5,8 +5,9 @@ Subspace NUFFT Operator
 
 An example to show how to setup a subspace NUFFT operator.
 
-This example shows how to use the Subspace NUFFT operator to acquire 
-and reconstruct data while projecting onto a low rank spatiotemporal subspace.
+This example shows how to use the Subspace NUFFT operator to acquire data
+and reconstruct an image (or a volume for 3D imaging)
+while projecting onto a low rank spatiotemporal subspace.
 This can be useful e.g., for dynamic multi-contrast MRI.
 Hereafter a 2D spiral trajectory is used for demonstration.
 
@@ -56,8 +57,8 @@ plt.show()
 # -------------------
 #
 # As an example, we simulate a simple monoexponential Spin Echo acquisition.
-# We assume that refocusing train is constant (flip angle set to 180 degrees)
-# and k-space center is sampled at each TE (as for spiral or radial imaging).
+# We assume that k-space center is sampled at each TE (as in spiral or radial imaging)
+# and a constant flip angle train is constant set to 180 degrees.
 # In this way, we obtain an image for each of the shots in the echo train.
 
 from mrinufft.extras import fse_simulation
@@ -72,9 +73,9 @@ TR = 3000.0  # [ms]
 # -------------------
 #
 # Here, we generate temporal subspace basis
-# by Singular Value Decomposition of an ensemble
-# of simulated signals in the same property range.
-# our object.
+# by performing the Singular Value Decomposition of an ensemble
+# of simulated signals corresponding to the same T1-T2 range
+# of our object.
 
 
 def make_grid(T1range, T2range, natoms=100):
@@ -83,7 +84,7 @@ def make_grid(T1range, T2range, natoms=100):
     T1grid = np.linspace(T1range[0], T1range[1], num=natoms, dtype=np.float32)
     T2grid = np.linspace(T2range[0], T2range[1], num=natoms, dtype=np.float32)
 
-    # Create combined grid
+    # Cartesian product
     T1grid, T2grid = np.meshgrid(T1grid, T2grid)
 
     return T1grid.ravel(), T2grid.ravel()
@@ -125,7 +126,7 @@ plt.show()
 
 # %%
 # Here, we simulate Brainweb FSE data with the same
-# sequence parameters used for the subspace estimation.
+# sequence parameters as those used for the subspace estimation.
 
 mri_data = fse_simulation(M0, T1, T2, TE, TR).astype(np.float32)
 mri_data = np.ascontiguousarray(mri_data)
@@ -155,11 +156,12 @@ samples = initialize_2D_spiral(
 )
 
 # assume trajectory is reordered as (ncontrasts, nshots_per_contrast, nsamples_per_shot, ndims)
-samples = samples.reshape(16, ETL, *samples.shape[1:])
+# with contrast axis sorted by ascending TEs
+samples = samples.reshape(ETL, 16, *samples.shape[1:])
 
 # compute density compensation
 density = voronoi(samples)
-density = density.reshape(16, ETL, samples.shape[-2])
+density = density.reshape(ETL, 16, samples.shape[-2])
 
 display_2D_trajectory(samples.reshape(-1, *samples.shape[2:]))
 
@@ -178,7 +180,6 @@ nufft = get_operator("finufft")(
 )
 
 # Generate subspace-projected NUFFT operator
-multicontrast_nufft = MRISubspace(nufft, subspace_basis=np.eye(ETL))
 subspace_nufft = MRISubspace(nufft, subspace_basis=basis)
 
 # %%
@@ -189,17 +190,27 @@ subspace_nufft = MRISubspace(nufft, subspace_basis=basis)
 # This can be simply obtained by using an identity matrix
 # with of shape (ETL, ETL) (= number of contrasts) as a subspace basis.
 
-kspace = multicontrast_nufft.op(mri_data)
+multicontrast_nufft = [
+    get_operator("finufft")(
+        samples=samples[n],
+        shape=mri_data.shape[-2:],
+        density=density[n].ravel(),
+    )
+    for n in range(basis.shape[-1])
+]
+kspace = np.stack([multicontrast_nufft[n].op(mri_data[n]) for n in range(ETL)], axis=0)
 
 # %%
 # Image reconstruction
 # -----------------------
 #
-# We now reconstruct both using the subspace expanded operator
-# and the zero-filling operator followed by projection in image space
+# We now reconstruct both using the subspace expanded adjoint operator
+# and the zero-filling adjoint operator followed by projection in image space
 
 # Reconstruct with projection in image space
-zerofilled_data_adj = multicontrast_nufft.adj_op(kspace)
+zerofilled_data_adj = np.stack(
+    [multicontrast_nufft[n].adj_op(kspace[n]) for n in range(ETL)], axis=0
+)
 zerofilled_display = (zerofilled_data_adj.T @ basis.T).T
 zerofilled_display = np.concatenate(
     [abs(coeff) / abs(coeff).max() for coeff in zerofilled_display], axis=-1

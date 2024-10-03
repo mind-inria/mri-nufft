@@ -58,9 +58,9 @@ def operator(
     )
 
     # generate random orthonormal basis
-    train_data = np.exp(-4 * np.arange(64)[:, None] / np.arange(1, 1000, 1))
+    train_data = np.exp(-4 * np.arange(48)[:, None] / np.arange(1, 1000, 1))
     _, _, _basis = np.linalg.svd(train_data.T, full_matrices=False)
-    _basis = _basis[:3]
+    _basis = _basis[:5]
     _basis = _basis.astype(_op.cpx_dtype)
 
     # get reference operator
@@ -93,24 +93,24 @@ def image_data(operator):
     img += np.zeros(shape).astype(_operator._fourier_op.cpx_dtype)
     img[..., 32, 32] = 1.0
 
-    sig = np.exp(-4 * np.arange(64) / 200.0)
+    sig = np.exp(-4 * np.arange(48) / 200.0)
     weights = _operator.subspace_basis @ sig
-
-    return np.stack([weights[n] * img for n in range(_operator.n_coeffs)], axis=0)
+    image = np.stack([weights[n] * img for n in range(_operator.n_coeffs)], axis=0)
+    return np.ascontiguousarray(image.swapaxes(0, 1))
 
 
 @fixture(scope="module")
 def kspace_data(operator):
     """Generate a random image."""
     _operator = operator[0]
-    n_samples = int(_operator._fourier_op.n_samples / _operator.n_frames)
+    n_samples = int(_operator.n_samples / _operator.n_frames)
     shape = (_operator.n_batchs, _operator.n_coils, n_samples)
     kspace = (1j * np.zeros(shape)).astype(_operator._fourier_op.cpx_dtype)
     kspace += np.ones(shape).astype(_operator._fourier_op.cpx_dtype)
 
-    sig = np.exp(-4 * np.arange(64) / 200.0)
-
-    return sig[:, None, None, None] * kspace[None, ...]
+    sig = np.exp(-4 * np.arange(48) / 200.0)
+    kspace = sig[:, None, None, None] * kspace[None, ...]
+    return np.ascontiguousarray(kspace.swapaxes(0, 1))
 
 
 @param_array_interface
@@ -119,13 +119,15 @@ def test_subspace_op(operator, array_interface, image_data):
 
     # get reference
     # 1. back-project to time/contrast-domain image space
-    tmp = image_data[..., None].swapaxes(0, -1)[0, ...]
+    tmp = image_data.swapaxes(0, 1)
+    tmp = tmp[..., None].swapaxes(0, -1)[0, ...]
     tmp = tmp @ subspace_basis.conj()
     tmp = tmp[None, ...].swapaxes(0, -1)[..., 0]
 
     # 2. apply NUFFT
-    kspace_ref = [ref_op[n].op(tmp[n]) for n in range(tmp.shape[0])]
-    kspace_ref = np.stack(kspace_ref, axis=0)
+    tmp = [ref_op[n].op(tmp[n]) for n in range(tmp.shape[0])]
+    tmp = np.stack(tmp, axis=0)
+    kspace_ref = tmp.swapaxes(0, 1)
 
     # actual computation
     image_data = to_interface(image_data, array_interface)
@@ -140,12 +142,14 @@ def test_subspace_op_adj(operator, array_interface, kspace_data):
 
     # get reference
     # 1. apply adjoint NUFFT
-    tmp = [ref_op[n].adj_op(kspace_data[n]) for n in range(kspace_data.shape[0])]
+    tmp = kspace_data.swapaxes(0, 1)
+    tmp = [ref_op[n].adj_op(tmp[n]) for n in range(tmp.shape[0])]
 
     # 2. project to subspace image space
     tmp = np.stack(tmp, axis=-1)
     tmp = tmp @ subspace_basis.T
-    image_ref = tmp[None, ...].swapaxes(0, -1)[..., 0]
+    tmp = tmp[None, ...].swapaxes(0, -1)[..., 0]
+    image_ref = tmp.swapaxes(0, 1)
 
     # actual computation
     kspace_data = to_interface(kspace_data, array_interface)
@@ -201,17 +205,15 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
 def test_gradient_lipschitz(operator, image_data, kspace_data):
     """Test the gradient lipschitz constant."""
     subspace_op, _, _ = operator
-    C = 1 if subspace_op._fourier_op.uses_sense else subspace_op.n_coils
-    img = (
-        image_data.copy()
-        .reshape(subspace_op.n_coeffs, subspace_op.n_batchs, C, *subspace_op.shape)
-        .squeeze()
-    )
+
+    img = image_data.copy()
+    kspace = kspace_data.copy()
+
     for _ in range(10):
-        grad = subspace_op.data_consistency(img, kspace_data)
+        grad = subspace_op.data_consistency(img, kspace)
         norm = np.linalg.norm(grad)
         grad /= norm
-        np.copyto(img, grad.squeeze())
+        np.copyto(img, grad.reshape(*img.shape))
         norm_prev = norm
 
     # TODO: check that the value is "not too far" from 1
