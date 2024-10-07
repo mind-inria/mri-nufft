@@ -46,7 +46,7 @@ def get_array_module(array):
     for lib, array_type in ARRAY_LIBS.values():
         if lib is not None and isinstance(array, array_type):
             return lib
-    raise ValueError("Unknown array library.")
+    raise ValueError(f"Unknown array library (={type(array)}.")
 
 
 def auto_cast(array, dtype: DTypeLike):

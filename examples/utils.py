@@ -3,12 +3,13 @@ This module contains visualisation functions only relevant to
 the examples.
 """
 
-# External imports
-import numpy as np
 import matplotlib.pyplot as plt
 
+# External imports
+import numpy as np
+
 # Internal imports
-from mrinufft import displayConfig, display_2D_trajectory, display_3D_trajectory
+from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
 
 
 def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0, 1)):

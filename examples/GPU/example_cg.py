@@ -1,24 +1,27 @@
-# %%
 """
-Example of using the Conjugate Gradient method.
+======================================
+Reconstruction with conjugate gradient
+======================================
 
-This script demonstrates the use of the Conjugate Gradient (CG) method 
-for solving systems of linear equations of the form Ax = b, where A is a symmetric 
-positive-definite matrix. The CG method is an iterative algorithm that is particularly 
+An example to show how to reconstruct volumes using conjugate gradient method.
+
+This script demonstrates the use of the Conjugate Gradient (CG) method
+for solving systems of linear equations of the form Ax = b, where A is a symmetric
+positive-definite matrix. The CG method is an iterative algorithm that is particularly
 useful for large, sparse systems where direct methods are computationally expensive.
 
-The Conjugate Gradient method is widely used in various scientific and engineering 
-applications, including solving partial differential equations, optimization problems, 
+The Conjugate Gradient method is widely used in various scientific and engineering
+applications, including solving partial differential equations, optimization problems,
 and machine learning tasks.
 
 References
 ----------
-- Inpirations: 
+- Inpirations:
         - https://sigpy.readthedocs.io/en/latest/_modules/sigpy/alg.html#ConjugateGradient
         - https://aquaulb.github.io/book_solving_pde_mooc/solving_pde_mooc/notebooks/05_IterativeMethods/05_02_Conjugate_Gradient.html
-- Wikipedia: 
-        - https://en.wikipedia.org/wiki/Conjugate_gradient_method 
-        - https://en.wikipedia.org/wiki/Momentum 
+- Wikipedia:
+        - https://en.wikipedia.org/wiki/Conjugate_gradient_method
+        - https://en.wikipedia.org/wiki/Momentum
 """
 
 # %%
@@ -42,7 +45,10 @@ NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
 density = voronoi(samples_loc)  # get the density
 
 nufft = NufftOperator(
-    samples_loc, shape=image.shape, density=density, n_coils=1
+    samples_loc,
+    shape=image.shape,
+    density=density,
+    n_coils=1,
 )  # create the NUFFT operator
 
 # %%
@@ -52,17 +58,17 @@ reconstructed_image = cg(nufft, kspace_data)  # reconstruct the image
 
 # %%
 # Display the results
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(9, 3))
 plt.subplot(1, 3, 1)
-plt.title("Original Image")
+plt.title("Original image")
 plt.imshow(abs(image), cmap="gray")
 
 plt.subplot(1, 3, 2)
-plt.title("Reconstructed Image with CG")
+plt.title("Conjugate gradient")
 plt.imshow(abs(reconstructed_image), cmap="gray")
 
 plt.subplot(1, 3, 3)
-plt.title("Reconstructed Image with adjoint")
+plt.title("Adjoint NUFFT")
 plt.imshow(abs(nufft.adj_op(kspace_data)), cmap="gray")
 
 plt.show()
