@@ -11,12 +11,6 @@ on:
 env:
   PYTHON_VERSION: "3.10"
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 # Allow one concurrent deployment
 concurrency:
   group: "pages"
@@ -29,75 +23,53 @@ jobs:
     if: success()
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Get history and tags for SCM versioning to work
-        run: |
-          git fetch --prune --unshallow
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - name: Install dependencies
-        shell: bash -l {0}
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[doc]
-          python -m pip install finufft
-
-      - name: Build API documentation
-        run: |
-          python -m sphinx docs docs_build
-
-      - name: Get the badge from CI
+      - name: Get the docs_build artifact
         uses: actions/download-artifact@v4
         with:
-          name: coverage_badge
-          path: docs_build/_static
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: docs_final
+          path: docs_build
           run-id: ${{ github.event.workflow_run.id }}
-
-      - name: Display data
-        run: ls -R
-        working-directory: docs_build/_static
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: 'docs_build'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Display structure of docs
+        run: ls -R docs_build/
 
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_build
+          destination_dir: .  # Ensure you deploy to the root of the gh-pages branch
+          publish_branch: gh-pages
+          keep_files: false
+    
+  # build-n-publish:
+  #   name: Build and publish Python 🐍 distributions 📦 to TestPyPI
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #   - name: Get history and tags for SCM versioning to work
+  #     run: |
+  #       git fetch --prune --unshallow
+  #       git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+  #   - name: Set up Python 3.10
+  #     uses: actions/setup-python@v4
+  #     with:
+  #       python-version: "3.10"
 
-  build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to TestPyPI
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Get history and tags for SCM versioning to work
-      run: |
-        git fetch --prune --unshallow
-        git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+  #   - name: Install pypa/build
+  #     run: |
+  #       python -m pip install build twine
+  #       python -m pip install .
 
-    - name: Install pypa/build
-      run: |
-        python -m pip install build twine
-        python -m pip install .
+  #   - name: Build a binary wheel and a source tarball
+  #     run: |
+  #       python -m build --sdist --wheel --outdir dist/ .
 
-    - name: Build a binary wheel and a source tarball
-      run: |
-        python -m build --sdist --wheel --outdir dist/ .
-
-    - name: Check Dist
-      run: |
-        python -m twine check dist/*
-    - name: Upload to Test PyPI
-      run: |
-        python -m twine upload -r testpypi -u __token__ -p ${{ secrets.TEST_PYPI_API }} dist/*
+  #   - name: Check Dist
+  #     run: |
+  #       python -m twine check dist/*
+  #   - name: Upload to Test PyPI
+  #     run: |
+  #       python -m twine upload -r testpypi -u __token__ -p ${{ secrets.TEST_PYPI_API }} dist/*

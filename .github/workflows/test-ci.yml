@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-
   workflow_dispatch:
 
 concurrency:
@@ -20,22 +19,22 @@ env:
 
 jobs:
   test-cpu:
-    runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    runs-on: cpu
+    if: ${{ !contains(github.event.head_commit.message, '!style') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [finufft, pynfft, pynufft-cpu, bart, sigpy]
+        backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu]
         exclude:
           - backend: bart
           - backend: pynufft-cpu
+          - backend: torchkbnufft-cpu
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
       - name: Install Dependencies
         shell: bash
@@ -52,8 +51,7 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
-          sudo apt install -y libnfft3-dev
-          python -m pip install pynfft2
+          python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
@@ -69,7 +67,6 @@ jobs:
         shell: bash
         run: python -m pip install sigpy
 
-
       - name: Install BART
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
         shell: bash
@@ -82,26 +79,34 @@ jobs:
           make
           echo $PWD >> $GITHUB_PATH
 
+      - name: Install torchkbnufft-cpu
+        if: ${{ matrix.backend == 'torchkbnufft-cpu'  || env.ref_backend == 'torchkbnufft-cpu'}}
+        run: python -m pip install torchkbnufft
+
+
       - name: Run Tests
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
           pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
       - name: Upload coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
-          path: coverage_${{ matrix.backend}}
+          name: coverage_${{ matrix.backend }}
+          path: coverage_${{ matrix.backend }}
 
   test-gpu:
     runs-on: gpu
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    if: ${{ !contains(github.event.head_commit.message, '!style') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [gpunufft, cufinufft]
+        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
+        exclude:
+            # There is an issue with tensorflow and cupy. This was working. See #156
+          - backend: tensorflow
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install mri-nufft and finufft
         shell: bash
@@ -112,27 +117,31 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
-          pip install cupy-cuda11x
-          pip install torch --index-url https://download.pytorch.org/whl/cu118
-          pip install finufft
+          pip install cupy-cuda12x finufft "numpy<2.0"
 
+      - name: Install torch with CUDA 12.1
+        shell: bash
+        if: ${{ matrix.backend != 'tensorflow'}}
+        run: |
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install torch
 
       - name: Install backend
-        if: ${{ matrix.backend == 'gpunufft' || matrix.backend == 'cufinufft' }}
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-11.8/
-          export PATH=/usr/local/cuda-11.8/bin/${PATH:+:${PATH}}
-          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib/{LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-          pip install ${{ matrix.backend }}
-
-      - name: Install pynfft
-        if: ${{ matrix.backend == 'pynfft' }}
-        shell: bash
-        run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install pynfft2
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
+            pip install torchkbnufft
+          elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
+            pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
+          elif [[ ${{ matrix.backend }} == "cufinufft" ]]; then
+            pip install "cufinufft<2.3" 
+          else
+            pip install ${{ matrix.backend }}
+          fi
 
       - name: Run Tests
         shell: bash
@@ -144,9 +153,9 @@ jobs:
 
       - name: Upload coverage
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
+          name: coverage_${{ matrix.backend }}
           path: coverage_${{ matrix.backend }}
 
       - name: Cleanup
@@ -158,18 +167,33 @@ jobs:
           rm -rf finufft
           rm -rf gpuNUFFT
           rm -rf venv
-
-  test-examples:
+ 
+  get-commit-message:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'style')}}
+    outputs:
+       message: ${{ steps.get_commit_message.outputs.message }}
+    steps:
+       - uses: actions/checkout@v4
+         with:
+           ref: ${{ github.event.pull_request.head.sha }}
+       - name: Get commit message
+         id: get_commit_message
+         run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output name=message::$COMMIT_MESSAGE"
+    
+  test-examples:
+    runs-on: gpu
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, '!style') || github.ref == 'refs/heads/master' }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
       - name: Restore cached brainweb-dl directory
         uses: actions/cache/restore@v4
@@ -184,6 +208,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test,dev]
           python -m pip install finufft pooch brainweb-dl torch
+        
+      - name: Install GPU related interfaces
+        run: |
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda12x torch
+          python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image
 
       - name: Run examples
         shell: bash
@@ -200,9 +232,9 @@ jobs:
 
       - name: Upload coverage
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage_data
+          name: coverage_plots
           path: coverage_plots
 
   coverage:
@@ -211,17 +243,20 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Collect Coverages
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage_data
+          pattern: coverage_*
+          merge-multiple: true
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-
+          
       - name: add the coverage tool
         shell: bash
         run: |
@@ -258,3 +293,81 @@ jobs:
         with:
           name: coverage_badge
           path: coverage_badge.svg
+
+  BuildDocs:
+    name: Build API Documentation
+    runs-on: gpu
+    needs: get-commit-message
+    if: ${{ contains(needs.get-commit-message.outputs.message, '!docs_build') || github.ref == 'refs/heads/master' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Get history and tags for SCM versioning to work
+        run: |
+          git fetch --prune --unshallow
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+        
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[doc]
+          python -m pip install finufft
+      
+      - name: Install GPU related interfaces
+        run: |
+          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
+          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          pip install cupy-cuda12x torch
+          python -m pip install gpuNUFFT "cufinufft<2.3"
+      
+      - name: Build API documentation
+        run: |
+          python -m sphinx docs docs_build
+      
+      - name: Display data
+        run: ls -R
+        working-directory: docs_build/_static
+      
+      - name: Upload artifact
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v4
+        with:
+          # Upload the docs
+          name: docs
+          path: 'docs_build'
+          retention-days: 5
+    
+  CompileDocs:
+    name: Compile the coverage badge in docs
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: [BuildDocs, coverage]
+    steps:
+      - name: Get the docs_build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
+          path: docs_build
+          overwrite: true
+    
+      - name: Get the badge from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage_badge
+          path: docs_build/_static
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: ReUpload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs_final
+          retention-days: 20
+          path: docs_build

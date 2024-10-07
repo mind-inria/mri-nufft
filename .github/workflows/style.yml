@@ -1,4 +1,4 @@
-name: Style checking
+name: Style
 
 on:
   push:
@@ -42,4 +42,4 @@ jobs:
 
       - name: ruff Check
         shell: bash
-        run: ruff src
+        run: ruff check src

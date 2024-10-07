@@ -8,30 +8,19 @@ from https://github.com/CEA-COSMIC/pysap-mri
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
-from functools import partial, wraps
+from functools import partial
 
 import numpy as np
 
-from mrinufft._utils import auto_cast, get_array_module, power_method
+from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE
+from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-AUTOGRAD_AVAILABLE = True
-try:
-    import torch
-
+if AUTOGRAD_AVAILABLE:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
-except ImportError:
-    AUTOGRAD_AVAILABLE = False
 
 
 # Mapping between numpy float and complex types.
@@ -109,82 +98,14 @@ def get_operator(
         operator = operator(*args, **kwargs)
 
     # if autograd:
-    if isinstance(operator, FourierOperatorBase):
-        operator = operator.make_autograd(wrt_data, wrt_traj)
-    elif wrt_data or wrt_traj:  # instance will be created later
-        operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+    if wrt_data or wrt_traj:
+        if isinstance(operator, FourierOperatorBase):
+            operator = operator.make_autograd(wrt_data, wrt_traj)
+        else:
+            # instance will be created later
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+
     return operator
-
-
-def with_numpy(fun):
-    """Ensure the function works internally with numpy array."""
-
-    @wraps(fun)
-    def wrapper(self, data, *args, **kwargs):
-        if hasattr(data, "__cuda_array_interface__"):
-            warnings.warn("data is on gpu, it will be moved to CPU.")
-        xp = get_array_module(data)
-        if xp.__name__ == "torch":
-            data_ = data.to("cpu").numpy()
-        elif xp.__name__ == "cupy":
-            data_ = data.get()
-        elif xp.__name__ == "numpy":
-            data_ = data
-        else:
-            raise ValueError(f"Array library {xp} not supported.")
-        ret_ = fun(self, data_, *args, **kwargs)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-        elif xp.__name__ == "cupy":
-            return xp.array(ret_)
-        else:
-            return ret_
-
-    return wrapper
-
-
-def with_numpy_cupy(fun):
-    """Ensure the function works internally with numpy or cupy array."""
-
-    @wraps(fun)
-    def wrapper(self, data, output=None, *args, **kwargs):
-        xp = get_array_module(data)
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            # Move them to cupy
-            data_ = cp.from_dlpack(data)
-            output_ = cp.from_dlpack(output) if output is not None else None
-        elif xp.__name__ == "torch":
-            # Move to numpy
-            data_ = data.to("cpu").numpy()
-            output_ = output.to("cpu").numpy() if output is not None else None
-        else:
-            data_ = data
-            output_ = output
-
-        if output_ is not None:
-            if not (
-                (is_host_array(data_) and is_host_array(output_))
-                or (is_cuda_array(data_) and is_cuda_array(output_))
-            ):
-                raise ValueError(
-                    "input data and output should be " "on the same memory space."
-                )
-        ret_ = fun(self, data_, output_, *args, **kwargs)
-
-        if xp.__name__ == "torch" and is_cuda_array(data):
-            return xp.as_tensor(ret_, device=data.device)
-
-        if xp.__name__ == "torch":
-            if data.is_cpu:
-                return xp.from_numpy(ret_)
-            return xp.from_numpy(ret_).to(data.device)
-
-        return ret_
-
-    return wrapper
 
 
 class FourierOperatorBase(ABC):
@@ -197,6 +118,9 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple] = {}
     autograd_available = False
+    _density_method = None
+    _grad_wrt_data = False
+    _grad_wrt_traj = False
 
     def __init__(self):
         if not self.available:
@@ -213,6 +137,43 @@ class FourierOperatorBase(ABC):
             available = available()
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
+
+    def check_shape(self, *, image=None, ksp=None):
+        """
+        Validate the shapes of the image or k-space data against operator shapes.
+
+        Parameters
+        ----------
+        image : np.ndarray, optional
+            If passed, the shape of image data will be checked.
+
+        ksp : np.ndarray or object, optional
+            If passed, the shape of the k-space data will be checked.
+
+        Raises
+        ------
+        ValueError
+            If the shape of the provided image does not match the expected operator
+            shape, or if the number of k-space samples does not match the expected
+            number of samples.
+        """
+        if image is not None:
+            image_shape = image.shape[-len(self.shape) :]
+            if image_shape != self.shape:
+                raise ValueError(
+                    f"Image shape {image_shape} is not compatible "
+                    f"with the operator shape {self.shape}"
+                )
+
+        if ksp is not None:
+            kspace_shape = ksp.shape[-1]
+            if kspace_shape != self.n_samples:
+                raise ValueError(
+                    f"Kspace samples {kspace_shape} is not compatible "
+                    f"with the operator samples {self.n_samples}"
+                )
+        if image is None and ksp is None:
+            raise ValueError("Nothing to check, provides image or ksp arguments")
 
     @abstractmethod
     def op(self, data):
@@ -254,9 +215,9 @@ class FourierOperatorBase(ABC):
         """
         return self.adj_op(self.op(image) - obs_data)
 
-    def with_off_resonnance_correction(self, B, C, indices):
+    def with_off_resonance_correction(self, B, C, indices):
         """Return a new operator with Off Resonnance Correction."""
-        from ..off_resonnance import MRIFourierCorrected
+        from ..off_resonance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
 
@@ -274,12 +235,12 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        if isinstance(method, np.ndarray):
+        if is_host_array(method) or is_cuda_array(method):
             self.smaps = method
-            return None
+            return
         if not method:
             self.smaps = None
-            return None
+            return
         kwargs = {}
         if isinstance(method, dict):
             kwargs = method.copy()
@@ -332,20 +293,25 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        method: str or callable or array or dict
+        method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
             If a string, the method should be registered in the density registry.
             If a callable, it should take the samples and the shape as input.
             If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
             If an array, it should be of shape (Nsamples,) and will be used as is.
+            If `True`, the method `pipe` is chosen as default estimation method,
+            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
+                or `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray):
-            self.density = method
+            self._density = method
             return None
         if not method:
-            self.density = None
+            self._density = None
             return None
+        if method is True:
+            method = "pipe"
 
         kwargs = {}
         if isinstance(method, dict):
@@ -357,8 +323,13 @@ class FourierOperatorBase(ABC):
             method = get_density(method)
         if not callable(method):
             raise ValueError(f"Unknown density method: {method}")
-
-        self.density = method(self.samples, self.shape, **kwargs)
+        if self._density_method is None:
+            self._density_method = lambda samples, shape: method(
+                samples,
+                shape,
+                **kwargs,
+            )
+        self._density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
@@ -431,15 +402,18 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, smaps):
+        self._check_smaps_shape(smaps)
+        self._smaps = smaps
+
+    def _check_smaps_shape(self, smaps):
+        """Check the shape of the sensitivity maps."""
         if smaps is None:
             self._smaps = None
-        elif len(smaps) != self.n_coils:
+        elif smaps.shape != (self.n_coils, *self.shape):
             raise ValueError(
-                f"Number of sensitivity maps ({len(smaps)})"
-                f"should be equal to n_coils ({self.n_coils})"
+                f"smaps shape is {smaps.shape}, it should be"
+                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
-        else:
-            self._smaps = smaps
 
     @property
     def density(self):
@@ -546,7 +520,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         self.shape = shape
 
         # we will access the samples by their coordinate first.
-        self.samples = samples.reshape(-1, len(shape))
+        self._samples = samples.reshape(-1, len(shape))
         self.dtype = self.samples.dtype
         if n_coils < 1:
             raise ValueError("n_coils should be ≥ 1")
@@ -580,6 +554,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
+        self.check_shape(image=data, ksp=ksp)
         # sense
         data = auto_cast(data, self.cpx_dtype)
 
@@ -637,6 +612,7 @@ class FourierOperatorCPU(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        self.check_shape(image=img, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
         if self.uses_sense:
             ret = self._adj_op_sense(coeffs, img)
@@ -684,6 +660,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
+    @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 
@@ -709,7 +686,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
+        grad = np.zeros_like(dataf)
 
         coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)

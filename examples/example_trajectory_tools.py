@@ -24,57 +24,12 @@ A collection of tools to manipulate and develop non-Cartesian trajectories.
 # External
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import show_argument, show_trajectory
 
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.tools as tools
-from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
 from mrinufft.trajectories.utils import KMAX
-
-
-# Util function to display varying arguments
-def show_argument(function, arguments, one_shot, subfig_size, dim="3D", axes=(0, 1)):
-    # Initialize trajectories with varying option
-    trajectories = [function(arg) for arg in arguments]
-
-    # Plot the trajectories side by side
-    fig = plt.figure(
-        figsize=(len(trajectories) * subfigure_size, subfigure_size),
-        constrained_layout=True,
-    )
-    subfigs = fig.subfigures(1, len(trajectories), wspace=0)
-    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        if dim == "3D":
-            ax = display_3D_trajectory(
-                traj,
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-                per_plane=False,
-            )
-        else:
-            ax = display_2D_trajectory(
-                traj[..., axes],
-                size=subfigure_size,
-                one_shot=one_shot,
-                subfigure=subfig,
-            )
-        labels = ["kx", "ky", "kz"]
-        ax.set_xlabel(labels[axes[0]], fontsize=displayConfig.fontsize)
-        ax.set_ylabel(labels[axes[1]], fontsize=displayConfig.fontsize)
-        ax.set_aspect("equal")
-        ax.set_title(str(arg), fontsize=4 * subfigure_size)
-    plt.show()
-
-
-def show_trajectory(trajectory, one_shot, figure_size):
-    ax = display_3D_trajectory(
-        trajectory, size=figure_size, one_shot=one_shot, per_plane=False
-    )
-    plt.tight_layout()
-    plt.subplots_adjust(bottom=0.1)
-    plt.show()
-
 
 # %%
 # Script options
@@ -82,7 +37,7 @@ def show_trajectory(trajectory, one_shot, figure_size):
 # These options are used in the examples below as default values for all trajectories.
 
 # Trajectory parameters
-Nc = 100  # Number of shots
+Nc = 80  # Number of shots
 Ns = 500  # Number of samples per shot
 in_out = True  # Choose between in-out or center-out trajectories
 nb_repetitions = 8  # Number of stacks, rotations, cones, shells etc.
@@ -686,6 +641,188 @@ show_argument(
     subfig_size=subfigure_size,
     dim="2D",
     axes=(0, 2),
+)
+
+
+# %%
+# Epify
+# -----
+#
+# A tool to assemble multiple single-readout shots together by
+# adding transition steps in the trajectory to create EPI-like
+# multi-readout shots.
+#
+# Note that the ``epify`` tool is associated with an ``unepify``
+# tool to revert the operation on trajectory or acquired data.
+#
+# Arguments:
+#
+# - ``trajectory (array_like)``: trajectory to change by prolonging
+#   and merging the shots together.
+# - ``Ns_transitions (int)``: number of samples/steps between the
+#   merged readouts.
+# - ``nb_trains (int)``: number of resulting multi-readout shots,
+#   or trains.
+# - ``reverse_odd_shots (bool)``: Whether to reverse every odd shots
+#   such that, as in most trajectories, even shots end up closer to
+#   the start of odd shots.
+#
+
+trajectory = tools.epify(
+    planar_trajectories["Radial"],
+    Ns_transitions=Ns // 10,
+    nb_trains=Nc_planes // 2,
+    reverse_odd_shots=True,
+)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``trajectory (array)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# The trajectory to change by prolonging and merging the shots together.
+# Hereafter the shots are merged by pairs with short transitions.
+#
+
+arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
+function = lambda x: tools.epify(
+    planar_trajectories[x],
+    Ns_transitions=Ns // 10,
+    nb_trains=Nc_planes // 2,
+    reverse_odd_shots=True,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# ``Ns_transitions (int)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of samples/steps between the merged readouts.
+# Smoother transitions are achieved with more points, but it means longer
+# waiting times between readouts if they are split during acquisition.
+#
+
+arguments = [25, 50, 75, 100]
+function = lambda x: tools.epify(
+    planar_trajectories["2D Cones"],
+    Ns_transitions=x,
+    nb_trains=Nc_planes // 2,
+    reverse_odd_shots=True,
+)
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# ``nb_trains (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# Number of resulting multi-readout shots, or trains.
+#
+
+arguments = [Nc_planes, Nc_planes // 2, Nc_planes // 4, 1]
+function = lambda x: tools.epify(
+    planar_trajectories["Radial"],
+    Ns_transitions=50,
+    nb_trains=x,
+    reverse_odd_shots=True,
+)
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# ``reverse_odd_shots (bool)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Whether to reverse every odd shots such that, as in most trajectories,
+# even shots end up closer to the start of odd shots.
+#
+
+arguments = [True, False]
+function = lambda x: tools.epify(
+    planar_trajectories["Radial"],
+    Ns_transitions=100,
+    nb_trains=Nc_planes // 2,
+    reverse_odd_shots=x,
+)
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+
+# %%
+# Prewind/rewind
+# --------------
+#
+# Two tools used to generate gradients before and after the trajectory.
+#
+# The trajectory can be extended to start before the readout
+# from the k-space center with null gradients and reach
+# each shot position with the required gradient strength, and
+# then come back to the center.
+#
+# Arguments:
+#
+# - ``trajectory (array_like)``: trajectory to change by prolonging
+#   and merging the shots together.
+# - ``Ns_transitions (int)``: number of pre-winding/rewinding steps.
+#
+
+
+trajectory = tools.prewind(planar_trajectories["Spiral"], Ns_transitions=Ns // 10)
+trajectory = tools.rewind(trajectory, Ns_transitions=Ns // 10)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``trajectory (array)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# The trajectory to change by extending them before and/or after
+# the readouts.
+#
+# Note that the radial prewinding and rewinding parts are overlapping
+# with the actual trajectory.
+#
+
+arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
+function = lambda x: tools.prewind(
+    tools.rewind(planar_trajectories[x], Ns_transitions=Ns // 10),
+    Ns_transitions=Ns // 10,
+)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
+)
+
+# %%
+# ``Ns_transitions (int)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Number of samples/steps before and/or after the readouts.
+# Smoother transitions are achieved with more points, but it may imply delayed
+# readout starts and longer TRs.
+#
+
+arguments = [25, 50, 75, 100]
+function = lambda x: tools.prewind(
+    tools.rewind(planar_trajectories["2D Cones"], Ns_transitions=x),
+    Ns_transitions=x,
+)
+show_argument(
+    function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
 

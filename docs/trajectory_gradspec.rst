@@ -2,7 +2,7 @@
  The trajectory binary file specification
 =========================================
 
-The k-space trajectories are transformed to a binary file which is processed by scanner through the arbitrary gradients sequences from NeuroSpin.
+The k-space trajectories are transformed to a binary file which is processed by a given scanner through arbitrary gradient sequences. At Neurospin, we have specifically tested MR systems from Siemens-Healthineers vendor.
 This file mainly specifies an arbitrary gradient profile which is played on scanner at gradient raster time rate (10e-6 seconds).
 
 The binary file format is specified as follows:
@@ -10,7 +10,7 @@ The binary file format is specified as follows:
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | Name           | Type  | Size    | Unit    | Description                                                            |
 +================+=======+=========+=========+========================================================================+
-| Version        | FLOAT | 1       | n.a.    | file version this new version would be “4.0”                           |
+| Version        | FLOAT | 1       | n.a.    | file version this new version would be “5.0”                           |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | Dimension      | FLOAT | 1       | n.a.    | 2 -> 2D , 3 -> 3D                                                      |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
@@ -36,11 +36,13 @@ The binary file format is specified as follows:
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | kStarts        | FLOAT | D*Nc    | 1/m     | K-space location start                                                 |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
+| kEnds          | FLOAT | D*Nc    | 1/m     | K-space location end points. Only in version>5.0                       |
++----------------+-------+---------+---------+------------------------------------------------------------------------+
 | Gradient array | FLOAT | D*Nc*Ns | unitary | Gradient trajectory expressed in the range [-1; 1] relative to MaxGrad |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 
 
-:mod:`mrinufft.trajectories.io` module helps to convert a trajectory as numpy array to a binary file and vice versa.
+:mod:`mrinufft.trajectories.io` module helps convert a trajectory as numpy array to a binary file and vice versa.
 
 All the trajectory FLOAT's are specified with `float32` always.
 

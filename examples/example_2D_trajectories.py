@@ -13,49 +13,16 @@ A collection of 2D non-Cartesian trajectories with analytical definitions.
 # are redundant across the different patterns, some of the documentation
 # will refer to previous patterns for explanation.
 #
-# Note that most sources have not been added yet, but will be in the near
-# future.
-#
 
 # External
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import show_argument, show_trajectory
 
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.maths as mntm
 from mrinufft import display_2D_trajectory
-
-
-# Util function to display varying arguments
-def show_argument(function, arguments, one_shot, subfigure_size):
-    # Initialize trajectories with varying option
-    trajectories = [function(arg) for arg in arguments]
-
-    # Plot the trajectories side by side
-    fig = plt.figure(
-        figsize=(len(trajectories) * subfigure_size, subfigure_size),
-        constrained_layout=True,
-    )
-    subfigs = fig.subfigures(1, len(trajectories))
-    for subfig, arg, traj in zip(subfigs, arguments, trajectories):
-        ax = display_2D_trajectory(
-            traj,
-            size=subfigure_size,
-            one_shot=one_shot,
-            subfigure=subfig,
-        )
-        ax.set_aspect("equal")
-        ax.set_title(str(arg), fontsize=4 * subfigure_size)
-    plt.show()
-
-
-def show_trajectory(trajectory, one_shot, figure_size):
-    ax = display_2D_trajectory(trajectory, size=figure_size, one_shot=one_shot)
-    ax.set_aspect("equal")
-    plt.tight_layout()
-    plt.show()
-
 
 # %%
 # Script options
@@ -108,7 +75,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [8, 16, 32, 64]
 function = lambda x: mn.initialize_2D_radial(x, Ns, tilt=tilt, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -122,7 +89,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [8, 16, 32, 64]
 function = lambda x: mn.initialize_2D_radial(Nc, x, tilt=tilt, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -138,7 +105,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
 function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=x, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -161,7 +128,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [True, False]
 function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -203,7 +170,7 @@ arguments = [1 / 8, 1 / 2, 1, 3]
 function = lambda x: mn.initialize_2D_spiral(
     Nc, Ns, tilt=tilt, nb_revolutions=x, in_out=in_out
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -227,7 +194,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = ["galilean", "archimedes", "fermat", 1 / 4]
 function = lambda x: mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, spiral=x, in_out=in_out)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -254,7 +221,7 @@ function = lambda x: mn.initialize_2D_spiral(
     Ns,
     patch_center=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -300,7 +267,7 @@ function = lambda x: mn.initialize_2D_fibonacci_spiral(
     Ns,
     spiral_reduction=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -326,7 +293,7 @@ function = lambda x: mn.initialize_2D_fibonacci_spiral(
     Ns,
     patch_center=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -366,7 +333,7 @@ arguments = [0.5, 2, 5, 10]
 function = lambda x: mn.initialize_2D_cones(
     Nc, Ns, tilt=tilt, in_out=in_out, nb_zigzags=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -381,7 +348,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [0.2, 1, 2, 3]
 function = lambda x: mn.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out, width=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -446,7 +413,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [2, 3, 4, 6]
 function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -483,7 +450,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [Nc, int(2 * Nc / 3), int(Nc / 3)]
 function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 #
@@ -494,7 +461,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [Nc, int(4 * Nc / 3), 2 * Nc]
 function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=Nc)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -534,7 +501,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [0, 1, 5, 10]
 function = lambda x: mn.initialize_2D_rosette(Nc, Ns, in_out=in_out, coprime_index=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -574,7 +541,7 @@ arguments = [0, 3, 12, 15]
 function = lambda x: mn.initialize_2D_polar_lissajous(
     Nc, Ns, in_out=in_out, coprime_index=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -597,7 +564,7 @@ arguments = [1, 2, 3, 4, 6, 8, 12]
 function = lambda x: mn.initialize_2D_polar_lissajous(
     Nc, Ns, in_out=in_out, nb_segments=x
 )
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -622,7 +589,7 @@ for io in [True, False]:
             Nc, Ns, in_out=io, coprime_index=cpi, nb_segments=x
         )
         show_argument(
-            function, arguments, one_shot=one_shot, subfigure_size=subfigure_size
+            function, arguments, one_shot=one_shot, subfig_size=subfigure_size
         )
 
 
@@ -658,7 +625,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [1, 2.5, 5, 10]
 function = lambda x: mn.initialize_2D_waves(Nc, Ns, nb_zigzags=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -677,7 +644,7 @@ show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_s
 
 arguments = [0, 1, 1.5, 3]
 function = lambda x: mn.initialize_2D_waves(Nc, Ns, width=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -712,7 +679,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = [1, 1.5, 2, 3]
 function = lambda x: mn.initialize_2D_lissajous(Nc, Ns, density=x)
-show_argument(function, arguments, one_shot=one_shot, subfigure_size=subfigure_size)
+show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%

@@ -4,6 +4,8 @@ import numpy as np
 import numpy.testing as npt
 import scipy as sp
 
+from .factories import from_interface
+
 
 def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
     """Assert allclose with a tolerance on the number of mismatched elements.
@@ -40,8 +42,9 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
         try:
             npt.assert_allclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
         except AssertionError as e:
-            e.message += "\nMismatched elements: "
-            e.message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
+            message = getattr(e, "message", "")
+            message += "\nMismatched elements: "
+            message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
             raise e
 
 
@@ -63,3 +66,10 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
             f"intercept={intercept}, stderr={stderr}, "
             f"intercept_stderr={intercept_stderr}"
         )
+
+
+def assert_allclose(actual, expected, atol, rtol, interface):
+    """Backend agnostic assertion using from_interface helper."""
+    actual_np = from_interface(actual, interface)
+    expected_np = from_interface(expected, interface)
+    npt.assert_allclose(actual_np, expected_np, atol=atol, rtol=rtol)

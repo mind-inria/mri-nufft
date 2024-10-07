@@ -51,7 +51,7 @@ class CasesTrajectories:
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
-    def case_nyquist_radial3D_lowmem(self, Nc=2, Ns=16, Nr=2, N=10):
+    def case_nyquist_lowmem_radial3D(self, Nc=2, Ns=16, Nr=2, N=10):
         """Create a 3D radial trajectory with low memory."""
         trajectory = initialize_2D_radial(Nc, Ns)
         trajectory = rotate(trajectory, nb_rotations=Nr)
@@ -71,8 +71,16 @@ class CasesTrajectories:
 
 
 # 1D grid is only use once, so we don't want to include systematically
-#  fsin the cases collection.
+# in the cases collection.
 def case_grid1D(N=256):
     """Create a 1D cartesian grid of frequencies locations."""
     freq_1d = sp.fft.fftfreq(N)
     return freq_1d.reshape(-1, 1), (N,)
+
+
+# multicontrast is only use once, so we don't want to include systematically
+# in the cases collection.
+def case_multicontrast2D(Nt=48, Nc=10, Ns=500, N=64):
+    """Create a 2D radial trajectory."""
+    trajectory = initialize_2D_radial(Nc * Nt, Ns, tilt="mri-golden")
+    return trajectory.reshape(Nt, Nc, Ns, 2), (N, N)

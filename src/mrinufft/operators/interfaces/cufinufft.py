@@ -12,7 +12,6 @@ from mrinufft._utils import (
 
 from .utils import (
     CUPY_AVAILABLE,
-    check_size,
     is_cuda_array,
     is_host_array,
     nvtx_mark,
@@ -58,11 +57,10 @@ class RawCufinufftPlan:
         **kwargs,
     ):
         self.shape = shape
-        self.samples = samples
         self.ndim = len(shape)
         self.eps = float(eps)
         self.n_trans = n_trans
-
+        self._dtype = samples.dtype
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
         self.plans = [None, None, None]
@@ -70,7 +68,7 @@ class RawCufinufftPlan:
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i)
+            self._set_pts(i, samples)
 
     @property
     def dtype(self):
@@ -78,7 +76,7 @@ class RawCufinufftPlan:
         try:
             return self.plans[1].dtype
         except AttributeError:
-            return DTYPE_R2C[str(self.samples.dtype)]
+            return DTYPE_R2C[str(self._dtype)]
 
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
@@ -86,28 +84,16 @@ class RawCufinufftPlan:
             self.shape,
             self.n_trans,
             self.eps,
-            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            dtype=DTYPE_R2C[str(self._dtype)],
             **kwargs,
         )
 
-    def _make_plan_grad(self, **kwargs):
-        self.grad_plan = Plan(
-            2,
-            self.shape,
-            self.n_trans,
-            self.eps,
-            dtype=DTYPE_R2C[str(self.samples.dtype)],
-            isign=1,
-            **kwargs,
-        )
-        self._set_pts(typ="grad")
-
-    def _set_pts(self, typ):
+    def _set_pts(self, typ, samples):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
         plan.setpts(
-            cp.array(self.samples[:, 0], copy=False),
-            cp.array(self.samples[:, 1], copy=False),
-            cp.array(self.samples[:, 2], copy=False) if self.ndim == 3 else None,
+            cp.array(samples[:, 0], copy=False),
+            cp.array(samples[:, 1], copy=False),
+            cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None,
         )
 
     def _destroy_plan(self, typ):
@@ -222,7 +208,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.autograd_available = True
         # For now only single precision is supported
-        self.samples = np.asfortranarray(
+        self._samples = np.asfortranarray(
             proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
         )
         self.dtype = self.samples.dtype
@@ -234,35 +220,77 @@ class MRICufiNUFFT(FourierOperatorBase):
             if is_host_array(self.density):
                 self.density = cp.array(self.density)
 
-        # Smaps support
+        self.smaps_cached = smaps_cached
         self.compute_smaps(smaps)
-        self.smaps_cached = False
-        if smaps is not None:
-            if not (is_host_array(smaps) or is_cuda_array(smaps)):
-                raise ValueError(
-                    "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
-                )
-            self.smaps_cached = False
-            if smaps_cached:
-                warnings.warn(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
-                    "used on gpu for smaps."
-                )
-                self.smaps = cp.array(
-                    smaps, order="C", copy=False, dtype=self.cpx_dtype
-                )
-                self.smaps_cached = True
-            else:
-                self.smaps = pin_memory(smaps.astype(self.cpx_dtype, copy=False))
-                self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
-
+        # Smaps support
+        if self.smaps is not None and (
+            not (is_host_array(self.smaps) or is_cuda_array(self.smaps))
+        ):
+            raise ValueError(
+                "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
+            )
         self.raw_op = RawCufinufftPlan(
             self.samples,
             tuple(shape),
             n_trans=n_trans,
             **kwargs,
         )
-        # Support for concurrent stream and computations.
+
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update smaps.
+
+        Parameters
+        ----------
+        new_smaps: C-ordered ndarray or a GPUArray.
+
+        """
+        self._check_smaps_shape(new_smaps)
+        if new_smaps is not None and hasattr(self, "smaps_cached"):
+            if self.smaps_cached or is_cuda_array(new_smaps):
+                self.smaps_cached = True
+                warnings.warn(
+                    f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
+                    "used on gpu for smaps."
+                )
+                self._smaps = cp.array(
+                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+                )
+            else:
+                if self._smaps is None:
+                    self._smaps = pin_memory(
+                        new_smaps.astype(self.cpx_dtype, copy=False)
+                    )
+                    self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
+                else:
+                    # copy the array to pinned memory
+                    np.copyto(self._smaps, new_smaps.astype(self.cpx_dtype, copy=False))
+        else:
+            self._smaps = new_smaps
+
+    @FourierOperatorBase.samples.setter
+    def samples(self, samples):
+        """Update the plans when changing the samples."""
+        self._samples = np.asfortranarray(
+            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+        )
+        for typ in [1, 2, "grad"]:
+            if typ == "grad" and not self._grad_wrt_traj:
+                continue
+            self.raw_op._set_pts(typ, samples)
+        self.compute_density(self._density_method)
+
+    @FourierOperatorBase.density.setter
+    def density(self, new_density):
+        """Update the density compensation."""
+        if new_density is None:
+            self._density = None
+            return
+        xp = get_array_module(new_density)
+        if xp.__name__ == "numpy":
+            self._density = cp.array(new_density)
+        elif xp.__name__ == "cupy":
+            self._density = new_density
 
     @with_numpy_cupy
     @nvtx_mark()
@@ -283,11 +311,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         this performs for every coil \ell:
         ..math:: \mathcal{F}\mathcal{S}_\ell x
         """
-        # monocoil
-        if self.uses_sense:
-            check_size(data, (self.n_batchs, *self.shape))
-        else:
-            check_size(data, (self.n_batchs, self.n_coils, *self.shape))
+        self.check_shape(image=data, ksp=ksp_d)
         data = auto_cast(data, self.cpx_dtype)
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(data):
@@ -399,8 +423,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         -------
         Array in the same memory space of coeffs. (ie on cpu or gpu Memory).
         """
+        self.check_shape(image=img_d, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
-        check_size(coeffs, (self.n_batchs, self.n_coils, self.n_samples))
         # Dispatch to special case.
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device
@@ -560,14 +584,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         obs_data = auto_cast(obs_data, self.cpx_dtype)
         image_data = auto_cast(image_data, self.cpx_dtype)
 
-        B, C = self.n_batchs, self.n_coils
-        K, XYZ = self.n_samples, self.shape
-
-        check_size(obs_data, (B, C, K))
-        if self.uses_sense:
-            check_size(image_data, (B, *XYZ))
-        else:
-            check_size(image_data, (B, C, *XYZ))
+        self.check_shape(image=image_data, ksp=obs_data)
 
         if self.uses_sense and is_host_array(image_data):
             grad_func = self._dc_sense_host
@@ -783,6 +800,18 @@ class MRICufiNUFFT(FourierOperatorBase):
             ")"
         )
 
+    def _make_plan_grad(self, **kwargs):
+        self.raw_op.grad_plan = Plan(
+            2,
+            self.shape,
+            self.n_trans,
+            self.raw_op.eps,
+            dtype=DTYPE_R2C[str(self.samples.dtype)],
+            isign=1,
+            **kwargs,
+        )
+        self.raw_op._set_pts(typ="grad", samples=self.samples)
+
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
 
@@ -814,3 +843,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         return power_method(
             max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )
+
+    def toggle_grad_traj(self):
+        """Toggle between the gradient trajectory and the plan for type 1 transform."""
+        if self.uses_sense:
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()

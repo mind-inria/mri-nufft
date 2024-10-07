@@ -1,22 +1,27 @@
 """
-=======================
-2D Trajectories display
-=======================
+========================
+Animated 2D trajectories
+========================
 
-A collection of 2D trajectories are generated and saved as a gif.
+An animation to show 2D trajectory customization.
 
 """
+
+import time
 
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
+import tempfile as tmp
 from PIL import Image, ImageSequence
 
 import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory2D as mtt
 from mrinufft.trajectories.display import displayConfig
 
-# Options
+# %%
+# Script options
+# ==============
 
 Nc = 16
 Ns = 200
@@ -29,7 +34,9 @@ nb_frames = 3
 duration = 150  # seconds
 
 
-# Generation
+# %%
+# Trajectory generation
+# =====================
 
 # Initialize trajectory function
 functions = [
@@ -125,6 +132,10 @@ arguments = [
 ]
 
 
+# %%
+# Animation rendering
+# ===================
+
 frame_setup = [
     (f, i, name, arg)
     for (name, f), args in list(zip(functions, arguments))
@@ -132,7 +143,7 @@ frame_setup = [
 ]
 
 
-def draw_frame(func, index, name, arg, save_dir="/tmp/"):
+def draw_frame(func, index, name, arg):
     """Draw a single frame of the gif and save it to a tmp file."""
     trajectory = func(arg)
     # General configuration
@@ -158,8 +169,7 @@ def draw_frame(func, index, name, arg, save_dir="/tmp/"):
     )
 
     # Save figure
-    hashed = joblib.hash((index, name, arg))
-    filename = save_dir + f"{hashed}.png"
+    filename = f"{tmp.NamedTemporaryFile().name}.png"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
     return filename
@@ -193,7 +203,7 @@ for f in image_files:
         os.remove(f)
     except OSError:
         continue
-# don't raise errors from pytest. This will only be excecuted for the sphinx gallery stuff
+# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
         Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"

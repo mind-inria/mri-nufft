@@ -6,10 +6,226 @@ import numpy as np
 import numpy.linalg as nl
 from scipy.special import ellipj, ellipk
 
-from .maths import CIRCLE_PACKING_DENSITY, Ra, Ry, Rz, generate_fibonacci_circle
-from .tools import conify, duplicate_along_axes, precess
-from .trajectory2D import initialize_2D_spiral
+from .maths import (
+    CIRCLE_PACKING_DENSITY,
+    R2D,
+    Ra,
+    Ry,
+    Rz,
+    generate_fibonacci_circle,
+    EIGENVECTOR_2D_FIBONACCI,
+)
+from .tools import conify, duplicate_along_axes, epify, precess, stack
+from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Packings, initialize_shape_norm, initialize_tilt
+
+##############
+# 3D RADIALS #
+##############
+
+
+def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    """Initialize 3D radial trajectories with phyllotactic structure.
+
+    The radial shots are oriented according to a Fibonacci sphere
+    lattice, supposed to reproduce the phyllotaxis found in nature
+    through flowers, etc. It ensures an almost uniform distribution.
+
+    This function reproduces the proposition from [Pic+11]_, but the name
+    "spiral phyllotaxis" was changed to avoid confusion with
+    actual spirals.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_interleaves : int, optional
+        Number of implicit interleaves defining the shots order
+        for a more uniform k-space distribution over time. When the
+        number of interleaves belong to the Fibonacci sequence, the
+        shots from one interleave are structured into a continuous
+        spiral over the surface the k-space sphere, by default 1
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center,
+        by default False
+
+    Returns
+    -------
+    array_like
+        3D phyllotaxis radial trajectory
+
+    References
+    ----------
+    .. [Pic+11] Piccini, Davide, Arne Littmann,
+       Sonia Nielles‐Vallespin, and Michael O. Zenge.
+       "Spiral phyllotaxis: the natural way to construct
+       a 3D radial trajectory in MRI."
+       Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
+    """
+    trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
+    trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns, 3))
+    return trajectory
+
+
+def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
+    """Initialize 3D radial trajectories with golden means-based structure.
+
+    The radial shots are oriented using multidimensional golden means,
+    which are derived from modified Fibonacci sequences by an eigenvalue
+    approach, to provide a temporally stable acquisition with widely
+    spread shots at all time.
+
+    This function reproduces the proposition from [Cha+09]_, with
+    in addition the option to switch between center-out
+    and in-out radial shots.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center,
+        by default False
+
+    Returns
+    -------
+    array_like
+        3D golden means radial trajectory
+
+    References
+    ----------
+    .. [Cha+09] Chan, Rachel W., Elizabeth A. Ramsay,
+       Charles H. Cunningham, and Donald B. Plewes.
+       "Temporal stability of adaptive 3D radial MRI
+       using multidimensional golden means."
+       Magnetic Resonance in Medicine 61, no. 2 (2009): 354-363.
+    """
+    m1 = (EIGENVECTOR_2D_FIBONACCI[0] * np.arange(Nc)) % 1
+    m2 = (EIGENVECTOR_2D_FIBONACCI[1] * np.arange(Nc)) % 1
+
+    polar_angle = np.arccos(m1).reshape((-1, 1))
+    azimuthal_angle = (2 * np.pi * m2).reshape((-1, 1))
+
+    radius = np.linspace(-1 * in_out, 1, Ns).reshape((1, -1))
+    sign = 1 if in_out else (-1) ** np.arange(Nc).reshape((-1, 1))
+
+    trajectory = np.zeros((Nc, Ns, 3))
+    trajectory[..., 0] = radius * np.sin(polar_angle) * np.cos(azimuthal_angle)
+    trajectory[..., 1] = radius * np.sin(polar_angle) * np.sin(azimuthal_angle)
+    trajectory[..., 2] = radius * np.cos(polar_angle) * sign
+
+    return KMAX * trajectory
+
+
+def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    """Initialize 3D radial trajectories with a spiral structure.
+
+    The radial shots are oriented according to an archimedean spiral
+    over a sphere surface, for each interleave.
+
+    This function reproduces the proposition from [WR94]_, with
+    in addition the option to switch between center-out
+    and in-out radial shots.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_interleaves : int, optional
+        Number of implicit interleaves defining the shots order
+        for a more structured k-space distribution over time,
+        by default 1
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center,
+        by default False
+
+    Returns
+    -------
+    array_like
+        3D Wong radial trajectory
+
+    References
+    ----------
+    .. [WR94] Wong, Sam TS, and Mark S. Roos.
+       "A strategy for sampling on a sphere applied
+       to 3D selective RF pulse design."
+       Magnetic Resonance in Medicine 32, no. 6 (1994): 778-784.
+    """
+    N = Nc // nb_interleaves
+    M = nb_interleaves
+
+    points = np.zeros((M, N, 3))
+    points[..., 2] = (
+        (2 - in_out) * np.arange(1, N + 1) - (1 - in_out) * N - 1
+    ).reshape((1, -1)) / N
+
+    planar_radius = np.sqrt(1 - points[..., 2] ** 2)
+    azimuthal_angle = np.sqrt(N * np.pi / M) * np.arcsin(points[..., 2])
+    azimuthal_angle += 2 * np.pi * np.arange(1, M + 1).reshape((-1, 1)) / M
+
+    points[..., 0] = planar_radius * np.cos(azimuthal_angle)
+    points[..., 1] = planar_radius * np.sin(azimuthal_angle)
+    points = points.reshape((Nc, 3))
+
+    trajectory = np.linspace(-points * in_out, points, Ns)
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = KMAX * trajectory / np.max(nl.norm(trajectory, axis=-1))
+    return trajectory
+
+
+def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+    """Initialize 3D radial trajectories with a spiral structure.
+
+    The radial shots are oriented according to an archimedean spiral
+    over a sphere surface, shared uniformly between all interleaves.
+
+    This function reproduces the proposition from [Par+16]_,
+    itself based on the work from [WR94]_, with
+    in addition the option to switch between center-out
+    and in-out radial shots.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    nb_interleaves : int, optional
+        Number of implicit interleaves defining the shots order
+        for a more structured k-space distribution over time,
+        by default 1
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center,
+        by default False
+
+    Returns
+    -------
+    array_like
+        3D Park radial trajectory
+
+    References
+    ----------
+    .. [Par+16] Park, Jinil, Taehoon Shin, Soon Ho Yoon,
+       Jin Mo Goo, and Jang‐Yeon Park.
+       "A radial sampling strategy for uniform k‐space coverage
+       with retrospective respiratory gating
+       in 3D ultrashort‐echo‐time lung imaging."
+       NMR in Biomedicine 29, no. 5 (2016): 576-587.
+    """
+    trajectory = initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=in_out)
+    trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns, 3))
+    return trajectory
+
 
 ############################
 # FREEFORM 3D TRAJECTORIES #
@@ -681,3 +897,225 @@ def initialize_3D_seiffert_shells(
         trajectory[count : count + Ms] = trajectory[count : count + Ms] @ rotation
         count += Ms
     return KMAX * trajectory
+
+
+#####################
+# fMRI TRAJECTORIES #
+#####################
+
+
+def initialize_3D_turbine(
+    Nc,
+    Ns_readouts,
+    Ns_transitions,
+    nb_blades,
+    blade_tilt="uniform",
+    nb_trains="auto",
+    skip_factor=1,
+    in_out=True,
+):
+    """Initialize 3D TURBINE trajectory.
+
+    This is an implementation of the TURBINE (Trajectory Using Radially
+    Batched Internal Navigator Echoes) trajectory proposed in [MGM10]_.
+    It consists of EPI-like multi-echo planes rotated around any axis
+    (here :math:`k_z`-axis) in a radial fashion.
+
+    Note that our implementation also proposes to segment the planes
+    into several shots instead of just one, and includes the proposition
+    from [GMC22]_ to also accelerate within the blades by skipping lines
+    but while alternating them between blades.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns_readouts : int
+        Number of samples per readout
+    Ns_transitions : int
+        Number of samples per transition between two readouts
+    nb_blades : int
+        Number of line stacks over the :math:`k_z`-axis axis
+    blade_tilt : str, float, optional
+        Tilt between individual blades, by default "uniform"
+    nb_trains : int, str, optional
+        Number of resulting shots, or readout trains, such that each of
+        them will be composed of :math:`n` readouts with
+        ``Nc = n * nb_trains``. If ``"auto"`` then ``nb_trains`` is set
+        to ``nb_blades``.
+    skip_factor : int, optional
+        Factor defining the way different blades alternate to skip lines,
+        forming groups of `skip_factor` non-redundant blades.
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center
+
+    Returns
+    -------
+    array_like
+        3D TURBINE trajectory
+
+    References
+    ----------
+    .. [MGM10] McNab, Jennifer A., Daniel Gallichan, and Karla L. Miller.
+       "3D steady‐state diffusion‐weighted imaging with trajectory using
+       radially batched internal navigator echoes (TURBINE)."
+       Magnetic Resonance in Medicine 63, no. 1 (2010): 235-242.
+    .. [GMC22] Graedel, Nadine N., Karla L. Miller, and Mark Chiew.
+       "Ultrahigh resolution fMRI at 7T using radial‐cartesian TURBINE sampling."
+       Magnetic Resonance in Medicine 88, no. 5 (2022): 2058-2073.
+    """
+    # Assess arguments validity
+    if nb_trains == "auto":
+        nb_trains = nb_blades
+    if not isinstance(skip_factor, int):
+        raise ValueError("`skip_factor` must be an integer.")
+    if Nc % nb_blades != 0:
+        raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
+    if nb_trains and (Nc % nb_trains != 0):
+        raise ValueError("`nb_trains` should divide `Nc`.")
+    nb_shot_per_blade = Nc // nb_blades
+
+    # Initialize the first shot of each blade on a plane
+    single_plane = initialize_2D_radial(
+        nb_blades, Ns_readouts, in_out=in_out, tilt=blade_tilt
+    )
+
+    # Stack the blades first shots with tilt to create each full blade
+    trajectory = stack(single_plane, nb_shot_per_blade * skip_factor, z_tilt=0)
+
+    # Re-order the shot to be EPI-compatible
+    trajectory = trajectory.reshape(
+        (nb_shot_per_blade * skip_factor, nb_blades, Ns_readouts, 3)
+    )
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc * skip_factor, Ns_readouts, 3))
+
+    # Skip lines but alternate which ones between blades
+    skip_mask = (
+        np.arange(nb_blades)[:, None]
+        + np.arange(nb_shot_per_blade * skip_factor)[None, :]
+    )
+    skip_mask = ((skip_mask % skip_factor) == 0).astype(bool).flatten()
+    trajectory = trajectory[skip_mask]
+
+    # Merge shots into EPI-like multi-readout trains
+    if nb_trains and nb_trains != Nc:
+        trajectory = epify(
+            trajectory,
+            Ns_transitions=Ns_transitions,
+            nb_trains=nb_trains,
+            reverse_odd_shots=True,
+        )
+
+    return trajectory
+
+
+def initialize_3D_repi(
+    Nc,
+    Ns_readouts,
+    Ns_transitions,
+    nb_blades,
+    nb_blade_revolutions=0,
+    blade_tilt="uniform",
+    nb_spiral_revolutions=0,
+    spiral="archimedes",
+    nb_trains="auto",
+    in_out=True,
+):
+    """Initialize 3D REPI trajectory.
+
+    This is an implementation of the REPI (Radial Echo Planar Imaging)
+    trajectory proposed in [RMS22]_ and officially inspired
+    from TURBINE proposed in [MGM10]_.
+    It consists of multi-echo stacks of lines or spirals rotated around any axis
+    (here :math:`k_z`-axis) in a radial fashion, but each stack is also slightly
+    shifted along the rotation axis in order to be entangled with the others
+    without redundancy. This feature is similar to choosing ``skip_factor``
+    equal to ``nb_blades`` in TURBINE.
+
+    Note that our implementation also proposes to segment the planes/stacks
+    into several shots, instead of just one. Spirals can also be customized
+    beyond the classic Archimedean spiral.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns_readouts : int
+        Number of samples per readout
+    Ns_transitions : int
+        Number of samples per transition between two readouts
+    nb_blades : int
+        Number of line stacks over the kz axis
+    nb_blade_revolutions : float
+        Number of revolutions over lines/spirals within a blade
+        over the kz axis.
+    blade_tilt : str, float, optional
+        Tilt between individual blades, by default "uniform"
+    nb_spiral_revolutions : float, optional
+        Number of revolutions of the spirals over the readouts, by default 0
+    spiral : str, float, optional
+        Spiral type, by default "archimedes"
+    nb_trains : int, str
+        Number of trains dividing the readouts, such that each
+        shot will be composed of `n` readouts with `Nc = n * nb_trains`.
+        If "auto" then `nb_trains` is set to `nb_blades`.
+    in_out : bool, optional
+        Whether the curves are going in-and-out or start from the center
+
+    Returns
+    -------
+    array_like
+        3D REPI trajectory
+
+    References
+    ----------
+    .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
+       "Three dimensional radial echo planar imaging for functional MRI."
+       Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.
+    """
+    # Assess arguments validity
+    if nb_trains == "auto":
+        nb_trains = nb_blades
+    if Nc % nb_blades != 0:
+        raise ValueError("`nb_blades` should divide `Nc`.")
+    if Nc % nb_trains != 0:
+        raise ValueError("`nb_trains` should divide `Nc`.")
+    if nb_trains % nb_blades != 0:
+        raise ValueError("`nb_trains` should divide `nb_blades`.")
+    nb_shot_per_blade = Nc // nb_blades
+    nb_spiral_revolutions = max(nb_spiral_revolutions, 1e-5)
+
+    # Initialize trajectory as a stack of single shots
+    single_shot = initialize_2D_spiral(
+        1, Ns_readouts, in_out=in_out, tilt=0, nb_revolutions=nb_spiral_revolutions
+    )
+    shot_tilt = 2 * np.pi * nb_blade_revolutions / Nc
+    trajectory = stack(single_shot, Nc, z_tilt=shot_tilt)
+
+    # Rotate some shots to separate the blades
+    for i_b in range(nb_blades):
+        rotation = R2D(
+            i_b * initialize_tilt(blade_tilt, nb_partitions=nb_blades) / (1 + in_out)
+        ).T
+        trajectory[i_b::nb_blades, ..., :2] = (
+            trajectory[i_b::nb_blades, ..., :2] @ rotation
+        )
+
+    # Re-order the shot to be EPI-compatible
+    trajectory = trajectory.reshape((nb_shot_per_blade, nb_blades, Ns_readouts, 3))
+    trajectory = np.swapaxes(trajectory, 0, 1)
+    trajectory = trajectory.reshape((Nc, Ns_readouts, 3))
+
+    # Merge shots into EPI-like multi-readout trains
+    if nb_trains and nb_trains != Nc:
+        trajectory = epify(
+            trajectory,
+            Ns_transitions=Ns_transitions,
+            nb_trains=nb_trains,
+            reverse_odd_shots=True,
+        )
+
+    return trajectory

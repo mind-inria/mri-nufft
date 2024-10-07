@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
-from mrinufft.operators.base import get_array_module
+from mrinufft._utils import get_array_module
 from .utils import register_smaps
 import numpy as np
 
@@ -106,7 +106,7 @@ def low_frequency(
     threshold: float | tuple[float, ...] = 0.1,
     density=None,
     window_fun: str = "ellipse",
-    blurr_factor: float | tuple[float, ...] = 0.0,
+    blurr_factor: int | float | tuple[float, ...] = 0.0,
     mask: bool = False,
 ):
     """
@@ -160,7 +160,7 @@ def low_frequency(
         window_fun=window_fun,
     )
     smaps_adj_op = get_operator(backend)(
-        samples, shape, density=dc, n_coils=k_space.shape[0]
+        samples, shape, density=dc, n_coils=k_space.shape[-2]
     )
     Smaps = smaps_adj_op.adj_op(k_space)
     SOS = np.linalg.norm(Smaps, axis=0)
@@ -171,7 +171,7 @@ def low_frequency(
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
     if np.sum(blurr_factor) > 0:
-        if isinstance(blurr_factor, float):
+        if isinstance(blurr_factor, (float, int)):
             blurr_factor = (blurr_factor,) * SOS.ndim
         Smaps = gaussian(np.abs(Smaps), sigma=(0,) + blurr_factor) * np.exp(
             1j * np.angle(Smaps)

@@ -15,6 +15,10 @@ from .trajectory2D import (
 )
 
 from .trajectory3D import (
+    initialize_3D_phyllotaxis_radial,
+    initialize_3D_golden_means_radial,
+    initialize_3D_wong_radial,
+    initialize_3D_park_radial,
     initialize_3D_cones,
     initialize_3D_floret,
     initialize_3D_wave_caipi,
@@ -22,6 +26,8 @@ from .trajectory3D import (
     initialize_3D_helical_shells,
     initialize_3D_annular_shells,
     initialize_3D_seiffert_shells,
+    initialize_3D_turbine,
+    initialize_3D_repi,
 )
 
 from .tools import (
@@ -55,6 +61,10 @@ __all__ = [
     "initialize_2D_polar_lissajous",
     "initialize_2D_lissajous",
     "initialize_2D_waves",
+    "initialize_3D_phyllotaxis_radial",
+    "initialize_3D_golden_means_radial",
+    "initialize_3D_wong_radial",
+    "initialize_3D_park_radial",
     "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
     "initialize_3D_floret",
@@ -63,6 +73,8 @@ __all__ = [
     "initialize_3D_helical_shells",
     "initialize_3D_annular_shells",
     "initialize_3D_seiffert_shells",
+    "initialize_3D_turbine",
+    "initialize_3D_repi",
     "stack",
     "rotate",
     "precess",

@@ -46,7 +46,7 @@ def get_array_module(array):
     for lib, array_type in ARRAY_LIBS.values():
         if lib is not None and isinstance(array, array_type):
             return lib
-    raise ValueError("Unknown array library.")
+    raise ValueError(f"Unknown array library (={type(array)}.")
 
 
 def auto_cast(array, dtype: DTypeLike):
@@ -86,7 +86,6 @@ def proper_trajectory(trajectory, normalize="pi"):
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"
         ) from e
-
     new_traj = new_traj.reshape(-1, trajectory.shape[-1])
 
     max_abs_val = xp.max(xp.abs(new_traj))
