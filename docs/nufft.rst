@@ -166,6 +166,57 @@ Where :math:`E_mn = e^i\Delta\omega_0(u_n)t_m`.
 
 .. _nufft-algo:
 
+Subspace Projection Model
+~~~~~~~~~~~~~~~~~~~~~~~~~
+In several MRI applications, such as dynamic or quantitative MRI, a single acquisition provides a stack of two- or three-dimensional images, each representing a single time frame (for dynamic MRI) or a single contrast (for quantitative MRI).
+To achieve a clinically feasible scan time, each frame or contrast is acquired with a different aggressively undersampled k-space trajectory. In this context, the single-coil acquisition model becomes:
+
+.. math::
+
+   \tilde{\boldsymbol{y}} = \begin{bmatrix}
+      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \vdots & \vdots & \ddots & \vdots \\
+      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+   \end{bmatrix}
+   \boldsymbol{x} + \boldsymbol{n}
+
+where :math:`\mathcal{F}_\Omega_1, \dots, \mathcal{F}_\Omega_T` are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting [3]_) may consists of 
+thousands of total frames :math:`T`, leading to repeated Fourier Transform operations and high computational burden. However, the 1D signal series arising from similar voxels, e.g., with similar
+relaxation properties, are typically highly correlated. For this reason, the image series can be represented as:
+
+.. math::
+
+   \boldsymbol{x} = \Phi\Phi^H \boldsymbol{x}
+
+where :math:`\Phi` is an orthonormal basis spanning a low dimensional subspace whose rank :math:`K \ll T` which can be obtained performing a Singular Value Decomposition of a low resolution fully sampled
+training dataset or an ensemble of simulated Bloch responses. The signal model can be then written as:
+
+.. math::
+
+   \tilde{\boldsymbol{y}} = \begin{bmatrix}
+      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \vdots & \vdots & \ddots & \vdots \\
+      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+   \end{bmatrix}
+   \Phi \Phi^H \boldsymbol{x} + \boldsymbol{n} =
+    \begin{bmatrix}
+      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \vdots & \vdots & \ddots & \vdots \\
+      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+   \end{bmatrix}
+   \Phi \boldsymbol{\alpha} + \boldsymbol{n}
+
+where :math:`\boldsymbol{\alpha} = \Phi^H \boldsymbol{x}` are the spatial coefficients representing the image series. Since the elements of :math:`\Phi^H` do not depend on the specific k-space frequency points,
+the projection operator :math:`\boldsymbol{\Phi}` commutes with the Fourier transform, and the signal equation finally becomes:
+
+.. math::
+
+   \tilde{\boldsymbol{y}} = \Phi \mathcal{F}_Omega(\boldsymbol{\alpha}) + \boldsymbol{n}
+
+that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.
 
 The Non Uniform Fast Fourier Transform
 ======================================
@@ -206,5 +257,6 @@ References
 ==========
 
 .. [1] https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
-.. [2] Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., "A homogeneity correction method for magnetic resonance imaging with time-varying gradients", IEEE Transaction on Medical Imaging (1991), pp. 629-637
+.. [2] Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., "A homogeneity correction method for magnetic resonance imaging with time-varying gradients", IEEE Transaction on Medical Imaging (1991), pp. 629-637.
 .. [3] Fessler, J. A., Lee, S., Olafsson, V. T., Shi, H. R., Noll, D. C., "Toeplitz-based iterative image reconstruction for MRI with correction for magnetic field inhomogeneity",  IEEE Transactions on Signal Processing 53.9 (2005), pp. 3393–3402.
+.. [4] D. F. McGivney et al., "SVD Compression for Magnetic Resonance Fingerprinting in the Time Domain," IEEE Transactions on Medical Imaging (2014), pp. 2311-2322.

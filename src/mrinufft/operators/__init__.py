@@ -12,6 +12,7 @@ from .base import (
 )
 from .off_resonance import MRIFourierCorrected, get_interpolators_from_fieldmap
 from .stacked import MRIStackedNUFFT
+from .subspace import MRISubspace
 
 #
 # load all the interfaces modules
@@ -25,6 +26,7 @@ __all__ = [
     "FourierOperatorBase",
     "MRIFourierCorrected",
     "MRIStackedNUFFT",
+    "MRISubspace",
     "check_backend",
     "get_operator",
     "list_backends",
