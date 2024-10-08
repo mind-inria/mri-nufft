@@ -203,7 +203,7 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_unet.gif", final_dir / "mrinufft_learn_unet.gif")
+    shutil.copyfile("mrinufft_learn_Unet.gif", final_dir / "mrinufft_learn_Unet.gif")
 except FileNotFoundError:
     pass
 # sphinx_gallery_end_ignore
