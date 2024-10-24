@@ -12,8 +12,8 @@ https://stackoverflow.com/questions/56807698/how-to-run-script-as-pytest-test
 
 """
 
-import sys
 import runpy
+import sys
 from pathlib import Path
 
 import matplotlib as mpl

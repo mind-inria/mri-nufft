@@ -268,7 +268,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         self._check_smaps_shape(new_smaps)
         if new_smaps is not None and hasattr(self, "smaps_cached"):
-            if self.smaps_cached:
+            if self.smaps_cached or is_cuda_array(new_smaps):
+                self.smaps_cached = True
                 warnings.warn(
                     f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
@@ -297,8 +298,20 @@ class MRICufiNUFFT(FourierOperatorBase):
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ, samples)
+            self.raw_op._set_pts(typ, self._samples)
         self.compute_density(self._density_method)
+
+    @FourierOperatorBase.density.setter
+    def density(self, new_density):
+        """Update the density compensation."""
+        if new_density is None:
+            self._density = None
+            return
+        xp = get_array_module(new_density)
+        if xp.__name__ == "numpy":
+            self._density = cp.array(new_density)
+        elif xp.__name__ == "cupy":
+            self._density = new_density
 
     @with_numpy_cupy
     @nvtx_mark()
