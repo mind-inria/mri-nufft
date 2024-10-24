@@ -13,7 +13,7 @@ from functools import partial
 
 import numpy as np
 
-from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE
+from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE, CUPY_AVAILABLE
 from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
@@ -21,6 +21,8 @@ from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 if AUTOGRAD_AVAILABLE:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
+if CUPY_AVAILABLE:
+    import cupy as cp
 
 
 # Mapping between numpy float and complex types.
@@ -304,8 +306,10 @@ class FourierOperatorBase(ABC):
             if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
                 or `torchkbnufft-gpu`.
         """
-        if isinstance(method, np.ndarray):
-            self._density = method
+        if isinstance(method, np.ndarray) or (
+            CUPY_AVAILABLE and isinstance(method, cp.ndarray)
+        ):
+            self.density = method
             return None
         if not method:
             self._density = None
