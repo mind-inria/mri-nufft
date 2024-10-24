@@ -13,10 +13,10 @@ A collection of 3D non-Cartesian trajectories with analytical definitions.
 # are redundant across the different patterns, some of the documentation
 # will refer to previous patterns for explanation.
 #
-# Note that most sources have not been added yet, but will be in the near
-# future. Also the examples hereafter only cover natively 3D trajectories
+# Note that the examples hereafter only cover natively 3D trajectories
 # or famous 3D trajectories obtained from 2D. Examples on how to use
-# 2D-to-3D expansion methods will be presented over another page.
+# tools to make 3D trajectories out of 2D ones are presented in
+# :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py`
 #
 # In this page in particular, we invite the user to manually run the script
 # to be able to manipulate the plot orientations with the matplotlib interface
@@ -26,12 +26,11 @@ A collection of 3D non-Cartesian trajectories with analytical definitions.
 # External
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import show_argument, show_trajectory
 
 # Internal
 import mrinufft as mn
 from mrinufft import display_2D_trajectory, display_3D_trajectory
-from utils import show_argument, show_trajectory
-
 
 # %%
 # Script options
