@@ -13,7 +13,12 @@ from functools import partial
 
 import numpy as np
 
-from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE, CUPY_AVAILABLE
+from mrinufft._array_compat import (
+    with_numpy,
+    with_numpy_cupy,
+    AUTOGRAD_AVAILABLE,
+    CUPY_AVAILABLE,
+)
 from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps

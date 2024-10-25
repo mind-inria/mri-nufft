@@ -110,7 +110,7 @@ class RawCufinufftPlan:
             dtype=DTYPE_R2C[str(self._dtype)],
             **kwargs,
         )
-    
+
     def _set_kxyz(self, samples):
         self._kx.set(samples[:, 0])
         self._ky.set(samples[:, 1])
