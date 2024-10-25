@@ -47,10 +47,10 @@ class Model(torch.nn.Module):
             data=torch.Tensor(inital_trajectory),
             requires_grad=True,
         )
-        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
             self.trajectory.detach().cpu().numpy(),
             shape=(256, 256),
-            density=False,
+            density=True,
             squeeze_dims=False,
         )
 
@@ -60,12 +60,11 @@ class Model(torch.nn.Module):
         self.operator.samples = self.trajectory.clone()
 
         # A simple acquisition model simulated with a forward NUFFT operator
-        #kspace = self.operator.op(x)
+        kspace = self.operator.op(x)
 
         # A simple density compensated adjoint operator
-        #adjoint = self.operator.adj_op(kspace)
-        #return adjoint / torch.linalg.norm(adjoint)
-        return
+        adjoint = self.operator.adj_op(kspace)
+        return adjoint / torch.linalg.norm(adjoint)
 
 
 # %%
@@ -114,8 +113,8 @@ mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.comple
 mri_2D = mri_2D / torch.linalg.norm(mri_2D)
 model.eval()
 recon = model(mri_2D)
-#fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-#plot_state(axs, mri_2D, init_traj, recon)
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+plot_state(axs, mri_2D, init_traj, recon)
 
 # %%
 # Start training loop
@@ -123,34 +122,34 @@ recon = model(mri_2D)
 losses = []
 image_files = []
 model.train()
-with tqdm(range(1000), unit="steps") as tqdms:
+with tqdm(range(100), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_2D)
-        #loss = torch.norm(out - mri_2D[None])
-        #numpy_loss = loss.detach().cpu().numpy()
-        #tqdms.set_postfix({"loss": numpy_loss})
-        #losses.append(numpy_loss)
-        #optimizer.zero_grad()
-        #loss.backward()
-        #optimizer.step()
+        loss = torch.norm(out - mri_2D[None])
+        numpy_loss = loss.detach().cpu().numpy()
+        tqdms.set_postfix({"loss": numpy_loss})
+        losses.append(numpy_loss)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
         with torch.no_grad():
             # Clamp the value of trajectory between [-0.5, 0.5]
             for param in model.parameters():
                 param.clamp_(-0.5, 0.5)
-        #schedulder.step()
+        schedulder.step()
         # Generate images for gif
         hashed = joblib.hash((i, "learn_traj", time.time()))
         filename = "/tmp/" + f"{hashed}.png"
-        #fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-        #plot_state(
-        #    axs,
-        #    mri_2D,
-        #    model.trajectory.detach().cpu().numpy(),
-        #    out,
-        #    losses,
-        #    save_name=filename,
-        #)
-        #image_files.append(filename)
+        fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+        plot_state(
+            axs,
+            mri_2D,
+            model.trajectory.detach().cpu().numpy(),
+            out,
+            losses,
+            save_name=filename,
+        )
+        image_files.append(filename)
 
 
 # Make a GIF of all images.
