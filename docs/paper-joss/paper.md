@@ -20,7 +20,7 @@ authors:
   - name: Asma Tanabene
     affiliation: "1,2,5" 
   - name: Léna Oudjman
-    affiliation: 1,2
+    affiliation: "1, 2"
   - name: Matteo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
