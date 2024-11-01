@@ -129,7 +129,7 @@ MRI-NUFFT comes with a wide variety of non-Cartesian trajectory generation routi
 Following the formulation of [@wang_efficient_2023], MRI-NUFFT provides automatic differentiation for all NUFFT backends, with respect to both gradients and data (image or k-space). This enables efficient backpropagation through NUFFT operators and supports research on learned sampling model and image reconstruction network.
 
 # MRI-NUFFT utilization
-MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI [@comby_snake-fmri_2024], deepinv [@tachella_deepinverse_2023] and PySAP-MRI [@farrens_pysap_2020;@gueddarri_pysap-mri_2020]
+MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI [@comby_snake-fmri_2024], deepinv [@tachella_deepinverse_2023] and PySAP-MRI [@farrens_pysap_2020; @gueddari_pysap-mri_2020]
 
 # References
 
