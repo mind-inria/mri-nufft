@@ -52,11 +52,11 @@ bibliography: paper.bib
 MRI-NUFFT is a python package that provides a universal interface to various Non-Uniform Fast Fourier Transform libraries running on CPU or GPU (gpuNUFFT, FINUFFT, CUFINUFFT, pyNFFT), adding compatibily with standard array library (NumPy, CuPy, PyTorch, TensorFlow, etc.) On top of these libraries it extends the existing NUFFT operations to provide a physical model of the MRI acquisition process (e.g. multi-coil acquisition and static-field inhomogeneities). It also provides a wide variety of customizable implementations of non-Cartesian sampling trajectories, as well as density compensation methods. Finally, it proposes optimized auto-differentiation with respect to the data and sampling locations for machine learning. With MRI-NUFFT one can experiment with non-Cartesian sampling in MRI, get access to the latest advances in the field and state-of-the-art sampling patterns.
 
 
-# Statement of Need 
+# Statement of need 
 MRI is an non-invasive biomedical imaging technique, where raw data is sampled in the spatial frequency domain (k-space) and final images are  obtained by applying an inverse (fast) Fourier transform on this data.
 Traditionnaly, the data is sampled on a Cartesian grid (often partially by skipping lines to accelerate the acquisition)  and reconstructed using FFT-based algorithms. 
-However, the Cartesian approach is not always the best choice for collecting the data, and non-Cartesian sampling schemes have been proposed to improve the image quality, reduce the acquisition time or to enable new imaging modalities. But the reconstruction of non-Cartesian data is more challenging and requires the use of non-uniform fast Fourier transform (NUFFT) algorithms. 
-Several NUFFT libraries have been developed in the past years, but they are not always easy to use or don't account for the specificities of MRI data acquisition (e.g. multi-coil acquisition, static-field inhomogeneities, density compensation, etc.). Also their performances can vary a lot depending on the use cases (2D vs 3D data, number of coils, etc.). 
+However, the Cartesian approach is not always the best choice for data collection, and non-Cartesian sampling schemes have been proposed to improve image quality, reduce acquisition time or enable new imaging modalities. But the reconstruction of non-Cartesian data is more challenging and requires the use of non-uniform fast Fourier transform (NUFFT) algorithms. 
+Several NUFFT libraries have been developed in the past few years, but they are not always easy to use or don't account for the specificities of MRI data acquisition (e.g. multi-coil acquisition, static-field inhomogeneities, density compensation, etc.). Also their performances can vary a lot depending on the use cases (2D vs 3D data, number of coils, etc.). 
 
 Moreover, non-Cartesian acquisitions are still an active research field, with new sampling patterns being proposed regularly. With MRI-NUFFT one can easily experiment with these new patterns and compare them to existing ones.
 Furthermore, there has been a growing interest in using deep learning to jointly learn MRI acquisition and reconstruction, which requires to compute the gradients of the reconstruction with respect to the raw data and/or the sampling locations.
@@ -66,28 +66,28 @@ Furthermore, there has been a growing interest in using deep learning to jointly
 ![MRI-NUFFT as an interface for non-Cartesian MRI](../_static/mri-nufft-scheme.svg){width=10cm}
 
 ## NUFFT Library compatibility 
-MRI-NUFFT is compatible with the following NUFFT librairies: finufft[@barnett_parallel_2019], cufinufft[@shih_cufinufft_2021], gpunufft[@knoll_gpunufft_2014], torchkbnufft[@muckley_torchkbnufft_2020], pynfft, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
-Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determine which NUFFT implementation provides the best performances both in term of computation time and memory footprint. As the time of writing, cufinufft and gpunufft provide the best performances by leveraging CUDA acceleration. MRI-NUFFT supports as well standard array libraries (numpy, cupy, torch, tensorflow, etc.) and optimizes data copies, relying on the array-API standard. 
-On top of these NUFFT backend, it provides several enhancements, notably an optimized 2.5D NUFFT (for stack of 2D non uniform trajectory, a common pattern in MRI), and a data-consistency term for iterative reeconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$) that can be used in iterative reconstruction algorithms.
+MRI-NUFFT is compatible with the following NUFFT librairies: FINUFFT[@barnett_parallel_2019], CUFINUFFT[@shih_cufinufft_2021], gpuNUFFT[@knoll_gpunufft_2014], TorchKbNufft[@muckley_torchkbnufft_2020], pyNFFT, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
+Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determine which NUFFT implementation provides the best performances both in term of computation time and memory footprint. At the time of writing, cufinufft and gpunufft provide the best performances by leveraging CUDA acceleration. MRI-NUFFT supports as well standard array libraries (NumPy, CuPy, PyTorch, TensorFlow, etc.) and optimizes data copies, relying on the array-API standard. 
+It also provides several enhancements on top of these backends, notably an optimized 2.5D NUFFT (for stacks of 2D non uniform trajectories, commonly used in MRI), and a data-consistency term for iterative reconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$).
 
 
 ## Extended Fourier Model 
 MRI-NUFFT provides a physical model of the MRI acquisition processus, including multi-coil acquisition and static-field inhomogeneities. This model is compatible with the NUFFT libraries, and can be used to simulate the acquisition of MRI data, or to reconstruct data from a given set of measurements. Namely we provide a linear operator that encapsulates the forward and adjoint NUFFT operators, the coil sensitivity maps and (optionnaly) the static field inhomogeneities. The forward model is described by the following equation:
 $$y(\boldsymbol{\nu}_i) = \sum_{j=1}^N x(\boldsymbol{u}_j) e^{-2\imath\pi\boldsymbol{u}_j\cdot\boldsymbol{\nu_i}} + n_i, \quad i=1,\dots,M$$
-Where:
-$x(\boldsymbol{u})$ is the spatially varying image contrast acquired; $y_1, \dots, y_M$ are the sampled points at frequency locations;  $\Omega=\lbrace \boldsymbol{\nu}_1, \dots, \boldsymbol{\nu}_M \in [-1/2, 1/2]^d\rbrace$; $\boldsymbol{u}_j$ are the $N$ spatial locations of image voxels.; and $n_i$ is a zero-mean complex-valued Gaussian Noise, modeling the thermal noise of the scanner.
+where:
+$x(\boldsymbol{u})$ is the spatially varying image contrast acquired; $y_1, \dots, y_M$ are the sampled points at frequency locations;  $\Omega=\lbrace \boldsymbol{\nu}_1, \dots, \boldsymbol{\nu}_M \in [-1/2, 1/2]^d\rbrace$; $\boldsymbol{u}_j$ are the $N$ spatial locations of image voxels, and $n_i$ is a zero-mean complex-valued Gaussian noise, modeling the thermal noise of the scanner.
 
 This can also be formulated using the operator notation $\boldsymbol{y} = \mathcal{F}_\Omega (\boldsymbol{x}) + \boldsymbol{n}$
 
 As the sampling locations $\Omega$ are non-uniform and the image locations $\boldsymbol{u}_j$ are uniform, $\mathcal{F}_\Omega$ is a NUDFT operator, and the equation above describe a Type 2 NUDFT.
-Similarly the adjoint operator is a Type 1 NUFFT:
+Similarly the adjoint operator is a Type 1 NUDFT:
 
-: Correspondance Table between NUFFT and MRI acquisition model.
+: Correspondence Table between NUFFT and MRI acquisition model.
 
 | NUFFT Type | Operation | MRI Transform      | Operator               |
 |:-----------|:----------|:-------------------|:-----------------------|
-| Type 1     | Adjoint   | Kspace $\to$ Image | $\mathcal{F}_\Omega^*$ |
-| Type 2     | Forward   | Image $\to$ Kspace | $\mathcal{F}_\Omega$   |
+| Type 1     | Adjoint   | K-space $\to$ image | $\mathcal{F}_\Omega^*$ |
+| Type 2     | Forward   | Image $\to$ k-space | $\mathcal{F}_\Omega$   |
 
 
 ### Parallel Imaging Model
@@ -103,32 +103,32 @@ $$\begin{aligned}
  \boldsymbol{x} + \boldsymbol{n}_\ell  = \mathcal{F}_\Omega S \otimes \boldsymbol{x} + \tilde{\boldsymbol{n}}
 \end{aligned}$$
 
-Where $S_1, \dots, S_L$ are the sensitivity maps of each coil. 
-Such sensitivity maps can be acquired separetely by acquiring low frequency of the kspace, or estimated from the data.
+where $S_1, \dots, S_L$ are the sensitivity maps of each coil. 
+Such maps can be acquired separately by sampling the k-space low frequencies, or estimated from the data.
 
 ### Off-resonance correction model
-The constant magnetic field applied in a MRI machine $B0$ (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at tissue interfaces with owing to different magnetic susceptibilities (such as air-tissue interfaces in the nose and ear canals). 
-Those field perturbations introduce a spatially varying phase shift in the frequencies acquired (noted $\Delta\omega_0$), making the acquisition model deviating from the convenient Fourier model. 
-Fortunately, this inhomogeneity map can be acquired separately or estimated and integrated in the model as:
+The constant magnetic field $B0$ applied in an MRI machine (typically 1.5, 3 or 7 teslas) is inherently disturbed by metal implants or even simply by difference in magnetic susceptibilities of tissues (such at air-tissue interfaces close to the nose and ear canals). 
+Those field perturbations introduce a spatially varying phase shift in the acquired frequencies (noted $\Delta\omega_0$), causing the physical model to deviate from the ideal Fourier model. 
+Fortunately, this inhomogeneity map can be acquired separately or estimated then integrated as:
 
 $$y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}$$
 
 where $t_i$ is the time at which the frequency $\nu_i$ is acquired.
-With these mixed-domain field pertubations, the Fourier model does not hold anymore and the FFT algorithm cannot be used any longer. 
-The main approach [@sutton_fast_2003] is to approximate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
+With these mixed-domain field perturbations, the Fourier model does not hold anymore and the FFT algorithm can no longer be used. 
+The main solution [@sutton_fast_2003] is to interpolate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
 
 $$x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}$$
 
-The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be optimally estimated within MRI-NUFFT.
+The coefficients $B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}$ and $C=(c_\ell, n) \in \mathbb{C}^{L\times N}$ can be estimated within MRI-NUFFT.
 
 ## Trajectories generation and expansions 
-MRI-NUFFT comes with a wide variety of Non Cartesian trajectory generation routines, that have been gathered from the literature. It also provides ways of expanding existing trajectories. It is also able to export to specific formats, to be used in other toolboxes and on MRI hardware.
+MRI-NUFFT comes with a wide variety of non-Cartesian trajectory generation routines that have been gathered from the literature. It also provides ways to extend existing trajectories and export them to specific formats, for use in other toolkits and on MRI hardware.
 
-## Autodifferentiation for data and sampling pattern
+## Auto-differentiation for data and sampling pattern
 
-Following the formulation of [@wang_efficient_2023], MRI-NUFFT also provides autodifferentation capabilities for all the NUFFT backends. Both gradients with respect to the data (image or kspace) and the sampling point location are available. This allows for efficient backpropagation throught the NUFFT operators, and sustains research on learned sampling pattern and image reconstruction network.
+Following the formulation of [@wang_efficient_2023], MRI-NUFFT provides automatic differentiation for all NUFFT backends, with respect to both gradients and data (image or k-space). This enables efficient backpropagation through NUFFT operators and supports research on learned sampling model and image reconstruction network.
 
-# MRI-NUFFT Utilization
+# MRI-NUFFT utilization
 MRI-NUFFT is already used in conjunction with other software such as SNAKE-fMRI [@comby_snake-fmri_2024], deepinv [@tachella_deepinverse_2023] and PySAP-MRI [@farrens_pysap_2020]
 
 # References
