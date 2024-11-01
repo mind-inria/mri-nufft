@@ -24,7 +24,7 @@ authors:
   - name: Matteo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
-     orcid: 0000-0001-5374-962X
+    orcid: 0000-0001-5374-962X
     affiliation: "1,2"
   - name: Chaithya GR
     orcid: 0000-0001-9859-6006
