@@ -13,6 +13,7 @@ authors:
     corresponding: true
     affiliation: "1, 2"
   - name: Guillaume Daval-Frérot
+    orcid: 0000-0002-5317-2522
     affiliation: 3
   - name: Caini Pan 
     affiliation: "1, 2"
@@ -23,8 +24,10 @@ authors:
   - name: Matteo Cencini
     affiliation: 4
   - name: Philippe Ciuciu
+     orcid: 0000-0001-5374-962X
     affiliation: "1,2"
   - name: Chaithya GR
+    orcid: 0000-0001-9859-6006
     corresponding: true 
     affiliation: "1,2"
     
