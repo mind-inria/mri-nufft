@@ -25,7 +25,7 @@ def _get_diagonal_neighbors_flat_offsets(shape):
     return neighbors
 
 
-def _initialize_ND_random_walk(Nc, Ns, density, diagonals=True, pseudo_random=True):
+def _initialize_ND_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
     flat_density = np.copy(density.flatten())
     max_id = np.prod(density.shape)
     mask = np.ones_like(flat_density)
@@ -79,7 +79,33 @@ def _initialize_ND_random_walk(Nc, Ns, density, diagonals=True, pseudo_random=Tr
     return trajectory
 
 
-def initialize_2D_random_walk(Nc, Ns, density, diagonals=True, pseudo_random=True):
+def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
+    """Initialize a 2D random walk trajectory.
+
+    It creates a trajectory by walking randomly to neighboring points
+    following a provided sampling density.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    density : array_like
+        Sampling density used to determine the walk probabilities.
+    diagonals : bool, optional
+        Whether to draw the next walk step from the diagional neighbors
+        on top of the adjacent ones. Default to True.
+    pseudo_random : bool, optional
+        Whether to adapt the density dynamically to reduce areas
+        already covered. The density is still statistically followed
+        for undersampled acquisitions. Default to True.
+
+    Returns
+    -------
+    array_like
+        2D random walk trajectory
+    """
     if len(density.shape) != 2:
         raise ValueError("`density` is expected to be 2-dimensional.")
     return _initialize_ND_random_walk(
@@ -87,7 +113,33 @@ def initialize_2D_random_walk(Nc, Ns, density, diagonals=True, pseudo_random=Tru
     )
 
 
-def initialize_3D_random_walk(Nc, Ns, density, diagonals=True, pseudo_random=True):
+def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
+    """Initialize a 3D random walk trajectory.
+
+    It creates a trajectory by walking randomly to neighboring points
+    following a provided sampling density.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots
+    Ns : int
+        Number of samples per shot
+    density : array_like
+        Sampling density used to determine the walk probabilities.
+    diagonals : bool, optional
+        Whether to draw the next walk step from the diagional neighbors
+        on top of the adjacent ones. Default to True.
+    pseudo_random : bool, optional
+        Whether to adapt the density dynamically to reduce areas
+        already covered. The density is still statistically followed
+        for undersampled acquisitions. Default to True.
+
+    Returns
+    -------
+    array_like
+        3D random walk trajectory
+    """
     if len(density.shape) != 3:
         raise ValueError("`density` is expected to be 3-dimensional.")
     return _initialize_ND_random_walk(

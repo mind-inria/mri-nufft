@@ -100,7 +100,7 @@ def _initialize_ND_travelling_salesman(
     # Check arguments validity
     if Nc * nb_tsp_points > np.prod(density.shape):
         raise ValueError(
-            "`density` array not large enough to peak `Nc` * `nb_tsp_points` points."
+            "`density` array not large enough to pick `Nc` * `nb_tsp_points` points."
         )
     Nd = len(density.shape)
 

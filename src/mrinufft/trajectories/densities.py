@@ -1,3 +1,5 @@
+"""Sampling densities and methods."""
+
 import numpy as np
 import numpy.fft as nf
 import numpy.linalg as nl
