@@ -106,7 +106,7 @@ def _initialize_ND_travelling_salesman(
 
     # Select k-space locations
     density = density / np.sum(density)
-    locations = sample_from_density(Nc * Ns, density, method=sampling)
+    locations = sample_from_density(Nc * nb_tsp_points, density, method=sampling)
 
     # Re-organise locations into Nc clusters
     if first_cluster_by:
@@ -130,7 +130,7 @@ def _initialize_ND_travelling_salesman(
         # Compute TSP solution over the whole cloud
         order = solve_tsp_with_2opt(locations, improvement_threshold=tsp_tol)
         locations = locations[order]
-        locations = locations.reshape((Nc, Ns, Nd))
+        locations = locations.reshape((Nc, nb_tsp_points, Nd))
 
     # Interpolate shot points up to full length
     trajectory = np.zeros((Nc, Ns, Nd))
