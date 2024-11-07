@@ -1,7 +1,7 @@
 """Functions to manipulate/modify trajectories."""
 
 import numpy as np
-from scipy.interpolate import CubicSpline
+from scipy.interpolate import CubicSpline, interp1d
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import KMAX, initialize_tilt
@@ -427,6 +427,11 @@ def rewind(trajectory, Ns_transitions):
     assembled_trajectory = np.array(assembled_trajectory)
 
     return assembled_trajectory
+
+
+def oversample(trajectory, new_Ns, kind="cubic"):
+    f = interp1d(np.linspace(0, 1, trajectory.shape[1]), trajectory, axis=1, kind=kind)
+    return f(np.linspace(0, 1, new_Ns))
 
 
 ####################

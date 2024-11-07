@@ -1,13 +1,5 @@
 """Collection of trajectories and tools used for non-Cartesian MRI."""
 
-from .densities import (
-    create_chauffert_density,
-    create_cutoff_decay_density,
-    create_energy_density,
-    create_fast_chauffert_density,
-    create_polynomial_density,
-    sample_from_density,
-)
 from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
 from .gradients import patch_center_anomaly
 from .inits import (
@@ -15,6 +7,14 @@ from .inits import (
     initialize_2D_travelling_salesman,
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
+)
+from .sampling_densities import (
+    create_chauffert_density,
+    create_cutoff_decay_density,
+    create_energy_density,
+    create_fast_chauffert_density,
+    create_polynomial_density,
+    sample_from_density,
 )
 from .tools import (
     conify,

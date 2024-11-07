@@ -14,7 +14,8 @@ from .utils import KMAX
 def sample_from_density(nb_samples, density, method="random"):
     rng = nr.default_rng()
 
-    shape = density.shape
+    density = density / np.sum(density)
+    shape = np.array(density.shape)
     nb_dims = len(shape)
     max_nb_samples = np.prod(shape)
 
@@ -29,8 +30,9 @@ def sample_from_density(nb_samples, density, method="random"):
             replace=False,
         )
         locations = np.indices(shape).reshape((nb_dims, -1))[:, choices]
-        locations = locations.T
-        locations = 2 * KMAX * locations / np.max(locations) - KMAX
+        locations = locations.T + 0.5
+        locations = locations / shape[None, :]
+        locations = 2 * KMAX * locations - KMAX
     elif method == "lloyd":
         kmeans = (
             KMeans(n_clusters=nb_samples)

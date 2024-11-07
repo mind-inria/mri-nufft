@@ -1,15 +1,17 @@
-"""Trajectories based on the Travelig Salesman Problem."""
+"""Trajectories based on the Travelling Salesman Problem."""
 
 import numpy as np
 import numpy.linalg as nl
 from scipy.interpolate import CubicSpline
 from tqdm.auto import tqdm
 
-from ..densities import sample_from_density
 from ..maths import solve_tsp_with_2opt
+from ..sampling_densities import sample_from_density
+from ..tools import oversample
 
 
 def _get_approx_cluster_sizes(nb_total, nb_clusters):
+    # Give a list of cluster sizes close to sqrt(`nb_total`)
     cluster_sizes = round(nb_total / nb_clusters) * np.ones(nb_clusters).astype(int)
     delta_sum = nb_total - np.sum(cluster_sizes)
     cluster_sizes[: int(np.abs(delta_sum))] += np.sign(delta_sum)
@@ -92,6 +94,8 @@ def _initialize_ND_travelling_salesman(
     nb_tsp_points="auto",
     sampling="random",
     tsp_tol=1e-8,
+    *,
+    mask_density=False,
     verbose=False,
 ):
     # Handle variable inputs
@@ -105,7 +109,8 @@ def _initialize_ND_travelling_salesman(
     Nd = len(density.shape)
 
     # Select k-space locations
-    density = density / np.sum(density)
+    if mask_density:
+        density = density ** (Nd / (Nd - 1))
     locations = sample_from_density(Nc * nb_tsp_points, density, method=sampling)
 
     # Re-organise locations into Nc clusters
@@ -133,10 +138,8 @@ def _initialize_ND_travelling_salesman(
         locations = locations.reshape((Nc, nb_tsp_points, Nd))
 
     # Interpolate shot points up to full length
-    trajectory = np.zeros((Nc, Ns, Nd))
-    for i in range(Nc):
-        cbs = CubicSpline(np.linspace(0, 1, nb_tsp_points), locations[i])
-        trajectory[i] = cbs(np.linspace(0, 1, Ns))
+    trajectory = oversample(locations, Ns)
+
     return trajectory
 
 
@@ -150,6 +153,8 @@ def initialize_2D_travelling_salesman(
     nb_tsp_points="auto",
     sampling="random",
     tsp_tol=1e-8,
+    *,
+    mask_density=False,
     verbose=False,
 ):
     if len(density.shape) != 2:
@@ -164,6 +169,7 @@ def initialize_2D_travelling_salesman(
         nb_tsp_points=nb_tsp_points,
         sampling=sampling,
         tsp_tol=tsp_tol,
+        mask_density=mask_density,
         verbose=verbose,
     )
 
@@ -178,6 +184,8 @@ def initialize_3D_travelling_salesman(
     nb_tsp_points="auto",
     sampling="random",
     tsp_tol=1e-8,
+    *,
+    mask_density=False,
     verbose=False,
 ):
     if len(density.shape) != 3:
@@ -192,5 +200,6 @@ def initialize_3D_travelling_salesman(
         nb_tsp_points=nb_tsp_points,
         sampling=sampling,
         tsp_tol=tsp_tol,
+        mask_density=mask_density,
         verbose=verbose,
     )
