@@ -52,7 +52,7 @@ def get_gridded_trajectory(
         Note that "gpunufft" is anyway used to get the `pipe` density internally.
     traj_params : dict, optional
         The trajectory parameters. Default is None.
-        This is only needed when `grid_type` is "gradients" or "slew".    
+        This is only needed when `grid_type` is "gradients" or "slew".
     turbo_factor : int, optional
         The turbo factor when sampling is with inversion. Default is 176.
     elliptical_samp : bool, optional
@@ -60,7 +60,7 @@ def get_gridded_trajectory(
         This is useful while analyzing the k-space holes.
     threshold: float, optional
         The threshold for the k-space holes. Default is 1e-3.
-        
+
     Returns
     -------
     ndarray
@@ -93,9 +93,12 @@ def get_gridded_trajectory(
         if elliptical_samp:
             data[
                 np.linalg.norm(
-                    np.meshgrid(*[np.linspace(-1, 1, sh) for sh in shape], indexing="ij"),
+                    np.meshgrid(
+                        *[np.linspace(-1, 1, sh) for sh in shape], indexing="ij"
+                    ),
                     axis=0,
-                ) > 1
+                )
+                > 1
             ] = 0
     elif grid_type in ["gradients", "slew"]:
         gradients, initial_position = convert_trajectory_to_gradients(
@@ -116,4 +119,4 @@ def get_gridded_trajectory(
         data = grid_op.raw_op.adj_op(
             np.linalg.norm(data, axis=-1).flatten(), None, True
         )
-    return np.squeeze(np.abs(data))  
+    return np.squeeze(np.abs(data))
