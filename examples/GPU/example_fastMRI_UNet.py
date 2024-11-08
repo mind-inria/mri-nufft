@@ -54,7 +54,7 @@ from PIL import Image
 
 from fastmri.models import Unet
 from mrinufft import get_operator
-from mrinufft.trajectories import initialize_2D_spiral
+from mrinufft.trajectories import initialize_2D_cones
 
 # %%
 # Setup a simple class for the U-Net model
@@ -120,7 +120,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
 
 # %%
 # Setup Inputs (models, trajectory and image)
-init_traj = initialize_2D_spiral(64, 256).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_cones(32, 256).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj)
 model.eval()
 
@@ -142,7 +142,7 @@ plot_state(axs, mri_2D, init_traj, dc_adjoint)
 # %%
 # Start training loop
 epoch = 100
-optimizer = torch.optim.RMSprop(model.parameters(), lr=1e-4)
+optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
 model.train()
