@@ -82,8 +82,14 @@ def _initialize_ND_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random
 def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
     """Initialize a 2D random walk trajectory.
 
+    This is an adaptation of the proposition from [Cha+14]_.
     It creates a trajectory by walking randomly to neighboring points
     following a provided sampling density.
+
+    This implementation is different from the original proposition:
+    trajectories are continuous with a fixed length instead of
+    making random jumps to other locations, and an option
+    is provided to have pseudo-random walks to improve coverage.
 
     Parameters
     ----------
@@ -95,16 +101,23 @@ def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
         Sampling density used to determine the walk probabilities.
     diagonals : bool, optional
         Whether to draw the next walk step from the diagional neighbors
-        on top of the adjacent ones. Default to True.
+        on top of the adjacent ones. Default to ``True``.
     pseudo_random : bool, optional
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
-        for undersampled acquisitions. Default to True.
+        for undersampled acquisitions. Default to ``True``.
 
     Returns
     -------
     array_like
         2D random walk trajectory
+
+    References
+    ----------
+    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
+       Jonas Kahn, and Pierre Weiss.
+       "Variable density sampling with continuous trajectories."
+       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     if len(density.shape) != 2:
         raise ValueError("`density` is expected to be 2-dimensional.")
@@ -116,8 +129,14 @@ def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
 def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
     """Initialize a 3D random walk trajectory.
 
+    This is an adaptation of the proposition from [Cha+14]_.
     It creates a trajectory by walking randomly to neighboring points
     following a provided sampling density.
+
+    This implementation is different from the original proposition:
+    trajectories are continuous with a fixed length instead of
+    making random jumps to other locations, and an option
+    is provided to have pseudo-random walks to improve coverage.
 
     Parameters
     ----------
@@ -129,16 +148,23 @@ def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
         Sampling density used to determine the walk probabilities.
     diagonals : bool, optional
         Whether to draw the next walk step from the diagional neighbors
-        on top of the adjacent ones. Default to True.
+        on top of the adjacent ones. Default to ``True``.
     pseudo_random : bool, optional
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
-        for undersampled acquisitions. Default to True.
+        for undersampled acquisitions. Default to ``True``.
 
     Returns
     -------
     array_like
         3D random walk trajectory
+
+    References
+    ----------
+    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
+       Jonas Kahn, and Pierre Weiss.
+       "Variable density sampling with continuous trajectories."
+       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     if len(density.shape) != 3:
         raise ValueError("`density` is expected to be 3-dimensional.")

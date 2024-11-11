@@ -8,7 +8,7 @@ from .inits import (
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
-from .sampling_densities import (
+from .sampling import (
     create_chauffert_density,
     create_cutoff_decay_density,
     create_energy_density,

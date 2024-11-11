@@ -6,7 +6,7 @@ from scipy.interpolate import CubicSpline
 from tqdm.auto import tqdm
 
 from ..maths import solve_tsp_with_2opt
-from ..sampling_densities import sample_from_density
+from ..sampling import sample_from_density
 from ..tools import oversample
 
 
@@ -19,6 +19,7 @@ def _get_approx_cluster_sizes(nb_total, nb_clusters):
 
 
 def _sort_by_coordinate(array, coord):
+    # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
             f"Invalid `coord`='{coord}' for arrays with less than 3 dimensions."
@@ -48,6 +49,7 @@ def _sort_by_coordinate(array, coord):
 def _cluster_by_coordinate(
     locations, nb_clusters, cluster_by, second_cluster_by=None, sort_by=None
 ):
+    # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
     nb_dims = locations.shape[-1]
     locations = locations.reshape((-1, nb_dims))
@@ -91,32 +93,23 @@ def _initialize_ND_travelling_salesman(
     first_cluster_by=None,
     second_cluster_by=None,
     sort_by=None,
-    nb_tsp_points="auto",
-    sampling="random",
     tsp_tol=1e-8,
     *,
-    mask_density=False,
     verbose=False,
+    **sampling_kwargs,
 ):
-    # Handle variable inputs
-    nb_tsp_points = Ns if nb_tsp_points == "auto" else nb_tsp_points
-
     # Check arguments validity
-    if Nc * nb_tsp_points > np.prod(density.shape):
-        raise ValueError(
-            "`density` array not large enough to pick `Nc` * `nb_tsp_points` points."
-        )
+    if Nc * Ns > np.prod(density.shape):
+        raise ValueError("`density` array not large enough to pick `Nc` * `Ns` points.")
     Nd = len(density.shape)
 
     # Select k-space locations
-    if mask_density:
-        density = density ** (Nd / (Nd - 1))
-    locations = sample_from_density(Nc * nb_tsp_points, density, method=sampling)
+    trajectory = sample_from_density(Nc * Ns, density, **sampling_kwargs)
 
     # Re-organise locations into Nc clusters
     if first_cluster_by:
-        locations = _cluster_by_coordinate(
-            locations,
+        trajectory = _cluster_by_coordinate(
+            trajectory,
             Nc,
             cluster_by=first_cluster_by,
             second_cluster_by=second_cluster_by,
@@ -125,20 +118,17 @@ def _initialize_ND_travelling_salesman(
 
         # Compute TSP solution within each cluster/shot
         for i in tqdm(range(Nc), disable=not verbose):
-            order = solve_tsp_with_2opt(locations[i], improvement_threshold=tsp_tol)
-            locations[i] = locations[i][order]
+            order = solve_tsp_with_2opt(trajectory[i], improvement_threshold=tsp_tol)
+            trajectory[i] = trajectory[i][order]
     else:
-        locations = (
-            _sort_by_coordinate(locations, coord=sort_by) if sort_by else locations
+        trajectory = (
+            _sort_by_coordinate(trajectory, coord=sort_by) if sort_by else trajectory
         )
 
         # Compute TSP solution over the whole cloud
-        order = solve_tsp_with_2opt(locations, improvement_threshold=tsp_tol)
-        locations = locations[order]
-        locations = locations.reshape((Nc, nb_tsp_points, Nd))
-
-    # Interpolate shot points up to full length
-    trajectory = oversample(locations, Ns)
+        order = solve_tsp_with_2opt(trajectory, improvement_threshold=tsp_tol)
+        trajectory = trajectory[order]
+        trajectory = trajectory.reshape((Nc, Ns, Nd))
 
     return trajectory
 
@@ -150,13 +140,61 @@ def initialize_2D_travelling_salesman(
     first_cluster_by=None,
     second_cluster_by=None,
     sort_by=None,
-    nb_tsp_points="auto",
-    sampling="random",
     tsp_tol=1e-8,
     *,
-    mask_density=False,
     verbose=False,
+    **sampling_kwargs,
 ):
+    """
+    Initialize a 2D trajectory using a Travelling Salesman Problem (TSP)-based path.
+
+    This is a reproduction of the work from [Cha+14]_. The TSP solution
+    is obtained using the 2-opt method in O(n²). An additional option
+    is provided to cluster shots before solving the TSP and thus
+    reduce drastically the computation time. The initial sampling method
+    can also be customized.
+
+    Parameters
+    ----------
+    Nc : int
+        The number of clusters (or shots) to divide the trajectory into.
+    Ns : int
+        The number of points per cluster.
+    density : np.ndarray
+        A 2-dimensional density array from which points are sampled.
+    first_cluster_by : str, optional
+        The coordinate used to cluster points initially, by default ``None``.
+    second_cluster_by : str, optional
+        A secondary coordinate used for clustering within primary clusters,
+        by default ``None``.
+    sort_by : str, optional
+        The coordinate by which to order points within each cluster,
+        by default ``None``.
+    tsp_tol : float, optional
+        Convergence tolerance for the TSP solution, by default ``1e-8``.
+    verbose : bool, optional
+        If ``True``, displays a progress bar, by default ``False``.
+    **sampling_kwargs : dict, optional
+        Additional arguments to pass to
+        ``mrinufft.trajectories.sampling.sample_from_density``.
+
+    Returns
+    -------
+    np.ndarray
+        A 2D array representing the TSP-ordered trajectory.
+
+    Raises
+    ------
+    ValueError
+        If ``density`` is not a 2-dimensional array.
+
+    References
+    ----------
+    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
+       Jonas Kahn, and Pierre Weiss.
+       "Variable density sampling with continuous trajectories."
+       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
+    """
     if len(density.shape) != 2:
         raise ValueError("`density` is expected to be 2-dimensional.")
     return _initialize_ND_travelling_salesman(
@@ -166,11 +204,9 @@ def initialize_2D_travelling_salesman(
         first_cluster_by=first_cluster_by,
         second_cluster_by=second_cluster_by,
         sort_by=sort_by,
-        nb_tsp_points=nb_tsp_points,
-        sampling=sampling,
         tsp_tol=tsp_tol,
-        mask_density=mask_density,
         verbose=verbose,
+        **sampling_kwargs,
     )
 
 
@@ -181,13 +217,61 @@ def initialize_3D_travelling_salesman(
     first_cluster_by=None,
     second_cluster_by=None,
     sort_by=None,
-    nb_tsp_points="auto",
-    sampling="random",
     tsp_tol=1e-8,
     *,
-    mask_density=False,
     verbose=False,
+    **sampling_kwargs,
 ):
+    """
+    Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.
+
+    This is a reproduction of the work from [Cha+14]_. The TSP solution
+    is obtained using the 2-opt method in O(n²). An additional option
+    is provided to cluster shots before solving the TSP and thus
+    reduce drastically the computation time. The initial sampling method
+    can also be customized.
+
+    Parameters
+    ----------
+    Nc : int
+        The number of clusters (or shots) to divide the trajectory into.
+    Ns : int
+        The number of points per cluster.
+    density : np.ndarray
+        A 3-dimensional density array from which points are sampled.
+    first_cluster_by : str, optional
+        The coordinate used to cluster points initially, by default ``None``.
+    second_cluster_by : str, optional
+        A secondary coordinate used for clustering within primary clusters,
+        by default ``None``.
+    sort_by : str, optional
+        The coordinate by which to order points within each cluster,
+        by default ``None``.
+    tsp_tol : float, optional
+        Convergence tolerance for the TSP solution, by default ``1e-8``.
+    verbose : bool, optional
+        If ``True``, displays a progress bar, by default ``False``.
+    **sampling_kwargs : dict, optional
+        Additional arguments to pass to
+        ``mrinufft.trajectories.sampling.sample_from_density``.
+
+    Returns
+    -------
+    np.ndarray
+        A 3D array representing the TSP-ordered trajectory.
+
+    Raises
+    ------
+    ValueError
+        If ``density`` is not a 3-dimensional array.
+
+    References
+    ----------
+    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
+       Jonas Kahn, and Pierre Weiss.
+       "Variable density sampling with continuous trajectories."
+       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
+    """
     if len(density.shape) != 3:
         raise ValueError("`density` is expected to be 3-dimensional.")
     return _initialize_ND_travelling_salesman(
@@ -197,9 +281,7 @@ def initialize_3D_travelling_salesman(
         first_cluster_by=first_cluster_by,
         second_cluster_by=second_cluster_by,
         sort_by=sort_by,
-        nb_tsp_points=nb_tsp_points,
-        sampling=sampling,
         tsp_tol=tsp_tol,
-        mask_density=mask_density,
         verbose=verbose,
+        **sampling_kwargs,
     )

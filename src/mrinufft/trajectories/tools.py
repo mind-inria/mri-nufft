@@ -430,6 +430,41 @@ def rewind(trajectory, Ns_transitions):
 
 
 def oversample(trajectory, new_Ns, kind="cubic"):
+    """
+    Resample a trajectory to increase the number of samples using interpolation.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        The original trajectory array, where interpolation
+        is applied along the second axis.
+    new_Ns : int
+        The desired number of samples in the resampled trajectory.
+    kind : str, optional
+        The type of interpolation to use, such as 'linear',
+        'quadratic', or 'cubic', by default "cubic".
+
+    Returns
+    -------
+    np.ndarray
+        The resampled trajectory array with ``new_Ns`` points along the second axis.
+
+    Notes
+    -----
+    This function uses ``scipy.interpolate.interp1d`` to perform
+    the interpolation along the second axis of the input `trajectory` array.
+
+    Warnings
+    --------
+    Using 'quadratic' or 'cubic' interpolations is likely to generate
+    samples located slightly beyond the original k-space limits by
+    making smooth transitions.
+
+    See Also
+    --------
+    scipy.interpolate.interp1d : The underlying interpolation function
+        used for resampling.
+    """
     f = interp1d(np.linspace(0, 1, trajectory.shape[1]), trajectory, axis=1, kind=kind)
     return f(np.linspace(0, 1, new_Ns))
 
