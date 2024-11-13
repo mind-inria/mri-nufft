@@ -7,7 +7,6 @@ Simple UNet model.
 This model is a simplified version of the U-Net architecture, 
 which is widely used for image segmentation tasks.  
 This is implemented in the proprietary FASTMRI package [fastmri]_.  
-Users are encouraged to contact the authors if they want to use it.  
 
 The U-Net model consists of an encoder (downsampling path) and 
 a decoder (upsampling path) with skip connections between corresponding 
@@ -51,6 +50,7 @@ from tqdm import tqdm
 import time
 import joblib
 from PIL import Image
+import tempfile as tmp
 
 from fastmri.models import Unet
 from mrinufft import get_operator
@@ -161,7 +161,7 @@ with tqdm(range(epoch), unit="steps") as tqdms:
 
         # Generate images for gif
         hashed = joblib.hash((i, "learn_traj", time.time()))
-        filename = "/tmp/" + f"{hashed}.png"
+        filename = f"{tmp.NamedTemporaryFile().name}.png"
         fig, axs = plt.subplots(2, 2, figsize=(10, 10))
         plot_state(
             axs,
