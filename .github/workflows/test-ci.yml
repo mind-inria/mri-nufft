@@ -46,28 +46,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
-
-      - name: Install pynfft
-        if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
-        shell: bash
-        run: |
-          python -m pip install "pynfft2>=1.4.3"
-
-      - name: Install pynufft
-        if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
-        run: python -m pip install pynufft
-
-      - name: Install finufft
-        if: ${{ matrix.backend == 'finufft'  || env.ref_backend == 'finufft'}}
-        shell: bash
-        run: python -m pip install finufft
-
-      - name: Install Sigpy
-        if: ${{ matrix.backend == 'sigpy'  || env.ref_backend == 'sigpy'}}
-        shell: bash
-        run: python -m pip install sigpy
-
-      - name: Install BART
+          python -m pip install -e .[${{ env.ref_backend }}]
+          python -m pip install -e .[${{ matrix.backend }}]
+          
+      - name: Install BART if needed
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
         shell: bash
         run: |
@@ -78,11 +60,6 @@ jobs:
           cd bart-${{ env.BART_VERSION }}
           make
           echo $PWD >> $GITHUB_PATH
-
-      - name: Install torchkbnufft-cpu
-        if: ${{ matrix.backend == 'torchkbnufft-cpu'  || env.ref_backend == 'torchkbnufft-cpu'}}
-        run: python -m pip install torchkbnufft
-
 
       - name: Run Tests
         shell: bash
@@ -117,7 +94,6 @@ jobs:
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
           pip install -e mri-nufft[test]
-          pip install cupy-cuda12x finufft "numpy<2.0"
 
       - name: Install torch with CUDA 12.1
         shell: bash
@@ -133,16 +109,7 @@ jobs:
           export CUDA_BIN_PATH=/usr/local/cuda-12.1/
           export PATH=/usr/local/cuda-12.1/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
-          if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
-            pip install torchkbnufft
-          elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
-            pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
-          elif [[ ${{ matrix.backend }} == "cufinufft" ]]; then
-            git clone https://github.com/flatironinstitute/finufft
-            pip install finufft/python/cufinufft
-          else
-            pip install ${{ matrix.backend }}
-          fi
+          pip install -e .[${{ matrix.backend }}]
 
       - name: Run Tests
         shell: bash
@@ -217,8 +184,7 @@ jobs:
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           pip install cupy-cuda12x torch
           python -m pip install gpuNUFFT sigpy scikit-image
-          git clone https://github.com/flatironinstitute/finufft
-          pip install finufft/python/cufinufft
+          pip install "cufinufft>=2.3.1"
 
       - name: Run examples
         shell: bash
@@ -330,8 +296,7 @@ jobs:
           export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
           pip install cupy-cuda12x torch
           python -m pip install gpuNUFFT 
-          git clone https://github.com/flatironinstitute/finufft
-          pip install finufft/python/cufinufft
+          pip install "cufinufft>=2.3.1"
           
       - name: Build API documentation
         run: |
