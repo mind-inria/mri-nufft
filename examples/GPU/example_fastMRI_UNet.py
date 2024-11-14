@@ -28,10 +28,10 @@ the field of medical imaging using machine learning techniques.
     \mathbf{\hat{x}} = \mathrm{arg} \min_{\mathbf{x}} || \mathcal{U}_\mathbf{\theta}(\mathbf{y}) - \mathbf{x} ||_2^2
 
 where:
-- \( \mathbf{\hat{x}} \) is the reconstructed MRI image,
-- \( \mathbf{x} \) is the ground truth image,
-- \( \mathbf{y} \) is the input MRI image (e.g., k-space data),
-- \( \mathcal{U}_\mathbf{\theta} \) is the U-Net model parameterized by \( \theta \).
+- :math: `\mathbf{\hat{x}}` is the reconstructed MRI image,
+- :math: `\mathbf{x}` is the ground truth image,
+- :math: `\mathbf{y}` is the input MRI image (e.g., k-space data),
+- :math: `\mathcal{U}_\mathbf{\theta}` is the U-Net model parameterized by :math: `\theta`.
 
 .. warning::
     We train on a single image here. In practice, this should be done on a database like fastMRI [fastmri]_.
@@ -203,10 +203,20 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_Unet.gif", final_dir / "mrinufft_learn_Unet.gif")
+    shutil.copyfile("mrinufft_learn_unet.gif", final_dir / "mrinufft_learn_unet.gif")
 except FileNotFoundError:
     pass
+
 # sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_unet.gif'
+
+# %%
+# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
+#    :alt: example learn_samples
+#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
+#    :class: sphx-glr-single-img
+
 # %%
 # Reconstruction from partially trained U-Net model
 model.eval()
