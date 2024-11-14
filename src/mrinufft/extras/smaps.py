@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
-from mrinufft.operators.base import get_array_module
+from mrinufft._utils import get_array_module
 from .utils import register_smaps
 import numpy as np
 

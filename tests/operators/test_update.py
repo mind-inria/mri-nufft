@@ -13,6 +13,7 @@ from helpers import (
     from_interface,
 )
 from mrinufft import get_operator
+from mrinufft._utils import get_array_module
 from case_trajectories import CasesTrajectories
 
 
@@ -128,7 +129,7 @@ def new_smaps(operator):
 
 
 @param_array_interface
-def test_op(
+def test_op_samples(
     operator,
     array_interface,
     image_data,
@@ -145,7 +146,7 @@ def test_op(
 
 
 @param_array_interface
-def test_adj_op(
+def test_adj_op_samples(
     operator,
     array_interface,
     kspace_data,
@@ -160,6 +161,38 @@ def test_adj_op(
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
     npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
+
+
+@param_array_interface
+def test_adj_op_density(
+    operator,
+    array_interface,
+    kspace_data,
+):
+    """Test the batch type 1 (adjoint)."""
+    kspace_data = to_interface(kspace_data, array_interface)
+    jitter = np.random.rand(operator.samples.shape[0]).astype(np.float32)
+    # Add very little noise to the trajectory, variance of 1e-3
+    if operator.uses_density:
+        # Test density can be updated
+        xp = get_array_module(operator.density)
+
+        operator.density += xp.array(jitter) / 100
+    else:
+        # Test that operator can handle density added later
+        operator.density = 1e-2 + jitter / 100
+    new_operator = update_operator(operator)
+    image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
+    image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
+    # Reduced accuracy for the GPU cases...
+    npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
+    if operator.uses_density:
+        # Check if the operator can handle removing density compensation
+        operator.density = None
+        new_operator = update_operator(operator)
+        image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
+        image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
+        npt.assert_allclose(image_changed, image_true, atol=1e-3, rtol=1e-3)
 
 
 @param_array_interface
