@@ -27,11 +27,8 @@ the field of medical imaging using machine learning techniques.
 
     \mathbf{\hat{x}} = \mathrm{arg} \min_{\mathbf{x}} || \mathcal{U}_\mathbf{\theta}(\mathbf{y}) - \mathbf{x} ||_2^2
 
-where:
-- :math: `\mathbf{\hat{x}}` is the reconstructed MRI image,
-- :math: `\mathbf{x}` is the ground truth image,
-- :math: `\mathbf{y}` is the input MRI image (e.g., k-space data),
-- :math: `\mathcal{U}_\mathbf{\theta}` is the U-Net model parameterized by :math: `\theta`.
+where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}` is the ground truth image, 
+:math:`\mathbf{y}` is the input MRI image (e.g., k-space data), and :math:`\mathcal{U}_\mathbf{\theta}` is the U-Net model parameterized by :math:`\theta`.
 
 .. warning::
     We train on a single image here. In practice, this should be done on a database like fastMRI [fastmri]_.
@@ -141,13 +138,13 @@ plot_state(axs, mri_2D, init_traj, dc_adjoint)
 
 # %%
 # Start training loop
-epoch = 100
+num_epochs = 2
 optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
 model.train()
 
-with tqdm(range(epoch), unit="steps") as tqdms:
+with tqdm(range(num_epochs), unit="steps") as tqdms:
     for i in tqdms:
         out = model(kspace_mri_2D)  # Forward pass
 
