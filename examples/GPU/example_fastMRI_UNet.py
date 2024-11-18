@@ -138,7 +138,7 @@ plot_state(axs, mri_2D, init_traj, dc_adjoint)
 
 # %%
 # Start training loop
-num_epochs = 2
+num_epochs = 100
 optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
