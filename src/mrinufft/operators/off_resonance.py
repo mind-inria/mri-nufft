@@ -312,7 +312,7 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         """
         y = 0.0
-        coeffs_d = self.xp.array(coeffs)
+        coeffs_d = self.xp.asarray(coeffs)
         if self.C is not None:
             for idx in range(self.n_interpolators):
                 y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
