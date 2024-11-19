@@ -223,14 +223,15 @@ class MRIFourierCorrected(FourierOperatorBase):
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
             raise RuntimeError("Cupy is required for gpu computations.")
-        if backend == "torch":
+        elif backend == "torch":
             self.xp = torch
-        if backend == "gpu":
+        elif backend == "gpu":
             self.xp = cp
         elif backend == "cpu":
             self.xp = np
         else:
             raise ValueError("Unsupported backend.")
+
         self._fourier_op = fourier_op
 
         self.n_coils = fourier_op.n_coils
