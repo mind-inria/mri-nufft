@@ -39,6 +39,7 @@ OPTS_FIELD_DECODE = {
 
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
+
 def _next235beven(n, b):
     """Find the next even integer not less than n.
 
@@ -63,6 +64,7 @@ def _next235beven(n, b):
         while numdiv % 5 == 0:
             numdiv //= 5
     return nplus
+
 
 def _error_check(ier, msg):
     if ier != 0:
@@ -921,12 +923,8 @@ class MRICufiNUFFT(FourierOperatorBase):
                 ).squeeze()
             )
         if normalize:
-            test_op = MRICufiNUFFT(
-                samples=kspace_loc,
-                shape=original_shape,
-                **kwargs
-            )
+            test_op = MRICufiNUFFT(samples=kspace_loc, shape=original_shape, **kwargs)
             test_im = cp.ones(original_shape, dtype=test_op.cpx_dtype)
-            test_im_recon = test_op.adj_op(density_comp*test_op.op(test_im))
+            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
             density_comp /= cp.mean(cp.abs(test_im_recon))
         return density_comp.squeeze()
