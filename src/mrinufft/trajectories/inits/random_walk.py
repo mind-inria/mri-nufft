@@ -2,55 +2,63 @@
 
 import numpy as np
 
+from ..sampling import sample_from_density
 from ..utils import KMAX
 
 
-def _get_adjacent_neighbors_flat_offsets(shape):
-    nb_dims = len(shape)
-    neighborhood = np.indices([3] * nb_dims) - 1
-    distances = np.sum(np.abs(neighborhood), axis=0)
+def _get_adjacent_neighbors_offsets(shape):
+    return np.concatenate([np.eye(len(shape)), -np.eye(len(shape))], axis=0).astype(int)
 
-    center = np.ravel_multi_index([1] * nb_dims, dims=shape)
-    neighbors = np.ravel_multi_index(np.where(distances == 1), dims=shape) - center
+
+def _get_neighbors_offsets(shape):
+    nb_dims = len(shape)
+    neighbors = (np.indices([3] * nb_dims) - 1).reshape((nb_dims, -1)).T
+    nb_half = neighbors.shape[0] // 2
+    # Remove full zero entry
+    neighbors = np.concatenate([neighbors[:nb_half], neighbors[-nb_half:]], axis=0)
     return neighbors
 
 
-def _get_diagonal_neighbors_flat_offsets(shape):
-    nb_dims = len(shape)
-    neighborhood = np.indices([3] * nb_dims) - 1
-    distances = np.sum(np.abs(neighborhood), axis=0)
-
-    center = np.ravel_multi_index([1] * nb_dims, dims=shape)
-    neighbors = np.ravel_multi_index(np.where(distances > 1), dims=shape) - center
-    return neighbors
-
-
-def _initialize_ND_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
+def _initialize_ND_random_walk(
+    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
+):
+    density = density / np.sum(density)
     flat_density = np.copy(density.flatten())
-    max_id = np.prod(density.shape)
+    shape = np.array(density.shape)
     mask = np.ones_like(flat_density)
 
     # Prepare neighbor offsets once
-    offsets = _get_adjacent_neighbors_flat_offsets(density.shape)
-    if diagonals:
-        offsets = np.concatenate(
-            [offsets, _get_diagonal_neighbors_flat_offsets(density.shape)]
-        )
+    offsets = (
+        _get_neighbors_offsets(shape)
+        if diagonals
+        else _get_adjacent_neighbors_offsets(shape)
+    )
 
     # Make all random draws at once for performance
     draws = np.random.random((Ns, Nc))  # inverted shape for convenience
 
     # Initialize shot starting points
-    choices = np.random.choice(np.arange(len(flat_density)), size=Nc, p=flat_density)
+    locations = sample_from_density(Nc, density, **sampling_kwargs)
+    choices = np.around((locations + KMAX) * (np.array(density.shape) - 1)).astype(int)
+    choices = np.ravel_multi_index(choices.T, density.shape)
+    # choices = np.random.choice(np.arange(len(flat_density)), size=Nc, p=flat_density)
     routes = [choices]
 
     # Walk
     for i in range(1, Ns):
-        neighbors = choices[:, None] + offsets[None]
+        # Express indices back to multi-dim coordinates to check bounds
+        neighbors = np.array(np.unravel_index(choices, shape))
+        neighbors = neighbors[:, None] + offsets.T[..., None]
 
         # Find out-of-bound neighbors and ignore them
-        invalids = (neighbors < 0) | (neighbors > max_id)
-        neighbors[invalids] = 0
+        invalids = (neighbors < 0).any(axis=0) | (
+            neighbors >= shape[:, None, None]
+        ).any(axis=0)
+        neighbors[:, invalids] = 0
+        invalids = invalids.T
+
+        # Flatten indices to use np.random.choice
+        neighbors = np.ravel_multi_index(neighbors, shape).T
 
         # Set walk probabilities
         walk_probs = flat_density[neighbors]
@@ -72,14 +80,16 @@ def _initialize_ND_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random
     routes = np.array(routes).T
 
     # Create trajectory from routes
-    locations = np.indices(density.shape)
-    locations = locations.reshape((len(density.shape), -1))
+    locations = np.indices(shape)
+    locations = locations.reshape((len(shape), -1))
     trajectory = np.array([locations[:, r].T for r in routes])
-    trajectory = 2 * KMAX * trajectory / density.shape - KMAX
+    trajectory = 2 * KMAX * trajectory / (shape - 1) - KMAX
     return trajectory
 
 
-def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
+def initialize_2D_random_walk(
+    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
+):
     """Initialize a 2D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -98,7 +108,8 @@ def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
     Ns : int
         Number of samples per shot
     density : array_like
-        Sampling density used to determine the walk probabilities.
+        Sampling density used to determine the walk probabilities,
+        normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
         Whether to draw the next walk step from the diagional neighbors
         on top of the adjacent ones. Default to ``True``.
@@ -106,6 +117,10 @@ def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
         for undersampled acquisitions. Default to ``True``.
+    **sampling_kwargs
+        Sampling parameters in
+        ``mrinufft.trajectories.sampling.sample_from_density`` used for the
+        shot starting positions.
 
     Returns
     -------
@@ -122,11 +137,18 @@ def initialize_2D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
     if len(density.shape) != 2:
         raise ValueError("`density` is expected to be 2-dimensional.")
     return _initialize_ND_random_walk(
-        Nc, Ns, density, diagonals=diagonals, pseudo_random=pseudo_random
+        Nc,
+        Ns,
+        density,
+        diagonals=diagonals,
+        pseudo_random=pseudo_random,
+        **sampling_kwargs,
     )
 
 
-def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=True):
+def initialize_3D_random_walk(
+    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
+):
     """Initialize a 3D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -145,7 +167,8 @@ def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
     Ns : int
         Number of samples per shot
     density : array_like
-        Sampling density used to determine the walk probabilities.
+        Sampling density used to determine the walk probabilities,
+        normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
         Whether to draw the next walk step from the diagional neighbors
         on top of the adjacent ones. Default to ``True``.
@@ -153,6 +176,10 @@ def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
         for undersampled acquisitions. Default to ``True``.
+    **sampling_kwargs
+        Sampling parameters in
+        ``mrinufft.trajectories.sampling.sample_from_density`` used for the
+        shot starting positions.
 
     Returns
     -------
@@ -169,5 +196,10 @@ def initialize_3D_random_walk(Nc, Ns, density, *, diagonals=True, pseudo_random=
     if len(density.shape) != 3:
         raise ValueError("`density` is expected to be 3-dimensional.")
     return _initialize_ND_random_walk(
-        Nc, Ns, density, diagonals=diagonals, pseudo_random=pseudo_random
+        Nc,
+        Ns,
+        density,
+        diagonals=diagonals,
+        pseudo_random=pseudo_random,
+        **sampling_kwargs,
     )

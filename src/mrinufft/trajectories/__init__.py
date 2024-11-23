@@ -19,6 +19,7 @@ from .sampling import (
 from .tools import (
     conify,
     duplicate_along_axes,
+    oversample,
     precess,
     radialize_center,
     rotate,
@@ -56,7 +57,7 @@ from .trajectory3D import (
 )
 
 __all__ = [
-    # Trajectories
+    # trajectories
     "initialize_2D_radial",
     "initialize_2D_spiral",
     "initialize_2D_fibonacci_spiral",
@@ -68,6 +69,8 @@ __all__ = [
     "initialize_2D_polar_lissajous",
     "initialize_2D_lissajous",
     "initialize_2D_waves",
+    "initialize_2D_random_walk",
+    "initialize_2D_travelling_salesman",
     "initialize_3D_phyllotaxis_radial",
     "initialize_3D_golden_means_radial",
     "initialize_3D_wong_radial",
@@ -82,7 +85,9 @@ __all__ = [
     "initialize_3D_seiffert_shells",
     "initialize_3D_turbine",
     "initialize_3D_repi",
-    # Tools
+    "initialize_3D_random_walk",
+    "initialize_3D_travelling_salesman",
+    # tools
     "stack",
     "rotate",
     "precess",
@@ -95,11 +100,16 @@ __all__ = [
     "display_2D_trajectory",
     "display_3D_trajectory",
     "patch_center_anomaly",
-    # Densities
+    "oversample",
+    # densities
     "sample_from_density",
     "create_cutoff_decay_density",
     "create_polynomial_density",
     "create_energy_density",
     "create_chauffert_density",
     "create_fast_chauffert_density",
+    # display
+    "displayConfig",
+    "display_2D_trajectory",
+    "display_3D_trajectory",
 ]

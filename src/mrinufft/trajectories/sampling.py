@@ -12,7 +12,7 @@ from .utils import KMAX
 
 
 def sample_from_density(
-    nb_samples, density, method="random", *, binary_mask_density=False
+    nb_samples, density, method="random", *, dim_compensation="auto"
 ):
     """
     Sample points based on a given density distribution.
@@ -22,18 +22,20 @@ def sample_from_density(
     nb_samples : int
         The number of samples to draw.
     density : np.ndarray
-        An array representing the density distribution from which samples are drawn.
+        An array representing the density distribution from which samples are drawn,
+        normalized automatically by its sum during the call for convenience.
     method : str, optional
         The sampling method to use, either 'random' for random sampling over
         the discrete grid defined by the density or 'lloyd' for Lloyd's
         algorithm over a continuous space, by default "random".
-    binary_mask_density : bool, optional
-        Whether to apply a specific density correction introduced
+    dim_compensation : str, bool, optional
+        Whether to apply a specific dimensionality compensation introduced
         in [Cha+14]_. An exponent ``N/(N-1)`` with ``N`` the number of
         dimensions in ``density`` is applied to fix the observed
-        density expectation when paths are traced between drawn samples
-        specifically over binary masks/grids. Otherwise it is demonstrated
-        that the empirical density will be ``density ** (N - 1) / N``.
+        density expectation when set to ``"auto"`` and ``method="lloyd"``.
+        It is also relevant to set it to ``True`` when ``method="random"``
+        and one wants to create binary masks with continuous paths between
+        drawn samples.
 
     Returns
     -------
@@ -45,7 +47,6 @@ def sample_from_density(
     ValueError
         If ``nb_samples`` exceeds the total size of the density array or if the
         specified ``method`` is unknown.
-
 
     References
     ----------
@@ -60,13 +61,19 @@ def sample_from_density(
     shape = np.array(density.shape)
     nb_dims = len(shape)
     max_nb_samples = np.prod(shape)
+    density = density / np.sum(density)
 
     if nb_samples > max_nb_samples:
         raise ValueError("`nb_samples` must be lower than the size of `density`.")
 
-    # Adapt density to use binary mask use case
-    density = density ** (nb_dims / (nb_dims - 1)) if binary_mask_density else density
-    density = density / np.sum(density)
+    # Check for dimensionality compensation
+    if isinstance(dim_compensation, str) and dim_compensation != "auto":
+        raise ValueError(f"Unknown string {dim_compensation} for `dim_compensation`.")
+    if (dim_compensation == "auto" and method == "lloyd") or (
+        isinstance(dim_compensation, bool) and dim_compensation
+    ):
+        density = density ** (nb_dims / (nb_dims - 1))
+        density = density / np.sum(density)
 
     # Sample using specified method
     if method == "random":
