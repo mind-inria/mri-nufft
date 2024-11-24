@@ -6,11 +6,11 @@ import numpy as np
 def solve_tsp_with_2opt(locations, improvement_threshold=1e-8):
     """Solve the TSP problem using a 2-opt approach.
 
-        A sub-optimal solution to the Travelling Salesman Problem (TSP)
-        is provided using the 2-opt approach in O(n²) where chunks of
-        an initially random route are reversed, and selected if the
-        total distance is reduced. As a result the route solution
-        does not cross its own path in 2D.
+    A sub-optimal solution to the Travelling Salesman Problem (TSP)
+    is provided using the 2-opt approach in O(n²) where chunks of
+    an initially random route are reversed, and selected if the
+    total distance is reduced. As a result the route solution
+    does not cross its own path in 2D.
 
     Parameters
     ----------

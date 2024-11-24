@@ -120,10 +120,10 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
         The k-space radius cutoff ratio between 0 and 1 within
         which density remains uniform and beyond which it decays.
     decay : float
-        The rate of decay of density beyond the cutoff ratio.
+        The polynomial decay in density beyond the cutoff ratio.
     resolution : np.ndarray, optional
         Resolution scaling factors for each dimension of the density grid,
-        by default None.
+        by default ``None``.
 
     Returns
     -------
