@@ -1,4 +1,6 @@
 *.npy
+*.gif
+docs/sg_execution_times.rst
 build/
 dist/
 *.egg-info/
