@@ -42,7 +42,7 @@ def get_gridded_trajectory(
             off-resonance effects.
             "inversion" : Relative inversion time at the sampling location. Needs
             turbo_factor to be set.
-            "holes": Show the k-space holes within a elliosoid of the k-space.
+            "holes": Show the k-space holes within a ellipsoid of the k-space.
             "gradients": Show the gradient strengths of the k-space trajectory.
             "slew": Show the slew rate of the k-space trajectory.
     osf : int, optional

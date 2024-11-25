@@ -1,11 +1,11 @@
 """
 ======================
-3D Trajectory Display
+3D Trajectory display
 ======================
 
-In this example, we show some tools available through the `mrinufft` package to display 3D trajectories.
-This is useful to understand the sampling pattern of the k-space data, and to visualize the trajectory, see sampling time, gradient strength, slew rates etc.
-Also, another key useful feature is that it enables us to see the density of sampling pattern in the k-space, and help analyze k-space holes, which can help debug artifacts in reconstructions.
+In this example, we show some tools available to display 3D trajectories.
+It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc.
+Another key feature is to display the sampling density in k-space, for example to check for k-space holes or irregularities in the learning-based trajectories that would lead to artifacts in the images.
 """
 
 # %%
@@ -70,8 +70,8 @@ create_grid("density", "Sampling Density")
 
 
 # %%
-# Display the sample time of the trajectories, along the 3 mid-planes. For this, make `grid_type="time"`.
-# This helps in obtaining relative sampling times of the k-space sampling pattern, which helps debug off-resonance issues
+# Display the sampling times over the trajectories, along the 3 mid-planes. For this, make `grid_type="time"`.
+# It helps to check the sampling times over the k-space trajectories, which can be responsible for excessive off-resonance artifacts.
 create_grid("time", "Sampling Time")
 
 # %%
