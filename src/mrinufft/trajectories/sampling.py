@@ -135,7 +135,7 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
     ----------
     .. [Cha+22] Chaithya, G. R., Pierre Weiss, Guillaume Daval-Frérot,
        Aurélien Massire, Alexandre Vignaud, and Philippe Ciuciu.
-       "Optimizing full 3d sparkling trajectories for high-resolution
+       "Optimizing full 3D SPARKLING trajectories for high-resolution
        magnetic resonance imaging."
        IEEE Transactions on Medical Imaging 41, no. 8 (2022): 2105-2117.
     """

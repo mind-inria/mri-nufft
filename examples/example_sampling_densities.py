@@ -75,7 +75,7 @@ show_density(cutoff_density, figure_size=figure_size)
 # which density remains uniform and beyond which it decays.
 # It is modulated by ``resolution`` to create ellipsoids.
 #
-# The ``mrinufft.trajectories.sampling.create_polynomial_density``
+# The ``mrinufft.create_polynomial_density``
 # simply calls this function with ``cutoff=0``.
 
 arguments = [0, 0.1, 0.2, 0.3]
@@ -90,7 +90,6 @@ show_densities(
     subfig_size=subfigure_size,
 )
 
-
 # %%
 # ``decay (float)``
 # ~~~~~~~~~~~~~~~~~
@@ -98,7 +97,6 @@ show_densities(
 # The polynomial decay in density beyond the cutoff ratio.
 # It can be zero or negative as shown below, but most applications
 # are expected have decays in the positive range.
-
 
 arguments = [-1, 0, 0.5, 2]
 function = lambda x: mn.create_cutoff_decay_density(
@@ -138,6 +136,7 @@ show_densities(
     subfig_size=subfigure_size,
 )
 
+
 # %%
 # Energy-based density
 # --------------------
@@ -164,7 +163,6 @@ show_density(energy_density, figure_size=figure_size, log_scale=True)
 # More relevant use cases would be to learn densities for
 # different organs and/or contrasts.
 
-
 arguments = [50, 100, 150]
 function = lambda x: mn.create_energy_density(dataset=bwdl.get_mri(4, "T1")[x : x + 20])
 show_densities(
@@ -179,7 +177,14 @@ show_densities(
 # Chauffert's density
 # -------------------
 #
-
+# This is a reproduction of the proposition from [CCW13]_.
+# A sampling density is derived from compressed sensing
+# equations to maximize guarantees of exact image recovery
+# for a specified sparse wavelet domain decomposition.
+#
+# This principle is valid for any linear transform but
+# for convenience it was limited to wavelets as in the
+# original implementation.
 
 chauffert_density = mn.create_chauffert_density(
     shape=shape_2d,
@@ -192,6 +197,10 @@ show_density(chauffert_density, figure_size=figure_size)
 # %%
 # ``wavelet_basis (str)``
 # ~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The wavelet basis to use for wavelet decomposition, either
+# as a built-in wavelet name from the PyWavelets package
+# or as a custom ``pywt.Wavelet`` object.
 
 arguments = ["haar", "rbio2.2", "coif4", "sym8"]
 function = lambda x: mn.create_chauffert_density(
@@ -208,6 +217,8 @@ show_densities(
 # %%
 # ``nb_wavelet_scales (int)``
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The number of wavelet scales to use in decomposition.
 
 arguments = [1, 2, 3, 4]
 function = lambda x: mn.create_chauffert_density(
@@ -225,6 +236,9 @@ show_densities(
 # %%
 # Custom density
 # --------------
+#
+# Any density can be defined and later used for sampling and
+# trajectories.
 
 # Linear gradient
 density = np.tile(np.linspace(0, 1, shape_2d[1])[:, None], (1, shape_2d[0]))
@@ -269,6 +283,9 @@ show_densities(function, arguments, subfig_size=subfigure_size)
 # %%
 # Random sampling
 # ---------------
+#
+# This sampling simply consists of weighted-random selection from the
+# density grid locations.
 
 arguments = densities.keys()
 function = lambda x: mn.sample_from_density(Nc * Ns, densities[x], method="random")
@@ -278,6 +295,11 @@ show_locations(function, arguments, subfig_size=subfigure_size)
 # %%
 # Lloyd's sampling
 # ----------------
+#
+# This sampling is based on a Voronoi/Dirichlet tesselation using Lloyd's
+# weighted KMeans algorithm. The implementation is based on
+# ``sklearn.cluster.KMeans`` in 2D and ``sklearn.cluster.BisectingKMeans``
+# in 3D, mostly to reduce computation times in the most demanding cases.
 
 arguments = densities.keys()
 function = lambda x: mn.sample_from_density(Nc * Ns, densities[x], method="lloyd")
@@ -293,7 +315,15 @@ show_locations(function, arguments, subfig_size=subfigure_size)
 #
 # Random walks
 # ------------
+# 
+# This is an adaptation of the proposition from [Cha+14]_.
+# It creates a trajectory by walking randomly to neighboring points
+# following a provided sampling density.
 #
+# This implementation is different from the original proposition:
+# trajectories are continuous with a fixed length instead of
+# making random jumps to other locations, and an option
+# is provided to have pseudo-random walks to improve coverage.
 
 arguments = densities.keys()
 function = lambda x: mn.initialize_2D_random_walk(
@@ -303,6 +333,11 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 # %%
 #
+# The starting shot positions can be modified to follow Lloyd's sampling
+# method rather than the default random approach, resulting in more evenly
+# spaced shots that still respect the prescribed density.
+# Additional ``kwargs`` can provided to set the arguments in
+# ``mrinufft.sample_from_density``.
 
 arguments = densities.keys()
 function = lambda x: mn.initialize_2D_random_walk(
@@ -310,9 +345,10 @@ function = lambda x: mn.initialize_2D_random_walk(
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
-# %%
+# %%    
 #
-# Oversampled
+# The random paths can be made into a smooth and continuous
+# trajectory by oversampling the shots with cubic splines.
 
 arguments = densities.keys()
 function = lambda x: mn.oversample(
@@ -328,6 +364,9 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # Travelling Salesman
 # -------------------
 #
+# This is a reproduction of the work from [Cha+14]_. The Travelling
+# Salesman Problem (TSP) solution is obtained using the 2-opt method
+# with a complexity in O(n²) in time and memory.
 
 arguments = densities.keys()
 function = lambda x: mn.initialize_2D_travelling_salesman(
@@ -339,6 +378,10 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 # %%
 #
+# It is possible to customize the sampling method using ``kwargs``
+# to provide arguments to ``mrinufft.sample_from_density``.
+# For example, one can use Lloyd's sampling method to create evenly
+# spaced point distributions and obtain a more deterministic coverage.
 
 arguments = densities.keys()
 function = lambda x: mn.initialize_2D_travelling_salesman(
@@ -351,7 +394,10 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 # %%
 #
-# Oversampled
+# Similarly to random walks, the travelling paths can be smoothed
+# by oversampling the shots with cubic splines. Another use case
+# is to reduce the number of TSP points to reduce the computation load
+# and then oversample up to the desired shot length.
 
 arguments = densities.keys()
 function = lambda x: mn.oversample(
@@ -362,6 +408,12 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 # %%
 #
+# An option is provided to cluster the points before calling the TSP solver,
+# reducing drastically the computation time.
+# Clusters are chosen by Cartesian (``"x"``, ``"y"``, ``"z"``) or spherical
+# (``"r"``, ``"phi"``, ``"theta"``) coordinate with up to two coordinates.
+# Then the points can be sorted within each cluster in order to define a general
+# shot direction as shown below.
 
 arguments = ((None, None, None), ("y", None, "x"), ("phi", None, "r"), ("y", "x", "r"))
 function = lambda x: mn.initialize_2D_travelling_salesman(
@@ -380,8 +432,17 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # References
 # ==========
 #
+# .. [CCW13] Chauffert, Nicolas, Philippe Ciuciu, and Pierre Weiss.
+#    "Variable density compressed sensing in MRI.
+#    Theoretical vs heuristic sampling strategies."
+#    In 2013 IEEE 10th International Symposium on Biomedical Imaging,
+#    pp. 298-301. IEEE, 2013.
+# .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
+#    Jonas Kahn, and Pierre Weiss.
+#    "Variable density sampling with continuous trajectories."
+#    SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
 # .. [Cha+22] Chaithya, G. R., Pierre Weiss, Guillaume Daval-Frérot,
 #    Aurélien Massire, Alexandre Vignaud, and Philippe Ciuciu.
-#    "Optimizing full 3d sparkling trajectories for high-resolution
+#    "Optimizing full 3D SPARKLING trajectories for high-resolution
 #    magnetic resonance imaging."
 #    IEEE Transactions on Medical Imaging 41, no. 8 (2022): 2105-2117.

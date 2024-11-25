@@ -226,10 +226,12 @@ def initialize_3D_travelling_salesman(
     Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.
 
     This is a reproduction of the work from [Cha+14]_. The TSP solution
-    is obtained using the 2-opt method in O(n²). An additional option
-    is provided to cluster shots before solving the TSP and thus
-    reduce drastically the computation time. The initial sampling method
-    can also be customized.
+    is obtained using the 2-opt method with a complexity in O(n²) in time
+    and memory.
+
+    An additional option is provided to cluster shots before solving the
+    TSP and thus reduce drastically the computation time. The initial
+    sampling method can also be customized.
 
     Parameters
     ----------
