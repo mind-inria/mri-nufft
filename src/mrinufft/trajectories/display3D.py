@@ -25,12 +25,12 @@ def get_gridded_trajectory(
 ):
     """
     Compute the gridded trajectory for MRI reconstruction.
-    
+
     This function helps in gridding a k-space sampling trajectory to a desired shape.
-    The gridding process can be carried out to reflect the sampling density, 
+    The gridding process can be carried out to reflect the sampling density,
     sampling time, inversion time, k-space holes, gradient strengths, or slew rates.
     Please check `grid_type` parameter to know the benefits of each type of gridding.
-    
+
     Parameters
     ----------
     shots : ndarray
@@ -42,16 +42,16 @@ def get_gridded_trajectory(
         The type of gridded trajectory to compute. Default is "density".
         It can be one of the following:
         "density" : Get the sampling density in closest number of samples per voxel.
-            Helps understand suboptimal sampling, by showcasing regions with strong 
+            Helps understand suboptimal sampling, by showcasing regions with strong
             oversampling.
         "time" : Showcases when the k-space data is acquired in time.
             This is helpful to view and understand off-resonance effects.
-            Generally, lower off-resonance effects occur when the sampling trajectory 
+            Generally, lower off-resonance effects occur when the sampling trajectory
             has smoother k-space sampling time over the k-space.
         "inversion" : Relative inversion time at the sampling location. Needs
-            turbo_factor to be set. This is useful for analyzing the exact inversion 
+            turbo_factor to be set. This is useful for analyzing the exact inversion
             time when the k-space is acquired, for sequences like MP(2)RAGE.
-        "holes": Show the k-space holes within a ellipsoid of the k-space.    
+        "holes": Show the k-space holes within a ellipsoid of the k-space.
         "gradients": Show the gradient strengths of the k-space trajectory.
         "slew": Show the slew rate of the k-space trajectory.
     osf : int, optional
@@ -66,12 +66,12 @@ def get_gridded_trajectory(
         Generally these values are stored in the header of the trajectory file.
     turbo_factor : int, optional
         The turbo factor when sampling is with inversion. Default is 176, which is
-        the default turbo factor for MPRAGE acquisitions at 1mm whole 
+        the default turbo factor for MPRAGE acquisitions at 1mm whole
         brain acquisitions.
     elliptical_samp : bool, optional
         Whether to use elliptical sampling. Default is True.
         This is useful while analyzing the k-space holes, especially if the k-space
-        trajectory is expected to be elliptical sampling of k-space 
+        trajectory is expected to be elliptical sampling of k-space
         (i.e. ellipsoid over cuboid).
     threshold: float, optional
         The threshold for the k-space holes. Default is 1e-3.
@@ -107,7 +107,7 @@ def get_gridded_trajectory(
     elif grid_type == "holes":
         data = np.abs(gridded_ones).squeeze() < threshold
         if elliptical_samp:
-            # If the trajectory uses elliptical sampling, ignore the k-space holes 
+            # If the trajectory uses elliptical sampling, ignore the k-space holes
             # outside the ellipsoid.
             data[
                 np.linalg.norm(
