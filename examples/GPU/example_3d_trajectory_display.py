@@ -43,7 +43,11 @@ def create_grid(grid_type, trajectories, **kwargs):
     fig, axs = plt.subplots(3, 3, figsize=(10, 10))
     for i, (name, traj) in enumerate(trajectories.items()):
         grid = get_gridded_trajectory(
-            traj, traj_params['img_size'], grid_type=grid_type, traj_params=traj_params, **kwargs
+            traj,
+            traj_params["img_size"],
+            grid_type=grid_type,
+            traj_params=traj_params,
+            **kwargs,
         )
         plot_slices(axs[:, i], grid, title=name)
     plt.tight_layout()
