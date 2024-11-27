@@ -7,4 +7,3 @@ dependencies:
   - jupyter>=1.0.0
   - pip:
       - mri-nufft[finufft]
-      - pynfft2
