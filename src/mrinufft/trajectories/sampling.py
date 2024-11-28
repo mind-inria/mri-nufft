@@ -4,11 +4,15 @@ import numpy as np
 import numpy.fft as nf
 import numpy.linalg as nl
 import numpy.random as nr
-import pywt as pw
 from sklearn.cluster import BisectingKMeans, KMeans
 from tqdm.auto import tqdm
 
 from .utils import KMAX
+
+try:
+    import pywt as pw
+except ImportError:
+    pw = None
 
 
 def sample_from_density(
@@ -254,6 +258,12 @@ def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=Fa
        In 2013 IEEE 10th International Symposium on Biomedical Imaging,
        pp. 298-301. IEEE, 2013.
     """
+    if pw is None:
+        raise ImportError(
+            "The PyWavelets package must be installed "
+            "as an additional dependency for this function."
+        )
+
     nb_dims = len(shape)
     indices = np.indices(shape).reshape((nb_dims, -1)).T
 
@@ -319,6 +329,12 @@ def create_fast_chauffert_density(shape, wavelet_basis, nb_wavelet_scales):
        In 2013 IEEE 10th International Symposium on Biomedical Imaging,
        pp. 298-301. IEEE, 2013.
     """
+    if pw is None:
+        raise ImportError(
+            "The PyWavelets package must be installed "
+            "as an additional dependency for this function."
+        )
+
     nb_dims = len(shape)
 
     density = np.ones(shape)

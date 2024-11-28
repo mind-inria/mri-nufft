@@ -315,7 +315,7 @@ show_locations(function, arguments, subfig_size=subfigure_size)
 #
 # Random walks
 # ------------
-# 
+#
 # This is an adaptation of the proposition from [Cha+14]_.
 # It creates a trajectory by walking randomly to neighboring points
 # following a provided sampling density.
@@ -345,7 +345,7 @@ function = lambda x: mn.initialize_2D_random_walk(
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
-# %%    
+# %%
 #
 # The random paths can be made into a smooth and continuous
 # trajectory by oversampling the shots with cubic splines.

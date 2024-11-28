@@ -19,6 +19,7 @@ pynfft = ["pynfft2>=1.4.3", "numpy>=2.0.0"]
 pynufft = ["pynufft"]
 io = ["pymapvbvd"]
 smaps = ["scikit-image"]
+wavelets = ["pywavelets"]
 autodiff = ["torch"]
 
 
