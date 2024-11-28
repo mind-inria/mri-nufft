@@ -7,3 +7,6 @@ dependencies:
   - jupyter>=1.0.0
   - pip:
       - mri-nufft[finufft]
+      - joblib
+      - brainweb-dl
+      - torch
