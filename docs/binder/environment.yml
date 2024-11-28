@@ -9,4 +9,4 @@ dependencies:
       - mri-nufft[finufft]
       - joblib
       - brainweb-dl
-      - pytorch
+      - torch
