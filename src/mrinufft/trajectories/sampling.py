@@ -119,10 +119,11 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
     Parameters
     ----------
     shape : tuple of int
-        The shape of the density grid.
+        The shape of the density grid, analog to the field-of-view
+        as opposed to ``resolution`` below.
     cutoff : float
-        The k-space radius cutoff ratio between 0 and 1 within
-        which density remains uniform and beyond which it decays.
+        The ratio of the largest k-space dimension between 0
+        and 1 within which density remains uniform and beyond which it decays.
     decay : float
         The polynomial decay in density beyond the cutoff ratio.
     resolution : np.ndarray, optional
@@ -149,13 +150,13 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
     if not resolution:
         resolution = np.ones(nb_dims)
 
-    distances = np.indices(shape).astype(float)
+    differences = np.indices(shape).astype(float)
     for i in range(nb_dims):
-        distances[i] = distances[i] + 0.5 - shape[i] / 2
-        distances[i] = distances[i] / shape[i] * resolution[i]
-    distances = nl.norm(distances, axis=0)
+        differences[i] = differences[i] + 0.5 - shape[i] / 2
+        differences[i] = differences[i] / shape[i] / resolution[i]
+    distances = nl.norm(differences, axis=0)
 
-    cutoff = cutoff * np.max(distances) if cutoff else np.min(distances)
+    cutoff = cutoff * np.max(differences) if cutoff else np.min(differences)
     density = np.ones(shape)
     decay_mask = np.where(distances > cutoff, True, False)
 
