@@ -841,7 +841,7 @@ def get_random_loc_1d(
         Undersampling/Acceleration factor
     pdf: str, optional
         Probability density function for the remaining samples.
-        "gaussian" (default) or "uniform".
+        "gaussian" (default) or "uniform" or np.array
     rng: random state
 
     Returns
@@ -850,8 +850,12 @@ def get_random_loc_1d(
     """
     order = VDSorder(order)
     pdf = VDSpdf(pdf)
-    if accel == 0:
+    if accel == 0 or accel == 1:
         return np.arange(dim_size)  # type: ignore
+    elif accel < 0:
+        raise ValueError("acceleration factor should be positive.")
+    elif isinstance(accel, float):
+        raise ValueError("acceleration factor should be an integer.")
 
     indexes = list(range(dim_size))
 
@@ -908,13 +912,7 @@ def get_random_loc_1d(
         line_locs = np.array(sorted(line_locs))
     else:
         raise ValueError(f"Unknown direction '{order}'.")
-    return (line_locs / dim_size) - 0.5  # rescale to [-0.5,0.5]
-
-
-def get_random_loc_nd(N_samples, shape, pdf):
-    """Get random location in N-dimensions."""
-    # TODO
-    pass
+    return (line_locs / dim_size) * 2 * KMAX - KMAX  # rescale to [-0.5,0.5]
 
 
 def stack_random(
