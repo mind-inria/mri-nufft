@@ -957,7 +957,7 @@ def stack_random(
 
     new_traj = np.zeros((len(line_locs), Nc, Ns, 3))
     for i, loc in enumerate(line_locs):
-        new_traj[i, :, :2] = traj
-        new_traj[i, :, 2] = loc
+        new_traj[i, :, :, :2] = traj
+        new_traj[i, :, :, 2] = loc
 
     return new_traj.reshape(-1, Ns, 3)
