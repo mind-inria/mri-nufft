@@ -25,6 +25,12 @@ References
 """
 
 # %%
+# .. colab-link::
+#    :needs_gpu: 1
+#
+#    !pip install mri-nufft[gpunufft] scikit-image
+
+# %%
 # Imports
 import numpy as np
 import mrinufft
