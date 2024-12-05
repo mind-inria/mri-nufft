@@ -40,32 +40,6 @@ OPTS_FIELD_DECODE = {
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
-def _next235beven(n, b):
-    """Find the next even integer not less than n.
-
-    This function finds the next even integer not less than n, with prime factors no
-    larger than 5, and is a multiple of b (where b is a number that only
-    has prime factors 2, 3, and 5).
-    It is used in particular with `pipe` density compensation estimation.
-    """
-    if n <= 2:
-        return 2
-    if n % 2 == 1:
-        n += 1  # make it even
-    nplus = n - 2  # to cancel out the +=2 at start of loop
-    numdiv = 2  # a dummy that is >1
-    while numdiv > 1 or nplus % b != 0:
-        nplus += 2  # stays even
-        numdiv = nplus
-        while numdiv % 2 == 0:
-            numdiv //= 2  # remove all factors of 2, 3, 5...
-        while numdiv % 3 == 0:
-            numdiv //= 3
-        while numdiv % 5 == 0:
-            numdiv //= 5
-    return nplus
-
-
 def _error_check(ier, msg):
     if ier != 0:
         raise RuntimeError(msg)
@@ -875,56 +849,3 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.uses_sense:
             self.smaps = self.smaps.conj()
         self.raw_op.toggle_grad_traj()
-
-    @classmethod
-    def pipe(
-        cls,
-        kspace_loc,
-        volume_shape,
-        num_iterations=10,
-        osf=2,
-        normalize=True,
-        **kwargs,
-    ):
-        """Compute the density compensation weights for a given set of kspace locations.
-
-        Parameters
-        ----------
-        kspace_loc: np.ndarray
-            the kspace locations
-        volume_shape: np.ndarray
-            the volume shape
-        num_iterations: int default 10
-            the number of iterations for density estimation
-        osf: float or int
-            The oversampling factor the volume shape
-        normalize: bool
-            Whether to normalize the density compensation.
-        """
-        if CUFINUFFT_AVAILABLE is False:
-            raise ValueError(
-                "gpuNUFFT is not available, cannot " "estimate the density compensation"
-            )
-        original_shape = volume_shape
-        volume_shape = np.array([_next235beven(int(osf * i), 1) for i in volume_shape])
-        grid_op = MRICufiNUFFT(
-            samples=kspace_loc,
-            shape=volume_shape,
-            upsampfac=1,
-            gpu_spreadinterponly=1,
-            gpu_kerevalmeth=0,
-            **kwargs,
-        )
-        density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
-        for _ in range(num_iterations):
-            density_comp /= cp.abs(
-                grid_op.op(
-                    grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
-                ).squeeze()
-            )
-        if normalize:
-            test_op = MRICufiNUFFT(samples=kspace_loc, shape=original_shape, **kwargs)
-            test_im = cp.ones(original_shape, dtype=test_op.cpx_dtype)
-            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
-            density_comp /= cp.mean(cp.abs(test_im_recon))
-        return density_comp.squeeze()
