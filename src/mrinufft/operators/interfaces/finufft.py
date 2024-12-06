@@ -200,6 +200,7 @@ class MRIfinufft(FourierOperatorCPU):
             raise ValueError(
                 "finufft is not available, cannot estimate the density compensation"
             )
+        original_shape = volume_shape
         volume_shape = np.array([_next235beven(int(osf * i), 1) for i in volume_shape])
         grid_op = MRIfinufft(
             samples=kspace_loc,
@@ -216,9 +217,9 @@ class MRIfinufft(FourierOperatorCPU):
                     grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
                 ).squeeze()
             )
-        # if normalize:
-        #    test_op = MRIfinufft(samples=kspace_loc, shape=original_shape, **kwargs)
-        #    test_im = np.ones(original_shape, dtype=test_op.cpx_dtype)
-        #    test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
-        #    density_comp /= np.mean(np.abs(test_im_recon))
+        if normalize:
+           test_op = MRIfinufft(samples=kspace_loc, shape=original_shape, **kwargs)
+           test_im = np.ones(original_shape, dtype=test_op.cpx_dtype)
+           test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
+           density_comp /= np.mean(np.abs(test_im_recon))
         return density_comp.squeeze()
