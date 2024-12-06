@@ -27,15 +27,17 @@ the field of medical imaging using machine learning techniques.
 
     \mathbf{\hat{x}} = \mathrm{arg} \min_{\mathbf{x}} || \mathcal{U}_\mathbf{\theta}(\mathbf{y}) - \mathbf{x} ||_2^2
 
-where:
-- \( \mathbf{\hat{x}} \) is the reconstructed MRI image,
-- \( \mathbf{x} \) is the ground truth image,
-- \( \mathbf{y} \) is the input MRI image (e.g., k-space data),
-- \( \mathcal{U}_\mathbf{\theta} \) is the U-Net model parameterized by \( \theta \).
+where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}` is the ground truth image, 
+:math:`\mathbf{y}` is the input MRI image (e.g., k-space data), and :math:`\mathcal{U}_\mathbf{\theta}` is the U-Net model parameterized by :math:`\theta`.
 
 .. warning::
     We train on a single image here. In practice, this should be done on a database like fastMRI [fastmri]_.
 """
+# %%
+# .. colab-link::
+#    :needs_gpu: 1
+#
+#    !pip install mri-nufft[gpunufft] scikit-image fastmri
 
 # %%
 # Imports
@@ -141,13 +143,13 @@ plot_state(axs, mri_2D, init_traj, dc_adjoint)
 
 # %%
 # Start training loop
-epoch = 100
+num_epochs = 100
 optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
 losses = []  # Store the loss values and create an animation
 image_files = []  # Store the images to create a gif
 model.train()
 
-with tqdm(range(epoch), unit="steps") as tqdms:
+with tqdm(range(num_epochs), unit="steps") as tqdms:
     for i in tqdms:
         out = model(kspace_mri_2D)  # Forward pass
 
@@ -203,10 +205,20 @@ try:
         / "GPU"
         / "images"
     )
-    shutil.copyfile("mrinufft_learn_Unet.gif", final_dir / "mrinufft_learn_Unet.gif")
+    shutil.copyfile("mrinufft_learn_unet.gif", final_dir / "mrinufft_learn_unet.gif")
 except FileNotFoundError:
     pass
+
 # sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_unet.gif'
+
+# %%
+# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
+#    :alt: example learn_samples
+#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
+#    :class: sphx-glr-single-img
+
 # %%
 # Reconstruction from partially trained U-Net model
 model.eval()

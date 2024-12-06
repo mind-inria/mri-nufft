@@ -223,14 +223,15 @@ class MRIFourierCorrected(FourierOperatorBase):
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
             raise RuntimeError("Cupy is required for gpu computations.")
-        if backend == "torch":
+        elif backend == "torch":
             self.xp = torch
-        if backend == "gpu":
+        elif backend == "gpu":
             self.xp = cp
         elif backend == "cpu":
             self.xp = np
         else:
             raise ValueError("Unsupported backend.")
+
         self._fourier_op = fourier_op
 
         self.n_coils = fourier_op.n_coils
@@ -311,7 +312,7 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         """
         y = 0.0
-        coeffs_d = self.xp.array(coeffs)
+        coeffs_d = self.xp.asarray(coeffs)
         if self.C is not None:
             for idx in range(self.n_interpolators):
                 y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
