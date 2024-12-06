@@ -83,6 +83,7 @@ class Model(torch.nn.Module):
         self.operator = get_operator("finufft", wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
+            density=True,
             squeeze_dims=False,
         )
         self.img_size = img_size
