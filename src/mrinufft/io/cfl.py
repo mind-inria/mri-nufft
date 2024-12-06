@@ -71,8 +71,7 @@ def _writecfl(array, cfl_file, hdr_file=None):
 
     with open(hdr_file, "w") as h:
         h.write("# Dimensions\n")
-        for i in array.shape:
-            h.write("%d " % i)
+        h.write("".join(f"{i} " for i in array.shape))
         h.write("\n")
 
     size = np.prod(array.shape) * np.dtype(np.complex64).itemsize
