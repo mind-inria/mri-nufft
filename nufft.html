@@ -833,13 +833,13 @@ The main approach (initially proposed by Noll et al. <a class="footnote-referenc
 To achieve a clinically feasible scan time, each frame or contrast is acquired with a different aggressively undersampled k-space trajectory. In this context, the single-coil acquisition model becomes:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\tilde{\boldsymbol{y}} = \begin{bmatrix}
-   \mathcal{F}_\Omega_1 &amp; 0 &amp; \cdots &amp; 0 \\
-   0 &amp; \mathcal{F}_\Omega_2 &amp; \cdots &amp; 0 \\
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
-   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_\Omega_T
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
 \end{bmatrix}
 \boldsymbol{x} + \boldsymbol{n}\end{split}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathcal{F}_\Omega_1, \dots, \mathcal{F}_\Omega_T\)</span> are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting <a class="footnote-reference brackets" href="#id7" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>) may consists of
+<p>where <span class="math notranslate nohighlight">\(\mathcal{F}_{\Omega_1}, \dots, \mathcal{F}_{\Omega_T}\)</span> are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting <a class="footnote-reference brackets" href="#id7" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>) may consists of
 thousands of total frames <span class="math notranslate nohighlight">\(T\)</span>, leading to repeated Fourier Transform operations and high computational burden. However, the 1D signal series arising from similar voxels, e.g., with similar
 relaxation properties, are typically highly correlated. For this reason, the image series can be represented as:</p>
 <div class="math notranslate nohighlight">
@@ -848,30 +848,30 @@ relaxation properties, are typically highly correlated. For this reason, the ima
 training dataset or an ensemble of simulated Bloch responses. The signal model can be then written as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\tilde{\boldsymbol{y}} = \begin{bmatrix}
-   \mathcal{F}_\Omega_1 &amp; 0 &amp; \cdots &amp; 0 \\
-   0 &amp; \mathcal{F}_\Omega_2 &amp; \cdots &amp; 0 \\
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
-   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_\Omega_T
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
 \end{bmatrix}
 \Phi \Phi^H \boldsymbol{x} + \boldsymbol{n} =
  \begin{bmatrix}
-   \mathcal{F}_\Omega_1 &amp; 0 &amp; \cdots &amp; 0 \\
-   0 &amp; \mathcal{F}_\Omega_2 &amp; \cdots &amp; 0 \\
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
-   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_\Omega_T
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
 \end{bmatrix}
 \Phi \boldsymbol{\alpha} + \boldsymbol{n}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\boldsymbol{\alpha} = \Phi^H \boldsymbol{x}\)</span> are the spatial coefficients representing the image series. Since the elements of <span class="math notranslate nohighlight">\(\Phi^H\)</span> do not depend on the specific k-space frequency points,
 the projection operator <span class="math notranslate nohighlight">\(\boldsymbol{\Phi}\)</span> commutes with the Fourier transform, and the signal equation finally becomes:</p>
 <div class="math notranslate nohighlight">
-\[\tilde{\boldsymbol{y}} = \Phi \mathcal{F}_Omega(\boldsymbol{\alpha}) + \boldsymbol{n}\]</div>
+\[\tilde{\boldsymbol{y}} = \Phi \mathcal{F}_\Omega(\boldsymbol{\alpha}) + \boldsymbol{n}\]</div>
 <p>that is, computation now involves <span class="math notranslate nohighlight">\(K \ll T\)</span> Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.</p>
 </section>
 </section>
 </section>
 <section id="the-non-uniform-fast-fourier-transform">
 <h2>The Non Uniform Fast Fourier Transform<a class="headerlink" href="#the-non-uniform-fast-fourier-transform" title="Link to this heading">#</a></h2>
-<p>In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical <span class="math notranslate nohighlight">\(O(MN)\)</span> complexity to <cite>O(Mlog(N))</cite>). Thus, the main steps of the <em>Non-Uniform Fast Fourier Transform</em> are for the type 1:</p>
+<p>In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical <span class="math notranslate nohighlight">\(O(MN)\)</span> complexity to <span class="math notranslate nohighlight">\(O(M\log(N))\)</span>). Thus, the main steps of the <em>Non-Uniform Fast Fourier Transform</em> are for the type 1:</p>
 <ol class="arabic simple">
 <li><p>Spreading/Interpolation of the non-uniform points to an oversampled Cartesian grid (typically with twice the resolution of the final image)</p></li>
 <li><p>Perform the (I)FFT on this image</p></li>
