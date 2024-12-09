@@ -24,7 +24,7 @@ A collection of tools to manipulate and develop non-Cartesian trajectories.
 # External
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import show_argument, show_trajectory
+from utils import show_trajectories, show_trajectory
 
 # Internal
 import mrinufft as mn
@@ -87,7 +87,9 @@ single_trajectories = {
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: single_trajectories[x]
-show_argument(function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size)
+show_trajectories(
+    function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size
+)
 
 
 # %%
@@ -119,7 +121,9 @@ planar_trajectories = {
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: planar_trajectories[x]
-show_argument(function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size)
+show_trajectories(
+    function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size
+)
 
 
 # %%
@@ -160,9 +164,9 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.stack(planar_trajectories[x], nb_stacks=nb_repetitions)
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -188,7 +192,7 @@ function = lambda x: tools.stack(
     ),
     nb_stacks=nb_repetitions,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -206,7 +210,7 @@ arguments = [True, False]
 trajectory = np.copy(planar_trajectories["3D Cones"])
 trajectory[..., 2] *= 2
 function = lambda x: tools.stack(trajectory, nb_stacks=nb_repetitions, hard_bounded=x)
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -258,9 +262,9 @@ function = lambda x: tools.rotate(
     nb_rotations=nb_repetitions,
     x_tilt="uniform",
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -326,7 +330,7 @@ function = lambda x: tools.precess(
     half_sphere=in_out,
     axis=2,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 #
@@ -345,7 +349,7 @@ function = lambda x: tools.precess(
     half_sphere=in_out,
     axis=0,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -369,7 +373,7 @@ function = lambda x: tools.precess(
     half_sphere=x,
     axis=0,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -396,7 +400,7 @@ function = lambda x: tools.precess(
     partition=x,
     axis=0,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -422,7 +426,7 @@ function = lambda x: tools.precess(
     partition=x,
     axis=0,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -445,7 +449,7 @@ function = lambda x: tools.precess(
     partition=x,
     axis=0,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 # ``axis (int, array)``
@@ -478,7 +482,7 @@ function = lambda x: tools.precess(
     half_sphere=in_out,
     axis=x,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -501,7 +505,7 @@ function = lambda x: tools.precess(
     half_sphere=in_out,
     axis=x,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 #
@@ -556,9 +560,9 @@ arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.conify(
     planar_trajectories[x], nb_cones=nb_repetitions, in_out=in_out
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -578,9 +582,9 @@ arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.conify(
     single_trajectories[x], nb_cones=Nc, z_tilt="golden", in_out=in_out
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -607,7 +611,7 @@ function = lambda x: tools.conify(
     in_out=in_out,
     max_angle=x,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -634,7 +638,7 @@ function = lambda x: tools.conify(
     max_angle=np.pi / 2,
     borderless=x,
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -691,11 +695,11 @@ function = lambda x: tools.epify(
     nb_trains=Nc_planes // 2,
     reverse_odd_shots=True,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -716,7 +720,7 @@ function = lambda x: tools.epify(
     nb_trains=Nc_planes // 2,
     reverse_odd_shots=True,
 )
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -735,7 +739,7 @@ function = lambda x: tools.epify(
     nb_trains=x,
     reverse_odd_shots=True,
 )
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -755,7 +759,7 @@ function = lambda x: tools.epify(
     nb_trains=Nc_planes // 2,
     reverse_odd_shots=x,
 )
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -799,11 +803,11 @@ function = lambda x: tools.prewind(
     tools.rewind(planar_trajectories[x], Ns_transitions=Ns // 10),
     Ns_transitions=Ns // 10,
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -821,7 +825,7 @@ function = lambda x: tools.prewind(
     tools.rewind(planar_trajectories["2D Cones"], Ns_transitions=x),
     Ns_transitions=x,
 )
-show_argument(
+show_trajectories(
     function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
 )
 
@@ -898,9 +902,9 @@ arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.stack_spherically(
     init_trajectories[x], Nc=Nc, nb_stacks=nb_repetitions
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,
@@ -935,7 +939,7 @@ traj_normal[..., :2] = (
 trajectories = {"Classic": traj_classic, "Normalized": traj_normal}
 arguments = ["Classic", "Normalized"]
 function = lambda x: trajectories[x]
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 # %%
@@ -988,7 +992,7 @@ arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
 function = lambda x: tools.shellify(
     init_trajectories[x], Nc=Nc, nb_shells=nb_repetitions
 )
-show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 # ``hemisphere_mode (str)``
@@ -1005,7 +1009,7 @@ arguments = ["symmetric", "reversed"]
 function = lambda x: tools.shellify(
     init_trajectories["Spiral"], Nc=Nc, nb_shells=nb_repetitions, hemisphere_mode=x
 )
-show_argument(
+show_trajectories(
     function,
     arguments,
     one_shot=one_shot,

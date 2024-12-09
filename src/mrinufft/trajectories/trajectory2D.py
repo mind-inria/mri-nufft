@@ -27,6 +27,11 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
+
+    Returns
+    -------
+    array_like
+        2D radial trajectory
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
