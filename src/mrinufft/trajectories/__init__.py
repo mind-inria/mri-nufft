@@ -32,6 +32,9 @@ from .trajectory3D import (
 
 from .tools import (
     stack,
+    stack_random,
+    get_random_loc_1d,
+    get_random_loc_nd,
     rotate,
     precess,
     conify,
@@ -75,7 +78,10 @@ __all__ = [
     "initialize_3D_seiffert_shells",
     "initialize_3D_turbine",
     "initialize_3D_repi",
+    "get_random_loc_1d",
+    "get_random_loc_nd",
     "stack",
+    "stack_random",
     "rotate",
     "precess",
     "conify",
