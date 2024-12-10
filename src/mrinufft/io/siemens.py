@@ -57,8 +57,9 @@ def read_siemens_rawdat(
         from mapvbvd import mapVBVD
     except ImportError as err:
         raise ImportError(
-            "The mapVBVD module is not available. Please install it using "
-            "the following command: pip install pymapVBVD"
+            "The mapVBVD module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install pymapVBVD`."
         ) from err
     twixObj = mapVBVD(filename)
     if isinstance(twixObj, list):
