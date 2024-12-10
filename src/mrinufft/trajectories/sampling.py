@@ -4,15 +4,9 @@ import numpy as np
 import numpy.fft as nf
 import numpy.linalg as nl
 import numpy.random as nr
-from sklearn.cluster import BisectingKMeans, KMeans
 from tqdm.auto import tqdm
 
 from .utils import KMAX
-
-try:
-    import pywt as pw
-except ImportError:
-    pw = None
 
 
 def sample_from_density(
@@ -59,7 +53,15 @@ def sample_from_density(
        "Variable density sampling with continuous trajectories."
        SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
-    rng = nr.default_rng()
+    try:
+        from sklearn.cluster import BisectingKMeans, KMeans
+    except ImportError as err:
+        raise ImportError(
+            "The scikit-learn module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install scikit-learn`."
+        ) from err
+
 
     # Define dimension variables
     shape = np.array(density.shape)
@@ -80,6 +82,7 @@ def sample_from_density(
         density = density / np.sum(density)
 
     # Sample using specified method
+    rng = nr.default_rng()
     if method == "random":
         choices = rng.choice(
             np.arange(max_nb_samples),
@@ -259,11 +262,14 @@ def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=Fa
        In 2013 IEEE 10th International Symposium on Biomedical Imaging,
        pp. 298-301. IEEE, 2013.
     """
-    if pw is None:
+    try:
+        import pywt
+    except ImportError as err:
         raise ImportError(
-            "The PyWavelets package must be installed "
-            "as an additional dependency for this function."
-        )
+            "The PyWavelets module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install pywavelets`."
+        ) from err
 
     nb_dims = len(shape)
     indices = np.indices(shape).reshape((nb_dims, -1)).T
@@ -330,11 +336,14 @@ def create_fast_chauffert_density(shape, wavelet_basis, nb_wavelet_scales):
        In 2013 IEEE 10th International Symposium on Biomedical Imaging,
        pp. 298-301. IEEE, 2013.
     """
-    if pw is None:
+    try:
+        import pywt
+    except ImportError as err:
         raise ImportError(
-            "The PyWavelets package must be installed "
-            "as an additional dependency for this function."
-        )
+            "The PyWavelets module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install pywavelets`."
+        ) from err
 
     nb_dims = len(shape)
 
