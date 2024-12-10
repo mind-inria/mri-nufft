@@ -62,7 +62,6 @@ def sample_from_density(
             "or using `pip install scikit-learn`."
         ) from err
 
-
     # Define dimension variables
     shape = np.array(density.shape)
     nb_dims = len(shape)
@@ -263,7 +262,7 @@ def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=Fa
        pp. 298-301. IEEE, 2013.
     """
     try:
-        import pywt
+        import pywt as pw
     except ImportError as err:
         raise ImportError(
             "The PyWavelets module is not available. Please install "
@@ -337,7 +336,7 @@ def create_fast_chauffert_density(shape, wavelet_basis, nb_wavelet_scales):
        pp. 298-301. IEEE, 2013.
     """
     try:
-        import pywt
+        import pywt as pw
     except ImportError as err:
         raise ImportError(
             "The PyWavelets module is not available. Please install "
