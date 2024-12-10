@@ -149,6 +149,7 @@ def low_frequency(
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
+
     try:
         from skimage.filters import threshold_otsu, gaussian
         from skimage.morphology import convex_hull_image
