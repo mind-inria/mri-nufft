@@ -8,12 +8,12 @@ from scipy.special import ellipj, ellipk
 
 from .maths import (
     CIRCLE_PACKING_DENSITY,
+    EIGENVECTOR_2D_FIBONACCI,
     R2D,
     Ra,
     Ry,
     Rz,
     generate_fibonacci_circle,
-    EIGENVECTOR_2D_FIBONACCI,
 )
 from .tools import conify, duplicate_along_axes, epify, precess, stack
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral

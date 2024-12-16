@@ -14,6 +14,7 @@ from .operators import (
 )
 
 from .trajectories import (
+    # trajectories
     initialize_2D_radial,
     initialize_2D_spiral,
     initialize_2D_fibonacci_spiral,
@@ -25,6 +26,8 @@ from .trajectories import (
     initialize_2D_polar_lissajous,
     initialize_2D_lissajous,
     initialize_2D_waves,
+    initialize_2D_random_walk,
+    initialize_2D_travelling_salesman,
     initialize_3D_phyllotaxis_radial,
     initialize_3D_golden_means_radial,
     initialize_3D_wong_radial,
@@ -38,6 +41,9 @@ from .trajectories import (
     initialize_3D_seiffert_shells,
     initialize_3D_turbine,
     initialize_3D_repi,
+    initialize_3D_random_walk,
+    initialize_3D_travelling_salesman,
+    # tools
     stack,
     rotate,
     precess,
@@ -46,6 +52,15 @@ from .trajectories import (
     shellify,
     duplicate_along_axes,
     radialize_center,
+    oversample,
+    # densities
+    sample_from_density,
+    create_cutoff_decay_density,
+    create_polynomial_density,
+    create_energy_density,
+    create_chauffert_density,
+    create_fast_chauffert_density,
+    # display
     displayConfig,
     display_2D_trajectory,
     display_3D_trajectory,
@@ -54,10 +69,16 @@ from .trajectories import (
 from .density import voronoi, cell_count, pipe, get_density
 
 __all__ = [
+    # nufft
     "get_operator",
     "check_backend",
     "list_backends",
     "get_interpolators_from_fieldmap",
+    "voronoi",
+    "cell_count",
+    "pipe",
+    "get_density",
+    # trajectories
     "initialize_2D_radial",
     "initialize_2D_spiral",
     "initialize_2D_fibonacci_spiral",
@@ -69,6 +90,8 @@ __all__ = [
     "initialize_2D_polar_lissajous",
     "initialize_2D_lissajous",
     "initialize_2D_waves",
+    "initialize_2D_random_walk",
+    "initialize_2D_travelling_salesman",
     "initialize_3D_phyllotaxis_radial",
     "initialize_3D_golden_means_radial",
     "initialize_3D_wong_radial",
@@ -83,6 +106,9 @@ __all__ = [
     "initialize_3D_seiffert_shells",
     "initialize_3D_turbine",
     "initialize_3D_repi",
+    "initialize_3D_random_walk",
+    "initialize_3D_travelling_salesman",
+    # tools
     "stack",
     "rotate",
     "precess",
@@ -92,13 +118,18 @@ __all__ = [
     "duplicate_along_axes",
     "radialize_center",
     "patch_center_anomaly",
+    "oversample",
+    # densities
+    "sample_from_density",
+    "create_cutoff_decay_density",
+    "create_polynomial_density",
+    "create_energy_density",
+    "create_chauffert_density",
+    "create_fast_chauffert_density",
+    # display
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
-    "voronoi",
-    "cell_count",
-    "pipe",
-    "get_density",
 ]
 
 from importlib.metadata import version, PackageNotFoundError

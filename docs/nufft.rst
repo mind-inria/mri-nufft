@@ -174,14 +174,14 @@ To achieve a clinically feasible scan time, each frame or contrast is acquired w
 .. math::
 
    \tilde{\boldsymbol{y}} = \begin{bmatrix}
-      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
-      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \mathcal{F}_{\Omega_1} & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_{\Omega_2} & \cdots & 0 \\
       \vdots & \vdots & \ddots & \vdots \\
-      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+      0 & 0 & \cdots & \mathcal{F}_{\Omega_T}
    \end{bmatrix}
    \boldsymbol{x} + \boldsymbol{n}
 
-where :math:`\mathcal{F}_\Omega_1, \dots, \mathcal{F}_\Omega_T` are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting [3]_) may consists of 
+where :math:`\mathcal{F}_{\Omega_1}, \dots, \mathcal{F}_{\Omega_T}` are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting [3]_) may consists of 
 thousands of total frames :math:`T`, leading to repeated Fourier Transform operations and high computational burden. However, the 1D signal series arising from similar voxels, e.g., with similar
 relaxation properties, are typically highly correlated. For this reason, the image series can be represented as:
 
@@ -195,17 +195,17 @@ training dataset or an ensemble of simulated Bloch responses. The signal model c
 .. math::
 
    \tilde{\boldsymbol{y}} = \begin{bmatrix}
-      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
-      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \mathcal{F}_{\Omega_1} & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_{\Omega_2} & \cdots & 0 \\
       \vdots & \vdots & \ddots & \vdots \\
-      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+      0 & 0 & \cdots & \mathcal{F}_{\Omega_T}
    \end{bmatrix}
    \Phi \Phi^H \boldsymbol{x} + \boldsymbol{n} =
     \begin{bmatrix}
-      \mathcal{F}_\Omega_1 & 0 & \cdots & 0 \\
-      0 & \mathcal{F}_\Omega_2 & \cdots & 0 \\
+      \mathcal{F}_{\Omega_1} & 0 & \cdots & 0 \\
+      0 & \mathcal{F}_{\Omega_2} & \cdots & 0 \\
       \vdots & \vdots & \ddots & \vdots \\
-      0 & 0 & \cdots & \mathcal{F}_\Omega_T
+      0 & 0 & \cdots & \mathcal{F}_{\Omega_T}
    \end{bmatrix}
    \Phi \boldsymbol{\alpha} + \boldsymbol{n}
 
@@ -214,7 +214,7 @@ the projection operator :math:`\boldsymbol{\Phi}` commutes with the Fourier tran
 
 .. math::
 
-   \tilde{\boldsymbol{y}} = \Phi \mathcal{F}_Omega(\boldsymbol{\alpha}) + \boldsymbol{n}
+   \tilde{\boldsymbol{y}} = \Phi \mathcal{F}_\Omega(\boldsymbol{\alpha}) + \boldsymbol{n}
 
 that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.
 
@@ -222,7 +222,7 @@ The Non Uniform Fast Fourier Transform
 ======================================
 
 
-In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to `O(M\log(N))`). Thus, the main steps of the *Non-Uniform Fast Fourier Transform* are for the type 1:
+In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to :math:`O(M\log(N))`). Thus, the main steps of the *Non-Uniform Fast Fourier Transform* are for the type 1:
 
 1. Spreading/Interpolation of the non-uniform points to an oversampled Cartesian grid (typically with twice the resolution of the final image)
 2. Perform the (I)FFT on this image
