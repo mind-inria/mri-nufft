@@ -47,7 +47,7 @@ visualize the 3D volumes.
     # External
     import matplotlib.pyplot as plt
     import numpy as np
-    from utils import show_argument, show_trajectory
+    from utils import show_trajectories, show_trajectory
 
     # Internal
     import mrinufft as mn
@@ -140,14 +140,16 @@ Single shots from 2D radial, Fermat's spiral, and 2D/3D cones.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-93
+.. GENERATED FROM PYTHON SOURCE LINES 87-95
 
 .. code-block:: Python
 
 
     arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
     function = lambda x: single_trajectories[x]
-    show_argument(function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size)
+    show_trajectories(
+        function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size
+    )
 
 
 
@@ -162,7 +164,7 @@ Single shots from 2D radial, Fermat's spiral, and 2D/3D cones.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-99
+.. GENERATED FROM PYTHON SOURCE LINES 96-101
 
 Planes
 ~~~~~~
@@ -170,7 +172,7 @@ Planes
 We will also be using them as planes, or thick planes for 3D shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-118
+.. GENERATED FROM PYTHON SOURCE LINES 101-120
 
 .. code-block:: Python
 
@@ -200,14 +202,16 @@ We will also be using them as planes, or thick planes for 3D shots.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-125
+.. GENERATED FROM PYTHON SOURCE LINES 121-129
 
 .. code-block:: Python
 
 
     arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
     function = lambda x: planar_trajectories[x]
-    show_argument(function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size)
+    show_trajectories(
+        function, arguments, one_shot=bool(one_shot), subfig_size=subfigure_size
+    )
 
 
 
@@ -222,7 +226,7 @@ We will also be using them as planes, or thick planes for 3D shots.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-143
+.. GENERATED FROM PYTHON SOURCE LINES 130-147
 
 Stack
 -----
@@ -242,7 +246,7 @@ Arguments:
   strictly bounded to k-space. ``(default True)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-147
+.. GENERATED FROM PYTHON SOURCE LINES 147-151
 
 .. code-block:: Python
 
@@ -262,7 +266,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-160
+.. GENERATED FROM PYTHON SOURCE LINES 152-164
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -277,14 +281,14 @@ with stacked-NUFFT operators, reducing time and memory
 consumption during reconstruction.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-164
+.. GENERATED FROM PYTHON SOURCE LINES 164-168
 
 .. code-block:: Python
 
 
     arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
     function = lambda x: tools.stack(planar_trajectories[x], nb_stacks=nb_repetitions)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -297,11 +301,11 @@ consumption during reconstruction.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-174
+.. GENERATED FROM PYTHON SOURCE LINES 169-178
 
 .. code-block:: Python
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -322,7 +326,7 @@ consumption during reconstruction.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 175-180
+.. GENERATED FROM PYTHON SOURCE LINES 179-184
 
 It can also be applied twice to single shots to create
 a plane before stacking it over the :math:`k_z`-axis.
@@ -330,7 +334,7 @@ Note here that is does not make a lot of sense for
 non-radial trajectories such as spirals.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 181-194
+.. GENERATED FROM PYTHON SOURCE LINES 185-198
 
 .. code-block:: Python
 
@@ -344,7 +348,7 @@ non-radial trajectories such as spirals.
         ),
         nb_stacks=nb_repetitions,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -359,7 +363,7 @@ non-radial trajectories such as spirals.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 195-204
+.. GENERATED FROM PYTHON SOURCE LINES 199-208
 
 ``hard_bounded (bool)``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -371,7 +375,7 @@ In the example below, the thickness is deliberately increased to
 emphasize this point.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 204-219
+.. GENERATED FROM PYTHON SOURCE LINES 208-223
 
 .. code-block:: Python
 
@@ -380,7 +384,7 @@ emphasize this point.
     trajectory = np.copy(planar_trajectories["3D Cones"])
     trajectory[..., 2] *= 2
     function = lambda x: tools.stack(trajectory, nb_stacks=nb_repetitions, hard_bounded=x)
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -402,7 +406,7 @@ emphasize this point.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 220-238
+.. GENERATED FROM PYTHON SOURCE LINES 224-242
 
 Rotate
 ------
@@ -423,7 +427,7 @@ Arguments:
   over the :math:`k_z`-axis. ``(default None)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 238-244
+.. GENERATED FROM PYTHON SOURCE LINES 242-248
 
 .. code-block:: Python
 
@@ -445,7 +449,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 245-254
+.. GENERATED FROM PYTHON SOURCE LINES 249-258
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -457,7 +461,7 @@ create 3D trajectories, but the density (and redundancy) along that
 axis is then much greater than anywhere else.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 254-262
+.. GENERATED FROM PYTHON SOURCE LINES 258-266
 
 .. code-block:: Python
 
@@ -468,7 +472,7 @@ axis is then much greater than anywhere else.
         nb_rotations=nb_repetitions,
         x_tilt="uniform",
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -481,11 +485,11 @@ axis is then much greater than anywhere else.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 263-273
+.. GENERATED FROM PYTHON SOURCE LINES 267-277
 
 .. code-block:: Python
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -507,7 +511,7 @@ axis is then much greater than anywhere else.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 274-302
+.. GENERATED FROM PYTHON SOURCE LINES 278-306
 
 Precess
 -------
@@ -538,7 +542,7 @@ Arguments:
   of the first shot as the axis. ``(default None)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 302-312
+.. GENERATED FROM PYTHON SOURCE LINES 306-316
 
 .. code-block:: Python
 
@@ -564,7 +568,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 313-320
+.. GENERATED FROM PYTHON SOURCE LINES 317-324
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -574,7 +578,7 @@ This method provides a way to distribute duplicated trajectories
 axis tilting the azimuthal orientation.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 320-331
+.. GENERATED FROM PYTHON SOURCE LINES 324-335
 
 .. code-block:: Python
 
@@ -587,7 +591,7 @@ axis tilting the azimuthal orientation.
         half_sphere=in_out,
         axis=2,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -601,7 +605,7 @@ axis tilting the azimuthal orientation.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 332-338
+.. GENERATED FROM PYTHON SOURCE LINES 336-342
 
 It is however most often used with single shots to
 cover more evenly the k-space sphere, such as with 3D cones
@@ -610,7 +614,7 @@ the golden angle is known to approximate an even distribution
 of points over a sphere surface.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 339-351
+.. GENERATED FROM PYTHON SOURCE LINES 343-355
 
 .. code-block:: Python
 
@@ -623,7 +627,7 @@ of points over a sphere surface.
         half_sphere=in_out,
         axis=0,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -638,7 +642,7 @@ of points over a sphere surface.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 352-362
+.. GENERATED FROM PYTHON SOURCE LINES 356-366
 
 ``half_sphere (bool)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -651,7 +655,7 @@ otherwise shots would likely be stacked in a redundant way.
 In the example hereafter, center-out shots are shown for clarity.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 362-382
+.. GENERATED FROM PYTHON SOURCE LINES 366-386
 
 .. code-block:: Python
 
@@ -665,7 +669,7 @@ In the example hereafter, center-out shots are shown for clarity.
         half_sphere=x,
         axis=0,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -687,7 +691,7 @@ In the example hereafter, center-out shots are shown for clarity.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 383-390
+.. GENERATED FROM PYTHON SOURCE LINES 387-394
 
 ``partition (str)``
 ~~~~~~~~~~~~~~~~~~~
@@ -697,7 +701,7 @@ split of the :math:`k_z`-axis, designating whether the axis should
 be fragmented by radius or angle respectively.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 390-408
+.. GENERATED FROM PYTHON SOURCE LINES 394-412
 
 .. code-block:: Python
 
@@ -710,7 +714,7 @@ be fragmented by radius or angle respectively.
         partition=x,
         axis=0,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -731,7 +735,7 @@ be fragmented by radius or angle respectively.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 409-415
+.. GENERATED FROM PYTHON SOURCE LINES 413-419
 
 While "polar" looks more natural in the absence of rotation (``tilt=None``),
 it results in too many shots close to the rotation axis, and therefore
@@ -740,7 +744,7 @@ is obtained with an "axial" partition and "golden" tilt along
 the provided axis.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 416-434
+.. GENERATED FROM PYTHON SOURCE LINES 420-438
 
 .. code-block:: Python
 
@@ -753,7 +757,7 @@ the provided axis.
         partition=x,
         axis=0,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -774,13 +778,13 @@ the provided axis.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 435-438
+.. GENERATED FROM PYTHON SOURCE LINES 439-442
 
 The distribution over the k-space sphere surface can be shown by
 displaying only the tip of the shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 439-450
+.. GENERATED FROM PYTHON SOURCE LINES 443-454
 
 .. code-block:: Python
 
@@ -793,7 +797,7 @@ displaying only the tip of the shots.
         partition=x,
         axis=0,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -807,7 +811,7 @@ displaying only the tip of the shots.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 451-472
+.. GENERATED FROM PYTHON SOURCE LINES 455-476
 
 ``axis (int, array)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -831,7 +835,7 @@ The first case is single shots, where the provided axis should
 simply correspond to the shot axis.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 472-490
+.. GENERATED FROM PYTHON SOURCE LINES 476-494
 
 .. code-block:: Python
 
@@ -844,7 +848,7 @@ simply correspond to the shot axis.
         half_sphere=in_out,
         axis=x,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -865,13 +869,13 @@ simply correspond to the shot axis.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 491-494
+.. GENERATED FROM PYTHON SOURCE LINES 495-498
 
 The second case is planar trajectories, where the axis orthogonal
 to the shots plane is preferred.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 495-506
+.. GENERATED FROM PYTHON SOURCE LINES 499-510
 
 .. code-block:: Python
 
@@ -884,7 +888,7 @@ to the shots plane is preferred.
         half_sphere=in_out,
         axis=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -898,7 +902,7 @@ to the shots plane is preferred.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 507-513
+.. GENERATED FROM PYTHON SOURCE LINES 511-517
 
 Some trickier cases exist in the literature, with the example of Seiffert spirals.
 Those 3D spirals neither correspond to a single-axis shot or a plane, so the authors
@@ -907,7 +911,7 @@ In order to handle the redundant distribution, they added a pseudo-random rotati
 within the shot axes.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 517-538
+.. GENERATED FROM PYTHON SOURCE LINES 521-542
 
 Conify
 ------
@@ -931,7 +935,7 @@ Arguments:
   mostly to avoid 1D cones if ``max_angle`` is equal to pi / 2, by default True.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 538-544
+.. GENERATED FROM PYTHON SOURCE LINES 542-548
 
 .. code-block:: Python
 
@@ -953,7 +957,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 545-554
+.. GENERATED FROM PYTHON SOURCE LINES 549-558
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -965,7 +969,7 @@ Also, the distortion is likely to increase the required gradient amplitudes
 and slew rates.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 554-560
+.. GENERATED FROM PYTHON SOURCE LINES 558-564
 
 .. code-block:: Python
 
@@ -974,7 +978,7 @@ and slew rates.
     function = lambda x: tools.conify(
         planar_trajectories[x], nb_cones=nb_repetitions, in_out=in_out
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -987,11 +991,11 @@ and slew rates.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 561-570
+.. GENERATED FROM PYTHON SOURCE LINES 565-574
 
 .. code-block:: Python
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1012,14 +1016,14 @@ and slew rates.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 571-575
+.. GENERATED FROM PYTHON SOURCE LINES 575-579
 
 Similarly to other tools, it can be used with single shots.
 In that case, ``nb_cones`` is set to ``Nc`` to create as many
 individual cones.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 576-582
+.. GENERATED FROM PYTHON SOURCE LINES 580-586
 
 .. code-block:: Python
 
@@ -1028,7 +1032,7 @@ individual cones.
     function = lambda x: tools.conify(
         single_trajectories[x], nb_cones=Nc, z_tilt="golden", in_out=in_out
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1041,11 +1045,11 @@ individual cones.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 583-592
+.. GENERATED FROM PYTHON SOURCE LINES 587-596
 
 .. code-block:: Python
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1066,7 +1070,7 @@ individual cones.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 593-602
+.. GENERATED FROM PYTHON SOURCE LINES 597-606
 
 ``max_angle (float)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1078,7 +1082,7 @@ to reduce the maximum angle but duplicate all of the cones along
 another axis to still cover the whole k-space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 602-620
+.. GENERATED FROM PYTHON SOURCE LINES 606-624
 
 .. code-block:: Python
 
@@ -1090,7 +1094,7 @@ another axis to still cover the whole k-space.
         in_out=in_out,
         max_angle=x,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1112,7 +1116,7 @@ another axis to still cover the whole k-space.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 621-628
+.. GENERATED FROM PYTHON SOURCE LINES 625-632
 
 ``borderless (bool)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1122,7 +1126,7 @@ when equal to ``False``, or instead simply partition the
 sphere over a polar split.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 628-647
+.. GENERATED FROM PYTHON SOURCE LINES 632-651
 
 .. code-block:: Python
 
@@ -1135,7 +1139,7 @@ sphere over a polar split.
         max_angle=np.pi / 2,
         borderless=x,
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1157,7 +1161,7 @@ sphere over a polar split.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 648-670
+.. GENERATED FROM PYTHON SOURCE LINES 652-674
 
 Epify
 -----
@@ -1182,7 +1186,7 @@ Arguments:
   the start of odd shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 670-679
+.. GENERATED FROM PYTHON SOURCE LINES 674-683
 
 .. code-block:: Python
 
@@ -1207,7 +1211,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 680-686
+.. GENERATED FROM PYTHON SOURCE LINES 684-690
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1216,7 +1220,7 @@ The trajectory to change by prolonging and merging the shots together.
 Hereafter the shots are merged by pairs with short transitions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 686-696
+.. GENERATED FROM PYTHON SOURCE LINES 690-700
 
 .. code-block:: Python
 
@@ -1228,7 +1232,7 @@ Hereafter the shots are merged by pairs with short transitions.
         nb_trains=Nc_planes // 2,
         reverse_odd_shots=True,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1242,12 +1246,12 @@ Hereafter the shots are merged by pairs with short transitions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 697-703
+.. GENERATED FROM PYTHON SOURCE LINES 701-707
 
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1264,7 +1268,7 @@ Hereafter the shots are merged by pairs with short transitions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 704-711
+.. GENERATED FROM PYTHON SOURCE LINES 708-715
 
 ``Ns_transitions (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1274,7 +1278,7 @@ Smoother transitions are achieved with more points, but it means longer
 waiting times between readouts if they are split during acquisition.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 711-724
+.. GENERATED FROM PYTHON SOURCE LINES 715-728
 
 .. code-block:: Python
 
@@ -1286,7 +1290,7 @@ waiting times between readouts if they are split during acquisition.
         nb_trains=Nc_planes // 2,
         reverse_odd_shots=True,
     )
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1303,7 +1307,7 @@ waiting times between readouts if they are split during acquisition.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 725-730
+.. GENERATED FROM PYTHON SOURCE LINES 729-734
 
 ``nb_trains (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -1311,7 +1315,7 @@ waiting times between readouts if they are split during acquisition.
 Number of resulting multi-readout shots, or trains.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 730-743
+.. GENERATED FROM PYTHON SOURCE LINES 734-747
 
 .. code-block:: Python
 
@@ -1323,7 +1327,7 @@ Number of resulting multi-readout shots, or trains.
         nb_trains=x,
         reverse_odd_shots=True,
     )
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1340,7 +1344,7 @@ Number of resulting multi-readout shots, or trains.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 744-750
+.. GENERATED FROM PYTHON SOURCE LINES 748-754
 
 ``reverse_odd_shots (bool)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1349,7 +1353,7 @@ Whether to reverse every odd shots such that, as in most trajectories,
 even shots end up closer to the start of odd shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 750-763
+.. GENERATED FROM PYTHON SOURCE LINES 754-767
 
 .. code-block:: Python
 
@@ -1361,7 +1365,7 @@ even shots end up closer to the start of odd shots.
         nb_trains=Nc_planes // 2,
         reverse_odd_shots=x,
     )
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1378,7 +1382,7 @@ even shots end up closer to the start of odd shots.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 764-780
+.. GENERATED FROM PYTHON SOURCE LINES 768-784
 
 Prewind/rewind
 --------------
@@ -1397,7 +1401,7 @@ Arguments:
 - ``Ns_transitions (int)``: number of pre-winding/rewinding steps.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 780-786
+.. GENERATED FROM PYTHON SOURCE LINES 784-790
 
 .. code-block:: Python
 
@@ -1419,7 +1423,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 787-796
+.. GENERATED FROM PYTHON SOURCE LINES 791-800
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1431,7 +1435,7 @@ Note that the radial prewinding and rewinding parts are overlapping
 with the actual trajectory.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 796-804
+.. GENERATED FROM PYTHON SOURCE LINES 800-808
 
 .. code-block:: Python
 
@@ -1441,7 +1445,7 @@ with the actual trajectory.
         tools.rewind(planar_trajectories[x], Ns_transitions=Ns // 10),
         Ns_transitions=Ns // 10,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1455,12 +1459,12 @@ with the actual trajectory.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 805-810
+.. GENERATED FROM PYTHON SOURCE LINES 809-814
 
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1476,7 +1480,7 @@ with the actual trajectory.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 811-818
+.. GENERATED FROM PYTHON SOURCE LINES 815-822
 
 ``Ns_transitions (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1486,7 +1490,7 @@ Smoother transitions are achieved with more points, but it may imply delayed
 readout starts and longer TRs.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 818-829
+.. GENERATED FROM PYTHON SOURCE LINES 822-833
 
 .. code-block:: Python
 
@@ -1496,7 +1500,7 @@ readout starts and longer TRs.
         tools.rewind(planar_trajectories["2D Cones"], Ns_transitions=x),
         Ns_transitions=x,
     )
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1513,12 +1517,12 @@ readout starts and longer TRs.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 830-832
+.. GENERATED FROM PYTHON SOURCE LINES 834-836
 
 Functional tools
 ================
 
-.. GENERATED FROM PYTHON SOURCE LINES 834-840
+.. GENERATED FROM PYTHON SOURCE LINES 838-844
 
 Preparation
 -----------
@@ -1527,7 +1531,7 @@ We can define a few functions that will be used in the following
 examples, using again 2D radial, Fermat's spiral, and 2D/3D cones:
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 840-857
+.. GENERATED FROM PYTHON SOURCE LINES 844-861
 
 .. code-block:: Python
 
@@ -1555,7 +1559,7 @@ examples, using again 2D radial, Fermat's spiral, and 2D/3D cones:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 858-880
+.. GENERATED FROM PYTHON SOURCE LINES 862-884
 
 Stack spherically
 -----------------
@@ -1580,7 +1584,7 @@ Arguments:
   function provided with ``trajectory_func``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 880-886
+.. GENERATED FROM PYTHON SOURCE LINES 884-890
 
 .. code-block:: Python
 
@@ -1602,7 +1606,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 887-896
+.. GENERATED FROM PYTHON SOURCE LINES 891-900
 
 ``trajectory_func (function)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1614,7 +1618,7 @@ and focus more ressources over larger areas. In opposition to
 with ``tools.stack_spherically``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 896-902
+.. GENERATED FROM PYTHON SOURCE LINES 900-906
 
 .. code-block:: Python
 
@@ -1623,7 +1627,7 @@ with ``tools.stack_spherically``.
     function = lambda x: tools.stack_spherically(
         init_trajectories[x], Nc=Nc, nb_stacks=nb_repetitions
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1636,11 +1640,11 @@ with ``tools.stack_spherically``.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 903-912
+.. GENERATED FROM PYTHON SOURCE LINES 907-916
 
 .. code-block:: Python
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1661,7 +1665,7 @@ with ``tools.stack_spherically``.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 913-919
+.. GENERATED FROM PYTHON SOURCE LINES 917-923
 
 In the previous example, we can observe that spirals and cones
 are nicely adapted for each stack, while shrinking the shots
@@ -1670,7 +1674,7 @@ improved). Instead, each radial disc could be normalized to
 cover a cylinder with variable density over :math:`k_z`.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 920-941
+.. GENERATED FROM PYTHON SOURCE LINES 924-945
 
 .. code-block:: Python
 
@@ -1692,7 +1696,7 @@ cover a cylinder with variable density over :math:`k_z`.
     trajectories = {"Classic": traj_classic, "Normalized": traj_normal}
     arguments = ["Classic", "Normalized"]
     function = lambda x: trajectories[x]
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1707,7 +1711,7 @@ cover a cylinder with variable density over :math:`k_z`.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 942-967
+.. GENERATED FROM PYTHON SOURCE LINES 946-971
 
 Shellify
 --------
@@ -1735,7 +1739,7 @@ Arguments:
   function provided with ``trajectory_func``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 967-973
+.. GENERATED FROM PYTHON SOURCE LINES 971-977
 
 .. code-block:: Python
 
@@ -1757,7 +1761,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 974-986
+.. GENERATED FROM PYTHON SOURCE LINES 978-990
 
 ``trajectory_func (function)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1772,7 +1776,7 @@ Companion functions will be added in the future in order
 to manipulate individual spheres.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 986-993
+.. GENERATED FROM PYTHON SOURCE LINES 990-997
 
 .. code-block:: Python
 
@@ -1781,7 +1785,7 @@ to manipulate individual spheres.
     function = lambda x: tools.shellify(
         init_trajectories[x], Nc=Nc, nb_shells=nb_repetitions
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1795,7 +1799,7 @@ to manipulate individual spheres.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 994-1003
+.. GENERATED FROM PYTHON SOURCE LINES 998-1007
 
 ``hemisphere_mode (str)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1807,7 +1811,7 @@ promoting continuity (for example in spirals) by reversing
 the azimuthal angle.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1003-1018
+.. GENERATED FROM PYTHON SOURCE LINES 1007-1022
 
 .. code-block:: Python
 
@@ -1816,7 +1820,7 @@ the azimuthal angle.
     function = lambda x: tools.shellify(
         init_trajectories["Spiral"], Nc=Nc, nb_shells=nb_repetitions, hemisphere_mode=x
     )
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1838,7 +1842,7 @@ the azimuthal angle.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1019-1027
+.. GENERATED FROM PYTHON SOURCE LINES 1023-1031
 
 References
 ==========
@@ -1852,7 +1856,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 39.625 seconds)
+   **Total running time of the script:** (0 minutes 37.299 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_trajectory_tools.py:

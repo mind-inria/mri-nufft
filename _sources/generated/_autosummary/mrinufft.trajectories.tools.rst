@@ -18,6 +18,7 @@
       conify
       duplicate_along_axes
       epify
+      oversample
       precess
       prewind
       radialize_center

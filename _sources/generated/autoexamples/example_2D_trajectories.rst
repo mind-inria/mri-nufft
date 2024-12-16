@@ -40,7 +40,7 @@ will refer to previous patterns for explanation.
     # External
     import matplotlib.pyplot as plt
     import numpy as np
-    from utils import show_argument, show_trajectory
+    from utils import show_trajectories, show_trajectory
 
     # Internal
     import mrinufft as mn
@@ -142,7 +142,7 @@ k-space. More shots means better coverage but also longer acquisitions.
 
     arguments = [8, 16, 32, 64]
     function = lambda x: mn.initialize_2D_radial(x, Ns, tilt=tilt, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -174,7 +174,7 @@ is lengthened or the sampling rate is increased.
 
     arguments = [8, 16, 32, 64]
     function = lambda x: mn.initialize_2D_radial(Nc, x, tilt=tilt, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -208,7 +208,7 @@ when the ``in_out`` argument is switched to keep the same behavior.
 
     arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
     function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=x, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -249,7 +249,7 @@ to update it too when switching ``in_out``.
 
     arguments = [True, False]
     function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -327,7 +327,7 @@ twice for in-out trajectories).
     function = lambda x: mn.initialize_2D_spiral(
         Nc, Ns, tilt=tilt, nb_revolutions=x, in_out=in_out
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -369,7 +369,7 @@ of their asymptotic behavior around the center.
 
     arguments = ["galilean", "archimedes", "fermat", 1 / 4]
     function = lambda x: mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, spiral=x, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -414,7 +414,7 @@ subtle, as shown below.
         Ns,
         patch_center=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -496,7 +496,7 @@ spiral length, which makes k-space denser along the shorter shots.
         Ns,
         spiral_reduction=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -540,7 +540,7 @@ below.
         Ns,
         patch_center=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -616,7 +616,7 @@ The number of “zigzags”, or sinusoidal patterns present over a center-out sh
     function = lambda x: mn.initialize_2D_cones(
         Nc, Ns, tilt=tilt, in_out=in_out, nb_zigzags=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -649,7 +649,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 
     arguments = [0.2, 1, 2, 3]
     function = lambda x: mn.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out, width=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -768,7 +768,7 @@ ratio is even to cover the center.
 
     arguments = [2, 3, 4, 6]
     function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -841,7 +841,7 @@ set around :math:`FOV / (2 * resolution)`.
 
     arguments = [Nc, int(2 * Nc / 3), int(Nc / 3)]
     function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -869,7 +869,7 @@ amplitude and slew rate.
 
     arguments = [Nc, int(4 * Nc / 3), 2 * Nc]
     function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=Nc)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -945,7 +945,7 @@ details, please consult this `Wikipedia page`_.
 
     arguments = [0, 1, 5, 10]
     function = lambda x: mn.initialize_2D_rosette(Nc, Ns, in_out=in_out, coprime_index=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1021,7 +1021,7 @@ but it will be updated in the future.
     function = lambda x: mn.initialize_2D_polar_lissajous(
         Nc, Ns, in_out=in_out, coprime_index=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1062,7 +1062,7 @@ be a divider of ``Nc``.
     function = lambda x: mn.initialize_2D_polar_lissajous(
         Nc, Ns, in_out=in_out, nb_segments=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1104,7 +1104,7 @@ unexploited geometries.
             function = lambda x: mn.initialize_2D_polar_lissajous(
                 Nc, Ns, in_out=io, coprime_index=cpi, nb_segments=x
             )
-            show_argument(
+            show_trajectories(
                 function, arguments, one_shot=one_shot, subfig_size=subfigure_size
             )
 
@@ -1203,7 +1203,7 @@ The number of sinusoidal patterns along a line, similar to cones and sinusoidal 
 
     arguments = [1, 2.5, 5, 10]
     function = lambda x: mn.initialize_2D_waves(Nc, Ns, nb_zigzags=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1240,7 +1240,7 @@ changes in future versions.
 
     arguments = [0, 1, 1.5, 3]
     function = lambda x: mn.initialize_2D_waves(Nc, Ns, width=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1311,7 +1311,7 @@ It relates to both the curve length and curvature, normalized such that
 
     arguments = [1, 1.5, 2, 3]
     function = lambda x: mn.initialize_2D_lissajous(Nc, Ns, density=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1338,7 +1338,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 29.577 seconds)
+   **Total running time of the script:** (0 minutes 28.588 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_2D_trajectories.py:

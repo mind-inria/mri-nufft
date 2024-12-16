@@ -49,7 +49,7 @@ to better visualize the 3D volumes.
     # External
     import matplotlib.pyplot as plt
     import numpy as np
-    from utils import show_argument, show_trajectory
+    from utils import show_trajectories, show_trajectory
 
     # Internal
     import mrinufft as mn
@@ -160,7 +160,7 @@ k-space. More shots means better coverage but also longer acquisitions.
 
     arguments = [Nc // 4, Nc // 2, Nc, Nc * 2]
     function = lambda x: mn.initialize_3D_phyllotaxis_radial(x, Ns, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -191,7 +191,7 @@ the acquisition window is lengthened or the sampling rate is increased.
 
     arguments = [10, 25, 40, 100]
     function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, x, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -232,7 +232,7 @@ to the changes to avoid having to update them too when switching ``in_out``.
 
     arguments = [True, False]
     function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -458,7 +458,7 @@ when the ``in_out`` argument is switched to keep the same behavior.
 
     arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
     function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -489,7 +489,7 @@ The number of “zigzags”, or revolutions around the 3D cone on a center-out s
 
     arguments = [0.5, 2, 5, 10]
     function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -522,7 +522,7 @@ spirals are available as string options for convenience.
 
     arguments = ["archimedes", "fermat", 0.5, 1.5]
     function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, spiral=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -555,7 +555,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 
     arguments = [0.2, 1, 2, 3]
     function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, width=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -654,7 +654,7 @@ proposed by [Pip+11]_.
         max_angle=np.pi / 4,
         axes=x,
     )[::-1]
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -673,7 +673,7 @@ proposed by [Pip+11]_.
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -751,7 +751,7 @@ The number of revolutions of the helices from bottom to top.
 
     arguments = [0.5, 2.5, 5, 10]
     function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -785,7 +785,7 @@ See ``packing`` for more details about coverage.
 
     arguments = [0.2, 1, 2, 3]
     function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, width=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -825,7 +825,7 @@ following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 
     arguments = ["triangular", "square", "circular", "fibonacci", "random"]
     function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -844,7 +844,7 @@ following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -884,7 +884,7 @@ a minimal 2-norm (eliminating the diagonals) except for circles with infinity-no
 
     arguments = ["circle", "square", "diamond", 0.5]
     function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, shape=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -903,7 +903,7 @@ a minimal 2-norm (eliminating the diagonals) except for circles with infinity-no
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -938,7 +938,7 @@ fit within the cubic k-space.
 
     arguments = [(1, 1), (2, 1), (1, 2), (2.3, 1.8)]
     function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing="square", spacing=x)
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -957,7 +957,7 @@ fit within the cubic k-space.
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1047,7 +1047,7 @@ the curve while asymptotically approaching :math:`1`.
     function = lambda x: mn.initialize_3D_seiffert_spiral(
         Nc, Ns, in_out=in_out, curve_index=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1085,7 +1085,7 @@ subsequently defines the length of the curve.
         in_out=in_out,
         nb_revolutions=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1127,7 +1127,7 @@ for clarity.
         axis_tilt=x,
         spiral_tilt=0,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1171,7 +1171,7 @@ argument.
         axis_tilt="golden",
         spiral_tilt=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1256,7 +1256,7 @@ Number of shells, i.e. concentric spheres, used to partition the k-space sphere.
     function = lambda x: mn.initialize_3D_helical_shells(
         Nc=x, Ns=Ns, nb_shells=x, spiral_reduction=2
     )
-    show_argument(function, arguments, one_shot=False, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=False, subfig_size=subfigure_size)
 
 
 
@@ -1293,7 +1293,7 @@ spiral curvature.
     function = lambda x: mn.initialize_3D_helical_shells(
         Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1325,7 +1325,7 @@ Angle between each consecutive shells (in radians).
     function = lambda x: mn.initialize_3D_helical_shells(
         Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shell_tilt=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1360,7 +1360,7 @@ is advised to use adaptive keywords such as "uniform" rather than hard values.
     function = lambda x: mn.initialize_3D_helical_shells(
         Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shot_tilt=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1448,7 +1448,7 @@ two shots.
     function = lambda x: mn.initialize_3D_annular_shells(
         Nc, Ns, nb_shells=nb_repetitions, ring_tilt=x
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1598,7 +1598,7 @@ waiting times between readouts if they are split during acquisition.
         Ns_transitions=x,
         nb_blades=nb_blades,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1635,7 +1635,7 @@ It should be lower than ``Nc`` and divide it.
         Ns_transitions=Ns // 10,
         nb_blades=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1671,7 +1671,7 @@ Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
         nb_blades=nb_blades,
         blade_tilt=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1690,7 +1690,7 @@ Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function, arguments, one_shot=one_shot, subfig_size=subfigure_size, dim="2D"
     )
 
@@ -1730,7 +1730,7 @@ If ``"auto"`` then ``nb_trains`` is set to ``nb_blades``.
         nb_blades=nb_blades,
         nb_trains=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1772,7 +1772,7 @@ as below results in k-space areas being not covered by any blade.
         nb_blades=nb_blades,
         skip_factor=x,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1791,7 +1791,7 @@ as below results in k-space areas being not covered by any blade.
 .. code-block:: Python
 
 
-    show_argument(
+    show_trajectories(
         function,
         arguments,
         one_shot=one_shot,
@@ -1911,7 +1911,7 @@ and slew rates.
         nb_blade_revolutions=x,
         nb_spiral_revolutions=0,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -1945,7 +1945,7 @@ Same but with a spiral pattern instead of radial.
         nb_blade_revolutions=x,
         nb_spiral_revolutions=nb_revolutions,
     )
-    show_argument(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
 
@@ -2030,7 +2030,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 12.613 seconds)
+   **Total running time of the script:** (1 minutes 13.119 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_3D_trajectories.py:

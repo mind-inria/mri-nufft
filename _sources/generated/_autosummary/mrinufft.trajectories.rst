@@ -27,7 +27,9 @@
 
    display
    gradients
+   inits
    maths
+   sampling
    tools
    trajectory2D
    trajectory3D

@@ -136,6 +136,23 @@ This is a collection of examples showing how to use MRI-nufft to perform MR imag
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="A collection of sampling densities and density-based non-Cartesian trajectories.">
+
+.. only:: html
+
+  .. image:: /generated/autoexamples/images/thumb/sphx_glr_example_sampling_densities_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Sampling densities</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="An example to show how to setup a stacked NUFFT operator.">
 
 .. only:: html
@@ -219,6 +236,7 @@ This is a collection of examples showing how to use MRI-nufft to perform MR imag
    /generated/autoexamples/example_learn_samples_multires
    /generated/autoexamples/example_readme
    /generated/autoexamples/example_offresonance
+   /generated/autoexamples/example_sampling_densities
    /generated/autoexamples/example_stacked
    /generated/autoexamples/example_subspace
    /generated/autoexamples/example_display_config

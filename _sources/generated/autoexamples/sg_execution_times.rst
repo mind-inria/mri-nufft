@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**10:44.084** total execution time for 11 files **from generated/autoexamples**:
+**13:06.055** total execution time for 12 files **from generated/autoexamples**:
 
 .. container::
 
@@ -33,35 +33,38 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_3D.py` (``example_gif_3D.py``)
-     - 03:15.254
+     - 03:04.607
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``example_sampling_densities.py``)
+     - 02:52.454
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_2D.py` (``example_gif_2D.py``)
-     - 02:22.530
+     - 02:16.127
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_learn_samples_multires.py` (``example_learn_samples_multires.py``)
-     - 01:35.368
+     - 01:28.349
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` (``example_3D_trajectories.py``)
-     - 01:12.613
+     - 01:13.119
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_subspace.py` (``example_subspace.py``)
-     - 00:50.112
+     - 00:47.066
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py` (``example_trajectory_tools.py``)
-     - 00:39.625
+     - 00:37.299
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_2D_trajectories.py` (``example_2D_trajectories.py``)
-     - 00:29.577
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``example_stacked.py``)
-     - 00:06.681
+     - 00:28.588
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_display_config.py` (``example_display_config.py``)
-     - 00:06.575
+     - 00:06.825
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``example_stacked.py``)
+     - 00:06.515
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_readme.py` (``example_readme.py``)
-     - 00:03.034
+     - 00:02.578
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_offresonance.py` (``example_offresonance.py``)
-     - 00:02.715
+     - 00:02.528
      - 0.0
