@@ -1,6 +1,7 @@
 """Display functions for trajectories."""
 
 import itertools
+from typing import Any
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -124,7 +125,7 @@ class displayConfig:
 ##############
 
 
-def _setup_2D_ticks(figsize, fig=None):
+def _setup_2D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
     """Add ticks to 2D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
@@ -139,7 +140,7 @@ def _setup_2D_ticks(figsize, fig=None):
     return ax
 
 
-def _setup_3D_ticks(figsize, fig=None):
+def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
     """Add ticks to 3D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
@@ -163,21 +164,21 @@ def _setup_3D_ticks(figsize, fig=None):
 
 
 def display_2D_trajectory(
-    trajectory,
-    figsize=5,
-    one_shot=False,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    **constraints_kwargs,
-):
+    trajectory: np.ndarray,
+    figsize: float = 5,
+    one_shot: bool | int = False,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    **constraints_kwargs: Any,
+) -> plt.Axes:
     """Display 2D trajectories.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to display.
     figsize : float, optional
         Size of the figure.
@@ -278,23 +279,23 @@ def display_2D_trajectory(
 
 
 def display_3D_trajectory(
-    trajectory,
-    nb_repetitions=None,
-    figsize=5,
-    per_plane=True,
-    one_shot=False,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    **constraints_kwargs,
-):
+    trajectory: np.ndarray,
+    nb_repetitions: int | None = None,
+    figsize: float = 5,
+    per_plane: bool = True,
+    one_shot: bool | int = False,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    **constraints_kwargs: dict,
+) -> plt.Axes:
     """Display 3D trajectories.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to display.
     nb_repetitions : int
         Number of repetitions (planes, cones, shells, etc).
@@ -417,22 +418,22 @@ def display_3D_trajectory(
 
 
 def display_gradients_simply(
-    trajectory,
-    shot_ids=(0,),
-    figsize=5,
-    fill_area=True,
-    show_signal=True,
-    uni_signal="gray",
-    uni_gradient=None,
-    subfigure=None,
-):
+    trajectory: np.ndarray,
+    shot_ids: tuple[int, ...] = (0,),
+    figsize: float = 5,
+    fill_area: bool = True,
+    show_signal: bool = True,
+    uni_signal: str | None = "gray",
+    uni_gradient: str | None = None,
+    subfigure: plt.Figure | None = None,
+) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to display.
-    shot_ids : list of int
+    shot_ids : tuple[int, ...], optional
         Indices of the shots to display.
         The default is `[0]`.
     figsize : float, optional
@@ -455,7 +456,7 @@ def display_gradients_simply(
         unique color given as argument or just by the default
         color cycle when `None`.
         The default is `None`.
-    subfigure: plt.Figure or plt.SubFigure, optional
+    subfigure: plt.Figure, optional
         The figure where the trajectory should be displayed.
         The default is `None`.
 
@@ -531,26 +532,26 @@ def display_gradients_simply(
 
 
 def display_gradients(
-    trajectory,
-    shot_ids=(0,),
-    figsize=5,
-    fill_area=True,
-    show_signal=True,
-    uni_signal="gray",
-    uni_gradient=None,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    raster_time=DEFAULT_RASTER_TIME,
-    **constraints_kwargs,
-):
+    trajectory: np.ndarray,
+    shot_ids: tuple[int, ...] = (0,),
+    figsize: float = 5,
+    fill_area: bool = True,
+    show_signal: bool = True,
+    uni_signal: str | None = "gray",
+    uni_gradient: str | None = None,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    **constraints_kwargs: Any,
+) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to display.
     shot_ids : list of int
         Indices of the shots to display.

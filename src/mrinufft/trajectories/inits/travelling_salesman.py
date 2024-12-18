@@ -1,5 +1,7 @@
 """Trajectories based on the Travelling Salesman Problem."""
 
+from typing import Any
+
 import numpy as np
 import numpy.linalg as nl
 from scipy.interpolate import CubicSpline
@@ -10,7 +12,7 @@ from ..sampling import sample_from_density
 from ..tools import oversample
 
 
-def _get_approx_cluster_sizes(nb_total, nb_clusters):
+def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> np.ndarray:
     # Give a list of cluster sizes close to sqrt(`nb_total`)
     cluster_sizes = round(nb_total / nb_clusters) * np.ones(nb_clusters).astype(int)
     delta_sum = nb_total - np.sum(cluster_sizes)
@@ -18,7 +20,7 @@ def _get_approx_cluster_sizes(nb_total, nb_clusters):
     return cluster_sizes
 
 
-def _sort_by_coordinate(array, coord):
+def _sort_by_coordinate(array: np.ndarray, coord: str) -> np.ndarray:
     # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
@@ -47,8 +49,12 @@ def _sort_by_coordinate(array, coord):
 
 
 def _cluster_by_coordinate(
-    locations, nb_clusters, cluster_by, second_cluster_by=None, sort_by=None
-):
+    locations: np.ndarray,
+    nb_clusters: int,
+    cluster_by: str,
+    second_cluster_by: str | None = None,
+    sort_by: str | None = None,
+) -> np.ndarray:
     # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
     nb_dims = locations.shape[-1]
@@ -87,17 +93,17 @@ def _cluster_by_coordinate(
 
 
 def _initialize_ND_travelling_salesman(
-    Nc,
-    Ns,
-    density,
-    first_cluster_by=None,
-    second_cluster_by=None,
-    sort_by=None,
-    tsp_tol=1e-8,
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    first_cluster_by: str | None = None,
+    second_cluster_by: str | None = None,
+    sort_by: str | None = None,
+    tsp_tol: float = 1e-8,
     *,
-    verbose=False,
-    **sampling_kwargs,
-):
+    verbose: bool = False,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     # Check arguments validity
     if Nc * Ns > np.prod(density.shape):
         raise ValueError("`density` array not large enough to pick `Nc` * `Ns` points.")
@@ -134,17 +140,17 @@ def _initialize_ND_travelling_salesman(
 
 
 def initialize_2D_travelling_salesman(
-    Nc,
-    Ns,
-    density,
-    first_cluster_by=None,
-    second_cluster_by=None,
-    sort_by=None,
-    tsp_tol=1e-8,
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    first_cluster_by: str | None = None,
+    second_cluster_by: str | None = None,
+    sort_by: str | None = None,
+    tsp_tol: float = 1e-8,
     *,
-    verbose=False,
-    **sampling_kwargs,
-):
+    verbose: bool = False,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     """
     Initialize a 2D trajectory using a Travelling Salesman Problem (TSP)-based path.
 
@@ -192,7 +198,7 @@ def initialize_2D_travelling_salesman(
     ----------
     .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
        Jonas Kahn, and Pierre Weiss.
-       "Variable density sampling with continuous trajectories."
+       "Variable density sampling with continuous trajectories"
        SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     if len(density.shape) != 2:
@@ -211,17 +217,17 @@ def initialize_2D_travelling_salesman(
 
 
 def initialize_3D_travelling_salesman(
-    Nc,
-    Ns,
-    density,
-    first_cluster_by=None,
-    second_cluster_by=None,
-    sort_by=None,
-    tsp_tol=1e-8,
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    first_cluster_by: str | None = None,
+    second_cluster_by: str | None = None,
+    sort_by: str | None = None,
+    tsp_tol: float = 1e-8,
     *,
-    verbose=False,
-    **sampling_kwargs,
-):
+    verbose: bool = False,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     """
     Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.
 

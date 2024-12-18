@@ -50,7 +50,7 @@ def sample_from_density(
     ----------
     .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
        Jonas Kahn, and Pierre Weiss.
-       "Variable density sampling with continuous trajectories."
+       "Variable density sampling with continuous trajectories"
        SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     try:
