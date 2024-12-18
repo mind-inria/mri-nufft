@@ -1,16 +1,18 @@
 """Trajectories based on random walks."""
 
+from typing import Any
+
 import numpy as np
 
 from ..sampling import sample_from_density
 from ..utils import KMAX
 
 
-def _get_adjacent_neighbors_offsets(shape):
+def _get_adjacent_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
     return np.concatenate([np.eye(len(shape)), -np.eye(len(shape))], axis=0).astype(int)
 
 
-def _get_neighbors_offsets(shape):
+def _get_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
     nb_dims = len(shape)
     neighbors = (np.indices([3] * nb_dims) - 1).reshape((nb_dims, -1)).T
     nb_half = neighbors.shape[0] // 2
@@ -20,8 +22,14 @@ def _get_neighbors_offsets(shape):
 
 
 def _initialize_ND_random_walk(
-    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
-):
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    *,
+    diagonals: bool = True,
+    pseudo_random: bool = True,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     density = density / np.sum(density)
     flat_density = np.copy(density.flatten())
     shape = np.array(density.shape)
@@ -41,7 +49,6 @@ def _initialize_ND_random_walk(
     locations = sample_from_density(Nc, density, **sampling_kwargs)
     choices = np.around((locations + KMAX) * (np.array(density.shape) - 1)).astype(int)
     choices = np.ravel_multi_index(choices.T, density.shape)
-    # choices = np.random.choice(np.arange(len(flat_density)), size=Nc, p=flat_density)
     routes = [choices]
 
     # Walk
@@ -71,7 +78,7 @@ def _initialize_ND_random_walk(
         choices = neighbors[np.arange(Nc), indices]
         routes.append(choices)
 
-        # Update density to account for already drawed positions
+        # Update density to account for already drawn positions
         if pseudo_random:
             flat_density[choices] = (
                 mask[choices] * flat_density[choices] / (mask[choices] + 1)
@@ -88,8 +95,14 @@ def _initialize_ND_random_walk(
 
 
 def initialize_2D_random_walk(
-    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
-):
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    *,
+    diagonals: bool = True,
+    pseudo_random: bool = True,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     """Initialize a 2D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -107,31 +120,31 @@ def initialize_2D_random_walk(
         Number of shots
     Ns : int
         Number of samples per shot
-    density : array_like
+    density : np.ndarray
         Sampling density used to determine the walk probabilities,
         normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
-        Whether to draw the next walk step from the diagional neighbors
+        Whether to draw the next walk step from the diagonal neighbors
         on top of the adjacent ones. Default to ``True``.
     pseudo_random : bool, optional
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
         for undersampled acquisitions. Default to ``True``.
-    **sampling_kwargs
+    **sampling_kwargs : Any
         Sampling parameters in
         ``mrinufft.trajectories.sampling.sample_from_density`` used for the
         shot starting positions.
 
     Returns
     -------
-    array_like
+    np.ndarray
         2D random walk trajectory
 
     References
     ----------
     .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
        Jonas Kahn, and Pierre Weiss.
-       "Variable density sampling with continuous trajectories."
+       "Variable density sampling with continuous trajectories"
        SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     if len(density.shape) != 2:
@@ -147,8 +160,14 @@ def initialize_2D_random_walk(
 
 
 def initialize_3D_random_walk(
-    Nc, Ns, density, *, diagonals=True, pseudo_random=True, **sampling_kwargs
-):
+    Nc: int,
+    Ns: int,
+    density: np.ndarray,
+    *,
+    diagonals: bool = True,
+    pseudo_random: bool = True,
+    **sampling_kwargs: Any,
+) -> np.ndarray:
     """Initialize a 3D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -166,31 +185,31 @@ def initialize_3D_random_walk(
         Number of shots
     Ns : int
         Number of samples per shot
-    density : array_like
+    density : np.ndarray
         Sampling density used to determine the walk probabilities,
         normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
-        Whether to draw the next walk step from the diagional neighbors
+        Whether to draw the next walk step from the diagonal neighbors
         on top of the adjacent ones. Default to ``True``.
     pseudo_random : bool, optional
         Whether to adapt the density dynamically to reduce areas
         already covered. The density is still statistically followed
         for undersampled acquisitions. Default to ``True``.
-    **sampling_kwargs
+    **sampling_kwargs : Any
         Sampling parameters in
         ``mrinufft.trajectories.sampling.sample_from_density`` used for the
         shot starting positions.
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D random walk trajectory
 
     References
     ----------
     .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,
        Jonas Kahn, and Pierre Weiss.
-       "Variable density sampling with continuous trajectories."
+       "Variable density sampling with continuous trajectories"
        SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.
     """
     if len(density.shape) != 3:

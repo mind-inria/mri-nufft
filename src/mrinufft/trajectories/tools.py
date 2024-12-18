@@ -1,5 +1,7 @@
 """Functions to manipulate/modify trajectories."""
 
+from typing import Any, Callable
+
 import numpy as np
 from scipy.interpolate import CubicSpline, interp1d
 
@@ -11,12 +13,18 @@ from .utils import KMAX, initialize_tilt
 ################
 
 
-def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
+def stack(
+    trajectory: np.ndarray,
+    nb_stacks: int,
+    z_tilt: str | None = None,
+    *,
+    hard_bounded: bool = True,
+) -> np.ndarray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory in 2D or 3D to stack.
     nb_stacks : int
         Number of stacks repeating the provided trajectory.
@@ -27,7 +35,7 @@ def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
 
     Returns
     -------
-    array_like
+    np.ndarray
         Stacked trajectory.
     """
     # Check dimensionality and initialize output
@@ -55,12 +63,18 @@ def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
     return new_trajectory.reshape(nb_stacks * Nc, Ns, 3)
 
 
-def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
+def rotate(
+    trajectory: np.ndarray,
+    nb_rotations: int,
+    x_tilt: str | None = None,
+    y_tilt: str | None = None,
+    z_tilt: str | None = None,
+) -> np.ndarray:
     """Rotate 2D or 3D trajectories over the different axes.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory.
@@ -73,7 +87,7 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
 
     Returns
     -------
-    array_like
+    np.ndarray
         Rotated trajectory.
     """
     # Check dimensionality and initialize output
@@ -96,18 +110,18 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
 
 
 def precess(
-    trajectory,
-    nb_rotations,
-    tilt="golden",
-    half_sphere=False,
-    partition="axial",
-    axis=None,
-):
+    trajectory: np.ndarray,
+    nb_rotations: int,
+    tilt: str = "golden",
+    half_sphere: bool = False,
+    partition: str = "axial",
+    axis: int | np.ndarray | None = None,
+) -> np.ndarray:
     """Rotate trajectories as a precession around the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory while precessing.
@@ -122,7 +136,7 @@ def precess(
         Partition type between an "axial" or "polar" split of the
         :math:`k_z`-axis, designating whether the axis should be fragmented
         by radius or angle respectively, by default "axial".
-    axis : int, array_like, optional
+    axis : int, np.ndarray, optional
         Axis selected for alignment reference when rotating the trajectory
         around the :math:`k_z`-axis, generally corresponding to the shot
         direction for single shot ``trajectory`` inputs. It can either
@@ -132,7 +146,7 @@ def precess(
 
     Returns
     -------
-    array_like
+    np.ndarray
         Precessed trajectory.
     """
     # Check for partition option error
@@ -175,18 +189,18 @@ def precess(
 
 
 def conify(
-    trajectory,
-    nb_cones,
-    z_tilt=None,
-    in_out=False,
-    max_angle=np.pi / 2,
-    borderless=True,
-):
+    trajectory: np.ndarray,
+    nb_cones: int,
+    z_tilt: str | None = None,
+    in_out: bool = False,
+    max_angle: float = np.pi / 2,
+    borderless: bool = True,
+) -> np.ndarray:
     """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to conify.
     nb_cones : int
         Number of cones repeating the provided trajectory.
@@ -203,7 +217,7 @@ def conify(
 
     Returns
     -------
-    array_like
+    np.ndarray
         Conified trajectory.
     """
     # Check dimensionality and initialize output
@@ -253,7 +267,13 @@ def conify(
     return new_trajectory
 
 
-def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
+def epify(
+    trajectory: np.ndarray,
+    Ns_transitions: int,
+    nb_trains: int,
+    *,
+    reverse_odd_shots: bool = False,
+) -> np.ndarray:
     """Create multi-readout shots from trajectory composed of single-readouts.
 
     Assemble multiple single-readout shots together by adding transition
@@ -261,7 +281,7 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to change by prolonging and merging the shots.
     Ns_transitions : int
         Number of samples/steps between the merged readouts.
@@ -274,7 +294,7 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
 
     Returns
     -------
-    array_like
+    np.ndarray
         Trajectory with fewer but longer multi-readout shots.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -307,7 +327,9 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
     return assembled_trajectory
 
 
-def unepify(trajectory, Ns_readouts, Ns_transitions):
+def unepify(
+    trajectory: np.ndarray, Ns_readouts: int, Ns_transitions: int
+) -> np.ndarray:
     """Recover single-readout shots from multi-readout trajectory.
 
     Reformat an EPI-like trajectory with multiple readouts and transitions
@@ -319,7 +341,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to reduce by discarding transitions between readouts.
     Ns_readouts : int
         Number of samples within a single readout.
@@ -328,7 +350,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 
     Returns
     -------
-    array_like
+    np.ndarray
         Trajectory with more but shorter single shots.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -349,7 +371,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
     return trajectory
 
 
-def prewind(trajectory, Ns_transitions):
+def prewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
     """Add pre-winding/positioning to the trajectory.
 
     The trajectory is extended to start before the readout
@@ -358,7 +380,7 @@ def prewind(trajectory, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to extend with rewind gradients.
     Ns_transitions : int
         Number of pre-winding/positioning steps used to leave the
@@ -366,7 +388,7 @@ def prewind(trajectory, Ns_transitions):
 
     Returns
     -------
-    array_like
+    np.ndarray
         Extended trajectory with pre-winding/positioning.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -389,7 +411,7 @@ def prewind(trajectory, Ns_transitions):
     return assembled_trajectory
 
 
-def rewind(trajectory, Ns_transitions):
+def rewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
     """Add rewinding to the trajectory.
 
     The trajectory is extended to come back to the k-space center
@@ -397,14 +419,14 @@ def rewind(trajectory, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to extend with rewind gradients.
     Ns_transitions : int
         Number of rewinding steps used to come back to the k-space center.
 
     Returns
     -------
-    array_like
+    np.ndarray
         Extended trajectory with rewinding.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -429,7 +451,7 @@ def rewind(trajectory, Ns_transitions):
     return assembled_trajectory
 
 
-def oversample(trajectory, new_Ns, kind="cubic"):
+def oversample(trajectory: np.ndarray, new_Ns: int, kind: str = "cubic") -> np.ndarray:
     """
     Resample a trajectory to increase the number of samples using interpolation.
 
@@ -475,32 +497,36 @@ def oversample(trajectory, new_Ns, kind="cubic"):
 
 
 def stack_spherically(
-    trajectory_func, Nc, nb_stacks, z_tilt=None, hard_bounded=True, **traj_kwargs
-):
+    trajectory_func: Callable[..., np.ndarray],
+    Nc: int,
+    nb_stacks: int,
+    z_tilt: str | None = None,
+    hard_bounded: bool = True,
+    **traj_kwargs: Any,
+) -> np.ndarray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
-    trajectory_func : function
+    trajectory_func : Callable[..., np.ndarray]
         Trajectory function that should return an array-like
         with the usual (Nc, Ns, Nd) size.
     Nc : int
-        Number of shots to use for the whole spherically
-        stacked trajectory.
+        Number of shots to use for the whole spherically stacked trajectory.
     nb_stacks : int
         Number of stacks of trajectories.
-    z_tilt : str, optional
+    z_tilt : str | None, optional
         Tilt of the stacks, by default `None`.
     hard_bounded : bool, optional
-        Whether the stacks should be strictly within the limits of the k-space,
-        by default `True`.
-    **kwargs
-        Trajectory initialization parameters for the function provided
-        with `trajectory_func`.
+        Whether the stacks should be strictly within the limits
+        of the k-space, by default `True`.
+    **traj_kwargs : Any
+        Trajectory initialization parameters for the function
+        provided with `trajectory_func`.
 
     Returns
     -------
-    array_like
+    np.ndarray
         Stacked trajectory.
     """
     # Handle argument errors
@@ -558,41 +584,39 @@ def stack_spherically(
 
 
 def shellify(
-    trajectory_func,
-    Nc,
-    nb_shells,
-    z_tilt="golden",
-    hemisphere_mode="symmetric",
-    **traj_kwargs,
-):
+    trajectory_func: Callable[..., np.ndarray],
+    Nc: int,
+    nb_shells: int,
+    z_tilt: str | float = "golden",
+    hemisphere_mode: str = "symmetric",
+    **traj_kwargs: Any,
+) -> np.ndarray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
-    trajectory_func : function
-        Trajectory function that should return an array-like
-        with the usual (Nc, Ns, Nd) size.
+    trajectory_func : Callable[..., np.ndarray]
+        Trajectory function that should return an array-like with the usual
+        (Nc, Ns, Nd) size.
     Nc : int
-        Number of shots to use for the whole spherically
-        stacked trajectory.
+        Number of shots to use for the whole spherically stacked trajectory.
     nb_shells : int
-        Number of shells of distorded trajectories.
-    z_tilt : str, float, optional
+        Number of shells of distorted trajectories.
+    z_tilt : str | float, optional
         Tilt of the shells, by default "golden".
     hemisphere_mode : str, optional
-        Define how the lower hemisphere should be oriented
-        relatively to the upper one, with "symmetric" providing
-        a :math:`k_x-k_y` planar symmetry by changing the polar angle,
-        and with "reversed" promoting continuity (for example
-        in spirals) by reversing the azimuth angle.
+        Define how the lower hemisphere should be oriented relatively to the
+        upper one, with "symmetric" providing a :math:`k_x-k_y` planar symmetry
+        by changing the polar angle, and with "reversed" promoting continuity
+        (for example in spirals) by reversing the azimuth angle.
         The default is "symmetric".
-    **kwargs
-        Trajectory initialization parameters for the function provided
-        with `trajectory_func`.
+    **traj_kwargs : Any
+        Trajectory initialization parameters for the function
+        provided with `trajectory_func`.
 
     Returns
     -------
-    array_like
+    np.ndarray
         Concentric shell trajectory.
     """
     # Handle argument errors
@@ -658,7 +682,9 @@ def shellify(
 #########
 
 
-def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
+def duplicate_along_axes(
+    trajectory: np.ndarray, axes: tuple[int, ...] = (0, 1, 2)
+) -> np.ndarray:
     """
     Duplicate a trajectory along the specified axes.
 
@@ -668,14 +694,14 @@ def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to duplicate.
-    axes : tuple, optional
+    axes : tuple[int, ...], optional
         Axes along which to duplicate the trajectory, by default (0, 1, 2)
 
     Returns
     -------
-    array_like
+    np.ndarray
         Duplicated trajectory along the specified axes.
     """
     # Copy input trajectory along other axes
@@ -694,8 +720,21 @@ def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
     return new_trajectory
 
 
-def _radialize_center_out(trajectory, nb_samples):
-    """Radialize a trajectory from the center to the outside."""
+def _radialize_center_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray:
+    """Radialize a trajectory from the center to the outside.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Trajectory to radialize.
+    nb_samples : int
+        Number of samples to radialize from the center.
+
+    Returns
+    -------
+    np.ndarray
+        Radialized trajectory.
+    """
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     for i in range(Nc):
@@ -706,8 +745,21 @@ def _radialize_center_out(trajectory, nb_samples):
     return new_trajectory
 
 
-def _radialize_in_out(trajectory, nb_samples):
-    """Radialize a trajectory from the inside to the outside."""
+def _radialize_in_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray:
+    """Radialize a trajectory from the inside to the outside.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        Trajectory to radialize.
+    nb_samples : int
+        Number of samples to radialize from the inside out.
+
+    Returns
+    -------
+    np.ndarray
+        Radialized trajectory.
+    """
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     first, half, second = (Ns - nb_samples) // 2, Ns // 2, (Ns + nb_samples) // 2
@@ -723,20 +775,26 @@ def _radialize_in_out(trajectory, nb_samples):
     return new_trajectory
 
 
-def radialize_center(trajectory, nb_samples, in_out=False):
+def radialize_center(
+    trajectory: np.ndarray, nb_samples: int, in_out: bool = False
+) -> np.ndarray:
     """Radialize a trajectory.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : np.ndarray
         Trajectory to radialize.
     nb_samples : int
         Number of samples to keep.
     in_out : bool, optional
         Whether the radialization is from the inside to the outside, by default False
+
+    Returns
+    -------
+    np.ndarray
+        Radialized trajectory.
     """
     # Make nb_samples into straight lines around the center
     if in_out:
         return _radialize_in_out(trajectory, nb_samples)
-    else:
-        return _radialize_center_out(trajectory, nb_samples)
+    return _radialize_center_out(trajectory, nb_samples)

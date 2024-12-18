@@ -150,10 +150,10 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 
 
 def normalize_trajectory(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-):
+    trajectory: np.ndarray,
+    norm_factor: float = KMAX,
+    resolution: float | np.ndarray = DEFAULT_RESOLUTION,
+) -> np.ndarray:
     """Normalize an un-normalized/natural trajectory for NUFFT use.
 
     Parameters
@@ -176,10 +176,10 @@ def normalize_trajectory(
 
 
 def unnormalize_trajectory(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-):
+    trajectory: np.ndarray,
+    norm_factor: float = KMAX,
+    resolution: float | np.ndarray = DEFAULT_RESOLUTION,
+) -> np.ndarray:
     """Un-normalize a NUFFT-normalized trajectory.
 
     Parameters
@@ -202,13 +202,13 @@ def unnormalize_trajectory(
 
 
 def convert_trajectory_to_gradients(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-    get_final_positions=False,
-):
+    trajectory: np.ndarray,
+    norm_factor: float = KMAX,
+    resolution: float | np.ndarray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+    get_final_positions: bool = False,
+) -> tuple[np.ndarray, ...]:
     """Derive a normalized trajectory over time to provide gradients.
 
     Parameters
@@ -249,13 +249,13 @@ def convert_trajectory_to_gradients(
 
 
 def convert_gradients_to_trajectory(
-    gradients,
-    initial_positions=None,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-):
+    gradients: np.ndarray,
+    initial_positions: np.ndarray | None = None,
+    norm_factor: float = KMAX,
+    resolution: float | np.ndarray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+) -> np.ndarray:
     """Integrate gradients over time to provide a normalized trajectory.
 
     Parameters
@@ -299,9 +299,9 @@ def convert_gradients_to_trajectory(
 
 
 def convert_gradients_to_slew_rates(
-    gradients,
-    raster_time=DEFAULT_RASTER_TIME,
-):
+    gradients: np.ndarray,
+    raster_time: float = DEFAULT_RASTER_TIME,
+) -> tuple[np.ndarray, np.ndarray]:
     """Derive the gradients over time to provide slew rates.
 
     Parameters
@@ -327,10 +327,10 @@ def convert_gradients_to_slew_rates(
 
 
 def convert_slew_rates_to_gradients(
-    slewrates,
-    initial_gradients=None,
-    raster_time=DEFAULT_RASTER_TIME,
-):
+    slewrates: np.ndarray,
+    initial_gradients: np.ndarray | None = None,
+    raster_time: float = DEFAULT_RASTER_TIME,
+) -> np.ndarray:
     """Integrate slew rates over time to provide gradients.
 
     Parameters
@@ -362,12 +362,12 @@ def convert_slew_rates_to_gradients(
 
 
 def compute_gradients_and_slew_rates(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-):
+    trajectory: np.ndarray,
+    norm_factor: float = KMAX,
+    resolution: float | np.ndarray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+) -> tuple[np.ndarray, np.ndarray]:
     """Compute the gradients and slew rates from a normalized trajectory.
 
     Parameters
@@ -411,8 +411,12 @@ def compute_gradients_and_slew_rates(
 
 
 def check_hardware_constraints(
-    gradients, slewrates, gmax=DEFAULT_GMAX, smax=DEFAULT_SMAX, order=None
-):
+    gradients: np.ndarray,
+    slewrates: np.ndarray,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    order: int | str | None = None,
+) -> tuple[bool, float, float]:
     """Check if a trajectory satisfies the gradient hardware constraints.
 
     Parameters
@@ -450,7 +454,7 @@ def check_hardware_constraints(
 ###########
 
 
-def initialize_tilt(tilt, nb_partitions=1):
+def initialize_tilt(tilt: str | float, nb_partitions: int = 1) -> float:
     r"""Initialize the tilt angle.
 
     Parameters
@@ -493,7 +497,7 @@ def initialize_tilt(tilt, nb_partitions=1):
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
 
 
-def initialize_algebraic_spiral(spiral):
+def initialize_algebraic_spiral(spiral: str | float) -> float:
     """Initialize the algebraic spiral type.
 
     Parameters
@@ -511,7 +515,7 @@ def initialize_algebraic_spiral(spiral):
     return Spirals[spiral]
 
 
-def initialize_shape_norm(shape):
+def initialize_shape_norm(shape: str | float) -> float:
     """Initialize the norm for a given shape.
 
     Parameters

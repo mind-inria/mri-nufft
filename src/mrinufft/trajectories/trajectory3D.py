@@ -24,7 +24,9 @@ from .utils import KMAX, Packings, initialize_shape_norm, initialize_tilt
 ##############
 
 
-def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+def initialize_3D_phyllotaxis_radial(
+    Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
+) -> np.ndarray:
     """Initialize 3D radial trajectories with phyllotactic structure.
 
     The radial shots are oriented according to a Fibonacci sphere
@@ -53,7 +55,7 @@ def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D phyllotaxis radial trajectory
 
     References
@@ -71,7 +73,9 @@ def initialize_3D_phyllotaxis_radial(Nc, Ns, nb_interleaves=1, in_out=False):
     return trajectory
 
 
-def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
+def initialize_3D_golden_means_radial(
+    Nc: int, Ns: int, in_out: bool = False
+) -> np.ndarray:
     """Initialize 3D radial trajectories with golden means-based structure.
 
     The radial shots are oriented using multidimensional golden means,
@@ -95,7 +99,7 @@ def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D golden means radial trajectory
 
     References
@@ -123,7 +127,9 @@ def initialize_3D_golden_means_radial(Nc, Ns, in_out=False):
     return KMAX * trajectory
 
 
-def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+def initialize_3D_wong_radial(
+    Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
+) -> np.ndarray:
     """Initialize 3D radial trajectories with a spiral structure.
 
     The radial shots are oriented according to an archimedean spiral
@@ -149,7 +155,7 @@ def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D Wong radial trajectory
 
     References
@@ -181,7 +187,9 @@ def initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=False):
     return trajectory
 
 
-def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
+def initialize_3D_park_radial(
+    Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
+) -> np.ndarray:
     """Initialize 3D radial trajectories with a spiral structure.
 
     The radial shots are oriented according to an archimedean spiral
@@ -208,7 +216,7 @@ def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D Park radial trajectory
 
     References
@@ -233,8 +241,14 @@ def initialize_3D_park_radial(Nc, Ns, nb_interleaves=1, in_out=False):
 
 
 def initialize_3D_cones(
-    Nc, Ns, tilt="golden", in_out=False, nb_zigzags=5, spiral="archimedes", width=1
-):
+    Nc: int,
+    Ns: int,
+    tilt: str | float = "golden",
+    in_out: bool = False,
+    nb_zigzags: float = 5,
+    spiral: str | float = "archimedes",
+    width: float = 1,
+) -> np.ndarray:
     """Initialize 3D trajectories with cones.
 
     Initialize a trajectory consisting of 3D cones duplicated
@@ -264,7 +278,7 @@ def initialize_3D_cones(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D cones trajectory
 
     References
@@ -308,15 +322,15 @@ def initialize_3D_cones(
 
 
 def initialize_3D_floret(
-    Nc,
-    Ns,
-    in_out=False,
-    nb_revolutions=1,
-    spiral="fermat",
-    cone_tilt="golden",
-    max_angle=np.pi / 2,
-    axes=(2,),
-):
+    Nc: int,
+    Ns: int,
+    in_out: bool = False,
+    nb_revolutions: float = 1,
+    spiral: str | float = "fermat",
+    cone_tilt: str | float = "golden",
+    max_angle: float = np.pi / 2,
+    axes: tuple[int, ...] = (2,),
+) -> np.ndarray:
     """Initialize 3D trajectories with FLORET.
 
     This implementation is based on the work from [Pip+11]_.
@@ -346,7 +360,7 @@ def initialize_3D_floret(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D FLORET trajectory
 
     References
@@ -387,14 +401,14 @@ def initialize_3D_floret(
 
 
 def initialize_3D_wave_caipi(
-    Nc,
-    Ns,
-    nb_revolutions=5,
-    width=1,
-    packing="triangular",
-    shape="square",
-    spacing=(1, 1),
-):
+    Nc: int,
+    Ns: int,
+    nb_revolutions: float = 5,
+    width: float = 1,
+    packing: str = "triangular",
+    shape: str | float = "square",
+    spacing: tuple[int, int] = (1, 1),
+) -> np.ndarray:
     """Initialize 3D trajectories with Wave-CAIPI.
 
     This implementation is based on the work from [Bil+15]_.
@@ -428,7 +442,7 @@ def initialize_3D_wave_caipi(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D wave-CAIPI trajectory
 
     References
@@ -506,14 +520,14 @@ def initialize_3D_wave_caipi(
 
 
 def initialize_3D_seiffert_spiral(
-    Nc,
-    Ns,
-    curve_index=0.2,
-    nb_revolutions=1,
-    axis_tilt="golden",
-    spiral_tilt="golden",
-    in_out=False,
-):
+    Nc: int,
+    Ns: int,
+    curve_index: float = 0.2,
+    nb_revolutions: float = 1,
+    axis_tilt: str | float = "golden",
+    spiral_tilt: str | float = "golden",
+    in_out: bool = False,
+) -> np.ndarray:
     """Initialize 3D trajectories with modulated Seiffert spirals.
 
     Initially introduced in [SMR18]_, but also proposed later as "Yarnball"
@@ -543,7 +557,7 @@ def initialize_3D_seiffert_spiral(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D Seiffert spiral trajectory
 
     References
@@ -611,8 +625,13 @@ def initialize_3D_seiffert_spiral(
 
 
 def initialize_3D_helical_shells(
-    Nc, Ns, nb_shells, spiral_reduction=1, shell_tilt="intergaps", shot_tilt="uniform"
-):
+    Nc: int,
+    Ns: int,
+    nb_shells: int,
+    spiral_reduction: float = 1,
+    shell_tilt: str = "intergaps",
+    shot_tilt: str = "uniform",
+) -> np.ndarray:
     """Initialize 3D trajectories with helical shells.
 
     The implementation follows the proposition from [YRB06]_
@@ -635,7 +654,7 @@ def initialize_3D_helical_shells(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D helical shell trajectory
 
     References
@@ -694,8 +713,12 @@ def initialize_3D_helical_shells(
 
 
 def initialize_3D_annular_shells(
-    Nc, Ns, nb_shells, shell_tilt=np.pi, ring_tilt=np.pi / 2
-):
+    Nc: int,
+    Ns: int,
+    nb_shells: int,
+    shell_tilt: float = np.pi,
+    ring_tilt: float = np.pi / 2,
+) -> np.ndarray:
     """Initialize 3D trajectories with annular shells.
 
     An exclusive trajectory inspired from the work proposed in [HM11]_.
@@ -715,7 +738,7 @@ def initialize_3D_annular_shells(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D annular shell trajectory
 
     References
@@ -807,14 +830,14 @@ def initialize_3D_annular_shells(
 
 
 def initialize_3D_seiffert_shells(
-    Nc,
-    Ns,
-    nb_shells,
-    curve_index=0.5,
-    nb_revolutions=1,
-    shell_tilt="uniform",
-    shot_tilt="uniform",
-):
+    Nc: int,
+    Ns: int,
+    nb_shells: int,
+    curve_index: float = 0.5,
+    nb_revolutions: float = 1,
+    shell_tilt: str = "uniform",
+    shot_tilt: str = "uniform",
+) -> np.ndarray:
     """Initialize 3D trajectories with Seiffert shells.
 
     The implementation is based on work from [Er00]_ and [Br09]_,
@@ -841,7 +864,7 @@ def initialize_3D_seiffert_shells(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D Seiffert shell trajectory
 
     References
@@ -905,15 +928,15 @@ def initialize_3D_seiffert_shells(
 
 
 def initialize_3D_turbine(
-    Nc,
-    Ns_readouts,
-    Ns_transitions,
-    nb_blades,
-    blade_tilt="uniform",
-    nb_trains="auto",
-    skip_factor=1,
-    in_out=True,
-):
+    Nc: int,
+    Ns_readouts: int,
+    Ns_transitions: int,
+    nb_blades: int,
+    blade_tilt: str = "uniform",
+    nb_trains: int | str = "auto",
+    skip_factor: int = 1,
+    in_out: bool = True,
+) -> np.ndarray:
     """Initialize 3D TURBINE trajectory.
 
     This is an implementation of the TURBINE (Trajectory Using Radially
@@ -951,7 +974,7 @@ def initialize_3D_turbine(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D TURBINE trajectory
 
     References
@@ -1013,17 +1036,17 @@ def initialize_3D_turbine(
 
 
 def initialize_3D_repi(
-    Nc,
-    Ns_readouts,
-    Ns_transitions,
-    nb_blades,
-    nb_blade_revolutions=0,
-    blade_tilt="uniform",
-    nb_spiral_revolutions=0,
-    spiral="archimedes",
-    nb_trains="auto",
-    in_out=True,
-):
+    Nc: int,
+    Ns_readouts: int,
+    Ns_transitions: int,
+    nb_blades: int,
+    nb_blade_revolutions: float = 0,
+    blade_tilt: str = "uniform",
+    nb_spiral_revolutions: float = 0,
+    spiral: str = "archimedes",
+    nb_trains: int | str = "auto",
+    in_out: bool = True,
+) -> np.ndarray:
     """Initialize 3D REPI trajectory.
 
     This is an implementation of the REPI (Radial Echo Planar Imaging)
@@ -1067,7 +1090,7 @@ def initialize_3D_repi(
 
     Returns
     -------
-    array_like
+    np.ndarray
         3D REPI trajectory
 
     References
