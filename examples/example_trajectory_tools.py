@@ -273,6 +273,44 @@ show_trajectories(
     axes=(1, 2),
 )
 
+# %%
+# Random Stacks
+# -------------
+#
+# A direct extension of the stacking expansion is to distribute the stacks
+# according to a random distribution over the :math:`k_z`-axis.
+#
+# Arguments:
+# -
+# ``trajectory (array)``: array of k-space coordinates of
+#  size :math:`(N_c, N_s, N_d)`
+# - ``dim_size (int)``: size of the kspace in voxel units
+# - ``center_prop  (int or float)`` : number of line
+# - ``acceleration (int)``:  Acceleration factor
+# - ``pdf (str or array)``: Probability density function for the random distribution
+# - ``rng (int or np.random.Generator)``: Random number generator
+# - ``order (int)``: Order of the shots in the stack
+
+
+trajectory = tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=0.1,
+    acceleration=4,
+    pdf="uniform",
+    order="center-out",
+)
+
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``trajectory (array)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+# The main use case is to stack trajectories consisting of
+# flat or thick planes that will match the image slices.
+#
+#
+#
 
 # %%
 # Precess

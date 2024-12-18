@@ -916,9 +916,9 @@ def get_random_loc_1d(
 
 
 def stack_random(
-    traj,
+    trajectory,
     dim_size,
-    center_prop,
+    center_prop=0.0,
     accel=4,
     pdf="uniform",
     rng=None,
@@ -934,6 +934,8 @@ def stack_random(
         Size of the k_z dimension
     center_prop: int or float
         Number of line or proportion of slice to sample in the center of the k-space
+    accel: int
+        Undersampling/Acceleration factor
     pdf: str or np.array
         Probability density function for the remaining samples.
         "uniform" (default), "gaussian" or np.array
@@ -947,15 +949,16 @@ def stack_random(
         The 3D trajectory stacked along the :math:`k_z` axis.
 
     """
+
     line_locs = get_random_loc_1d(dim_size, center_prop, accel, pdf, rng, order)
-    if len(traj.shape) == 2:
-        Nc, Ns = 1, traj.shape[0]
+    if len(trajectory.shape) == 2:
+        Nc, Ns = 1, trajectory.shape[0]
     else:
-        Nc, Ns = traj.shape[:2]
+        Nc, Ns = trajectory.shape[:2]
 
-    new_traj = np.zeros((len(line_locs), Nc, Ns, 3))
+    new_trajectory = np.zeros((len(line_locs), Nc, Ns, 3))
     for i, loc in enumerate(line_locs):
-        new_traj[i, :, :, :2] = traj
-        new_traj[i, :, :, 2] = loc
+        new_trajectory[i, :, :, :2] = trajectory
+        new_trajectory[i, :, :, 2] = loc
 
-    return new_traj.reshape(-1, Ns, 3)
+    return new_trajectory.reshape(-1, Ns, 3)
