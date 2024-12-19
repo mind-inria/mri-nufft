@@ -47,7 +47,7 @@ class displayConfig:
     """Font size for most labels and texts, by default ``18``."""
     small_fontsize: int = 14
     """Font size for smaller texts, by default ``14``."""
-    nb_colors = 10
+    nb_colors: int = 10
     """Number of colors to use in the color cycle, by default ``10``."""
     palette: str = "tab10"
     """Name of the color palette to use, by default ``"tab10"``.
@@ -59,33 +59,33 @@ class displayConfig:
     slewrate_point_color: str = "b"
     """Matplotlib color for slew rate constraint points, by default ``"b"`` (blue)."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:  # noqa ANN401
         """Update the display configuration."""
         self.update(**kwargs)
 
-    def update(self, **kwargs):
+    def update(self, **kwargs: Any) -> None:  # noqa ANN401
         """Update the display configuration."""
         self._old_values = {}
         for key, value in kwargs.items():
             self._old_values[key] = getattr(displayConfig, key)
             setattr(displayConfig, key, value)
 
-    def reset(self):
+    def reset(self) -> None:
         """Restore the display configuration."""
         for key, value in self._old_values.items():
             setattr(displayConfig, key, value)
         delattr(self, "_old_values")
 
-    def __enter__(self):
+    def __enter__(self) -> "displayConfig":
         """Enter the context manager."""
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Any) -> None:  # noqa ANN401
         """Exit the context manager."""
         self.reset()
 
     @classmethod
-    def get_colorlist(cls):
+    def get_colorlist(cls) -> list[str | np.ndarray]:
         """Extract a list of colors from a matplotlib palette.
 
         If the palette is continuous, the colors will be sampled from it.
@@ -172,7 +172,7 @@ def display_2D_trajectory(
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: Any,
+    **constraints_kwargs: float | np.ndarray,
 ) -> plt.Axes:
     """Display 2D trajectories.
 
@@ -205,7 +205,7 @@ def display_2D_trajectory(
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    **kwargs
+    **constraints_kwargs
         Acquisition parameters used to check on hardware constraints,
         following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
@@ -545,7 +545,7 @@ def display_gradients(
     smax: float = DEFAULT_SMAX,
     constraints_order: int | str | None = None,
     raster_time: float = DEFAULT_RASTER_TIME,
-    **constraints_kwargs: Any,
+    **constraints_kwargs: float | np.ndarray,
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
@@ -598,7 +598,7 @@ def display_gradients(
         Amount of time between the acquisition of two
         consecutive samples in ms.
         The default is `DEFAULT_RASTER_TIME`.
-    **kwargs
+    **constraints_kwargs
         Acquisition parameters used to check on hardware constraints,
         following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.

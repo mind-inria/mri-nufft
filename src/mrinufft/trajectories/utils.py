@@ -2,6 +2,7 @@
 
 from enum import Enum, EnumMeta
 from numbers import Real
+from typing import Literal
 
 import numpy as np
 
@@ -26,11 +27,11 @@ DEFAULT_SMAX = 0.1  # T/m/ms
 class CaseInsensitiveEnumMeta(EnumMeta):
     """A case-insensitive EnumMeta."""
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> Enum:
         """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
         return super().__getitem__(name.upper())
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:  # noqa ANN401
         """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
         return super().__getattr__(name.upper())
 
@@ -454,12 +455,12 @@ def check_hardware_constraints(
 ###########
 
 
-def initialize_tilt(tilt: str | float, nb_partitions: int = 1) -> float:
+def initialize_tilt(tilt: Literal | float, nb_partitions: int = 1) -> float:
     r"""Initialize the tilt angle.
 
     Parameters
     ----------
-    tilt : str or float
+    tilt : Literal or float
         Tilt angle in rad or name of the tilt.
     nb_partitions : int, optional
         Number of partitions. The default is 1.
@@ -497,12 +498,12 @@ def initialize_tilt(tilt: str | float, nb_partitions: int = 1) -> float:
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
 
 
-def initialize_algebraic_spiral(spiral: str | float) -> float:
+def initialize_algebraic_spiral(spiral: Literal | float) -> float:
     """Initialize the algebraic spiral type.
 
     Parameters
     ----------
-    spiral : str or float
+    spiral : Literal or float
         Spiral type or spiral power value.
 
     Returns
@@ -515,12 +516,12 @@ def initialize_algebraic_spiral(spiral: str | float) -> float:
     return Spirals[spiral]
 
 
-def initialize_shape_norm(shape: str | float) -> float:
+def initialize_shape_norm(shape: Literal | float) -> float:
     """Initialize the norm for a given shape.
 
     Parameters
     ----------
-    shape : str or float
+    shape : Literal or float
         Shape name or p-norm value.
 
     Returns

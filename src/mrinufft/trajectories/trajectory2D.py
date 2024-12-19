@@ -1,5 +1,7 @@
 """Functions to initialize 2D trajectories."""
 
+from typing import Any, Literal
+
 import numpy as np
 import numpy.linalg as nl
 from scipy.interpolate import CubicSpline
@@ -15,7 +17,7 @@ from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 
 
 def initialize_2D_radial(
-    Nc: int, Ns: int, tilt: str | float = "uniform", in_out: bool = False
+    Nc: int, Ns: int, tilt: Literal | float = "uniform", in_out: bool = False
 ) -> np.ndarray:
     """Initialize a 2D radial trajectory.
 
@@ -25,7 +27,7 @@ def initialize_2D_radial(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : Literal, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -51,10 +53,10 @@ def initialize_2D_radial(
 def initialize_2D_spiral(
     Nc: int,
     Ns: int,
-    tilt: str | float = "uniform",
+    tilt: Literal | float = "uniform",
     in_out: bool = False,
     nb_revolutions: int = 1,
-    spiral: str | float = "archimedes",
+    spiral: Literal | float = "archimedes",
     patch_center: bool = True,
 ) -> np.ndarray:
     """Initialize a 2D algebraic spiral trajectory.
@@ -70,13 +72,13 @@ def initialize_2D_spiral(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : Literal, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
     nb_revolutions : int, optional
         Number of revolutions, by default 1
-    spiral : str, float, optional
+    spiral : Literal, float, optional
         Spiral type or algebraic power, by default "archimedes"
     patch_center : bool, optional
         Whether the spiral anomaly at the center should be patched
@@ -111,11 +113,18 @@ def initialize_2D_spiral(
     # Algebraic spirals with power coefficients superior to 1
     # have a non-monotonic gradient norm when varying the angle
     # over [0, +inf)
-    def _update_shot(angles, radius, *args):
+    def _update_shot(
+        angles: np.ndarray, radius: np.ndarray, *args: Any  # noqa ANN401
+    ) -> np.ndarray:
         shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
         return np.stack([shot.real, shot.imag], axis=-1)
 
-    def _update_parameters(single_shot, angles, radius, spiral_power):
+    def _update_parameters(
+        single_shot: np.ndarray,
+        angles: np.ndarray,
+        radius: np.ndarray,
+        spiral_power: float,
+    ) -> tuple[np.ndarray, np.ndarray, float]:
         radius = nl.norm(single_shot, axis=-1)
         angles = np.sign(angles) * np.abs(radius) ** (1 / spiral_power)
         return angles, radius, spiral_power
@@ -220,7 +229,7 @@ def initialize_2D_fibonacci_spiral(
 def initialize_2D_cones(
     Nc: int,
     Ns: int,
-    tilt: str = "uniform",
+    tilt: Literal = "uniform",
     in_out: bool = False,
     nb_zigzags: float = 5,
     width: float = 1,
@@ -233,7 +242,7 @@ def initialize_2D_cones(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : Literal, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -266,7 +275,7 @@ def initialize_2D_cones(
 def initialize_2D_sinusoide(
     Nc: int,
     Ns: int,
-    tilt: str | float = "uniform",
+    tilt: Literal | float = "uniform",
     in_out: bool = False,
     nb_zigzags: float = 5,
     width: float = 1,
@@ -279,7 +288,7 @@ def initialize_2D_sinusoide(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : Literal, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False

@@ -1,6 +1,7 @@
 """Functions to initialize 3D trajectories."""
 
 from functools import partial
+from typing import Literal
 
 import numpy as np
 import numpy.linalg as nl
@@ -243,10 +244,10 @@ def initialize_3D_park_radial(
 def initialize_3D_cones(
     Nc: int,
     Ns: int,
-    tilt: str | float = "golden",
+    tilt: Literal | float = "golden",
     in_out: bool = False,
     nb_zigzags: float = 5,
-    spiral: str | float = "archimedes",
+    spiral: Literal | float = "archimedes",
     width: float = 1,
 ) -> np.ndarray:
     """Initialize 3D trajectories with cones.
@@ -264,14 +265,14 @@ def initialize_3D_cones(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : Literal, float, optional
         Tilt of the cones, by default "golden"
     in_out : bool, optional
         Whether the curves are going in-and-out or start from the center,
         by default False
     nb_zigzags : float, optional
         Number of zigzags of the cones, by default 5
-    spiral : str, float, optional
+    spiral : Literal, float, optional
         Spiral type, by default "archimedes"
     width : float, optional
         Cone width normalized such that `width=1` avoids cone overlaps, by default 1
@@ -326,8 +327,8 @@ def initialize_3D_floret(
     Ns: int,
     in_out: bool = False,
     nb_revolutions: float = 1,
-    spiral: str | float = "fermat",
-    cone_tilt: str | float = "golden",
+    spiral: Literal | float = "fermat",
+    cone_tilt: Literal | float = "golden",
     max_angle: float = np.pi / 2,
     axes: tuple[int, ...] = (2,),
 ) -> np.ndarray:
@@ -348,9 +349,9 @@ def initialize_3D_floret(
         Whether to start from the center or not, by default False
     nb_revolutions : float, optional
         Number of revolutions of the spirals, by default 1
-    spiral : str, float, optional
+    spiral : Literal, float, optional
         Spiral type, by default "fermat"
-    cone_tilt : str, float, optional
+    cone_tilt : Literal, float, optional
         Tilt of the cones around the :math:`k_z`-axis, by default "golden"
     max_angle : float, optional
         Maximum polar angle starting from the :math:`k_x-k_y` plane,
@@ -405,8 +406,8 @@ def initialize_3D_wave_caipi(
     Ns: int,
     nb_revolutions: float = 5,
     width: float = 1,
-    packing: str = "triangular",
-    shape: str | float = "square",
+    packing: Literal = "triangular",
+    shape: Literal | float = "square",
     spacing: tuple[int, int] = (1, 1),
 ) -> np.ndarray:
     """Initialize 3D trajectories with Wave-CAIPI.
@@ -425,11 +426,11 @@ def initialize_3D_wave_caipi(
         Diameter of the helices normalized such that `width=1`
         densely covers the k-space without overlap for square packing,
         by default 1.
-    packing : str, optional
+    packing : Literal, optional
         Packing method used to position the helices:
         "triangular"/"hexagonal", "square", "circular"
         or "random"/"uniform", by default "triangular".
-    shape : str or float, optional
+    shape : Literal or float, optional
         Shape over the 2D :math:`k_x-k_y` plane to pack with shots,
         either defined as `str` ("circle", "square", "diamond")
         or as `float` through p-norms following the conventions
@@ -524,8 +525,8 @@ def initialize_3D_seiffert_spiral(
     Ns: int,
     curve_index: float = 0.2,
     nb_revolutions: float = 1,
-    axis_tilt: str | float = "golden",
-    spiral_tilt: str | float = "golden",
+    axis_tilt: Literal | float = "golden",
+    spiral_tilt: Literal | float = "golden",
     in_out: bool = False,
 ) -> np.ndarray:
     """Initialize 3D trajectories with modulated Seiffert spirals.
@@ -546,9 +547,9 @@ def initialize_3D_seiffert_spiral(
     nb_revolutions : float
         Number of revolutions, i.e. times the polar angle of the curves
         passes through 0, by default 1
-    axis_tilt : str, float, optional
+    axis_tilt : Literal, float, optional
         Angle between shots over a precession around the z-axis, by default "golden"
-    spiral_tilt : str, float, optional
+    spiral_tilt : Literal, float, optional
         Angle of the spiral within its own axis defined from center to its outermost
         point, by default "golden"
     in_out : bool
@@ -629,8 +630,8 @@ def initialize_3D_helical_shells(
     Ns: int,
     nb_shells: int,
     spiral_reduction: float = 1,
-    shell_tilt: str = "intergaps",
-    shot_tilt: str = "uniform",
+    shell_tilt: Literal = "intergaps",
+    shot_tilt: Literal = "uniform",
 ) -> np.ndarray:
     """Initialize 3D trajectories with helical shells.
 
@@ -647,9 +648,9 @@ def initialize_3D_helical_shells(
         Number of concentric shells/spheres
     spiral_reduction : float, optional
         Factor used to reduce the automatic spiral length, by default 1
-    shell_tilt : str, float, optional
+    shell_tilt : Literal, float, optional
         Angle between consecutive shells along z-axis, by default "intergaps"
-    shot_tilt : str, float, optional
+    shot_tilt : Literal, float, optional
         Angle between shots over a shell surface along z-axis, by default "uniform"
 
     Returns
@@ -731,9 +732,9 @@ def initialize_3D_annular_shells(
         Number of samples per shot
     nb_shells : int
         Number of concentric shells/spheres
-    shell_tilt : str, float, optional
+    shell_tilt : Literal, float, optional
         Angle between consecutive shells along z-axis, by default pi
-    ring_tilt : str, float, optional
+    ring_tilt : Literal, float, optional
         Angle controlling approximately the ring halves rotation, by default pi / 2
 
     Returns
@@ -835,8 +836,8 @@ def initialize_3D_seiffert_shells(
     nb_shells: int,
     curve_index: float = 0.5,
     nb_revolutions: float = 1,
-    shell_tilt: str = "uniform",
-    shot_tilt: str = "uniform",
+    shell_tilt: Literal = "uniform",
+    shot_tilt: Literal = "uniform",
 ) -> np.ndarray:
     """Initialize 3D trajectories with Seiffert shells.
 
@@ -857,9 +858,9 @@ def initialize_3D_seiffert_shells(
     nb_revolutions : float
         Number of revolutions, i.e. times the curve passes through the upper-half
         of the z-axis, by default 1
-    shell_tilt : str, float, optional
+    shell_tilt : Literal, float, optional
         Angle between consecutive shells along z-axis, by default "uniform"
-    shot_tilt : str, float, optional
+    shot_tilt : Literal, float, optional
         Angle between shots over a shell surface along z-axis, by default "uniform"
 
     Returns
@@ -932,7 +933,7 @@ def initialize_3D_turbine(
     Ns_readouts: int,
     Ns_transitions: int,
     nb_blades: int,
-    blade_tilt: str = "uniform",
+    blade_tilt: Literal = "uniform",
     nb_trains: int | str = "auto",
     skip_factor: int = 1,
     in_out: bool = True,
@@ -959,7 +960,7 @@ def initialize_3D_turbine(
         Number of samples per transition between two readouts
     nb_blades : int
         Number of line stacks over the :math:`k_z`-axis axis
-    blade_tilt : str, float, optional
+    blade_tilt : Literal, float, optional
         Tilt between individual blades, by default "uniform"
     nb_trains : int, str, optional
         Number of resulting shots, or readout trains, such that each of
@@ -1041,9 +1042,9 @@ def initialize_3D_repi(
     Ns_transitions: int,
     nb_blades: int,
     nb_blade_revolutions: float = 0,
-    blade_tilt: str = "uniform",
+    blade_tilt: Literal = "uniform",
     nb_spiral_revolutions: float = 0,
-    spiral: str = "archimedes",
+    spiral: Literal = "archimedes",
     nb_trains: int | str = "auto",
     in_out: bool = True,
 ) -> np.ndarray:
@@ -1075,11 +1076,11 @@ def initialize_3D_repi(
     nb_blade_revolutions : float
         Number of revolutions over lines/spirals within a blade
         over the kz axis.
-    blade_tilt : str, float, optional
+    blade_tilt : Literal, float, optional
         Tilt between individual blades, by default "uniform"
     nb_spiral_revolutions : float, optional
         Number of revolutions of the spirals over the readouts, by default 0
-    spiral : str, float, optional
+    spiral : Literal, float, optional
         Spiral type, by default "archimedes"
     nb_trains : int, str
         Number of trains dividing the readouts, such that each

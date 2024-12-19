@@ -1,17 +1,24 @@
 """Sampling densities and methods."""
 
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    import pywt as pw
+
 import numpy as np
 import numpy.fft as nf
-import numpy.linalg as nl
-import numpy.random as nr
 from tqdm.auto import tqdm
 
 from .utils import KMAX
 
 
 def sample_from_density(
-    nb_samples, density, method="random", *, dim_compensation="auto"
-):
+    nb_samples: int,
+    density: np.ndarray,
+    method: Literal = "random",
+    *,
+    dim_compensation: Literal | bool = "auto",
+) -> np.ndarray:
     """
     Sample points based on a given density distribution.
 
@@ -81,7 +88,7 @@ def sample_from_density(
         density = density / np.sum(density)
 
     # Sample using specified method
-    rng = nr.default_rng()
+    rng = np.random.default_rng()
     if method == "random":
         choices = rng.choice(
             np.arange(max_nb_samples),
@@ -110,7 +117,12 @@ def sample_from_density(
     return locations
 
 
-def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
+def create_cutoff_decay_density(
+    shape: tuple[int, ...],
+    cutoff: float,
+    decay: float,
+    resolution: np.ndarray | None = None,
+) -> np.ndarray:
     """
     Create a density with central plateau and polynomial decay.
 
@@ -120,7 +132,7 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
 
     Parameters
     ----------
-    shape : tuple of int
+    shape : tuple[int, ...]
         The shape of the density grid, analog to the field-of-view
         as opposed to ``resolution`` below.
     cutoff : float
@@ -156,7 +168,7 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
     for i in range(nb_dims):
         differences[i] = differences[i] + 0.5 - shape[i] / 2
         differences[i] = differences[i] / shape[i] / resolution[i]
-    distances = nl.norm(differences, axis=0)
+    distances = np.linalg.norm(differences, axis=0)
 
     cutoff = cutoff * np.max(differences) if cutoff else np.min(differences)
     density = np.ones(shape)
@@ -167,7 +179,9 @@ def create_cutoff_decay_density(shape, cutoff, decay, resolution=None):
     return density
 
 
-def create_polynomial_density(shape, decay, resolution=None):
+def create_polynomial_density(
+    shape: tuple[int, ...], decay: float, resolution: np.ndarray | None = None
+) -> np.ndarray:
     """
     Create a density with polynomial decay from the center.
 
@@ -191,7 +205,7 @@ def create_polynomial_density(shape, decay, resolution=None):
     )
 
 
-def create_energy_density(dataset):
+def create_energy_density(dataset: np.ndarray) -> np.ndarray:
     """
     Create a density based on energy in the Fourier spectrum.
 
@@ -221,7 +235,13 @@ def create_energy_density(dataset):
     return density
 
 
-def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=False):
+def create_chauffert_density(
+    shape: tuple[int, ...],
+    wavelet_basis: Literal | pw.Wavelet,
+    nb_wavelet_scales: int,
+    *,
+    verbose: bool = False,
+) -> np.ndarray:
     """Create a density based on Chauffert's method.
 
     This is a reproduction of the proposition from [CCW13]_.
@@ -231,7 +251,7 @@ def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=Fa
 
     Parameters
     ----------
-    shape : tuple of int
+    shape : tuple[int, ...]
         The shape of the density grid.
     wavelet_basis : str, pywt.Wavelet
         The wavelet basis to use for wavelet decomposition, either
@@ -290,7 +310,11 @@ def create_chauffert_density(shape, wavelet_basis, nb_wavelet_scales, verbose=Fa
     return nf.ifftshift(density)
 
 
-def create_fast_chauffert_density(shape, wavelet_basis, nb_wavelet_scales):
+def create_fast_chauffert_density(
+    shape: tuple[int, ...],
+    wavelet_basis: Literal | pw.Wavelet,
+    nb_wavelet_scales: int,
+) -> np.ndarray:
     """Create a density based on an approximated Chauffert method.
 
     This implementation is based on this
@@ -306,7 +330,7 @@ def create_fast_chauffert_density(shape, wavelet_basis, nb_wavelet_scales):
 
     Parameters
     ----------
-    shape : tuple of int
+    shape : tuple[int, ...]
         The shape of the density grid.
     wavelet_basis : str, pywt.Wavelet
         The wavelet basis to use for wavelet decomposition, either

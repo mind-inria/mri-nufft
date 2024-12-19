@@ -1,6 +1,6 @@
 """Trajectories based on the Travelling Salesman Problem."""
 
-from typing import Any
+from typing import Literal
 
 import numpy as np
 import numpy.linalg as nl
@@ -20,7 +20,7 @@ def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> np.ndarray:
     return cluster_sizes
 
 
-def _sort_by_coordinate(array: np.ndarray, coord: str) -> np.ndarray:
+def _sort_by_coordinate(array: np.ndarray, coord: Literal) -> np.ndarray:
     # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
@@ -51,9 +51,9 @@ def _sort_by_coordinate(array: np.ndarray, coord: str) -> np.ndarray:
 def _cluster_by_coordinate(
     locations: np.ndarray,
     nb_clusters: int,
-    cluster_by: str,
-    second_cluster_by: str | None = None,
-    sort_by: str | None = None,
+    cluster_by: Literal,
+    second_cluster_by: Literal | None = None,
+    sort_by: Literal | None = None,
 ) -> np.ndarray:
     # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
@@ -96,13 +96,13 @@ def _initialize_ND_travelling_salesman(
     Nc: int,
     Ns: int,
     density: np.ndarray,
-    first_cluster_by: str | None = None,
-    second_cluster_by: str | None = None,
-    sort_by: str | None = None,
+    first_cluster_by: Literal | None = None,
+    second_cluster_by: Literal | None = None,
+    sort_by: Literal | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     # Check arguments validity
     if Nc * Ns > np.prod(density.shape):
@@ -143,13 +143,13 @@ def initialize_2D_travelling_salesman(
     Nc: int,
     Ns: int,
     density: np.ndarray,
-    first_cluster_by: str | None = None,
-    second_cluster_by: str | None = None,
-    sort_by: str | None = None,
+    first_cluster_by: Literal | None = None,
+    second_cluster_by: Literal | None = None,
+    sort_by: Literal | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     """
     Initialize a 2D trajectory using a Travelling Salesman Problem (TSP)-based path.
@@ -168,12 +168,12 @@ def initialize_2D_travelling_salesman(
         The number of points per cluster.
     density : np.ndarray
         A 2-dimensional density array from which points are sampled.
-    first_cluster_by : str, optional
+    first_cluster_by : Literal, optional
         The coordinate used to cluster points initially, by default ``None``.
-    second_cluster_by : str, optional
+    second_cluster_by : Literal, optional
         A secondary coordinate used for clustering within primary clusters,
         by default ``None``.
-    sort_by : str, optional
+    sort_by : Literal, optional
         The coordinate by which to order points within each cluster,
         by default ``None``.
     tsp_tol : float, optional
@@ -220,13 +220,13 @@ def initialize_3D_travelling_salesman(
     Nc: int,
     Ns: int,
     density: np.ndarray,
-    first_cluster_by: str | None = None,
-    second_cluster_by: str | None = None,
-    sort_by: str | None = None,
+    first_cluster_by: Literal | None = None,
+    second_cluster_by: Literal | None = None,
+    sort_by: Literal | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     """
     Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.
@@ -247,12 +247,12 @@ def initialize_3D_travelling_salesman(
         The number of points per cluster.
     density : np.ndarray
         A 3-dimensional density array from which points are sampled.
-    first_cluster_by : str, optional
+    first_cluster_by : Literal, optional
         The coordinate used to cluster points initially, by default ``None``.
-    second_cluster_by : str, optional
+    second_cluster_by : Literal, optional
         A secondary coordinate used for clustering within primary clusters,
         by default ``None``.
-    sort_by : str, optional
+    sort_by : Literal, optional
         The coordinate by which to order points within each cluster,
         by default ``None``.
     tsp_tol : float, optional

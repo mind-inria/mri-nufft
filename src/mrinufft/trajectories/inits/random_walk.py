@@ -1,6 +1,6 @@
 """Trajectories based on random walks."""
 
-from typing import Any
+from typing import Literal
 
 import numpy as np
 
@@ -28,7 +28,7 @@ def _initialize_ND_random_walk(
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     density = density / np.sum(density)
     flat_density = np.copy(density.flatten())
@@ -101,7 +101,7 @@ def initialize_2D_random_walk(
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     """Initialize a 2D random walk trajectory.
 
@@ -166,7 +166,7 @@ def initialize_3D_random_walk(
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Any,
+    **sampling_kwargs: Literal | bool,
 ) -> np.ndarray:
     """Initialize a 3D random walk trajectory.
 

@@ -1,6 +1,6 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import numpy as np
 from scipy.interpolate import CubicSpline, interp1d
@@ -16,7 +16,7 @@ from .utils import KMAX, initialize_tilt
 def stack(
     trajectory: np.ndarray,
     nb_stacks: int,
-    z_tilt: str | None = None,
+    z_tilt: Literal | float | None = None,
     *,
     hard_bounded: bool = True,
 ) -> np.ndarray:
@@ -28,7 +28,7 @@ def stack(
         Trajectory in 2D or 3D to stack.
     nb_stacks : int
         Number of stacks repeating the provided trajectory.
-    z_tilt : str, optional
+    z_tilt : Literal, float, optional
         Tilt of the stacks, by default `None`.
     hard_bounded : bool, optional
         Whether the stacks should be strictly within the limits of the k-space.
@@ -66,9 +66,9 @@ def stack(
 def rotate(
     trajectory: np.ndarray,
     nb_rotations: int,
-    x_tilt: str | None = None,
-    y_tilt: str | None = None,
-    z_tilt: str | None = None,
+    x_tilt: Literal | float | None = None,
+    y_tilt: Literal | float | None = None,
+    z_tilt: Literal | float | None = None,
 ) -> np.ndarray:
     """Rotate 2D or 3D trajectories over the different axes.
 
@@ -78,11 +78,11 @@ def rotate(
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory.
-    x_tilt : str, optional
+    x_tilt : Literal, optional
         Tilt of the trajectory over the :math:`k_x`-axis, by default `None`.
-    y_tilt : str, optional
+    y_tilt : Literal, optional
         Tilt of the trajectory over the :math:`k_y`-axis, by default `None`.
-    z_tilt : str, optional
+    z_tilt : Literal, optional
         Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
 
     Returns
@@ -112,9 +112,9 @@ def rotate(
 def precess(
     trajectory: np.ndarray,
     nb_rotations: int,
-    tilt: str = "golden",
+    tilt: Literal | float = "golden",
     half_sphere: bool = False,
-    partition: str = "axial",
+    partition: Literal = "axial",
     axis: int | np.ndarray | None = None,
 ) -> np.ndarray:
     """Rotate trajectories as a precession around the :math:`k_z`-axis.
@@ -125,14 +125,14 @@ def precess(
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory while precessing.
-    tilt : str, optional
+    tilt : Literal, float, optional
         Angle tilt between consecutive rotations around the :math:`k_z`-axis,
         by default "golden".
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
         of the k-space sphere.
         It is typically used for in-out trajectories or planes.
-    partition : str, optional
+    partition : Literal, optional
         Partition type between an "axial" or "polar" split of the
         :math:`k_z`-axis, designating whether the axis should be fragmented
         by radius or angle respectively, by default "axial".
@@ -191,7 +191,7 @@ def precess(
 def conify(
     trajectory: np.ndarray,
     nb_cones: int,
-    z_tilt: str | None = None,
+    z_tilt: Literal | float | None = None,
     in_out: bool = False,
     max_angle: float = np.pi / 2,
     borderless: bool = True,
@@ -204,7 +204,7 @@ def conify(
         Trajectory to conify.
     nb_cones : int
         Number of cones repeating the provided trajectory.
-    z_tilt : str, optional
+    z_tilt : Literal, float, optional
         Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
     in_out : bool, optional
         Whether to account for the in-out nature of some trajectories
@@ -451,7 +451,9 @@ def rewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
     return assembled_trajectory
 
 
-def oversample(trajectory: np.ndarray, new_Ns: int, kind: str = "cubic") -> np.ndarray:
+def oversample(
+    trajectory: np.ndarray, new_Ns: int, kind: Literal = "cubic"
+) -> np.ndarray:
     """
     Resample a trajectory to increase the number of samples using interpolation.
 
@@ -462,7 +464,7 @@ def oversample(trajectory: np.ndarray, new_Ns: int, kind: str = "cubic") -> np.n
         is applied along the second axis.
     new_Ns : int
         The desired number of samples in the resampled trajectory.
-    kind : str, optional
+    kind : Literal, optional
         The type of interpolation to use, such as 'linear',
         'quadratic', or 'cubic', by default "cubic".
 
@@ -500,9 +502,9 @@ def stack_spherically(
     trajectory_func: Callable[..., np.ndarray],
     Nc: int,
     nb_stacks: int,
-    z_tilt: str | None = None,
+    z_tilt: Literal | float | None = None,
     hard_bounded: bool = True,
-    **traj_kwargs: Any,
+    **traj_kwargs: Any,  # noqa ANN401
 ) -> np.ndarray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
@@ -515,7 +517,7 @@ def stack_spherically(
         Number of shots to use for the whole spherically stacked trajectory.
     nb_stacks : int
         Number of stacks of trajectories.
-    z_tilt : str | None, optional
+    z_tilt : Literal, float, optional
         Tilt of the stacks, by default `None`.
     hard_bounded : bool, optional
         Whether the stacks should be strictly within the limits
@@ -587,9 +589,9 @@ def shellify(
     trajectory_func: Callable[..., np.ndarray],
     Nc: int,
     nb_shells: int,
-    z_tilt: str | float = "golden",
-    hemisphere_mode: str = "symmetric",
-    **traj_kwargs: Any,
+    z_tilt: Literal | float = "golden",
+    hemisphere_mode: Literal = "symmetric",
+    **traj_kwargs: Any,  # noqa ANN401
 ) -> np.ndarray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
@@ -602,9 +604,9 @@ def shellify(
         Number of shots to use for the whole spherically stacked trajectory.
     nb_shells : int
         Number of shells of distorted trajectories.
-    z_tilt : str | float, optional
+    z_tilt : Literal, float, optional
         Tilt of the shells, by default "golden".
-    hemisphere_mode : str, optional
+    hemisphere_mode : Literal, optional
         Define how the lower hemisphere should be oriented relatively to the
         upper one, with "symmetric" providing a :math:`k_x-k_y` planar symmetry
         by changing the polar angle, and with "reversed" promoting continuity
