@@ -20,7 +20,7 @@ def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> np.ndarray:
     return cluster_sizes
 
 
-def _sort_by_coordinate(array: np.ndarray, coord: Literal) -> np.ndarray:
+def _sort_by_coordinate(array: np.typing.NDArray, coord: Literal) -> np.ndarray:
     # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
@@ -49,7 +49,7 @@ def _sort_by_coordinate(array: np.ndarray, coord: Literal) -> np.ndarray:
 
 
 def _cluster_by_coordinate(
-    locations: np.ndarray,
+    locations: np.typing.NDArray,
     nb_clusters: int,
     cluster_by: Literal,
     second_cluster_by: Literal | None = None,
@@ -95,7 +95,7 @@ def _cluster_by_coordinate(
 def _initialize_ND_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     first_cluster_by: Literal | None = None,
     second_cluster_by: Literal | None = None,
     sort_by: Literal | None = None,
@@ -142,7 +142,7 @@ def _initialize_ND_travelling_salesman(
 def initialize_2D_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     first_cluster_by: Literal | None = None,
     second_cluster_by: Literal | None = None,
     sort_by: Literal | None = None,
@@ -219,7 +219,7 @@ def initialize_2D_travelling_salesman(
 def initialize_3D_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     first_cluster_by: Literal | None = None,
     second_cluster_by: Literal | None = None,
     sort_by: Literal | None = None,

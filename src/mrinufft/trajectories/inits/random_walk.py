@@ -24,7 +24,7 @@ def _get_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
 def _initialize_ND_random_walk(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
@@ -97,7 +97,7 @@ def _initialize_ND_random_walk(
 def initialize_2D_random_walk(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
@@ -162,7 +162,7 @@ def initialize_2D_random_walk(
 def initialize_3D_random_walk(
     Nc: int,
     Ns: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,

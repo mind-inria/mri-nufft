@@ -14,7 +14,7 @@ from .utils import KMAX, initialize_tilt
 
 
 def stack(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     nb_stacks: int,
     z_tilt: Literal | float | None = None,
     *,
@@ -64,7 +64,7 @@ def stack(
 
 
 def rotate(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     nb_rotations: int,
     x_tilt: Literal | float | None = None,
     y_tilt: Literal | float | None = None,
@@ -110,7 +110,7 @@ def rotate(
 
 
 def precess(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     nb_rotations: int,
     tilt: Literal | float = "golden",
     half_sphere: bool = False,
@@ -189,7 +189,7 @@ def precess(
 
 
 def conify(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     nb_cones: int,
     z_tilt: Literal | float | None = None,
     in_out: bool = False,
@@ -268,7 +268,7 @@ def conify(
 
 
 def epify(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     Ns_transitions: int,
     nb_trains: int,
     *,
@@ -328,7 +328,7 @@ def epify(
 
 
 def unepify(
-    trajectory: np.ndarray, Ns_readouts: int, Ns_transitions: int
+    trajectory: np.typing.NDArray, Ns_readouts: int, Ns_transitions: int
 ) -> np.ndarray:
     """Recover single-readout shots from multi-readout trajectory.
 
@@ -371,7 +371,7 @@ def unepify(
     return trajectory
 
 
-def prewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
+def prewind(trajectory: np.typing.NDArray, Ns_transitions: int) -> np.ndarray:
     """Add pre-winding/positioning to the trajectory.
 
     The trajectory is extended to start before the readout
@@ -411,7 +411,7 @@ def prewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
     return assembled_trajectory
 
 
-def rewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
+def rewind(trajectory: np.typing.NDArray, Ns_transitions: int) -> np.ndarray:
     """Add rewinding to the trajectory.
 
     The trajectory is extended to come back to the k-space center
@@ -452,7 +452,7 @@ def rewind(trajectory: np.ndarray, Ns_transitions: int) -> np.ndarray:
 
 
 def oversample(
-    trajectory: np.ndarray, new_Ns: int, kind: Literal = "cubic"
+    trajectory: np.typing.NDArray, new_Ns: int, kind: Literal = "cubic"
 ) -> np.ndarray:
     """
     Resample a trajectory to increase the number of samples using interpolation.
@@ -685,7 +685,7 @@ def shellify(
 
 
 def duplicate_along_axes(
-    trajectory: np.ndarray, axes: tuple[int, ...] = (0, 1, 2)
+    trajectory: np.typing.NDArray, axes: tuple[int, ...] = (0, 1, 2)
 ) -> np.ndarray:
     """
     Duplicate a trajectory along the specified axes.
@@ -722,7 +722,7 @@ def duplicate_along_axes(
     return new_trajectory
 
 
-def _radialize_center_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray:
+def _radialize_center_out(trajectory: np.typing.NDArray, nb_samples: int) -> np.ndarray:
     """Radialize a trajectory from the center to the outside.
 
     Parameters
@@ -747,7 +747,7 @@ def _radialize_center_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray
     return new_trajectory
 
 
-def _radialize_in_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray:
+def _radialize_in_out(trajectory: np.typing.NDArray, nb_samples: int) -> np.ndarray:
     """Radialize a trajectory from the inside to the outside.
 
     Parameters
@@ -778,7 +778,7 @@ def _radialize_in_out(trajectory: np.ndarray, nb_samples: int) -> np.ndarray:
 
 
 def radialize_center(
-    trajectory: np.ndarray, nb_samples: int, in_out: bool = False
+    trajectory: np.typing.NDArray, nb_samples: int, in_out: bool = False
 ) -> np.ndarray:
     """Radialize a trajectory.
 

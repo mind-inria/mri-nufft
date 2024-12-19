@@ -4,7 +4,7 @@ import numpy as np
 
 
 def solve_tsp_with_2opt(
-    locations: np.ndarray, improvement_threshold: float = 1e-8
+    locations: np.typing.NDArray, improvement_threshold: float = 1e-8
 ) -> np.ndarray:
     """Solve the TSP problem using a 2-opt approach.
 

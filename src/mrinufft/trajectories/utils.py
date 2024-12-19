@@ -151,7 +151,7 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 
 
 def normalize_trajectory(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     norm_factor: float = KMAX,
     resolution: float | np.ndarray = DEFAULT_RESOLUTION,
 ) -> np.ndarray:
@@ -177,7 +177,7 @@ def normalize_trajectory(
 
 
 def unnormalize_trajectory(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     norm_factor: float = KMAX,
     resolution: float | np.ndarray = DEFAULT_RESOLUTION,
 ) -> np.ndarray:
@@ -203,7 +203,7 @@ def unnormalize_trajectory(
 
 
 def convert_trajectory_to_gradients(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     norm_factor: float = KMAX,
     resolution: float | np.ndarray = DEFAULT_RESOLUTION,
     raster_time: float = DEFAULT_RASTER_TIME,
@@ -250,8 +250,8 @@ def convert_trajectory_to_gradients(
 
 
 def convert_gradients_to_trajectory(
-    gradients: np.ndarray,
-    initial_positions: np.ndarray | None = None,
+    gradients: np.typing.NDArray,
+    initial_positions: np.typing.NDArray | None = None,
     norm_factor: float = KMAX,
     resolution: float | np.ndarray = DEFAULT_RESOLUTION,
     raster_time: float = DEFAULT_RASTER_TIME,
@@ -300,7 +300,7 @@ def convert_gradients_to_trajectory(
 
 
 def convert_gradients_to_slew_rates(
-    gradients: np.ndarray,
+    gradients: np.typing.NDArray,
     raster_time: float = DEFAULT_RASTER_TIME,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Derive the gradients over time to provide slew rates.
@@ -328,8 +328,8 @@ def convert_gradients_to_slew_rates(
 
 
 def convert_slew_rates_to_gradients(
-    slewrates: np.ndarray,
-    initial_gradients: np.ndarray | None = None,
+    slewrates: np.typing.NDArray,
+    initial_gradients: np.typing.NDArray | None = None,
     raster_time: float = DEFAULT_RASTER_TIME,
 ) -> np.ndarray:
     """Integrate slew rates over time to provide gradients.
@@ -363,7 +363,7 @@ def convert_slew_rates_to_gradients(
 
 
 def compute_gradients_and_slew_rates(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     norm_factor: float = KMAX,
     resolution: float | np.ndarray = DEFAULT_RESOLUTION,
     raster_time: float = DEFAULT_RASTER_TIME,
@@ -412,8 +412,8 @@ def compute_gradients_and_slew_rates(
 
 
 def check_hardware_constraints(
-    gradients: np.ndarray,
-    slewrates: np.ndarray,
+    gradients: np.typing.NDArray,
+    slewrates: np.typing.NDArray,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     order: int | str | None = None,

@@ -14,7 +14,7 @@ from .utils import KMAX
 
 def sample_from_density(
     nb_samples: int,
-    density: np.ndarray,
+    density: np.typing.NDArray,
     method: Literal = "random",
     *,
     dim_compensation: Literal | bool = "auto",
@@ -121,7 +121,7 @@ def create_cutoff_decay_density(
     shape: tuple[int, ...],
     cutoff: float,
     decay: float,
-    resolution: np.ndarray | None = None,
+    resolution: np.typing.NDArray | None = None,
 ) -> np.ndarray:
     """
     Create a density with central plateau and polynomial decay.
@@ -180,7 +180,7 @@ def create_cutoff_decay_density(
 
 
 def create_polynomial_density(
-    shape: tuple[int, ...], decay: float, resolution: np.ndarray | None = None
+    shape: tuple[int, ...], decay: float, resolution: np.typing.NDArray | None = None
 ) -> np.ndarray:
     """
     Create a density with polynomial decay from the center.
@@ -205,7 +205,7 @@ def create_polynomial_density(
     )
 
 
-def create_energy_density(dataset: np.ndarray) -> np.ndarray:
+def create_energy_density(dataset: np.typing.NDArray) -> np.ndarray:
     """
     Create a density based on energy in the Fourier spectrum.
 

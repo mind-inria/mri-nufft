@@ -114,15 +114,15 @@ def initialize_2D_spiral(
     # have a non-monotonic gradient norm when varying the angle
     # over [0, +inf)
     def _update_shot(
-        angles: np.ndarray, radius: np.ndarray, *args: Any  # noqa ANN401
+        angles: np.typing.NDArray, radius: np.typing.NDArray, *args: Any  # noqa ANN401
     ) -> np.ndarray:
         shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
         return np.stack([shot.real, shot.imag], axis=-1)
 
     def _update_parameters(
-        single_shot: np.ndarray,
-        angles: np.ndarray,
-        radius: np.ndarray,
+        single_shot: np.typing.NDArray,
+        angles: np.typing.NDArray,
+        radius: np.typing.NDArray,
         spiral_power: float,
     ) -> tuple[np.ndarray, np.ndarray, float]:
         radius = nl.norm(single_shot, axis=-1)

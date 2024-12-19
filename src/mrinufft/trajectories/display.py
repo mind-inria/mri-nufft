@@ -164,7 +164,7 @@ def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
 
 
 def display_2D_trajectory(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     figsize: float = 5,
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
@@ -279,7 +279,7 @@ def display_2D_trajectory(
 
 
 def display_3D_trajectory(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     nb_repetitions: int | None = None,
     figsize: float = 5,
     per_plane: bool = True,
@@ -418,7 +418,7 @@ def display_3D_trajectory(
 
 
 def display_gradients_simply(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
@@ -532,7 +532,7 @@ def display_gradients_simply(
 
 
 def display_gradients(
-    trajectory: np.ndarray,
+    trajectory: np.typing.NDArray,
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,

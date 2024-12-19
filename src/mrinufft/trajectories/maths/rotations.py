@@ -87,7 +87,11 @@ def Rz(theta: float) -> np.ndarray:
 
 
 def Rv(
-    v1: np.ndarray, v2: np.ndarray, eps: float = 1e-8, *, normalize: bool = True
+    v1: np.typing.NDArray,
+    v2: np.typing.NDArray,
+    eps: float = 1e-8,
+    *,
+    normalize: bool = True,
 ) -> np.ndarray:
     """Initialize 3D rotation matrix from two vectors.
 
@@ -126,7 +130,7 @@ def Rv(
     return np.identity(3) + cross_matrix + cross_matrix @ cross_matrix / (1 + cos_theta)
 
 
-def Ra(vector: np.ndarray, theta: float) -> np.ndarray:
+def Ra(vector: np.typing.NDArray, theta: float) -> np.ndarray:
     """Initialize 3D rotation matrix around an arbitrary vector.
 
     Initialize a 3D rotation matrix to rotate around `vector` by an angle `theta`.

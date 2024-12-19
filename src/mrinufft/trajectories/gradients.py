@@ -8,12 +8,12 @@ from scipy.interpolate import CubicSpline
 
 
 def patch_center_anomaly(
-    shot_or_params: np.ndarray | list,
-    update_shot: Callable[..., np.ndarray] | None = None,
+    shot_or_params: np.typing.NDArray | list,
+    update_shot: Callable[..., np.typing.NDArray] | None = None,
     update_parameters: Callable[..., list] | None = None,
     in_out: bool = False,
     learning_rate: float = 1e-1,
-) -> tuple[np.ndarray, list]:
+) -> tuple[np.typing.NDArray, list]:
     """Re-position samples to avoid center anomalies.
 
     Some trajectories behave slightly differently from expected when
@@ -72,7 +72,9 @@ def patch_center_anomaly(
 
     if update_shot is None or update_parameters is None:
 
-        def _default_update_parameters(shot: np.ndarray, *parameters: list) -> list:
+        def _default_update_parameters(
+            shot: np.typing.NDArray, *parameters: list
+        ) -> list:
             return parameters
 
         update_parameters = _default_update_parameters
