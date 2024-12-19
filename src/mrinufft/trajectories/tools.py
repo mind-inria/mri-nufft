@@ -849,7 +849,7 @@ def get_random_loc_1d(
     np.ndarray: array of size dim_size/accel.
     """
     order = VDSorder(order)
-    pdf = VDSpdf(pdf)
+    pdf = VDSpdf(pdf) if isinstance(pdf, str) else pdf
     if accel == 0 or accel == 1:
         return np.arange(dim_size)  # type: ignore
     elif accel < 0:
@@ -876,19 +876,10 @@ def get_random_loc_1d(
     rng = np.random.default_rng(rng)  # validate get a RNG from a seed or existing rng.
 
     def _get_samples(p) -> list[int]:
-        p /= np.sum(p)
+        p = p / np.sum(p)  # automatic casting if needed
         return list(rng.choice(borders, size=n_samples_borders, replace=False, p=p))
 
-    if pdf == VDSpdf.GAUSSIAN:
-        p = norm.pdf(np.linspace(norm.ppf(0.001), norm.ppf(0.999), len(borders)))
-        sampled_in_border = _get_samples(p)
-    elif pdf == VDSpdf.UNIFORM:
-        p = np.ones(len(borders))
-        sampled_in_border = _get_samples(p)
-    elif pdf == VDSpdf.EQUISPACED:
-        sampled_in_border = list(borders[::accel])
-
-    elif isinstance(pdf, np.ndarray):
+    if isinstance(pdf, np.ndarray):
         if len(pdf) == dim_size:
             # extract the borders
             p = pdf[borders]
@@ -897,6 +888,15 @@ def get_random_loc_1d(
         else:
             raise ValueError("Invalid size for probability.")
         sampled_in_border = _get_samples(p)
+
+    elif pdf == VDSpdf.GAUSSIAN:
+        p = norm.pdf(np.linspace(norm.ppf(0.001), norm.ppf(0.999), len(borders)))
+        sampled_in_border = _get_samples(p)
+    elif pdf == VDSpdf.UNIFORM:
+        p = np.ones(len(borders))
+        sampled_in_border = _get_samples(p)
+    elif pdf == VDSpdf.EQUISPACED:
+        sampled_in_border = list(borders[::accel])
 
     else:
         raise ValueError("Unsupported value for pdf use any of . ")
@@ -947,9 +947,7 @@ def stack_random(
     -------
     numpy.ndarray
         The 3D trajectory stacked along the :math:`k_z` axis.
-
     """
-
     line_locs = get_random_loc_1d(dim_size, center_prop, accel, pdf, rng, order)
     if len(trajectory.shape) == 2:
         Nc, Ns = 1, trajectory.shape[0]
@@ -958,7 +956,10 @@ def stack_random(
 
     new_trajectory = np.zeros((len(line_locs), Nc, Ns, 3))
     for i, loc in enumerate(line_locs):
-        new_trajectory[i, :, :, :2] = trajectory
-        new_trajectory[i, :, :, 2] = loc
+        new_trajectory[i, :, :, :2] = trajectory[..., :2]
+        if trajectory.shape[-1] == 3:
+            new_trajectory[i, :, :, 2] = trajectory[..., 2] + loc
+        else:
+            new_trajectory[i, :, :, 2] = loc
 
     return new_trajectory.reshape(-1, Ns, 3)

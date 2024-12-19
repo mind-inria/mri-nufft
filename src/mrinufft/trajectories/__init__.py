@@ -60,7 +60,6 @@ from .tools import (
     stack,
     stack_random,
     get_random_loc_1d,
-    get_random_loc_nd,
     rotate,
     precess,
     conify,
@@ -111,7 +110,6 @@ __all__ = [
     "initialize_3D_travelling_salesman",
     # tools
     "get_random_loc_1d",
-    "get_random_loc_nd",
     "stack",
     "stack_random",
     "rotate",
