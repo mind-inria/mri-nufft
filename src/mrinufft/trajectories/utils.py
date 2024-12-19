@@ -2,7 +2,7 @@
 
 from enum import Enum, EnumMeta
 from numbers import Real
-from typing import Literal
+from typing import Literal, Any
 
 import numpy as np
 
