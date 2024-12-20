@@ -14,8 +14,8 @@ dynamic = ["version"]
 gpunufft = ["gpuNUFFT>=0.9.0", "cupy-cuda12x"]
 
 torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
-torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x"]
-torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x"]
+torchkbnufft-cpu = ["mri-nufft[torchkbnufft]"]
+torchkbnufft-gpu = ["mri-nufft[torchkbnufft]"]
 
 cufinufft = ["cufinufft>=2.3.1", "cupy-cuda12x"]
 tensorflow = ["tensorflow-mri==0.21.0", "tensorflow-probability==0.17.0", "tensorflow-io==0.27.0", "matplotlib==3.7"]
@@ -24,8 +24,9 @@ sigpy = ["sigpy"]
 pynfft = ["pynfft2>=1.4.3; python_version < '3.12'", "numpy>=2.0.0; python_version < '3.12'"]
 
 pynufft = ["pynufft"]
-pynufft-cpu = ["pynufft"]
-pynufft-gpu = ["pynufft"]
+pynufft-cpu = ["mri-nufft[pynufft]"]
+pynufft-gpu = ["mri-nufft[pynufft]"]
+
 extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets"]
 autodiff = ["torch"]
 

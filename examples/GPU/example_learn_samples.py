@@ -24,7 +24,7 @@ where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_
 # .. colab-link::
 #    :needs_gpu: 1
 #
-#    !pip install mri-nufft[gpunufft] scikit-image
+#    !pip install mri-nufft[cufinufft] scikit-image
 
 import time
 import joblib

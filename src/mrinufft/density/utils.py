@@ -5,6 +5,7 @@ from functools import wraps
 import numpy as np
 
 from mrinufft._utils import MethodRegister, proper_trajectory
+from mrinufft import get_operator
 
 register_density = MethodRegister("density_compensation")
 
@@ -51,3 +52,11 @@ def normalize_weights(weights):
     """
     inv_weights = np.sum(weights) / weights
     return inv_weights / (np.sum(inv_weights))
+
+
+def normalize_density(kspace_loc, shape, density, backend, **kwargs):
+    """Normalize the density to ensure that the reconstruction is stable."""
+    test_op = get_operator(backend)(samples=kspace_loc, shape=shape, **kwargs)
+    test_im = np.ones(shape, dtype=test_op.cpx_dtype)
+    test_im_recon = test_op.adj_op(density * test_op.op(test_im))
+    density /= np.mean(np.abs(test_im_recon))

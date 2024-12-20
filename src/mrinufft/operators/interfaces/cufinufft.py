@@ -18,6 +18,7 @@ from .utils import (
     pin_memory,
     sizeof_fmt,
 )
+from mrinufft.density.utils import normalize_density
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
@@ -924,8 +925,11 @@ class MRICufiNUFFT(FourierOperatorBase):
                 ).squeeze()
             )
         if normalize:
-            test_op = MRICufiNUFFT(samples=kspace_loc, shape=original_shape, **kwargs)
-            test_im = cp.ones(original_shape, dtype=test_op.cpx_dtype)
-            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
-            density_comp /= cp.mean(cp.abs(test_im_recon))
+            density_comp = normalize_density(
+                kspace_loc=kspace_loc,
+                shape=original_shape,
+                density=density_comp,
+                backend=cls.backend,
+                **kwargs
+            )
         return density_comp.squeeze()

@@ -6,6 +6,7 @@ import warnings
 from ..base import FourierOperatorBase, with_numpy_cupy
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from mrinufft.density.utils import normalize_density
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -596,6 +597,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             raise ValueError(
                 "gpuNUFFT is not available, cannot " "estimate the density compensation"
             )
+        original_shape = volume_shape
         volume_shape = (np.array(volume_shape) * osf).astype(int)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
@@ -607,11 +609,13 @@ class MRIGpuNUFFT(FourierOperatorBase):
             max_iter=num_iterations
         )
         if normalize:
-            spike = np.zeros(volume_shape)
-            mid_loc = tuple(v // 2 for v in volume_shape)
-            spike[mid_loc] = 1
-            psf = grid_op.adj_op(grid_op.op(spike))
-            density_comp /= np.linalg.norm(psf)
+            density_comp = normalize_density(
+                kspace_loc=kspace_loc,
+                shape=original_shape,
+                density=density_comp,
+                backend=cls.backend,
+                **kwargs
+            )
         return density_comp.squeeze()
 
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
