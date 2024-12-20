@@ -930,6 +930,6 @@ class MRICufiNUFFT(FourierOperatorBase):
                 shape=original_shape,
                 density=density_comp,
                 backend=cls.backend,
-                **kwargs
+                **kwargs,
             )
         return density_comp.squeeze()
