@@ -56,9 +56,11 @@ def normalize_weights(weights):
 def normalize_density(kspace_loc, shape, density, backend, **kwargs):
     """Normalize the density to ensure that the reconstruction is stable."""
     from mrinufft import get_operator
+
     xp = np
     if backend == "cufinufft":
         import cupy as cp
+
         xp = cp
     test_op = get_operator(backend)(samples=kspace_loc, shape=shape, **kwargs)
     test_im = xp.ones(shape, dtype=test_op.cpx_dtype)
