@@ -4,16 +4,17 @@ from typing import Callable
 
 import numpy as np
 import numpy.linalg as nl
+from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
 
 def patch_center_anomaly(
-    shot_or_params: np.typing.NDArray | list,
-    update_shot: Callable[..., np.typing.NDArray] | None = None,
-    update_parameters: Callable[..., list] | None = None,
+    shot_or_params: NDArray | tuple,
+    update_shot: Callable[..., NDArray] | None = None,
+    update_parameters: Callable[..., tuple] | None = None,
     in_out: bool = False,
     learning_rate: float = 1e-1,
-) -> tuple[np.typing.NDArray, list]:
+) -> tuple[NDArray, tuple]:
     """Re-position samples to avoid center anomalies.
 
     Some trajectories behave slightly differently from expected when
@@ -33,11 +34,11 @@ def patch_center_anomaly(
     shot_or_params : np.array, list
         Either a single shot of shape (Ns, Nd), or a list of arbitrary
         arguments used by ``update_shot`` to initialize a single shot.
-    update_shot : function, optional
+    update_shot : Callable[..., NDArray], optional
         Function used to initialize a single shot based on parameters
         provided by ``update_parameters``. If None, cubic splines are
         used as an approximation instead, by default None
-    update_parameters : function, optional
+    update_parameters : Callable[..., tuple], optional
         Function used to update shot parameters when provided in
         ``shot_or_params`` from an updated shot and parameters.
         If None, cubic spline parameterization is used instead,
@@ -51,9 +52,9 @@ def patch_center_anomaly(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         N-D trajectory based on ``shot_or_params`` if a shot or
-        update_shot otherwise.
+        ``update_shot`` otherwise.
     list
         Updated parameters either in the ``shot_or_params`` format
         if params, or cubic spline parameterization as an array of
@@ -72,9 +73,7 @@ def patch_center_anomaly(
 
     if update_shot is None or update_parameters is None:
 
-        def _default_update_parameters(
-            shot: np.typing.NDArray, *parameters: list
-        ) -> list:
+        def _default_update_parameters(shot: NDArray, *parameters: list) -> list:
             return parameters
 
         update_parameters = _default_update_parameters

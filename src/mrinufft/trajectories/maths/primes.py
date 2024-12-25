@@ -25,7 +25,7 @@ def compute_coprime_factors(
         List of coprime factors of Nc.
     """
     count = start
-    coprimes = []
+    coprimes: list[int] = []
     while len(coprimes) < length:
         # Check greatest common divider (gcd)
         if np.gcd(Nc, count) == 1:

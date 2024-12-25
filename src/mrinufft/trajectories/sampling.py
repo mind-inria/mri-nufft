@@ -1,5 +1,7 @@
 """Sampling densities and methods."""
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
@@ -7,6 +9,7 @@ if TYPE_CHECKING:
 
 import numpy as np
 import numpy.fft as nf
+from numpy.typing import NDArray
 from tqdm.auto import tqdm
 
 from .utils import KMAX
@@ -14,11 +17,11 @@ from .utils import KMAX
 
 def sample_from_density(
     nb_samples: int,
-    density: np.typing.NDArray,
-    method: Literal = "random",
+    density: NDArray,
+    method: Literal["random", "lloyd"] = "random",
     *,
-    dim_compensation: Literal | bool = "auto",
-) -> np.ndarray:
+    dim_compensation: Literal["auto"] | bool = "auto",
+) -> NDArray:
     """
     Sample points based on a given density distribution.
 
@@ -26,14 +29,14 @@ def sample_from_density(
     ----------
     nb_samples : int
         The number of samples to draw.
-    density : np.ndarray
+    density : NDArray
         An array representing the density distribution from which samples are drawn,
         normalized automatically by its sum during the call for convenience.
-    method : str, optional
+    method : Literal["random", "lloyd"], optional
         The sampling method to use, either 'random' for random sampling over
         the discrete grid defined by the density or 'lloyd' for Lloyd's
         algorithm over a continuous space, by default "random".
-    dim_compensation : str, bool, optional
+    dim_compensation : Literal["auto"], bool, optional
         Whether to apply a specific dimensionality compensation introduced
         in [Cha+14]_. An exponent ``N/(N-1)`` with ``N`` the number of
         dimensions in ``density`` is applied to fix the observed
@@ -44,7 +47,7 @@ def sample_from_density(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         An array of range-normalized sampled locations.
 
     Raises
@@ -70,7 +73,7 @@ def sample_from_density(
         ) from err
 
     # Define dimension variables
-    shape = np.array(density.shape)
+    shape = density.shape
     nb_dims = len(shape)
     max_nb_samples = np.prod(shape)
     density = density / np.sum(density)
@@ -98,7 +101,7 @@ def sample_from_density(
         )
         locations = np.indices(shape).reshape((nb_dims, -1))[:, choices]
         locations = locations.T + 0.5
-        locations = locations / shape[None, :]
+        locations = locations / np.array(shape)[None, :]
         locations = 2 * KMAX * locations - KMAX
     elif method == "lloyd":
         kmeans = (
@@ -107,10 +110,10 @@ def sample_from_density(
             else BisectingKMeans(n_clusters=nb_samples)
         )
         kmeans.fit(
-            np.indices(density.shape).reshape((nb_dims, -1)).T,
+            np.indices(shape).reshape((nb_dims, -1)).T,
             sample_weight=density.flatten(),
         )
-        locations = kmeans.cluster_centers_ - np.array(density.shape) / 2
+        locations = kmeans.cluster_centers_ - np.array(shape) / 2
         locations = KMAX * locations / np.max(np.abs(locations))
     else:
         raise ValueError(f"Unknown sampling method {method}.")
@@ -121,8 +124,8 @@ def create_cutoff_decay_density(
     shape: tuple[int, ...],
     cutoff: float,
     decay: float,
-    resolution: np.typing.NDArray | None = None,
-) -> np.ndarray:
+    resolution: NDArray | None = None,
+) -> NDArray:
     """
     Create a density with central plateau and polynomial decay.
 
@@ -140,13 +143,13 @@ def create_cutoff_decay_density(
         and 1 within which density remains uniform and beyond which it decays.
     decay : float
         The polynomial decay in density beyond the cutoff ratio.
-    resolution : np.ndarray, optional
+    resolution : NDArray, optional
         Resolution scaling factors for each dimension of the density grid,
         by default ``None``.
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A density array with values decaying based on the specified
         cutoff ratio and decay rate.
 
@@ -158,7 +161,6 @@ def create_cutoff_decay_density(
        magnetic resonance imaging."
        IEEE Transactions on Medical Imaging 41, no. 8 (2022): 2105-2117.
     """
-    shape = np.array(shape)
     nb_dims = len(shape)
 
     if not resolution:
@@ -180,8 +182,8 @@ def create_cutoff_decay_density(
 
 
 def create_polynomial_density(
-    shape: tuple[int, ...], decay: float, resolution: np.typing.NDArray | None = None
-) -> np.ndarray:
+    shape: tuple[int, ...], decay: float, resolution: NDArray | None = None
+) -> NDArray:
     """
     Create a density with polynomial decay from the center.
 
@@ -191,13 +193,13 @@ def create_polynomial_density(
         The shape of the density grid.
     decay : float
         The exponent that controls the rate of decay for density.
-    resolution : np.ndarray, optional
+    resolution : NDArray, optional
         Resolution scaling factors for each dimension of the density grid,
         by default None.
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A density array with polynomial decay.
     """
     return create_cutoff_decay_density(
@@ -205,7 +207,7 @@ def create_polynomial_density(
     )
 
 
-def create_energy_density(dataset: np.typing.NDArray) -> np.ndarray:
+def create_energy_density(dataset: NDArray) -> NDArray:
     """
     Create a density based on energy in the Fourier spectrum.
 
@@ -214,7 +216,7 @@ def create_energy_density(dataset: np.typing.NDArray) -> np.ndarray:
 
     Parameters
     ----------
-    dataset : np.ndarray
+    dataset : NDArray
         The dataset from which to calculate the density
         based on its Fourier transform, with an expected
         shape (nb_volumes, dim_1, ..., dim_N).
@@ -222,7 +224,7 @@ def create_energy_density(dataset: np.typing.NDArray) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A density array derived from the mean energy in the Fourier
         domain of the input dataset.
     """
@@ -237,11 +239,11 @@ def create_energy_density(dataset: np.typing.NDArray) -> np.ndarray:
 
 def create_chauffert_density(
     shape: tuple[int, ...],
-    wavelet_basis: Literal | pw.Wavelet,
+    wavelet_basis: str | pw.Wavelet,
     nb_wavelet_scales: int,
     *,
     verbose: bool = False,
-) -> np.ndarray:
+) -> NDArray:
     """Create a density based on Chauffert's method.
 
     This is a reproduction of the proposition from [CCW13]_.
@@ -264,7 +266,7 @@ def create_chauffert_density(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A density array created based on wavelet transform coefficients.
 
     See Also
@@ -312,9 +314,9 @@ def create_chauffert_density(
 
 def create_fast_chauffert_density(
     shape: tuple[int, ...],
-    wavelet_basis: Literal | pw.Wavelet,
+    wavelet_basis: str | pw.Wavelet,
     nb_wavelet_scales: int,
-) -> np.ndarray:
+) -> NDArray:
     """Create a density based on an approximated Chauffert method.
 
     This implementation is based on this
@@ -341,7 +343,7 @@ def create_fast_chauffert_density(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A density array created using a faster approximation
         based on 1D projections of the wavelet transform.
 

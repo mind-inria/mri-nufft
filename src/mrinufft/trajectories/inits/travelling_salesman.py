@@ -1,9 +1,10 @@
 """Trajectories based on the Travelling Salesman Problem."""
 
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import numpy.linalg as nl
+from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from tqdm.auto import tqdm
 
@@ -12,7 +13,7 @@ from ..sampling import sample_from_density
 from ..tools import oversample
 
 
-def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> np.ndarray:
+def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> NDArray:
     # Give a list of cluster sizes close to sqrt(`nb_total`)
     cluster_sizes = round(nb_total / nb_clusters) * np.ones(nb_clusters).astype(int)
     delta_sum = nb_total - np.sum(cluster_sizes)
@@ -20,7 +21,9 @@ def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> np.ndarray:
     return cluster_sizes
 
 
-def _sort_by_coordinate(array: np.typing.NDArray, coord: Literal) -> np.ndarray:
+def _sort_by_coordinate(
+    array: NDArray, coord: Literal["x", "y", "z", "r", "phi", "theta"]
+) -> NDArray:
     # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
@@ -49,12 +52,12 @@ def _sort_by_coordinate(array: np.typing.NDArray, coord: Literal) -> np.ndarray:
 
 
 def _cluster_by_coordinate(
-    locations: np.typing.NDArray,
+    locations: NDArray,
     nb_clusters: int,
-    cluster_by: Literal,
-    second_cluster_by: Literal | None = None,
-    sort_by: Literal | None = None,
-) -> np.ndarray:
+    cluster_by: Literal["x", "y", "z", "r", "phi", "theta"],
+    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+) -> NDArray:
     # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
     nb_dims = locations.shape[-1]
@@ -95,15 +98,15 @@ def _cluster_by_coordinate(
 def _initialize_ND_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
-    first_cluster_by: Literal | None = None,
-    second_cluster_by: Literal | None = None,
-    sort_by: Literal | None = None,
+    density: NDArray,
+    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     # Check arguments validity
     if Nc * Ns > np.prod(density.shape):
         raise ValueError("`density` array not large enough to pick `Nc` * `Ns` points.")
@@ -142,15 +145,15 @@ def _initialize_ND_travelling_salesman(
 def initialize_2D_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
-    first_cluster_by: Literal | None = None,
-    second_cluster_by: Literal | None = None,
-    sort_by: Literal | None = None,
+    density: NDArray,
+    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """
     Initialize a 2D trajectory using a Travelling Salesman Problem (TSP)-based path.
 
@@ -166,14 +169,14 @@ def initialize_2D_travelling_salesman(
         The number of clusters (or shots) to divide the trajectory into.
     Ns : int
         The number of points per cluster.
-    density : np.ndarray
+    density : NDArray
         A 2-dimensional density array from which points are sampled.
-    first_cluster_by : Literal, optional
+    first_cluster_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         The coordinate used to cluster points initially, by default ``None``.
-    second_cluster_by : Literal, optional
+    second_cluster_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         A secondary coordinate used for clustering within primary clusters,
         by default ``None``.
-    sort_by : Literal, optional
+    sort_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         The coordinate by which to order points within each cluster,
         by default ``None``.
     tsp_tol : float, optional
@@ -186,7 +189,7 @@ def initialize_2D_travelling_salesman(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A 2D array representing the TSP-ordered trajectory.
 
     Raises
@@ -219,15 +222,15 @@ def initialize_2D_travelling_salesman(
 def initialize_3D_travelling_salesman(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
-    first_cluster_by: Literal | None = None,
-    second_cluster_by: Literal | None = None,
-    sort_by: Literal | None = None,
+    density: NDArray,
+    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """
     Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.
 
@@ -245,14 +248,14 @@ def initialize_3D_travelling_salesman(
         The number of clusters (or shots) to divide the trajectory into.
     Ns : int
         The number of points per cluster.
-    density : np.ndarray
+    density : NDArray
         A 3-dimensional density array from which points are sampled.
-    first_cluster_by : Literal, optional
+    first_cluster_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         The coordinate used to cluster points initially, by default ``None``.
-    second_cluster_by : Literal, optional
+    second_cluster_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         A secondary coordinate used for clustering within primary clusters,
         by default ``None``.
-    sort_by : Literal, optional
+    sort_by : {"x", "y", "z", "r", "phi", "theta"}, optional
         The coordinate by which to order points within each cluster,
         by default ``None``.
     tsp_tol : float, optional
@@ -265,7 +268,7 @@ def initialize_3D_travelling_salesman(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         A 3D array representing the TSP-ordered trajectory.
 
     Raises

@@ -1,11 +1,12 @@
 """Solver for the Travelling Salesman Problem."""
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 def solve_tsp_with_2opt(
-    locations: np.typing.NDArray, improvement_threshold: float = 1e-8
-) -> np.ndarray:
+    locations: NDArray, improvement_threshold: float = 1e-8
+) -> NDArray:
     """Solve the TSP problem using a 2-opt approach.
 
     A sub-optimal solution to the Travelling Salesman Problem (TSP)
@@ -16,7 +17,7 @@ def solve_tsp_with_2opt(
 
     Parameters
     ----------
-    locations : np.ndarray
+    locations : NDArray
         An array of N points with shape (N, D) where D is the space dimension.
     improvement_threshold : float, optional
         Threshold used as progress criterion to stop the optimization process.
@@ -24,7 +25,7 @@ def solve_tsp_with_2opt(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         The new positions order of shape (N,).
     """
     route = np.arange(locations.shape[0])

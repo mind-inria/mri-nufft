@@ -1,5 +1,7 @@
 """Display functions for trajectories."""
 
+from __future__ import annotations
+
 import itertools
 from typing import Any
 
@@ -7,6 +9,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from numpy.typing import NDArray
 
 from .utils import (
     DEFAULT_GMAX,
@@ -76,7 +79,7 @@ class displayConfig:
             setattr(displayConfig, key, value)
         delattr(self, "_old_values")
 
-    def __enter__(self) -> "displayConfig":
+    def __enter__(self) -> displayConfig:
         """Enter the context manager."""
         return self
 
@@ -85,7 +88,7 @@ class displayConfig:
         self.reset()
 
     @classmethod
-    def get_colorlist(cls) -> list[str | np.ndarray]:
+    def get_colorlist(cls) -> list[str | NDArray]:
         """Extract a list of colors from a matplotlib palette.
 
         If the palette is continuous, the colors will be sampled from it.
@@ -164,7 +167,7 @@ def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
 
 
 def display_2D_trajectory(
-    trajectory: np.typing.NDArray,
+    trajectory: NDArray,
     figsize: float = 5,
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
@@ -172,13 +175,13 @@ def display_2D_trajectory(
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: float | np.ndarray,
+    **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
     """Display 2D trajectories.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Trajectory to display.
     figsize : float, optional
         Size of the figure.
@@ -279,7 +282,7 @@ def display_2D_trajectory(
 
 
 def display_3D_trajectory(
-    trajectory: np.typing.NDArray,
+    trajectory: NDArray,
     nb_repetitions: int | None = None,
     figsize: float = 5,
     per_plane: bool = True,
@@ -289,13 +292,13 @@ def display_3D_trajectory(
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: dict,
+    **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
     """Display 3D trajectories.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Trajectory to display.
     nb_repetitions : int
         Number of repetitions (planes, cones, shells, etc).
@@ -418,7 +421,7 @@ def display_3D_trajectory(
 
 
 def display_gradients_simply(
-    trajectory: np.typing.NDArray,
+    trajectory: NDArray,
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
@@ -431,7 +434,7 @@ def display_gradients_simply(
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Trajectory to display.
     shot_ids : tuple[int, ...], optional
         Indices of the shots to display.
@@ -532,7 +535,7 @@ def display_gradients_simply(
 
 
 def display_gradients(
-    trajectory: np.typing.NDArray,
+    trajectory: NDArray,
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
@@ -545,13 +548,13 @@ def display_gradients(
     smax: float = DEFAULT_SMAX,
     constraints_order: int | str | None = None,
     raster_time: float = DEFAULT_RASTER_TIME,
-    **constraints_kwargs: float | np.ndarray,
+    **constraints_kwargs: Any,  # noqa ANN401
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Trajectory to display.
     shot_ids : list of int
         Indices of the shots to display.

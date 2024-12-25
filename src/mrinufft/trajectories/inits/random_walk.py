@@ -1,19 +1,19 @@
 """Trajectories based on random walks."""
 
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..sampling import sample_from_density
 from ..utils import KMAX
 
 
-def _get_adjacent_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
-    return np.concatenate([np.eye(len(shape)), -np.eye(len(shape))], axis=0).astype(int)
+def _get_adjacent_neighbors_offsets(nb_dims: int) -> NDArray:
+    return np.concatenate([np.eye(nb_dims), -np.eye(nb_dims)], axis=0).astype(int)
 
 
-def _get_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
-    nb_dims = len(shape)
+def _get_neighbors_offsets(nb_dims: int) -> NDArray:
     neighbors = (np.indices([3] * nb_dims) - 1).reshape((nb_dims, -1)).T
     nb_half = neighbors.shape[0] // 2
     # Remove full zero entry
@@ -24,22 +24,23 @@ def _get_neighbors_offsets(shape: tuple[int, ...]) -> np.ndarray:
 def _initialize_ND_random_walk(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
+    density: NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     density = density / np.sum(density)
     flat_density = np.copy(density.flatten())
-    shape = np.array(density.shape)
+    shape = density.shape
+    nb_dims = len(shape)
     mask = np.ones_like(flat_density)
 
     # Prepare neighbor offsets once
     offsets = (
-        _get_neighbors_offsets(shape)
+        _get_neighbors_offsets(nb_dims)
         if diagonals
-        else _get_adjacent_neighbors_offsets(shape)
+        else _get_adjacent_neighbors_offsets(nb_dims)
     )
 
     # Make all random draws at once for performance
@@ -47,8 +48,8 @@ def _initialize_ND_random_walk(
 
     # Initialize shot starting points
     locations = sample_from_density(Nc, density, **sampling_kwargs)
-    choices = np.around((locations + KMAX) * (np.array(density.shape) - 1)).astype(int)
-    choices = np.ravel_multi_index(choices.T, density.shape)
+    choices = np.around((locations + KMAX) * (np.array(shape) - 1)).astype(int)
+    choices = np.ravel_multi_index(choices.T, shape)
     routes = [choices]
 
     # Walk
@@ -59,7 +60,7 @@ def _initialize_ND_random_walk(
 
         # Find out-of-bound neighbors and ignore them
         invalids = (neighbors < 0).any(axis=0) | (
-            neighbors >= shape[:, None, None]
+            neighbors >= np.array(shape)[:, None, None]
         ).any(axis=0)
         neighbors[:, invalids] = 0
         invalids = invalids.T
@@ -84,25 +85,24 @@ def _initialize_ND_random_walk(
                 mask[choices] * flat_density[choices] / (mask[choices] + 1)
             )
             mask[choices] += 1
-    routes = np.array(routes).T
 
     # Create trajectory from routes
     locations = np.indices(shape)
-    locations = locations.reshape((len(shape), -1))
-    trajectory = np.array([locations[:, r].T for r in routes])
-    trajectory = 2 * KMAX * trajectory / (shape - 1) - KMAX
+    locations = locations.reshape((nb_dims, -1))
+    trajectory = np.array([locations[:, r].T for r in np.array(routes).T])
+    trajectory = 2 * KMAX * trajectory / (np.array(shape) - 1) - KMAX
     return trajectory
 
 
 def initialize_2D_random_walk(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
+    density: NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """Initialize a 2D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -120,7 +120,7 @@ def initialize_2D_random_walk(
         Number of shots
     Ns : int
         Number of samples per shot
-    density : np.ndarray
+    density : NDArray
         Sampling density used to determine the walk probabilities,
         normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
@@ -137,7 +137,7 @@ def initialize_2D_random_walk(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         2D random walk trajectory
 
     References
@@ -162,12 +162,12 @@ def initialize_2D_random_walk(
 def initialize_3D_random_walk(
     Nc: int,
     Ns: int,
-    density: np.typing.NDArray,
+    density: NDArray,
     *,
     diagonals: bool = True,
     pseudo_random: bool = True,
-    **sampling_kwargs: Literal | bool,
-) -> np.ndarray:
+    **sampling_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """Initialize a 3D random walk trajectory.
 
     This is an adaptation of the proposition from [Cha+14]_.
@@ -185,7 +185,7 @@ def initialize_3D_random_walk(
         Number of shots
     Ns : int
         Number of samples per shot
-    density : np.ndarray
+    density : NDArray
         Sampling density used to determine the walk probabilities,
         normalized automatically by its sum during the call for convenience.
     diagonals : bool, optional
@@ -202,7 +202,7 @@ def initialize_3D_random_walk(
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D random walk trajectory
 
     References
