@@ -1,6 +1,6 @@
 """Trajectories based on the Travelling Salesman Problem."""
 
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 import numpy.linalg as nl
@@ -12,6 +12,8 @@ from ..maths import solve_tsp_with_2opt
 from ..sampling import sample_from_density
 from ..tools import oversample
 
+Coordinate: TypeAlias = Literal["x", "y", "z", "r", "phi", "theta"]
+
 
 def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> NDArray:
     # Give a list of cluster sizes close to sqrt(`nb_total`)
@@ -21,9 +23,7 @@ def _get_approx_cluster_sizes(nb_total: int, nb_clusters: int) -> NDArray:
     return cluster_sizes
 
 
-def _sort_by_coordinate(
-    array: NDArray, coord: Literal["x", "y", "z", "r", "phi", "theta"]
-) -> NDArray:
+def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
     # Sort a list of N-D locations by a Cartesian/spherical coordinate
     if array.shape[-1] < 3 and coord.lower() in ["z", "theta"]:
         raise ValueError(
@@ -54,9 +54,9 @@ def _sort_by_coordinate(
 def _cluster_by_coordinate(
     locations: NDArray,
     nb_clusters: int,
-    cluster_by: Literal["x", "y", "z", "r", "phi", "theta"],
-    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    cluster_by: Coordinate,
+    second_cluster_by: Coordinate | None = None,
+    sort_by: Coordinate | None = None,
 ) -> NDArray:
     # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
@@ -99,9 +99,9 @@ def _initialize_ND_travelling_salesman(
     Nc: int,
     Ns: int,
     density: NDArray,
-    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    first_cluster_by: Coordinate | None = None,
+    second_cluster_by: Coordinate | None = None,
+    sort_by: Coordinate | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
@@ -146,9 +146,9 @@ def initialize_2D_travelling_salesman(
     Nc: int,
     Ns: int,
     density: NDArray,
-    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    first_cluster_by: Coordinate | None = None,
+    second_cluster_by: Coordinate | None = None,
+    sort_by: Coordinate | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
@@ -223,9 +223,9 @@ def initialize_3D_travelling_salesman(
     Nc: int,
     Ns: int,
     density: NDArray,
-    first_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    second_cluster_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
-    sort_by: Literal["x", "y", "z", "r", "phi", "theta"] | None = None,
+    first_cluster_by: Coordinate | None = None,
+    second_cluster_by: Coordinate | None = None,
+    sort_by: Coordinate | None = None,
     tsp_tol: float = 1e-8,
     *,
     verbose: bool = False,
