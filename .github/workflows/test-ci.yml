@@ -127,10 +127,10 @@ jobs:
         shell: bash
         run: |
           cd $RUNNER_WORKSPACE
-          ls -al
-          rm -rf finufft
-          rm -rf gpuNUFFT
-          rm -rf venv
+          # ls -al
+          # rm -rf finufft
+          # rm -rf gpuNUFFT
+          # rm -rf venv
  
   get-commit-message:
     runs-on: ubuntu-latest
