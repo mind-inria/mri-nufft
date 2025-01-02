@@ -126,11 +126,11 @@ jobs:
         if: always()
         shell: bash
         run: |
-          #cd $RUNNER_WORKSPACE
+          cd $RUNNER_WORKSPACE
           ls -al
-          #rm -rf finufft
-          #rm -rf gpuNUFFT
-          #rm -rf venv
+          rm -rf finufft
+          rm -rf gpuNUFFT
+          rm -rf venv
  
   get-commit-message:
     runs-on: ubuntu-latest
