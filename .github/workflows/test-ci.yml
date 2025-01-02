@@ -98,9 +98,9 @@ jobs:
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
+          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
           pip install -e .[${{ matrix.backend }},autodiff]
 
       - name: Run Tests
@@ -169,11 +169,11 @@ jobs:
           python -m pip install -e .[extra,test,dev]
           python -m pip install finufft pooch brainweb-dl torch fastmri
         
-      - name: Point to CUDA 12.1 #TODO: This can be combined from other jobs
+      - name: Point to CUDA 12.4 #TODO: This can be combined from other jobs
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
+          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
 
       - name: Install Python deps
         shell: bash
@@ -277,11 +277,11 @@ jobs:
         with:
           python-version: "3.10"
         
-      - name: Point to CUDA 12.1
+      - name: Point to CUDA 12.4
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
+          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
       
       - name: Install dependencies
         shell: bash -l {0}
