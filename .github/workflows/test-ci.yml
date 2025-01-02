@@ -46,6 +46,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .[test,${{ env.ref_backend }},${{ matrix.backend }}]
+          if [[ ${{ matrix.backend }} == "finufft" ]]; then
+            # Install torch for testing autodiff
+            python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          fi
           
       - name: Install BART if needed
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
@@ -91,7 +95,7 @@ jobs:
           python -m venv venv
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
-          pip install -e mri-nufft[test]
+          pip install -e mri-nufft[test,${{ env.ref_backend }}]
 
 
       - name: Install backend
