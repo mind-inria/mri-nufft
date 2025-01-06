@@ -105,7 +105,7 @@ jobs:
           export CUDA_BIN_PATH=/usr/local/cuda-12.4/
           export PATH=/usr/local/cuda-12.4/bin/:${PATH}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
-          pip install -e .[${{ matrix.backend }},autodiff]
+          pip install --no-binary cufinufft -e .[${{ matrix.backend }},autodiff]
 
       - name: Run Tests
         shell: bash
@@ -183,7 +183,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e .[test,dev,extra,finufft,cufinufft,gpuNUFFT,sigpy,autodiff,doc]
+          python -m pip install -e --no-binary cufinufft .[test,dev,extra,finufft,cufinufft,gpuNUFFT,sigpy,autodiff,doc]
         
       - name: Run examples
         shell: bash
@@ -291,7 +291,7 @@ jobs:
         shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft]
+          python -m pip install --no-binary cufinufft .[doc,finufft,autodiff,gpunufft,cufinufft]
       
           
       - name: Build API documentation
