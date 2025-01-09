@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -661,27 +666,27 @@
 <span class="sd">https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wrapper.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">.._array_compat</span> <span class="kn">import</span> <span class="n">CUPY_AVAILABLE</span><span class="p">,</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">,</span> <span class="n">with_numpy_cupy</span>
-<span class="kn">from</span> <span class="nn">.._utils</span> <span class="kn">import</span> <span class="n">get_array_module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">CUPY_AVAILABLE</span><span class="p">,</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">,</span> <span class="n">with_numpy_cupy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_array_module</span>
 
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">FourierOperatorBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierOperatorBase</span>
 
-<span class="kn">from</span> <span class="nn">.interfaces.utils</span> <span class="kn">import</span> <span class="n">is_cuda_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_cuda_array</span>
 
 <span class="k">if</span> <span class="n">CUPY_AVAILABLE</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">cupy</span> <span class="k">as</span> <span class="nn">cp</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
 
 <span class="k">if</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 
 <div class="viewcode-block" id="get_interpolators_from_fieldmap">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html#mrinufft.operators.off_resonance.get_interpolators_from_fieldmap">[docs]</a>
 <span class="nd">@with_numpy_cupy</span>
-<span class="k">def</span> <span class="nf">get_interpolators_from_fieldmap</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_interpolators_from_fieldmap</span><span class="p">(</span>
     <span class="n">b0_map</span><span class="p">,</span> <span class="n">readout_time</span><span class="p">,</span> <span class="n">n_time_segments</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Approximate ``exp(-2j*pi*fieldmap*readout_time) ≈ Σ B_n(t)C_n(r)``.</span>
@@ -810,7 +815,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_outer_sum</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_outer_sum</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">):</span>
     <span class="n">xx</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># add a singleton dimension at axis 1</span>
     <span class="n">yy</span> <span class="o">=</span> <span class="n">yy</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># add a singleton dimension at axis 0</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">yy</span>  <span class="c1"># compute the outer sum</span>
@@ -819,7 +824,7 @@
 
 <div class="viewcode-block" id="MRIFourierCorrected">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected">[docs]</a>
-<span class="k">class</span> <span class="nc">MRIFourierCorrected</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MRIFourierCorrected</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fourier Operator with B0 Inhomogeneities compensation.</span>
 
 <span class="sd">    This is a wrapper around the Fourier Operator to compensate for the</span>
@@ -870,7 +875,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fourier_op</span><span class="p">,</span>
         <span class="n">b0_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -929,7 +934,7 @@
 
 <div class="viewcode-block" id="MRIFourierCorrected.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.op">[docs]</a>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute Forward Operation with off-resonance effect.</span>
 
 <span class="sd">        Parameters</span>
@@ -960,7 +965,7 @@
 
 <div class="viewcode-block" id="MRIFourierCorrected.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.adj_op">[docs]</a>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute Adjoint Operation with off-resonance effect.</span>
 
@@ -998,7 +1003,7 @@
 <div class="viewcode-block" id="MRIFourierCorrected.get_spatial_coefficients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.get_spatial_coefficients">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute spatial coefficients for field approximation.</span>
 
 <span class="sd">        Parameters</span>
@@ -1024,7 +1029,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_get_complex_fieldmap</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_complex_fieldmap</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">b0_map</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">r2star_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1036,7 +1041,7 @@
     <span class="k">return</span> <span class="n">field_map</span>
 
 
-<span class="k">def</span> <span class="nf">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
     <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
 
     <span class="c1"># get spatial coeffs</span>
@@ -1112,8 +1117,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

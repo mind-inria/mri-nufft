@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,14 +662,14 @@
   <h1>Source code for mrinufft.operators.interfaces.finufft</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Finufft interface.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mrinufft._utils</span> <span class="kn">import</span> <span class="n">proper_trajectory</span>
-<span class="kn">from</span> <span class="nn">mrinufft.operators.base</span> <span class="kn">import</span> <span class="n">FourierOperatorCPU</span><span class="p">,</span> <span class="n">FourierOperatorBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">proper_trajectory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierOperatorCPU</span><span class="p">,</span> <span class="n">FourierOperatorBase</span>
 
 <span class="n">FINUFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">finufft._interfaces</span> <span class="kn">import</span> <span class="n">Plan</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">finufft._interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plan</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">FINUFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -673,10 +678,10 @@
 
 <div class="viewcode-block" id="RawFinufftPlan">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html#mrinufft.operators.interfaces.finufft.RawFinufftPlan">[docs]</a>
-<span class="k">class</span> <span class="nc">RawFinufftPlan</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawFinufftPlan</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Light wrapper around the guru interface of finufft.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -698,7 +703,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_make_plan</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_pts</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typ</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typ</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plans</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span> <span class="o">=</span> <span class="n">Plan</span><span class="p">(</span>
             <span class="n">typ</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -708,7 +713,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_pts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typ</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_pts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typ</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
         <span class="n">fpts_axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
             <span class="n">fpts_axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">samples</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
@@ -717,7 +722,7 @@
 
 <div class="viewcode-block" id="RawFinufftPlan.adj_op">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html#mrinufft.operators.interfaces.finufft.RawFinufftPlan.adj_op">[docs]</a>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Type 1 transform. Non Uniform to Uniform.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">grid_data</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -727,7 +732,7 @@
 
 <div class="viewcode-block" id="RawFinufftPlan.op">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html#mrinufft.operators.interfaces.finufft.RawFinufftPlan.op">[docs]</a>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Type 2 transform. Uniform to non-uniform.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">grid_data</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -737,7 +742,7 @@
 
 <div class="viewcode-block" id="RawFinufftPlan.toggle_grad_traj">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html#mrinufft.operators.interfaces.finufft.RawFinufftPlan.toggle_grad_traj">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_grad_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_grad_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle between the gradient trajectory and the plan for type 1 transform.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plans</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_plan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plans</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
 </div>
@@ -746,7 +751,7 @@
 
 <div class="viewcode-block" id="MRIfinufft">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.MRIfinufft.html#mrinufft.operators.interfaces.finufft.MRIfinufft">[docs]</a>
-<span class="k">class</span> <span class="nc">MRIfinufft</span><span class="p">(</span><span class="n">FourierOperatorCPU</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MRIfinufft</span><span class="p">(</span><span class="n">FourierOperatorCPU</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MRI Transform Operator using finufft.</span>
 
 <span class="sd">    Parameters</span>
@@ -779,7 +784,7 @@
     <span class="n">available</span> <span class="o">=</span> <span class="n">FINUFFT_AVAILABLE</span>
     <span class="n">autograd_available</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -811,7 +816,7 @@
         <span class="p">)</span>
 
     <span class="nd">@FourierOperatorBase</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_samples</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the plans when changing the samples.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">proper_trajectory</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">new_samples</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span>
@@ -822,7 +827,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">_set_pts</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_density</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_density_method</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_plan_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_plan_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">grad_plan</span> <span class="o">=</span> <span class="n">Plan</span><span class="p">(</span>
             <span class="mi">2</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -836,7 +841,7 @@
 
 <div class="viewcode-block" id="MRIfinufft.toggle_grad_traj">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.finufft.MRIfinufft.html#mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj">[docs]</a>
-    <span class="k">def</span> <span class="nf">toggle_grad_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_grad_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle between the gradient trajectory and the plan for type 1 transform.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uses_sense</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
@@ -905,8 +910,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

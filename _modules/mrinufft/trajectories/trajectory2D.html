@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,14 +662,14 @@
   <h1>Source code for mrinufft.trajectories.trajectory2D</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions to initialize 2D trajectories.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">numpy.linalg</span> <span class="k">as</span> <span class="nn">nl</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span>
 
-<span class="kn">from</span> <span class="nn">.gradients</span> <span class="kn">import</span> <span class="n">patch_center_anomaly</span>
-<span class="kn">from</span> <span class="nn">.maths</span> <span class="kn">import</span> <span class="n">R2D</span><span class="p">,</span> <span class="n">compute_coprime_factors</span><span class="p">,</span> <span class="n">is_from_fibonacci_sequence</span>
-<span class="kn">from</span> <span class="nn">.tools</span> <span class="kn">import</span> <span class="n">rotate</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_algebraic_spiral</span><span class="p">,</span> <span class="n">initialize_tilt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gradients</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch_center_anomaly</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.maths</span><span class="w"> </span><span class="kn">import</span> <span class="n">R2D</span><span class="p">,</span> <span class="n">compute_coprime_factors</span><span class="p">,</span> <span class="n">is_from_fibonacci_sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">rotate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_algebraic_spiral</span><span class="p">,</span> <span class="n">initialize_tilt</span>
 
 <span class="c1">#####################</span>
 <span class="c1"># CIRCULAR PATTERNS #</span>
@@ -673,7 +678,7 @@
 
 <div class="viewcode-block" id="initialize_2D_radial">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_radial.html#mrinufft.trajectories.trajectory2D.initialize_2D_radial">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D radial trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -708,7 +713,7 @@
 
 <div class="viewcode-block" id="initialize_2D_spiral">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_spiral.html#mrinufft.trajectories.trajectory2D.initialize_2D_spiral">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_spiral</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_spiral</span><span class="p">(</span>
     <span class="n">Nc</span><span class="p">,</span>
     <span class="n">Ns</span><span class="p">,</span>
     <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
@@ -771,11 +776,11 @@
     <span class="c1"># Algebraic spirals with power coefficients superior to 1</span>
     <span class="c1"># have a non-monotonic gradient norm when varying the angle</span>
     <span class="c1"># over [0, +inf)</span>
-    <span class="k">def</span> <span class="nf">_update_shot</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_shot</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="n">shot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">angles</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">shot</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">shot</span><span class="o">.</span><span class="n">imag</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_update_parameters</span><span class="p">(</span><span class="n">single_shot</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">spiral_power</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_parameters</span><span class="p">(</span><span class="n">single_shot</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">spiral_power</span><span class="p">):</span>
         <span class="n">radius</span> <span class="o">=</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">single_shot</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">spiral_power</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">angles</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">spiral_power</span>
@@ -809,7 +814,7 @@
 
 <div class="viewcode-block" id="initialize_2D_fibonacci_spiral">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral.html#mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_fibonacci_spiral</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">spiral_reduction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patch_center</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_fibonacci_spiral</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">spiral_reduction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patch_center</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D Fibonacci spiral trajectory.</span>
 
 <span class="sd">    A non-algebraic spiral trajectory based on the Fibonacci sequence,</span>
@@ -881,7 +886,7 @@
 
 <div class="viewcode-block" id="initialize_2D_cones">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_cones.html#mrinufft.trajectories.trajectory2D.initialize_2D_cones">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_cones</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_cones</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D cone trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -923,7 +928,7 @@
 
 <div class="viewcode-block" id="initialize_2D_sinusoide">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide.html#mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_sinusoide</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_sinusoide</span><span class="p">(</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D sinusoide trajectory.</span>
@@ -967,7 +972,7 @@
 
 <div class="viewcode-block" id="initialize_2D_propeller">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_propeller.html#mrinufft.trajectories.trajectory2D.initialize_2D_propeller">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_propeller</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_strips</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_propeller</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_strips</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D PROPELLER trajectory, as proposed in [Pip99]_.</span>
 
 <span class="sd">    The PROPELLER trajectory is generally used along a specific</span>
@@ -1018,7 +1023,7 @@
 
 <div class="viewcode-block" id="initialize_2D_rings">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rings.html#mrinufft.trajectories.trajectory2D.initialize_2D_rings">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_rings</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_rings</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_rings</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_rings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D ring trajectory, as proposed in [HHN08]_.</span>
 
 <span class="sd">    Parameters</span>
@@ -1067,7 +1072,7 @@
 
 <div class="viewcode-block" id="initialize_2D_rosette">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rosette.html#mrinufft.trajectories.trajectory2D.initialize_2D_rosette">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_rosette</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">coprime_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_rosette</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">coprime_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D rosette trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -1111,7 +1116,7 @@
 
 <div class="viewcode-block" id="initialize_2D_polar_lissajous">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous.html#mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_polar_lissajous</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">coprime_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_polar_lissajous</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_segments</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">coprime_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D polar Lissajous trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -1168,7 +1173,7 @@
 
 <div class="viewcode-block" id="initialize_2D_lissajous">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_lissajous.html#mrinufft.trajectories.trajectory2D.initialize_2D_lissajous">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_lissajous</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_lissajous</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D Lissajous trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -1201,7 +1206,7 @@
 
 <div class="viewcode-block" id="initialize_2D_waves">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_waves.html#mrinufft.trajectories.trajectory2D.initialize_2D_waves">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_2D_waves</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_waves</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D waves trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -1296,8 +1301,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

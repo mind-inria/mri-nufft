@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
@@ -39,10 +39,10 @@
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -523,9 +523,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -782,19 +787,19 @@ Users are encouraged to contact the authors if they want to use it.</p>
                 alt="Open In Colab"/>
             </a>
         </div>
-        <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+        <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="kn">import</span> <span class="nn">brainweb_dl</span> <span class="k">as</span> <span class="nn">bwdl</span>
-<span class="kn">import</span> <span class="nn">joblib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">tempfile</span> <span class="k">as</span> <span class="nn">tmp</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageSequence</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">brainweb_dl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bwdl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tmp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageSequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">mrinufft</span> <span class="kn">import</span> <span class="n">get_operator</span>
-<span class="kn">from</span> <span class="nn">mrinufft.trajectories</span> <span class="kn">import</span> <span class="n">initialize_2D_radial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_operator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.trajectories</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_2D_radial</span>
 </pre></div>
 </div>
 <section id="utils">
@@ -806,8 +811,8 @@ Users are encouraged to contact the authors if they want to use it.</p>
 <p>While we are only learning the NUFFT operator, we still need the gradient <cite>wrt_data=True</cite> to have all the gradients computed correctly.
 See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a> for more details.</p>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inital_trajectory</span><span class="p">,</span>
         <span class="n">img_size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span>
@@ -829,7 +834,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">img_size</span> <span class="o">=</span> <span class="n">img_size</span>
 
-    <span class="k">def</span> <span class="nf">_interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Torch interpolate function to upsample the trajectory&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span>
             <span class="n">traj</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
@@ -838,7 +843,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
             <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">get_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to get trajectory, which is interpolated version of control points.&quot;&quot;&quot;</span>
         <span class="n">traj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log2</span></a><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_decim</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)):</span>
@@ -846,7 +851,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
 
         <span class="k">return</span> <span class="n">traj</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">traj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">upscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Upscaling the model.</span>
 <span class="sd">        In this step, the number of control points are doubled and interpolated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -856,7 +861,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_decim</span> <span class="o">/=</span> <span class="n">factor</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">traj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_trajectory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">traj</span>
 
@@ -870,7 +875,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
 </section>
 <section id="state-plotting">
 <h3>State plotting<a class="headerlink" href="#state-plotting" title="Link to this heading">#</a></h3>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">recon</span><span class="p">,</span> <span class="n">control_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">recon</span><span class="p">,</span> <span class="n">control_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
     <span class="c1"># Upper left reference image</span>
     <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">abs</span></a><span class="p">(</span><span class="n">image</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
@@ -914,7 +919,7 @@ See <a class="reference internal" href="#grc23" id="id3"><span>[GRC23]</span></a
 </section>
 <section id="optimizer-upscaling">
 <h3>Optimizer upscaling<a class="headerlink" href="#optimizer-upscaling" title="Link to this heading">#</a></h3>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">upsample_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">new_optimizer</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">upsample_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">new_optimizer</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Upsample the optimizer.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">old_group</span><span class="p">,</span> <span class="n">new_group</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span></a><span class="p">,</span> <span class="n">new_optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">old_param</span><span class="p">,</span> <span class="n">new_param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">old_group</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">],</span> <span class="n">new_group</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]):</span>
@@ -966,7 +971,7 @@ we would use a whole dataset instead (e.g. fastMRI).</p>
 <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
 </pre></div>
 </div>
@@ -979,10 +984,12 @@ of the trajectory.</p>
 <span class="n">plot_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">initial_traj</span></a><span class="p">,</span> <span class="n">initial_recons</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_learn_samples_multires_001.png" srcset="../../_images/sphx_glr_example_learn_samples_multires_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<img src="../../_images/sphx_glr_example_learn_samples_multires_001.png" srcset="../../_images/sphx_glr_example_learn_samples_multires_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
   warnings.warn(f&quot;Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)&quot;)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:136: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+  axs[0].imshow(np.abs(image[0]), cmap=&quot;gray&quot;)
 </pre></div>
 </div>
 </section>
@@ -1033,265 +1040,269 @@ of the trajectory.</p>
             <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/30 [00:00&lt;?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/30 [00:00&lt;?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
   warnings.warn(f&quot;Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)&quot;)
-/volatile/github-ci-mind-inria/gpu_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:259: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:259: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
   loss = torch.nn.functional.mse_loss(out, image[None, None])
 
-  0%|          | 0/30 [00:00&lt;?, ?steps/s, loss=(array(0.86704654, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner/_work/_tool/Python/3.10.15/x64/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at ../aten/src/ATen/native/Copy.cpp:308.)
+  0%|          | 0/30 [00:00&lt;?, ?steps/s, loss=(array(0.86704654, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at ../aten/src/ATen/native/Copy.cpp:308.)
   grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:275: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+  fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:136: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+  axs[0].imshow(np.abs(image[0]), cmap=&quot;gray&quot;)
 
-  3%|▎         | 1/30 [00:00&lt;00:20,  1.42steps/s, loss=(array(0.86704654, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:20,  1.42steps/s, loss=(array(0.5286128, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.57steps/s, loss=(array(0.5286128, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.57steps/s, loss=(array(0.36503774, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:18,  1.50steps/s, loss=(array(0.36503774, dtype=float32),)]
- 10%|█         | 3/30 [00:02&lt;00:18,  1.50steps/s, loss=(array(0.4146319, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.55steps/s, loss=(array(0.4146319, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.55steps/s, loss=(array(0.30785707, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:16,  1.55steps/s, loss=(array(0.30785707, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:16,  1.55steps/s, loss=(array(0.32219106, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.32219106, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.34580207, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:13,  1.65steps/s, loss=(array(0.34580207, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:13,  1.65steps/s, loss=(array(0.3096822, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:13,  1.60steps/s, loss=(array(0.3096822, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:13,  1.60steps/s, loss=(array(0.29107636, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:14,  1.44steps/s, loss=(array(0.29107636, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:14,  1.44steps/s, loss=(array(0.28929195, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.50steps/s, loss=(array(0.28929195, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.50steps/s, loss=(array(0.27598783, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.53steps/s, loss=(array(0.27598783, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.53steps/s, loss=(array(0.27360773, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.57steps/s, loss=(array(0.27360773, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.57steps/s, loss=(array(0.2685275, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.56steps/s, loss=(array(0.2685275, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.56steps/s, loss=(array(0.25053963, dtype=float32),)]
- 47%|████▋     | 14/30 [00:09&lt;00:10,  1.59steps/s, loss=(array(0.25053963, dtype=float32),)]
- 47%|████▋     | 14/30 [00:09&lt;00:10,  1.59steps/s, loss=(array(0.23135254, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.64steps/s, loss=(array(0.23135254, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.64steps/s, loss=(array(0.24112129, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:08,  1.66steps/s, loss=(array(0.24112129, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:08,  1.66steps/s, loss=(array(0.23986332, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:10&lt;00:07,  1.78steps/s, loss=(array(0.23986332, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:10&lt;00:07,  1.78steps/s, loss=(array(0.22417977, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:06,  1.74steps/s, loss=(array(0.22417977, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:06,  1.74steps/s, loss=(array(0.21919632, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:07,  1.53steps/s, loss=(array(0.21919632, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:07,  1.53steps/s, loss=(array(0.20742278, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:12&lt;00:06,  1.57steps/s, loss=(array(0.20742278, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:12&lt;00:06,  1.57steps/s, loss=(array(0.20717141, dtype=float32),)]
- 70%|███████   | 21/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.20717141, dtype=float32),)]
- 70%|███████   | 21/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.19848356, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.19848356, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.18597358, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:14&lt;00:04,  1.61steps/s, loss=(array(0.18597358, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:14&lt;00:04,  1.61steps/s, loss=(array(0.18525052, dtype=float32),)]
- 80%|████████  | 24/30 [00:15&lt;00:03,  1.59steps/s, loss=(array(0.18525052, dtype=float32),)]
- 80%|████████  | 24/30 [00:15&lt;00:03,  1.59steps/s, loss=(array(0.17937596, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:15&lt;00:03,  1.62steps/s, loss=(array(0.17937596, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:15&lt;00:03,  1.62steps/s, loss=(array(0.17472246, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:16&lt;00:02,  1.46steps/s, loss=(array(0.17472246, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:16&lt;00:02,  1.46steps/s, loss=(array(0.16732308, dtype=float32),)]
- 90%|█████████ | 27/30 [00:17&lt;00:01,  1.50steps/s, loss=(array(0.16732308, dtype=float32),)]
- 90%|█████████ | 27/30 [00:17&lt;00:01,  1.50steps/s, loss=(array(0.1665864, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:17&lt;00:01,  1.55steps/s, loss=(array(0.1665864, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:17&lt;00:01,  1.55steps/s, loss=(array(0.15969816, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:18&lt;00:00,  1.38steps/s, loss=(array(0.15969816, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:18&lt;00:00,  1.38steps/s, loss=(array(0.15472594, dtype=float32),)]
-100%|██████████| 30/30 [00:19&lt;00:00,  1.45steps/s, loss=(array(0.15472594, dtype=float32),)]
-100%|██████████| 30/30 [00:19&lt;00:00,  1.55steps/s, loss=(array(0.15472594, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:13,  2.15steps/s, loss=(array(0.86704654, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:13,  2.15steps/s, loss=(array(0.5286128, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.19steps/s, loss=(array(0.5286128, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.19steps/s, loss=(array(0.36503774, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:12,  2.22steps/s, loss=(array(0.36503774, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:12,  2.22steps/s, loss=(array(0.4146319, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.27steps/s, loss=(array(0.4146319, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.27steps/s, loss=(array(0.30785707, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:10,  2.29steps/s, loss=(array(0.30785707, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:10,  2.29steps/s, loss=(array(0.32219106, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.32steps/s, loss=(array(0.32219106, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.32steps/s, loss=(array(0.34580207, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:09,  2.33steps/s, loss=(array(0.34580207, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:09,  2.33steps/s, loss=(array(0.3096822, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:10,  2.01steps/s, loss=(array(0.3096822, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:10,  2.01steps/s, loss=(array(0.29107636, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  2.10steps/s, loss=(array(0.29107636, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  2.10steps/s, loss=(array(0.28929195, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.17steps/s, loss=(array(0.28929195, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.17steps/s, loss=(array(0.27598783, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:04&lt;00:08,  2.21steps/s, loss=(array(0.27598783, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:05&lt;00:08,  2.21steps/s, loss=(array(0.27360773, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.23steps/s, loss=(array(0.27360773, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.23steps/s, loss=(array(0.2685275, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.28steps/s, loss=(array(0.2685275, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.28steps/s, loss=(array(0.25053963, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:06,  2.32steps/s, loss=(array(0.25053963, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:06,  2.32steps/s, loss=(array(0.23135254, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.34steps/s, loss=(array(0.23135254, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.34steps/s, loss=(array(0.24112129, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:05,  2.35steps/s, loss=(array(0.24112129, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:05,  2.35steps/s, loss=(array(0.23986332, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.36steps/s, loss=(array(0.23986332, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.36steps/s, loss=(array(0.22417977, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.03steps/s, loss=(array(0.22417977, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.03steps/s, loss=(array(0.21919632, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  2.13steps/s, loss=(array(0.21919632, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  2.13steps/s, loss=(array(0.20742278, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.19steps/s, loss=(array(0.20742278, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.19steps/s, loss=(array(0.20717141, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.23steps/s, loss=(array(0.20717141, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.23steps/s, loss=(array(0.19848356, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:09&lt;00:03,  2.26steps/s, loss=(array(0.19848356, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:09&lt;00:03,  2.26steps/s, loss=(array(0.18597358, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.29steps/s, loss=(array(0.18597358, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.29steps/s, loss=(array(0.18525052, dtype=float32),)]
+ 80%|████████  | 24/30 [00:10&lt;00:02,  2.32steps/s, loss=(array(0.18525052, dtype=float32),)]
+ 80%|████████  | 24/30 [00:10&lt;00:02,  2.32steps/s, loss=(array(0.17937596, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.35steps/s, loss=(array(0.17937596, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.35steps/s, loss=(array(0.17472246, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.36steps/s, loss=(array(0.17472246, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.36steps/s, loss=(array(0.16732308, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:11&lt;00:01,  2.37steps/s, loss=(array(0.16732308, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:11&lt;00:01,  2.37steps/s, loss=(array(0.1665864, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.03steps/s, loss=(array(0.1665864, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.03steps/s, loss=(array(0.15969816, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  2.13steps/s, loss=(array(0.15969816, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  2.13steps/s, loss=(array(0.15472594, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.19steps/s, loss=(array(0.15472594, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.23steps/s, loss=(array(0.15472594, dtype=float32),)]
 
   0%|          | 0/30 [00:00&lt;?, ?steps/s]
   0%|          | 0/30 [00:00&lt;?, ?steps/s, loss=(array(0.15260476, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:17,  1.64steps/s, loss=(array(0.15260476, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:17,  1.64steps/s, loss=(array(0.15010233, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.58steps/s, loss=(array(0.15010233, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.58steps/s, loss=(array(0.14741988, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:16,  1.61steps/s, loss=(array(0.14741988, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:16,  1.61steps/s, loss=(array(0.1448765, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.61steps/s, loss=(array(0.1448765, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.61steps/s, loss=(array(0.14455202, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:15,  1.61steps/s, loss=(array(0.14455202, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:15,  1.61steps/s, loss=(array(0.13923562, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:14,  1.64steps/s, loss=(array(0.13923562, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:14,  1.64steps/s, loss=(array(0.13722605, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:13,  1.67steps/s, loss=(array(0.13722605, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:13,  1.67steps/s, loss=(array(0.1342723, dtype=float32),)]
- 27%|██▋       | 8/30 [00:04&lt;00:12,  1.70steps/s, loss=(array(0.1342723, dtype=float32),)]
- 27%|██▋       | 8/30 [00:04&lt;00:12,  1.70steps/s, loss=(array(0.13274895, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:15,  1.37steps/s, loss=(array(0.13274895, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:15,  1.37steps/s, loss=(array(0.1312033, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.44steps/s, loss=(array(0.1312033, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.44steps/s, loss=(array(0.13059834, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.50steps/s, loss=(array(0.13059834, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.50steps/s, loss=(array(0.12819725, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.55steps/s, loss=(array(0.12819725, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.55steps/s, loss=(array(0.12721008, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.55steps/s, loss=(array(0.12721008, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.55steps/s, loss=(array(0.12574998, dtype=float32),)]
- 47%|████▋     | 14/30 [00:09&lt;00:10,  1.50steps/s, loss=(array(0.12574998, dtype=float32),)]
- 47%|████▋     | 14/30 [00:09&lt;00:10,  1.50steps/s, loss=(array(0.1241952, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.61steps/s, loss=(array(0.1241952, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.61steps/s, loss=(array(0.12223588, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:08,  1.70steps/s, loss=(array(0.12223588, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:08,  1.70steps/s, loss=(array(0.12121239, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:10&lt;00:07,  1.67steps/s, loss=(array(0.12121239, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:10&lt;00:07,  1.67steps/s, loss=(array(0.11902349, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:06,  1.72steps/s, loss=(array(0.11902349, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:06,  1.72steps/s, loss=(array(0.11780152, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:07,  1.51steps/s, loss=(array(0.11780152, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:07,  1.51steps/s, loss=(array(0.11655162, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:12&lt;00:06,  1.53steps/s, loss=(array(0.11655162, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:12&lt;00:06,  1.53steps/s, loss=(array(0.11569391, dtype=float32),)]
- 70%|███████   | 21/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.11569391, dtype=float32),)]
- 70%|███████   | 21/30 [00:13&lt;00:05,  1.59steps/s, loss=(array(0.11424895, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:13&lt;00:04,  1.62steps/s, loss=(array(0.11424895, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:13&lt;00:04,  1.62steps/s, loss=(array(0.1132096, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:14&lt;00:04,  1.67steps/s, loss=(array(0.1132096, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:14&lt;00:04,  1.67steps/s, loss=(array(0.11162986, dtype=float32),)]
- 80%|████████  | 24/30 [00:15&lt;00:03,  1.61steps/s, loss=(array(0.11162986, dtype=float32),)]
- 80%|████████  | 24/30 [00:15&lt;00:03,  1.61steps/s, loss=(array(0.11079919, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:15&lt;00:03,  1.63steps/s, loss=(array(0.11079919, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:15&lt;00:03,  1.63steps/s, loss=(array(0.10959952, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:16&lt;00:02,  1.67steps/s, loss=(array(0.10959952, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:16&lt;00:02,  1.67steps/s, loss=(array(0.10853799, dtype=float32),)]
- 90%|█████████ | 27/30 [00:16&lt;00:01,  1.59steps/s, loss=(array(0.10853799, dtype=float32),)]
- 90%|█████████ | 27/30 [00:17&lt;00:01,  1.59steps/s, loss=(array(0.10743055, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:17&lt;00:01,  1.60steps/s, loss=(array(0.10743055, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:17&lt;00:01,  1.60steps/s, loss=(array(0.10652827, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:18&lt;00:00,  1.39steps/s, loss=(array(0.10652827, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:18&lt;00:00,  1.39steps/s, loss=(array(0.10561012, dtype=float32),)]
-100%|██████████| 30/30 [00:19&lt;00:00,  1.47steps/s, loss=(array(0.10561012, dtype=float32),)]
-100%|██████████| 30/30 [00:19&lt;00:00,  1.57steps/s, loss=(array(0.10561012, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.35steps/s, loss=(array(0.15260476, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.35steps/s, loss=(array(0.15010233, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.33steps/s, loss=(array(0.15010233, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.33steps/s, loss=(array(0.14741988, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.34steps/s, loss=(array(0.14741988, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.34steps/s, loss=(array(0.1448765, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.34steps/s, loss=(array(0.1448765, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.34steps/s, loss=(array(0.14455202, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:10,  2.33steps/s, loss=(array(0.14455202, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:10,  2.33steps/s, loss=(array(0.13923562, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.34steps/s, loss=(array(0.13923562, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.34steps/s, loss=(array(0.13722605, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:02&lt;00:09,  2.34steps/s, loss=(array(0.13722605, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:09,  2.34steps/s, loss=(array(0.1342723, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:11,  1.98steps/s, loss=(array(0.1342723, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:11,  1.98steps/s, loss=(array(0.13274895, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  2.08steps/s, loss=(array(0.13274895, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  2.08steps/s, loss=(array(0.1312033, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.15steps/s, loss=(array(0.1312033, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.15steps/s, loss=(array(0.13059834, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:04&lt;00:08,  2.21steps/s, loss=(array(0.13059834, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:04&lt;00:08,  2.21steps/s, loss=(array(0.12819725, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.25steps/s, loss=(array(0.12819725, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.25steps/s, loss=(array(0.12721008, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.27steps/s, loss=(array(0.12721008, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.27steps/s, loss=(array(0.12574998, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:06,  2.29steps/s, loss=(array(0.12574998, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:06,  2.29steps/s, loss=(array(0.1241952, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.30steps/s, loss=(array(0.1241952, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.30steps/s, loss=(array(0.12223588, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.31steps/s, loss=(array(0.12223588, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.31steps/s, loss=(array(0.12121239, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.33steps/s, loss=(array(0.12121239, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.33steps/s, loss=(array(0.11902349, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:06,  1.99steps/s, loss=(array(0.11902349, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:06,  1.99steps/s, loss=(array(0.11780152, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  2.09steps/s, loss=(array(0.11780152, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  2.09steps/s, loss=(array(0.11655162, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.16steps/s, loss=(array(0.11655162, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.16steps/s, loss=(array(0.11569391, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.21steps/s, loss=(array(0.11569391, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.21steps/s, loss=(array(0.11424895, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:09&lt;00:03,  2.26steps/s, loss=(array(0.11424895, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:09&lt;00:03,  2.26steps/s, loss=(array(0.1132096, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.29steps/s, loss=(array(0.1132096, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.29steps/s, loss=(array(0.11162986, dtype=float32),)]
+ 80%|████████  | 24/30 [00:10&lt;00:02,  2.29steps/s, loss=(array(0.11162986, dtype=float32),)]
+ 80%|████████  | 24/30 [00:10&lt;00:02,  2.29steps/s, loss=(array(0.11079919, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.29steps/s, loss=(array(0.11079919, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.29steps/s, loss=(array(0.10959952, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.30steps/s, loss=(array(0.10959952, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.30steps/s, loss=(array(0.10853799, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.31steps/s, loss=(array(0.10853799, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.31steps/s, loss=(array(0.10743055, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:01,  1.99steps/s, loss=(array(0.10743055, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:01,  1.99steps/s, loss=(array(0.10652827, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  2.09steps/s, loss=(array(0.10652827, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  2.09steps/s, loss=(array(0.10561012, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.15steps/s, loss=(array(0.10561012, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.21steps/s, loss=(array(0.10561012, dtype=float32),)]
 
   0%|          | 0/30 [00:00&lt;?, ?steps/s]
   0%|          | 0/30 [00:00&lt;?, ?steps/s, loss=(array(0.10487418, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:18,  1.54steps/s, loss=(array(0.10487418, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:18,  1.54steps/s, loss=(array(0.10341767, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:18,  1.54steps/s, loss=(array(0.10341767, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:18,  1.54steps/s, loss=(array(0.10168627, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:17,  1.58steps/s, loss=(array(0.10168627, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:17,  1.58steps/s, loss=(array(0.0999157, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.56steps/s, loss=(array(0.0999157, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.56steps/s, loss=(array(0.0984189, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.0984189, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.0972532, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.0972532, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:15,  1.57steps/s, loss=(array(0.09613352, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:14,  1.61steps/s, loss=(array(0.09613352, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:14,  1.61steps/s, loss=(array(0.09505253, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:13,  1.62steps/s, loss=(array(0.09505253, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:13,  1.62steps/s, loss=(array(0.09403138, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:14,  1.41steps/s, loss=(array(0.09403138, dtype=float32),)]
- 30%|███       | 9/30 [00:05&lt;00:14,  1.41steps/s, loss=(array(0.09303587, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.46steps/s, loss=(array(0.09303587, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.46steps/s, loss=(array(0.09200649, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.51steps/s, loss=(array(0.09200649, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:12,  1.51steps/s, loss=(array(0.09091684, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.56steps/s, loss=(array(0.09091684, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:11,  1.56steps/s, loss=(array(0.08976055, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.60steps/s, loss=(array(0.08976055, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:10,  1.60steps/s, loss=(array(0.08874091, dtype=float32),)]
- 47%|████▋     | 14/30 [00:08&lt;00:09,  1.61steps/s, loss=(array(0.08874091, dtype=float32),)]
- 47%|████▋     | 14/30 [00:09&lt;00:09,  1.61steps/s, loss=(array(0.08782169, dtype=float32),)]
- 50%|█████     | 15/30 [00:10&lt;00:11,  1.33steps/s, loss=(array(0.08782169, dtype=float32),)]
- 50%|█████     | 15/30 [00:10&lt;00:11,  1.33steps/s, loss=(array(0.08700931, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:09,  1.42steps/s, loss=(array(0.08700931, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:09,  1.42steps/s, loss=(array(0.08608636, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:11&lt;00:08,  1.47steps/s, loss=(array(0.08608636, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:11&lt;00:08,  1.47steps/s, loss=(array(0.08510467, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:07,  1.52steps/s, loss=(array(0.08510467, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:07,  1.52steps/s, loss=(array(0.08416025, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:08,  1.35steps/s, loss=(array(0.08416025, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:12&lt;00:08,  1.35steps/s, loss=(array(0.08324701, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:13&lt;00:07,  1.41steps/s, loss=(array(0.08324701, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:13&lt;00:07,  1.41steps/s, loss=(array(0.08234854, dtype=float32),)]
- 70%|███████   | 21/30 [00:14&lt;00:06,  1.48steps/s, loss=(array(0.08234854, dtype=float32),)]
- 70%|███████   | 21/30 [00:14&lt;00:06,  1.48steps/s, loss=(array(0.08139667, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:14&lt;00:05,  1.53steps/s, loss=(array(0.08139667, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:14&lt;00:05,  1.53steps/s, loss=(array(0.0804868, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:15&lt;00:04,  1.56steps/s, loss=(array(0.0804868, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:15&lt;00:04,  1.56steps/s, loss=(array(0.07960066, dtype=float32),)]
- 80%|████████  | 24/30 [00:16&lt;00:04,  1.46steps/s, loss=(array(0.07960066, dtype=float32),)]
- 80%|████████  | 24/30 [00:16&lt;00:04,  1.46steps/s, loss=(array(0.07872592, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:16&lt;00:03,  1.30steps/s, loss=(array(0.07872592, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:17&lt;00:03,  1.30steps/s, loss=(array(0.07789394, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:17&lt;00:02,  1.40steps/s, loss=(array(0.07789394, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:17&lt;00:02,  1.40steps/s, loss=(array(0.07707645, dtype=float32),)]
- 90%|█████████ | 27/30 [00:18&lt;00:02,  1.47steps/s, loss=(array(0.07707645, dtype=float32),)]
- 90%|█████████ | 27/30 [00:18&lt;00:02,  1.47steps/s, loss=(array(0.07629781, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:18&lt;00:01,  1.53steps/s, loss=(array(0.07629781, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:18&lt;00:01,  1.53steps/s, loss=(array(0.07554185, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:19&lt;00:00,  1.38steps/s, loss=(array(0.07554185, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:19&lt;00:00,  1.38steps/s, loss=(array(0.07479402, dtype=float32),)]
-100%|██████████| 30/30 [00:20&lt;00:00,  1.46steps/s, loss=(array(0.07479402, dtype=float32),)]
-100%|██████████| 30/30 [00:20&lt;00:00,  1.48steps/s, loss=(array(0.07479402, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.28steps/s, loss=(array(0.10487418, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.28steps/s, loss=(array(0.10341767, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.30steps/s, loss=(array(0.10341767, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.30steps/s, loss=(array(0.10168627, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.30steps/s, loss=(array(0.10168627, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.30steps/s, loss=(array(0.0999157, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.28steps/s, loss=(array(0.0999157, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.28steps/s, loss=(array(0.0984189, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:11,  2.27steps/s, loss=(array(0.0984189, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:11,  2.27steps/s, loss=(array(0.0972532, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.28steps/s, loss=(array(0.0972532, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.28steps/s, loss=(array(0.09613352, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:10,  2.27steps/s, loss=(array(0.09613352, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:10,  2.27steps/s, loss=(array(0.09505253, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:09,  2.28steps/s, loss=(array(0.09505253, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:09,  2.28steps/s, loss=(array(0.09403138, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  1.97steps/s, loss=(array(0.09403138, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  1.97steps/s, loss=(array(0.09303587, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.08steps/s, loss=(array(0.09303587, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.08steps/s, loss=(array(0.09200649, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:05&lt;00:08,  2.13steps/s, loss=(array(0.09200649, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:05&lt;00:08,  2.13steps/s, loss=(array(0.09091684, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.18steps/s, loss=(array(0.09091684, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.18steps/s, loss=(array(0.08976055, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.20steps/s, loss=(array(0.08976055, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:05&lt;00:07,  2.20steps/s, loss=(array(0.08874091, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:07,  2.22steps/s, loss=(array(0.08874091, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:07,  2.22steps/s, loss=(array(0.08782169, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.24steps/s, loss=(array(0.08782169, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.24steps/s, loss=(array(0.08700931, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.25steps/s, loss=(array(0.08700931, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.25steps/s, loss=(array(0.08608636, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.26steps/s, loss=(array(0.08608636, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.26steps/s, loss=(array(0.08510467, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.26steps/s, loss=(array(0.08510467, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.26steps/s, loss=(array(0.08416025, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  1.95steps/s, loss=(array(0.08416025, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  1.95steps/s, loss=(array(0.08324701, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.03steps/s, loss=(array(0.08324701, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.03steps/s, loss=(array(0.08234854, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.09steps/s, loss=(array(0.08234854, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.09steps/s, loss=(array(0.08139667, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:10&lt;00:03,  2.13steps/s, loss=(array(0.08139667, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:10&lt;00:03,  2.13steps/s, loss=(array(0.0804868, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.16steps/s, loss=(array(0.0804868, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.16steps/s, loss=(array(0.07960066, dtype=float32),)]
+ 80%|████████  | 24/30 [00:11&lt;00:02,  2.19steps/s, loss=(array(0.07960066, dtype=float32),)]
+ 80%|████████  | 24/30 [00:11&lt;00:02,  2.19steps/s, loss=(array(0.07872592, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.21steps/s, loss=(array(0.07872592, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.21steps/s, loss=(array(0.07789394, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.22steps/s, loss=(array(0.07789394, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:11&lt;00:01,  2.22steps/s, loss=(array(0.07707645, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.23steps/s, loss=(array(0.07707645, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.23steps/s, loss=(array(0.07629781, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.24steps/s, loss=(array(0.07629781, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.24steps/s, loss=(array(0.07554185, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  1.94steps/s, loss=(array(0.07554185, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  1.94steps/s, loss=(array(0.07479402, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.02steps/s, loss=(array(0.07479402, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.16steps/s, loss=(array(0.07479402, dtype=float32),)]
 
   0%|          | 0/30 [00:00&lt;?, ?steps/s]
   0%|          | 0/30 [00:00&lt;?, ?steps/s, loss=(array(0.07407662, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:18,  1.61steps/s, loss=(array(0.07407662, dtype=float32),)]
-  3%|▎         | 1/30 [00:00&lt;00:18,  1.61steps/s, loss=(array(0.0726244, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.56steps/s, loss=(array(0.0726244, dtype=float32),)]
-  7%|▋         | 2/30 [00:01&lt;00:17,  1.56steps/s, loss=(array(0.07098428, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:17,  1.51steps/s, loss=(array(0.07098428, dtype=float32),)]
- 10%|█         | 3/30 [00:01&lt;00:17,  1.51steps/s, loss=(array(0.06965234, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.53steps/s, loss=(array(0.06965234, dtype=float32),)]
- 13%|█▎        | 4/30 [00:02&lt;00:16,  1.53steps/s, loss=(array(0.0685983, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:16,  1.53steps/s, loss=(array(0.0685983, dtype=float32),)]
- 17%|█▋        | 5/30 [00:03&lt;00:16,  1.53steps/s, loss=(array(0.0676876, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:16,  1.47steps/s, loss=(array(0.0676876, dtype=float32),)]
- 20%|██        | 6/30 [00:03&lt;00:16,  1.47steps/s, loss=(array(0.06679374, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:15,  1.51steps/s, loss=(array(0.06679374, dtype=float32),)]
- 23%|██▎       | 7/30 [00:04&lt;00:15,  1.51steps/s, loss=(array(0.06589988, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:14,  1.54steps/s, loss=(array(0.06589988, dtype=float32),)]
- 27%|██▋       | 8/30 [00:05&lt;00:14,  1.54steps/s, loss=(array(0.06502866, dtype=float32),)]
- 30%|███       | 9/30 [00:06&lt;00:15,  1.39steps/s, loss=(array(0.06502866, dtype=float32),)]
- 30%|███       | 9/30 [00:06&lt;00:15,  1.39steps/s, loss=(array(0.06413081, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.49steps/s, loss=(array(0.06413081, dtype=float32),)]
- 33%|███▎      | 10/30 [00:06&lt;00:13,  1.49steps/s, loss=(array(0.06324845, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:11,  1.61steps/s, loss=(array(0.06324845, dtype=float32),)]
- 37%|███▋      | 11/30 [00:07&lt;00:11,  1.61steps/s, loss=(array(0.06246167, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:10,  1.72steps/s, loss=(array(0.06246167, dtype=float32),)]
- 40%|████      | 12/30 [00:07&lt;00:10,  1.72steps/s, loss=(array(0.06174359, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:09,  1.79steps/s, loss=(array(0.06174359, dtype=float32),)]
- 43%|████▎     | 13/30 [00:08&lt;00:09,  1.79steps/s, loss=(array(0.06104461, dtype=float32),)]
- 47%|████▋     | 14/30 [00:08&lt;00:09,  1.62steps/s, loss=(array(0.06104461, dtype=float32),)]
- 47%|████▋     | 14/30 [00:08&lt;00:09,  1.62steps/s, loss=(array(0.06036811, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.59steps/s, loss=(array(0.06036811, dtype=float32),)]
- 50%|█████     | 15/30 [00:09&lt;00:09,  1.59steps/s, loss=(array(0.05971479, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:09,  1.50steps/s, loss=(array(0.05971479, dtype=float32),)]
- 53%|█████▎    | 16/30 [00:10&lt;00:09,  1.50steps/s, loss=(array(0.05908708, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:11&lt;00:08,  1.50steps/s, loss=(array(0.05908708, dtype=float32),)]
- 57%|█████▋    | 17/30 [00:11&lt;00:08,  1.50steps/s, loss=(array(0.05846841, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:08,  1.36steps/s, loss=(array(0.05846841, dtype=float32),)]
- 60%|██████    | 18/30 [00:11&lt;00:08,  1.36steps/s, loss=(array(0.0578428, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:13&lt;00:09,  1.17steps/s, loss=(array(0.0578428, dtype=float32),)]
- 63%|██████▎   | 19/30 [00:13&lt;00:09,  1.17steps/s, loss=(array(0.0572281, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:13&lt;00:08,  1.25steps/s, loss=(array(0.0572281, dtype=float32),)]
- 67%|██████▋   | 20/30 [00:13&lt;00:08,  1.25steps/s, loss=(array(0.05666602, dtype=float32),)]
- 70%|███████   | 21/30 [00:14&lt;00:06,  1.36steps/s, loss=(array(0.05666602, dtype=float32),)]
- 70%|███████   | 21/30 [00:14&lt;00:06,  1.36steps/s, loss=(array(0.05613874, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:14&lt;00:05,  1.44steps/s, loss=(array(0.05613874, dtype=float32),)]
- 73%|███████▎  | 22/30 [00:14&lt;00:05,  1.44steps/s, loss=(array(0.05561662, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:15&lt;00:04,  1.47steps/s, loss=(array(0.05561662, dtype=float32),)]
- 77%|███████▋  | 23/30 [00:15&lt;00:04,  1.47steps/s, loss=(array(0.05512222, dtype=float32),)]
- 80%|████████  | 24/30 [00:16&lt;00:04,  1.35steps/s, loss=(array(0.05512222, dtype=float32),)]
- 80%|████████  | 24/30 [00:16&lt;00:04,  1.35steps/s, loss=(array(0.05470764, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:17&lt;00:03,  1.33steps/s, loss=(array(0.05470764, dtype=float32),)]
- 83%|████████▎ | 25/30 [00:17&lt;00:03,  1.33steps/s, loss=(array(0.05457507, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:18&lt;00:03,  1.28steps/s, loss=(array(0.05457507, dtype=float32),)]
- 87%|████████▋ | 26/30 [00:18&lt;00:03,  1.28steps/s, loss=(array(0.0563061, dtype=float32),)]
- 90%|█████████ | 27/30 [00:18&lt;00:02,  1.33steps/s, loss=(array(0.0563061, dtype=float32),)]
- 90%|█████████ | 27/30 [00:18&lt;00:02,  1.33steps/s, loss=(array(0.09944884, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:19&lt;00:01,  1.30steps/s, loss=(array(0.09944884, dtype=float32),)]
- 93%|█████████▎| 28/30 [00:19&lt;00:01,  1.30steps/s, loss=(array(0.43647137, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:20&lt;00:00,  1.33steps/s, loss=(array(0.43647137, dtype=float32),)]
- 97%|█████████▋| 29/30 [00:20&lt;00:00,  1.33steps/s, loss=(array(0.07823093, dtype=float32),)]
-100%|██████████| 30/30 [00:21&lt;00:00,  1.26steps/s, loss=(array(0.07823093, dtype=float32),)]
-100%|██████████| 30/30 [00:21&lt;00:00,  1.42steps/s, loss=(array(0.07823093, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.25steps/s, loss=(array(0.07407662, dtype=float32),)]
+  3%|▎         | 1/30 [00:00&lt;00:12,  2.25steps/s, loss=(array(0.0726244, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.26steps/s, loss=(array(0.0726244, dtype=float32),)]
+  7%|▋         | 2/30 [00:00&lt;00:12,  2.26steps/s, loss=(array(0.07098428, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.25steps/s, loss=(array(0.07098428, dtype=float32),)]
+ 10%|█         | 3/30 [00:01&lt;00:11,  2.25steps/s, loss=(array(0.06965234, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.25steps/s, loss=(array(0.06965234, dtype=float32),)]
+ 13%|█▎        | 4/30 [00:01&lt;00:11,  2.25steps/s, loss=(array(0.0685983, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:11,  2.26steps/s, loss=(array(0.0685983, dtype=float32),)]
+ 17%|█▋        | 5/30 [00:02&lt;00:11,  2.26steps/s, loss=(array(0.0676876, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.27steps/s, loss=(array(0.0676876, dtype=float32),)]
+ 20%|██        | 6/30 [00:02&lt;00:10,  2.27steps/s, loss=(array(0.06679374, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:10,  2.26steps/s, loss=(array(0.06679374, dtype=float32),)]
+ 23%|██▎       | 7/30 [00:03&lt;00:10,  2.26steps/s, loss=(array(0.06589988, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:09,  2.25steps/s, loss=(array(0.06589988, dtype=float32),)]
+ 27%|██▋       | 8/30 [00:03&lt;00:09,  2.25steps/s, loss=(array(0.06502866, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  1.93steps/s, loss=(array(0.06502866, dtype=float32),)]
+ 30%|███       | 9/30 [00:04&lt;00:10,  1.93steps/s, loss=(array(0.06413081, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.02steps/s, loss=(array(0.06413081, dtype=float32),)]
+ 33%|███▎      | 10/30 [00:04&lt;00:09,  2.02steps/s, loss=(array(0.06324845, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:05&lt;00:09,  2.07steps/s, loss=(array(0.06324845, dtype=float32),)]
+ 37%|███▋      | 11/30 [00:05&lt;00:09,  2.07steps/s, loss=(array(0.06246167, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.12steps/s, loss=(array(0.06246167, dtype=float32),)]
+ 40%|████      | 12/30 [00:05&lt;00:08,  2.12steps/s, loss=(array(0.06174359, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:06&lt;00:07,  2.16steps/s, loss=(array(0.06174359, dtype=float32),)]
+ 43%|████▎     | 13/30 [00:06&lt;00:07,  2.16steps/s, loss=(array(0.06104461, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:07,  2.18steps/s, loss=(array(0.06104461, dtype=float32),)]
+ 47%|████▋     | 14/30 [00:06&lt;00:07,  2.18steps/s, loss=(array(0.06036811, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.20steps/s, loss=(array(0.06036811, dtype=float32),)]
+ 50%|█████     | 15/30 [00:06&lt;00:06,  2.20steps/s, loss=(array(0.05971479, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.21steps/s, loss=(array(0.05971479, dtype=float32),)]
+ 53%|█████▎    | 16/30 [00:07&lt;00:06,  2.21steps/s, loss=(array(0.05908708, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.22steps/s, loss=(array(0.05908708, dtype=float32),)]
+ 57%|█████▋    | 17/30 [00:07&lt;00:05,  2.22steps/s, loss=(array(0.05846841, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.23steps/s, loss=(array(0.05846841, dtype=float32),)]
+ 60%|██████    | 18/30 [00:08&lt;00:05,  2.23steps/s, loss=(array(0.0578428, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  1.93steps/s, loss=(array(0.0578428, dtype=float32),)]
+ 63%|██████▎   | 19/30 [00:08&lt;00:05,  1.93steps/s, loss=(array(0.0572281, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.01steps/s, loss=(array(0.0572281, dtype=float32),)]
+ 67%|██████▋   | 20/30 [00:09&lt;00:04,  2.01steps/s, loss=(array(0.05666602, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.07steps/s, loss=(array(0.05666602, dtype=float32),)]
+ 70%|███████   | 21/30 [00:09&lt;00:04,  2.07steps/s, loss=(array(0.05613874, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:10&lt;00:03,  2.12steps/s, loss=(array(0.05613874, dtype=float32),)]
+ 73%|███████▎  | 22/30 [00:10&lt;00:03,  2.12steps/s, loss=(array(0.05561662, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.16steps/s, loss=(array(0.05561662, dtype=float32),)]
+ 77%|███████▋  | 23/30 [00:10&lt;00:03,  2.16steps/s, loss=(array(0.05512222, dtype=float32),)]
+ 80%|████████  | 24/30 [00:11&lt;00:02,  2.18steps/s, loss=(array(0.05512222, dtype=float32),)]
+ 80%|████████  | 24/30 [00:11&lt;00:02,  2.18steps/s, loss=(array(0.05470764, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.21steps/s, loss=(array(0.05470764, dtype=float32),)]
+ 83%|████████▎ | 25/30 [00:11&lt;00:02,  2.21steps/s, loss=(array(0.05457507, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:12&lt;00:01,  2.24steps/s, loss=(array(0.05457507, dtype=float32),)]
+ 87%|████████▋ | 26/30 [00:12&lt;00:01,  2.24steps/s, loss=(array(0.0563061, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.27steps/s, loss=(array(0.0563061, dtype=float32),)]
+ 90%|█████████ | 27/30 [00:12&lt;00:01,  2.27steps/s, loss=(array(0.09944884, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.29steps/s, loss=(array(0.09944884, dtype=float32),)]
+ 93%|█████████▎| 28/30 [00:12&lt;00:00,  2.29steps/s, loss=(array(0.43647137, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  1.98steps/s, loss=(array(0.43647137, dtype=float32),)]
+ 97%|█████████▋| 29/30 [00:13&lt;00:00,  1.98steps/s, loss=(array(0.07823093, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.07steps/s, loss=(array(0.07823093, dtype=float32),)]
+100%|██████████| 30/30 [00:13&lt;00:00,  2.14steps/s, loss=(array(0.07823093, dtype=float32),)]
 </pre></div>
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make a GIF of all images.</span>
@@ -1353,7 +1364,7 @@ through Projection” Bioengineering 10, no. 2: 158.
 <a class="reference external" href="https://doi.org/10.3390/bioengineering10020158">https://doi.org/10.3390/bioengineering10020158</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 28.349 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 1.529 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-example-learn-samples-multires-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/example_learn_samples_multires.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />
@@ -1481,8 +1492,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

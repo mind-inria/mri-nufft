@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,10 +662,10 @@
   <h1>Source code for mrinufft.trajectories.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utility functions in general.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">EnumMeta</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">EnumMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="c1">#############</span>
 <span class="c1"># CONSTANTS #</span>
@@ -682,14 +687,14 @@
 
 <div class="viewcode-block" id="CaseInsensitiveEnumMeta">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.CaseInsensitiveEnumMeta.html#mrinufft.trajectories.utils.CaseInsensitiveEnumMeta">[docs]</a>
-<span class="k">class</span> <span class="nc">CaseInsensitiveEnumMeta</span><span class="p">(</span><span class="n">EnumMeta</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CaseInsensitiveEnumMeta</span><span class="p">(</span><span class="n">EnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A case-insensitive EnumMeta.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow ``MyEnum[&#39;Member&#39;] == MyEnum[&#39;MEMBER&#39;]`` .&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow ``MyEnum.Member == MyEnum.MEMBER`` .&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
 
@@ -697,7 +702,7 @@
 
 <div class="viewcode-block" id="FloatEnum">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.FloatEnum.html#mrinufft.trajectories.utils.FloatEnum">[docs]</a>
-<span class="k">class</span> <span class="nc">FloatEnum</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FloatEnum</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An Enum for float that is case insensitive for ist attributes.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
@@ -706,7 +711,7 @@
 
 <div class="viewcode-block" id="Gammas">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Gammas.html#mrinufft.trajectories.utils.Gammas">[docs]</a>
-<span class="k">class</span> <span class="nc">Gammas</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Gammas</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate gyromagnetic ratios for common nuclei in MR.&quot;&quot;&quot;</span>
 
     <span class="c1"># Values in kHz/T</span>
@@ -733,7 +738,7 @@
 
 <div class="viewcode-block" id="Spirals">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Spirals.html#mrinufft.trajectories.utils.Spirals">[docs]</a>
-<span class="k">class</span> <span class="nc">Spirals</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Spirals</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate algebraic spiral types.&quot;&quot;&quot;</span>
 
     <span class="n">ARCHIMEDES</span> <span class="o">=</span> <span class="mi">1</span>
@@ -749,7 +754,7 @@
 
 <div class="viewcode-block" id="NormShapes">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.NormShapes.html#mrinufft.trajectories.utils.NormShapes">[docs]</a>
-<span class="k">class</span> <span class="nc">NormShapes</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NormShapes</span><span class="p">(</span><span class="n">FloatEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate shape norms.&quot;&quot;&quot;</span>
 
     <span class="n">L1</span> <span class="o">=</span> <span class="mi">1</span>
@@ -766,7 +771,7 @@
 
 <div class="viewcode-block" id="Tilts">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Tilts.html#mrinufft.trajectories.utils.Tilts">[docs]</a>
-<span class="k">class</span> <span class="nc">Tilts</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Tilts</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Enumerate available tilts.</span>
 
 <span class="sd">    Notes</span>
@@ -795,7 +800,7 @@
 
 <div class="viewcode-block" id="Packings">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Packings.html#mrinufft.trajectories.utils.Packings">[docs]</a>
-<span class="k">class</span> <span class="nc">Packings</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Packings</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate available packing method for shots.</span>
 
 <span class="sd">    It is mostly use for wave-CAIPI trajectory</span>
@@ -829,7 +834,7 @@
 
 <div class="viewcode-block" id="normalize_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.normalize_trajectory.html#mrinufft.trajectories.utils.normalize_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">normalize_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_trajectory</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
@@ -858,7 +863,7 @@
 
 <div class="viewcode-block" id="unnormalize_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.unnormalize_trajectory.html#mrinufft.trajectories.utils.unnormalize_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">unnormalize_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unnormalize_trajectory</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
@@ -887,7 +892,7 @@
 
 <div class="viewcode-block" id="convert_trajectory_to_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_trajectory_to_gradients.html#mrinufft.trajectories.utils.convert_trajectory_to_gradients">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_trajectory_to_gradients</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_trajectory_to_gradients</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
@@ -937,7 +942,7 @@
 
 <div class="viewcode-block" id="convert_gradients_to_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_trajectory.html#mrinufft.trajectories.utils.convert_gradients_to_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_gradients_to_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_gradients_to_trajectory</span><span class="p">(</span>
     <span class="n">gradients</span><span class="p">,</span>
     <span class="n">initial_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
@@ -990,7 +995,7 @@
 
 <div class="viewcode-block" id="convert_gradients_to_slew_rates">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_slew_rates.html#mrinufft.trajectories.utils.convert_gradients_to_slew_rates">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_gradients_to_slew_rates</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_gradients_to_slew_rates</span><span class="p">(</span>
     <span class="n">gradients</span><span class="p">,</span>
     <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
 <span class="p">):</span>
@@ -1021,7 +1026,7 @@
 
 <div class="viewcode-block" id="convert_slew_rates_to_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_slew_rates_to_gradients.html#mrinufft.trajectories.utils.convert_slew_rates_to_gradients">[docs]</a>
-<span class="k">def</span> <span class="nf">convert_slew_rates_to_gradients</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_slew_rates_to_gradients</span><span class="p">(</span>
     <span class="n">slewrates</span><span class="p">,</span>
     <span class="n">initial_gradients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
@@ -1059,7 +1064,7 @@
 
 <div class="viewcode-block" id="compute_gradients_and_slew_rates">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html#mrinufft.trajectories.utils.compute_gradients_and_slew_rates">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_gradients_and_slew_rates</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_gradients_and_slew_rates</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
@@ -1111,7 +1116,7 @@
 
 <div class="viewcode-block" id="check_hardware_constraints">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.check_hardware_constraints.html#mrinufft.trajectories.utils.check_hardware_constraints">[docs]</a>
-<span class="k">def</span> <span class="nf">check_hardware_constraints</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_hardware_constraints</span><span class="p">(</span>
     <span class="n">gradients</span><span class="p">,</span> <span class="n">slewrates</span><span class="p">,</span> <span class="n">gmax</span><span class="o">=</span><span class="n">DEFAULT_GMAX</span><span class="p">,</span> <span class="n">smax</span><span class="o">=</span><span class="n">DEFAULT_SMAX</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a trajectory satisfies the gradient hardware constraints.</span>
@@ -1154,7 +1159,7 @@
 
 <div class="viewcode-block" id="initialize_tilt">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_tilt.html#mrinufft.trajectories.utils.initialize_tilt">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_tilt</span><span class="p">(</span><span class="n">tilt</span><span class="p">,</span> <span class="n">nb_partitions</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_tilt</span><span class="p">(</span><span class="n">tilt</span><span class="p">,</span> <span class="n">nb_partitions</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize the tilt angle.</span>
 
 <span class="sd">    Parameters</span>
@@ -1200,7 +1205,7 @@
 
 <div class="viewcode-block" id="initialize_algebraic_spiral">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_algebraic_spiral.html#mrinufft.trajectories.utils.initialize_algebraic_spiral">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_algebraic_spiral</span><span class="p">(</span><span class="n">spiral</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_algebraic_spiral</span><span class="p">(</span><span class="n">spiral</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the algebraic spiral type.</span>
 
 <span class="sd">    Parameters</span>
@@ -1221,7 +1226,7 @@
 
 <div class="viewcode-block" id="initialize_shape_norm">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_shape_norm.html#mrinufft.trajectories.utils.initialize_shape_norm">[docs]</a>
-<span class="k">def</span> <span class="nf">initialize_shape_norm</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_shape_norm</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the norm for a given shape.</span>
 
 <span class="sd">    Parameters</span>
@@ -1300,8 +1305,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

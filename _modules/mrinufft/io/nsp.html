@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,16 +662,16 @@
   <h1>Source code for mrinufft.io.nsp</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Read/Write trajectory for Neurospin sequences.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">array</span> <span class="kn">import</span> <span class="n">array</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">array</span><span class="w"> </span><span class="kn">import</span> <span class="n">array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mrinufft.trajectories.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.trajectories.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
     <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
     <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
@@ -677,12 +682,12 @@
     <span class="n">convert_trajectory_to_gradients</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.siemens</span> <span class="kn">import</span> <span class="n">read_siemens_rawdat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.siemens</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_siemens_rawdat</span>
 
 
 <div class="viewcode-block" id="write_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.nsp.write_gradients.html#mrinufft.io.nsp.write_gradients">[docs]</a>
-<span class="k">def</span> <span class="nf">write_gradients</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_gradients</span><span class="p">(</span>
     <span class="n">gradients</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">initial_positions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">grad_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -825,7 +830,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_pop_elements</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">num_elements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_pop_elements</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">num_elements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pop elements from an array.</span>
 
 <span class="sd">    Parameters</span>
@@ -853,7 +858,7 @@
 
 <div class="viewcode-block" id="write_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.nsp.write_trajectory.html#mrinufft.io.nsp.write_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">write_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_trajectory</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">FOV</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">img_size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
@@ -941,7 +946,7 @@
 
 <div class="viewcode-block" id="read_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.nsp.read_trajectory.html#mrinufft.io.nsp.read_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">read_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_trajectory</span><span class="p">(</span>
     <span class="n">grad_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dwell_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
     <span class="n">num_adc_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1095,7 +1100,7 @@
 
 <div class="viewcode-block" id="read_arbgrad_rawdat">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.nsp.read_arbgrad_rawdat.html#mrinufft.io.nsp.read_arbgrad_rawdat">[docs]</a>
-<span class="k">def</span> <span class="nf">read_arbgrad_rawdat</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_arbgrad_rawdat</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">removeOS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">doAverage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1232,8 +1237,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

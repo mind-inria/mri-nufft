@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,11 +662,11 @@
   <h1>Source code for mrinufft.trajectories.tools</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions to manipulate/modify trajectories.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">CubicSpline</span><span class="p">,</span> <span class="n">interp1d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span><span class="p">,</span> <span class="n">interp1d</span>
 
-<span class="kn">from</span> <span class="nn">.maths</span> <span class="kn">import</span> <span class="n">Rv</span><span class="p">,</span> <span class="n">Rx</span><span class="p">,</span> <span class="n">Ry</span><span class="p">,</span> <span class="n">Rz</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_tilt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.maths</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rv</span><span class="p">,</span> <span class="n">Rx</span><span class="p">,</span> <span class="n">Ry</span><span class="p">,</span> <span class="n">Rz</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_tilt</span>
 
 <span class="c1">################</span>
 <span class="c1"># DIRECT TOOLS #</span>
@@ -670,7 +675,7 @@
 
 <div class="viewcode-block" id="stack">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack.html#mrinufft.trajectories.tools.stack">[docs]</a>
-<span class="k">def</span> <span class="nf">stack</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_stacks</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_stacks</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack 2D or 3D trajectories over the :math:`k_z`-axis.</span>
 
 <span class="sd">    Parameters</span>
@@ -717,7 +722,7 @@
 
 <div class="viewcode-block" id="rotate">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rotate.html#mrinufft.trajectories.tools.rotate">[docs]</a>
-<span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_rotations</span><span class="p">,</span> <span class="n">x_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_rotations</span><span class="p">,</span> <span class="n">x_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate 2D or 3D trajectories over the different axes.</span>
 
 <span class="sd">    Parameters</span>
@@ -760,7 +765,7 @@
 
 <div class="viewcode-block" id="precess">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.precess.html#mrinufft.trajectories.tools.precess">[docs]</a>
-<span class="k">def</span> <span class="nf">precess</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">precess</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">nb_rotations</span><span class="p">,</span>
     <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
@@ -842,7 +847,7 @@
 
 <div class="viewcode-block" id="conify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.conify.html#mrinufft.trajectories.tools.conify">[docs]</a>
-<span class="k">def</span> <span class="nf">conify</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">conify</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">nb_cones</span><span class="p">,</span>
     <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -924,7 +929,7 @@
 
 <div class="viewcode-block" id="epify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.epify.html#mrinufft.trajectories.tools.epify">[docs]</a>
-<span class="k">def</span> <span class="nf">epify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">,</span> <span class="n">nb_trains</span><span class="p">,</span> <span class="n">reverse_odd_shots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">epify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">,</span> <span class="n">nb_trains</span><span class="p">,</span> <span class="n">reverse_odd_shots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create multi-readout shots from trajectory composed of single-readouts.</span>
 
 <span class="sd">    Assemble multiple single-readout shots together by adding transition</span>
@@ -981,7 +986,7 @@
 
 <div class="viewcode-block" id="unepify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.unepify.html#mrinufft.trajectories.tools.unepify">[docs]</a>
-<span class="k">def</span> <span class="nf">unepify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_readouts</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unepify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_readouts</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover single-readout shots from multi-readout trajectory.</span>
 
 <span class="sd">    Reformat an EPI-like trajectory with multiple readouts and transitions</span>
@@ -1026,7 +1031,7 @@
 
 <div class="viewcode-block" id="prewind">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.prewind.html#mrinufft.trajectories.tools.prewind">[docs]</a>
-<span class="k">def</span> <span class="nf">prewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add pre-winding/positioning to the trajectory.</span>
 
 <span class="sd">    The trajectory is extended to start before the readout</span>
@@ -1069,7 +1074,7 @@
 
 <div class="viewcode-block" id="rewind">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rewind.html#mrinufft.trajectories.tools.rewind">[docs]</a>
-<span class="k">def</span> <span class="nf">rewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add rewinding to the trajectory.</span>
 
 <span class="sd">    The trajectory is extended to come back to the k-space center</span>
@@ -1112,7 +1117,7 @@
 
 <div class="viewcode-block" id="oversample">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.oversample.html#mrinufft.trajectories.tools.oversample">[docs]</a>
-<span class="k">def</span> <span class="nf">oversample</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">new_Ns</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oversample</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">new_Ns</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resample a trajectory to increase the number of samples using interpolation.</span>
 
@@ -1160,7 +1165,7 @@
 
 <div class="viewcode-block" id="stack_spherically">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html#mrinufft.trajectories.tools.stack_spherically">[docs]</a>
-<span class="k">def</span> <span class="nf">stack_spherically</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack_spherically</span><span class="p">(</span>
     <span class="n">trajectory_func</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">nb_stacks</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">traj_kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.</span>
@@ -1246,7 +1251,7 @@
 
 <div class="viewcode-block" id="shellify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.shellify.html#mrinufft.trajectories.tools.shellify">[docs]</a>
-<span class="k">def</span> <span class="nf">shellify</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">shellify</span><span class="p">(</span>
     <span class="n">trajectory_func</span><span class="p">,</span>
     <span class="n">Nc</span><span class="p">,</span>
     <span class="n">nb_shells</span><span class="p">,</span>
@@ -1350,7 +1355,7 @@
 
 <div class="viewcode-block" id="duplicate_along_axes">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html#mrinufft.trajectories.tools.duplicate_along_axes">[docs]</a>
-<span class="k">def</span> <span class="nf">duplicate_along_axes</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">duplicate_along_axes</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Duplicate a trajectory along the specified axes.</span>
 
@@ -1387,7 +1392,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the center to the outside.&quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
@@ -1399,7 +1404,7 @@
     <span class="k">return</span> <span class="n">new_trajectory</span>
 
 
-<span class="k">def</span> <span class="nf">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the inside to the outside.&quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
@@ -1418,7 +1423,7 @@
 
 <div class="viewcode-block" id="radialize_center">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.radialize_center.html#mrinufft.trajectories.tools.radialize_center">[docs]</a>
-<span class="k">def</span> <span class="nf">radialize_center</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">radialize_center</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory.</span>
 
 <span class="sd">    Parameters</span>
@@ -1498,8 +1503,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

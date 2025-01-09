@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,14 +662,14 @@
   <h1>Source code for mrinufft.trajectories.display</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Display functions for trajectories.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.ticker</span> <span class="k">as</span> <span class="nn">mticker</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mticker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
     <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
     <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
@@ -676,7 +681,7 @@
 
 <div class="viewcode-block" id="displayConfig">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig">[docs]</a>
-<span class="k">class</span> <span class="nc">displayConfig</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">displayConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A container class used to share arguments related to display.</span>
 
@@ -717,13 +722,13 @@
     <span class="n">slewrate_point_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib color for slew rate constraint points, by default ``&quot;b&quot;`` (blue).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the display configuration.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="displayConfig.update">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.update">[docs]</a>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the display configuration.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_old_values</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -733,25 +738,25 @@
 
 <div class="viewcode-block" id="displayConfig.reset">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore the display configuration.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">displayConfig</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_old_values&quot;</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Enter the context manager.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Exit the context manager.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
 <div class="viewcode-block" id="displayConfig.get_colorlist">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.get_colorlist">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_colorlist</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_colorlist</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract a list of colors from a matplotlib palette.</span>
 
 <span class="sd">        If the palette is continuous, the colors will be sampled from it.</span>
@@ -793,7 +798,7 @@
 <span class="c1">##############</span>
 
 
-<span class="k">def</span> <span class="nf">_setup_2D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_2D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add ticks to 2D plot.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span><span class="p">))</span>
@@ -808,7 +813,7 @@
     <span class="k">return</span> <span class="n">ax</span>
 
 
-<span class="k">def</span> <span class="nf">_setup_3D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_3D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add ticks to 3D plot.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span><span class="p">))</span>
@@ -833,7 +838,7 @@
 
 <div class="viewcode-block" id="display_2D_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_2D_trajectory.html#mrinufft.trajectories.display.display_2D_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">display_2D_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_2D_trajectory</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">one_shot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -951,7 +956,7 @@
 
 <div class="viewcode-block" id="display_3D_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_3D_trajectory.html#mrinufft.trajectories.display.display_3D_trajectory">[docs]</a>
-<span class="k">def</span> <span class="nf">display_3D_trajectory</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_3D_trajectory</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">nb_repetitions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -1093,7 +1098,7 @@
 
 <div class="viewcode-block" id="display_gradients_simply">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_gradients_simply.html#mrinufft.trajectories.display.display_gradients_simply">[docs]</a>
-<span class="k">def</span> <span class="nf">display_gradients_simply</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_gradients_simply</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">shot_ids</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
     <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -1210,7 +1215,7 @@
 
 <div class="viewcode-block" id="display_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_gradients.html#mrinufft.trajectories.display.display_gradients">[docs]</a>
-<span class="k">def</span> <span class="nf">display_gradients</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">display_gradients</span><span class="p">(</span>
     <span class="n">trajectory</span><span class="p">,</span>
     <span class="n">shot_ids</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
     <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -1433,8 +1438,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

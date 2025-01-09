@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -663,15 +668,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="nn">subp</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">mrinufft._utils</span> <span class="kn">import</span> <span class="n">proper_trajectory</span>
-<span class="kn">from</span> <span class="nn">mrinufft.operators.base</span> <span class="kn">import</span> <span class="n">FourierOperatorCPU</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">subp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">proper_trajectory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierOperatorCPU</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mrinufft.io.cfl</span> <span class="kn">import</span> <span class="n">traj2cfl</span><span class="p">,</span> <span class="n">_writecfl</span><span class="p">,</span> <span class="n">_readcfl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.io.cfl</span><span class="w"> </span><span class="kn">import</span> <span class="n">traj2cfl</span><span class="p">,</span> <span class="n">_writecfl</span><span class="p">,</span> <span class="n">_readcfl</span>
 
 <span class="c1"># available if return code is 0</span>
 <span class="k">try</span><span class="p">:</span>
@@ -684,10 +689,10 @@
 
 <div class="viewcode-block" id="RawBartNUFFT">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html#mrinufft.operators.interfaces.bart.RawBartNUFFT">[docs]</a>
-<span class="k">class</span> <span class="nc">RawBartNUFFT</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawBartNUFFT</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper around BART NUFFT CLI.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">extra_op_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_adj_op_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">extra_op_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_adj_op_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">samples</span>  <span class="c1"># To normalize and send to file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape_str</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">])</span>
@@ -706,18 +711,18 @@
 
 <div class="viewcode-block" id="RawBartNUFFT._tmp_file">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html#mrinufft.operators.interfaces.bart.RawBartNUFFT._tmp_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">_tmp_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tmp_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a temporary file name.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_temp_dir</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">_get_candidate_names</span><span class="p">()))</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete also the temporary files.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_temp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RawBartNUFFT.op">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html#mrinufft.operators.interfaces.bart.RawBartNUFFT.op">[docs]</a>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward Operator.&quot;&quot;&quot;</span>
         <span class="n">grid_data_</span> <span class="o">=</span> <span class="n">grid_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">_writecfl</span><span class="p">(</span><span class="n">grid_data_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_file</span><span class="p">)</span>
@@ -739,7 +744,7 @@
             <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;cmd: &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;stdout: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;stderr: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="n">ksp_raw</span> <span class="o">=</span> <span class="n">_readcfl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ksp_file</span><span class="p">)</span>
         <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">coeffs_data</span><span class="p">,</span> <span class="n">ksp_raw</span><span class="p">)</span>
@@ -748,7 +753,7 @@
 
 <div class="viewcode-block" id="RawBartNUFFT.adj_op">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html#mrinufft.operators.interfaces.bart.RawBartNUFFT.adj_op">[docs]</a>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs_data</span><span class="p">,</span> <span class="n">grid_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adjoint Operator.&quot;&quot;&quot;</span>
         <span class="c1"># Format grid data to cfl format, and write to file</span>
         <span class="c1"># Run bart nufft with argument in subprocess</span>
@@ -775,7 +780,7 @@
             <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;cmd: &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;stdout: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;stderr: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="n">grid_raw</span> <span class="o">=</span> <span class="n">_readcfl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_file</span><span class="p">)</span>
         <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">grid_data</span><span class="p">,</span> <span class="n">grid_raw</span><span class="p">)</span>
@@ -786,7 +791,7 @@
 
 <div class="viewcode-block" id="MRIBartNUFFT">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.bart.MRIBartNUFFT.html#mrinufft.operators.interfaces.bart.MRIBartNUFFT">[docs]</a>
-<span class="k">class</span> <span class="nc">MRIBartNUFFT</span><span class="p">(</span><span class="n">FourierOperatorCPU</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MRIBartNUFFT</span><span class="p">(</span><span class="n">FourierOperatorCPU</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;BART implementation of MRI NUFFT transform.&quot;&quot;&quot;</span>
 
     <span class="c1"># TODO override Data consistency function: use toepliz</span>
@@ -794,7 +799,7 @@
     <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;bart&quot;</span>
     <span class="n">available</span> <span class="o">=</span> <span class="n">BART_AVAILABLE</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -827,7 +832,7 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalization factor of the operator.&quot;&quot;&quot;</span>
         <span class="c1"># return 1.0</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span></div>
@@ -894,8 +899,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

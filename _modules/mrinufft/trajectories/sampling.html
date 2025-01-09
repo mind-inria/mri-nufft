@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,18 +662,18 @@
   <h1>Source code for mrinufft.trajectories.sampling</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Sampling densities and methods.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">numpy.fft</span> <span class="k">as</span> <span class="nn">nf</span>
-<span class="kn">import</span> <span class="nn">numpy.linalg</span> <span class="k">as</span> <span class="nn">nl</span>
-<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="nn">nr</span>
-<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.fft</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">KMAX</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span>
 
 
 <div class="viewcode-block" id="sample_from_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.sample_from_density.html#mrinufft.trajectories.sampling.sample_from_density">[docs]</a>
-<span class="k">def</span> <span class="nf">sample_from_density</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_from_density</span><span class="p">(</span>
     <span class="n">nb_samples</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dim_compensation</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -713,13 +718,13 @@
 <span class="sd">       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">BisectingKMeans</span><span class="p">,</span> <span class="n">KMeans</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">BisectingKMeans</span><span class="p">,</span> <span class="n">KMeans</span>
     <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="s2">&quot;The scikit-learn module is not available. Please install &quot;</span>
             <span class="s2">&quot;it along with the [extra] dependencies &quot;</span>
             <span class="s2">&quot;or using `pip install scikit-learn`.&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 
     <span class="c1"># Define dimension variables</span>
     <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -772,7 +777,7 @@
 
 <div class="viewcode-block" id="create_cutoff_decay_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_cutoff_decay_density.html#mrinufft.trajectories.sampling.create_cutoff_decay_density">[docs]</a>
-<span class="k">def</span> <span class="nf">create_cutoff_decay_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_cutoff_decay_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density with central plateau and polynomial decay.</span>
 
@@ -832,7 +837,7 @@
 
 <div class="viewcode-block" id="create_polynomial_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_polynomial_density.html#mrinufft.trajectories.sampling.create_polynomial_density">[docs]</a>
-<span class="k">def</span> <span class="nf">create_polynomial_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_polynomial_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density with polynomial decay from the center.</span>
 
@@ -859,7 +864,7 @@
 
 <div class="viewcode-block" id="create_energy_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_energy_density.html#mrinufft.trajectories.sampling.create_energy_density">[docs]</a>
-<span class="k">def</span> <span class="nf">create_energy_density</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_energy_density</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density based on energy in the Fourier spectrum.</span>
 
@@ -892,7 +897,7 @@
 
 <div class="viewcode-block" id="create_chauffert_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_chauffert_density.html#mrinufft.trajectories.sampling.create_chauffert_density">[docs]</a>
-<span class="k">def</span> <span class="nf">create_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a density based on Chauffert&#39;s method.</span>
 
 <span class="sd">    This is a reproduction of the proposition from [CCW13]_.</span>
@@ -933,13 +938,13 @@
 <span class="sd">       pp. 298-301. IEEE, 2013.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">pywt</span> <span class="k">as</span> <span class="nn">pw</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pw</span>
     <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="s2">&quot;The PyWavelets module is not available. Please install &quot;</span>
             <span class="s2">&quot;it along with the [extra] dependencies &quot;</span>
             <span class="s2">&quot;or using `pip install pywavelets`.&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 
     <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
@@ -964,7 +969,7 @@
 
 <div class="viewcode-block" id="create_fast_chauffert_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_fast_chauffert_density.html#mrinufft.trajectories.sampling.create_fast_chauffert_density">[docs]</a>
-<span class="k">def</span> <span class="nf">create_fast_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_fast_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a density based on an approximated Chauffert method.</span>
 
 <span class="sd">    This implementation is based on this</span>
@@ -1010,13 +1015,13 @@
 <span class="sd">       pp. 298-301. IEEE, 2013.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">pywt</span> <span class="k">as</span> <span class="nn">pw</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pw</span>
     <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="s2">&quot;The PyWavelets module is not available. Please install &quot;</span>
             <span class="s2">&quot;it along with the [extra] dependencies &quot;</span>
             <span class="s2">&quot;or using `pip install pywavelets`.&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 
     <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
 
@@ -1105,8 +1110,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

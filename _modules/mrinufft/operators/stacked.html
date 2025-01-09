@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -657,19 +662,19 @@
   <h1>Source code for mrinufft.operators.stacked</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Stacked Operator for NUFFT.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
 
-<span class="kn">from</span> <span class="nn">mrinufft._utils</span> <span class="kn">import</span> <span class="n">proper_trajectory</span><span class="p">,</span> <span class="n">power_method</span><span class="p">,</span> <span class="n">get_array_module</span><span class="p">,</span> <span class="n">auto_cast</span>
-<span class="kn">from</span> <span class="nn">mrinufft.operators.base</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">proper_trajectory</span><span class="p">,</span> <span class="n">power_method</span><span class="p">,</span> <span class="n">get_array_module</span><span class="p">,</span> <span class="n">auto_cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">FourierOperatorBase</span><span class="p">,</span>
     <span class="n">check_backend</span><span class="p">,</span>
     <span class="n">get_operator</span><span class="p">,</span>
     <span class="n">with_numpy_cupy</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mrinufft.operators.interfaces.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.interfaces.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">is_cuda_array</span><span class="p">,</span>
     <span class="n">is_host_array</span><span class="p">,</span>
     <span class="n">pin_memory</span><span class="p">,</span>
@@ -678,15 +683,15 @@
 
 <span class="n">CUPY_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">cupy</span> <span class="k">as</span> <span class="nn">cp</span>
-    <span class="kn">from</span> <span class="nn">cupyx.scipy</span> <span class="kn">import</span> <span class="n">fft</span> <span class="k">as</span> <span class="n">cpfft</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cupyx.scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">fft</span> <span class="k">as</span> <span class="n">cpfft</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">CUPY_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="MRIStackedNUFFT">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT">[docs]</a>
-<span class="k">class</span> <span class="nc">MRIStackedNUFFT</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MRIStackedNUFFT</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stacked NUFFT Operator for MRI.</span>
 
 <span class="sd">    The dimension of stacking is always the last one.</span>
@@ -729,7 +734,7 @@
     <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;stacked&quot;</span>
     <span class="n">available</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># the true availabily will be check at runtime.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -786,7 +791,7 @@
             <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_init_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">z_index</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">z_index</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
         <span class="n">samples_dim</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">auto_z</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">z_index</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">z_index</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span>
         <span class="k">if</span> <span class="n">samples_dim</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="ow">and</span> <span class="n">auto_z</span><span class="p">:</span>
@@ -805,29 +810,29 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;z-index should be a boolean array of length shape[-1], &quot;</span>
                     <span class="s2">&quot;or an array of integer.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid samples or z-index&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">samples2d</span><span class="p">,</span> <span class="n">z_index_</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return dtype.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="nd">@dtype</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return number of samples.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MRIStackedNUFFT._fftz">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._fftz">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_fftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply FFT on z-axis.&quot;&quot;&quot;</span>
         <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># sqrt(2) required for normalization</span>
@@ -839,7 +844,7 @@
 <div class="viewcode-block" id="MRIStackedNUFFT._ifftz">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._ifftz">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_ifftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ifftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply IFFT on z-axis.&quot;&quot;&quot;</span>
         <span class="c1"># sqrt(2) required for normalization</span>
         <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -851,7 +856,7 @@
 <div class="viewcode-block" id="MRIStackedNUFFT.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT.op">[docs]</a>
     <span class="nd">@with_numpy_cupy</span>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uses_sense</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_op_sense</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="p">))</span>
@@ -860,7 +865,7 @@
 
 <div class="viewcode-block" id="MRIStackedNUFFT._op_sense">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._op_sense">[docs]</a>
-    <span class="k">def</span> <span class="nf">_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply SENSE operator.&quot;&quot;&quot;</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
@@ -882,7 +887,7 @@
         <span class="k">return</span> <span class="n">ksp</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -904,14 +909,14 @@
 <div class="viewcode-block" id="MRIStackedNUFFT.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT.adj_op">[docs]</a>
     <span class="nd">@with_numpy_cupy</span>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adjoint operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uses_sense</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adj_op_sense</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adj_op_calibless</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">))</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_adj_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
@@ -931,7 +936,7 @@
             <span class="n">img</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">imgc</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
@@ -952,7 +957,7 @@
 
 <div class="viewcode-block" id="MRIStackedNUFFT._safe_squeeze">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._safe_squeeze">[docs]</a>
-    <span class="k">def</span> <span class="nf">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Squeeze the first two dimensions of shape of the operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -968,7 +973,7 @@
 
 <div class="viewcode-block" id="MRIStackedNUFFT.get_lipschitz_cst">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT.get_lipschitz_cst">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Lipschitz constant of the operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -993,7 +998,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return samples as a N_slice x N_samples x 3 array.</span>
 
 <span class="sd">        Built from the 2D samples and the z_index normalized to [-0.5, 0.5).</span>
@@ -1014,7 +1019,7 @@
             <span class="p">)</span>
 
     <span class="nd">@samples</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set samples.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span></div>
@@ -1023,7 +1028,7 @@
 
 <div class="viewcode-block" id="MRIStackedNUFFTGPU">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU">[docs]</a>
-<span class="k">class</span> <span class="nc">MRIStackedNUFFTGPU</span><span class="p">(</span><span class="n">MRIStackedNUFFT</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MRIStackedNUFFTGPU</span><span class="p">(</span><span class="n">MRIStackedNUFFT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Stacked NUFFT Operator for MRI using GPU only backend.</span>
 
@@ -1051,7 +1056,7 @@
     <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;stacked-cufinufft&quot;</span>
     <span class="n">available</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># the true availabily will be check at runtime.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -1139,14 +1144,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_smap_d</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cpx_dtype</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Norm factor of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">norm_factor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MRIStackedNUFFTGPU._fftz">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU._fftz">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_fftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply FFT on z-axis.&quot;&quot;&quot;</span>
         <span class="c1"># sqrt(2) required for normalization</span>
         <span class="k">return</span> <span class="n">cpfft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span>
@@ -1163,7 +1168,7 @@
 <div class="viewcode-block" id="MRIStackedNUFFTGPU._ifftz">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU._ifftz">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_ifftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ifftz</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply IFFT on z-axis.&quot;&quot;&quot;</span>
         <span class="c1"># sqrt(2) required for normalization</span>
         <span class="k">return</span> <span class="n">cpfft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span>
@@ -1180,7 +1185,7 @@
 <div class="viewcode-block" id="MRIStackedNUFFTGPU.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU.op">[docs]</a>
     <span class="nd">@with_numpy_cupy</span>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward operator.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="n">ksp</span><span class="p">)</span>
         <span class="c1"># Dispatch to special case.</span>
@@ -1199,7 +1204,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_op_sense_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_sense_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
@@ -1237,7 +1242,7 @@
         <span class="n">ksp</span> <span class="o">=</span> <span class="n">ksp</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">*</span> <span class="n">NS</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ksp</span>
 
-    <span class="k">def</span> <span class="nf">_op_sense_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_sense_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1276,7 +1281,7 @@
         <span class="n">ksp</span> <span class="o">=</span> <span class="n">ksp</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">*</span> <span class="n">NS</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ksp</span>
 
-    <span class="k">def</span> <span class="nf">_op_calibless_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_calibless_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
@@ -1305,7 +1310,7 @@
         <span class="n">ksp</span> <span class="o">=</span> <span class="n">ksp</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">*</span> <span class="n">NS</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ksp</span>
 
-    <span class="k">def</span> <span class="nf">_op_calibless_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_calibless_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1338,7 +1343,7 @@
 <div class="viewcode-block" id="MRIStackedNUFFTGPU.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU.adj_op">[docs]</a>
     <span class="nd">@with_numpy_cupy</span>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adjoint operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">check_shape</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="n">coeffs</span><span class="p">)</span>
@@ -1359,7 +1364,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_adj_op_sense_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img_d</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_sense_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img_d</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
 
@@ -1394,7 +1399,7 @@
         <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op_sense_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_sense_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">coeffs</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
@@ -1428,7 +1433,7 @@
         <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op_calibless_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_calibless_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">coeffs_f</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">*</span> <span class="n">NS</span><span class="p">)</span>
@@ -1455,7 +1460,7 @@
         <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op_calibless_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_calibless_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
         <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">NS</span><span class="p">,</span> <span class="n">NZ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples2d</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_index</span><span class="p">)</span>
         <span class="n">coeffs</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
@@ -1484,7 +1489,7 @@
 
 <div class="viewcode-block" id="MRIStackedNUFFTGPU.get_lipschitz_cst">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU.get_lipschitz_cst">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Lipschitz constant of the operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1524,7 +1529,7 @@
 
 <div class="viewcode-block" id="traj3d2stacked">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.traj3d2stacked.html#mrinufft.operators.stacked.traj3d2stacked">[docs]</a>
-<span class="k">def</span> <span class="nf">traj3d2stacked</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">traj3d2stacked</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a 3D trajectory into a trajectory and the z-stack index.</span>
 
 <span class="sd">    Parameters</span>
@@ -1559,7 +1564,7 @@
 
 <div class="viewcode-block" id="stacked2traj3d">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.stacked.stacked2traj3d.html#mrinufft.operators.stacked.stacked2traj3d">[docs]</a>
-<span class="k">def</span> <span class="nf">stacked2traj3d</span><span class="p">(</span><span class="n">samples2d</span><span class="p">,</span> <span class="n">z_indexes</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stacked2traj3d</span><span class="p">(</span><span class="n">samples2d</span><span class="p">,</span> <span class="n">z_indexes</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a 2D trajectory and list of z_index into a 3D trajectory.</span>
 
 <span class="sd">    Note that the trajectory is flatten in the process.</span>
@@ -1653,8 +1658,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

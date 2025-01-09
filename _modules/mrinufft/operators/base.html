@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -521,9 +521,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -663,21 +668,21 @@
 <span class="sd">:author: Pierre-Antoine Comby</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mrinufft._array_compat</span> <span class="kn">import</span> <span class="n">with_numpy</span><span class="p">,</span> <span class="n">with_numpy_cupy</span><span class="p">,</span> <span class="n">AUTOGRAD_AVAILABLE</span>
-<span class="kn">from</span> <span class="nn">mrinufft._utils</span> <span class="kn">import</span> <span class="n">auto_cast</span><span class="p">,</span> <span class="n">power_method</span>
-<span class="kn">from</span> <span class="nn">mrinufft.density</span> <span class="kn">import</span> <span class="n">get_density</span>
-<span class="kn">from</span> <span class="nn">mrinufft.extras</span> <span class="kn">import</span> <span class="n">get_smaps</span>
-<span class="kn">from</span> <span class="nn">mrinufft.operators.interfaces.utils</span> <span class="kn">import</span> <span class="n">is_cuda_array</span><span class="p">,</span> <span class="n">is_host_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_numpy</span><span class="p">,</span> <span class="n">with_numpy_cupy</span><span class="p">,</span> <span class="n">AUTOGRAD_AVAILABLE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_cast</span><span class="p">,</span> <span class="n">power_method</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.density</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_density</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.extras</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_smaps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.interfaces.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_cuda_array</span><span class="p">,</span> <span class="n">is_host_array</span>
 
 <span class="k">if</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">mrinufft.operators.autodiff</span> <span class="kn">import</span> <span class="n">MRINufftAutoGrad</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.operators.autodiff</span><span class="w"> </span><span class="kn">import</span> <span class="n">MRINufftAutoGrad</span>
 
 
 <span class="c1"># Mapping between numpy float and complex types.</span>
@@ -686,19 +691,19 @@
 
 <div class="viewcode-block" id="check_backend">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.check_backend.html#mrinufft.operators.base.check_backend">[docs]</a>
-<span class="k">def</span> <span class="nf">check_backend</span><span class="p">(</span><span class="n">backend_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_backend</span><span class="p">(</span><span class="n">backend_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a specific backend is available.&quot;&quot;&quot;</span>
     <span class="n">backend_name</span> <span class="o">=</span> <span class="n">backend_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FourierOperatorBase</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">backend_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown backend: &#39;</span><span class="si">{</span><span class="n">backend_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown backend: &#39;</span><span class="si">{</span><span class="n">backend_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
 
 
 
 <div class="viewcode-block" id="list_backends">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.list_backends.html#mrinufft.operators.base.list_backends">[docs]</a>
-<span class="k">def</span> <span class="nf">list_backends</span><span class="p">(</span><span class="n">available_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_backends</span><span class="p">(</span><span class="n">available_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a list of backend.</span>
 
 <span class="sd">    Parameters</span>
@@ -717,7 +722,7 @@
 
 <div class="viewcode-block" id="get_operator">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.get_operator.html#mrinufft.operators.base.get_operator">[docs]</a>
-<span class="k">def</span> <span class="nf">get_operator</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_operator</span><span class="p">(</span>
     <span class="n">backend_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wrt_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an MRI Fourier operator interface using the correct backend.</span>
@@ -748,7 +753,7 @@
         <span class="n">available</span><span class="p">,</span> <span class="n">operator</span> <span class="o">=</span> <span class="n">FourierOperatorBase</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="n">backend_name</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">backend_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;stacked-&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;backend </span><span class="si">{</span><span class="n">backend_name</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;backend </span><span class="si">{</span><span class="n">backend_name</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="c1"># try to get the backend with stacked</span>
         <span class="c1"># Dedicated registered stacked backend (like stacked-cufinufft)</span>
         <span class="c1"># have be found earlier.</span>
@@ -776,7 +781,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase">[docs]</a>
-<span class="k">class</span> <span class="nc">FourierOperatorBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FourierOperatorBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base Fourier Operator class.</span>
 
 <span class="sd">    Every (Linear) Fourier operator inherits from this class,</span>
@@ -790,14 +795,14 @@
     <span class="n">_grad_wrt_data</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">_grad_wrt_traj</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">available</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="si">}</span><span class="s2">&#39; backend is not available.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_coils</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register the class in the list of available operators.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
         <span class="n">available</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;available&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
@@ -808,7 +813,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.check_shape">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.check_shape">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate the shapes of the image or k-space data against operator shapes.</span>
 
@@ -849,7 +854,7 @@
 <div class="viewcode-block" id="FourierOperatorBase.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.op">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute operator transform.</span>
 
 <span class="sd">        Parameters</span>
@@ -868,7 +873,7 @@
 <div class="viewcode-block" id="FourierOperatorBase.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.adj_op">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute adjoint operator transform.</span>
 
 <span class="sd">        Parameters</span>
@@ -886,7 +891,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.data_consistency">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.data_consistency">[docs]</a>
-    <span class="k">def</span> <span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the gradient data consistency.</span>
 
 <span class="sd">        This is the naive implementation using adj_op(op(x)-y).</span>
@@ -897,16 +902,16 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.with_off_resonance_correction">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction">[docs]</a>
-    <span class="k">def</span> <span class="nf">with_off_resonance_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_off_resonance_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new operator with Off Resonnance Correction.&quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">..off_resonance</span> <span class="kn">import</span> <span class="n">MRIFourierCorrected</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..off_resonance</span><span class="w"> </span><span class="kn">import</span> <span class="n">MRIFourierCorrected</span>
 
         <span class="k">return</span> <span class="n">MRIFourierCorrected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FourierOperatorBase.compute_smaps">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.compute_smaps">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the sensitivity maps and set it.</span>
 
 <span class="sd">        Parameters</span>
@@ -945,7 +950,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.make_autograd">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.make_autograd">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_autograd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_autograd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a new Operator with autodiff support.</span>
 
 <span class="sd">        Parameters</span>
@@ -979,7 +984,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.compute_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.compute_density">[docs]</a>
-    <span class="k">def</span> <span class="nf">compute_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the density compensation weights and set it.</span>
 
 <span class="sd">        Parameters</span>
@@ -1025,7 +1030,7 @@
 
 <div class="viewcode-block" id="FourierOperatorBase.get_lipschitz_cst">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.get_lipschitz_cst">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Lipschitz constant of the operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1056,53 +1061,53 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">uses_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uses_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the operator uses sensitivity maps.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">uses_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uses_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the operator uses density compensation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of dimensions in image space of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shape of the image space of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
 
     <span class="nd">@shape</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_coils</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_coils</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of coils for the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_coils</span>
 
     <span class="nd">@n_coils</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">n_coils</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_coils</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_coils</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_coils</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">n_coils</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_coils</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_coils</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;n_coils should be a positive integer, </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">n_coils</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_coils</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_coils</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sensitivity maps of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span>
 
     <span class="nd">@smaps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smaps</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">smaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smaps</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_smaps_shape</span><span class="p">(</span><span class="n">smaps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span> <span class="o">=</span> <span class="n">smaps</span>
 
 <div class="viewcode-block" id="FourierOperatorBase._check_smaps_shape">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase._check_smaps_shape">[docs]</a>
-    <span class="k">def</span> <span class="nf">_check_smaps_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smaps</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_smaps_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smaps</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the shape of the sensitivity maps.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">smaps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1114,12 +1119,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Density compensation of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density</span>
 
     <span class="nd">@density</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">density</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">density</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">:</span>
@@ -1128,39 +1133,39 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="n">density</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return floating precision of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
 
     <span class="nd">@dtype</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cpx_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cpx_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return complex floating precision of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">DTYPE_R2C</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)])</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the samples used by the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span>
 
     <span class="nd">@samples</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">samples</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of samples used by the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalization factor of the operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return info about the Fourier operator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -1174,7 +1179,7 @@
 <div class="viewcode-block" id="FourierOperatorBase.with_autograd">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.with_autograd">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">with_autograd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_autograd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a Fourier operator with autograd capabilities.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">make_autograd</span><span class="p">(</span><span class="n">wrt_data</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="p">)</span></div>
 </div>
@@ -1183,7 +1188,7 @@
 
 <div class="viewcode-block" id="FourierOperatorCPU">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU">[docs]</a>
-<span class="k">class</span> <span class="nc">FourierOperatorCPU</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FourierOperatorCPU</span><span class="p">(</span><span class="n">FourierOperatorBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for CPU-based NUFFT operator.</span>
 
 <span class="sd">    The NUFFT operation will be done sequentially and looped over coils and batches.</span>
@@ -1207,7 +1212,7 @@
 <span class="sd">        single type 1 /type 2 NUFFT.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
@@ -1243,7 +1248,7 @@
 <div class="viewcode-block" id="FourierOperatorCPU.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU.op">[docs]</a>
     <span class="nd">@with_numpy</span>
-    <span class="k">def</span> <span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Non Cartesian MRI forward operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1275,7 +1280,7 @@
         <span class="k">return</span> <span class="n">ret</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">dataf</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">))</span>
@@ -1290,7 +1295,7 @@
         <span class="n">ksp</span> <span class="o">=</span> <span class="n">ksp</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ksp</span>
 
-    <span class="k">def</span> <span class="nf">_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ksp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="n">ksp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1304,13 +1309,13 @@
         <span class="n">ksp</span> <span class="o">=</span> <span class="n">ksp</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ksp</span>
 
-    <span class="k">def</span> <span class="nf">_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FourierOperatorCPU.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU.adj_op">[docs]</a>
     <span class="nd">@with_numpy</span>
-    <span class="k">def</span> <span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Non Cartesian MRI adjoint operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1332,7 +1337,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_adj_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1349,7 +1354,7 @@
         <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">img</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1361,7 +1366,7 @@
         <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">img</span>
 
-    <span class="k">def</span> <span class="nf">_adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">coeffs2</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">):</span>
@@ -1373,7 +1378,7 @@
 <div class="viewcode-block" id="FourierOperatorCPU.data_consistency">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU.data_consistency">[docs]</a>
     <span class="nd">@with_numpy_cupy</span>
-    <span class="k">def</span> <span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the gradient data consistency.</span>
 
 <span class="sd">        This mixes the op and adj_op method to perform F_adj(F(x-y))</span>
@@ -1393,7 +1398,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grad_calibless</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">))</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_grad_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_grad_sense</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
 
@@ -1418,7 +1423,7 @@
         <span class="n">grad</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_factor</span>
         <span class="k">return</span> <span class="n">grad</span>
 
-    <span class="k">def</span> <span class="nf">_grad_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_grad_calibless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
         <span class="n">T</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trans</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
 
@@ -1438,7 +1443,7 @@
 
 <div class="viewcode-block" id="FourierOperatorCPU._safe_squeeze">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU._safe_squeeze">[docs]</a>
-    <span class="k">def</span> <span class="nf">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_safe_squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Squeeze the first two dimensions of shape of the operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1514,8 +1519,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>
