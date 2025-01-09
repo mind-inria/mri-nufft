@@ -23,7 +23,6 @@ CUPY_AVAILABLE = True
 try:
     import cupy as cp
     from cupyx.scipy import fft as cpfft
-
 except ImportError:
     CUPY_AVAILABLE = False
 
