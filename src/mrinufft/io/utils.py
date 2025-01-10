@@ -1,6 +1,7 @@
 """Module containing utility functions for IO in MRI NUFFT."""
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 
 def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
@@ -41,28 +42,10 @@ def siemens_quat_to_rot_mat(quat):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
     """
-    a = quat[1]
-    b = quat[2]
-    c = quat[3]
-    d = quat[0]
-
     R = np.zeros((4, 4))
-    
-    R[0,1] = 1.0 - 2.0 * (b * b + c * c)
-    R[0,0] = 2.0 * (a * b - c * d)
-    R[0,2] = 2.0 * (a * c + b * d)
-
-    R[1,1] = 2.0 * (a * b + c * d)
-    R[1,0] = 1.0 - 2.0 * (a * a + c * c)
-    R[1,2] = 2.0 * (b * c - a * d)
-
-    R[2,1] = 2.0 * (a * c - b * d)
-    R[2,0] = 2.0 * (b * c + a * d)
-    R[2,2] = 1.0 - 2.0 * (a * a + b * b)
-
-    if (np.linalg.det(R[:3, :3]) < 0):
+    R[:3, :3] = Rotation.from_quat([quat[1], quat[2], quat[3], quat[0]]).as_matrix()
+    R[:, (0, 1)] = R[:, (1, 0)]
+    if np.linalg.det(R[:3, :3]) < 0:
         R[2] = -R[2]
-        
-    R[-1,-1] = 1
-
+    R[-1, -1] = 1
     return R

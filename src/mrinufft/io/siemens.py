@@ -74,7 +74,7 @@ def read_siemens_rawdat(
         "n_adc_samples": int(twixObj.image.NCol),
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
-        "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:])
+        "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
     }
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
