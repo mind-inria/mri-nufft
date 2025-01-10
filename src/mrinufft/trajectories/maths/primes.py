@@ -3,7 +3,9 @@
 import numpy as np
 
 
-def compute_coprime_factors(Nc, length, start=1, update=1):
+def compute_coprime_factors(
+    Nc: int, length: int, start: int = 1, update: int = 1
+) -> list[int]:
     """Compute a list of coprime factors of Nc.
 
     Parameters
@@ -19,11 +21,11 @@ def compute_coprime_factors(Nc, length, start=1, update=1):
 
     Returns
     -------
-    list
+    list[int]
         List of coprime factors of Nc.
     """
     count = start
-    coprimes = []
+    coprimes: list[int] = []
     while len(coprimes) < length:
         # Check greatest common divider (gcd)
         if np.gcd(Nc, count) == 1:
