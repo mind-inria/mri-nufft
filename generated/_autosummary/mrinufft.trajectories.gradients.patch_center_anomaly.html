@@ -744,7 +744,7 @@
 <p>Some trajectories behave slightly differently from expected when
 approaching definition bounds, most often the k-space center as
 for spirals in some cases.</p>
-<p>This function enforces non-strictly increasing monoticity of
+<p>This function enforces non-strictly increasing monotonicity of
 sample distances from the center, effectively reducing slew
 rates and smoothing gradient transitions locally.</p>
 <p>Shots can be updated with provided functions to keep fitting
@@ -755,14 +755,14 @@ spline approximations.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>shot_or_params</strong> (<em>np.array</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Either a single shot of shape (Ns, Nd), or a list of arbitrary
 arguments used by <code class="docutils literal notranslate"><span class="pre">update_shot</span></code> to initialize a single shot.</p></li>
-<li><p><strong>update_shot</strong> (<em>function</em><em>, </em><em>optional</em>) – Function used to initialize a single shot based on parameters
+<li><p><strong>update_shot</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>NDArray</em><em>]</em><em>, </em><em>optional</em>) – Function used to initialize a single shot based on parameters
 provided by <code class="docutils literal notranslate"><span class="pre">update_parameters</span></code>. If None, cubic splines are
 used as an approximation instead, by default None</p></li>
-<li><p><strong>update_parameters</strong> (<em>function</em><em>, </em><em>optional</em>) – Function used to update shot parameters when provided in
+<li><p><strong>update_parameters</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>]</em><em>, </em><em>optional</em>) – Function used to update shot parameters when provided in
 <code class="docutils literal notranslate"><span class="pre">shot_or_params</span></code> from an updated shot and parameters.
 If None, cubic spline parameterization is used instead,
 by default None</p></li>
-<li><p><strong>in_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the shot is going in-and-out or start from the center,
+<li><p><strong>in_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the shot is going in-and-out or starts from the center,
 by default False</p></li>
 <li><p><strong>learning_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Learning rate used in the iterative optimization process,
 by default 1e-1</p></li>
@@ -770,13 +770,16 @@ by default 1e-1</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><em>array_like</em> – N-D trajectory based on <code class="docutils literal notranslate"><span class="pre">shot_or_params</span></code> if a shot or
-update_shot otherwise.</p></li>
+<li><p><em>NDArray</em> – N-D trajectory based on <code class="docutils literal notranslate"><span class="pre">shot_or_params</span></code> if a shot or
+<code class="docutils literal notranslate"><span class="pre">update_shot</span></code> otherwise.</p></li>
 <li><p><em>list</em> – Updated parameters either in the <code class="docutils literal notranslate"><span class="pre">shot_or_params</span></code> format
 if params, or cubic spline parameterization as an array of
 floats between 0 and 1 otherwise.</p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>ndarray</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.2)"><em>dtype</em></a>[<em>_ScalarType_co</em>]], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>]</p>
 </dd>
 </dl>
 </dd></dl>

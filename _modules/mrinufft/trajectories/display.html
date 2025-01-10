@@ -662,12 +662,16 @@
   <h1>Source code for mrinufft.trajectories.display</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Display functions for trajectories.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mticker</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
@@ -710,7 +714,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Font size for most labels and texts, by default ``18``.&quot;&quot;&quot;</span>
     <span class="n">small_fontsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">14</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Font size for smaller texts, by default ``14``.&quot;&quot;&quot;</span>
-    <span class="n">nb_colors</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">nb_colors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of colors to use in the color cycle, by default ``10``.&quot;&quot;&quot;</span>
     <span class="n">palette</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tab10&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Name of the color palette to use, by default ``&quot;tab10&quot;``.</span>
@@ -722,13 +726,13 @@
     <span class="n">slewrate_point_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib color for slew rate constraint points, by default ``&quot;b&quot;`` (blue).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa ANN401</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the display configuration.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="displayConfig.update">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa ANN401</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the display configuration.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_old_values</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -738,25 +742,25 @@
 
 <div class="viewcode-block" id="displayConfig.reset">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.reset">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore the display configuration.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">displayConfig</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_old_values&quot;</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">displayConfig</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Enter the context manager.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa ANN401</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Exit the context manager.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
 <div class="viewcode-block" id="displayConfig.get_colorlist">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.get_colorlist">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_colorlist</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_colorlist</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract a list of colors from a matplotlib palette.</span>
 
 <span class="sd">        If the palette is continuous, the colors will be sampled from it.</span>
@@ -798,7 +802,7 @@
 <span class="c1">##############</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_setup_2D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_2D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fig</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add ticks to 2D plot.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span><span class="p">))</span>
@@ -813,7 +817,7 @@
     <span class="k">return</span> <span class="n">ax</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_setup_3D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_3D_ticks</span><span class="p">(</span><span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fig</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add ticks to 3D plot.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span><span class="p">))</span>
@@ -839,21 +843,21 @@
 <div class="viewcode-block" id="display_2D_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_2D_trajectory.html#mrinufft.trajectories.display.display_2D_trajectory">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_2D_trajectory</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">one_shot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">subfigure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">show_constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">gmax</span><span class="o">=</span><span class="n">DEFAULT_GMAX</span><span class="p">,</span>
-    <span class="n">smax</span><span class="o">=</span><span class="n">DEFAULT_SMAX</span><span class="p">,</span>
-    <span class="n">constraints_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">one_shot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">gmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
+    <span class="n">smax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
+    <span class="n">constraints_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display 2D trajectories.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to display.</span>
 <span class="sd">    figsize : float, optional</span>
 <span class="sd">        Size of the figure.</span>
@@ -880,7 +884,7 @@
 <span class="sd">        typically 2 or `np.inf`, following the `numpy.linalg.norm`</span>
 <span class="sd">        conventions on parameter `ord`.</span>
 <span class="sd">        The default is None.</span>
-<span class="sd">    **kwargs</span>
+<span class="sd">    **constraints_kwargs</span>
 <span class="sd">        Acquisition parameters used to check on hardware constraints,</span>
 <span class="sd">        following the parameter convention from</span>
 <span class="sd">        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.</span>
@@ -957,23 +961,23 @@
 <div class="viewcode-block" id="display_3D_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_3D_trajectory.html#mrinufft.trajectories.display.display_3D_trajectory">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_3D_trajectory</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">nb_repetitions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">per_plane</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">one_shot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">subfigure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">show_constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">gmax</span><span class="o">=</span><span class="n">DEFAULT_GMAX</span><span class="p">,</span>
-    <span class="n">smax</span><span class="o">=</span><span class="n">DEFAULT_SMAX</span><span class="p">,</span>
-    <span class="n">constraints_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_repetitions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">per_plane</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">one_shot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">gmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
+    <span class="n">smax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
+    <span class="n">constraints_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display 3D trajectories.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to display.</span>
 <span class="sd">    nb_repetitions : int</span>
 <span class="sd">        Number of repetitions (planes, cones, shells, etc).</span>
@@ -1099,22 +1103,22 @@
 <div class="viewcode-block" id="display_gradients_simply">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_gradients_simply.html#mrinufft.trajectories.display.display_gradients_simply">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_gradients_simply</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">shot_ids</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
-    <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">fill_area</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">show_signal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">uni_signal</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
-    <span class="n">uni_gradient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">subfigure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">shot_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+    <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">fill_area</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_signal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">uni_signal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+    <span class="n">uni_gradient</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display gradients based on trajectory of any dimension.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to display.</span>
-<span class="sd">    shot_ids : list of int</span>
+<span class="sd">    shot_ids : tuple[int, ...], optional</span>
 <span class="sd">        Indices of the shots to display.</span>
 <span class="sd">        The default is `[0]`.</span>
 <span class="sd">    figsize : float, optional</span>
@@ -1137,7 +1141,7 @@
 <span class="sd">        unique color given as argument or just by the default</span>
 <span class="sd">        color cycle when `None`.</span>
 <span class="sd">        The default is `None`.</span>
-<span class="sd">    subfigure: plt.Figure or plt.SubFigure, optional</span>
+<span class="sd">    subfigure: plt.Figure, optional</span>
 <span class="sd">        The figure where the trajectory should be displayed.</span>
 <span class="sd">        The default is `None`.</span>
 
@@ -1216,26 +1220,26 @@
 <div class="viewcode-block" id="display_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.display.display_gradients.html#mrinufft.trajectories.display.display_gradients">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">display_gradients</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">shot_ids</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
-    <span class="n">figsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">fill_area</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">show_signal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">uni_signal</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
-    <span class="n">uni_gradient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">subfigure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">show_constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">gmax</span><span class="o">=</span><span class="n">DEFAULT_GMAX</span><span class="p">,</span>
-    <span class="n">smax</span><span class="o">=</span><span class="n">DEFAULT_SMAX</span><span class="p">,</span>
-    <span class="n">constraints_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">shot_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+    <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">fill_area</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_signal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">uni_signal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+    <span class="n">uni_gradient</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">gmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
+    <span class="n">smax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
+    <span class="n">constraints_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">constraints_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display gradients based on trajectory of any dimension.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to display.</span>
 <span class="sd">    shot_ids : list of int</span>
 <span class="sd">        Indices of the shots to display.</span>
@@ -1282,7 +1286,7 @@
 <span class="sd">        Amount of time between the acquisition of two</span>
 <span class="sd">        consecutive samples in ms.</span>
 <span class="sd">        The default is `DEFAULT_RASTER_TIME`.</span>
-<span class="sd">    **kwargs</span>
+<span class="sd">    **constraints_kwargs</span>
 <span class="sd">        Acquisition parameters used to check on hardware constraints,</span>
 <span class="sd">        following the parameter convention from</span>
 <span class="sd">        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.</span>

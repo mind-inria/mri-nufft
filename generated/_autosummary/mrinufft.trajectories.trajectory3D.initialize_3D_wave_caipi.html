@@ -755,12 +755,12 @@ by default 1.</p></li>
 <li><p><strong>packing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Packing method used to position the helices:
 “triangular”/”hexagonal”, “square”, “circular”
 or “random”/”uniform”, by default “triangular”.</p></li>
-<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Shape over the 2D <span class="math notranslate nohighlight">\(k_x-k_y\)</span> plane to pack with shots,
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Shape over the 2D <span class="math notranslate nohighlight">\(k_x-k_y\)</span> plane to pack with shots,
 either defined as <cite>str</cite> (“circle”, “square”, “diamond”)
 or as <cite>float</cite> through p-norms following the conventions
 of the <cite>ord</cite> parameter from <cite>numpy.linalg.norm</cite>,
 by default “circle”.</p></li>
-<li><p><strong>spacing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>)</em>) – Spacing between helices over the 2D <span class="math notranslate nohighlight">\(k_x-k_y\)</span> plane
+<li><p><strong>spacing</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – Spacing between helices over the 2D <span class="math notranslate nohighlight">\(k_x-k_y\)</span> plane
 normalized similarly to <cite>width</cite> to correspond to
 helix diameters, by default (1, 1).</p></li>
 </ul>
@@ -769,7 +769,7 @@ helix diameters, by default (1, 1).</p></li>
 <dd class="field-even"><p>3D wave-CAIPI trajectory</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition-references admonition">

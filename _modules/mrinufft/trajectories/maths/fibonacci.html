@@ -667,7 +667,7 @@
 
 <div class="viewcode-block" id="is_from_fibonacci_sequence">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence.html#mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">is_from_fibonacci_sequence</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_from_fibonacci_sequence</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an integer belongs to the Fibonacci sequence.</span>
 
 <span class="sd">    An integer belongs to the Fibonacci sequence if either</span>
@@ -685,7 +685,7 @@
 <span class="sd">        Whether or not ``n`` belongs to the Fibonacci sequence.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_perfect_square</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_perfect_square</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">==</span> <span class="n">n</span>
 
@@ -695,7 +695,7 @@
 
 <div class="viewcode-block" id="get_closest_fibonacci_number">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.fibonacci.get_closest_fibonacci_number.html#mrinufft.trajectories.maths.fibonacci.get_closest_fibonacci_number">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_closest_fibonacci_number</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_closest_fibonacci_number</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide the closest Fibonacci number.</span>
 
 <span class="sd">    Parameters</span>
@@ -722,7 +722,7 @@
 
 <div class="viewcode-block" id="generate_fibonacci_lattice">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_lattice.html#mrinufft.trajectories.maths.fibonacci.generate_fibonacci_lattice">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_lattice</span><span class="p">(</span><span class="n">nb_points</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_lattice</span><span class="p">(</span><span class="n">nb_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 2D Cartesian coordinates using the Fibonacci lattice.</span>
 
 <span class="sd">    Place 2D points over a 1x1 square following the Fibonacci lattice.</span>
@@ -751,7 +751,7 @@
 
 <div class="viewcode-block" id="generate_fibonacci_circle">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle.html#mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_circle</span><span class="p">(</span><span class="n">nb_points</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_circle</span><span class="p">(</span><span class="n">nb_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 2D Cartesian coordinates shaped as Fibonacci spirals.</span>
 
 <span class="sd">    Place 2D points structured as Fibonacci spirals by distorting</span>
@@ -782,7 +782,7 @@
 
 <div class="viewcode-block" id="generate_fibonacci_sphere">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere.html#mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_sphere</span><span class="p">(</span><span class="n">nb_points</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_fibonacci_sphere</span><span class="p">(</span><span class="n">nb_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate 3D Cartesian coordinates as a Fibonacci sphere.</span>
 
 <span class="sd">    Place 3D points almost evenly over a sphere surface of radius</span>

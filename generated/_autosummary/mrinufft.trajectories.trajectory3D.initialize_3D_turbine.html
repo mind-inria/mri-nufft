@@ -758,7 +758,7 @@ but while alternating them between blades.</p>
 <li><p><strong>Ns_transitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of samples per transition between two readouts</p></li>
 <li><p><strong>nb_blades</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of line stacks over the <span class="math notranslate nohighlight">\(k_z\)</span>-axis axis</p></li>
 <li><p><strong>blade_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tilt between individual blades, by default “uniform”</p></li>
-<li><p><strong>nb_trains</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Number of resulting shots, or readout trains, such that each of
+<li><p><strong>nb_trains</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>Literal</em><em>[</em><em>&quot;auto&quot;</em><em>]</em><em>, </em><em>optional</em>) – Number of resulting shots, or readout trains, such that each of
 them will be composed of <span class="math notranslate nohighlight">\(n\)</span> readouts with
 <code class="docutils literal notranslate"><span class="pre">Nc</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">nb_trains</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> then <code class="docutils literal notranslate"><span class="pre">nb_trains</span></code> is set
 to <code class="docutils literal notranslate"><span class="pre">nb_blades</span></code>.</p></li>
@@ -771,7 +771,7 @@ forming groups of <cite>skip_factor</cite> non-redundant blades.</p></li>
 <dd class="field-even"><p>3D TURBINE trajectory</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition-references admonition">

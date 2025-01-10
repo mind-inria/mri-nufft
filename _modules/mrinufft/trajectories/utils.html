@@ -664,8 +664,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">EnumMeta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
 <span class="c1">#############</span>
 <span class="c1"># CONSTANTS #</span>
@@ -690,11 +692,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CaseInsensitiveEnumMeta</span><span class="p">(</span><span class="n">EnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A case-insensitive EnumMeta.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Enum</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow ``MyEnum[&#39;Member&#39;] == MyEnum[&#39;MEMBER&#39;]`` .&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>  <span class="c1"># noqa ANN401</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow ``MyEnum.Member == MyEnum.MEMBER`` .&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span></div>
 
@@ -803,7 +805,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Packings</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate available packing method for shots.</span>
 
-<span class="sd">    It is mostly use for wave-CAIPI trajectory</span>
+<span class="sd">    It is mostly used for wave-CAIPI trajectory</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -835,15 +837,15 @@
 <div class="viewcode-block" id="normalize_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.normalize_trajectory.html#mrinufft.trajectories.utils.normalize_trajectory">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalize_trajectory</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">norm_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">KMAX</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize an un-normalized/natural trajectory for NUFFT use.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Un-normalized trajectory consisting of k-space coordinates in 2D or 3D.</span>
 <span class="sd">    norm_factor : float, optional</span>
 <span class="sd">        Trajectory normalization factor, by default KMAX.</span>
@@ -854,7 +856,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Normalized trajectory corresponding to `trajectory` input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">trajectory</span> <span class="o">*</span> <span class="n">norm_factor</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">resolution</span><span class="p">)</span></div>
@@ -864,15 +866,15 @@
 <div class="viewcode-block" id="unnormalize_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.unnormalize_trajectory.html#mrinufft.trajectories.utils.unnormalize_trajectory">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">unnormalize_trajectory</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">norm_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">KMAX</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Un-normalize a NUFFT-normalized trajectory.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Normalized trajectory consisting of k-space coordinates in 2D or 3D.</span>
 <span class="sd">    norm_factor : float, optional</span>
 <span class="sd">        Trajectory normalization factor, by default KMAX.</span>
@@ -883,7 +885,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Un-normalized trajectory corresponding to `trajectory` input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">trajectory</span> <span class="o">/</span> <span class="n">norm_factor</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">resolution</span><span class="p">)</span></div>
@@ -893,18 +895,18 @@
 <div class="viewcode-block" id="convert_trajectory_to_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_trajectory_to_gradients.html#mrinufft.trajectories.utils.convert_trajectory_to_gradients">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_trajectory_to_gradients</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-    <span class="n">gamma</span><span class="o">=</span><span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
-    <span class="n">get_final_positions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">norm_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">KMAX</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
+    <span class="n">get_final_positions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a normalized trajectory over time to provide gradients.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Normalized trajectory consisting of k-space coordinates in 2D or 3D.</span>
 <span class="sd">    norm_factor : float, optional</span>
 <span class="sd">        Trajectory normalization factor, by default KMAX.</span>
@@ -925,7 +927,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients corresponding to `trajectory`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Un-normalize the trajectory from NUFFT usage</span>
@@ -943,20 +945,20 @@
 <div class="viewcode-block" id="convert_gradients_to_trajectory">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_trajectory.html#mrinufft.trajectories.utils.convert_gradients_to_trajectory">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_gradients_to_trajectory</span><span class="p">(</span>
-    <span class="n">gradients</span><span class="p">,</span>
-    <span class="n">initial_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-    <span class="n">gamma</span><span class="o">=</span><span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">gradients</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">initial_positions</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">norm_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">KMAX</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Integrate gradients over time to provide a normalized trajectory.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients over 2 or 3 directions.</span>
-<span class="sd">    initial_positions: np.ndarray, optional</span>
+<span class="sd">    initial_positions: NDArray, optional</span>
 <span class="sd">        Positions in k-space at the beginning of the readout window.</span>
 <span class="sd">        The default is `None`.</span>
 <span class="sd">    norm_factor : float, optional</span>
@@ -975,7 +977,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Normalized trajectory corresponding to `gradients`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle no initial positions</span>
@@ -996,14 +998,14 @@
 <div class="viewcode-block" id="convert_gradients_to_slew_rates">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_slew_rates.html#mrinufft.trajectories.utils.convert_gradients_to_slew_rates">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_gradients_to_slew_rates</span><span class="p">(</span>
-    <span class="n">gradients</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">gradients</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive the gradients over time to provide slew rates.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients over 2 or 3 directions.</span>
 <span class="sd">    raster_time : float, optional</span>
 <span class="sd">        Amount of time between the acquisition of two</span>
@@ -1012,9 +1014,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    slewrates : np.ndarray</span>
+<span class="sd">    slewrates : NDArray</span>
 <span class="sd">        Slew rates corresponding to `gradients`.</span>
-<span class="sd">    initial_gradients : np.ndarray</span>
+<span class="sd">    initial_gradients : NDArray</span>
 <span class="sd">        Gradients at the beginning of the readout window.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Compute slew rates and starting gradients</span>
@@ -1027,17 +1029,17 @@
 <div class="viewcode-block" id="convert_slew_rates_to_gradients">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.convert_slew_rates_to_gradients.html#mrinufft.trajectories.utils.convert_slew_rates_to_gradients">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_slew_rates_to_gradients</span><span class="p">(</span>
-    <span class="n">slewrates</span><span class="p">,</span>
-    <span class="n">initial_gradients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">slewrates</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">initial_gradients</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Integrate slew rates over time to provide gradients.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    slewrates : np.ndarray</span>
+<span class="sd">    slewrates : NDArray</span>
 <span class="sd">        Slew rates over 2 or 3 directions.</span>
-<span class="sd">    initial_gradients: np.ndarray, optional</span>
+<span class="sd">    initial_gradients: NDArray, optional</span>
 <span class="sd">        Gradients at the beginning of the readout window.</span>
 <span class="sd">        The default is `None`.</span>
 <span class="sd">    raster_time : float, optional</span>
@@ -1047,7 +1049,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients corresponding to `slewrates`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle no initial gradients</span>
@@ -1065,17 +1067,17 @@
 <div class="viewcode-block" id="compute_gradients_and_slew_rates">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html#mrinufft.trajectories.utils.compute_gradients_and_slew_rates">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_gradients_and_slew_rates</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">norm_factor</span><span class="o">=</span><span class="n">KMAX</span><span class="p">,</span>
-    <span class="n">resolution</span><span class="o">=</span><span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
-    <span class="n">raster_time</span><span class="o">=</span><span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
-    <span class="n">gamma</span><span class="o">=</span><span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">norm_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">KMAX</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="n">DEFAULT_RESOLUTION</span><span class="p">,</span>
+    <span class="n">raster_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_RASTER_TIME</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Gammas</span><span class="o">.</span><span class="n">HYDROGEN</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the gradients and slew rates from a normalized trajectory.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Normalized trajectory consisting of k-space coordinates in 2D or 3D.</span>
 <span class="sd">    norm_factor : float, optional</span>
 <span class="sd">        Trajectory normalization factor, by default KMAX.</span>
@@ -1093,9 +1095,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients corresponding to `trajectory`.</span>
-<span class="sd">    slewrates : np.ndarray</span>
+<span class="sd">    slewrates : NDArray</span>
 <span class="sd">        Slew rates corresponding to `trajectory` gradients.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Convert normalized trajectory to gradients</span>
@@ -1117,15 +1119,19 @@
 <div class="viewcode-block" id="check_hardware_constraints">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.check_hardware_constraints.html#mrinufft.trajectories.utils.check_hardware_constraints">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_hardware_constraints</span><span class="p">(</span>
-    <span class="n">gradients</span><span class="p">,</span> <span class="n">slewrates</span><span class="p">,</span> <span class="n">gmax</span><span class="o">=</span><span class="n">DEFAULT_GMAX</span><span class="p">,</span> <span class="n">smax</span><span class="o">=</span><span class="n">DEFAULT_SMAX</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>
+    <span class="n">gradients</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">slewrates</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">gmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GMAX</span><span class="p">,</span>
+    <span class="n">smax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_SMAX</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a trajectory satisfies the gradient hardware constraints.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    gradients : np.ndarray</span>
+<span class="sd">    gradients : NDArray</span>
 <span class="sd">        Gradients to check</span>
-<span class="sd">    slewrates: np.ndarray</span>
+<span class="sd">    slewrates: NDArray</span>
 <span class="sd">        Slewrates to check</span>
 <span class="sd">    gmax : float, optional</span>
 <span class="sd">        Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.</span>
@@ -1159,12 +1165,12 @@
 
 <div class="viewcode-block" id="initialize_tilt">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_tilt.html#mrinufft.trajectories.utils.initialize_tilt">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_tilt</span><span class="p">(</span><span class="n">tilt</span><span class="p">,</span> <span class="n">nb_partitions</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_tilt</span><span class="p">(</span><span class="n">tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nb_partitions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize the tilt angle.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    tilt : str or float</span>
+<span class="sd">    tilt : str | float | None</span>
 <span class="sd">        Tilt angle in rad or name of the tilt.</span>
 <span class="sd">    nb_partitions : int, optional</span>
 <span class="sd">        Number of partitions. The default is 1.</span>
@@ -1205,12 +1211,12 @@
 
 <div class="viewcode-block" id="initialize_algebraic_spiral">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_algebraic_spiral.html#mrinufft.trajectories.utils.initialize_algebraic_spiral">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_algebraic_spiral</span><span class="p">(</span><span class="n">spiral</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_algebraic_spiral</span><span class="p">(</span><span class="n">spiral</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the algebraic spiral type.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spiral : str or float</span>
+<span class="sd">    spiral : str | float</span>
 <span class="sd">        Spiral type or spiral power value.</span>
 
 <span class="sd">    Returns</span>
@@ -1219,19 +1225,19 @@
 <span class="sd">        Spiral power value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spiral</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">spiral</span>
-    <span class="k">return</span> <span class="n">Spirals</span><span class="p">[</span><span class="n">spiral</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">spiral</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Spirals</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">spiral</span><span class="p">)]</span></div>
 
 
 
 <div class="viewcode-block" id="initialize_shape_norm">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.utils.initialize_shape_norm.html#mrinufft.trajectories.utils.initialize_shape_norm">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_shape_norm</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_shape_norm</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the norm for a given shape.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : str or float</span>
+<span class="sd">    shape : str | float</span>
 <span class="sd">        Shape name or p-norm value.</span>
 
 <span class="sd">    Returns</span>
@@ -1240,8 +1246,8 @@
 <span class="sd">        Shape p-norm value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">shape</span>
-    <span class="k">return</span> <span class="n">NormShapes</span><span class="p">[</span><span class="n">shape</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">NormShapes</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">shape</span><span class="p">)]</span></div>
 
 </pre></div>
 

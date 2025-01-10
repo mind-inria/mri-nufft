@@ -662,10 +662,16 @@
   <h1>Source code for mrinufft.trajectories.sampling</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Sampling densities and methods.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pywt</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pw</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.fft</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nf</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span>
@@ -674,8 +680,12 @@
 <div class="viewcode-block" id="sample_from_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.sample_from_density.html#mrinufft.trajectories.sampling.sample_from_density">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">sample_from_density</span><span class="p">(</span>
-    <span class="n">nb_samples</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dim_compensation</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span>
-<span class="p">):</span>
+    <span class="n">nb_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="s2">&quot;lloyd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dim_compensation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sample points based on a given density distribution.</span>
 
@@ -683,14 +693,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    nb_samples : int</span>
 <span class="sd">        The number of samples to draw.</span>
-<span class="sd">    density : np.ndarray</span>
+<span class="sd">    density : NDArray</span>
 <span class="sd">        An array representing the density distribution from which samples are drawn,</span>
 <span class="sd">        normalized automatically by its sum during the call for convenience.</span>
-<span class="sd">    method : str, optional</span>
+<span class="sd">    method : Literal[&quot;random&quot;, &quot;lloyd&quot;], optional</span>
 <span class="sd">        The sampling method to use, either &#39;random&#39; for random sampling over</span>
 <span class="sd">        the discrete grid defined by the density or &#39;lloyd&#39; for Lloyd&#39;s</span>
 <span class="sd">        algorithm over a continuous space, by default &quot;random&quot;.</span>
-<span class="sd">    dim_compensation : str, bool, optional</span>
+<span class="sd">    dim_compensation : Literal[&quot;auto&quot;], bool, optional</span>
 <span class="sd">        Whether to apply a specific dimensionality compensation introduced</span>
 <span class="sd">        in [Cha+14]_. An exponent ``N/(N-1)`` with ``N`` the number of</span>
 <span class="sd">        dimensions in ``density`` is applied to fix the observed</span>
@@ -701,7 +711,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        An array of range-normalized sampled locations.</span>
 
 <span class="sd">    Raises</span>
@@ -714,7 +724,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,</span>
 <span class="sd">       Jonas Kahn, and Pierre Weiss.</span>
-<span class="sd">       &quot;Variable density sampling with continuous trajectories.&quot;</span>
+<span class="sd">       &quot;Variable density sampling with continuous trajectories&quot;</span>
 <span class="sd">       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -727,7 +737,7 @@
         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 
     <span class="c1"># Define dimension variables</span>
-    <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">density</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">max_nb_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">density</span> <span class="o">=</span> <span class="n">density</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density</span><span class="p">)</span>
@@ -745,7 +755,7 @@
         <span class="n">density</span> <span class="o">=</span> <span class="n">density</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density</span><span class="p">)</span>
 
     <span class="c1"># Sample using specified method</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
         <span class="n">choices</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">max_nb_samples</span><span class="p">),</span>
@@ -755,7 +765,7 @@
         <span class="p">)</span>
         <span class="n">locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[:,</span> <span class="n">choices</span><span class="p">]</span>
         <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="mf">0.5</span>
-        <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span> <span class="o">/</span> <span class="n">shape</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">locations</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">KMAX</span> <span class="o">*</span> <span class="n">locations</span> <span class="o">-</span> <span class="n">KMAX</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;lloyd&quot;</span><span class="p">:</span>
         <span class="n">kmeans</span> <span class="o">=</span> <span class="p">(</span>
@@ -764,10 +774,10 @@
             <span class="k">else</span> <span class="n">BisectingKMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">nb_samples</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">kmeans</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="n">density</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">locations</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">locations</span> <span class="o">=</span> <span class="n">KMAX</span> <span class="o">*</span> <span class="n">locations</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">locations</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown sampling method </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
@@ -777,7 +787,12 @@
 
 <div class="viewcode-block" id="create_cutoff_decay_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_cutoff_decay_density.html#mrinufft.trajectories.sampling.create_cutoff_decay_density">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_cutoff_decay_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_cutoff_decay_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density with central plateau and polynomial decay.</span>
 
@@ -787,7 +802,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple of int</span>
+<span class="sd">    shape : tuple[int, ...]</span>
 <span class="sd">        The shape of the density grid, analog to the field-of-view</span>
 <span class="sd">        as opposed to ``resolution`` below.</span>
 <span class="sd">    cutoff : float</span>
@@ -795,13 +810,13 @@
 <span class="sd">        and 1 within which density remains uniform and beyond which it decays.</span>
 <span class="sd">    decay : float</span>
 <span class="sd">        The polynomial decay in density beyond the cutoff ratio.</span>
-<span class="sd">    resolution : np.ndarray, optional</span>
+<span class="sd">    resolution : NDArray, optional</span>
 <span class="sd">        Resolution scaling factors for each dimension of the density grid,</span>
 <span class="sd">        by default ``None``.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A density array with values decaying based on the specified</span>
 <span class="sd">        cutoff ratio and decay rate.</span>
 
@@ -813,7 +828,6 @@
 <span class="sd">       magnetic resonance imaging.&quot;</span>
 <span class="sd">       IEEE Transactions on Medical Imaging 41, no. 8 (2022): 2105-2117.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">resolution</span><span class="p">:</span>
@@ -823,7 +837,7 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">):</span>
         <span class="n">differences</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">-</span> <span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">differences</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">differences</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">differences</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">differences</span><span class="p">)</span> <span class="k">if</span> <span class="n">cutoff</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">differences</span><span class="p">)</span>
     <span class="n">density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
@@ -837,7 +851,9 @@
 
 <div class="viewcode-block" id="create_polynomial_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_polynomial_density.html#mrinufft.trajectories.sampling.create_polynomial_density">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_polynomial_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">decay</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_polynomial_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density with polynomial decay from the center.</span>
 
@@ -847,13 +863,13 @@
 <span class="sd">        The shape of the density grid.</span>
 <span class="sd">    decay : float</span>
 <span class="sd">        The exponent that controls the rate of decay for density.</span>
-<span class="sd">    resolution : np.ndarray, optional</span>
+<span class="sd">    resolution : NDArray, optional</span>
 <span class="sd">        Resolution scaling factors for each dimension of the density grid,</span>
 <span class="sd">        by default None.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A density array with polynomial decay.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">create_cutoff_decay_density</span><span class="p">(</span>
@@ -864,7 +880,7 @@
 
 <div class="viewcode-block" id="create_energy_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_energy_density.html#mrinufft.trajectories.sampling.create_energy_density">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_energy_density</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_energy_density</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a density based on energy in the Fourier spectrum.</span>
 
@@ -873,7 +889,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataset : np.ndarray</span>
+<span class="sd">    dataset : NDArray</span>
 <span class="sd">        The dataset from which to calculate the density</span>
 <span class="sd">        based on its Fourier transform, with an expected</span>
 <span class="sd">        shape (nb_volumes, dim_1, ..., dim_N).</span>
@@ -881,7 +897,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A density array derived from the mean energy in the Fourier</span>
 <span class="sd">        domain of the input dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -897,7 +913,13 @@
 
 <div class="viewcode-block" id="create_chauffert_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_chauffert_density.html#mrinufft.trajectories.sampling.create_chauffert_density">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_chauffert_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">wavelet_basis</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pw</span><span class="o">.</span><span class="n">Wavelet</span><span class="p">,</span>
+    <span class="n">nb_wavelet_scales</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a density based on Chauffert&#39;s method.</span>
 
 <span class="sd">    This is a reproduction of the proposition from [CCW13]_.</span>
@@ -907,7 +929,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple of int</span>
+<span class="sd">    shape : tuple[int, ...]</span>
 <span class="sd">        The shape of the density grid.</span>
 <span class="sd">    wavelet_basis : str, pywt.Wavelet</span>
 <span class="sd">        The wavelet basis to use for wavelet decomposition, either</span>
@@ -920,7 +942,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A density array created based on wavelet transform coefficients.</span>
 
 <span class="sd">    See Also</span>
@@ -969,7 +991,11 @@
 
 <div class="viewcode-block" id="create_fast_chauffert_density">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.create_fast_chauffert_density.html#mrinufft.trajectories.sampling.create_fast_chauffert_density">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_fast_chauffert_density</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">wavelet_basis</span><span class="p">,</span> <span class="n">nb_wavelet_scales</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_fast_chauffert_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">wavelet_basis</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pw</span><span class="o">.</span><span class="n">Wavelet</span><span class="p">,</span>
+    <span class="n">nb_wavelet_scales</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a density based on an approximated Chauffert method.</span>
 
 <span class="sd">    This implementation is based on this</span>
@@ -985,7 +1011,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple of int</span>
+<span class="sd">    shape : tuple[int, ...]</span>
 <span class="sd">        The shape of the density grid.</span>
 <span class="sd">    wavelet_basis : str, pywt.Wavelet</span>
 <span class="sd">        The wavelet basis to use for wavelet decomposition, either</span>
@@ -996,7 +1022,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A density array created using a faster approximation</span>
 <span class="sd">        based on 1D projections of the wavelet transform.</span>
 

@@ -667,7 +667,9 @@
 
 <div class="viewcode-block" id="compute_coprime_factors">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.primes.compute_coprime_factors.html#mrinufft.trajectories.maths.primes.compute_coprime_factors">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_coprime_factors</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_coprime_factors</span><span class="p">(</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a list of coprime factors of Nc.</span>
 
 <span class="sd">    Parameters</span>
@@ -683,11 +685,11 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    list</span>
+<span class="sd">    list[int]</span>
 <span class="sd">        List of coprime factors of Nc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">count</span> <span class="o">=</span> <span class="n">start</span>
-    <span class="n">coprimes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">coprimes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">coprimes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
         <span class="c1"># Check greatest common divider (gcd)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

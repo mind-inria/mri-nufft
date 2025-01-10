@@ -739,7 +739,7 @@
 <h1>create_chauffert_density<a class="headerlink" href="#create-chauffert-density" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mrinufft.trajectories.sampling.create_chauffert_density">
-<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.sampling.</span></span><span class="sig-name descname"><span class="pre">create_chauffert_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelet_basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_wavelet_scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/sampling.html#create_chauffert_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.sampling.create_chauffert_density" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.sampling.</span></span><span class="sig-name descname"><span class="pre">create_chauffert_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelet_basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_wavelet_scales</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/sampling.html#create_chauffert_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.sampling.create_chauffert_density" title="Link to this definition">#</a></dt>
 <dd><p>Create a density based on Chauffert’s method.</p>
 <p>This is a reproduction of the proposition from <a class="reference internal" href="../autoexamples/example_sampling_densities.html#ccw13" id="id1"><span>[CCW13]</span></a>.
 A sampling density is derived from compressed sensing
@@ -748,7 +748,7 @@ for a specified sparse wavelet domain decomposition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The shape of the density grid.</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>...</em><em>]</em>) – The shape of the density grid.</p></li>
 <li><p><strong>wavelet_basis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>pywt.Wavelet</em>) – The wavelet basis to use for wavelet decomposition, either
 as a built-in wavelet name from the PyWavelets package
 or as a custom <code class="docutils literal notranslate"><span class="pre">pywt.Wavelet</span></code> object.</p></li>
@@ -760,7 +760,7 @@ or as a custom <code class="docutils literal notranslate"><span class="pre">pywt
 <dd class="field-even"><p>A density array created based on wavelet transform coefficients.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition seealso">

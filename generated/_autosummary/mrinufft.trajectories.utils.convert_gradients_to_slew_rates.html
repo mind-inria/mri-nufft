@@ -744,7 +744,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gradients</strong> (<em>np.ndarray</em>) – Gradients over 2 or 3 directions.</p></li>
+<li><p><strong>gradients</strong> (<em>NDArray</em>) – Gradients over 2 or 3 directions.</p></li>
 <li><p><strong>raster_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Amount of time between the acquisition of two
 consecutive samples in ms.
 The default is <cite>DEFAULT_RASTER_TIME</cite>.</p></li>
@@ -752,10 +752,13 @@ The default is <cite>DEFAULT_RASTER_TIME</cite>.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>slewrates</strong> (<em>np.ndarray</em>) – Slew rates corresponding to <cite>gradients</cite>.</p></li>
-<li><p><strong>initial_gradients</strong> (<em>np.ndarray</em>) – Gradients at the beginning of the readout window.</p></li>
+<li><p><strong>slewrates</strong> (<em>NDArray</em>) – Slew rates corresponding to <cite>gradients</cite>.</p></li>
+<li><p><strong>initial_gradients</strong> (<em>NDArray</em>) – Gradients at the beginning of the readout window.</p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>ndarray</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.2)"><em>dtype</em></a>[<em>_ScalarType_co</em>]], <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>ndarray</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.2)"><em>dtype</em></a>[<em>_ScalarType_co</em>]]]</p>
 </dd>
 </dl>
 </dd></dl>

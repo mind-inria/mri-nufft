@@ -662,27 +662,30 @@
   <h1>Source code for mrinufft.trajectories.gradients</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions to improve/modify gradients.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span>
 
 
 <div class="viewcode-block" id="patch_center_anomaly">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.gradients.patch_center_anomaly.html#mrinufft.trajectories.gradients.patch_center_anomaly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">patch_center_anomaly</span><span class="p">(</span>
-    <span class="n">shot_or_params</span><span class="p">,</span>
-    <span class="n">update_shot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">shot_or_params</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span>
+    <span class="n">update_shot</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">update_parameters</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-position samples to avoid center anomalies.</span>
 
 <span class="sd">    Some trajectories behave slightly differently from expected when</span>
 <span class="sd">    approaching definition bounds, most often the k-space center as</span>
 <span class="sd">    for spirals in some cases.</span>
 
-<span class="sd">    This function enforces non-strictly increasing monoticity of</span>
+<span class="sd">    This function enforces non-strictly increasing monotonicity of</span>
 <span class="sd">    sample distances from the center, effectively reducing slew</span>
 <span class="sd">    rates and smoothing gradient transitions locally.</span>
 
@@ -695,17 +698,17 @@
 <span class="sd">    shot_or_params : np.array, list</span>
 <span class="sd">        Either a single shot of shape (Ns, Nd), or a list of arbitrary</span>
 <span class="sd">        arguments used by ``update_shot`` to initialize a single shot.</span>
-<span class="sd">    update_shot : function, optional</span>
+<span class="sd">    update_shot : Callable[..., NDArray], optional</span>
 <span class="sd">        Function used to initialize a single shot based on parameters</span>
 <span class="sd">        provided by ``update_parameters``. If None, cubic splines are</span>
 <span class="sd">        used as an approximation instead, by default None</span>
-<span class="sd">    update_parameters : function, optional</span>
+<span class="sd">    update_parameters : Callable[..., tuple], optional</span>
 <span class="sd">        Function used to update shot parameters when provided in</span>
 <span class="sd">        ``shot_or_params`` from an updated shot and parameters.</span>
 <span class="sd">        If None, cubic spline parameterization is used instead,</span>
 <span class="sd">        by default None</span>
 <span class="sd">    in_out : bool, optional</span>
-<span class="sd">        Whether the shot is going in-and-out or start from the center,</span>
+<span class="sd">        Whether the shot is going in-and-out or starts from the center,</span>
 <span class="sd">        by default False</span>
 <span class="sd">    learning_rate : float, optional</span>
 <span class="sd">        Learning rate used in the iterative optimization process,</span>
@@ -713,9 +716,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        N-D trajectory based on ``shot_or_params`` if a shot or</span>
-<span class="sd">        update_shot otherwise.</span>
+<span class="sd">        ``update_shot`` otherwise.</span>
 <span class="sd">    list</span>
 <span class="sd">        Updated parameters either in the ``shot_or_params`` format</span>
 <span class="sd">        if params, or cubic spline parameterization as an array of</span>
@@ -734,7 +737,7 @@
 
     <span class="k">if</span> <span class="n">update_shot</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">update_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">_default_update_parameters</span><span class="p">(</span><span class="n">shot</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_default_update_parameters</span><span class="p">(</span><span class="n">shot</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">parameters</span>
 
         <span class="n">update_parameters</span> <span class="o">=</span> <span class="n">_default_update_parameters</span>
@@ -778,7 +781,7 @@
         <span class="n">single_shot</span> <span class="o">=</span> <span class="n">cbs</span><span class="p">(</span><span class="n">x_axis</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="n">update_parameters</span><span class="p">(</span><span class="n">single_shot</span><span class="p">,</span> <span class="o">*</span><span class="n">parameters</span><span class="p">)</span>
 
-    <span class="n">single_shot</span> <span class="o">=</span> <span class="n">single_shot</span> <span class="o">=</span> <span class="n">update_shot</span><span class="p">(</span><span class="o">*</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">single_shot</span> <span class="o">=</span> <span class="n">update_shot</span><span class="p">(</span><span class="o">*</span><span class="n">parameters</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">single_shot</span><span class="p">,</span> <span class="n">parameters</span></div>
 
 </pre></div>

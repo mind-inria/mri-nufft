@@ -745,17 +745,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>array_like</em>) – Trajectory in 2D or 3D to rotate.</p></li>
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – Trajectory in 2D or 3D to rotate.</p></li>
 <li><p><strong>nb_rotations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of rotations repeating the provided trajectory while precessing.</p></li>
-<li><p><strong>tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Angle tilt between consecutive rotations around the <span class="math notranslate nohighlight">\(k_z\)</span>-axis,
+<li><p><strong>tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Angle tilt between consecutive rotations around the <span class="math notranslate nohighlight">\(k_z\)</span>-axis,
 by default “golden”.</p></li>
 <li><p><strong>half_sphere</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the precession should be limited to the upper half
 of the k-space sphere.
 It is typically used for in-out trajectories or planes.</p></li>
-<li><p><strong>partition</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Partition type between an “axial” or “polar” split of the
+<li><p><strong>partition</strong> (<em>Literal</em><em>[</em><em>&quot;axial&quot;</em><em>, </em><em>&quot;polar&quot;</em><em>]</em><em>, </em><em>optional</em>) – Partition type between an “axial” or “polar” split of the
 <span class="math notranslate nohighlight">\(k_z\)</span>-axis, designating whether the axis should be fragmented
 by radius or angle respectively, by default “axial”.</p></li>
-<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>array_like</em><em>, </em><em>optional</em>) – Axis selected for alignment reference when rotating the trajectory
+<li><p><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>NDArray</em><em>, </em><em>optional</em>) – Axis selected for alignment reference when rotating the trajectory
 around the <span class="math notranslate nohighlight">\(k_z\)</span>-axis, generally corresponding to the shot
 direction for single shot <code class="docutils literal notranslate"><span class="pre">trajectory</span></code> inputs. It can either
 be an integer for one of the three k-space axes, or directly a 3D
@@ -767,7 +767,7 @@ coordinate of the first shot as the axis, by default <cite>None</cite>.</p></li>
 <dd class="field-even"><p>Precessed trajectory.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

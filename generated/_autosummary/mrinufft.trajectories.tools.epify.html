@@ -740,14 +740,14 @@
 <h1>epify<a class="headerlink" href="#epify" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mrinufft.trajectories.tools.epify">
-<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.tools.</span></span><span class="sig-name descname"><span class="pre">epify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns_transitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_trains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_odd_shots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/tools.html#epify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.tools.epify" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.tools.</span></span><span class="sig-name descname"><span class="pre">epify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns_transitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_trains</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_odd_shots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/tools.html#epify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.tools.epify" title="Link to this definition">#</a></dt>
 <dd><p>Create multi-readout shots from trajectory composed of single-readouts.</p>
 <p>Assemble multiple single-readout shots together by adding transition
 steps in the trajectory to create EPI-like multi-readout shots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>array_like</em>) – Trajectory to change by prolonging and merging the shots.</p></li>
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – Trajectory to change by prolonging and merging the shots.</p></li>
 <li><p><strong>Ns_transitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of samples/steps between the merged readouts.</p></li>
 <li><p><strong>nb_trains</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of resulting multi-readout shots, or trains.</p></li>
 <li><p><strong>reverse_odd_shots</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to reverse every odd shots such that, as in most
@@ -759,7 +759,7 @@ shots.</p></li>
 <dd class="field-even"><p>Trajectory with fewer but longer multi-readout shots.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

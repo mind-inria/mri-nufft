@@ -662,8 +662,11 @@
   <h1>Source code for mrinufft.trajectories.inits.travelling_salesman</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Trajectories based on the Travelling Salesman Problem.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeAlias</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.auto</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
@@ -671,8 +674,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_from_density</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">oversample</span>
 
+<span class="n">Coordinate</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;phi&quot;</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">]</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_approx_cluster_sizes</span><span class="p">(</span><span class="n">nb_total</span><span class="p">,</span> <span class="n">nb_clusters</span><span class="p">):</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_approx_cluster_sizes</span><span class="p">(</span><span class="n">nb_total</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="c1"># Give a list of cluster sizes close to sqrt(`nb_total`)</span>
     <span class="n">cluster_sizes</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">nb_total</span> <span class="o">/</span> <span class="n">nb_clusters</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nb_clusters</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">delta_sum</span> <span class="o">=</span> <span class="n">nb_total</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cluster_sizes</span><span class="p">)</span>
@@ -680,7 +685,7 @@
     <span class="k">return</span> <span class="n">cluster_sizes</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_sort_by_coordinate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sort_by_coordinate</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">Coordinate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="c1"># Sort a list of N-D locations by a Cartesian/spherical coordinate</span>
     <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">coord</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -709,8 +714,12 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_cluster_by_coordinate</span><span class="p">(</span>
-    <span class="n">locations</span><span class="p">,</span> <span class="n">nb_clusters</span><span class="p">,</span> <span class="n">cluster_by</span><span class="p">,</span> <span class="n">second_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>
+    <span class="n">locations</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span><span class="p">,</span>
+    <span class="n">second_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="c1"># Cluster approximately a list of N-D locations by Cartesian/spherical coordinates</span>
     <span class="c1"># Gather dimension variables</span>
     <span class="n">nb_dims</span> <span class="o">=</span> <span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -749,17 +758,17 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_ND_travelling_salesman</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">density</span><span class="p">,</span>
-    <span class="n">first_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">second_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">tsp_tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">first_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">second_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tsp_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="c1"># Check arguments validity</span>
     <span class="k">if</span> <span class="n">Nc</span> <span class="o">*</span> <span class="n">Ns</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`density` array not large enough to pick `Nc` * `Ns` points.&quot;</span><span class="p">)</span>
@@ -798,17 +807,17 @@
 <div class="viewcode-block" id="initialize_2D_travelling_salesman">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_2D_travelling_salesman.html#mrinufft.trajectories.inits.travelling_salesman.initialize_2D_travelling_salesman">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_travelling_salesman</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">density</span><span class="p">,</span>
-    <span class="n">first_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">second_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">tsp_tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">first_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">second_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tsp_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize a 2D trajectory using a Travelling Salesman Problem (TSP)-based path.</span>
 
@@ -824,14 +833,14 @@
 <span class="sd">        The number of clusters (or shots) to divide the trajectory into.</span>
 <span class="sd">    Ns : int</span>
 <span class="sd">        The number of points per cluster.</span>
-<span class="sd">    density : np.ndarray</span>
+<span class="sd">    density : NDArray</span>
 <span class="sd">        A 2-dimensional density array from which points are sampled.</span>
-<span class="sd">    first_cluster_by : str, optional</span>
+<span class="sd">    first_cluster_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        The coordinate used to cluster points initially, by default ``None``.</span>
-<span class="sd">    second_cluster_by : str, optional</span>
+<span class="sd">    second_cluster_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        A secondary coordinate used for clustering within primary clusters,</span>
 <span class="sd">        by default ``None``.</span>
-<span class="sd">    sort_by : str, optional</span>
+<span class="sd">    sort_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        The coordinate by which to order points within each cluster,</span>
 <span class="sd">        by default ``None``.</span>
 <span class="sd">    tsp_tol : float, optional</span>
@@ -844,7 +853,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A 2D array representing the TSP-ordered trajectory.</span>
 
 <span class="sd">    Raises</span>
@@ -856,7 +865,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,</span>
 <span class="sd">       Jonas Kahn, and Pierre Weiss.</span>
-<span class="sd">       &quot;Variable density sampling with continuous trajectories.&quot;</span>
+<span class="sd">       &quot;Variable density sampling with continuous trajectories&quot;</span>
 <span class="sd">       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -878,17 +887,17 @@
 <div class="viewcode-block" id="initialize_3D_travelling_salesman">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_3D_travelling_salesman.html#mrinufft.trajectories.inits.travelling_salesman.initialize_3D_travelling_salesman">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_travelling_salesman</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">density</span><span class="p">,</span>
-    <span class="n">first_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">second_cluster_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">tsp_tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">first_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">second_cluster_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="p">:</span> <span class="n">Coordinate</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tsp_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize a 3D trajectory using a Travelling Salesman Problem (TSP)-based path.</span>
 
@@ -906,14 +915,14 @@
 <span class="sd">        The number of clusters (or shots) to divide the trajectory into.</span>
 <span class="sd">    Ns : int</span>
 <span class="sd">        The number of points per cluster.</span>
-<span class="sd">    density : np.ndarray</span>
+<span class="sd">    density : NDArray</span>
 <span class="sd">        A 3-dimensional density array from which points are sampled.</span>
-<span class="sd">    first_cluster_by : str, optional</span>
+<span class="sd">    first_cluster_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        The coordinate used to cluster points initially, by default ``None``.</span>
-<span class="sd">    second_cluster_by : str, optional</span>
+<span class="sd">    second_cluster_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        A secondary coordinate used for clustering within primary clusters,</span>
 <span class="sd">        by default ``None``.</span>
-<span class="sd">    sort_by : str, optional</span>
+<span class="sd">    sort_by : {&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;r&quot;, &quot;phi&quot;, &quot;theta&quot;}, optional</span>
 <span class="sd">        The coordinate by which to order points within each cluster,</span>
 <span class="sd">        by default ``None``.</span>
 <span class="sd">    tsp_tol : float, optional</span>
@@ -926,7 +935,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        A 3D array representing the TSP-ordered trajectory.</span>
 
 <span class="sd">    Raises</span>

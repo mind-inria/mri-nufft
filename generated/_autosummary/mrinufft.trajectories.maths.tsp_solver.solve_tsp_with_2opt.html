@@ -744,22 +744,21 @@
 <p>A sub-optimal solution to the Travelling Salesman Problem (TSP)
 is provided using the 2-opt approach in O(n²) where chunks of
 an initially random route are reversed, and selected if the
-total distance is reduced. As a result the route solution
+total distance is reduced. As a result, the route solution
 does not cross its own path in 2D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>locations</strong> (<em>array_like</em>) – An array of N points with shape (N, D) with D
-the space dimension.</p></li>
-<li><p><strong>improvement_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Threshold used as progress criterion to stop the optimization
-process.</p></li>
+<li><p><strong>locations</strong> (<em>NDArray</em>) – An array of N points with shape (N, D) where D is the space dimension.</p></li>
+<li><p><strong>improvement_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold used as progress criterion to stop the optimization process.
+The default is 1e-8.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The new positions order of shape (N,).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

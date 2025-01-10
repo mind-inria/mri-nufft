@@ -744,8 +744,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gradients</strong> (<em>np.ndarray</em>) – Gradients to check</p></li>
-<li><p><strong>slewrates</strong> (<em>np.ndarray</em>) – Slewrates to check</p></li>
+<li><p><strong>gradients</strong> (<em>NDArray</em>) – Gradients to check</p></li>
+<li><p><strong>slewrates</strong> (<em>NDArray</em>) – Slewrates to check</p></li>
 <li><p><strong>gmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.</p></li>
 <li><p><strong>smax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum slew rate in T/m/ms. The default is DEFAULT_SMAX.</p></li>
 <li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Norm order defining how the constraints are checked,
@@ -761,6 +761,9 @@ The default is None.</p></li>
 <li><p><em>float</em> – Maximum slew rate in T/m/ms.</p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>

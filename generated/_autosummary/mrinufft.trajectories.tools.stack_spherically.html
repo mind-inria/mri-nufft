@@ -745,23 +745,22 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory_func</strong> (<em>function</em>) – Trajectory function that should return an array-like
+<li><p><strong>trajectory_func</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>NDArray</em><em>]</em>) – Trajectory function that should return an array-like
 with the usual (Nc, Ns, Nd) size.</p></li>
-<li><p><strong>Nc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of shots to use for the whole spherically
-stacked trajectory.</p></li>
+<li><p><strong>Nc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of shots to use for the whole spherically stacked trajectory.</p></li>
 <li><p><strong>nb_stacks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of stacks of trajectories.</p></li>
-<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Tilt of the stacks, by default <cite>None</cite>.</p></li>
-<li><p><strong>hard_bounded</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the stacks should be strictly within the limits of the k-space,
-by default <cite>True</cite>.</p></li>
-<li><p><strong>**kwargs</strong> – Trajectory initialization parameters for the function provided
-with <cite>trajectory_func</cite>.</p></li>
+<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tilt of the stacks, by default <cite>None</cite>.</p></li>
+<li><p><strong>hard_bounded</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the stacks should be strictly within the limits
+of the k-space, by default <cite>True</cite>.</p></li>
+<li><p><strong>**traj_kwargs</strong> (<em>Any</em>) – Trajectory initialization parameters for the function
+provided with <cite>trajectory_func</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Stacked trajectory.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

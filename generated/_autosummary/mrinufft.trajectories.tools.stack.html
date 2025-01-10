@@ -740,14 +740,14 @@
 <h1>stack<a class="headerlink" href="#stack" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mrinufft.trajectories.tools.stack">
-<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.tools.</span></span><span class="sig-name descname"><span class="pre">stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_stacks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_tilt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_bounded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/tools.html#stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.tools.stack" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.tools.</span></span><span class="sig-name descname"><span class="pre">stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_stacks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_tilt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_bounded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/tools.html#stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.tools.stack" title="Link to this definition">#</a></dt>
 <dd><p>Stack 2D or 3D trajectories over the <span class="math notranslate nohighlight">\(k_z\)</span>-axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>array_like</em>) – Trajectory in 2D or 3D to stack.</p></li>
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – Trajectory in 2D or 3D to stack.</p></li>
 <li><p><strong>nb_stacks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of stacks repeating the provided trajectory.</p></li>
-<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Tilt of the stacks, by default <cite>None</cite>.</p></li>
+<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tilt of the stacks, by default <cite>None</cite>.</p></li>
 <li><p><strong>hard_bounded</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the stacks should be strictly within the limits of the k-space.</p></li>
 </ul>
 </dd>
@@ -755,7 +755,7 @@
 <dd class="field-even"><p>Stacked trajectory.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

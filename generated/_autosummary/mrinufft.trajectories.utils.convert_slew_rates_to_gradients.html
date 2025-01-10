@@ -744,8 +744,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>slewrates</strong> (<em>np.ndarray</em>) – Slew rates over 2 or 3 directions.</p></li>
-<li><p><strong>initial_gradients</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Gradients at the beginning of the readout window.
+<li><p><strong>slewrates</strong> (<em>NDArray</em>) – Slew rates over 2 or 3 directions.</p></li>
+<li><p><strong>initial_gradients</strong> (<em>NDArray</em><em>, </em><em>optional</em>) – Gradients at the beginning of the readout window.
 The default is <cite>None</cite>.</p></li>
 <li><p><strong>raster_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Amount of time between the acquisition of two
 consecutive samples in ms.
@@ -756,7 +756,7 @@ The default is <cite>DEFAULT_RASTER_TIME</cite>.</p></li>
 <dd class="field-even"><p><strong>gradients</strong> – Gradients corresponding to <cite>slewrates</cite>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

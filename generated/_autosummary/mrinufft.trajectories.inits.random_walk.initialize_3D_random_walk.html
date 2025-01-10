@@ -753,14 +753,14 @@ is provided to have pseudo-random walks to improve coverage.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Nc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of shots</p></li>
 <li><p><strong>Ns</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of samples per shot</p></li>
-<li><p><strong>density</strong> (<em>array_like</em>) – Sampling density used to determine the walk probabilities,
+<li><p><strong>density</strong> (<em>NDArray</em>) – Sampling density used to determine the walk probabilities,
 normalized automatically by its sum during the call for convenience.</p></li>
-<li><p><strong>diagonals</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to draw the next walk step from the diagional neighbors
+<li><p><strong>diagonals</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to draw the next walk step from the diagonal neighbors
 on top of the adjacent ones. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 <li><p><strong>pseudo_random</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to adapt the density dynamically to reduce areas
 already covered. The density is still statistically followed
 for undersampled acquisitions. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
-<li><p><strong>**sampling_kwargs</strong> – Sampling parameters in
+<li><p><strong>**sampling_kwargs</strong> (<em>Any</em>) – Sampling parameters in
 <code class="docutils literal notranslate"><span class="pre">mrinufft.trajectories.sampling.sample_from_density</span></code> used for the
 shot starting positions.</p></li>
 </ul>
@@ -769,7 +769,7 @@ shot starting positions.</p></li>
 <dd class="field-even"><p>3D random walk trajectory</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition-references admonition">
@@ -779,7 +779,7 @@ shot starting positions.</p></li>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Cha+14</a><span class="fn-bracket">]</span></span>
 <p>Chauffert, Nicolas, Philippe Ciuciu,
 Jonas Kahn, and Pierre Weiss.
-“Variable density sampling with continuous trajectories.”
+“Variable density sampling with continuous trajectories”
 SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</p>
 </div>
 </div>

@@ -662,18 +662,20 @@
   <h1>Source code for mrinufft.trajectories.inits.random_walk</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Trajectories based on random walks.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_from_density</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_adjacent_neighbors_offsets</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_adjacent_neighbors_offsets</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_neighbors_offsets</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
-    <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_neighbors_offsets</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="n">neighbors</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">([</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb_dims</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
     <span class="n">nb_half</span> <span class="o">=</span> <span class="n">neighbors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="c1"># Remove full zero entry</span>
@@ -682,18 +684,25 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_ND_random_walk</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">diagonals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pseudo_random</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">sampling_kwargs</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">diagonals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">pseudo_random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
     <span class="n">density</span> <span class="o">=</span> <span class="n">density</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density</span><span class="p">)</span>
     <span class="n">flat_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
-    <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">density</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">nb_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">flat_density</span><span class="p">)</span>
 
     <span class="c1"># Prepare neighbor offsets once</span>
     <span class="n">offsets</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">_get_neighbors_offsets</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">_get_neighbors_offsets</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">diagonals</span>
-        <span class="k">else</span> <span class="n">_get_adjacent_neighbors_offsets</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">_get_adjacent_neighbors_offsets</span><span class="p">(</span><span class="n">nb_dims</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Make all random draws at once for performance</span>
@@ -701,9 +710,8 @@
 
     <span class="c1"># Initialize shot starting points</span>
     <span class="n">locations</span> <span class="o">=</span> <span class="n">sample_from_density</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">)</span>
-    <span class="n">choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">((</span><span class="n">locations</span> <span class="o">+</span> <span class="n">KMAX</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">choices</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="c1"># choices = np.random.choice(np.arange(len(flat_density)), size=Nc, p=flat_density)</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">((</span><span class="n">locations</span> <span class="o">+</span> <span class="n">KMAX</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">choices</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
     <span class="n">routes</span> <span class="o">=</span> <span class="p">[</span><span class="n">choices</span><span class="p">]</span>
 
     <span class="c1"># Walk</span>
@@ -714,7 +722,7 @@
 
         <span class="c1"># Find out-of-bound neighbors and ignore them</span>
         <span class="n">invalids</span> <span class="o">=</span> <span class="p">(</span><span class="n">neighbors</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
-            <span class="n">neighbors</span> <span class="o">&gt;=</span> <span class="n">shape</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">neighbors</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">neighbors</span><span class="p">[:,</span> <span class="n">invalids</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">invalids</span> <span class="o">=</span> <span class="n">invalids</span><span class="o">.</span><span class="n">T</span>
@@ -733,27 +741,32 @@
         <span class="n">choices</span> <span class="o">=</span> <span class="n">neighbors</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nc</span><span class="p">),</span> <span class="n">indices</span><span class="p">]</span>
         <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
 
-        <span class="c1"># Update density to account for already drawed positions</span>
+        <span class="c1"># Update density to account for already drawn positions</span>
         <span class="k">if</span> <span class="n">pseudo_random</span><span class="p">:</span>
             <span class="n">flat_density</span><span class="p">[</span><span class="n">choices</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">mask</span><span class="p">[</span><span class="n">choices</span><span class="p">]</span> <span class="o">*</span> <span class="n">flat_density</span><span class="p">[</span><span class="n">choices</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">choices</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">mask</span><span class="p">[</span><span class="n">choices</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">routes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">routes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
     <span class="c1"># Create trajectory from routes</span>
     <span class="n">locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-    <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">locations</span><span class="p">[:,</span> <span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">])</span>
-    <span class="n">trajectory</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">KMAX</span> <span class="o">*</span> <span class="n">trajectory</span> <span class="o">/</span> <span class="p">(</span><span class="n">shape</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">KMAX</span>
+    <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nb_dims</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">locations</span><span class="p">[:,</span> <span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">routes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+    <span class="n">trajectory</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">KMAX</span> <span class="o">*</span> <span class="n">trajectory</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">KMAX</span>
     <span class="k">return</span> <span class="n">trajectory</span>
 
 
 <div class="viewcode-block" id="initialize_2D_random_walk">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html#mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_2D_random_walk</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">diagonals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pseudo_random</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">sampling_kwargs</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">diagonals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">pseudo_random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 2D random walk trajectory.</span>
 
 <span class="sd">    This is an adaptation of the proposition from [Cha+14]_.</span>
@@ -771,31 +784,31 @@
 <span class="sd">        Number of shots</span>
 <span class="sd">    Ns : int</span>
 <span class="sd">        Number of samples per shot</span>
-<span class="sd">    density : array_like</span>
+<span class="sd">    density : NDArray</span>
 <span class="sd">        Sampling density used to determine the walk probabilities,</span>
 <span class="sd">        normalized automatically by its sum during the call for convenience.</span>
 <span class="sd">    diagonals : bool, optional</span>
-<span class="sd">        Whether to draw the next walk step from the diagional neighbors</span>
+<span class="sd">        Whether to draw the next walk step from the diagonal neighbors</span>
 <span class="sd">        on top of the adjacent ones. Default to ``True``.</span>
 <span class="sd">    pseudo_random : bool, optional</span>
 <span class="sd">        Whether to adapt the density dynamically to reduce areas</span>
 <span class="sd">        already covered. The density is still statistically followed</span>
 <span class="sd">        for undersampled acquisitions. Default to ``True``.</span>
-<span class="sd">    **sampling_kwargs</span>
+<span class="sd">    **sampling_kwargs : Any</span>
 <span class="sd">        Sampling parameters in</span>
 <span class="sd">        ``mrinufft.trajectories.sampling.sample_from_density`` used for the</span>
 <span class="sd">        shot starting positions.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        2D random walk trajectory</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,</span>
 <span class="sd">       Jonas Kahn, and Pierre Weiss.</span>
-<span class="sd">       &quot;Variable density sampling with continuous trajectories.&quot;</span>
+<span class="sd">       &quot;Variable density sampling with continuous trajectories&quot;</span>
 <span class="sd">       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -814,8 +827,14 @@
 <div class="viewcode-block" id="initialize_3D_random_walk">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html#mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_random_walk</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">diagonals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pseudo_random</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">sampling_kwargs</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">diagonals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">pseudo_random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">sampling_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a 3D random walk trajectory.</span>
 
 <span class="sd">    This is an adaptation of the proposition from [Cha+14]_.</span>
@@ -833,31 +852,31 @@
 <span class="sd">        Number of shots</span>
 <span class="sd">    Ns : int</span>
 <span class="sd">        Number of samples per shot</span>
-<span class="sd">    density : array_like</span>
+<span class="sd">    density : NDArray</span>
 <span class="sd">        Sampling density used to determine the walk probabilities,</span>
 <span class="sd">        normalized automatically by its sum during the call for convenience.</span>
 <span class="sd">    diagonals : bool, optional</span>
-<span class="sd">        Whether to draw the next walk step from the diagional neighbors</span>
+<span class="sd">        Whether to draw the next walk step from the diagonal neighbors</span>
 <span class="sd">        on top of the adjacent ones. Default to ``True``.</span>
 <span class="sd">    pseudo_random : bool, optional</span>
 <span class="sd">        Whether to adapt the density dynamically to reduce areas</span>
 <span class="sd">        already covered. The density is still statistically followed</span>
 <span class="sd">        for undersampled acquisitions. Default to ``True``.</span>
-<span class="sd">    **sampling_kwargs</span>
+<span class="sd">    **sampling_kwargs : Any</span>
 <span class="sd">        Sampling parameters in</span>
 <span class="sd">        ``mrinufft.trajectories.sampling.sample_from_density`` used for the</span>
 <span class="sd">        shot starting positions.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D random walk trajectory</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [Cha+14] Chauffert, Nicolas, Philippe Ciuciu,</span>
 <span class="sd">       Jonas Kahn, and Pierre Weiss.</span>
-<span class="sd">       &quot;Variable density sampling with continuous trajectories.&quot;</span>
+<span class="sd">       &quot;Variable density sampling with continuous trajectories&quot;</span>
 <span class="sd">       SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>

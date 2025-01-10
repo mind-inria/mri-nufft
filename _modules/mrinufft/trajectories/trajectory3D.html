@@ -663,9 +663,11 @@
 <span></span><span class="sd">&quot;&quot;&quot;Functions to initialize 3D trajectories.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">ellipj</span><span class="p">,</span> <span class="n">ellipk</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.maths</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -679,7 +681,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">conify</span><span class="p">,</span> <span class="n">duplicate_along_axes</span><span class="p">,</span> <span class="n">epify</span><span class="p">,</span> <span class="n">precess</span><span class="p">,</span> <span class="n">stack</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.trajectory2D</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_2D_radial</span><span class="p">,</span> <span class="n">initialize_2D_spiral</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">Packings</span><span class="p">,</span> <span class="n">initialize_shape_norm</span><span class="p">,</span> <span class="n">initialize_tilt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">Packings</span><span class="p">,</span> <span class="n">Spirals</span><span class="p">,</span> <span class="n">initialize_shape_norm</span><span class="p">,</span> <span class="n">initialize_tilt</span>
 
 <span class="c1">##############</span>
 <span class="c1"># 3D RADIALS #</span>
@@ -688,7 +690,9 @@
 
 <div class="viewcode-block" id="initialize_3D_phyllotaxis_radial">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial.html#mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_phyllotaxis_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_phyllotaxis_radial</span><span class="p">(</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D radial trajectories with phyllotactic structure.</span>
 
 <span class="sd">    The radial shots are oriented according to a Fibonacci sphere</span>
@@ -717,7 +721,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D phyllotaxis radial trajectory</span>
 
 <span class="sd">    References</span>
@@ -738,7 +742,9 @@
 
 <div class="viewcode-block" id="initialize_3D_golden_means_radial">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_golden_means_radial.html#mrinufft.trajectories.trajectory3D.initialize_3D_golden_means_radial">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_golden_means_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_golden_means_radial</span><span class="p">(</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D radial trajectories with golden means-based structure.</span>
 
 <span class="sd">    The radial shots are oriented using multidimensional golden means,</span>
@@ -762,7 +768,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D golden means radial trajectory</span>
 
 <span class="sd">    References</span>
@@ -793,7 +799,9 @@
 
 <div class="viewcode-block" id="initialize_3D_wong_radial">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wong_radial.html#mrinufft.trajectories.trajectory3D.initialize_3D_wong_radial">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_wong_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_wong_radial</span><span class="p">(</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D radial trajectories with a spiral structure.</span>
 
 <span class="sd">    The radial shots are oriented according to an archimedean spiral</span>
@@ -819,7 +827,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D Wong radial trajectory</span>
 
 <span class="sd">    References</span>
@@ -854,7 +862,9 @@
 
 <div class="viewcode-block" id="initialize_3D_park_radial">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_park_radial.html#mrinufft.trajectories.trajectory3D.initialize_3D_park_radial">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_park_radial</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_park_radial</span><span class="p">(</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_interleaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D radial trajectories with a spiral structure.</span>
 
 <span class="sd">    The radial shots are oriented according to an archimedean spiral</span>
@@ -881,7 +891,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D Park radial trajectory</span>
 
 <span class="sd">    References</span>
@@ -909,8 +919,14 @@
 <div class="viewcode-block" id="initialize_3D_cones">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_cones.html#mrinufft.trajectories.trajectory3D.initialize_3D_cones">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_cones</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">spiral</span><span class="o">=</span><span class="s2">&quot;archimedes&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nb_zigzags</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">spiral</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;archimedes&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with cones.</span>
 
 <span class="sd">    Initialize a trajectory consisting of 3D cones duplicated</span>
@@ -940,7 +956,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D cones trajectory</span>
 
 <span class="sd">    References</span>
@@ -950,7 +966,7 @@
 <span class="sd">       Journal of mathematical chemistry 6, no. 1 (1991): 325-349.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Initialize first spiral</span>
-    <span class="n">spiral</span> <span class="o">=</span> <span class="n">initialize_2D_spiral</span><span class="p">(</span>
+    <span class="n">single_spiral</span> <span class="o">=</span> <span class="n">initialize_2D_spiral</span><span class="p">(</span>
         <span class="n">Nc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">Ns</span><span class="o">=</span><span class="n">Ns</span><span class="p">,</span>
         <span class="n">spiral</span><span class="o">=</span><span class="n">spiral</span><span class="p">,</span>
@@ -966,8 +982,8 @@
 
     <span class="c1"># Initialize first cone</span>
     <span class="c1">## Create three cones for proper partitioning, but only one is needed</span>
-    <span class="n">cone</span> <span class="o">=</span> <span class="n">conify</span><span class="p">(</span>
-        <span class="n">spiral</span><span class="p">,</span>
+    <span class="n">cones</span> <span class="o">=</span> <span class="n">conify</span><span class="p">(</span>
+        <span class="n">single_spiral</span><span class="p">,</span>
         <span class="n">nb_cones</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
         <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">in_out</span><span class="o">=</span><span class="n">in_out</span><span class="p">,</span>
@@ -977,7 +993,12 @@
 
     <span class="c1"># Apply precession to the first cone</span>
     <span class="n">trajectory</span> <span class="o">=</span> <span class="n">precess</span><span class="p">(</span>
-        <span class="n">cone</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="n">tilt</span><span class="p">,</span> <span class="n">nb_rotations</span><span class="o">=</span><span class="n">Nc</span><span class="p">,</span> <span class="n">half_sphere</span><span class="o">=</span><span class="n">in_out</span><span class="p">,</span> <span class="n">partition</span><span class="o">=</span><span class="s2">&quot;axial&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span>
+        <span class="n">cones</span><span class="p">,</span>
+        <span class="n">tilt</span><span class="o">=</span><span class="n">tilt</span><span class="p">,</span>
+        <span class="n">nb_rotations</span><span class="o">=</span><span class="n">Nc</span><span class="p">,</span>
+        <span class="n">half_sphere</span><span class="o">=</span><span class="n">in_out</span><span class="p">,</span>
+        <span class="n">partition</span><span class="o">=</span><span class="s2">&quot;axial&quot;</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">trajectory</span></div>
@@ -987,15 +1008,15 @@
 <div class="viewcode-block" id="initialize_3D_floret">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_floret.html#mrinufft.trajectories.trajectory3D.initialize_3D_floret">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_floret</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">spiral</span><span class="o">=</span><span class="s2">&quot;fermat&quot;</span><span class="p">,</span>
-    <span class="n">cone_tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
-    <span class="n">max_angle</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,),</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nb_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">spiral</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;fermat&quot;</span><span class="p">,</span>
+    <span class="n">cone_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">max_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with FLORET.</span>
 
 <span class="sd">    This implementation is based on the work from [Pip+11]_.</span>
@@ -1025,7 +1046,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D FLORET trajectory</span>
 
 <span class="sd">    References</span>
@@ -1042,7 +1063,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nc should be divisible by len(axes).&quot;</span><span class="p">)</span>
 
     <span class="c1"># Initialize first spiral</span>
-    <span class="n">spiral</span> <span class="o">=</span> <span class="n">initialize_2D_spiral</span><span class="p">(</span>
+    <span class="n">single_spiral</span> <span class="o">=</span> <span class="n">initialize_2D_spiral</span><span class="p">(</span>
         <span class="n">Nc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">Ns</span><span class="o">=</span><span class="n">Ns</span><span class="p">,</span>
         <span class="n">spiral</span><span class="o">=</span><span class="n">spiral</span><span class="p">,</span>
@@ -1051,8 +1072,8 @@
     <span class="p">)</span>
 
     <span class="c1"># Initialize first cone</span>
-    <span class="n">cone</span> <span class="o">=</span> <span class="n">conify</span><span class="p">(</span>
-        <span class="n">spiral</span><span class="p">,</span>
+    <span class="n">cones</span> <span class="o">=</span> <span class="n">conify</span><span class="p">(</span>
+        <span class="n">single_spiral</span><span class="p">,</span>
         <span class="n">nb_cones</span><span class="o">=</span><span class="n">Nc_per_axis</span><span class="p">,</span>
         <span class="n">z_tilt</span><span class="o">=</span><span class="n">cone_tilt</span><span class="p">,</span>
         <span class="n">in_out</span><span class="o">=</span><span class="n">in_out</span><span class="p">,</span>
@@ -1060,8 +1081,8 @@
     <span class="p">)</span>
 
     <span class="c1"># Duplicate cone along axes</span>
-    <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ax</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">]</span>  <span class="c1"># Default axis is kz, not kx</span>
-    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">duplicate_along_axes</span><span class="p">(</span><span class="n">cone</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ax</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">)</span>  <span class="c1"># Default axis is kz, not kx</span>
+    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">duplicate_along_axes</span><span class="p">(</span><span class="n">cones</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trajectory</span></div>
 
 
@@ -1069,14 +1090,14 @@
 <div class="viewcode-block" id="initialize_3D_wave_caipi">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi.html#mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_wave_caipi</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">packing</span><span class="o">=</span><span class="s2">&quot;triangular&quot;</span><span class="p">,</span>
-    <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;square&quot;</span><span class="p">,</span>
-    <span class="n">spacing</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">packing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;triangular&quot;</span><span class="p">,</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;square&quot;</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with Wave-CAIPI.</span>
 
 <span class="sd">    This implementation is based on the work from [Bil+15]_.</span>
@@ -1097,20 +1118,20 @@
 <span class="sd">        Packing method used to position the helices:</span>
 <span class="sd">        &quot;triangular&quot;/&quot;hexagonal&quot;, &quot;square&quot;, &quot;circular&quot;</span>
 <span class="sd">        or &quot;random&quot;/&quot;uniform&quot;, by default &quot;triangular&quot;.</span>
-<span class="sd">    shape : str or float, optional</span>
+<span class="sd">    shape : str | float, optional</span>
 <span class="sd">        Shape over the 2D :math:`k_x-k_y` plane to pack with shots,</span>
 <span class="sd">        either defined as `str` (&quot;circle&quot;, &quot;square&quot;, &quot;diamond&quot;)</span>
 <span class="sd">        or as `float` through p-norms following the conventions</span>
 <span class="sd">        of the `ord` parameter from `numpy.linalg.norm`,</span>
 <span class="sd">        by default &quot;circle&quot;.</span>
-<span class="sd">    spacing : tuple(int, int)</span>
+<span class="sd">    spacing : tuple[int, int]</span>
 <span class="sd">        Spacing between helices over the 2D :math:`k_x-k_y` plane</span>
 <span class="sd">        normalized similarly to `width` to correspond to</span>
 <span class="sd">        helix diameters, by default (1, 1).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D wave-CAIPI trajectory</span>
 
 <span class="sd">    References</span>
@@ -1121,7 +1142,6 @@
 <span class="sd">       Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-    <span class="n">spacing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span>
 
     <span class="c1"># Initialize first shot</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">nb_revolutions</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Ns</span><span class="p">)</span> <span class="o">/</span> <span class="n">Ns</span>
@@ -1130,11 +1150,11 @@
     <span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Ns</span><span class="p">)</span>
 
     <span class="c1"># Choose the helix positions according to packing</span>
-    <span class="n">packing</span> <span class="o">=</span> <span class="n">Packings</span><span class="p">[</span><span class="n">packing</span><span class="p">]</span>
+    <span class="n">packing_enum</span> <span class="o">=</span> <span class="n">Packings</span><span class="p">[</span><span class="n">packing</span><span class="p">]</span>
     <span class="n">side</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Nc</span><span class="p">)))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">packing</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">RANDOM</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">packing_enum</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">RANDOM</span><span class="p">:</span>
         <span class="n">positions</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">side</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="n">side</span> <span class="o">*</span> <span class="n">side</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">packing</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">CIRCLE</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">packing_enum</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">CIRCLE</span><span class="p">:</span>
         <span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">side</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span>
@@ -1148,21 +1168,21 @@
             <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">positions</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">circle</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">circle</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
             <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">packing</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Packings</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">TRIANGLE</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">HEXAGONAL</span><span class="p">]:</span>
+    <span class="k">elif</span> <span class="n">packing_enum</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Packings</span><span class="o">.</span><span class="n">SQUARE</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">TRIANGLE</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">HEXAGONAL</span><span class="p">]:</span>
         <span class="c1"># Square packing or initialize hexagonal/triangular packing</span>
         <span class="n">px</span><span class="p">,</span> <span class="n">py</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">side</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">side</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">px</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">py</span><span class="o">.</span><span class="n">flatten</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">packing</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Packings</span><span class="o">.</span><span class="n">HEXAGON</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">TRIANGLE</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">packing_enum</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Packings</span><span class="o">.</span><span class="n">HEXAGON</span><span class="p">,</span> <span class="n">Packings</span><span class="o">.</span><span class="n">TRIANGLE</span><span class="p">]:</span>
         <span class="c1"># Hexagonal/triangular packing based on square packing</span>
         <span class="n">positions</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">ratio</span> <span class="o">=</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">positions</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">positions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">ratio</span> <span class="o">/</span> <span class="mi">2</span>
 
-    <span class="k">if</span> <span class="n">packing</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">FIBONACCI</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">packing_enum</span> <span class="o">==</span> <span class="n">Packings</span><span class="o">.</span><span class="n">FIBONACCI</span><span class="p">:</span>
         <span class="c1"># Estimate helix width based on the k-space 2D surface</span>
         <span class="c1"># and an optimal circle packing</span>
         <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
@@ -1172,7 +1192,7 @@
     <span class="c1"># Remove points by distance to fit both shape and Nc</span>
     <span class="n">main_order</span> <span class="o">=</span> <span class="n">initialize_shape_norm</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">tie_order</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="p">(</span><span class="n">main_order</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># breaking ties</span>
-    <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">*</span> <span class="n">spacing</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spacing</span><span class="p">)</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">tie_order</span><span class="p">))</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">main_order</span><span class="p">))</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[:</span><span class="n">Nc</span><span class="p">]</span>
@@ -1191,14 +1211,14 @@
 <div class="viewcode-block" id="initialize_3D_seiffert_spiral">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral.html#mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_seiffert_spiral</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">curve_index</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">axis_tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
-    <span class="n">spiral_tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">curve_index</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">nb_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">axis_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">spiral_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with modulated Seiffert spirals.</span>
 
 <span class="sd">    Initially introduced in [SMR18]_, but also proposed later as &quot;Yarnball&quot;</span>
@@ -1228,7 +1248,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D Seiffert spiral trajectory</span>
 
 <span class="sd">    References</span>
@@ -1299,8 +1319,13 @@
 <div class="viewcode-block" id="initialize_3D_helical_shells">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_helical_shells.html#mrinufft.trajectories.trajectory3D.initialize_3D_helical_shells">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_helical_shells</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_shells</span><span class="p">,</span> <span class="n">spiral_reduction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shell_tilt</span><span class="o">=</span><span class="s2">&quot;intergaps&quot;</span><span class="p">,</span> <span class="n">shot_tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_shells</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">spiral_reduction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">shell_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intergaps&quot;</span><span class="p">,</span>
+    <span class="n">shot_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with helical shells.</span>
 
 <span class="sd">    The implementation follows the proposition from [YRB06]_</span>
@@ -1323,7 +1348,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D helical shell trajectory</span>
 
 <span class="sd">    References</span>
@@ -1385,8 +1410,12 @@
 <div class="viewcode-block" id="initialize_3D_annular_shells">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells.html#mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_annular_shells</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">nb_shells</span><span class="p">,</span> <span class="n">shell_tilt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">ring_tilt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_shells</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">shell_tilt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+    <span class="n">ring_tilt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with annular shells.</span>
 
 <span class="sd">    An exclusive trajectory inspired from the work proposed in [HM11]_.</span>
@@ -1406,7 +1435,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D annular shell trajectory</span>
 
 <span class="sd">    References</span>
@@ -1501,14 +1530,14 @@
 <div class="viewcode-block" id="initialize_3D_seiffert_shells">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_shells.html#mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_shells">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_seiffert_shells</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns</span><span class="p">,</span>
-    <span class="n">nb_shells</span><span class="p">,</span>
-    <span class="n">curve_index</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">shell_tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
-    <span class="n">shot_tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_shells</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">curve_index</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">nb_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">shell_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+    <span class="n">shot_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D trajectories with Seiffert shells.</span>
 
 <span class="sd">    The implementation is based on work from [Er00]_ and [Br09]_,</span>
@@ -1535,7 +1564,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D Seiffert shell trajectory</span>
 
 <span class="sd">    References</span>
@@ -1602,15 +1631,15 @@
 <div class="viewcode-block" id="initialize_3D_turbine">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_turbine.html#mrinufft.trajectories.trajectory3D.initialize_3D_turbine">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_turbine</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns_readouts</span><span class="p">,</span>
-    <span class="n">Ns_transitions</span><span class="p">,</span>
-    <span class="n">nb_blades</span><span class="p">,</span>
-    <span class="n">blade_tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
-    <span class="n">nb_trains</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-    <span class="n">skip_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns_readouts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_blades</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">blade_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+    <span class="n">nb_trains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">skip_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D TURBINE trajectory.</span>
 
 <span class="sd">    This is an implementation of the TURBINE (Trajectory Using Radially</span>
@@ -1635,7 +1664,7 @@
 <span class="sd">        Number of line stacks over the :math:`k_z`-axis axis</span>
 <span class="sd">    blade_tilt : str, float, optional</span>
 <span class="sd">        Tilt between individual blades, by default &quot;uniform&quot;</span>
-<span class="sd">    nb_trains : int, str, optional</span>
+<span class="sd">    nb_trains : int, Literal[&quot;auto&quot;], optional</span>
 <span class="sd">        Number of resulting shots, or readout trains, such that each of</span>
 <span class="sd">        them will be composed of :math:`n` readouts with</span>
 <span class="sd">        ``Nc = n * nb_trains``. If ``&quot;auto&quot;`` then ``nb_trains`` is set</span>
@@ -1648,7 +1677,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D TURBINE trajectory</span>
 
 <span class="sd">    References</span>
@@ -1713,17 +1742,17 @@
 <div class="viewcode-block" id="initialize_3D_repi">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_repi.html#mrinufft.trajectories.trajectory3D.initialize_3D_repi">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize_3D_repi</span><span class="p">(</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">Ns_readouts</span><span class="p">,</span>
-    <span class="n">Ns_transitions</span><span class="p">,</span>
-    <span class="n">nb_blades</span><span class="p">,</span>
-    <span class="n">nb_blade_revolutions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">blade_tilt</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
-    <span class="n">nb_spiral_revolutions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">spiral</span><span class="o">=</span><span class="s2">&quot;archimedes&quot;</span><span class="p">,</span>
-    <span class="n">nb_trains</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns_readouts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_blades</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_blade_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">blade_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+    <span class="n">nb_spiral_revolutions</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">spiral</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;archimedes&quot;</span><span class="p">,</span>
+    <span class="n">nb_trains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize 3D REPI trajectory.</span>
 
 <span class="sd">    This is an implementation of the REPI (Radial Echo Planar Imaging)</span>
@@ -1758,7 +1787,7 @@
 <span class="sd">        Number of revolutions of the spirals over the readouts, by default 0</span>
 <span class="sd">    spiral : str, float, optional</span>
 <span class="sd">        Spiral type, by default &quot;archimedes&quot;</span>
-<span class="sd">    nb_trains : int, str</span>
+<span class="sd">    nb_trains : int, Literal[&quot;auto&quot;], optional</span>
 <span class="sd">        Number of trains dividing the readouts, such that each</span>
 <span class="sd">        shot will be composed of `n` readouts with `Nc = n * nb_trains`.</span>
 <span class="sd">        If &quot;auto&quot; then `nb_trains` is set to `nb_blades`.</span>
@@ -1767,7 +1796,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        3D REPI trajectory</span>
 
 <span class="sd">    References</span>

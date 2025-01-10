@@ -663,31 +663,33 @@
 <span></span><span class="sd">&quot;&quot;&quot;Solver for the Travelling Salesman Problem.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
 
 <div class="viewcode-block" id="solve_tsp_with_2opt">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt.html#mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">solve_tsp_with_2opt</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">improvement_threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">solve_tsp_with_2opt</span><span class="p">(</span>
+    <span class="n">locations</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">improvement_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve the TSP problem using a 2-opt approach.</span>
 
 <span class="sd">    A sub-optimal solution to the Travelling Salesman Problem (TSP)</span>
 <span class="sd">    is provided using the 2-opt approach in O(n²) where chunks of</span>
 <span class="sd">    an initially random route are reversed, and selected if the</span>
-<span class="sd">    total distance is reduced. As a result the route solution</span>
+<span class="sd">    total distance is reduced. As a result, the route solution</span>
 <span class="sd">    does not cross its own path in 2D.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    locations : array_like</span>
-<span class="sd">        An array of N points with shape (N, D) with D</span>
-<span class="sd">        the space dimension.</span>
-<span class="sd">    improvement_threshold: float</span>
-<span class="sd">                Threshold used as progress criterion to stop the optimization</span>
-<span class="sd">                process.</span>
+<span class="sd">    locations : NDArray</span>
+<span class="sd">        An array of N points with shape (N, D) where D is the space dimension.</span>
+<span class="sd">    improvement_threshold : float, optional</span>
+<span class="sd">        Threshold used as progress criterion to stop the optimization process.</span>
+<span class="sd">        The default is 1e-8.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        The new positions order of shape (N,).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">route</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>

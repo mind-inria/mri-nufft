@@ -765,7 +765,7 @@ over the kz axis.</p></li>
 <li><p><strong>blade_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tilt between individual blades, by default “uniform”</p></li>
 <li><p><strong>nb_spiral_revolutions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Number of revolutions of the spirals over the readouts, by default 0</p></li>
 <li><p><strong>spiral</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Spiral type, by default “archimedes”</p></li>
-<li><p><strong>nb_trains</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Number of trains dividing the readouts, such that each
+<li><p><strong>nb_trains</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>Literal</em><em>[</em><em>&quot;auto&quot;</em><em>]</em><em>, </em><em>optional</em>) – Number of trains dividing the readouts, such that each
 shot will be composed of <cite>n</cite> readouts with <cite>Nc = n * nb_trains</cite>.
 If “auto” then <cite>nb_trains</cite> is set to <cite>nb_blades</cite>.</p></li>
 <li><p><strong>in_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether the curves are going in-and-out or start from the center</p></li>
@@ -775,7 +775,7 @@ If “auto” then <cite>nb_trains</cite> is set to <cite>nb_blades</cite>.</p><
 <dd class="field-even"><p>3D REPI trajectory</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition-references admonition">

@@ -745,9 +745,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>array_like</em>) – Trajectory to conify.</p></li>
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – Trajectory to conify.</p></li>
 <li><p><strong>nb_cones</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of cones repeating the provided trajectory.</p></li>
-<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Tilt of the trajectory over the <span class="math notranslate nohighlight">\(k_z\)</span>-axis, by default <cite>None</cite>.</p></li>
+<li><p><strong>z_tilt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Tilt of the trajectory over the <span class="math notranslate nohighlight">\(k_z\)</span>-axis, by default <cite>None</cite>.</p></li>
 <li><p><strong>in_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to account for the in-out nature of some trajectories
 to avoid hard angles around the center, by default False.</p></li>
 <li><p><strong>max_angle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum angle of the cones, by default pi / 2.</p></li>
@@ -759,7 +759,7 @@ and avoid 1D cones if equal to pi / 2, by default True.</p></li>
 <dd class="field-even"><p>Conified trajectory.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 </dd></dl>

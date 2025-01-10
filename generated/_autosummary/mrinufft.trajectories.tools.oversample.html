@@ -744,10 +744,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>np.ndarray</em>) – The original trajectory array, where interpolation
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – The original trajectory array, where interpolation
 is applied along the second axis.</p></li>
 <li><p><strong>new_Ns</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The desired number of samples in the resampled trajectory.</p></li>
-<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type of interpolation to use, such as ‘linear’,
+<li><p><strong>kind</strong> (<em>Literal</em><em>, </em><em>optional</em>) – The type of interpolation to use, such as ‘linear’,
 ‘quadratic’, or ‘cubic’, by default “cubic”.</p></li>
 </ul>
 </dd>
@@ -755,7 +755,7 @@ is applied along the second axis.</p></li>
 <dd class="field-even"><p>The resampled trajectory array with <code class="docutils literal notranslate"><span class="pre">new_Ns</span></code> points along the second axis.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>

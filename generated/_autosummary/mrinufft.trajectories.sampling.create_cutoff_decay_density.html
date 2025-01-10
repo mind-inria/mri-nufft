@@ -747,12 +747,12 @@ outer regions as defined in <a class="reference internal" href="../autoexamples/
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The shape of the density grid, analog to the field-of-view
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>...</em><em>]</em>) – The shape of the density grid, analog to the field-of-view
 as opposed to <code class="docutils literal notranslate"><span class="pre">resolution</span></code> below.</p></li>
 <li><p><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The ratio of the largest k-space dimension between 0
 and 1 within which density remains uniform and beyond which it decays.</p></li>
 <li><p><strong>decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The polynomial decay in density beyond the cutoff ratio.</p></li>
-<li><p><strong>resolution</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Resolution scaling factors for each dimension of the density grid,
+<li><p><strong>resolution</strong> (<em>NDArray</em><em>, </em><em>optional</em>) – Resolution scaling factors for each dimension of the density grid,
 by default <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 </ul>
 </dd>
@@ -761,7 +761,7 @@ by default <code class="docutils literal notranslate"><span class="pre">None</sp
 cutoff ratio and decay rate.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
 <div class="admonition-references admonition">

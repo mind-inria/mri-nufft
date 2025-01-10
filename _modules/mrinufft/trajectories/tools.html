@@ -662,7 +662,10 @@
   <h1>Source code for mrinufft.trajectories.tools</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions to manipulate/modify trajectories.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span><span class="p">,</span> <span class="n">interp1d</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.maths</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rv</span><span class="p">,</span> <span class="n">Rx</span><span class="p">,</span> <span class="n">Ry</span><span class="p">,</span> <span class="n">Rz</span>
@@ -675,23 +678,29 @@
 
 <div class="viewcode-block" id="stack">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack.html#mrinufft.trajectories.tools.stack">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">stack</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_stacks</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_stacks</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">z_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">hard_bounded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack 2D or 3D trajectories over the :math:`k_z`-axis.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory in 2D or 3D to stack.</span>
 <span class="sd">    nb_stacks : int</span>
 <span class="sd">        Number of stacks repeating the provided trajectory.</span>
-<span class="sd">    z_tilt : str, optional</span>
+<span class="sd">    z_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the stacks, by default `None`.</span>
 <span class="sd">    hard_bounded : bool, optional</span>
 <span class="sd">        Whether the stacks should be strictly within the limits of the k-space.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Stacked trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check dimensionality and initialize output</span>
@@ -722,25 +731,31 @@
 
 <div class="viewcode-block" id="rotate">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rotate.html#mrinufft.trajectories.tools.rotate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_rotations</span><span class="p">,</span> <span class="n">x_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_rotations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">x_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">z_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate 2D or 3D trajectories over the different axes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory in 2D or 3D to rotate.</span>
 <span class="sd">    nb_rotations : int</span>
 <span class="sd">        Number of rotations repeating the provided trajectory.</span>
-<span class="sd">    x_tilt : str, optional</span>
+<span class="sd">    x_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the trajectory over the :math:`k_x`-axis, by default `None`.</span>
-<span class="sd">    y_tilt : str, optional</span>
+<span class="sd">    y_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the trajectory over the :math:`k_y`-axis, by default `None`.</span>
-<span class="sd">    z_tilt : str, optional</span>
+<span class="sd">    z_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Rotated trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check dimensionality and initialize output</span>
@@ -766,33 +781,33 @@
 <div class="viewcode-block" id="precess">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.precess.html#mrinufft.trajectories.tools.precess">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">precess</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">nb_rotations</span><span class="p">,</span>
-    <span class="n">tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
-    <span class="n">half_sphere</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">partition</span><span class="o">=</span><span class="s2">&quot;axial&quot;</span><span class="p">,</span>
-    <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_rotations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">half_sphere</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">partition</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;axial&quot;</span><span class="p">,</span> <span class="s2">&quot;polar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;axial&quot;</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate trajectories as a precession around the :math:`k_z`-axis.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory in 2D or 3D to rotate.</span>
 <span class="sd">    nb_rotations : int</span>
 <span class="sd">        Number of rotations repeating the provided trajectory while precessing.</span>
-<span class="sd">    tilt : str, optional</span>
+<span class="sd">    tilt : str | float, optional</span>
 <span class="sd">        Angle tilt between consecutive rotations around the :math:`k_z`-axis,</span>
 <span class="sd">        by default &quot;golden&quot;.</span>
 <span class="sd">    half_sphere : bool, optional</span>
 <span class="sd">        Whether the precession should be limited to the upper half</span>
 <span class="sd">        of the k-space sphere.</span>
 <span class="sd">        It is typically used for in-out trajectories or planes.</span>
-<span class="sd">    partition : str, optional</span>
+<span class="sd">    partition : Literal[&quot;axial&quot;, &quot;polar&quot;], optional</span>
 <span class="sd">        Partition type between an &quot;axial&quot; or &quot;polar&quot; split of the</span>
 <span class="sd">        :math:`k_z`-axis, designating whether the axis should be fragmented</span>
 <span class="sd">        by radius or angle respectively, by default &quot;axial&quot;.</span>
-<span class="sd">    axis : int, array_like, optional</span>
+<span class="sd">    axis : int, NDArray, optional</span>
 <span class="sd">        Axis selected for alignment reference when rotating the trajectory</span>
 <span class="sd">        around the :math:`k_z`-axis, generally corresponding to the shot</span>
 <span class="sd">        direction for single shot ``trajectory`` inputs. It can either</span>
@@ -802,7 +817,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Precessed trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check for partition option error</span>
@@ -848,22 +863,22 @@
 <div class="viewcode-block" id="conify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.conify.html#mrinufft.trajectories.tools.conify">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">conify</span><span class="p">(</span>
-    <span class="n">trajectory</span><span class="p">,</span>
-    <span class="n">nb_cones</span><span class="p">,</span>
-    <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">max_angle</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="n">borderless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">nb_cones</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">z_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">max_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">borderless</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to conify.</span>
 <span class="sd">    nb_cones : int</span>
 <span class="sd">        Number of cones repeating the provided trajectory.</span>
-<span class="sd">    z_tilt : str, optional</span>
+<span class="sd">    z_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.</span>
 <span class="sd">    in_out : bool, optional</span>
 <span class="sd">        Whether to account for the in-out nature of some trajectories</span>
@@ -876,7 +891,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Conified trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check dimensionality and initialize output</span>
@@ -929,7 +944,13 @@
 
 <div class="viewcode-block" id="epify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.epify.html#mrinufft.trajectories.tools.epify">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">epify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">,</span> <span class="n">nb_trains</span><span class="p">,</span> <span class="n">reverse_odd_shots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">epify</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_trains</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">reverse_odd_shots</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create multi-readout shots from trajectory composed of single-readouts.</span>
 
 <span class="sd">    Assemble multiple single-readout shots together by adding transition</span>
@@ -937,7 +958,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to change by prolonging and merging the shots.</span>
 <span class="sd">    Ns_transitions : int</span>
 <span class="sd">        Number of samples/steps between the merged readouts.</span>
@@ -950,7 +971,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Trajectory with fewer but longer multi-readout shots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span>
@@ -978,15 +999,13 @@
     <span class="k">for</span> <span class="n">i_c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_trains</span><span class="p">):</span>
         <span class="n">spline</span> <span class="o">=</span> <span class="n">CubicSpline</span><span class="p">(</span><span class="n">source_sample_ids</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">trajectory</span><span class="p">[</span><span class="n">i_c</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
         <span class="n">assembled_trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spline</span><span class="p">(</span><span class="n">target_sample_ids</span><span class="p">))</span>
-    <span class="n">assembled_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">assembled_trajectory</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="unepify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.unepify.html#mrinufft.trajectories.tools.unepify">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">unepify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_readouts</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unepify</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Ns_readouts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recover single-readout shots from multi-readout trajectory.</span>
 
 <span class="sd">    Reformat an EPI-like trajectory with multiple readouts and transitions</span>
@@ -998,7 +1017,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to reduce by discarding transitions between readouts.</span>
 <span class="sd">    Ns_readouts : int</span>
 <span class="sd">        Number of samples within a single readout.</span>
@@ -1007,7 +1026,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Trajectory with more but shorter single shots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span>
@@ -1031,7 +1050,7 @@
 
 <div class="viewcode-block" id="prewind">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.prewind.html#mrinufft.trajectories.tools.prewind">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add pre-winding/positioning to the trajectory.</span>
 
 <span class="sd">    The trajectory is extended to start before the readout</span>
@@ -1040,7 +1059,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to extend with rewind gradients.</span>
 <span class="sd">    Ns_transitions : int</span>
 <span class="sd">        Number of pre-winding/positioning steps used to leave the</span>
@@ -1048,7 +1067,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Extended trajectory with pre-winding/positioning.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span>
@@ -1066,15 +1085,13 @@
             <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">Nd</span><span class="p">)),</span> <span class="n">trajectory</span><span class="p">[</span><span class="n">i_c</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">assembled_trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spline</span><span class="p">(</span><span class="n">target_sample_ids</span><span class="p">))</span>
-    <span class="n">assembled_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">assembled_trajectory</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="rewind">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rewind.html#mrinufft.trajectories.tools.rewind">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">rewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rewind</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">Ns_transitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add rewinding to the trajectory.</span>
 
 <span class="sd">    The trajectory is extended to come back to the k-space center</span>
@@ -1082,14 +1099,14 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to extend with rewind gradients.</span>
 <span class="sd">    Ns_transitions : int</span>
 <span class="sd">        Number of rewinding steps used to come back to the k-space center.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Extended trajectory with rewinding.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span>
@@ -1109,32 +1126,34 @@
             <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">trajectory</span><span class="p">[</span><span class="n">i_c</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">Nd</span><span class="p">))],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="n">assembled_trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spline</span><span class="p">(</span><span class="n">target_sample_ids</span><span class="p">))</span>
-    <span class="n">assembled_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">assembled_trajectory</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">assembled_trajectory</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="oversample">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.oversample.html#mrinufft.trajectories.tools.oversample">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">oversample</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">new_Ns</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">oversample</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">new_Ns</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;quadratic&quot;</span><span class="p">,</span> <span class="s2">&quot;cubic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resample a trajectory to increase the number of samples using interpolation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : np.ndarray</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        The original trajectory array, where interpolation</span>
 <span class="sd">        is applied along the second axis.</span>
 <span class="sd">    new_Ns : int</span>
 <span class="sd">        The desired number of samples in the resampled trajectory.</span>
-<span class="sd">    kind : str, optional</span>
+<span class="sd">    kind : Literal, optional</span>
 <span class="sd">        The type of interpolation to use, such as &#39;linear&#39;,</span>
 <span class="sd">        &#39;quadratic&#39;, or &#39;cubic&#39;, by default &quot;cubic&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        The resampled trajectory array with ``new_Ns`` points along the second axis.</span>
 
 <span class="sd">    Notes</span>
@@ -1166,32 +1185,36 @@
 <div class="viewcode-block" id="stack_spherically">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html#mrinufft.trajectories.tools.stack_spherically">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">stack_spherically</span><span class="p">(</span>
-    <span class="n">trajectory_func</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">nb_stacks</span><span class="p">,</span> <span class="n">z_tilt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">traj_kwargs</span>
-<span class="p">):</span>
+    <span class="n">trajectory_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_stacks</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">z_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hard_bounded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">traj_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory_func : function</span>
+<span class="sd">    trajectory_func : Callable[..., NDArray]</span>
 <span class="sd">        Trajectory function that should return an array-like</span>
 <span class="sd">        with the usual (Nc, Ns, Nd) size.</span>
 <span class="sd">    Nc : int</span>
-<span class="sd">        Number of shots to use for the whole spherically</span>
-<span class="sd">        stacked trajectory.</span>
+<span class="sd">        Number of shots to use for the whole spherically stacked trajectory.</span>
 <span class="sd">    nb_stacks : int</span>
 <span class="sd">        Number of stacks of trajectories.</span>
-<span class="sd">    z_tilt : str, optional</span>
+<span class="sd">    z_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the stacks, by default `None`.</span>
 <span class="sd">    hard_bounded : bool, optional</span>
-<span class="sd">        Whether the stacks should be strictly within the limits of the k-space,</span>
-<span class="sd">        by default `True`.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Trajectory initialization parameters for the function provided</span>
-<span class="sd">        with `trajectory_func`.</span>
+<span class="sd">        Whether the stacks should be strictly within the limits</span>
+<span class="sd">        of the k-space, by default `True`.</span>
+<span class="sd">    **traj_kwargs : Any</span>
+<span class="sd">        Trajectory initialization parameters for the function</span>
+<span class="sd">        provided with `trajectory_func`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Stacked trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle argument errors</span>
@@ -1238,55 +1261,48 @@
     <span class="c1"># Concatenate or handle varying Ns value</span>
     <span class="n">Ns_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">stk</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">])</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">Ns_values</span> <span class="o">==</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">new_trajectory</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">stk</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">stk</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">new_trajectory</span></div>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">stk</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">stk</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="shellify">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.shellify.html#mrinufft.trajectories.tools.shellify">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">shellify</span><span class="p">(</span>
-    <span class="n">trajectory_func</span><span class="p">,</span>
-    <span class="n">Nc</span><span class="p">,</span>
-    <span class="n">nb_shells</span><span class="p">,</span>
-    <span class="n">z_tilt</span><span class="o">=</span><span class="s2">&quot;golden&quot;</span><span class="p">,</span>
-    <span class="n">hemisphere_mode</span><span class="o">=</span><span class="s2">&quot;symmetric&quot;</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">traj_kwargs</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">trajectory_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+    <span class="n">Nc</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nb_shells</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">z_tilt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+    <span class="n">hemisphere_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;symmetric&quot;</span><span class="p">,</span> <span class="s2">&quot;reversed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;symmetric&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">traj_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa ANN401</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory_func : function</span>
-<span class="sd">        Trajectory function that should return an array-like</span>
-<span class="sd">        with the usual (Nc, Ns, Nd) size.</span>
+<span class="sd">    trajectory_func : Callable[..., NDArray]</span>
+<span class="sd">        Trajectory function that should return an array-like with the usual</span>
+<span class="sd">        (Nc, Ns, Nd) size.</span>
 <span class="sd">    Nc : int</span>
-<span class="sd">        Number of shots to use for the whole spherically</span>
-<span class="sd">        stacked trajectory.</span>
+<span class="sd">        Number of shots to use for the whole spherically stacked trajectory.</span>
 <span class="sd">    nb_shells : int</span>
-<span class="sd">        Number of shells of distorded trajectories.</span>
-<span class="sd">    z_tilt : str, float, optional</span>
+<span class="sd">        Number of shells of distorted trajectories.</span>
+<span class="sd">    z_tilt : str | float, optional</span>
 <span class="sd">        Tilt of the shells, by default &quot;golden&quot;.</span>
-<span class="sd">    hemisphere_mode : str, optional</span>
-<span class="sd">        Define how the lower hemisphere should be oriented</span>
-<span class="sd">        relatively to the upper one, with &quot;symmetric&quot; providing</span>
-<span class="sd">        a :math:`k_x-k_y` planar symmetry by changing the polar angle,</span>
-<span class="sd">        and with &quot;reversed&quot; promoting continuity (for example</span>
-<span class="sd">        in spirals) by reversing the azimuth angle.</span>
+<span class="sd">    hemisphere_mode : Literal[&quot;symmetric&quot;, &quot;reversed&quot;], optional</span>
+<span class="sd">        Define how the lower hemisphere should be oriented relatively to the</span>
+<span class="sd">        upper one, with &quot;symmetric&quot; providing a :math:`k_x-k_y` planar symmetry</span>
+<span class="sd">        by changing the polar angle, and with &quot;reversed&quot; promoting continuity</span>
+<span class="sd">        (for example in spirals) by reversing the azimuth angle.</span>
 <span class="sd">        The default is &quot;symmetric&quot;.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Trajectory initialization parameters for the function provided</span>
-<span class="sd">        with `trajectory_func`.</span>
+<span class="sd">    **traj_kwargs : Any</span>
+<span class="sd">        Trajectory initialization parameters for the function</span>
+<span class="sd">        provided with `trajectory_func`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Concentric shell trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle argument errors</span>
@@ -1337,14 +1353,9 @@
     <span class="c1"># Concatenate or handle varying Ns value</span>
     <span class="n">Ns_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">hem</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">hem</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">])</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">Ns_values</span> <span class="o">==</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">new_trajectory</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">hem</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">hem</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">new_trajectory</span></div>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Nc</span><span class="p">,</span> <span class="n">Ns_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">hem</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">hem</span> <span class="ow">in</span> <span class="n">new_trajectory</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 
@@ -1355,7 +1366,9 @@
 
 <div class="viewcode-block" id="duplicate_along_axes">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html#mrinufft.trajectories.tools.duplicate_along_axes">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">duplicate_along_axes</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">duplicate_along_axes</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Duplicate a trajectory along the specified axes.</span>
 
@@ -1365,14 +1378,14 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to duplicate.</span>
-<span class="sd">    axes : tuple, optional</span>
+<span class="sd">    axes : tuple[int, ...], optional</span>
 <span class="sd">        Axes along which to duplicate the trajectory, by default (0, 1, 2)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array_like</span>
+<span class="sd">    NDArray</span>
 <span class="sd">        Duplicated trajectory along the specified axes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Copy input trajectory along other axes</span>
@@ -1387,13 +1400,25 @@
         <span class="n">dp_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
         <span class="n">dp_trajectory</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dp_trajectory</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
         <span class="n">new_trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dp_trajectory</span><span class="p">)</span>
-    <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">new_trajectory</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">new_trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the center to the outside.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the center to the outside.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trajectory : NDArray</span>
+<span class="sd">        Trajectory to radialize.</span>
+<span class="sd">    nb_samples : int</span>
+<span class="sd">        Number of samples to radialize from the center.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        Radialized trajectory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nc</span><span class="p">):</span>
@@ -1404,8 +1429,21 @@
     <span class="k">return</span> <span class="n">new_trajectory</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the inside to the outside.&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory from the inside to the outside.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trajectory : NDArray</span>
+<span class="sd">        Trajectory to radialize.</span>
+<span class="sd">    nb_samples : int</span>
+<span class="sd">        Number of samples to radialize from the inside out.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        Radialized trajectory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
     <span class="n">first</span><span class="p">,</span> <span class="n">half</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ns</span> <span class="o">-</span> <span class="n">nb_samples</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">Ns</span> <span class="o">+</span> <span class="n">nb_samples</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
@@ -1423,23 +1461,29 @@
 
 <div class="viewcode-block" id="radialize_center">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.radialize_center.html#mrinufft.trajectories.tools.radialize_center">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">radialize_center</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">radialize_center</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_out</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Radialize a trajectory.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    trajectory : array_like</span>
+<span class="sd">    trajectory : NDArray</span>
 <span class="sd">        Trajectory to radialize.</span>
 <span class="sd">    nb_samples : int</span>
 <span class="sd">        Number of samples to keep.</span>
 <span class="sd">    in_out : bool, optional</span>
 <span class="sd">        Whether the radialization is from the inside to the outside, by default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        Radialized trajectory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Make nb_samples into straight lines around the center</span>
     <span class="k">if</span> <span class="n">in_out</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -745,8 +745,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trajectory</strong> (<em>array_like</em>) – Trajectory to display.</p></li>
-<li><p><strong>shot_ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Indices of the shots to display.
+<li><p><strong>trajectory</strong> (<em>NDArray</em>) – Trajectory to display.</p></li>
+<li><p><strong>shot_ids</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – Indices of the shots to display.
 The default is <cite>[0]</cite>.</p></li>
 <li><p><strong>figsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Size of the figure.</p></li>
 <li><p><strong>fill_area</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Fills the area under the curve for improved visibility and
@@ -763,8 +763,9 @@ The default is <cite>“gray”</cite>.</p></li>
 unique color given as argument or just by the default
 color cycle when <cite>None</cite>.
 The default is <cite>None</cite>.</p></li>
-<li><p><strong>subfigure</strong> (<em>plt.Figure</em><em> or </em><em>plt.SubFigure</em><em>, </em><em>optional</em>) – The figure where the trajectory should be displayed.
+<li><p><strong>subfigure</strong> (<em>plt.Figure</em><em>, </em><em>optional</em>) – The figure where the trajectory should be displayed.
 The default is <cite>None</cite>.</p></li>
+<li><p><strong>uni_gradient</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
