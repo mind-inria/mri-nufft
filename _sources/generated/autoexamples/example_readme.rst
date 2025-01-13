@@ -123,7 +123,7 @@ An example to show how to perform a simple NUFFT.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.345 seconds)
+   **Total running time of the script:** (0 minutes 2.734 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_readme.py:

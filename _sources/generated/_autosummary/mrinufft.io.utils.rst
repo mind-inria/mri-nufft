@@ -16,6 +16,7 @@
       :nosignatures:
    
       add_phase_to_kspace_with_shifts
+      siemens_quat_to_rot_mat
    
    
 
