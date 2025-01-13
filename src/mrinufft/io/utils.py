@@ -41,6 +41,17 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
 def siemens_quat_to_rot_mat(quat):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
+
+    Parameters
+    ----------
+    quat : np.ndarray
+        The quaternion from the Siemens Twix file.
+
+    Returns
+    -------
+    np.ndarray
+        The affine rotation matrix which is a 4x4 matrix.
+        This can be passed as input to `affine` parameter in `nibabel`.
     """
     R = np.zeros((4, 4))
     R[:3, :3] = Rotation.from_quat([quat[1], quat[2], quat[3], quat[0]]).as_matrix()
