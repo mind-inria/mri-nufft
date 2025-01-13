@@ -2,8 +2,10 @@
 
 from enum import Enum, EnumMeta
 from numbers import Real
+from typing import Any, Literal
 
 import numpy as np
+from numpy.typing import NDArray
 
 #############
 # CONSTANTS #
@@ -26,11 +28,11 @@ DEFAULT_SMAX = 0.1  # T/m/ms
 class CaseInsensitiveEnumMeta(EnumMeta):
     """A case-insensitive EnumMeta."""
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> Enum:
         """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
         return super().__getitem__(name.upper())
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:  # noqa ANN401
         """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
         return super().__getattr__(name.upper())
 
@@ -121,7 +123,7 @@ class Tilts(str, Enum):
 class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Enumerate available packing method for shots.
 
-    It is mostly use for wave-CAIPI trajectory
+    It is mostly used for wave-CAIPI trajectory
 
     See Also
     --------
@@ -150,15 +152,15 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 
 
 def normalize_trajectory(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-):
+    trajectory: NDArray,
+    norm_factor: float = KMAX,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+) -> NDArray:
     """Normalize an un-normalized/natural trajectory for NUFFT use.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Un-normalized trajectory consisting of k-space coordinates in 2D or 3D.
     norm_factor : float, optional
         Trajectory normalization factor, by default KMAX.
@@ -169,22 +171,22 @@ def normalize_trajectory(
 
     Returns
     -------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Normalized trajectory corresponding to `trajectory` input.
     """
     return trajectory * norm_factor * (2 * resolution)
 
 
 def unnormalize_trajectory(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-):
+    trajectory: NDArray,
+    norm_factor: float = KMAX,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+) -> NDArray:
     """Un-normalize a NUFFT-normalized trajectory.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
     norm_factor : float, optional
         Trajectory normalization factor, by default KMAX.
@@ -195,25 +197,25 @@ def unnormalize_trajectory(
 
     Returns
     -------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Un-normalized trajectory corresponding to `trajectory` input.
     """
     return trajectory / norm_factor / (2 * resolution)
 
 
 def convert_trajectory_to_gradients(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-    get_final_positions=False,
-):
+    trajectory: NDArray,
+    norm_factor: float = KMAX,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+    get_final_positions: bool = False,
+) -> tuple[NDArray, ...]:
     """Derive a normalized trajectory over time to provide gradients.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
     norm_factor : float, optional
         Trajectory normalization factor, by default KMAX.
@@ -234,7 +236,7 @@ def convert_trajectory_to_gradients(
 
     Returns
     -------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients corresponding to `trajectory`.
     """
     # Un-normalize the trajectory from NUFFT usage
@@ -249,20 +251,20 @@ def convert_trajectory_to_gradients(
 
 
 def convert_gradients_to_trajectory(
-    gradients,
-    initial_positions=None,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-):
+    gradients: NDArray,
+    initial_positions: NDArray | None = None,
+    norm_factor: float = KMAX,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+) -> NDArray:
     """Integrate gradients over time to provide a normalized trajectory.
 
     Parameters
     ----------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients over 2 or 3 directions.
-    initial_positions: np.ndarray, optional
+    initial_positions: NDArray, optional
         Positions in k-space at the beginning of the readout window.
         The default is `None`.
     norm_factor : float, optional
@@ -281,7 +283,7 @@ def convert_gradients_to_trajectory(
 
     Returns
     -------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Normalized trajectory corresponding to `gradients`.
     """
     # Handle no initial positions
@@ -299,14 +301,14 @@ def convert_gradients_to_trajectory(
 
 
 def convert_gradients_to_slew_rates(
-    gradients,
-    raster_time=DEFAULT_RASTER_TIME,
-):
+    gradients: NDArray,
+    raster_time: float = DEFAULT_RASTER_TIME,
+) -> tuple[NDArray, NDArray]:
     """Derive the gradients over time to provide slew rates.
 
     Parameters
     ----------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients over 2 or 3 directions.
     raster_time : float, optional
         Amount of time between the acquisition of two
@@ -315,9 +317,9 @@ def convert_gradients_to_slew_rates(
 
     Returns
     -------
-    slewrates : np.ndarray
+    slewrates : NDArray
         Slew rates corresponding to `gradients`.
-    initial_gradients : np.ndarray
+    initial_gradients : NDArray
         Gradients at the beginning of the readout window.
     """
     # Compute slew rates and starting gradients
@@ -327,17 +329,17 @@ def convert_gradients_to_slew_rates(
 
 
 def convert_slew_rates_to_gradients(
-    slewrates,
-    initial_gradients=None,
-    raster_time=DEFAULT_RASTER_TIME,
-):
+    slewrates: NDArray,
+    initial_gradients: NDArray | None = None,
+    raster_time: float = DEFAULT_RASTER_TIME,
+) -> NDArray:
     """Integrate slew rates over time to provide gradients.
 
     Parameters
     ----------
-    slewrates : np.ndarray
+    slewrates : NDArray
         Slew rates over 2 or 3 directions.
-    initial_gradients: np.ndarray, optional
+    initial_gradients: NDArray, optional
         Gradients at the beginning of the readout window.
         The default is `None`.
     raster_time : float, optional
@@ -347,7 +349,7 @@ def convert_slew_rates_to_gradients(
 
     Returns
     -------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients corresponding to `slewrates`.
     """
     # Handle no initial gradients
@@ -362,17 +364,17 @@ def convert_slew_rates_to_gradients(
 
 
 def compute_gradients_and_slew_rates(
-    trajectory,
-    norm_factor=KMAX,
-    resolution=DEFAULT_RESOLUTION,
-    raster_time=DEFAULT_RASTER_TIME,
-    gamma=Gammas.HYDROGEN,
-):
+    trajectory: NDArray,
+    norm_factor: float = KMAX,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.HYDROGEN,
+) -> tuple[NDArray, NDArray]:
     """Compute the gradients and slew rates from a normalized trajectory.
 
     Parameters
     ----------
-    trajectory : np.ndarray
+    trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
     norm_factor : float, optional
         Trajectory normalization factor, by default KMAX.
@@ -390,9 +392,9 @@ def compute_gradients_and_slew_rates(
 
     Returns
     -------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients corresponding to `trajectory`.
-    slewrates : np.ndarray
+    slewrates : NDArray
         Slew rates corresponding to `trajectory` gradients.
     """
     # Convert normalized trajectory to gradients
@@ -411,15 +413,19 @@ def compute_gradients_and_slew_rates(
 
 
 def check_hardware_constraints(
-    gradients, slewrates, gmax=DEFAULT_GMAX, smax=DEFAULT_SMAX, order=None
-):
+    gradients: NDArray,
+    slewrates: NDArray,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    order: int | str | None = None,
+) -> tuple[bool, float, float]:
     """Check if a trajectory satisfies the gradient hardware constraints.
 
     Parameters
     ----------
-    gradients : np.ndarray
+    gradients : NDArray
         Gradients to check
-    slewrates: np.ndarray
+    slewrates: NDArray
         Slewrates to check
     gmax : float, optional
         Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.
@@ -450,12 +456,12 @@ def check_hardware_constraints(
 ###########
 
 
-def initialize_tilt(tilt, nb_partitions=1):
+def initialize_tilt(tilt: str | float | None, nb_partitions: int = 1) -> float:
     r"""Initialize the tilt angle.
 
     Parameters
     ----------
-    tilt : str or float
+    tilt : str | float | None
         Tilt angle in rad or name of the tilt.
     nb_partitions : int, optional
         Number of partitions. The default is 1.
@@ -493,12 +499,12 @@ def initialize_tilt(tilt, nb_partitions=1):
         raise NotImplementedError(f"Unknown tilt name: {tilt}")
 
 
-def initialize_algebraic_spiral(spiral):
+def initialize_algebraic_spiral(spiral: str | float) -> float:
     """Initialize the algebraic spiral type.
 
     Parameters
     ----------
-    spiral : str or float
+    spiral : str | float
         Spiral type or spiral power value.
 
     Returns
@@ -507,16 +513,16 @@ def initialize_algebraic_spiral(spiral):
         Spiral power value.
     """
     if isinstance(spiral, Real):
-        return spiral
-    return Spirals[spiral]
+        return float(spiral)
+    return Spirals[str(spiral)]
 
 
-def initialize_shape_norm(shape):
+def initialize_shape_norm(shape: str | float) -> float:
     """Initialize the norm for a given shape.
 
     Parameters
     ----------
-    shape : str or float
+    shape : str | float
         Shape name or p-norm value.
 
     Returns
@@ -525,5 +531,5 @@ def initialize_shape_norm(shape):
         Shape p-norm value.
     """
     if isinstance(shape, Real):
-        return shape
-    return NormShapes[shape]
+        return float(shape)
+    return NormShapes[str(shape)]
