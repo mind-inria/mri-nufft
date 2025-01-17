@@ -1293,12 +1293,12 @@
 <span class="sd">            The oversampling factor the volume shape</span>
 <span class="sd">        normalize: bool</span>
 <span class="sd">            Whether to normalize the density compensation.</span>
-<span class="sd">            We normalize such that the energy of PSF = 1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">GPUNUFFT_AVAILABLE</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;gpuNUFFT is not available, cannot &quot;</span> <span class="s2">&quot;estimate the density compensation&quot;</span>
             <span class="p">)</span>
+        <span class="n">original_shape</span> <span class="o">=</span> <span class="n">volume_shape</span>
         <span class="n">volume_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">volume_shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">osf</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">grid_op</span> <span class="o">=</span> <span class="n">MRIGpuNUFFT</span><span class="p">(</span>
             <span class="n">samples</span><span class="o">=</span><span class="n">kspace_loc</span><span class="p">,</span>
@@ -1310,11 +1310,10 @@
             <span class="n">max_iter</span><span class="o">=</span><span class="n">num_iterations</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
-            <span class="n">spike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">volume_shape</span><span class="p">)</span>
-            <span class="n">mid_loc</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">volume_shape</span><span class="p">)</span>
-            <span class="n">spike</span><span class="p">[</span><span class="n">mid_loc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">psf</span> <span class="o">=</span> <span class="n">grid_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="n">grid_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">spike</span><span class="p">))</span>
-            <span class="n">density_comp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+            <span class="n">test_op</span> <span class="o">=</span> <span class="n">MRIGpuNUFFT</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">kspace_loc</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">original_shape</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">test_im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">original_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+            <span class="n">test_im_recon</span> <span class="o">=</span> <span class="n">test_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="n">density_comp</span> <span class="o">*</span> <span class="n">test_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">test_im</span><span class="p">))</span>
+            <span class="n">density_comp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">test_im_recon</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">density_comp</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
