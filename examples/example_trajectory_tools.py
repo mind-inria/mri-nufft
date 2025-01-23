@@ -327,12 +327,12 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # Size of the k-space in voxel units. It
 # is used to normalize the stack positions, and is used with the ``accel``
 # factor and ``center_prop`` to determine the number of stacks.
-arguments = [16, 32, 64, 128]
+arguments = [32, 64, 128]
 function = lambda x: tools.stack_random(
     planar_trajectories["Spiral"],
     dim_size=x,
     center_prop=0.1,
-    accel=16,
+    accel=8,
     pdf="gaussian",
     order="top-down",
     rng=42,
