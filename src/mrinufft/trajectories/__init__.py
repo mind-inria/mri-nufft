@@ -56,6 +56,28 @@ from .trajectory3D import (
     initialize_3D_wong_radial,
 )
 
+from .tools import (
+    stack,
+    stack_random,
+    get_random_loc_1d,
+    get_random_loc_nd,
+    rotate,
+    precess,
+    conify,
+    stack_spherically,
+    shellify,
+    duplicate_along_axes,
+    radialize_center,
+)
+
+from .display import (
+    displayConfig,
+    display_2D_trajectory,
+    display_3D_trajectory,
+)
+
+from .gradients import patch_center_anomaly
+
 __all__ = [
     # trajectories
     "initialize_2D_radial",
@@ -88,7 +110,10 @@ __all__ = [
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
     # tools
+    "get_random_loc_1d",
+    "get_random_loc_nd",
     "stack",
+    "stack_random",
     "rotate",
     "precess",
     "conify",

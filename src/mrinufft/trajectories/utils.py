@@ -146,6 +146,27 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     SPIRAL = FIBONACCI
 
 
+#############################
+# Variable Density Sampling #
+#############################
+
+
+class VDSorder(str, CaseInsensitiveEnumMeta):
+    """Available ordering for variable density sampling."""
+
+    CENTER_OUT = "center-out"
+    RANDOM = "random"
+    TOP_DOWN = "top-down"
+
+
+class VDSpdf(str, CaseInsensitiveEnumMeta):
+    """Available law for variable density sampling."""
+
+    GAUSSIAN = "gaussian"
+    UNIFORM = "uniform"
+    EQUISPACED = "equispaced"
+
+
 ###############
 # CONSTRAINTS #
 ###############
