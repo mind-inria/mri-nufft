@@ -2,9 +2,10 @@
 
 import numpy as np
 import numpy.linalg as nl
+from numpy.typing import NDArray
 
 
-def R2D(theta):
+def R2D(theta: float) -> NDArray:
     """Initialize 2D rotation matrix.
 
     Parameters
@@ -14,13 +15,13 @@ def R2D(theta):
 
     Returns
     -------
-    np.ndarray
+    NDArray
         2D rotation matrix.
     """
     return np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
 
 
-def Rx(theta):
+def Rx(theta: float) -> NDArray:
     """Initialize 3D rotation matrix around x axis.
 
     Parameters
@@ -30,7 +31,7 @@ def Rx(theta):
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D rotation matrix.
     """
     return np.array(
@@ -42,7 +43,7 @@ def Rx(theta):
     )
 
 
-def Ry(theta):
+def Ry(theta: float) -> NDArray:
     """Initialize 3D rotation matrix around y axis.
 
     Parameters
@@ -52,7 +53,7 @@ def Ry(theta):
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D rotation matrix.
     """
     return np.array(
@@ -64,7 +65,7 @@ def Ry(theta):
     )
 
 
-def Rz(theta):
+def Rz(theta: float) -> NDArray:
     """Initialize 3D rotation matrix around z axis.
 
     Parameters
@@ -74,7 +75,7 @@ def Rz(theta):
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D rotation matrix.
     """
     return np.array(
@@ -86,7 +87,13 @@ def Rz(theta):
     )
 
 
-def Rv(v1, v2, normalize=True, eps=1e-8):
+def Rv(
+    v1: NDArray,
+    v2: NDArray,
+    eps: float = 1e-8,
+    *,
+    normalize: bool = True,
+) -> NDArray:
     """Initialize 3D rotation matrix from two vectors.
 
     Initialize a 3D rotation matrix from two vectors using Rodrigues's rotation
@@ -97,16 +104,18 @@ def Rv(v1, v2, normalize=True, eps=1e-8):
 
     Parameters
     ----------
-    v1 : np.ndarray
+    v1 : NDArray
         Source vector.
-    v2 : np.ndarray
+    v2 : NDArray
         Target vector.
+    eps : float, optional
+        Tolerance to consider two vectors as colinear. The default is 1e-8.
     normalize : bool, optional
         Normalize the vectors. The default is True.
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D rotation matrix.
     """
     # Check for colinearity, not handled by Rodrigues' coefficients
@@ -122,7 +131,7 @@ def Rv(v1, v2, normalize=True, eps=1e-8):
     return np.identity(3) + cross_matrix + cross_matrix @ cross_matrix / (1 + cos_theta)
 
 
-def Ra(vector, theta):
+def Ra(vector: NDArray, theta: float) -> NDArray:
     """Initialize 3D rotation matrix around an arbitrary vector.
 
     Initialize a 3D rotation matrix to rotate around `vector` by an angle `theta`.
@@ -130,14 +139,14 @@ def Ra(vector, theta):
 
     Parameters
     ----------
-    vector : np.ndarray
+    vector : NDArray
         Vector defining the rotation axis, automatically normalized.
     theta : float
         Angle in radians defining the rotation around `vector`.
 
     Returns
     -------
-    np.ndarray
+    NDArray
         3D rotation matrix.
     """
     cos_t = np.cos(theta)

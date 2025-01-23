@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def is_from_fibonacci_sequence(n):
+def is_from_fibonacci_sequence(n: int) -> bool:
     """Check if an integer belongs to the Fibonacci sequence.
 
     An integer belongs to the Fibonacci sequence if either
@@ -21,14 +21,14 @@ def is_from_fibonacci_sequence(n):
         Whether or not ``n`` belongs to the Fibonacci sequence.
     """
 
-    def _is_perfect_square(n):
+    def _is_perfect_square(n: int) -> bool:
         r = int(np.sqrt(n))
         return r * r == n
 
     return _is_perfect_square(5 * n**2 + 4) or _is_perfect_square(5 * n**2 - 4)
 
 
-def get_closest_fibonacci_number(x):
+def get_closest_fibonacci_number(x: float) -> int:
     """Provide the closest Fibonacci number.
 
     Parameters
@@ -52,7 +52,7 @@ def get_closest_fibonacci_number(x):
     return xf
 
 
-def generate_fibonacci_lattice(nb_points, epsilon=0.25):
+def generate_fibonacci_lattice(nb_points: int, epsilon: float = 0.25) -> np.ndarray:
     """Generate 2D Cartesian coordinates using the Fibonacci lattice.
 
     Place 2D points over a 1x1 square following the Fibonacci lattice.
@@ -78,7 +78,7 @@ def generate_fibonacci_lattice(nb_points, epsilon=0.25):
     return fibonacci_square
 
 
-def generate_fibonacci_circle(nb_points, epsilon=0.25):
+def generate_fibonacci_circle(nb_points: int, epsilon: float = 0.25) -> np.ndarray:
     """Generate 2D Cartesian coordinates shaped as Fibonacci spirals.
 
     Place 2D points structured as Fibonacci spirals by distorting
@@ -106,7 +106,7 @@ def generate_fibonacci_circle(nb_points, epsilon=0.25):
     return fibonacci_circle
 
 
-def generate_fibonacci_sphere(nb_points, epsilon=0.25):
+def generate_fibonacci_sphere(nb_points: int, epsilon: float = 0.25) -> np.ndarray:
     """Generate 3D Cartesian coordinates as a Fibonacci sphere.
 
     Place 3D points almost evenly over a sphere surface of radius
