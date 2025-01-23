@@ -6,7 +6,6 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
-from scipy.interpolate import CubicSpline
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import KMAX, initialize_tilt, VDSpdf, VDSorder

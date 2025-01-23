@@ -57,25 +57,11 @@ from .trajectory3D import (
 )
 
 from .tools import (
-    stack,
     stack_random,
     get_random_loc_1d,
-    rotate,
-    precess,
-    conify,
-    stack_spherically,
-    shellify,
-    duplicate_along_axes,
-    radialize_center,
 )
 
-from .display import (
-    displayConfig,
-    display_2D_trajectory,
-    display_3D_trajectory,
-)
 
-from .gradients import patch_center_anomaly
 
 __all__ = [
     # trajectories
