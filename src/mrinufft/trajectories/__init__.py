@@ -62,7 +62,6 @@ from .tools import (
 )
 
 
-
 __all__ = [
     # trajectories
     "initialize_2D_radial",
