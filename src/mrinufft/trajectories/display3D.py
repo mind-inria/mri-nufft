@@ -7,14 +7,15 @@ from mrinufft.trajectories.utils import (
     KMAX,
     DEFAULT_RASTER_TIME,
 )
+from mrinufft.density.utils import flat_traj
 import numpy as np
-from typing import Tuple
-from mrinufft.io import read_trajectory
+from typing import tuple
 
 
+@flat_traj
 def get_gridded_trajectory(
-    shots: np.ndarray,
-    shape: Tuple,
+    trajectory: np.ndarray,
+    shape: tuple,
     grid_type: str = "density",
     osf: int = 1,
     backend: str = "gpunufft",
@@ -26,14 +27,17 @@ def get_gridded_trajectory(
     """
     Compute the gridded trajectory for MRI reconstruction.
 
-    This function helps in gridding a k-space sampling trajectory to a desired shape.
+    This function helps in gridding a k-space sampling trajectory to a desired shape,
+    allowing for easier viewing of the trajectory.
     The gridding process can be carried out to reflect the sampling density,
     sampling time, inversion time, k-space holes, gradient strengths, or slew rates.
     Please check `grid_type` parameter to know the benefits of each type of gridding.
+    During the gridding process, the values corresponding to various samples within the
+    same voxel get averaged.
 
     Parameters
     ----------
-    shots : ndarray
+    trajectory : ndarray
         The input array of shape (N, M, D), where N is the number of shots and M is the
         number of samples per shot and D is the dimension of the trajectory (usually 3)
     shape : tuple
@@ -62,19 +66,20 @@ def get_gridded_trajectory(
     traj_params : dict, optional
         The trajectory parameters. Default is None.
         This is only needed when `grid_type` is "gradients" or "slew".
-        The parameters needed include `img_size`, `FOV`, and `gamma` of the sequence.
+        The parameters needed include `img_size` (tuple), `FOV` (tuple in `m`),
+        and `gamma` (float in kHz/T) of the sequence.
         Generally these values are stored in the header of the trajectory file.
     turbo_factor : int, optional
         The turbo factor when sampling is with inversion. Default is 176, which is
         the default turbo factor for MPRAGE acquisitions at 1mm whole
         brain acquisitions.
     elliptical_samp : bool, optional
-        Whether to use elliptical sampling. Default is True.
+        Whether the trajectory uses elliptical sampling. Default is True.
         This is useful while analyzing the k-space holes, especially if the k-space
         trajectory is expected to be elliptical sampling of k-space
         (i.e. ellipsoid over cuboid).
-    threshold: float, optional
-        The threshold for the k-space holes. Default is 1e-3.
+    threshold: float, optional default 1e-3
+        The threshold for the k-space holes in number of samples per voxel
         This value is set heuristically to visualize the k-space hole.
 
     Returns
@@ -82,25 +87,25 @@ def get_gridded_trajectory(
     ndarray
         The gridded trajectory of shape `shape`.
     """
-    samples = shots.reshape(-1, shots.shape[-1])
-    dcomp = get_density("pipe")(samples, shape)
+    dcomp = get_density("pipe")(trajectory, shape)
     grid_op = get_operator(backend)(
-        samples, [sh * osf for sh in shape], density=dcomp, upsampfac=1
+        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=1
     )
-    gridded_ones = grid_op.raw_op.adj_op(np.ones(samples.shape[0]), None, True)
+    gridded_ones = grid_op.raw_op.adj_op(np.ones(trajectory.shape[0]), None, True)
     if grid_type == "density":
         return np.abs(gridded_ones).squeeze()
     elif grid_type == "time":
         data = grid_op.raw_op.adj_op(
-            np.tile(np.linspace(1, 10, shots.shape[1]), (shots.shape[0],)),
+            np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],)),
             None,
             True,
         )
     elif grid_type == "inversion":
         data = grid_op.raw_op.adj_op(
             np.repeat(
-                np.linspace(1, 10, turbo_factor), samples.shape[0] // turbo_factor + 1
-            )[: samples.shape[0]],
+                np.linspace(1, 10, turbo_factor),
+                trajectory.shape[0] // turbo_factor + 1,
+            )[: trajectory.shape[0]],
             None,
             True,
         )
@@ -120,7 +125,7 @@ def get_gridded_trajectory(
             ] = 0
     elif grid_type in ["gradients", "slew"]:
         gradients, initial_position = convert_trajectory_to_gradients(
-            shots,
+            trajectory,
             norm_factor=KMAX,
             resolution=np.asarray(traj_params["FOV"])
             / np.asarray(traj_params["img_size"]),
