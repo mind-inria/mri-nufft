@@ -841,7 +841,10 @@ def get_random_loc_1d(
     pdf: str, optional
         Probability density function for the remaining samples.
         "gaussian" (default) or "uniform" or np.array
-    rng: random state
+    rng: int or np.random.Generator
+        random state
+    order: str
+        Order of the lines, "center-out" (default), "random" or "top-down"
 
     Returns
     -------
