@@ -18,6 +18,7 @@
       conify
       duplicate_along_axes
       epify
+      get_random_loc_1d
       oversample
       precess
       prewind
@@ -26,6 +27,7 @@
       rotate
       shellify
       stack
+      stack_random
       stack_spherically
       unepify
    

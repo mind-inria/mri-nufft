@@ -375,7 +375,7 @@ In the example below, the thickness is deliberately increased to
 emphasize this point.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 208-223
+.. GENERATED FROM PYTHON SOURCE LINES 208-222
 
 .. code-block:: Python
 
@@ -396,7 +396,6 @@ emphasize this point.
 
 
 
-
 .. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_007.png
    :alt: True, False
    :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_007.png
@@ -406,7 +405,287 @@ emphasize this point.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 224-242
+.. GENERATED FROM PYTHON SOURCE LINES 223-238
+
+Stack Random
+-------------
+
+A direct extension of the stacking expansion is to distribute the stacks
+according to a random distribution over the :math:`k_z`-axis.
+
+Arguments:
+- ``trajectory (array)``: array of k-space coordinates of size
+:math:`(N_c, N_s, N_d)`
+- ``dim_size (int)``: size of the kspace in voxel units
+- ``center_prop  (int or float)`` : number of line
+- ``acceleration (int)``:  Acceleration factor
+- ``pdf (str or array)``: Probability density function for the random distribution
+- ``rng (int or np.random.Generator)``: Random number generator
+- ``order (int)``: Order of the shots in the stack
+
+.. GENERATED FROM PYTHON SOURCE LINES 238-252
+
+.. code-block:: Python
+
+
+
+    trajectory = tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=128,
+        center_prop=0.1,
+        accel=16,
+        pdf="uniform",
+        order="top-down",
+        rng=42,
+    )
+
+    show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_008.png
+   :alt: example trajectory tools
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_008.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 253-257
+
+``trajectory (array)``
+~~~~~~~~~~~~~~~~~~~~~~
+The main use case is to stack trajectories consisting of
+flat or thick planes that will match the image slices.
+
+.. GENERATED FROM PYTHON SOURCE LINES 257-269
+
+.. code-block:: Python
+
+    arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
+    function = lambda x: tools.stack_random(
+        planar_trajectories[x],
+        dim_size=128,
+        center_prop=0.1,
+        accel=16,
+        pdf="gaussian",
+        order="top-down",
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_009.png
+   :alt: Radial, Spiral, 2D Cones, 3D Cones
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_009.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 270-275
+
+``dim_size (int)``
+~~~~~~~~~~~~~~~~~~
+Size of the k-space in voxel units over the stacking direction. It
+is used to normalize the stack positions, and is used with the ``accel``
+factor and ``center_prop`` to determine the number of stacks.
+
+.. GENERATED FROM PYTHON SOURCE LINES 275-287
+
+.. code-block:: Python
+
+    arguments = [32, 64, 128]
+    function = lambda x: tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=x,
+        center_prop=0.1,
+        accel=8,
+        pdf="gaussian",
+        order="top-down",
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_010.png
+   :alt: 32, 64, 128
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_010.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 288-294
+
+``center_prop (int or float)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Number of lines to keep in the center of the k-space. It is used to determine
+the number of stacks and the acceleration factor, and to keep the center of
+the k-space with a higher density of shots. If a ``float`` this is a fraction
+of the total ``dim_size``. If ``int`` it is directly the number of lines.
+
+.. GENERATED FROM PYTHON SOURCE LINES 294-308
+
+.. code-block:: Python
+
+
+    arguments = [1, 5, 0.1, 0.5]
+    function = lambda x: tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=128,
+        center_prop=x,
+        accel=16,
+        pdf="uniform",
+        order="top-down",
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_011.png
+   :alt: 1, 5, 0.1, 0.5
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_011.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 309-313
+
+``accel (int)``
+~~~~~~~~~~~~~~~
+Acceleration factor to subsample the outer region of the k-space.
+Note that the acceleration factor does not take into account the center lines.
+
+.. GENERATED FROM PYTHON SOURCE LINES 313-327
+
+.. code-block:: Python
+
+
+
+    arguments = [1, 4, 8, 16, 32]
+    function = lambda x: tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=128,
+        center_prop=0.1,
+        accel=x,
+        pdf="uniform",
+        order="top-down",
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_012.png
+   :alt: 1, 4, 8, 16, 32
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_012.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 328-335
+
+``pdf (str or array)``
+~~~~~~~~~~~~~~~~~~~~~~
+Probability density function for the sampling of the outer region. It can
+either be a string to use a known probability law ("gaussian" or "uniform") or
+"equispaced" for a coherent undersampling (like the one used in GRAPPA). It
+can also be a array, for using a customed density probability.
+In this case, it will be normalized so that ``sum(pdf) =1``.
+
+.. GENERATED FROM PYTHON SOURCE LINES 335-354
+
+.. code-block:: Python
+
+
+    dim_size = 128
+    arguments = [
+        "gaussian",
+        "uniform",
+        "equispaced",
+        np.arange(dim_size),
+    ]
+    function = lambda x: tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=128,
+        center_prop=0.1,
+        accel=32,
+        pdf=x,
+        order="top-down",
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_013.png
+   :alt: gaussian, uniform, equispaced, [  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17   18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35   36  37  38  39  40  41  42  43  44  45  46  47  48  49  50  51  52  53   54  55  56  57  58  59  60  61  62  63  64  65  66  67  68  69  70  71   72  73  74  75  76  77  78  79  80  81  82  83  84  85  86  87  88  89   90  91  92  93  94  95  96  97  98  99 100 101 102 103 104 105 106 107  108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125  126 127]
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_013.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 355-359
+
+``order (str)``
+~~~~~~~~~~~~~~~
+Determine the ordering of the shot in the trajectory.
+Accepeted values are "center-out", "top-down" or "random".
+
+.. GENERATED FROM PYTHON SOURCE LINES 359-376
+
+.. code-block:: Python
+
+    dim_size = 128
+    arguments = [
+        "center-out",
+        "random",
+        "top-down",
+    ]
+    function = lambda x: tools.stack_random(
+        planar_trajectories["Spiral"],
+        dim_size=128,
+        center_prop=0.1,
+        accel=32,
+        pdf="uniform",
+        order=x,
+        rng=42,
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_014.png
+   :alt: center-out, random, top-down
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_014.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 377-395
 
 Rotate
 ------
@@ -427,7 +706,7 @@ Arguments:
   over the :math:`k_z`-axis. ``(default None)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 242-248
+.. GENERATED FROM PYTHON SOURCE LINES 395-401
 
 .. code-block:: Python
 
@@ -440,16 +719,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_008.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_015.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_008.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_015.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 249-258
+.. GENERATED FROM PYTHON SOURCE LINES 402-411
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -461,7 +740,7 @@ create 3D trajectories, but the density (and redundancy) along that
 axis is then much greater than anywhere else.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 258-266
+.. GENERATED FROM PYTHON SOURCE LINES 411-419
 
 .. code-block:: Python
 
@@ -476,16 +755,16 @@ axis is then much greater than anywhere else.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_009.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_016.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_009.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_016.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 267-277
+.. GENERATED FROM PYTHON SOURCE LINES 420-430
 
 .. code-block:: Python
 
@@ -502,16 +781,16 @@ axis is then much greater than anywhere else.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_010.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_017.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_010.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_017.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 278-306
+.. GENERATED FROM PYTHON SOURCE LINES 431-459
 
 Precess
 -------
@@ -542,7 +821,7 @@ Arguments:
   of the first shot as the axis. ``(default None)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 306-316
+.. GENERATED FROM PYTHON SOURCE LINES 459-469
 
 .. code-block:: Python
 
@@ -559,16 +838,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_011.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_018.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_011.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_018.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 317-324
+.. GENERATED FROM PYTHON SOURCE LINES 470-477
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -578,7 +857,7 @@ This method provides a way to distribute duplicated trajectories
 axis tilting the azimuthal orientation.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 324-335
+.. GENERATED FROM PYTHON SOURCE LINES 477-488
 
 .. code-block:: Python
 
@@ -596,16 +875,16 @@ axis tilting the azimuthal orientation.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_012.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_019.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_012.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_019.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 336-342
+.. GENERATED FROM PYTHON SOURCE LINES 489-495
 
 It is however most often used with single shots to
 cover more evenly the k-space sphere, such as with 3D cones
@@ -614,7 +893,7 @@ the golden angle is known to approximate an even distribution
 of points over a sphere surface.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 343-355
+.. GENERATED FROM PYTHON SOURCE LINES 496-508
 
 .. code-block:: Python
 
@@ -633,16 +912,16 @@ of points over a sphere surface.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_013.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_020.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_013.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_020.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 356-366
+.. GENERATED FROM PYTHON SOURCE LINES 509-519
 
 ``half_sphere (bool)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -655,7 +934,7 @@ otherwise shots would likely be stacked in a redundant way.
 In the example hereafter, center-out shots are shown for clarity.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 366-386
+.. GENERATED FROM PYTHON SOURCE LINES 519-539
 
 .. code-block:: Python
 
@@ -682,16 +961,16 @@ In the example hereafter, center-out shots are shown for clarity.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_014.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_021.png
    :alt: True, False
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_014.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_021.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 387-394
+.. GENERATED FROM PYTHON SOURCE LINES 540-547
 
 ``partition (str)``
 ~~~~~~~~~~~~~~~~~~~
@@ -701,7 +980,7 @@ split of the :math:`k_z`-axis, designating whether the axis should
 be fragmented by radius or angle respectively.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 394-412
+.. GENERATED FROM PYTHON SOURCE LINES 547-565
 
 .. code-block:: Python
 
@@ -726,16 +1005,16 @@ be fragmented by radius or angle respectively.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_015.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_022.png
    :alt: axial, polar
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_015.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_022.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 413-419
+.. GENERATED FROM PYTHON SOURCE LINES 566-572
 
 While "polar" looks more natural in the absence of rotation (``tilt=None``),
 it results in too many shots close to the rotation axis, and therefore
@@ -744,7 +1023,7 @@ is obtained with an "axial" partition and "golden" tilt along
 the provided axis.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 420-438
+.. GENERATED FROM PYTHON SOURCE LINES 573-591
 
 .. code-block:: Python
 
@@ -769,22 +1048,22 @@ the provided axis.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_016.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_023.png
    :alt: axial, polar
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_016.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_023.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 439-442
+.. GENERATED FROM PYTHON SOURCE LINES 592-595
 
 The distribution over the k-space sphere surface can be shown by
 displaying only the tip of the shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 443-454
+.. GENERATED FROM PYTHON SOURCE LINES 596-607
 
 .. code-block:: Python
 
@@ -802,16 +1081,16 @@ displaying only the tip of the shots.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_017.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_024.png
    :alt: axial, polar
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_017.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_024.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 455-476
+.. GENERATED FROM PYTHON SOURCE LINES 608-629
 
 ``axis (int, array)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -835,7 +1114,7 @@ The first case is single shots, where the provided axis should
 simply correspond to the shot axis.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 476-494
+.. GENERATED FROM PYTHON SOURCE LINES 629-647
 
 .. code-block:: Python
 
@@ -860,22 +1139,22 @@ simply correspond to the shot axis.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_018.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_025.png
    :alt: None, 0, 1, 2
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_018.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_025.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 495-498
+.. GENERATED FROM PYTHON SOURCE LINES 648-651
 
 The second case is planar trajectories, where the axis orthogonal
 to the shots plane is preferred.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 499-510
+.. GENERATED FROM PYTHON SOURCE LINES 652-663
 
 .. code-block:: Python
 
@@ -893,16 +1172,16 @@ to the shots plane is preferred.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_019.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_026.png
    :alt: None, 0, 1, 2
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_019.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_026.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 511-517
+.. GENERATED FROM PYTHON SOURCE LINES 664-670
 
 Some trickier cases exist in the literature, with the example of Seiffert spirals.
 Those 3D spirals neither correspond to a single-axis shot or a plane, so the authors
@@ -911,7 +1190,7 @@ In order to handle the redundant distribution, they added a pseudo-random rotati
 within the shot axes.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 521-542
+.. GENERATED FROM PYTHON SOURCE LINES 674-695
 
 Conify
 ------
@@ -935,7 +1214,7 @@ Arguments:
   mostly to avoid 1D cones if ``max_angle`` is equal to pi / 2, by default True.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 542-548
+.. GENERATED FROM PYTHON SOURCE LINES 695-701
 
 .. code-block:: Python
 
@@ -948,16 +1227,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_020.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_027.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_020.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_027.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 549-558
+.. GENERATED FROM PYTHON SOURCE LINES 702-711
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -969,7 +1248,7 @@ Also, the distortion is likely to increase the required gradient amplitudes
 and slew rates.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 558-564
+.. GENERATED FROM PYTHON SOURCE LINES 711-717
 
 .. code-block:: Python
 
@@ -982,16 +1261,16 @@ and slew rates.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_021.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_028.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_021.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_028.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 565-574
+.. GENERATED FROM PYTHON SOURCE LINES 718-727
 
 .. code-block:: Python
 
@@ -1007,23 +1286,23 @@ and slew rates.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_022.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_029.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_022.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_029.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 575-579
+.. GENERATED FROM PYTHON SOURCE LINES 728-732
 
 Similarly to other tools, it can be used with single shots.
 In that case, ``nb_cones`` is set to ``Nc`` to create as many
 individual cones.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 580-586
+.. GENERATED FROM PYTHON SOURCE LINES 733-739
 
 .. code-block:: Python
 
@@ -1036,16 +1315,16 @@ individual cones.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_023.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_030.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_023.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_030.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 587-596
+.. GENERATED FROM PYTHON SOURCE LINES 740-749
 
 .. code-block:: Python
 
@@ -1061,16 +1340,16 @@ individual cones.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_024.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_031.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_024.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_031.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 597-606
+.. GENERATED FROM PYTHON SOURCE LINES 750-759
 
 ``max_angle (float)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1082,7 +1361,7 @@ to reduce the maximum angle but duplicate all of the cones along
 another axis to still cover the whole k-space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 606-624
+.. GENERATED FROM PYTHON SOURCE LINES 759-777
 
 .. code-block:: Python
 
@@ -1107,16 +1386,16 @@ another axis to still cover the whole k-space.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_025.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_032.png
    :alt: 1.5707963267948966, 1.0471975511965976, 0.7853981633974483, 0.6283185307179586
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_025.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_032.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 625-632
+.. GENERATED FROM PYTHON SOURCE LINES 778-785
 
 ``borderless (bool)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1126,7 +1405,7 @@ when equal to ``False``, or instead simply partition the
 sphere over a polar split.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 632-651
+.. GENERATED FROM PYTHON SOURCE LINES 785-804
 
 .. code-block:: Python
 
@@ -1152,16 +1431,16 @@ sphere over a polar split.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_026.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_033.png
    :alt: True, False
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_026.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_033.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 652-674
+.. GENERATED FROM PYTHON SOURCE LINES 805-827
 
 Epify
 -----
@@ -1186,7 +1465,7 @@ Arguments:
   the start of odd shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 674-683
+.. GENERATED FROM PYTHON SOURCE LINES 827-836
 
 .. code-block:: Python
 
@@ -1202,16 +1481,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_027.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_034.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_027.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_034.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 684-690
+.. GENERATED FROM PYTHON SOURCE LINES 837-843
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1220,7 +1499,7 @@ The trajectory to change by prolonging and merging the shots together.
 Hereafter the shots are merged by pairs with short transitions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 690-700
+.. GENERATED FROM PYTHON SOURCE LINES 843-853
 
 .. code-block:: Python
 
@@ -1237,16 +1516,16 @@ Hereafter the shots are merged by pairs with short transitions.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_028.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_035.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_028.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_035.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 701-707
+.. GENERATED FROM PYTHON SOURCE LINES 854-860
 
 .. code-block:: Python
 
@@ -1259,16 +1538,16 @@ Hereafter the shots are merged by pairs with short transitions.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_029.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_036.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_029.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_036.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 708-715
+.. GENERATED FROM PYTHON SOURCE LINES 861-868
 
 ``Ns_transitions (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1278,7 +1557,7 @@ Smoother transitions are achieved with more points, but it means longer
 waiting times between readouts if they are split during acquisition.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 715-728
+.. GENERATED FROM PYTHON SOURCE LINES 868-881
 
 .. code-block:: Python
 
@@ -1298,16 +1577,16 @@ waiting times between readouts if they are split during acquisition.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_030.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_037.png
    :alt: 25, 50, 75, 100
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_030.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_037.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 729-734
+.. GENERATED FROM PYTHON SOURCE LINES 882-887
 
 ``nb_trains (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -1315,7 +1594,7 @@ waiting times between readouts if they are split during acquisition.
 Number of resulting multi-readout shots, or trains.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 734-747
+.. GENERATED FROM PYTHON SOURCE LINES 887-900
 
 .. code-block:: Python
 
@@ -1335,16 +1614,16 @@ Number of resulting multi-readout shots, or trains.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_031.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_038.png
    :alt: 10, 5, 2, 1
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_031.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_038.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 748-754
+.. GENERATED FROM PYTHON SOURCE LINES 901-907
 
 ``reverse_odd_shots (bool)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1353,7 +1632,7 @@ Whether to reverse every odd shots such that, as in most trajectories,
 even shots end up closer to the start of odd shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 754-767
+.. GENERATED FROM PYTHON SOURCE LINES 907-920
 
 .. code-block:: Python
 
@@ -1373,16 +1652,16 @@ even shots end up closer to the start of odd shots.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_032.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_039.png
    :alt: True, False
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_032.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_039.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 768-784
+.. GENERATED FROM PYTHON SOURCE LINES 921-937
 
 Prewind/rewind
 --------------
@@ -1401,7 +1680,7 @@ Arguments:
 - ``Ns_transitions (int)``: number of pre-winding/rewinding steps.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 784-790
+.. GENERATED FROM PYTHON SOURCE LINES 937-943
 
 .. code-block:: Python
 
@@ -1414,16 +1693,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_033.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_040.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_033.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_040.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 791-800
+.. GENERATED FROM PYTHON SOURCE LINES 944-953
 
 ``trajectory (array)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1435,7 +1714,7 @@ Note that the radial prewinding and rewinding parts are overlapping
 with the actual trajectory.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 800-808
+.. GENERATED FROM PYTHON SOURCE LINES 953-961
 
 .. code-block:: Python
 
@@ -1450,16 +1729,16 @@ with the actual trajectory.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_034.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_041.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_034.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_041.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 809-814
+.. GENERATED FROM PYTHON SOURCE LINES 962-967
 
 .. code-block:: Python
 
@@ -1471,16 +1750,16 @@ with the actual trajectory.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_035.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_042.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_035.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_042.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 815-822
+.. GENERATED FROM PYTHON SOURCE LINES 968-975
 
 ``Ns_transitions (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1490,7 +1769,7 @@ Smoother transitions are achieved with more points, but it may imply delayed
 readout starts and longer TRs.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 822-833
+.. GENERATED FROM PYTHON SOURCE LINES 975-986
 
 .. code-block:: Python
 
@@ -1508,21 +1787,21 @@ readout starts and longer TRs.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_036.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_043.png
    :alt: 25, 50, 75, 100
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_036.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_043.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 834-836
+.. GENERATED FROM PYTHON SOURCE LINES 987-989
 
 Functional tools
 ================
 
-.. GENERATED FROM PYTHON SOURCE LINES 838-844
+.. GENERATED FROM PYTHON SOURCE LINES 991-997
 
 Preparation
 -----------
@@ -1531,7 +1810,7 @@ We can define a few functions that will be used in the following
 examples, using again 2D radial, Fermat's spiral, and 2D/3D cones:
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 844-861
+.. GENERATED FROM PYTHON SOURCE LINES 997-1014
 
 .. code-block:: Python
 
@@ -1559,7 +1838,7 @@ examples, using again 2D radial, Fermat's spiral, and 2D/3D cones:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 862-884
+.. GENERATED FROM PYTHON SOURCE LINES 1015-1037
 
 Stack spherically
 -----------------
@@ -1584,7 +1863,7 @@ Arguments:
   function provided with ``trajectory_func``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 884-890
+.. GENERATED FROM PYTHON SOURCE LINES 1037-1043
 
 .. code-block:: Python
 
@@ -1597,16 +1876,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_037.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_044.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_037.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_044.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 891-900
+.. GENERATED FROM PYTHON SOURCE LINES 1044-1053
 
 ``trajectory_func (function)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1618,7 +1897,7 @@ and focus more ressources over larger areas. In opposition to
 with ``tools.stack_spherically``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 900-906
+.. GENERATED FROM PYTHON SOURCE LINES 1053-1059
 
 .. code-block:: Python
 
@@ -1631,16 +1910,16 @@ with ``tools.stack_spherically``.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_038.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_045.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_038.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_045.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 907-916
+.. GENERATED FROM PYTHON SOURCE LINES 1060-1069
 
 .. code-block:: Python
 
@@ -1656,16 +1935,16 @@ with ``tools.stack_spherically``.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_039.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_046.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_039.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_046.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 917-923
+.. GENERATED FROM PYTHON SOURCE LINES 1070-1076
 
 In the previous example, we can observe that spirals and cones
 are nicely adapted for each stack, while shrinking the shots
@@ -1674,7 +1953,7 @@ improved). Instead, each radial disc could be normalized to
 cover a cylinder with variable density over :math:`k_z`.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 924-945
+.. GENERATED FROM PYTHON SOURCE LINES 1077-1098
 
 .. code-block:: Python
 
@@ -1702,16 +1981,16 @@ cover a cylinder with variable density over :math:`k_z`.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_040.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_047.png
    :alt: Classic, Normalized
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_040.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_047.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 946-971
+.. GENERATED FROM PYTHON SOURCE LINES 1099-1124
 
 Shellify
 --------
@@ -1739,7 +2018,7 @@ Arguments:
   function provided with ``trajectory_func``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 971-977
+.. GENERATED FROM PYTHON SOURCE LINES 1124-1130
 
 .. code-block:: Python
 
@@ -1752,16 +2031,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_041.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_048.png
    :alt: example trajectory tools
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_041.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_048.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 978-990
+.. GENERATED FROM PYTHON SOURCE LINES 1131-1143
 
 ``trajectory_func (function)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1776,7 +2055,7 @@ Companion functions will be added in the future in order
 to manipulate individual spheres.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 990-997
+.. GENERATED FROM PYTHON SOURCE LINES 1143-1150
 
 .. code-block:: Python
 
@@ -1790,16 +2069,16 @@ to manipulate individual spheres.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_042.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_049.png
    :alt: Radial, Spiral, 2D Cones, 3D Cones
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_042.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_049.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 998-1007
+.. GENERATED FROM PYTHON SOURCE LINES 1151-1160
 
 ``hemisphere_mode (str)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1811,7 +2090,7 @@ promoting continuity (for example in spirals) by reversing
 the azimuthal angle.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1007-1022
+.. GENERATED FROM PYTHON SOURCE LINES 1160-1175
 
 .. code-block:: Python
 
@@ -1833,16 +2112,16 @@ the azimuthal angle.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_043.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_050.png
    :alt: symmetric, reversed
-   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_043.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_trajectory_tools_050.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1023-1031
+.. GENERATED FROM PYTHON SOURCE LINES 1176-1184
 
 References
 ==========
@@ -1856,7 +2135,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 32.205 seconds)
+   **Total running time of the script:** (0 minutes 49.456 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_trajectory_tools.py:

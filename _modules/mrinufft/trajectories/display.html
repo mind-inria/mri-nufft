@@ -357,6 +357,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -365,6 +366,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -417,7 +419,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -722,6 +727,8 @@
 <span class="sd">    This can be any of the matplotlib colormaps, or a list of colors.&quot;&quot;&quot;</span>
     <span class="n">one_shot_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib color for the highlighted shot, by default ``&quot;k&quot;`` (black).&quot;&quot;&quot;</span>
+    <span class="n">one_shot_linewidth_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factor to multiply the linewidth of the highlighted shot, by default ``2``.&quot;&quot;&quot;</span>
     <span class="n">gradient_point_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib color for gradient constraint points, by default ``&quot;r&quot;`` (red).&quot;&quot;&quot;</span>
     <span class="n">slewrate_point_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
@@ -920,7 +927,7 @@
             <span class="n">trajectory</span><span class="p">[</span><span class="n">shot_id</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
             <span class="n">trajectory</span><span class="p">[</span><span class="n">shot_id</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
             <span class="n">color</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">one_shot_color</span><span class="p">,</span>
-            <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">linewidth</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">one_shot_linewidth_factor</span> <span class="o">*</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">linewidth</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Point out violated constraints if requested</span>
@@ -1059,7 +1066,7 @@
             <span class="n">trajectory</span><span class="p">[</span><span class="n">shot_id</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
             <span class="n">trajectory</span><span class="p">[</span><span class="n">shot_id</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">],</span>
             <span class="n">color</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">one_shot_color</span><span class="p">,</span>
-            <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">linewidth</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">one_shot_linewidth_factor</span> <span class="o">*</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">linewidth</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">trajectory</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 

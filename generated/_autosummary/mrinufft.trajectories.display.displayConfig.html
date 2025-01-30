@@ -358,6 +358,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -366,6 +367,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -418,7 +420,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -733,6 +738,7 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.nb_colors"><code class="docutils literal notranslate"><span class="pre">displayConfig.nb_colors</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.palette"><code class="docutils literal notranslate"><span class="pre">displayConfig.palette</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.one_shot_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.one_shot_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor"><code class="docutils literal notranslate"><span class="pre">displayConfig.one_shot_linewidth_factor</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.gradient_point_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.gradient_point_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.slewrate_point_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.slewrate_point_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.update"><code class="docutils literal notranslate"><span class="pre">displayConfig.update()</span></code></a></li>
@@ -810,16 +816,19 @@ a context manager.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.one_shot_color" title="mrinufft.trajectories.display.displayConfig.one_shot_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">one_shot_color</span></code></a></p></td>
 <td><p>Matplotlib color for the highlighted shot, by default <code class="docutils literal notranslate"><span class="pre">&quot;k&quot;</span></code> (black).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.palette" title="mrinufft.trajectories.display.displayConfig.palette"><code class="xref py py-obj docutils literal notranslate"><span class="pre">palette</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor" title="mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">one_shot_linewidth_factor</span></code></a></p></td>
+<td><p>Factor to multiply the linewidth of the highlighted shot, by default <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.palette" title="mrinufft.trajectories.display.displayConfig.palette"><code class="xref py py-obj docutils literal notranslate"><span class="pre">palette</span></code></a></p></td>
 <td><p>Name of the color palette to use, by default <code class="docutils literal notranslate"><span class="pre">&quot;tab10&quot;</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.pointsize" title="mrinufft.trajectories.display.displayConfig.pointsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointsize</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.pointsize" title="mrinufft.trajectories.display.displayConfig.pointsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointsize</span></code></a></p></td>
 <td><p>Size for points used to show constraints, by default <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.slewrate_point_color" title="mrinufft.trajectories.display.displayConfig.slewrate_point_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slewrate_point_color</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.slewrate_point_color" title="mrinufft.trajectories.display.displayConfig.slewrate_point_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slewrate_point_color</span></code></a></p></td>
 <td><p>Matplotlib color for slew rate constraint points, by default <code class="docutils literal notranslate"><span class="pre">&quot;b&quot;</span></code> (blue).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.small_fontsize" title="mrinufft.trajectories.display.displayConfig.small_fontsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">small_fontsize</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.trajectories.display.displayConfig.small_fontsize" title="mrinufft.trajectories.display.displayConfig.small_fontsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">small_fontsize</span></code></a></p></td>
 <td><p>Font size for smaller texts, by default <code class="docutils literal notranslate"><span class="pre">14</span></code>.</p></td>
 </tr>
 </tbody>
@@ -877,6 +886,12 @@ This can be any of the matplotlib colormaps, or a list of colors.</p>
 <dt class="sig sig-object py" id="mrinufft.trajectories.display.displayConfig.one_shot_color">
 <span class="sig-name descname"><span class="pre">one_shot_color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'k'</span></em><a class="headerlink" href="#mrinufft.trajectories.display.displayConfig.one_shot_color" title="Link to this definition">#</a></dt>
 <dd><p>Matplotlib color for the highlighted shot, by default <code class="docutils literal notranslate"><span class="pre">&quot;k&quot;</span></code> (black).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor">
+<span class="sig-name descname"><span class="pre">one_shot_linewidth_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor" title="Link to this definition">#</a></dt>
+<dd><p>Factor to multiply the linewidth of the highlighted shot, by default <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -998,6 +1013,7 @@ The default is -1, and the value will be read from displayConfig.nb_colors.</p><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.nb_colors"><code class="docutils literal notranslate"><span class="pre">displayConfig.nb_colors</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.palette"><code class="docutils literal notranslate"><span class="pre">displayConfig.palette</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.one_shot_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.one_shot_color</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor"><code class="docutils literal notranslate"><span class="pre">displayConfig.one_shot_linewidth_factor</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.gradient_point_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.gradient_point_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.slewrate_point_color"><code class="docutils literal notranslate"><span class="pre">displayConfig.slewrate_point_color</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.display.displayConfig.update"><code class="docutils literal notranslate"><span class="pre">displayConfig.update()</span></code></a></li>

@@ -357,6 +357,7 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -365,6 +366,7 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -417,7 +419,10 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -970,10 +975,10 @@
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html#mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix">(in module mrinufft.operators.interfaces.nudft_numpy)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix.html#mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix">get_implicit_matrix() (in module mrinufft.operators.interfaces.nudft_numpy)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html#mrinufft.operators.off_resonance.get_interpolators_from_fieldmap">get_interpolators_from_fieldmap() (in module mrinufft.operators.off_resonance)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.get_lipschitz_cst">get_lipschitz_cst() (mrinufft.operators.base.FourierOperatorBase method)</a>
@@ -991,6 +996,8 @@
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.get_maxThreadBlock.html#mrinufft.operators.interfaces.utils.gpu_utils.get_maxThreadBlock">get_maxThreadBlock() (in module mrinufft.operators.interfaces.utils.gpu_utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.get_operator.html#mrinufft.operators.base.get_operator">get_operator() (in module mrinufft.operators.base)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html#mrinufft.trajectories.tools.get_random_loc_1d">get_random_loc_1d() (in module mrinufft.trajectories.tools)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.extras.utils.get_smaps.html#mrinufft.extras.utils.get_smaps">get_smaps() (in module mrinufft.extras.utils)</a>
 </li>
@@ -1690,6 +1697,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.one_shot_color">one_shot_color (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.one_shot_linewidth_factor">one_shot_linewidth_factor (mrinufft.trajectories.display.displayConfig attribute)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.autodiff.MRINufftAutoGrad.html#mrinufft.operators.autodiff.MRINufftAutoGrad.op">op() (mrinufft.operators.autodiff.MRINufftAutoGrad method)</a>
 
       <ul>
@@ -1856,10 +1865,10 @@
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.shape">(mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.shellify.html#mrinufft.trajectories.tools.shellify">shellify() (in module mrinufft.trajectories.tools)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html#mrinufft.io.utils.siemens_quat_to_rot_mat">siemens_quat_to_rot_mat() (in module mrinufft.io.utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.sizeof_fmt.html#mrinufft.operators.interfaces.utils.utils.sizeof_fmt">sizeof_fmt() (in module mrinufft.operators.interfaces.utils.utils)</a>
@@ -1882,9 +1891,13 @@
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.stack.html#mrinufft.trajectories.tools.stack">stack() (in module mrinufft.trajectories.tools)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.tools.stack_random.html#mrinufft.trajectories.tools.stack_random">stack_random() (in module mrinufft.trajectories.tools)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html#mrinufft.trajectories.tools.stack_spherically">stack_spherically() (in module mrinufft.trajectories.tools)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.stacked.stacked2traj3d.html#mrinufft.operators.stacked.stacked2traj3d">stacked2traj3d() (in module mrinufft.operators.stacked)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.utils.StrEnum.html#mrinufft.trajectories.utils.StrEnum">StrEnum (class in mrinufft.trajectories.utils)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1950,10 +1963,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="generated/_autosummary/mrinufft.density.geometry_based.voronoi.html#mrinufft.density.geometry_based.voronoi">voronoi() (in module mrinufft.density.geometry_based)</a>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.utils.VDSorder.html#mrinufft.trajectories.utils.VDSorder">VDSorder (class in mrinufft.trajectories.utils)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.utils.VDSpdf.html#mrinufft.trajectories.utils.VDSpdf">VDSpdf (class in mrinufft.trajectories.utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft.density.geometry_based.voronoi.html#mrinufft.density.geometry_based.voronoi">voronoi() (in module mrinufft.density.geometry_based)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.density.geometry_based.voronoi_unique.html#mrinufft.density.geometry_based.voronoi_unique">voronoi_unique() (in module mrinufft.density.geometry_based)</a>
 </li>
   </ul></td>

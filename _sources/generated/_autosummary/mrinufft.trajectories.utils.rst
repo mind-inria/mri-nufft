@@ -43,7 +43,10 @@
       NormShapes
       Packings
       Spirals
+      StrEnum
       Tilts
+      VDSorder
+      VDSpdf
    
    
 

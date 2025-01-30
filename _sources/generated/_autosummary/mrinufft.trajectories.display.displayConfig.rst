@@ -35,6 +35,7 @@ displayConfig
       ~displayConfig.linewidth
       ~displayConfig.nb_colors
       ~displayConfig.one_shot_color
+      ~displayConfig.one_shot_linewidth_factor
       ~displayConfig.palette
       ~displayConfig.pointsize
       ~displayConfig.slewrate_point_color

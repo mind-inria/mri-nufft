@@ -5,15 +5,15 @@ Learn Sampling pattern for multi-coil MRI
 =========================================
 
 A small pytorch example to showcase learning k-space sampling patterns.
-This example showcases the auto-diff capabilities of the NUFFT operator 
+This example showcases the auto-diff capabilities of the NUFFT operator
 wrt to k-space trajectory in mri-nufft.
 
 Briefly, in this example we try to learn the k-space samples :math:`\mathbf{K}` for the following cost function:
 
 .. math::
 
-    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} x_\ell - \mathbf{x}_{sos} ||_2^2 
-    
+    \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} x_\ell - \mathbf{x}_{sos} ||_2^2
+
 where :math:`S_\ell` is the sensitivity map for the :math:`\ell`-th coil, :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}_\ell` is the image for the :math:`\ell`-th coil, and :math:`\mathbf{x}_{sos} = \sqrt{\sum_{\ell=1}^L x_\ell^2}` is the sum-of-squares image as target image to be reconstructed.
 
 In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is implemented with `model.operator` while the SENSE operator :math:`model.sense_op` models the term :math:`\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}`.
@@ -21,8 +21,8 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 
 .. note::
     To showcase the features of ``mri-nufft``, we use ``
-    "cufinufft"`` backend for ``model.operator`` without density compensation and ``"gpunufft"`` backend for ``model.sense_op`` with density compensation. 
-    
+    "cufinufft"`` backend for ``model.operator`` without density compensation and ``"gpunufft"`` backend for ``model.sense_op`` with density compensation.
+
 .. warning::
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """

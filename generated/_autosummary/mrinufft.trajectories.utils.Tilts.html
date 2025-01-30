@@ -55,8 +55,8 @@
     <link rel="icon" href="../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="mrinufft.density" href="mrinufft.density.html" />
-    <link rel="prev" title="Spirals" href="mrinufft.trajectories.utils.Spirals.html" />
+    <link rel="next" title="VDSorder" href="mrinufft.trajectories.utils.VDSorder.html" />
+    <link rel="prev" title="StrEnum" href="mrinufft.trajectories.utils.StrEnum.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -359,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -367,6 +368,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -419,7 +421,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -742,7 +747,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="mrinufft.trajectories.utils.Tilts">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.utils.</span></span><span class="sig-name descname"><span class="pre">Tilts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/utils.html#Tilts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.utils.Tilts" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="mrinufft.trajectories.utils.StrEnum.html#mrinufft.trajectories.utils.StrEnum" title="mrinufft.trajectories.utils.StrEnum"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>Enumerate available tilts.</p>
 <p class="rubric">Notes</p>
 <p>The following values are accepted for the tilt name, with <span class="math notranslate nohighlight">\(N\)</span> the number of
@@ -945,20 +950,20 @@ partitions:</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mrinufft.trajectories.utils.Spirals.html"
+       href="mrinufft.trajectories.utils.StrEnum.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Spirals</p>
+        <p class="prev-next-title">StrEnum</p>
       </div>
     </a>
     <a class="right-next"
-       href="mrinufft.density.html"
+       href="mrinufft.trajectories.utils.VDSorder.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">mrinufft.density</span></code></p>
+        <p class="prev-next-title">VDSorder</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

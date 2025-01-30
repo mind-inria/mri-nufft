@@ -275,7 +275,7 @@ This is a collection of examples showing features of mri-nufft, particularly tho
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator  wrt to k-space trajectory in mri-nufft.">
+    <div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator wrt to k-space trajectory in mri-nufft.">
 
 .. only:: html
 
@@ -292,7 +292,7 @@ This is a collection of examples showing features of mri-nufft, particularly tho
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator  wrt to k-space trajectory in mri-nufft.">
+    <div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator wrt to k-space trajectory in mri-nufft.">
 
 .. only:: html
 
@@ -343,7 +343,7 @@ This is a collection of examples showing features of mri-nufft, particularly tho
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This model is a simplified version of the U-Net architecture,  which is widely used for image segmentation tasks.   This is implemented in the proprietary FASTMRI package [fastmri]_.  ">
+    <div class="sphx-glr-thumbcontainer" tooltip="This model is a simplified version of the U-Net architecture, which is widely used for image segmentation tasks. This is implemented in the proprietary FASTMRI package [fastmri]_.">
 
 .. only:: html
 

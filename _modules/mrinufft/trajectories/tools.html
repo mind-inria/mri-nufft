@@ -357,6 +357,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -365,6 +366,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -417,7 +419,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -668,9 +673,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span><span class="p">,</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.maths</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rv</span><span class="p">,</span> <span class="n">Rx</span><span class="p">,</span> <span class="n">Ry</span><span class="p">,</span> <span class="n">Rz</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_tilt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMAX</span><span class="p">,</span> <span class="n">initialize_tilt</span><span class="p">,</span> <span class="n">VDSpdf</span><span class="p">,</span> <span class="n">VDSorder</span>
 
 <span class="c1">################</span>
 <span class="c1"># DIRECT TOOLS #</span>
@@ -1485,6 +1491,192 @@
     <span class="k">if</span> <span class="n">in_out</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_radialize_in_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_radialize_center_out</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">nb_samples</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#################</span>
+<span class="c1"># Randomization #</span>
+<span class="c1">#################</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_flip2center</span><span class="p">(</span><span class="n">mask_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">center_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reorder a list by starting by a center_position and alternating left/right.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mask_cols: list or np.array</span>
+<span class="sd">        List of columns to reorder.</span>
+<span class="sd">    center_pos: int</span>
+<span class="sd">        Position of the center column.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.array: reordered columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">center_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mask_cols</span><span class="p">)</span> <span class="o">-</span> <span class="n">center_value</span><span class="p">))</span>
+    <span class="n">mask_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mask_cols</span><span class="p">)</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">mask_cols</span><span class="p">[</span><span class="n">center_pos</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">mask_cols</span><span class="p">[</span><span class="n">center_pos</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">new_cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">left</span> <span class="ow">or</span> <span class="n">right</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">left</span><span class="p">:</span>
+            <span class="n">new_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">new_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_cols</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_random_loc_1d">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html#mrinufft.trajectories.tools.get_random_loc_1d">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_random_loc_1d</span><span class="p">(</span>
+    <span class="n">dim_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">center_prop</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">accel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">pdf</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="s2">&quot;equispaced&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;center-out&quot;</span><span class="p">,</span> <span class="s2">&quot;top-down&quot;</span><span class="p">,</span> <span class="s2">&quot;random&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;center-out&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get slice index at a random position.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dim_size: int</span>
+<span class="sd">        Dimension size</span>
+<span class="sd">    center_prop: float or int</span>
+<span class="sd">        Proportion of center of kspace to continuouly sample</span>
+<span class="sd">    accel: float</span>
+<span class="sd">        Undersampling/Acceleration factor</span>
+<span class="sd">    pdf: str, optional</span>
+<span class="sd">        Probability density function for the remaining samples.</span>
+<span class="sd">        &quot;gaussian&quot; (default) or &quot;uniform&quot; or np.array</span>
+<span class="sd">    rng: int or np.random.Generator</span>
+<span class="sd">        random state</span>
+<span class="sd">    order: str</span>
+<span class="sd">        Order of the lines, &quot;center-out&quot; (default), &quot;random&quot; or &quot;top-down&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray: array of size dim_size/accel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">VDSorder</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">VDSpdf</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">pdf</span>
+    <span class="k">if</span> <span class="n">accel</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">accel</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim_size</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+    <span class="k">elif</span> <span class="n">accel</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;acceleration factor should be positive.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">accel</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;acceleration factor should be an integer.&quot;</span><span class="p">)</span>
+
+    <span class="n">indexes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">dim_size</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">center_prop</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">center_prop</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">center_prop</span> <span class="o">*</span> <span class="n">dim_size</span><span class="p">)</span>
+
+    <span class="n">center_start</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim_size</span> <span class="o">-</span> <span class="n">center_prop</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">center_stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim_size</span> <span class="o">+</span> <span class="n">center_prop</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">center_indexes</span> <span class="o">=</span> <span class="n">indexes</span><span class="p">[</span><span class="n">center_start</span><span class="p">:</span><span class="n">center_stop</span><span class="p">]</span>
+    <span class="n">borders</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="o">*</span><span class="n">indexes</span><span class="p">[:</span><span class="n">center_start</span><span class="p">],</span> <span class="o">*</span><span class="n">indexes</span><span class="p">[</span><span class="n">center_stop</span><span class="p">:]])</span>
+
+    <span class="n">n_samples_borders</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">center_indexes</span><span class="p">))</span> <span class="o">//</span> <span class="n">accel</span>
+    <span class="k">if</span> <span class="n">n_samples_borders</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;acceleration factor, center_prop and dimension not compatible.&quot;</span>
+            <span class="s2">&quot;Edges will not be sampled. &quot;</span>
+        <span class="p">)</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>  <span class="c1"># get RNG from a seed or existing rng.</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_samples</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>  <span class="c1"># automatic casting if needed</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">borders</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_samples_borders</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span> <span class="o">==</span> <span class="n">dim_size</span><span class="p">:</span>
+            <span class="c1"># extract the borders</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="n">borders</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">borders</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">pdf</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid size for probability.&quot;</span><span class="p">)</span>
+        <span class="n">sampled_in_border</span> <span class="o">=</span> <span class="n">_get_samples</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pdf</span> <span class="o">==</span> <span class="n">VDSpdf</span><span class="o">.</span><span class="n">GAUSSIAN</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.999</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">borders</span><span class="p">)))</span>
+        <span class="n">sampled_in_border</span> <span class="o">=</span> <span class="n">_get_samples</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pdf</span> <span class="o">==</span> <span class="n">VDSpdf</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">borders</span><span class="p">))</span>
+        <span class="n">sampled_in_border</span> <span class="o">=</span> <span class="n">_get_samples</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pdf</span> <span class="o">==</span> <span class="n">VDSpdf</span><span class="o">.</span><span class="n">EQUISPACED</span><span class="p">:</span>
+        <span class="n">sampled_in_border</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">borders</span><span class="p">[::</span><span class="n">accel</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported value for pdf use any of . &quot;</span><span class="p">)</span>
+        <span class="c1"># TODO: allow custom pdf as argument (vector or function.)</span>
+
+    <span class="n">line_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">center_indexes</span> <span class="o">+</span> <span class="n">sampled_in_border</span><span class="p">))</span>
+    <span class="c1"># apply order of lines</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="n">VDSorder</span><span class="o">.</span><span class="n">CENTER_OUT</span><span class="p">:</span>
+        <span class="n">line_locs</span> <span class="o">=</span> <span class="n">_flip2center</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">line_locs</span><span class="p">),</span> <span class="n">dim_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="n">VDSorder</span><span class="o">.</span><span class="n">RANDOM</span><span class="p">:</span>
+        <span class="n">line_locs</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">line_locs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="n">VDSorder</span><span class="o">.</span><span class="n">TOP_DOWN</span><span class="p">:</span>
+        <span class="n">line_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">line_locs</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown direction &#39;</span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">line_locs</span> <span class="o">/</span> <span class="n">dim_size</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">KMAX</span> <span class="o">-</span> <span class="n">KMAX</span>  <span class="c1"># rescale to [-0.5,0.5]</span></div>
+
+
+
+<div class="viewcode-block" id="stack_random">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.tools.stack_random.html#mrinufft.trajectories.tools.stack_random">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack_random</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">dim_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">center_prop</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">accel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">pdf</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">,</span> <span class="s2">&quot;equispaced&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;center-out&quot;</span><span class="p">,</span> <span class="s2">&quot;top-down&quot;</span><span class="p">,</span> <span class="s2">&quot;random&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;center-out&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack a 2D trajectory with random location.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    traj: np.ndarray</span>
+<span class="sd">        Existing 2D trajectory.</span>
+<span class="sd">    dim_size: int</span>
+<span class="sd">        Size of the k_z dimension</span>
+<span class="sd">    center_prop: int or float</span>
+<span class="sd">        Number of line or proportion of slice to sample in the center of the k-space</span>
+<span class="sd">    accel: int</span>
+<span class="sd">        Undersampling/Acceleration factor</span>
+<span class="sd">    pdf: str or np.array</span>
+<span class="sd">        Probability density function for the remaining samples.</span>
+<span class="sd">        &quot;uniform&quot; (default), &quot;gaussian&quot; or np.array</span>
+<span class="sd">    rng: random state</span>
+<span class="sd">    order: str</span>
+<span class="sd">        Order of the lines, &quot;center-out&quot; (default), &quot;random&quot; or &quot;top-down&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The 3D trajectory stacked along the :math:`k_z` axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_locs</span> <span class="o">=</span> <span class="n">get_random_loc_1d</span><span class="p">(</span><span class="n">dim_size</span><span class="p">,</span> <span class="n">center_prop</span><span class="p">,</span> <span class="n">accel</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">line_locs</span><span class="p">),</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">loc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">line_locs</span><span class="p">):</span>
+        <span class="n">new_trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">new_trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">loc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc</span>
+
+    <span class="k">return</span> <span class="n">new_trajectory</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
 </pre></div>
 

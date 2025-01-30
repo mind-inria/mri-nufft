@@ -13,7 +13,7 @@ Hereafter we learn the k-space sample locations :math:`\mathbf{K}` using the fol
 
 .. math::
     \mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
-    
+
 where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator,
 :math:`D_\mathbf{K}` is the density compensator for trajectory :math:`\mathbf{K}`,
 and :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.

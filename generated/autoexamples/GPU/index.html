@@ -359,6 +359,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
@@ -367,6 +368,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
 </ul>
@@ -419,7 +421,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
 </ul>
 </details></li>
 </ul>
@@ -733,10 +738,10 @@
 <div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Examples of differents density compensation methods."><img alt="" src="../../../_images/sphx_glr_example_density_thumb.png" />
 <p><a class="reference internal" href="example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a></p>
   <div class="sphx-glr-thumbnail-title">Density Compensation Routines</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator  wrt to k-space trajectory in mri-nufft."><img alt="" src="../../../_images/sphx_glr_example_learn_samples_thumb.gif" />
+</div><div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator wrt to k-space trajectory in mri-nufft."><img alt="" src="../../../_images/sphx_glr_example_learn_samples_thumb.gif" />
 <p><a class="reference internal" href="example_learn_samples.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-py"><span class="std std-ref">Learn Sampling pattern</span></a></p>
   <div class="sphx-glr-thumbnail-title">Learn Sampling pattern</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator  wrt to k-space trajectory in mri-nufft."><img alt="" src="../../../_images/sphx_glr_example_learn_samples_multicoil_thumb.gif" />
+</div><div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator wrt to k-space trajectory in mri-nufft."><img alt="" src="../../../_images/sphx_glr_example_learn_samples_multicoil_thumb.gif" />
 <p><a class="reference internal" href="example_learn_samples_multicoil.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-multicoil-py"><span class="std std-ref">Learn Sampling pattern for multi-coil MRI</span></a></p>
   <div class="sphx-glr-thumbnail-title">Learn Sampling pattern for multi-coil MRI</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. In this example we learn the 2D sampling pattern for a 3D MRI image, assuming straight line readouts. This example showcases the auto-diff capabilities of the NUFFT operator The image resolution is kept small to reduce computation time."><img alt="" src="../../../_images/sphx_glr_example_learn_straight_line_readouts_thumb.gif" />
@@ -745,7 +750,7 @@
 </div><div class="sphx-glr-thumbcontainer" tooltip="An example to show how to reconstruct volumes using conjugate gradient method."><img alt="" src="../../../_images/sphx_glr_example_cg_thumb.png" />
 <p><a class="reference internal" href="example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a></p>
   <div class="sphx-glr-thumbnail-title">Reconstruction with conjugate gradient</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This model is a simplified version of the U-Net architecture,  which is widely used for image segmentation tasks.   This is implemented in the proprietary FASTMRI package [fastmri]_.  "><img alt="" src="../../../_images/sphx_glr_example_fastMRI_UNet_thumb.gif" />
+</div><div class="sphx-glr-thumbcontainer" tooltip="This model is a simplified version of the U-Net architecture, which is widely used for image segmentation tasks. This is implemented in the proprietary FASTMRI package [fastmri]_."><img alt="" src="../../../_images/sphx_glr_example_fastMRI_UNet_thumb.gif" />
 <p><a class="reference internal" href="example_fastMRI_UNet.html#sphx-glr-generated-autoexamples-gpu-example-fastmri-unet-py"><span class="std std-ref">Simple UNet model.</span></a></p>
   <div class="sphx-glr-thumbnail-title">Simple UNet model.</div>
 </div></div><div class="toctree-wrapper compound">

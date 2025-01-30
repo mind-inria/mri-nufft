@@ -4,30 +4,30 @@ r"""
 Simple UNet model.
 ==================
 
-This model is a simplified version of the U-Net architecture, 
-which is widely used for image segmentation tasks.  
-This is implemented in the proprietary FASTMRI package [fastmri]_.  
+This model is a simplified version of the U-Net architecture,
+which is widely used for image segmentation tasks.
+This is implemented in the proprietary FASTMRI package [fastmri]_.
 
-The U-Net model consists of an encoder (downsampling path) and 
-a decoder (upsampling path) with skip connections between corresponding 
-layers in the encoder and decoder. 
-These skip connections help in retaining spatial information 
+The U-Net model consists of an encoder (downsampling path) and
+a decoder (upsampling path) with skip connections between corresponding
+layers in the encoder and decoder.
+These skip connections help in retaining spatial information
 that is lost during the downsampling process.
 
-The primary purpose of this model is to perform image reconstruction tasks, 
-specifically for MRI images. 
-It takes an input MRI image and reconstructs it to improve the image quality 
+The primary purpose of this model is to perform image reconstruction tasks,
+specifically for MRI images.
+It takes an input MRI image and reconstructs it to improve the image quality
 or to recover missing parts of the image.
 
-This implementation of the UNet model was pulled from the FastMRI Facebook 
-repository, which is a collaborative research project aimed at advancing 
+This implementation of the UNet model was pulled from the FastMRI Facebook
+repository, which is a collaborative research project aimed at advancing
 the field of medical imaging using machine learning techniques.
 
 .. math::
 
     \mathbf{\hat{x}} = \mathrm{arg} \min_{\mathbf{x}} || \mathcal{U}_\mathbf{\theta}(\mathbf{y}) - \mathbf{x} ||_2^2
 
-where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}` is the ground truth image, 
+where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}` is the ground truth image,
 :math:`\mathbf{y}` is the input MRI image (e.g., k-space data), and :math:`\mathcal{U}_\mathbf{\theta}` is the U-Net model parameterized by :math:`\theta`.
 
 .. warning::

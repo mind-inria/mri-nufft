@@ -219,6 +219,159 @@ show_trajectories(
     axes=(0, 2),
 )
 
+# %%
+# Stack Random
+# -------------
+#
+# A direct extension of the stacking expansion is to distribute the stacks
+# according to a random distribution over the :math:`k_z`-axis.
+#
+# Arguments:
+# - ``trajectory (array)``: array of k-space coordinates of size
+# :math:`(N_c, N_s, N_d)`
+# - ``dim_size (int)``: size of the kspace in voxel units
+# - ``center_prop  (int or float)`` : number of line
+# - ``acceleration (int)``:  Acceleration factor
+# - ``pdf (str or array)``: Probability density function for the random distribution
+# - ``rng (int or np.random.Generator)``: Random number generator
+# - ``order (int)``: Order of the shots in the stack
+
+
+trajectory = tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=0.1,
+    accel=16,
+    pdf="uniform",
+    order="top-down",
+    rng=42,
+)
+
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``trajectory (array)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+# The main use case is to stack trajectories consisting of
+# flat or thick planes that will match the image slices.
+arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
+function = lambda x: tools.stack_random(
+    planar_trajectories[x],
+    dim_size=128,
+    center_prop=0.1,
+    accel=16,
+    pdf="gaussian",
+    order="top-down",
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``dim_size (int)``
+# ~~~~~~~~~~~~~~~~~~
+# Size of the k-space in voxel units over the stacking direction. It
+# is used to normalize the stack positions, and is used with the ``accel``
+# factor and ``center_prop`` to determine the number of stacks.
+arguments = [32, 64, 128]
+function = lambda x: tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=x,
+    center_prop=0.1,
+    accel=8,
+    pdf="gaussian",
+    order="top-down",
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``center_prop (int or float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Number of lines to keep in the center of the k-space. It is used to determine
+# the number of stacks and the acceleration factor, and to keep the center of
+# the k-space with a higher density of shots. If a ``float`` this is a fraction
+# of the total ``dim_size``. If ``int`` it is directly the number of lines.
+
+arguments = [1, 5, 0.1, 0.5]
+function = lambda x: tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=x,
+    accel=16,
+    pdf="uniform",
+    order="top-down",
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
+# ``accel (int)``
+# ~~~~~~~~~~~~~~~
+# Acceleration factor to subsample the outer region of the k-space.
+# Note that the acceleration factor does not take into account the center lines.
+
+
+arguments = [1, 4, 8, 16, 32]
+function = lambda x: tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=0.1,
+    accel=x,
+    pdf="uniform",
+    order="top-down",
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``pdf (str or array)``
+# ~~~~~~~~~~~~~~~~~~~~~~
+# Probability density function for the sampling of the outer region. It can
+# either be a string to use a known probability law ("gaussian" or "uniform") or
+# "equispaced" for a coherent undersampling (like the one used in GRAPPA). It
+# can also be a array, for using a customed density probability.
+# In this case, it will be normalized so that ``sum(pdf) =1``.
+
+dim_size = 128
+arguments = [
+    "gaussian",
+    "uniform",
+    "equispaced",
+    np.arange(dim_size),
+]
+function = lambda x: tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=0.1,
+    accel=32,
+    pdf=x,
+    order="top-down",
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``order (str)``
+# ~~~~~~~~~~~~~~~
+# Determine the ordering of the shot in the trajectory.
+# Accepeted values are "center-out", "top-down" or "random".
+dim_size = 128
+arguments = [
+    "center-out",
+    "random",
+    "top-down",
+]
+function = lambda x: tools.stack_random(
+    planar_trajectories["Spiral"],
+    dim_size=128,
+    center_prop=0.1,
+    accel=32,
+    pdf="uniform",
+    order=x,
+    rng=42,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 # Rotate
