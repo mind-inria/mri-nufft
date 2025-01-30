@@ -821,13 +821,13 @@ def _flip2center(mask_cols: list[int], center_value: int) -> np.ndarray:
 
 
 def get_random_loc_1d(
-    dim_size,
-    center_prop,
-    accel=4,
-    pdf="uniform",
-    rng=None,
-    order="center-out",
-) -> np.ndarray:
+    dim_size: int,
+    center_prop: float | int,
+    accel: float = 4,
+    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray = "uniform",
+    rng: int | np.random.Generator | None = None,
+    order: Literal["center-out", "top-down", "random"] = "center-out",
+) -> NDArray:
     """Get slice index at a random position.
 
     Parameters
@@ -872,9 +872,9 @@ def get_random_loc_1d(
             "acceleration factor, center_prop and dimension not compatible."
             "Edges will not be sampled. "
         )
-    rng = np.random.default_rng(rng)  # validate get a RNG from a seed or existing rng.
+    rng = np.random.default_rng(rng)  # get RNG from a seed or existing rng.
 
-    def _get_samples(p) -> list[int]:
+    def _get_samples(p: np.typing.ArrayLike) -> list[int]:
         p = p / np.sum(p)  # automatic casting if needed
         return list(rng.choice(borders, size=n_samples_borders, replace=False, p=p))
 
@@ -915,13 +915,13 @@ def get_random_loc_1d(
 
 
 def stack_random(
-    trajectory,
-    dim_size,
-    center_prop=0.0,
-    accel=4,
-    pdf="uniform",
-    rng=None,
-    order="center-out",
+    trajectory: NDArray,
+    dim_size: int,
+    center_prop: float | int = 0.0,
+    accel: float | int = 4,
+    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray = "uniform",
+    rng: int | np.random.Generator | None = None,
+    order: Literal["center-out", "top-down", "random"] = "center-out",
 ):
     """Stack a 2D trajectory with random location.
 
