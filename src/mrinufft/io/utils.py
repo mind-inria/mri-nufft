@@ -61,9 +61,10 @@ def siemens_quat_to_rot_mat(quat):
     R[-1, -1] = 1
     return R
 
+
 def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
-    """
-    Remove extra samples from k-space data.
+    """Remove extra samples from k-space data.
+
     This function is useful when the k-space data has extra samples
     mainly as ADC samples at only upto
 
