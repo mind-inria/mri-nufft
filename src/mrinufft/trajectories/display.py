@@ -57,6 +57,8 @@ class displayConfig:
     This can be any of the matplotlib colormaps, or a list of colors."""
     one_shot_color: str = "k"
     """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
+    one_shot_linewidth_factor: float = 2
+    """Factor to multiply the linewidth of the highlighted shot, by default ``2``."""
     gradient_point_color: str = "r"
     """Matplotlib color for gradient constraint points, by default ``"r"`` (red)."""
     slewrate_point_color: str = "b"
@@ -243,7 +245,7 @@ def display_2D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
 
     # Point out violated constraints if requested
@@ -379,7 +381,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
 

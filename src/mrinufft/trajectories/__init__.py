@@ -56,6 +56,12 @@ from .trajectory3D import (
     initialize_3D_wong_radial,
 )
 
+from .tools import (
+    stack_random,
+    get_random_loc_1d,
+)
+
+
 __all__ = [
     # trajectories
     "initialize_2D_radial",
@@ -88,7 +94,9 @@ __all__ = [
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
     # tools
+    "get_random_loc_1d",
     "stack",
+    "stack_random",
     "rotate",
     "precess",
     "conify",
