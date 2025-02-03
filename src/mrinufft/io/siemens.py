@@ -75,7 +75,12 @@ def read_siemens_rawdat(
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
         "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
+        "acs": None,
     }
+    if "refscan" in twixObj.keys():
+        twixObj.refscan.squeeze = True
+        acs = twixObj.refscan[""].astype(np.float32)
+        hdr["acs"] = acs.swapaxes(0, 1)
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
@@ -97,7 +102,8 @@ def read_siemens_rawdat(
 
     data = data.reshape(
         hdr["n_coils"],
-        hdr["n_shots"] * hdr["n_adc_samples"],
+        hdr["n_shots"],
+        hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
         hdr["n_contrasts"] if contrast_num is None else 1,
         hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
