@@ -14,7 +14,6 @@ from mrinufft.trajectories.display3D import get_gridded_trajectory
 import mrinufft.trajectories.trajectory3D as mtt
 from mrinufft.trajectories.utils import Gammas
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
 import numpy as np
 
 
@@ -39,10 +38,9 @@ def plot_slices(axs, volume, title=""):
         set_labels(axs[i], i)
 
 
-
 # %%
 # Helper function to showcase the features of `get_gridded_trajectory` function
-# This function will first grid the trajectory using the `get_gridded_trajectory` 
+# This function will first grid the trajectory using the `get_gridded_trajectory`
 # function and then plot the mid-plane slices of the gridded trajectory.
 def create_grid(grid_type, trajectories, traj_params, **kwargs):
     fig, axs = plt.subplots(3, 3, figsize=(10, 10))
@@ -88,8 +86,8 @@ plt.show()
 
 # %%
 # Display the inversion time of the trajectories. For this, make `grid_type="inversion"`.
-# This helps in obtaining the inversion time when particular region of k-space is sampled, assuming the trajectories are time ordered, 
-# and the argument `turbo_factor` is specified, which is time between 2 inversion pulses. 
+# This helps in obtaining the inversion time when particular region of k-space is sampled, assuming the trajectories are time ordered,
+# and the argument `turbo_factor` is specified, which is time between 2 inversion pulses.
 create_grid("inversion", trajectories, traj_params, turbo_factor=64)
 plt.suptitle("Inversion Time")
 plt.show()
@@ -102,7 +100,7 @@ plt.suptitle("K-space Holes")
 plt.show()
 # %%
 # Display the gradient strength of the trajectories. For this, make `grid_type="gradients"`.
-# This helps in displaying the gradient strength applied at specific k-space region, 
+# This helps in displaying the gradient strength applied at specific k-space region,
 # which can be used as a surrogate to k-space "velocity", i.e. how fast does trajectory pass through a given region in k-space.
 # It could be useful while characterizing spatial SNR profile in k-space
 create_grid("gradients", trajectories, traj_params)
@@ -111,7 +109,7 @@ plt.show()
 
 # %%
 # Display the slew rates of the trajectories. For this, make `grid_type="slew"`.
-# This helps in displaying the slew rates applied at specific k-space region, 
+# This helps in displaying the slew rates applied at specific k-space region,
 # which can ne used as a surrogate to k-space "acceleration", i.e. how fast does trajectory change in a given region in k-space
 # It could be useful to understand potential regions in k-space with eddy current artifacts and trajectories which could lead to peripheral nerve stimulations.
 create_grid("slew", trajectories, traj_params)

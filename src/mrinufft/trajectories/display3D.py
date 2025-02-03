@@ -9,10 +9,8 @@ from mrinufft.trajectories.utils import (
 )
 from mrinufft.density.utils import flat_traj
 import numpy as np
-from typing import tuple
 
 
-@flat_traj
 def get_gridded_trajectory(
     trajectory: np.ndarray,
     shape: tuple,
@@ -87,11 +85,12 @@ def get_gridded_trajectory(
     ndarray
         The gridded trajectory of shape `shape`.
     """
+    samples = trajectory.reshape(-1, trajectory.shape[-1])
     dcomp = get_density("pipe")(trajectory, shape)
     grid_op = get_operator(backend)(
         trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=1
     )
-    gridded_ones = grid_op.raw_op.adj_op(np.ones(trajectory.shape[0]), None, True)
+    gridded_ones = grid_op.raw_op.adj_op(np.ones(samples.shape[0]), None, True)
     if grid_type == "density":
         return np.abs(gridded_ones).squeeze()
     elif grid_type == "time":
@@ -104,8 +103,8 @@ def get_gridded_trajectory(
         data = grid_op.raw_op.adj_op(
             np.repeat(
                 np.linspace(1, 10, turbo_factor),
-                trajectory.shape[0] // turbo_factor + 1,
-            )[: trajectory.shape[0]],
+                samples.shape[0] // turbo_factor + 1,
+            )[: samples.shape[0]],
             None,
             True,
         )
