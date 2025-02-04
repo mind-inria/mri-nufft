@@ -79,7 +79,7 @@ def read_siemens_rawdat(
     }
     if "refscan" in twixObj.keys():
         twixObj.refscan.squeeze = True
-        acs = twixObj.refscan[""].astype(np.float32)
+        acs = twixObj.refscan[""].astype(np.complex64)
         hdr["acs"] = acs.swapaxes(0, 1)
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
