@@ -856,7 +856,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 15.800 seconds)
+   **Total running time of the script:** (2 minutes 11.883 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_sampling_densities.py:

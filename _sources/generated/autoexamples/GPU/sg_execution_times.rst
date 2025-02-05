@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**09:08.296** total execution time for 6 files **from generated/autoexamples/GPU**:
+**09:13.401** total execution time for 6 files **from generated/autoexamples/GPU**:
 
 .. container::
 
@@ -33,20 +33,20 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``example_learn_straight_line_readouts.py``)
-     - 04:56.673
+     - 04:58.021
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_fastMRI_UNet.py` (``example_fastMRI_UNet.py``)
-     - 01:31.303
+     - 01:32.406
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples_multicoil.py` (``example_learn_samples_multicoil.py``)
-     - 01:25.173
+     - 01:26.492
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` (``example_learn_samples.py``)
-     - 01:09.721
+     - 01:10.948
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_density.py` (``example_density.py``)
-     - 00:04.346
+     - 00:04.358
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_cg.py` (``example_cg.py``)
-     - 00:01.080
+     - 00:01.177
      - 0.0

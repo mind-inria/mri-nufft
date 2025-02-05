@@ -712,7 +712,7 @@
 <a class="viewcode-back" href="../../../../../generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor.html#mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_cuda_tensor</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if var is a CUDA tensor.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">is_cuda</span></div>
+    <span class="k">return</span> <span class="n">TORCH_AVAILABLE</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">is_cuda</span></div>
 
 
 
