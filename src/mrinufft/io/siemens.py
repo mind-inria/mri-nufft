@@ -42,6 +42,7 @@ def read_siemens_rawdat(
         Imported data formatted as n_coils X n_samples X n_slices X n_contrasts
     hdr: dict
         Extra information about the data parsed from the twix file
+        This header also contains the ACS data as "acs" if it was found in raw data.
 
     Raises
     ------
