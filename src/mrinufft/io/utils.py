@@ -67,8 +67,8 @@ def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
 
     This function is useful when the k-space data has extra samples
     mainly as ADC samples at only at specific number of samples.
-    This sometimes leads to a situation where we will have more ADC samples 
-    than what is expected. 
+    This sometimes leads to a situation where we will have more ADC samples
+    than what is expected.
 
     Parameters
     ----------
