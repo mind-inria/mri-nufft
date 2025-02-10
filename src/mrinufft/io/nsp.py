@@ -484,7 +484,7 @@ def read_arbgrad_rawdat(
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
         hdr["shifts"] = ()
-        for s in [7, 6, 8]:
+        for s in [6, 7, 8]:
             shift = twixObj.search_header_for_val(
                 "Phoenix", ("sWiPMemBlock", "adFree", str(s))
             )
