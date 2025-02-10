@@ -1267,10 +1267,11 @@
 <span class="sd">            The density for the Fourier Operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="n">density</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">set_pts</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="p">,</span>
-            <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;raw_op&quot;</span><span class="p">):</span>  <span class="c1"># edge case for init</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">set_pts</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="p">,</span>
+                <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="MRIGpuNUFFT.pipe">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe">[docs]</a>
@@ -1301,7 +1302,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">GPUNUFFT_AVAILABLE</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;gpuNUFFT is not available, cannot &quot;</span> <span class="s2">&quot;estimate the density compensation&quot;</span>
+                <span class="s2">&quot;gpuNUFFT is not available, cannot estimate the density compensation&quot;</span>
             <span class="p">)</span>
         <span class="n">original_shape</span> <span class="o">=</span> <span class="n">volume_shape</span>
         <span class="n">volume_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">volume_shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">osf</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
