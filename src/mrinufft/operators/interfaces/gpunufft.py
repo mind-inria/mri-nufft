@@ -532,7 +532,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             self.raw_op.set_smaps(smaps=new_smaps)
 
     @FourierOperatorBase.samples.setter
-    def samples(self, samples):
+    def samples(self, new_samples):
         """Set the samples for the Fourier Operator.
 
         Parameters
@@ -541,7 +541,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             The samples for the Fourier Operator.
         """
         self._samples = proper_trajectory(
-            samples.astype(np.float32, copy=False), normalize="unit"
+            new_samples.astype(np.float32, copy=False), normalize="unit"
         )
         # TODO: gpuNUFFT needs to sort the points twice in this case.
         # It could help to have access to directly dorted arrays from gpuNUFFT.
@@ -552,7 +552,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
 
     @FourierOperatorBase.density.setter
-    def density(self, density):
+    def density(self, new_density):
         """Set the density for the Fourier Operator.
 
         Parameters
@@ -560,11 +560,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density: np.ndarray
             The density for the Fourier Operator.
         """
-        self._density = density
+        self._density = new_density
         if hasattr(self, "raw_op"):  # edge case for init
             self.raw_op.set_pts(
                 self._samples,
-                density=density,
+                density=new_density,
             )
 
     @classmethod

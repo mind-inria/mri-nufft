@@ -76,3 +76,9 @@ live_mode = false
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pyright]
+reportPossiblyUnboundVariable = false
+typeCheckingMode = "basic"
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
