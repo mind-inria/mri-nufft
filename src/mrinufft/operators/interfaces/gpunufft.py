@@ -561,10 +561,11 @@ class MRIGpuNUFFT(FourierOperatorBase):
             The density for the Fourier Operator.
         """
         self._density = density
-        self.raw_op.set_pts(
-            self._samples,
-            density=density,
-        )
+        if hasattr(self, "raw_op"):  # edge case for init
+            self.raw_op.set_pts(
+                self._samples,
+                density=density,
+            )
 
     @classmethod
     def pipe(
@@ -593,7 +594,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
-                "gpuNUFFT is not available, cannot " "estimate the density compensation"
+                "gpuNUFFT is not available, cannot estimate the density compensation"
             )
         original_shape = volume_shape
         volume_shape = (np.array(volume_shape) * osf).astype(int)

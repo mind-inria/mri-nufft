@@ -329,7 +329,7 @@ class FourierOperatorBase(ABC):
                 shape,
                 **kwargs,
             )
-        self._density = method(self.samples, self.shape, **kwargs)
+        self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
