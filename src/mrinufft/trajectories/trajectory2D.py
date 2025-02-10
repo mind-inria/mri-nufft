@@ -1,7 +1,10 @@
 """Functions to initialize 2D trajectories."""
 
+from typing import Any, Literal
+
 import numpy as np
 import numpy.linalg as nl
+from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
 from .gradients import patch_center_anomaly
@@ -14,7 +17,9 @@ from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 #####################
 
 
-def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
+def initialize_2D_radial(
+    Nc: int, Ns: int, tilt: str | float = "uniform", in_out: bool = False
+) -> NDArray:
     """Initialize a 2D radial trajectory.
 
     Parameters
@@ -23,10 +28,15 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : str | float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
+
+    Returns
+    -------
+    NDArray
+        2D radial trajectory
     """
     # Initialize a first shot
     segment = np.linspace(-1 if (in_out) else 0, 1, Ns)
@@ -42,14 +52,14 @@ def initialize_2D_radial(Nc, Ns, tilt="uniform", in_out=False):
 
 
 def initialize_2D_spiral(
-    Nc,
-    Ns,
-    tilt="uniform",
-    in_out=False,
-    nb_revolutions=1,
-    spiral="archimedes",
-    patch_center=True,
-):
+    Nc: int,
+    Ns: int,
+    tilt: str | float = "uniform",
+    in_out: bool = False,
+    nb_revolutions: float = 1.0,
+    spiral: str | float = "archimedes",
+    patch_center: bool = True,
+) -> NDArray:
     """Initialize a 2D algebraic spiral trajectory.
 
     A generalized function that generates algebraic spirals defined
@@ -63,13 +73,13 @@ def initialize_2D_spiral(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : Literal, float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
-    nb_revolutions : int, optional
+    nb_revolutions : float, optional
         Number of revolutions, by default 1
-    spiral : str, float, optional
+    spiral : Literal, float, optional
         Spiral type or algebraic power, by default "archimedes"
     patch_center : bool, optional
         Whether the spiral anomaly at the center should be patched
@@ -77,7 +87,7 @@ def initialize_2D_spiral(
 
     Returns
     -------
-    array_like
+    NDArray
         2D spiral trajectory
 
     Raises
@@ -104,11 +114,18 @@ def initialize_2D_spiral(
     # Algebraic spirals with power coefficients superior to 1
     # have a non-monotonic gradient norm when varying the angle
     # over [0, +inf)
-    def _update_shot(angles, radius, *args):
+    def _update_shot(
+        angles: NDArray, radius: NDArray, *args: Any  # noqa ANN401
+    ) -> NDArray:
         shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
         return np.stack([shot.real, shot.imag], axis=-1)
 
-    def _update_parameters(single_shot, angles, radius, spiral_power):
+    def _update_parameters(
+        single_shot: NDArray,
+        angles: NDArray,
+        radius: NDArray,
+        spiral_power: float,
+    ) -> tuple[NDArray, NDArray, float]:
         radius = nl.norm(single_shot, axis=-1)
         angles = np.sign(angles) * np.abs(radius) ** (1 / spiral_power)
         return angles, radius, spiral_power
@@ -139,7 +156,9 @@ def initialize_2D_spiral(
     return trajectory
 
 
-def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True):
+def initialize_2D_fibonacci_spiral(
+    Nc: int, Ns: int, spiral_reduction: float = 1, patch_center: bool = True
+) -> NDArray:
     """Initialize a 2D Fibonacci spiral trajectory.
 
     A non-algebraic spiral trajectory based on the Fibonacci sequence,
@@ -163,7 +182,7 @@ def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True
 
     Returns
     -------
-    array_like
+    NDArray
         2D Fibonacci spiral trajectory
 
     References
@@ -208,7 +227,14 @@ def initialize_2D_fibonacci_spiral(Nc, Ns, spiral_reduction=1, patch_center=True
     return trajectory
 
 
-def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1):
+def initialize_2D_cones(
+    Nc: int,
+    Ns: int,
+    tilt: str | float = "uniform",
+    in_out: bool = False,
+    nb_zigzags: float = 5,
+    width: float = 1,
+) -> NDArray:
     """Initialize a 2D cone trajectory.
 
     Parameters
@@ -217,7 +243,7 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, optional
+    tilt : str | float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -228,7 +254,7 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
 
     Returns
     -------
-    array_like
+    NDArray
         2D cone trajectory
 
     """
@@ -248,8 +274,13 @@ def initialize_2D_cones(Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, widt
 
 
 def initialize_2D_sinusoide(
-    Nc, Ns, tilt="uniform", in_out=False, nb_zigzags=5, width=1
-):
+    Nc: int,
+    Ns: int,
+    tilt: str | float = "uniform",
+    in_out: bool = False,
+    nb_zigzags: float = 5,
+    width: float = 1,
+) -> NDArray:
     """Initialize a 2D sinusoide trajectory.
 
     Parameters
@@ -258,7 +289,7 @@ def initialize_2D_sinusoide(
         Number of shots
     Ns : int
         Number of samples per shot
-    tilt : str, float, optional
+    tilt : str | float, optional
         Tilt of the shots, by default "uniform"
     in_out : bool, optional
         Whether to start from the center or not, by default False
@@ -269,7 +300,7 @@ def initialize_2D_sinusoide(
 
     Returns
     -------
-    array_like
+    NDArray
         2D sinusoide trajectory
 
     """
@@ -288,7 +319,7 @@ def initialize_2D_sinusoide(
     return trajectory
 
 
-def initialize_2D_propeller(Nc, Ns, nb_strips):
+def initialize_2D_propeller(Nc: int, Ns: int, nb_strips: int) -> NDArray:
     """Initialize a 2D PROPELLER trajectory, as proposed in [Pip99]_.
 
     The PROPELLER trajectory is generally used along a specific
@@ -336,7 +367,7 @@ def initialize_2D_propeller(Nc, Ns, nb_strips):
     return KMAX * trajectory
 
 
-def initialize_2D_rings(Nc, Ns, nb_rings):
+def initialize_2D_rings(Nc: int, Ns: int, nb_rings: int) -> NDArray:
     """Initialize a 2D ring trajectory, as proposed in [HHN08]_.
 
     Parameters
@@ -350,7 +381,7 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
 
     Returns
     -------
-    array_like
+    NDArray
         2D ring trajectory
 
     References
@@ -382,7 +413,9 @@ def initialize_2D_rings(Nc, Ns, nb_rings):
     return KMAX * np.array(trajectory)
 
 
-def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
+def initialize_2D_rosette(
+    Nc: int, Ns: int, in_out: bool = False, coprime_index: int = 0
+) -> NDArray:
     """Initialize a 2D rosette trajectory.
 
     Parameters
@@ -398,7 +431,7 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
 
     Returns
     -------
-    array_like
+    NDArray
         2D rosette trajectory
 
     """
@@ -423,7 +456,9 @@ def initialize_2D_rosette(Nc, Ns, in_out=False, coprime_index=0):
     return trajectory
 
 
-def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_index=0):
+def initialize_2D_polar_lissajous(
+    Nc: int, Ns: int, in_out: bool = False, nb_segments: int = 1, coprime_index: int = 0
+) -> NDArray:
     """Initialize a 2D polar Lissajous trajectory.
 
     Parameters
@@ -441,7 +476,7 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
 
     Returns
     -------
-    array_like
+    NDArray
         2D polar Lissajous trajectory
     """
     # Adapt the parameters to subcases
@@ -477,7 +512,7 @@ def initialize_2D_polar_lissajous(Nc, Ns, in_out=False, nb_segments=1, coprime_i
 #########################
 
 
-def initialize_2D_lissajous(Nc, Ns, density=1):
+def initialize_2D_lissajous(Nc: int, Ns: int, density: float = 1) -> NDArray:
     """Initialize a 2D Lissajous trajectory.
 
     Parameters
@@ -491,7 +526,7 @@ def initialize_2D_lissajous(Nc, Ns, density=1):
 
     Returns
     -------
-    array_like
+    NDArray
         2D Lissajous trajectory
     """
     # Define the whole curve in Cartesian coordinates
@@ -507,7 +542,9 @@ def initialize_2D_lissajous(Nc, Ns, density=1):
     return trajectory
 
 
-def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
+def initialize_2D_waves(
+    Nc: int, Ns: int, nb_zigzags: float = 5, width: float = 1
+) -> NDArray:
     """Initialize a 2D waves trajectory.
 
     Parameters
@@ -523,7 +560,7 @@ def initialize_2D_waves(Nc, Ns, nb_zigzags=5, width=1):
 
     Returns
     -------
-    array_like
+    NDArray
         2D waves trajectory
     """
     # Initialize a first shot

@@ -1,11 +1,15 @@
 """Display functions for trajectories."""
 
+from __future__ import annotations
+
 import itertools
+from typing import Any
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from numpy.typing import NDArray
 
 from .utils import (
     DEFAULT_GMAX,
@@ -46,45 +50,47 @@ class displayConfig:
     """Font size for most labels and texts, by default ``18``."""
     small_fontsize: int = 14
     """Font size for smaller texts, by default ``14``."""
-    nb_colors = 10
+    nb_colors: int = 10
     """Number of colors to use in the color cycle, by default ``10``."""
     palette: str = "tab10"
     """Name of the color palette to use, by default ``"tab10"``.
     This can be any of the matplotlib colormaps, or a list of colors."""
     one_shot_color: str = "k"
     """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
+    one_shot_linewidth_factor: float = 2
+    """Factor to multiply the linewidth of the highlighted shot, by default ``2``."""
     gradient_point_color: str = "r"
     """Matplotlib color for gradient constraint points, by default ``"r"`` (red)."""
     slewrate_point_color: str = "b"
     """Matplotlib color for slew rate constraint points, by default ``"b"`` (blue)."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:  # noqa ANN401
         """Update the display configuration."""
         self.update(**kwargs)
 
-    def update(self, **kwargs):
+    def update(self, **kwargs: Any) -> None:  # noqa ANN401
         """Update the display configuration."""
         self._old_values = {}
         for key, value in kwargs.items():
             self._old_values[key] = getattr(displayConfig, key)
             setattr(displayConfig, key, value)
 
-    def reset(self):
+    def reset(self) -> None:
         """Restore the display configuration."""
         for key, value in self._old_values.items():
             setattr(displayConfig, key, value)
         delattr(self, "_old_values")
 
-    def __enter__(self):
+    def __enter__(self) -> displayConfig:
         """Enter the context manager."""
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Any) -> None:  # noqa ANN401
         """Exit the context manager."""
         self.reset()
 
     @classmethod
-    def get_colorlist(cls):
+    def get_colorlist(cls) -> list[str | NDArray]:
         """Extract a list of colors from a matplotlib palette.
 
         If the palette is continuous, the colors will be sampled from it.
@@ -124,7 +130,7 @@ class displayConfig:
 ##############
 
 
-def _setup_2D_ticks(figsize, fig=None):
+def _setup_2D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
     """Add ticks to 2D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
@@ -139,7 +145,7 @@ def _setup_2D_ticks(figsize, fig=None):
     return ax
 
 
-def _setup_3D_ticks(figsize, fig=None):
+def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
     """Add ticks to 3D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
@@ -163,21 +169,21 @@ def _setup_3D_ticks(figsize, fig=None):
 
 
 def display_2D_trajectory(
-    trajectory,
-    figsize=5,
-    one_shot=False,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    **constraints_kwargs,
-):
+    trajectory: NDArray,
+    figsize: float = 5,
+    one_shot: bool | int = False,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    **constraints_kwargs: Any,  # noqa ANN401
+) -> plt.Axes:
     """Display 2D trajectories.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to display.
     figsize : float, optional
         Size of the figure.
@@ -204,7 +210,7 @@ def display_2D_trajectory(
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    **kwargs
+    **constraints_kwargs
         Acquisition parameters used to check on hardware constraints,
         following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
@@ -239,7 +245,7 @@ def display_2D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
 
     # Point out violated constraints if requested
@@ -278,23 +284,23 @@ def display_2D_trajectory(
 
 
 def display_3D_trajectory(
-    trajectory,
-    nb_repetitions=None,
-    figsize=5,
-    per_plane=True,
-    one_shot=False,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    **constraints_kwargs,
-):
+    trajectory: NDArray,
+    nb_repetitions: int | None = None,
+    figsize: float = 5,
+    per_plane: bool = True,
+    one_shot: bool | int = False,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    **constraints_kwargs: Any,  # noqa ANN401
+) -> plt.Axes:
     """Display 3D trajectories.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to display.
     nb_repetitions : int
         Number of repetitions (planes, cones, shells, etc).
@@ -375,7 +381,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
 
@@ -417,22 +423,22 @@ def display_3D_trajectory(
 
 
 def display_gradients_simply(
-    trajectory,
-    shot_ids=(0,),
-    figsize=5,
-    fill_area=True,
-    show_signal=True,
-    uni_signal="gray",
-    uni_gradient=None,
-    subfigure=None,
-):
+    trajectory: NDArray,
+    shot_ids: tuple[int, ...] = (0,),
+    figsize: float = 5,
+    fill_area: bool = True,
+    show_signal: bool = True,
+    uni_signal: str | None = "gray",
+    uni_gradient: str | None = None,
+    subfigure: plt.Figure | None = None,
+) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to display.
-    shot_ids : list of int
+    shot_ids : tuple[int, ...], optional
         Indices of the shots to display.
         The default is `[0]`.
     figsize : float, optional
@@ -455,7 +461,7 @@ def display_gradients_simply(
         unique color given as argument or just by the default
         color cycle when `None`.
         The default is `None`.
-    subfigure: plt.Figure or plt.SubFigure, optional
+    subfigure: plt.Figure, optional
         The figure where the trajectory should be displayed.
         The default is `None`.
 
@@ -531,26 +537,26 @@ def display_gradients_simply(
 
 
 def display_gradients(
-    trajectory,
-    shot_ids=(0,),
-    figsize=5,
-    fill_area=True,
-    show_signal=True,
-    uni_signal="gray",
-    uni_gradient=None,
-    subfigure=None,
-    show_constraints=False,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
-    constraints_order=None,
-    raster_time=DEFAULT_RASTER_TIME,
-    **constraints_kwargs,
-):
+    trajectory: NDArray,
+    shot_ids: tuple[int, ...] = (0,),
+    figsize: float = 5,
+    fill_area: bool = True,
+    show_signal: bool = True,
+    uni_signal: str | None = "gray",
+    uni_gradient: str | None = None,
+    subfigure: plt.Figure | plt.Axes | None = None,
+    show_constraints: bool = False,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+    constraints_order: int | str | None = None,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    **constraints_kwargs: Any,  # noqa ANN401
+) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to display.
     shot_ids : list of int
         Indices of the shots to display.
@@ -597,7 +603,7 @@ def display_gradients(
         Amount of time between the acquisition of two
         consecutive samples in ms.
         The default is `DEFAULT_RASTER_TIME`.
-    **kwargs
+    **constraints_kwargs
         Acquisition parameters used to check on hardware constraints,
         following the parameter convention from
         `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.

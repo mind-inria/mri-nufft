@@ -1,33 +1,43 @@
 """Functions to manipulate/modify trajectories."""
 
+from typing import Any, Callable, Literal
+
 import numpy as np
-from scipy.interpolate import CubicSpline
+from numpy.typing import NDArray
+from scipy.interpolate import CubicSpline, interp1d
+from scipy.stats import norm
 
 from .maths import Rv, Rx, Ry, Rz
-from .utils import KMAX, initialize_tilt
+from .utils import KMAX, initialize_tilt, VDSpdf, VDSorder
 
 ################
 # DIRECT TOOLS #
 ################
 
 
-def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
+def stack(
+    trajectory: NDArray,
+    nb_stacks: int,
+    z_tilt: str | float | None = None,
+    *,
+    hard_bounded: bool = True,
+) -> NDArray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory in 2D or 3D to stack.
     nb_stacks : int
         Number of stacks repeating the provided trajectory.
-    z_tilt : str, optional
+    z_tilt : str | float, optional
         Tilt of the stacks, by default `None`.
     hard_bounded : bool, optional
         Whether the stacks should be strictly within the limits of the k-space.
 
     Returns
     -------
-    array_like
+    NDArray
         Stacked trajectory.
     """
     # Check dimensionality and initialize output
@@ -55,25 +65,31 @@ def stack(trajectory, nb_stacks, z_tilt=None, hard_bounded=True):
     return new_trajectory.reshape(nb_stacks * Nc, Ns, 3)
 
 
-def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
+def rotate(
+    trajectory: NDArray,
+    nb_rotations: int,
+    x_tilt: str | float | None = None,
+    y_tilt: str | float | None = None,
+    z_tilt: str | float | None = None,
+) -> NDArray:
     """Rotate 2D or 3D trajectories over the different axes.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory.
-    x_tilt : str, optional
+    x_tilt : str | float, optional
         Tilt of the trajectory over the :math:`k_x`-axis, by default `None`.
-    y_tilt : str, optional
+    y_tilt : str | float, optional
         Tilt of the trajectory over the :math:`k_y`-axis, by default `None`.
-    z_tilt : str, optional
+    z_tilt : str | float, optional
         Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
 
     Returns
     -------
-    array_like
+    NDArray
         Rotated trajectory.
     """
     # Check dimensionality and initialize output
@@ -96,33 +112,33 @@ def rotate(trajectory, nb_rotations, x_tilt=None, y_tilt=None, z_tilt=None):
 
 
 def precess(
-    trajectory,
-    nb_rotations,
-    tilt="golden",
-    half_sphere=False,
-    partition="axial",
-    axis=None,
-):
+    trajectory: NDArray,
+    nb_rotations: int,
+    tilt: str | float = "golden",
+    half_sphere: bool = False,
+    partition: Literal["axial", "polar"] = "axial",
+    axis: int | NDArray | None = None,
+) -> NDArray:
     """Rotate trajectories as a precession around the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory in 2D or 3D to rotate.
     nb_rotations : int
         Number of rotations repeating the provided trajectory while precessing.
-    tilt : str, optional
+    tilt : str | float, optional
         Angle tilt between consecutive rotations around the :math:`k_z`-axis,
         by default "golden".
     half_sphere : bool, optional
         Whether the precession should be limited to the upper half
         of the k-space sphere.
         It is typically used for in-out trajectories or planes.
-    partition : str, optional
+    partition : Literal["axial", "polar"], optional
         Partition type between an "axial" or "polar" split of the
         :math:`k_z`-axis, designating whether the axis should be fragmented
         by radius or angle respectively, by default "axial".
-    axis : int, array_like, optional
+    axis : int, NDArray, optional
         Axis selected for alignment reference when rotating the trajectory
         around the :math:`k_z`-axis, generally corresponding to the shot
         direction for single shot ``trajectory`` inputs. It can either
@@ -132,7 +148,7 @@ def precess(
 
     Returns
     -------
-    array_like
+    NDArray
         Precessed trajectory.
     """
     # Check for partition option error
@@ -175,22 +191,22 @@ def precess(
 
 
 def conify(
-    trajectory,
-    nb_cones,
-    z_tilt=None,
-    in_out=False,
-    max_angle=np.pi / 2,
-    borderless=True,
-):
+    trajectory: NDArray,
+    nb_cones: int,
+    z_tilt: str | float | None = None,
+    in_out: bool = False,
+    max_angle: float = np.pi / 2,
+    borderless: bool = True,
+) -> NDArray:
     """Distort 2D or 3D trajectories into cones along the :math:`k_z`-axis.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to conify.
     nb_cones : int
         Number of cones repeating the provided trajectory.
-    z_tilt : str, optional
+    z_tilt : str | float, optional
         Tilt of the trajectory over the :math:`k_z`-axis, by default `None`.
     in_out : bool, optional
         Whether to account for the in-out nature of some trajectories
@@ -203,7 +219,7 @@ def conify(
 
     Returns
     -------
-    array_like
+    NDArray
         Conified trajectory.
     """
     # Check dimensionality and initialize output
@@ -253,7 +269,13 @@ def conify(
     return new_trajectory
 
 
-def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
+def epify(
+    trajectory: NDArray,
+    Ns_transitions: int,
+    nb_trains: int,
+    *,
+    reverse_odd_shots: bool = False,
+) -> NDArray:
     """Create multi-readout shots from trajectory composed of single-readouts.
 
     Assemble multiple single-readout shots together by adding transition
@@ -261,7 +283,7 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to change by prolonging and merging the shots.
     Ns_transitions : int
         Number of samples/steps between the merged readouts.
@@ -274,7 +296,7 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
 
     Returns
     -------
-    array_like
+    NDArray
         Trajectory with fewer but longer multi-readout shots.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -302,12 +324,10 @@ def epify(trajectory, Ns_transitions, nb_trains, reverse_odd_shots=False):
     for i_c in range(nb_trains):
         spline = CubicSpline(source_sample_ids, np.concatenate(trajectory[i_c], axis=0))
         assembled_trajectory.append(spline(target_sample_ids))
-    assembled_trajectory = np.array(assembled_trajectory)
-
-    return assembled_trajectory
+    return np.array(assembled_trajectory)
 
 
-def unepify(trajectory, Ns_readouts, Ns_transitions):
+def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArray:
     """Recover single-readout shots from multi-readout trajectory.
 
     Reformat an EPI-like trajectory with multiple readouts and transitions
@@ -319,7 +339,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to reduce by discarding transitions between readouts.
     Ns_readouts : int
         Number of samples within a single readout.
@@ -328,7 +348,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
 
     Returns
     -------
-    array_like
+    NDArray
         Trajectory with more but shorter single shots.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -349,7 +369,7 @@ def unepify(trajectory, Ns_readouts, Ns_transitions):
     return trajectory
 
 
-def prewind(trajectory, Ns_transitions):
+def prewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:
     """Add pre-winding/positioning to the trajectory.
 
     The trajectory is extended to start before the readout
@@ -358,7 +378,7 @@ def prewind(trajectory, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to extend with rewind gradients.
     Ns_transitions : int
         Number of pre-winding/positioning steps used to leave the
@@ -366,7 +386,7 @@ def prewind(trajectory, Ns_transitions):
 
     Returns
     -------
-    array_like
+    NDArray
         Extended trajectory with pre-winding/positioning.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -384,12 +404,10 @@ def prewind(trajectory, Ns_transitions):
             np.concatenate([np.zeros((2, Nd)), trajectory[i_c]], axis=0),
         )
         assembled_trajectory.append(spline(target_sample_ids))
-    assembled_trajectory = np.array(assembled_trajectory)
-
-    return assembled_trajectory
+    return np.array(assembled_trajectory)
 
 
-def rewind(trajectory, Ns_transitions):
+def rewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:
     """Add rewinding to the trajectory.
 
     The trajectory is extended to come back to the k-space center
@@ -397,14 +415,14 @@ def rewind(trajectory, Ns_transitions):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to extend with rewind gradients.
     Ns_transitions : int
         Number of rewinding steps used to come back to the k-space center.
 
     Returns
     -------
-    array_like
+    NDArray
         Extended trajectory with rewinding.
     """
     Nc, Ns, Nd = trajectory.shape
@@ -424,9 +442,51 @@ def rewind(trajectory, Ns_transitions):
             np.concatenate([trajectory[i_c], np.zeros((2, Nd))], axis=0),
         )
         assembled_trajectory.append(spline(target_sample_ids))
-    assembled_trajectory = np.array(assembled_trajectory)
+    return np.array(assembled_trajectory)
 
-    return assembled_trajectory
+
+def oversample(
+    trajectory: NDArray,
+    new_Ns: int,
+    kind: Literal["linear", "quadratic", "cubic"] = "cubic",
+) -> NDArray:
+    """
+    Resample a trajectory to increase the number of samples using interpolation.
+
+    Parameters
+    ----------
+    trajectory : NDArray
+        The original trajectory array, where interpolation
+        is applied along the second axis.
+    new_Ns : int
+        The desired number of samples in the resampled trajectory.
+    kind : Literal, optional
+        The type of interpolation to use, such as 'linear',
+        'quadratic', or 'cubic', by default "cubic".
+
+    Returns
+    -------
+    NDArray
+        The resampled trajectory array with ``new_Ns`` points along the second axis.
+
+    Notes
+    -----
+    This function uses ``scipy.interpolate.interp1d`` to perform
+    the interpolation along the second axis of the input `trajectory` array.
+
+    Warnings
+    --------
+    Using 'quadratic' or 'cubic' interpolations is likely to generate
+    samples located slightly beyond the original k-space limits by
+    making smooth transitions.
+
+    See Also
+    --------
+    scipy.interpolate.interp1d : The underlying interpolation function
+        used for resampling.
+    """
+    f = interp1d(np.linspace(0, 1, trajectory.shape[1]), trajectory, axis=1, kind=kind)
+    return f(np.linspace(0, 1, new_Ns))
 
 
 ####################
@@ -435,32 +495,36 @@ def rewind(trajectory, Ns_transitions):
 
 
 def stack_spherically(
-    trajectory_func, Nc, nb_stacks, z_tilt=None, hard_bounded=True, **traj_kwargs
-):
+    trajectory_func: Callable[..., NDArray],
+    Nc: int,
+    nb_stacks: int,
+    z_tilt: str | float | None = None,
+    hard_bounded: bool = True,
+    **traj_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
-    trajectory_func : function
+    trajectory_func : Callable[..., NDArray]
         Trajectory function that should return an array-like
         with the usual (Nc, Ns, Nd) size.
     Nc : int
-        Number of shots to use for the whole spherically
-        stacked trajectory.
+        Number of shots to use for the whole spherically stacked trajectory.
     nb_stacks : int
         Number of stacks of trajectories.
-    z_tilt : str, optional
+    z_tilt : str | float, optional
         Tilt of the stacks, by default `None`.
     hard_bounded : bool, optional
-        Whether the stacks should be strictly within the limits of the k-space,
-        by default `True`.
-    **kwargs
-        Trajectory initialization parameters for the function provided
-        with `trajectory_func`.
+        Whether the stacks should be strictly within the limits
+        of the k-space, by default `True`.
+    **traj_kwargs : Any
+        Trajectory initialization parameters for the function
+        provided with `trajectory_func`.
 
     Returns
     -------
-    array_like
+    NDArray
         Stacked trajectory.
     """
     # Handle argument errors
@@ -507,52 +571,45 @@ def stack_spherically(
     # Concatenate or handle varying Ns value
     Ns_values = np.array([stk.shape[1] for stk in new_trajectory])
     if (Ns_values == Ns_values[0]).all():
-        new_trajectory = np.concatenate(new_trajectory, axis=0)
-        new_trajectory = new_trajectory.reshape(Nc, Ns_values[0], 3)
-    else:
-        new_trajectory = np.concatenate(
-            [stk.reshape((-1, 3)) for stk in new_trajectory], axis=0
-        )
-
-    return new_trajectory
+        output = np.concatenate(new_trajectory, axis=0)
+        return output.reshape(Nc, Ns_values[0], 3)
+    return np.concatenate([stk.reshape((-1, 3)) for stk in new_trajectory], axis=0)
 
 
 def shellify(
-    trajectory_func,
-    Nc,
-    nb_shells,
-    z_tilt="golden",
-    hemisphere_mode="symmetric",
-    **traj_kwargs,
-):
+    trajectory_func: Callable[..., NDArray],
+    Nc: int,
+    nb_shells: int,
+    z_tilt: str | float = "golden",
+    hemisphere_mode: Literal["symmetric", "reversed"] = "symmetric",
+    **traj_kwargs: Any,  # noqa ANN401
+) -> NDArray:
     """Stack 2D or 3D trajectories over the :math:`k_z`-axis to make a sphere.
 
     Parameters
     ----------
-    trajectory_func : function
-        Trajectory function that should return an array-like
-        with the usual (Nc, Ns, Nd) size.
+    trajectory_func : Callable[..., NDArray]
+        Trajectory function that should return an array-like with the usual
+        (Nc, Ns, Nd) size.
     Nc : int
-        Number of shots to use for the whole spherically
-        stacked trajectory.
+        Number of shots to use for the whole spherically stacked trajectory.
     nb_shells : int
-        Number of shells of distorded trajectories.
-    z_tilt : str, float, optional
+        Number of shells of distorted trajectories.
+    z_tilt : str | float, optional
         Tilt of the shells, by default "golden".
-    hemisphere_mode : str, optional
-        Define how the lower hemisphere should be oriented
-        relatively to the upper one, with "symmetric" providing
-        a :math:`k_x-k_y` planar symmetry by changing the polar angle,
-        and with "reversed" promoting continuity (for example
-        in spirals) by reversing the azimuth angle.
+    hemisphere_mode : Literal["symmetric", "reversed"], optional
+        Define how the lower hemisphere should be oriented relatively to the
+        upper one, with "symmetric" providing a :math:`k_x-k_y` planar symmetry
+        by changing the polar angle, and with "reversed" promoting continuity
+        (for example in spirals) by reversing the azimuth angle.
         The default is "symmetric".
-    **kwargs
-        Trajectory initialization parameters for the function provided
-        with `trajectory_func`.
+    **traj_kwargs : Any
+        Trajectory initialization parameters for the function
+        provided with `trajectory_func`.
 
     Returns
     -------
-    array_like
+    NDArray
         Concentric shell trajectory.
     """
     # Handle argument errors
@@ -603,14 +660,9 @@ def shellify(
     # Concatenate or handle varying Ns value
     Ns_values = np.array([hem.shape[1] for hem in new_trajectory])
     if (Ns_values == Ns_values[0]).all():
-        new_trajectory = np.concatenate(new_trajectory, axis=0)
-        new_trajectory = new_trajectory.reshape(Nc, Ns_values[0], 3)
-    else:
-        new_trajectory = np.concatenate(
-            [hem.reshape((-1, 3)) for hem in new_trajectory], axis=0
-        )
-
-    return new_trajectory
+        output = np.concatenate(new_trajectory, axis=0)
+        return output.reshape(Nc, Ns_values[0], 3)
+    return np.concatenate([hem.reshape((-1, 3)) for hem in new_trajectory], axis=0)
 
 
 #########
@@ -618,7 +670,9 @@ def shellify(
 #########
 
 
-def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
+def duplicate_along_axes(
+    trajectory: NDArray, axes: tuple[int, ...] = (0, 1, 2)
+) -> NDArray:
     """
     Duplicate a trajectory along the specified axes.
 
@@ -628,14 +682,14 @@ def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to duplicate.
-    axes : tuple, optional
+    axes : tuple[int, ...], optional
         Axes along which to duplicate the trajectory, by default (0, 1, 2)
 
     Returns
     -------
-    array_like
+    NDArray
         Duplicated trajectory along the specified axes.
     """
     # Copy input trajectory along other axes
@@ -650,12 +704,24 @@ def duplicate_along_axes(trajectory, axes=(0, 1, 2)):
         dp_trajectory = np.copy(trajectory)
         dp_trajectory[..., [2, 0]] = dp_trajectory[..., [0, 2]]
         new_trajectory.append(dp_trajectory)
-    new_trajectory = np.concatenate(new_trajectory, axis=0)
-    return new_trajectory
+    return np.concatenate(new_trajectory, axis=0)
 
 
-def _radialize_center_out(trajectory, nb_samples):
-    """Radialize a trajectory from the center to the outside."""
+def _radialize_center_out(trajectory: NDArray, nb_samples: int) -> NDArray:
+    """Radialize a trajectory from the center to the outside.
+
+    Parameters
+    ----------
+    trajectory : NDArray
+        Trajectory to radialize.
+    nb_samples : int
+        Number of samples to radialize from the center.
+
+    Returns
+    -------
+    NDArray
+        Radialized trajectory.
+    """
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     for i in range(Nc):
@@ -666,8 +732,21 @@ def _radialize_center_out(trajectory, nb_samples):
     return new_trajectory
 
 
-def _radialize_in_out(trajectory, nb_samples):
-    """Radialize a trajectory from the inside to the outside."""
+def _radialize_in_out(trajectory: NDArray, nb_samples: int) -> NDArray:
+    """Radialize a trajectory from the inside to the outside.
+
+    Parameters
+    ----------
+    trajectory : NDArray
+        Trajectory to radialize.
+    nb_samples : int
+        Number of samples to radialize from the inside out.
+
+    Returns
+    -------
+    NDArray
+        Radialized trajectory.
+    """
     Nc, Ns = trajectory.shape[:2]
     new_trajectory = np.copy(trajectory)
     first, half, second = (Ns - nb_samples) // 2, Ns // 2, (Ns + nb_samples) // 2
@@ -683,20 +762,206 @@ def _radialize_in_out(trajectory, nb_samples):
     return new_trajectory
 
 
-def radialize_center(trajectory, nb_samples, in_out=False):
+def radialize_center(
+    trajectory: NDArray, nb_samples: int, in_out: bool = False
+) -> NDArray:
     """Radialize a trajectory.
 
     Parameters
     ----------
-    trajectory : array_like
+    trajectory : NDArray
         Trajectory to radialize.
     nb_samples : int
         Number of samples to keep.
     in_out : bool, optional
         Whether the radialization is from the inside to the outside, by default False
+
+    Returns
+    -------
+    NDArray
+        Radialized trajectory.
     """
     # Make nb_samples into straight lines around the center
     if in_out:
         return _radialize_in_out(trajectory, nb_samples)
+    return _radialize_center_out(trajectory, nb_samples)
+
+
+#################
+# Randomization #
+#################
+
+
+def _flip2center(mask_cols: list[int], center_value: int) -> np.ndarray:
+    """
+    Reorder a list by starting by a center_position and alternating left/right.
+
+    Parameters
+    ----------
+    mask_cols: list or np.array
+        List of columns to reorder.
+    center_pos: int
+        Position of the center column.
+
+    Returns
+    -------
+    np.array: reordered columns.
+    """
+    center_pos = np.argmin(np.abs(np.array(mask_cols) - center_value))
+    mask_cols = list(mask_cols)
+    left = mask_cols[center_pos::-1]
+    right = mask_cols[center_pos + 1 :]
+    new_cols = []
+    while left or right:
+        if left:
+            new_cols.append(left.pop(0))
+        if right:
+            new_cols.append(right.pop(0))
+    return np.array(new_cols)
+
+
+def get_random_loc_1d(
+    dim_size: int,
+    center_prop: float | int,
+    accel: float = 4,
+    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray = "uniform",
+    rng: int | np.random.Generator | None = None,
+    order: Literal["center-out", "top-down", "random"] = "center-out",
+) -> NDArray:
+    """Get slice index at a random position.
+
+    Parameters
+    ----------
+    dim_size: int
+        Dimension size
+    center_prop: float or int
+        Proportion of center of kspace to continuouly sample
+    accel: float
+        Undersampling/Acceleration factor
+    pdf: str, optional
+        Probability density function for the remaining samples.
+        "gaussian" (default) or "uniform" or np.array
+    rng: int or np.random.Generator
+        random state
+    order: str
+        Order of the lines, "center-out" (default), "random" or "top-down"
+
+    Returns
+    -------
+    np.ndarray: array of size dim_size/accel.
+    """
+    order = VDSorder(order)
+    pdf = VDSpdf(pdf) if isinstance(pdf, str) else pdf
+    if accel == 0 or accel == 1:
+        return np.arange(dim_size)  # type: ignore
+    elif accel < 0:
+        raise ValueError("acceleration factor should be positive.")
+    elif isinstance(accel, float):
+        raise ValueError("acceleration factor should be an integer.")
+
+    indexes = list(range(dim_size))
+
+    if not isinstance(center_prop, int):
+        center_prop = int(center_prop * dim_size)
+
+    center_start = (dim_size - center_prop) // 2
+    center_stop = (dim_size + center_prop) // 2
+    center_indexes = indexes[center_start:center_stop]
+    borders = np.asarray([*indexes[:center_start], *indexes[center_stop:]])
+
+    n_samples_borders = (dim_size - len(center_indexes)) // accel
+    if n_samples_borders < 1:
+        raise ValueError(
+            "acceleration factor, center_prop and dimension not compatible."
+            "Edges will not be sampled. "
+        )
+    rng = np.random.default_rng(rng)  # get RNG from a seed or existing rng.
+
+    def _get_samples(p: np.typing.ArrayLike) -> list[int]:
+        p = p / np.sum(p)  # automatic casting if needed
+        return list(rng.choice(borders, size=n_samples_borders, replace=False, p=p))
+
+    if isinstance(pdf, np.ndarray):
+        if len(pdf) == dim_size:
+            # extract the borders
+            p = pdf[borders]
+        elif len(pdf) == len(borders):
+            p = pdf
+        else:
+            raise ValueError("Invalid size for probability.")
+        sampled_in_border = _get_samples(p)
+
+    elif pdf == VDSpdf.GAUSSIAN:
+        p = norm.pdf(np.linspace(norm.ppf(0.001), norm.ppf(0.999), len(borders)))
+        sampled_in_border = _get_samples(p)
+    elif pdf == VDSpdf.UNIFORM:
+        p = np.ones(len(borders))
+        sampled_in_border = _get_samples(p)
+    elif pdf == VDSpdf.EQUISPACED:
+        sampled_in_border = list(borders[::accel])
+
     else:
-        return _radialize_center_out(trajectory, nb_samples)
+        raise ValueError("Unsupported value for pdf use any of . ")
+        # TODO: allow custom pdf as argument (vector or function.)
+
+    line_locs = np.array(sorted(center_indexes + sampled_in_border))
+    # apply order of lines
+    if order == VDSorder.CENTER_OUT:
+        line_locs = _flip2center(sorted(line_locs), dim_size // 2)
+    elif order == VDSorder.RANDOM:
+        line_locs = rng.permutation(line_locs)
+    elif order == VDSorder.TOP_DOWN:
+        line_locs = np.array(sorted(line_locs))
+    else:
+        raise ValueError(f"Unknown direction '{order}'.")
+    return (line_locs / dim_size) * 2 * KMAX - KMAX  # rescale to [-0.5,0.5]
+
+
+def stack_random(
+    trajectory: NDArray,
+    dim_size: int,
+    center_prop: float | int = 0.0,
+    accel: float | int = 4,
+    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray = "uniform",
+    rng: int | np.random.Generator | None = None,
+    order: Literal["center-out", "top-down", "random"] = "center-out",
+):
+    """Stack a 2D trajectory with random location.
+
+    Parameters
+    ----------
+    traj: np.ndarray
+        Existing 2D trajectory.
+    dim_size: int
+        Size of the k_z dimension
+    center_prop: int or float
+        Number of line or proportion of slice to sample in the center of the k-space
+    accel: int
+        Undersampling/Acceleration factor
+    pdf: str or np.array
+        Probability density function for the remaining samples.
+        "uniform" (default), "gaussian" or np.array
+    rng: random state
+    order: str
+        Order of the lines, "center-out" (default), "random" or "top-down"
+
+    Returns
+    -------
+    numpy.ndarray
+        The 3D trajectory stacked along the :math:`k_z` axis.
+    """
+    line_locs = get_random_loc_1d(dim_size, center_prop, accel, pdf, rng, order)
+    if len(trajectory.shape) == 2:
+        Nc, Ns = 1, trajectory.shape[0]
+    else:
+        Nc, Ns = trajectory.shape[:2]
+
+    new_trajectory = np.zeros((len(line_locs), Nc, Ns, 3))
+    for i, loc in enumerate(line_locs):
+        new_trajectory[i, :, :, :2] = trajectory[..., :2]
+        if trajectory.shape[-1] == 3:
+            new_trajectory[i, :, :, 2] = trajectory[..., 2] + loc
+        else:
+            new_trajectory[i, :, :, 2] = loc
+
+    return new_trajectory.reshape(-1, Ns, 3)

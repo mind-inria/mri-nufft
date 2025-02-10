@@ -27,7 +27,6 @@ try:
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
-
 OPTS_FIELD_DECODE = {
     "gpu_method": {1: "nonuniform pts driven", 2: "shared memory"},
     "gpu_sort": {0: "no sort (GM)", 1: "sort (GM-sort)"},
@@ -269,10 +268,12 @@ class MRICufiNUFFT(FourierOperatorBase):
             self._smaps = new_smaps
 
     @FourierOperatorBase.samples.setter
-    def samples(self, samples):
+    def samples(self, new_samples):
         """Update the plans when changing the samples."""
         self._samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+            proper_trajectory(new_samples, normalize="pi").astype(
+                np.float32, copy=False
+            )
         )
         self.raw_op._set_kxyz(self._samples)
         for typ in [1, 2, "grad"]:

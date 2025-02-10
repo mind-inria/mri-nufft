@@ -4,8 +4,8 @@ description = "MRI Non-Cartesian Fourier Operators with multiple computation bac
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
 readme = "README.md"
-dependencies = ["numpy<=2.0.0", "scipy", "matplotlib", "tqdm"]
-requires-python = ">=3.8"
+dependencies = ["numpy", "scipy", "matplotlib", "tqdm"]
+requires-python = ">=3.9"
 
 dynamic = ["version"]
 
@@ -29,6 +29,7 @@ pynufft-gpu = ["pynufft"]
 
 io = ["pymapvbvd"]
 smaps = ["scikit-image"]
+extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets"]
 autodiff = ["torch"]
 
 
@@ -87,3 +88,9 @@ live_mode = false
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pyright]
+reportPossiblyUnboundVariable = false
+typeCheckingMode = "basic"
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
