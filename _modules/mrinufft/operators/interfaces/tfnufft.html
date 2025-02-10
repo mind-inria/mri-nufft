@@ -812,7 +812,7 @@
 <div class="viewcode-block" id="MRITensorflowNUFFT.data_consistency">
 <a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.html#mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.data_consistency">[docs]</a>
     <span class="nd">@with_tensorflow</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_consistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the data consistency.</span>
 
 <span class="sd">        Parameters</span>
@@ -827,7 +827,7 @@
 <span class="sd">        Tensor</span>
 <span class="sd">            The data consistency error in image space.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">obs_data</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span> <span class="o">-</span> <span class="n">obs_data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MRITensorflowNUFFT.pipe">

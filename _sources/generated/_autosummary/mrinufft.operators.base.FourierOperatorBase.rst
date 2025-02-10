@@ -50,5 +50,7 @@ FourierOperatorBase
       ~FourierOperatorBase.smaps
       ~FourierOperatorBase.uses_density
       ~FourierOperatorBase.uses_sense
+      ~FourierOperatorBase.backend
+      ~FourierOperatorBase.available
    
    

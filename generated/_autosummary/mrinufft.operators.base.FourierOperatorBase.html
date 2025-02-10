@@ -860,6 +860,12 @@ as required by ModOpt.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.base.FourierOperatorBase.uses_sense" title="mrinufft.operators.base.FourierOperatorBase.uses_sense"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uses_sense</span></code></a></p></td>
 <td><p>Return True if the operator uses sensitivity maps.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backend</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">available</span></code></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -918,7 +924,7 @@ as required by ModOpt.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mrinufft.operators.base.FourierOperatorBase.data_consistency">
-<span class="sig-name descname"><span class="pre">data_consistency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/base.html#FourierOperatorBase.data_consistency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.base.FourierOperatorBase.data_consistency" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">data_consistency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/base.html#FourierOperatorBase.data_consistency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.base.FourierOperatorBase.data_consistency" title="Link to this definition">#</a></dt>
 <dd><p>Compute the gradient data consistency.</p>
 <p>This is the naive implementation using adj_op(op(x)-y).
 Specific backend can (and should!) implement a more efficient version.</p>

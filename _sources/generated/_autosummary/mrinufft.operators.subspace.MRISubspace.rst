@@ -50,5 +50,7 @@ MRISubspace
       ~MRISubspace.smaps
       ~MRISubspace.uses_density
       ~MRISubspace.uses_sense
+      ~MRISubspace.backend
+      ~MRISubspace.available
    
    

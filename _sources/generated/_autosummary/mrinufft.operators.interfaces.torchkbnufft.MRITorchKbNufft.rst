@@ -52,5 +52,6 @@ MRITorchKbNufft
       ~MRITorchKbNufft.smaps
       ~MRITorchKbNufft.uses_density
       ~MRITorchKbNufft.uses_sense
+      ~MRITorchKbNufft.backend
    
    

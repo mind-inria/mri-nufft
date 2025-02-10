@@ -1238,7 +1238,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">set_smaps</span><span class="p">(</span><span class="n">smaps</span><span class="o">=</span><span class="n">new_smaps</span><span class="p">)</span>
 
     <span class="nd">@FourierOperatorBase</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_samples</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the samples for the Fourier Operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1247,7 +1247,7 @@
 <span class="sd">            The samples for the Fourier Operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">proper_trajectory</span><span class="p">(</span>
-            <span class="n">samples</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;unit&quot;</span>
+            <span class="n">new_samples</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;unit&quot;</span>
         <span class="p">)</span>
         <span class="c1"># TODO: gpuNUFFT needs to sort the points twice in this case.</span>
         <span class="c1"># It could help to have access to directly dorted arrays from gpuNUFFT.</span>
@@ -1258,7 +1258,7 @@
         <span class="p">)</span>
 
     <span class="nd">@FourierOperatorBase</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_density</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the density for the Fourier Operator.</span>
 
 <span class="sd">        Parameters</span>
@@ -1266,11 +1266,11 @@
 <span class="sd">        density: np.ndarray</span>
 <span class="sd">            The density for the Fourier Operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="n">density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_density</span> <span class="o">=</span> <span class="n">new_density</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;raw_op&quot;</span><span class="p">):</span>  <span class="c1"># edge case for init</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span><span class="o">.</span><span class="n">set_pts</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="p">,</span>
-                <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                <span class="n">density</span><span class="o">=</span><span class="n">new_density</span><span class="p">,</span>
             <span class="p">)</span>
 
 <div class="viewcode-block" id="MRIGpuNUFFT.pipe">

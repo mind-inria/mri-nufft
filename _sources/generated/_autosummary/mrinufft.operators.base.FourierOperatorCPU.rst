@@ -50,5 +50,7 @@ FourierOperatorCPU
       ~FourierOperatorCPU.smaps
       ~FourierOperatorCPU.uses_density
       ~FourierOperatorCPU.uses_sense
+      ~FourierOperatorCPU.backend
+      ~FourierOperatorCPU.available
    
    

@@ -51,5 +51,7 @@ MRIFourierCorrected
       ~MRIFourierCorrected.smaps
       ~MRIFourierCorrected.uses_density
       ~MRIFourierCorrected.uses_sense
+      ~MRIFourierCorrected.backend
+      ~MRIFourierCorrected.available
    
    

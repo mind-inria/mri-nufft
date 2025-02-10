@@ -694,7 +694,6 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">CUFINUFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
 
-
 <span class="n">OPTS_FIELD_DECODE</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;gpu_method&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;nonuniform pts driven&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;shared memory&quot;</span><span class="p">},</span>
     <span class="s2">&quot;gpu_sort&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;no sort (GM)&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;sort (GM-sort)&quot;</span><span class="p">},</span>
@@ -951,10 +950,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_smaps</span> <span class="o">=</span> <span class="n">new_smaps</span>
 
     <span class="nd">@FourierOperatorBase</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_samples</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the plans when changing the samples.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span>
-            <span class="n">proper_trajectory</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">proper_trajectory</span><span class="p">(</span><span class="n">new_samples</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;grad&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s2">&quot;grad&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grad_wrt_traj</span><span class="p">:</span>

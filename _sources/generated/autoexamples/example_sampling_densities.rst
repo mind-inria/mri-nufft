@@ -830,13 +830,6 @@ shot direction as shown below.
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/mrinufft/trajectories/inits/travelling_salesman.py:44: RuntimeWarning: invalid value encountered in divide
-      array[..., 0] / nl.norm(array[..., :2], axis=-1)
-
 
 
 
@@ -863,7 +856,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 17.319 seconds)
+   **Total running time of the script:** (2 minutes 23.843 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_sampling_densities.py:
