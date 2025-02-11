@@ -87,7 +87,7 @@ plt.show()
 # %%
 # Display the inversion time of the trajectories. For this, make `grid_type="inversion"`.
 # This helps in obtaining the inversion time when particular region of k-space is sampled, assuming the trajectories are time ordered,
-# and the argument `turbo_factor` is specified, which is time between 2 inversion pulses.
+# and the argument `turbo_factor` is specified, which is the time between 2 inversion pulses.
 create_grid("inversion", trajectories, traj_params, turbo_factor=64)
 plt.suptitle("Inversion Time")
 plt.show()
