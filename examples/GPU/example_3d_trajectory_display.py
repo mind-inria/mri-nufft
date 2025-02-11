@@ -93,7 +93,7 @@ plt.suptitle("Inversion Time")
 plt.show()
 # %%
 # Display the k-space holes in the trajectories. For this, make `grid_type="holes"`.
-# K-space holes can occur in a sampling trajectory when it is optimized or learned based on a specific loss.
+# K-space holes are areas with missing trajectory coverage, and can typically occur with learning-based trajectories when optimized using a specific loss.
 # This feature can be used to identify the k-space holes, which could lead to Gibbs like ringing artifacts in the images.
 create_grid("holes", trajectories, traj_params, threshold=1e-2)
 plt.suptitle("K-space Holes")
