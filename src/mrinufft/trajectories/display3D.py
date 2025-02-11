@@ -23,7 +23,7 @@ def get_gridded_trajectory(
     threshold: float = 1e-3,
 ):
     """
-    Compute the gridded trajectory for MRI reconstruction.
+    Compute various trajectory characteristics onto a grid.
 
     This function helps in gridding a k-space sampling trajectory to a desired shape,
     allowing for easier viewing of the trajectory.
