@@ -51,7 +51,7 @@ def get_gridded_trajectory(
             Generally, lower off-resonance effects occur when the sampling trajectory
             has smoother k-space sampling time over the k-space.
         "inversion" : Relative inversion time at the sampling location. Needs
-            turbo_factor to be set. This is useful for analyzing the exact inversion
+            `turbo_factor` to be set. This is useful for analyzing the exact inversion
             time when the k-space is acquired, for sequences like MP(2)RAGE.
         "holes": Show the k-space holes within a ellipsoid of the k-space.
         "gradients": Show the gradient strengths of the k-space trajectory.
