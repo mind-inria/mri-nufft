@@ -62,7 +62,7 @@ def create_grid(grid_type, trajectories, traj_params, **kwargs):
 # Create a bunch of sample trajectories
 trajectories = {
     "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64),
-    "FLORETs": mtt.initialize_3D_floret(64 * 8, 64, nb_revolutions=2),
+    "FLORET": mtt.initialize_3D_floret(64 * 8, 64, nb_revolutions=2),
     "Seiffert Spirals": mtt.initialize_3D_seiffert_spiral(64 * 8, 64),
 }
 traj_params = {
