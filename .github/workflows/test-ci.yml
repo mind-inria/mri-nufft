@@ -17,10 +17,6 @@ env:
   BART_VERSION: "0.8.00"
   ref_backend: "finufft"
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   test-cpu:
     runs-on: cpu
@@ -349,14 +345,16 @@ jobs:
           path: 'docs_build'
           retention-days: 5
     
-      - name: Comment the docs artifacts link
+      - name: Post download link as comment
+        if: github.event_name == 'pull_request'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: thollander/actions-comment-pull-request@v3
-        with:
-            message: |
-                API documentation at [link](${{ steps.artifact-upload-step.outputs.artifact-url }})"
-
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Use the Personal Access Token
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload-step.outputs.artifact-url }}"
+          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts [here](${ARTIFACT_URL})."
+          gh auth login --with-token <<< "${GITHUB_TOKEN}"
+          gh pr comment ${{ github.event.pull_request.number }} --repo mind-inria/mri-nufft --body "${COMMENT_BODY}"
+        
     
   CompileDocs:
     name: Compile the coverage badge in docs
