@@ -32,15 +32,15 @@ authors:
     affiliation: "1,2"
     
 affiliations:
- - name: MIND, Inria
+ - name: MIND, Inria, France
    index: 1
- - name: Université Paris-Saclay / CEA 
+ - name: Université Paris-Saclay / CEA, France
    index: 2
- - name: Chipiron
+ - name: Chipiron, France
    index: 3
- - name: INFN, Pisa Division 
+ - name: INFN, Pisa Division, Italy
    index: 4 
- - name: Siemens Healthineers 
+ - name: Siemens Healthineers, Princeton, United States of America
    index: 5
    
 date: 20 September 2024
