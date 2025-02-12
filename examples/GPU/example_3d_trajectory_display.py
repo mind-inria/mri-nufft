@@ -9,6 +9,7 @@ Another key feature is to display the sampling density in k-space, for example t
 """
 
 # %%
+
 # Imports
 from mrinufft.trajectories.display3D import get_gridded_trajectory
 import mrinufft.trajectories.trajectory3D as mtt
