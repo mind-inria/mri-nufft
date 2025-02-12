@@ -351,7 +351,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Use the Personal Access Token
         run: |
           ARTIFACT_URL=${{ steps.artifact-upload-step.outputs.artifact-url }}"
-          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts [here](${ARTIFACT_URL})."
+          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts here : ${ARTIFACT_URL}."
           gh auth login --with-token <<< "${GITHUB_TOKEN}"
           gh pr comment ${{ github.event.pull_request.number }} --repo mind-inria/mri-nufft --body "${COMMENT_BODY}"
         
