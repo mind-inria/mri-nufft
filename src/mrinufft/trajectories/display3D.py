@@ -73,9 +73,10 @@ def get_gridded_trajectory(
         the default turbo factor for MPRAGE acquisitions at 1mm whole
         brain acquisitions.
     elliptical_samp : bool, optional
-        Whether the trajectory uses elliptical sampling. Default is True.
-        This is useful while analyzing the k-space holes, especially if the k-space
-        trajectory is expected to be elliptical sampling of k-space
+        Whether the k-space corners should be expected to be covered
+        or ignored when `grid_type` is "holes". Ignoring them with `True`
+        corresponds to trajectories with spherical/elliptical sampling.
+        Default is `True`.
         (i.e. ellipsoid over cuboid). Use this if the trajectory is expected to be
         elliptical sampling of k-space, to avoid large holes between ellipsoid and
         cuboid.
