@@ -352,11 +352,11 @@ jobs:
       - name: Comment the docs artifacts link
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts [here](${ARTIFACT_URL})."
-          gh auth setup-git
-          gh pr comment ${{ github.event.pull_request.number }} --body "${COMMENT_BODY}"
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+            message: |
+                API documentation at [link](${{ steps.artifact-upload-step.outputs.artifact-url }})"
+
     
   CompileDocs:
     name: Compile the coverage badge in docs
