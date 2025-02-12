@@ -19,6 +19,7 @@ import numpy as np
 
 
 # %%
+
 # Utility function to plot mid-plane slices for 3D volumes
 def plot_slices(axs, volume, title=""):
     def set_labels(ax, axis_num=None):
