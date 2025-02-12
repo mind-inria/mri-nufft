@@ -17,6 +17,10 @@ env:
   BART_VERSION: "0.8.00"
   ref_backend: "finufft"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   test-cpu:
     runs-on: cpu
@@ -344,6 +348,15 @@ jobs:
           name: docs
           path: 'docs_build'
           retention-days: 5
+    
+      - name: Comment the docs artifacts link
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts [here](${ARTIFACT_URL})."
+          gh auth setup-git
+          gh pr comment ${{ github.event.pull_request.number }} --body "${COMMENT_BODY}"
     
   CompileDocs:
     name: Compile the coverage badge in docs

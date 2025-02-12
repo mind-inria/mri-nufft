@@ -53,7 +53,8 @@ def get_gridded_trajectory(
         "inversion" : Relative inversion time at the sampling location. Needs
             `turbo_factor` to be set. This is useful for analyzing the exact inversion
             time when the k-space is acquired, for sequences like MP(2)RAGE.
-        "holes": Show the k-space missing coverage, or holes, within a ellipsoid of the k-space.
+        "holes": Show the k-space missing coverage, or holes, within a ellipsoid of the 
+            k-space.
         "gradients": Show the gradient strengths of the k-space trajectory.
         "slew": Show the slew rate of the k-space trajectory.
     osf : int, optional
