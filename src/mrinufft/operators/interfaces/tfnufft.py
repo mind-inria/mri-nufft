@@ -134,7 +134,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))
 
     @with_tensorflow
-    def data_consistency(self, data, obs_data):
+    def data_consistency(self, image_data, obs_data):
         """Compute the data consistency.
 
         Parameters
@@ -149,7 +149,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         Tensor
             The data consistency error in image space.
         """
-        return self.adj_op(self.op(data) - obs_data)
+        return self.adj_op(self.op(image_data) - obs_data)
 
     @classmethod
     def pipe(

@@ -36,7 +36,7 @@ def is_cuda_array(var):
 
 def is_cuda_tensor(var):
     """Check if var is a CUDA tensor."""
-    return isinstance(var, torch.Tensor) and var.is_cuda
+    return TORCH_AVAILABLE and isinstance(var, torch.Tensor) and var.is_cuda
 
 
 def is_host_array(var):
