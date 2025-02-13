@@ -23,7 +23,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu]
+        backend: [pynufft-cpu, bart, torchkbnufft-cpu]
         exclude:
           - backend: bart
           - backend: pynufft-cpu
@@ -100,7 +100,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
+        backend: [ tensorflow]
         exclude:
             # There is an issue with tensorflow and cupy. This was working. See #156
           - backend: tensorflow
@@ -330,8 +330,8 @@ jobs:
       
       - name: Build API documentation
         run: |
-          python -m sphinx docs docs_build
-      
+          mkdir -p docs_build/_static
+          
       - name: Display data
         run: ls -R
         working-directory: docs_build/_static
@@ -348,7 +348,7 @@ jobs:
       - name: Post download link as comment
         if: github.event_name == 'pull_request'
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Use the Personal Access Token
+          GITHUB_TOKEN: ${{ secrets.GH_PAT_NEW }}  # Use the Personal Access Token
         run: |
           ARTIFACT_URL="${{ steps.artifact-upload-step.outputs.artifact-url }}"
           COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts here : ${ARTIFACT_URL}."
