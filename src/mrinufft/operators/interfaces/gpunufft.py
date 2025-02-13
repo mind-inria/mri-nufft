@@ -532,7 +532,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             self.raw_op.set_smaps(smaps=new_smaps)
 
     @FourierOperatorBase.samples.setter
-    def samples(self, samples):
+    def samples(self, new_samples):
         """Set the samples for the Fourier Operator.
 
         Parameters
@@ -541,7 +541,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             The samples for the Fourier Operator.
         """
         self._samples = proper_trajectory(
-            samples.astype(np.float32, copy=False), normalize="unit"
+            new_samples.astype(np.float32, copy=False), normalize="unit"
         )
         # TODO: gpuNUFFT needs to sort the points twice in this case.
         # It could help to have access to directly dorted arrays from gpuNUFFT.
@@ -552,7 +552,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         )
 
     @FourierOperatorBase.density.setter
-    def density(self, density):
+    def density(self, new_density):
         """Set the density for the Fourier Operator.
 
         Parameters
@@ -560,11 +560,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
         density: np.ndarray
             The density for the Fourier Operator.
         """
-        self._density = density
-        self.raw_op.set_pts(
-            self._samples,
-            density=density,
-        )
+        self._density = new_density
+        if hasattr(self, "raw_op"):  # edge case for init
+            self.raw_op.set_pts(
+                self._samples,
+                density=new_density,
+            )
 
     @classmethod
     def pipe(
@@ -590,12 +591,12 @@ class MRIGpuNUFFT(FourierOperatorBase):
             The oversampling factor the volume shape
         normalize: bool
             Whether to normalize the density compensation.
-            We normalize such that the energy of PSF = 1
         """
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
-                "gpuNUFFT is not available, cannot " "estimate the density compensation"
+                "gpuNUFFT is not available, cannot estimate the density compensation"
             )
+        original_shape = volume_shape
         volume_shape = (np.array(volume_shape) * osf).astype(int)
         grid_op = MRIGpuNUFFT(
             samples=kspace_loc,
@@ -607,11 +608,10 @@ class MRIGpuNUFFT(FourierOperatorBase):
             max_iter=num_iterations
         )
         if normalize:
-            spike = np.zeros(volume_shape)
-            mid_loc = tuple(v // 2 for v in volume_shape)
-            spike[mid_loc] = 1
-            psf = grid_op.adj_op(grid_op.op(spike))
-            density_comp /= np.linalg.norm(psf)
+            test_op = MRIGpuNUFFT(samples=kspace_loc, shape=original_shape, **kwargs)
+            test_im = np.ones(original_shape, dtype=np.complex64)
+            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
+            density_comp /= np.mean(np.abs(test_im_recon))
         return density_comp.squeeze()
 
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):

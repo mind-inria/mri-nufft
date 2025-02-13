@@ -149,8 +149,16 @@ def low_frequency(
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
-    from skimage.filters import threshold_otsu, gaussian
-    from skimage.morphology import convex_hull_image
+
+    try:
+        from skimage.filters import threshold_otsu, gaussian
+        from skimage.morphology import convex_hull_image
+    except ImportError as err:
+        raise ImportError(
+            "The scikit-image module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install scikit-image`."
+        ) from err
 
     k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,

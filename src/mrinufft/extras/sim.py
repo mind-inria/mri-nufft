@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from typing import Sequence
+from collections.abc import Sequence
 
 
 def fse_simulation(

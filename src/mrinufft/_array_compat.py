@@ -246,9 +246,9 @@ def _to_numpy_cupy(args, kwargs, leading_argument):
     This avoid transfers between different devices
     (e.g., CPU->GPU, GPU->CPU or different GPUs).
     """
-    if is_cuda_array(leading_argument) and CUPY_AVAILABLE:
-        return _to_cupy(*args, **kwargs)
-    elif is_cuda_tensor(leading_argument) and CUPY_AVAILABLE:
+    if (
+        is_cuda_array(leading_argument) or is_cuda_tensor(leading_argument)
+    ) and CUPY_AVAILABLE:
         return _to_cupy(*args, **kwargs)
     else:
         return _to_numpy(*args, **kwargs)
