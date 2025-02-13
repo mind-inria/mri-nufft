@@ -465,6 +465,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
 </details></li>
@@ -1163,7 +1164,7 @@
     <span class="k">if</span> <span class="s2">&quot;ARBGRAD_VE11C&quot;</span> <span class="ow">in</span> <span class="n">data_type</span><span class="p">:</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ARBGRAD_GRE&quot;</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;shifts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
             <span class="n">shift</span> <span class="o">=</span> <span class="n">twixObj</span><span class="o">.</span><span class="n">search_header_for_val</span><span class="p">(</span>
                 <span class="s2">&quot;Phoenix&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;sWiPMemBlock&quot;</span><span class="p">,</span> <span class="s2">&quot;adFree&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
             <span class="p">)</span>

@@ -466,6 +466,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
 </details></li>
@@ -763,7 +764,8 @@
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>data</strong> (<em>ndarray</em>) – Imported data formatted as n_coils X n_samples X n_slices X n_contrasts</p></li>
-<li><p><strong>hdr</strong> (<em>dict</em>) – Extra information about the data parsed from the twix file</p></li>
+<li><p><strong>hdr</strong> (<em>dict</em>) – Extra information about the data parsed from the twix file
+This header also contains the ACS data as “acs” if it was found in raw data.</p></li>
 </ul>
 </p>
 </dd>

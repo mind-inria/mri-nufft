@@ -465,6 +465,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
 </details></li>
@@ -712,6 +713,7 @@
 <span class="sd">        Imported data formatted as n_coils X n_samples X n_slices X n_contrasts</span>
 <span class="sd">    hdr: dict</span>
 <span class="sd">        Extra information about the data parsed from the twix file</span>
+<span class="sd">        This header also contains the ACS data as &quot;acs&quot; if it was found in raw data.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -745,7 +747,12 @@
         <span class="s2">&quot;n_slices&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">twixObj</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">NSli</span><span class="p">),</span>
         <span class="s2">&quot;n_average&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">twixObj</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">NAve</span><span class="p">),</span>
         <span class="s2">&quot;orientation&quot;</span><span class="p">:</span> <span class="n">siemens_quat_to_rot_mat</span><span class="p">(</span><span class="n">twixObj</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">slicePos</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]),</span>
+        <span class="s2">&quot;acs&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="s2">&quot;refscan&quot;</span> <span class="ow">in</span> <span class="n">twixObj</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">twixObj</span><span class="o">.</span><span class="n">refscan</span><span class="o">.</span><span class="n">squeeze</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">acs</span> <span class="o">=</span> <span class="n">twixObj</span><span class="o">.</span><span class="n">refscan</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;acs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">acs</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">slice_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_slices&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">slice_num</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The slice number is out of bounds.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">contrast_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_contrasts&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">contrast_num</span><span class="p">:</span>
@@ -767,7 +774,8 @@
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_coils&quot;</span><span class="p">],</span>
-        <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_shots&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_adc_samples&quot;</span><span class="p">],</span>
+        <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_shots&quot;</span><span class="p">],</span>
+        <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_adc_samples&quot;</span><span class="p">],</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_slices&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">slice_num</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_contrasts&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">contrast_num</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_average&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">hdr</span><span class="p">[</span><span class="s2">&quot;n_average&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">doAverage</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>

@@ -465,6 +465,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
 </details></li>
@@ -733,6 +734,36 @@
         <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">R</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">R</span></div>
+
+
+
+<div class="viewcode-block" id="remove_extra_kspace_samples">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html#mrinufft.io.utils.remove_extra_kspace_samples">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_extra_kspace_samples</span><span class="p">(</span><span class="n">kspace_data</span><span class="p">,</span> <span class="n">num_samples_per_shot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove extra samples from k-space data.</span>
+
+<span class="sd">    This function is useful when the k-space data has extra samples</span>
+<span class="sd">    mainly as ADC samples at only at specific number of samples.</span>
+<span class="sd">    This sometimes leads to a situation where we will have more ADC samples</span>
+<span class="sd">    than what is expected.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    kspace_data : np.ndarray</span>
+<span class="sd">        The k-space data ordered as NCha X NShot X NSamples.</span>
+<span class="sd">    num_samples_per_shot : int</span>
+<span class="sd">        The number of samples per shot in trajectory</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        The k-space data with extra samples removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">kspace_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">n_extra_samples</span> <span class="o">=</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="n">num_samples_per_shot</span>
+    <span class="k">if</span> <span class="n">n_extra_samples</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">kspace_data</span> <span class="o">=</span> <span class="n">kspace_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="n">n_extra_samples</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">kspace_data</span></div>
 
 </pre></div>
 
