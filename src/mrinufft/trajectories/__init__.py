@@ -8,6 +8,7 @@ from .inits import (
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
+from .projection import fit_arc_length
 from .sampling import (
     create_chauffert_density,
     create_cutoff_decay_density,
@@ -19,12 +20,14 @@ from .sampling import (
 from .tools import (
     conify,
     duplicate_along_axes,
+    get_random_loc_1d,
     oversample,
     precess,
     radialize_center,
     rotate,
     shellify,
     stack,
+    stack_random,
     stack_spherically,
 )
 from .trajectory2D import (
@@ -55,12 +58,6 @@ from .trajectory3D import (
     initialize_3D_wave_caipi,
     initialize_3D_wong_radial,
 )
-
-from .tools import (
-    stack_random,
-    get_random_loc_1d,
-)
-
 
 __all__ = [
     # trajectories
@@ -120,4 +117,6 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    # projection
+    "fit_arc_length",
 ]
