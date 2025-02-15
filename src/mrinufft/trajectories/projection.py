@@ -1,6 +1,7 @@
 """Functions to fit gradient constraints."""
 
 import numpy as np
+import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
@@ -35,22 +36,23 @@ def fit_arc_length(
     new_trajectory = np.copy(trajectory)
 
     for i in range(Nc):
+        # Set initial conditions
         time = np.linspace(0, 1, Ns)
         projection = trajectory[i]
         old_projection = 0
         arc_func = CubicSpline(time, projection)
 
-        while (
-            np.linalg.norm(projection - old_projection) / np.linalg.norm(projection)
-            > eps
-        ):
+        # Iterate to reduce arc length cubic approximation error
+        while nl.norm(projection - old_projection) / nl.norm(projection) > eps:
+            # Find mapping from arc length back to time
             arc_length = np.cumsum(
-                np.linalg.norm(np.diff(projection, axis=0), ord=order, axis=-1), axis=0
+                nl.norm(np.diff(projection, axis=0), ord=order, axis=-1), axis=0
             )
             arc_length = np.concatenate([[0], arc_length])
             arc_length = arc_length / arc_length[-1]
             inv_arc_func = CubicSpline(arc_length, time)
 
+            # Find times such that arc length is uniform
             time = inv_arc_func(np.linspace(0, 1, Ns))
             old_projection = np.copy(projection)
             projection = arc_func(time)
