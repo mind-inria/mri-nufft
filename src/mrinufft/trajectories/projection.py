@@ -36,11 +36,18 @@ def fit_arc_length(
     new_trajectory = np.copy(trajectory)
 
     for i in range(Nc):
-        # Set initial conditions
-        time = np.linspace(0, 1, Ns)
         projection = trajectory[i]
+
+        # Ignore null gradients
+        gradients = nl.norm(np.diff(projection, axis=0), ord=order, axis=-1)
+        non_zero_ids = np.where(~np.isclose(gradients, 0))
+        non_zero_time = np.linspace(0, 1, len(non_zeros[0]))
+        arc_func = CubicSpline(non_zero_time, projection[non_zero_ids])
+
+        # Setup initial conditions
+        time = np.linspace(0, 1, Ns)
+        projection = arc_func(time)
         old_projection = 0
-        arc_func = CubicSpline(time, projection)
 
         # Iterate to reduce arc length cubic approximation error
         while nl.norm(projection - old_projection) / nl.norm(projection) > eps:
