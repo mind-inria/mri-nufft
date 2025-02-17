@@ -41,7 +41,7 @@ def fit_arc_length(
         # Ignore null gradients
         gradients = nl.norm(np.diff(projection, axis=0), ord=order, axis=-1)
         non_zero_ids = np.where(~np.isclose(gradients, 0))
-        non_zero_time = np.linspace(0, 1, len(non_zeros[0]))
+        non_zero_time = np.linspace(0, 1, len(non_zero_ids[0]))
         arc_func = CubicSpline(non_zero_time, projection[non_zero_ids])
 
         # Setup initial conditions
