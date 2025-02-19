@@ -60,3 +60,30 @@ def siemens_quat_to_rot_mat(quat):
         R[2] = -R[2]
     R[-1, -1] = 1
     return R
+
+
+def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
+    """Remove extra samples from k-space data.
+
+    This function is useful when the k-space data has extra samples
+    mainly as ADC samples at only at specific number of samples.
+    This sometimes leads to a situation where we will have more ADC samples
+    than what is expected.
+
+    Parameters
+    ----------
+    kspace_data : np.ndarray
+        The k-space data ordered as NCha X NShot X NSamples.
+    num_samples_per_shot : int
+        The number of samples per shot in trajectory
+
+    Returns
+    -------
+    np.ndarray
+        The k-space data with extra samples removed.
+    """
+    n_samples = kspace_data.shape[-1]
+    n_extra_samples = n_samples - num_samples_per_shot
+    if n_extra_samples > 0:
+        kspace_data = kspace_data[..., :-n_extra_samples]
+    return kspace_data
