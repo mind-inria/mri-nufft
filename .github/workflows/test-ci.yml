@@ -23,7 +23,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [pynufft-cpu, bart, torchkbnufft-cpu]
+        backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu]
         exclude:
           - backend: bart
           - backend: pynufft-cpu
@@ -100,7 +100,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
-        backend: [ tensorflow]
+        backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
         exclude:
             # There is an issue with tensorflow and cupy. This was working. See #156
           - backend: tensorflow
@@ -330,8 +330,8 @@ jobs:
       
       - name: Build API documentation
         run: |
-          mkdir -p docs_build/_static
-          
+          python -m sphinx docs docs_build
+      
       - name: Display data
         run: ls -R
         working-directory: docs_build/_static
@@ -344,17 +344,6 @@ jobs:
           name: docs
           path: 'docs_build'
           retention-days: 5
-    
-      - name: Post download link as comment
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_NEW }}  # Use the Personal Access Token
-        run: |
-          ARTIFACT_URL="${{ steps.artifact-upload-step.outputs.artifact-url }}"
-          COMMENT_BODY=":memo: API documentation has been built. You can download the artifacts here : ${ARTIFACT_URL}."
-          gh auth login --with-token <<< "${GITHUB_TOKEN}"
-          gh pr comment ${{ github.event.pull_request.number }} --repo mind-inria/mri-nufft --body "${COMMENT_BODY}"
-        
     
   CompileDocs:
     name: Compile the coverage badge in docs
