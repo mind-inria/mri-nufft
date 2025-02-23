@@ -1,7 +1,7 @@
 """
-=============================
-3D Trajectory Gridded display
-=============================
+==========================
+Gridded trajectory display
+==========================
 
 In this example, we show some tools available to display 3D trajectories.
 It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc.
@@ -64,7 +64,7 @@ def create_grid(grid_type, trajectories, traj_params, **kwargs):
 # %%
 # Trajectories to display
 # =======================
-# Create a bunch of sampling trajectories
+# We instantiate a bunch of sampling trajectories to display hereafter with `get_gridded_trajectory` and previous helper functions.
 trajectories = {
     "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64),
     "FLORET": mtt.initialize_3D_floret(64 * 8, 64, nb_revolutions=2),

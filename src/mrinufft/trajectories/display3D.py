@@ -74,12 +74,10 @@ def get_gridded_trajectory(
         brain acquisitions.
     elliptical_samp : bool, optional
         Whether the k-space corners should be expected to be covered
-        or ignored when `grid_type` is "holes". Ignoring them with `True`
-        corresponds to trajectories with spherical/elliptical sampling.
-        Default is `True`.
-        (i.e. ellipsoid over cuboid). Use this if the trajectory is expected to be
-        elliptical sampling of k-space, to avoid large holes between ellipsoid and
-        cuboid.
+        or ignored when `grid_type` is "holes", i.e. the trajectory is an ellipsoid
+        or a cuboic and whether corners should be considered as potential holes.
+        Ignoring them with `True` corresponds to trajectories with spherical/elliptical
+        sampling. Default is `True`.
     threshold: float, optional default 1e-3
         The threshold for the k-space holes in number of samples per voxel
         This value is set heuristically to visualize the k-space hole.
