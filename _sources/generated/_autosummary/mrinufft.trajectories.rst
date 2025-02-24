@@ -26,6 +26,7 @@
    :recursive:
 
    display
+   display3D
    gradients
    inits
    maths

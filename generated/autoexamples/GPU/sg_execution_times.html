@@ -178,6 +178,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_3d_trajectory_display.html">Gridded trajectory display</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_samples.html">Learn Sampling pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
@@ -298,6 +299,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -734,7 +739,7 @@
                   
   <section id="computation-times">
 <span id="sphx-glr-generated-autoexamples-gpu-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Link to this heading">#</a></h1>
-<p><strong>11:48.896</strong> total execution time for 6 files <strong>from generated/autoexamples/GPU</strong>:</p>
+<p><strong>09:26.425</strong> total execution time for 7 files <strong>from generated/autoexamples/GPU</strong>:</p>
 <div class="docutils container">
 <style scoped>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
@@ -756,27 +761,31 @@ $(document).ready( function () {
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="example_learn_straight_line_readouts.html#sphx-glr-generated-autoexamples-gpu-example-learn-straight-line-readouts-py"><span class="std std-ref">Learn Straight line readout pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">example_learn_straight_line_readouts.py</span></code>)</p></td>
-<td><p>06:45.544</p></td>
+<td><p>04:59.725</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="example_fastMRI_UNet.html#sphx-glr-generated-autoexamples-gpu-example-fastmri-unet-py"><span class="std std-ref">Simple UNet model.</span></a> (<code class="docutils literal notranslate"><span class="pre">example_fastMRI_UNet.py</span></code>)</p></td>
-<td><p>01:53.406</p></td>
+<td><p>01:34.275</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="example_learn_samples_multicoil.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-multicoil-py"><span class="std std-ref">Learn Sampling pattern for multi-coil MRI</span></a> (<code class="docutils literal notranslate"><span class="pre">example_learn_samples_multicoil.py</span></code>)</p></td>
-<td><p>01:39.836</p></td>
+<td><p>01:26.742</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="example_learn_samples.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-py"><span class="std std-ref">Learn Sampling pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">example_learn_samples.py</span></code>)</p></td>
-<td><p>01:24.592</p></td>
+<td><p>01:12.666</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a> (<code class="docutils literal notranslate"><span class="pre">example_density.py</span></code>)</p></td>
-<td><p>00:04.348</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="example_3d_trajectory_display.html#sphx-glr-generated-autoexamples-gpu-example-3d-trajectory-display-py"><span class="std std-ref">Gridded trajectory display</span></a> (<code class="docutils literal notranslate"><span class="pre">example_3d_trajectory_display.py</span></code>)</p></td>
+<td><p>00:07.471</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a> (<code class="docutils literal notranslate"><span class="pre">example_cg.py</span></code>)</p></td>
-<td><p>00:01.169</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a> (<code class="docutils literal notranslate"><span class="pre">example_density.py</span></code>)</p></td>
+<td><p>00:04.391</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a> (<code class="docutils literal notranslate"><span class="pre">example_cg.py</span></code>)</p></td>
+<td><p>00:01.153</p></td>
 <td><p>0.0</p></td>
 </tr>
 </tbody>

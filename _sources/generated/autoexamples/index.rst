@@ -275,6 +275,23 @@ This is a collection of examples showing features of mri-nufft, particularly tho
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we show some tools available to display 3D trajectories. It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc. Another key feature is to display the sampling density in k-space, for example to check for k-space holes or irregularities in the learning-based trajectories that would lead to artifacts in the images.">
+
+.. only:: html
+
+  .. image:: /generated/autoexamples/GPU/images/thumb/sphx_glr_example_3d_trajectory_display_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_generated_autoexamples_GPU_example_3d_trajectory_display.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gridded trajectory display</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="A small pytorch example to showcase learning k-space sampling patterns. This example showcases the auto-diff capabilities of the NUFFT operator wrt to k-space trajectory in mri-nufft.">
 
 .. only:: html

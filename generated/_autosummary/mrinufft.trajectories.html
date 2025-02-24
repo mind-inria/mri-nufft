@@ -179,6 +179,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_samples.html">Learn Sampling pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
@@ -299,6 +300,10 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -741,28 +746,31 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.display.html#module-mrinufft.trajectories.display" title="mrinufft.trajectories.display"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display</span></code></a></p></td>
 <td><p>Display functions for trajectories.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.gradients.html#module-mrinufft.trajectories.gradients" title="mrinufft.trajectories.gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradients</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.display3D.html#module-mrinufft.trajectories.display3D" title="mrinufft.trajectories.display3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">display3D</span></code></a></p></td>
+<td><p>Utils for displaying 3D trajectories.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.gradients.html#module-mrinufft.trajectories.gradients" title="mrinufft.trajectories.gradients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradients</span></code></a></p></td>
 <td><p>Functions to improve/modify gradients.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.html#module-mrinufft.trajectories.inits" title="mrinufft.trajectories.inits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inits</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.html#module-mrinufft.trajectories.inits" title="mrinufft.trajectories.inits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inits</span></code></a></p></td>
 <td><p>Module containing all trajectories.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.maths.html#module-mrinufft.trajectories.maths" title="mrinufft.trajectories.maths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maths</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.maths.html#module-mrinufft.trajectories.maths" title="mrinufft.trajectories.maths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maths</span></code></a></p></td>
 <td><p>Utility module for mathematical operations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.sampling.html#module-mrinufft.trajectories.sampling" title="mrinufft.trajectories.sampling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.sampling.html#module-mrinufft.trajectories.sampling" title="mrinufft.trajectories.sampling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling</span></code></a></p></td>
 <td><p>Sampling densities and methods.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.tools.html#module-mrinufft.trajectories.tools" title="mrinufft.trajectories.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.tools.html#module-mrinufft.trajectories.tools" title="mrinufft.trajectories.tools"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tools</span></code></a></p></td>
 <td><p>Functions to manipulate/modify trajectories.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.trajectory2D.html#module-mrinufft.trajectories.trajectory2D" title="mrinufft.trajectories.trajectory2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trajectory2D</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.trajectory2D.html#module-mrinufft.trajectories.trajectory2D" title="mrinufft.trajectories.trajectory2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trajectory2D</span></code></a></p></td>
 <td><p>Functions to initialize 2D trajectories.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.trajectory3D.html#module-mrinufft.trajectories.trajectory3D" title="mrinufft.trajectories.trajectory3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trajectory3D</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.trajectory3D.html#module-mrinufft.trajectories.trajectory3D" title="mrinufft.trajectories.trajectory3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trajectory3D</span></code></a></p></td>
 <td><p>Functions to initialize 3D trajectories.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.utils.html#module-mrinufft.trajectories.utils" title="mrinufft.trajectories.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.utils.html#module-mrinufft.trajectories.utils" title="mrinufft.trajectories.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
 <td><p>Utility functions in general.</p></td>
 </tr>
 </tbody>

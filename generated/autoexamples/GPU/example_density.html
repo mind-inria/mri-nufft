@@ -54,7 +54,7 @@
     <link rel="icon" href="../../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Learn Sampling pattern" href="example_learn_samples.html" />
+    <link rel="next" title="Gridded trajectory display" href="example_3d_trajectory_display.html" />
     <link rel="prev" title="GPU Examples" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -178,6 +178,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">GPU Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_3d_trajectory_display.html">Gridded trajectory display</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_samples.html">Learn Sampling pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
@@ -298,6 +299,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -806,7 +811,7 @@ of the operator roughly equal to 1.</p>
 /volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
   warnings.warn(f&quot;Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)&quot;)
 
-&lt;matplotlib.image.AxesImage object at 0x7f5647e034f0&gt;
+&lt;matplotlib.image.AxesImage object at 0x745795b2ed10&gt;
 </pre></div>
 </div>
 <p>As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.</p>
@@ -930,10 +935,10 @@ Text(0.5, 1.0, &#39;manual density compensation&#39;)
 <span class="nb">print</span><span class="p">(</span><a href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.density" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.density" class="sphx-glr-backref-module-mrinufft-operators-interfaces-gpunufft sphx-glr-backref-type-py-property"><span class="n">nufft</span><span class="o">.</span><span class="n">density</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00879563 0.04014026 0.08093621 ... 3.2297926  2.6584153  3.4429455 ]
+<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00884255 0.04078772 0.0809504  ... 3.229958   2.6585517  3.443122  ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.348 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.391 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-density-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_density.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -974,11 +979,11 @@ Text(0.5, 1.0, &#39;manual density compensation&#39;)
       </div>
     </a>
     <a class="right-next"
-       href="example_learn_samples.html"
+       href="example_3d_trajectory_display.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Learn Sampling pattern</p>
+        <p class="prev-next-title">Gridded trajectory display</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

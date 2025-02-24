@@ -178,6 +178,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples.html">Learn Sampling pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
@@ -298,6 +299,10 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -734,7 +739,7 @@
                   
   <section id="computation-times">
 <span id="sphx-glr-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Link to this heading">#</a></h1>
-<p><strong>22:18.131</strong> total execution time for 18 files <strong>from all galleries</strong>:</p>
+<p><strong>19:10.259</strong> total execution time for 19 files <strong>from all galleries</strong>:</p>
 <div class="docutils container">
 <style scoped>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
@@ -756,75 +761,79 @@ $(document).ready( function () {
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_straight_line_readouts.html#sphx-glr-generated-autoexamples-gpu-example-learn-straight-line-readouts-py"><span class="std std-ref">Learn Straight line readout pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_straight_line_readouts.py</span></code>)</p></td>
-<td><p>06:45.544</p></td>
+<td><p>04:59.725</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_3D.html#sphx-glr-generated-autoexamples-example-gif-3d-py"><span class="std std-ref">Animated 3D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_3D.py</span></code>)</p></td>
-<td><p>02:18.540</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_sampling_densities.html#sphx-glr-generated-autoexamples-example-sampling-densities-py"><span class="std std-ref">Sampling densities</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_sampling_densities.py</span></code>)</p></td>
+<td><p>02:06.196</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_sampling_densities.html#sphx-glr-generated-autoexamples-example-sampling-densities-py"><span class="std std-ref">Sampling densities</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_sampling_densities.py</span></code>)</p></td>
-<td><p>02:13.594</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_3D.html#sphx-glr-generated-autoexamples-example-gif-3d-py"><span class="std std-ref">Animated 3D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_3D.py</span></code>)</p></td>
+<td><p>02:03.956</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_fastMRI_UNet.html#sphx-glr-generated-autoexamples-gpu-example-fastmri-unet-py"><span class="std std-ref">Simple UNet model.</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_fastMRI_UNet.py</span></code>)</p></td>
-<td><p>01:53.406</p></td>
+<td><p>01:34.275</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples_multicoil.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-multicoil-py"><span class="std std-ref">Learn Sampling pattern for multi-coil MRI</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_samples_multicoil.py</span></code>)</p></td>
-<td><p>01:39.836</p></td>
+<td><p>01:26.742</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-py"><span class="std std-ref">Learn Sampling pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_samples.py</span></code>)</p></td>
-<td><p>01:24.592</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_2D.html#sphx-glr-generated-autoexamples-example-gif-2d-py"><span class="std std-ref">Animated 2D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_2D.py</span></code>)</p></td>
+<td><p>01:19.497</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_2D.html#sphx-glr-generated-autoexamples-example-gif-2d-py"><span class="std std-ref">Animated 2D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_2D.py</span></code>)</p></td>
-<td><p>01:19.966</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-py"><span class="std std-ref">Learn Sampling pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_samples.py</span></code>)</p></td>
+<td><p>01:12.666</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_3D_trajectories.html#sphx-glr-generated-autoexamples-example-3d-trajectories-py"><span class="std std-ref">3D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_3D_trajectories.py</span></code>)</p></td>
-<td><p>01:10.762</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_learn_samples_multires.html#sphx-glr-generated-autoexamples-example-learn-samples-multires-py"><span class="std std-ref">Learning sampling pattern with decimation</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_learn_samples_multires.py</span></code>)</p></td>
+<td><p>01:05.421</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_learn_samples_multires.html#sphx-glr-generated-autoexamples-example-learn-samples-multires-py"><span class="std std-ref">Learning sampling pattern with decimation</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_learn_samples_multires.py</span></code>)</p></td>
-<td><p>01:09.476</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_3D_trajectories.html#sphx-glr-generated-autoexamples-example-3d-trajectories-py"><span class="std std-ref">3D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_3D_trajectories.py</span></code>)</p></td>
+<td><p>01:02.225</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_trajectory_tools.html#sphx-glr-generated-autoexamples-example-trajectory-tools-py"><span class="std std-ref">Trajectory tools</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_trajectory_tools.py</span></code>)</p></td>
-<td><p>00:54.623</p></td>
+<td><p>00:52.975</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_subspace.html#sphx-glr-generated-autoexamples-example-subspace-py"><span class="std std-ref">Subspace NUFFT Operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_subspace.py</span></code>)</p></td>
-<td><p>00:43.953</p></td>
+<td><p>00:38.077</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_2D_trajectories.html#sphx-glr-generated-autoexamples-example-2d-trajectories-py"><span class="std std-ref">2D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_2D_trajectories.py</span></code>)</p></td>
-<td><p>00:23.301</p></td>
+<td><p>00:22.415</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_display_config.html#sphx-glr-generated-autoexamples-example-display-config-py"><span class="std std-ref">Trajectory display configuration</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_display_config.py</span></code>)</p></td>
-<td><p>00:07.523</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_3d_trajectory_display.html#sphx-glr-generated-autoexamples-gpu-example-3d-trajectory-display-py"><span class="std std-ref">Gridded trajectory display</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_3d_trajectory_display.py</span></code>)</p></td>
+<td><p>00:07.471</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_density.py</span></code>)</p></td>
-<td><p>00:04.348</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_display_config.html#sphx-glr-generated-autoexamples-example-display-config-py"><span class="std std-ref">Trajectory display configuration</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_display_config.py</span></code>)</p></td>
+<td><p>00:05.796</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_stacked.html#sphx-glr-generated-autoexamples-example-stacked-py"><span class="std std-ref">Stacked NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_stacked.py</span></code>)</p></td>
-<td><p>00:03.245</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_density.py</span></code>)</p></td>
+<td><p>00:04.391</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_readme.html#sphx-glr-generated-autoexamples-example-readme-py"><span class="std std-ref">Minimal example script</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_readme.py</span></code>)</p></td>
-<td><p>00:02.289</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_stacked.html#sphx-glr-generated-autoexamples-example-stacked-py"><span class="std std-ref">Stacked NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_stacked.py</span></code>)</p></td>
+<td><p>00:03.131</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_offresonance.html#sphx-glr-generated-autoexamples-example-offresonance-py"><span class="std std-ref">Off-resonance corrected NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_offresonance.py</span></code>)</p></td>
-<td><p>00:01.961</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_readme.html#sphx-glr-generated-autoexamples-example-readme-py"><span class="std std-ref">Minimal example script</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_readme.py</span></code>)</p></td>
+<td><p>00:02.196</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_cg.py</span></code>)</p></td>
-<td><p>00:01.169</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_offresonance.html#sphx-glr-generated-autoexamples-example-offresonance-py"><span class="std std-ref">Off-resonance corrected NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_offresonance.py</span></code>)</p></td>
+<td><p>00:01.950</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_cg.py</span></code>)</p></td>
+<td><p>00:01.153</p></td>
 <td><p>0.0</p></td>
 </tr>
 </tbody>
