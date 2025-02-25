@@ -8,7 +8,7 @@ from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
 
 from .maths import Rv, Rx, Ry, Rz
-from .utils import KMAX, initialize_tilt, VDSpdf, VDSorder
+from .utils import KMAX, VDSorder, VDSpdf, initialize_tilt
 
 ################
 # DIRECT TOOLS #
