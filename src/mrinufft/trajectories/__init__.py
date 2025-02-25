@@ -3,8 +3,10 @@
 from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
 from .gradients import patch_center_anomaly
 from .inits import (
+    initialize_2D_eccentric,
     initialize_2D_random_walk,
     initialize_2D_travelling_salesman,
+    initialize_3D_eccentric,
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
@@ -19,12 +21,14 @@ from .sampling import (
 from .tools import (
     conify,
     duplicate_along_axes,
+    get_random_loc_1d,
     oversample,
     precess,
     radialize_center,
     rotate,
     shellify,
     stack,
+    stack_random,
     stack_spherically,
 )
 from .trajectory2D import (
@@ -55,12 +59,6 @@ from .trajectory3D import (
     initialize_3D_wave_caipi,
     initialize_3D_wong_radial,
 )
-
-from .tools import (
-    stack_random,
-    get_random_loc_1d,
-)
-
 
 __all__ = [
     # trajectories
@@ -93,6 +91,8 @@ __all__ = [
     "initialize_3D_repi",
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
+    "initialize_2D_eccentric",
+    "initialize_3D_eccentric",
     # tools
     "get_random_loc_1d",
     "stack",
