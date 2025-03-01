@@ -9,7 +9,7 @@ Doing non-Cartesian MR Imaging has never been so easy.
    :header-rows: 0
 
    * - .. image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
-     - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CI/badge.svg
+     - .. image:: https://github.com/mind-inria/mri-nufft/actions/workflows/test-ci.yml/badge.svg
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
