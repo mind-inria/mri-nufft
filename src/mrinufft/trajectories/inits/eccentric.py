@@ -32,13 +32,15 @@ def _initialize_2D_eccentric(
     Ns : int
         Number of samples per shot/circle.
     radius_ratio : float
-        Radius of each circle relative to the max radius.
+        Radius of each circle relatively to the k-space radius.
     center_ratio : float, optional
-        Ratio of central positions forming a pseudo-rosette. Defaults to 0.
+        Proportion of shots positioned around the center into a
+        pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
-        Minimum allowed distance between consecutive circles. Defaults to 0.
+        Minimum allowed distance between consecutive circles relatively
+        to the k-space radius. Defaults to 0.
     max_radius : float, optional
         Maximum radius for circle placement as ratio. Defaults to 1.
     seed : int | None, optional
@@ -144,13 +146,15 @@ def initialize_2D_eccentric(
     Ns : int
         Number of samples per shot/circle.
     radius_ratio : float
-        Radius of each circle relative to the max radius.
+        Radius of each circle relatively to the k-space radius.
     center_ratio : float, optional
-        Ratio of central positions forming a pseudo-rosette. Defaults to 0.
+        Proportion of shots positioned around the center into a
+        pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
-        Minimum allowed distance between consecutive circles. Defaults to 0.
+        Minimum allowed distance between consecutive circles relative
+        to the k-space radius. Defaults to 0.
     seed : int | None, optional
         Random seed for reproducibility, used only to draw the circle centers.
         Defaults to None.
@@ -165,7 +169,7 @@ def initialize_2D_eccentric(
     .. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
        Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
        Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
-       ECCENTRIC: a fast and unrestrained approach for high-resolution
+       "ECCENTRIC: a fast and unrestrained approach for high-resolution
        in vivo metabolic imaging at ultra-high field MR".
        Imaging Neuroscience 2 (2024): 1-20.
     """
@@ -217,15 +221,17 @@ def initialize_3D_eccentric(
     Ns : int
         Number of samples per shot/circle.
     nb_stacks : int
-        Number of stack layers along the z-axis.
+        Number of stack layers along the :math:`k_z`-axis.
     radius_ratio : float
-        Radius of each circle relative to the max radius.
+        Radius of each circle relatively to the k-space radius.
     center_ratio : float, optional
-        Ratio of central positions forming a pseudo-rosette. Defaults to 0.
+        Proportion of shots positioned around the center into a
+        pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
-        Minimum allowed distance between consecutive circles. Defaults to 0.
+        Minimum allowed distance between consecutive circles relative
+        to the k-space radius. Defaults to 0.
     seed : int | None, optional
         Random seed for reproducibility, used only to draw the circle centers.
         Defaults to None.
@@ -240,7 +246,7 @@ def initialize_3D_eccentric(
     .. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
        Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
        Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
-       ECCENTRIC: a fast and unrestrained approach for high-resolution
+       "ECCENTRIC: a fast and unrestrained approach for high-resolution
        in vivo metabolic imaging at ultra-high field MR".
        Imaging Neuroscience 2 (2024): 1-20.
     """
