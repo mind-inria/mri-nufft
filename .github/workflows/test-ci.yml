@@ -16,8 +16,8 @@ env:
   PYTHON_VERSION: "3.10"
   BART_VERSION: "0.8.00"
   ref_backend: "finufft"
-  create_venv: "python -m venv $RUNNER_WORKSPACE/venv/ --clear"
-  activate_venv_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
+  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
+  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
   setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda-12.1/;export PATH=/usr/local/cuda-12.1/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
@@ -48,8 +48,8 @@ jobs:
         shell: bash
         run: |
           python --version
-          ${{env.create_venv}}
-          ${{env.activate_venv_venv}}
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
@@ -57,27 +57,27 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           python -m pip install pynufft
 
       - name: Install finufft
         if: ${{ matrix.backend == 'finufft'  || env.ref_backend == 'finufft'}}
         shell: bash
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           python -m pip install finufft
 
       - name: Install Sigpy
         if: ${{ matrix.backend == 'sigpy'  || env.ref_backend == 'sigpy'}}
         shell: bash
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           python -m pip install sigpy
 
       - name: Install BART
@@ -95,14 +95,14 @@ jobs:
       - name: Install torchkbnufft-cpu
         if: ${{ matrix.backend == 'torchkbnufft-cpu'  || env.ref_backend == 'torchkbnufft-cpu'}}
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           python -m pip install torchkbnufft
 
 
       - name: Run Tests
         shell: bash
         run: |
-          ${{env.activate_venv}}
+          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
           python -m pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
       - name: Upload coverage
@@ -130,14 +130,14 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip wheel
-          python -m pip install -e mri-nufft[test]
+          python -m pip install -e .[test]
           python -m pip install cupy-cuda12x finufft "numpy<2.0"
 
       - name: Install torch with CUDA 12.1
         shell: bash
         if: ${{ matrix.backend != 'tensorflow'}}
         run: |
-          source $RUNNER_WORKSPACE/venv/binactivate_venv
+          ${{ env.activate_venv }}
           python -m pip install torch
 
       - name: Install backend
