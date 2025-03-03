@@ -89,7 +89,10 @@ def get_operator(
         operator = partial(operator, backend=backend)
 
     if not available:
-        raise ValueError(f"backend {backend_name} found, but dependencies are not met.")
+        raise ValueError(
+            f"backend {backend_name} found, but dependencies are not met."
+            f" ``pip install mri-nufft[{backend_name}]`` may solve the issue."
+        )
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
