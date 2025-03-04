@@ -138,13 +138,13 @@ jobs:
         if: ${{ matrix.backend != 'tensorflow'}}
         run: |
           ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
           python -m pip install torch
 
       - name: Install backend
         shell: bash
         run: |
           ${{ env.activate_venv }}
-          ${{ env.setup_cuda }}
           if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
             python -m pip install torchkbnufft
           elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
@@ -179,6 +179,52 @@ jobs:
           rm -rf finufft
           rm -rf gpuNUFFT
           rm -rf venv
+
+  test-other:
+    runs-on: [gpu]
+    if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mri-nufft and finufft
+        shell: bash
+        run: |
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
+          python -m pip install --upgrade pip wheel
+          python -m pip install -e .[test]
+          python -m pip install cupy-cuda12x finufft "numpy<2.0"
+
+      - name: Install torch with CUDA 12.1
+        shell: bash
+        run: |
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
+          python -m pip install torch
+
+      - name: Run non operators tests
+        shell: bash
+        run: |
+          ${{ env.activate_venv }}
+          python -m pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
+
+      - name: Upload coverage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_other
+          path: coverage_other
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: |
+          cd $RUNNER_WORKSPACE
+          ls -al
+          rm -rf finufft
+          rm -rf gpuNUFFT
+          rm -rf venv
+
 
   get-commit-message:
     runs-on: ubuntu-latest
