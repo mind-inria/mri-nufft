@@ -19,7 +19,6 @@ The image resolution is kept small to reduce computation time.
 #
 #    !pip install mri-nufft[gpunufft]
 
-
 # %%
 # Imports
 # -------
@@ -134,11 +133,11 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
             plt_kwargs = {"s": 1, "alpha": 0.2}
             if i is not None:
                 fig_kwargs["azim"], fig_kwargs["elev"] = (
-                    i / 50 * 60 - 60,
-                    30 - i / 50 * 30,
+                    i / 25 * 60 - 60,
+                    30 - i / 25 * 30,
                 )
-                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 50
-                plt_kwargs["s"] = 1 + 9 * i / 50
+                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 20
+                plt_kwargs["s"] = 1 + 9 * i / 20
             axs[1].remove()
             axs[1] = fig.add_subplot(*fig_grid, 2, projection="3d", **fig_kwargs)
             for shot in traj:
@@ -182,7 +181,7 @@ plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon)
 losses = []
 image_files = []
 model.train()
-with tqdm(range(100), unit="steps") as tqdms:
+with tqdm(range(40), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_3D)
         loss = torch.nn.functional.mse_loss(out, mri_3D[None])
