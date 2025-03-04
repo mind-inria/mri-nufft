@@ -384,7 +384,7 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
-          python -m pip install .[doc]
+          python -m pip install .[doc,extra]
           python -m pip install finufft
 
       - name: Install GPU related interfaces
@@ -392,7 +392,7 @@ jobs:
           ${{ env.activate_venv }}
           ${{ env.setup_cuda }}
           pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT "cufinufft<2.3"
+          python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image fastmri
 
       - name: Build API documentation
         run: |
