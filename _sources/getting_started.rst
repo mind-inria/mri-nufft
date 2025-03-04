@@ -24,7 +24,18 @@ If you want to modifiy the mri-nufft code base
 Choosing a NUFFT Backend
 ========================
 
-In order to perform Non-Uniform fast Fourier transform you need to install a specific backend library.
+In order to perform Non-Uniform fast Fourier transform you need to install a specific :ref:`NUFFT` computation library backend.
+
+.. tip::
+
+   TLDR: If you have a GPU and CUDA>=12.0, you probably want to install MRI-NUFFT like so:
+   ``pip install mri-nufft[cufinufft]`` or ``pip install mri-nufft[gpunufft]``
+   For CPU only setup we recommend ``pip install mri-nufft[finufft]``
+
+   Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
+
+   For more information , check the :ref:`Examples`
+
 
 Supported Libraries
 -------------------
@@ -116,8 +127,9 @@ PyNFFT requires Cython<3.0.0 to work.  and can be installed using
 
 Which backend to use
 --------------------
-[TBA] See the benchmark. Fastest are gpunufft and cufinufft (because they are using gpu). Additionally, Gunufft is usually more memory efficient.
 
+We provided an extensive benchmark on computation and memory usage on https://github.com/mind-inria/mri-nufft-benchmark/
 
-.. note::
-   if you are using pytorch gpu-array, you can only use cufinufft.
+.. tip::
+
+   Overall, we recommend to use ``finufft`` for CPU, and ``cufinufft`` or ``gpunufft`` when CUDA GPU are available.

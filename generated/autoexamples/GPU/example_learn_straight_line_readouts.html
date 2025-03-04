@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -59,7 +56,6 @@
     <link rel="prev" title="Learn Sampling pattern for multi-coil MRI" href="example_learn_samples_multicoil.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -75,8 +71,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -84,6 +91,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -91,8 +99,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -108,8 +116,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -139,17 +146,21 @@
     
     
     <img src="../../../_static/mri-nufft.png" class="logo__image only-light" alt="MRI-nufft Documentation - Home"/>
-    <img src="../../../_static/mri-nufft.png" class="logo__image only-dark pst-js-only" alt="MRI-nufft Documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/mri-nufft.png" class="logo__image only-dark" alt="MRI-nufft Documentation - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -535,14 +546,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -703,16 +709,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 <button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
@@ -882,18 +896,18 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
     <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
     <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;MR Image&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">traj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">if</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+        <span class="k">if</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
             <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">traj</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fig_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">plt_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">}</span>
             <span class="k">if</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">fig_kwargs</span><span class="p">[</span><span class="s2">&quot;azim&quot;</span><span class="p">],</span> <span class="n">fig_kwargs</span><span class="p">[</span><span class="s2">&quot;elev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">50</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">-</span> <span class="mi">60</span><span class="p">,</span>
-                    <span class="mi">30</span> <span class="o">-</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">50</span> <span class="o">*</span> <span class="mi">30</span><span class="p">,</span>
+                    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">25</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">-</span> <span class="mi">60</span><span class="p">,</span>
+                    <span class="mi">30</span> <span class="o">-</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">25</span> <span class="o">*</span> <span class="mi">30</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">plt_kwargs</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="mf">0.8</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">50</span>
-                <span class="n">plt_kwargs</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">50</span>
+                <span class="n">plt_kwargs</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="mf">0.8</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">20</span>
+                <span class="n">plt_kwargs</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="o">/</span> <span class="mi">20</span>
             <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
             <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="o">*</span><span class="n">fig_grid</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kwargs</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">shot</span> <span class="ow">in</span> <span class="n">traj</span><span class="p">:</span>
@@ -933,9 +947,9 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 <span class="n">plot_state</span><span class="p">(</span><span class="n">mri_3D</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">get_trajectory</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">recon</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" srcset="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" alt="MR Image, Reconstruction, Trajectory" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:174: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at ../aten/src/ATen/native/Copy.cpp:308.)
+<img src="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" srcset="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" alt="MR Image, Reconstruction, Trajectory" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:173: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:308.)
   mri_3D = torch.Tensor(cart_data)[None]
-/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:126: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:125: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
   axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap=&quot;gray&quot;)
 </pre></div>
 </div>
@@ -945,7 +959,7 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">losses</span></a> <span class="o">=</span> <span class="p">[]</span>
 <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_files</span></a> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;steps&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tqdms</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;steps&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tqdms</span><span class="p">:</span>
     <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="n">tqdms</span><span class="p">:</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">mri_3D</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">mri_3D</span><span class="p">[</span><span class="kc">None</span><span class="p">])</span>
@@ -986,208 +1000,88 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 <span class="c1"># sphinx_gallery_thumbnail_path = &#39;generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif&#39;</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/100 [00:00&lt;?, ?steps/s]
-  0%|          | 0/100 [00:00&lt;?, ?steps/s, loss=0.304918]
-  1%|          | 1/100 [00:05&lt;09:42,  5.89s/steps, loss=0.304918]
-  1%|          | 1/100 [00:06&lt;09:42,  5.89s/steps, loss=0.30846578]
-  2%|▏         | 2/100 [00:11&lt;09:23,  5.74s/steps, loss=0.30846578]
-  2%|▏         | 2/100 [00:11&lt;09:23,  5.74s/steps, loss=0.28450415]
-  3%|▎         | 3/100 [00:17&lt;09:05,  5.62s/steps, loss=0.28450415]
-  3%|▎         | 3/100 [00:17&lt;09:05,  5.62s/steps, loss=0.2808421]
-  4%|▍         | 4/100 [00:22&lt;09:09,  5.73s/steps, loss=0.2808421]
-  4%|▍         | 4/100 [00:22&lt;09:09,  5.73s/steps, loss=0.27308217]
-  5%|▌         | 5/100 [00:28&lt;08:53,  5.62s/steps, loss=0.27308217]
-  5%|▌         | 5/100 [00:28&lt;08:53,  5.62s/steps, loss=0.27527574]
-  6%|▌         | 6/100 [00:34&lt;08:50,  5.64s/steps, loss=0.27527574]
-  6%|▌         | 6/100 [00:34&lt;08:50,  5.64s/steps, loss=0.28743815]
-  7%|▋         | 7/100 [00:39&lt;08:38,  5.58s/steps, loss=0.28743815]
-  7%|▋         | 7/100 [00:39&lt;08:38,  5.58s/steps, loss=0.27506837]
-  8%|▊         | 8/100 [00:44&lt;08:28,  5.53s/steps, loss=0.27506837]
-  8%|▊         | 8/100 [00:44&lt;08:28,  5.53s/steps, loss=0.26318744]
-  9%|▉         | 9/100 [00:50&lt;08:29,  5.59s/steps, loss=0.26318744]
-  9%|▉         | 9/100 [00:50&lt;08:29,  5.59s/steps, loss=0.2535975]
- 10%|█         | 10/100 [00:56&lt;08:17,  5.53s/steps, loss=0.2535975]
- 10%|█         | 10/100 [00:56&lt;08:17,  5.53s/steps, loss=0.26540998]
- 11%|█         | 11/100 [01:01&lt;08:15,  5.57s/steps, loss=0.26540998]
- 11%|█         | 11/100 [01:01&lt;08:15,  5.57s/steps, loss=0.26768008]
- 12%|█▏        | 12/100 [01:07&lt;08:08,  5.55s/steps, loss=0.26768008]
- 12%|█▏        | 12/100 [01:07&lt;08:08,  5.55s/steps, loss=0.2569219]
- 13%|█▎        | 13/100 [01:12&lt;07:54,  5.46s/steps, loss=0.2569219]
- 13%|█▎        | 13/100 [01:12&lt;07:54,  5.46s/steps, loss=0.25170654]
- 14%|█▍        | 14/100 [01:17&lt;07:52,  5.49s/steps, loss=0.25170654]
- 14%|█▍        | 14/100 [01:18&lt;07:52,  5.49s/steps, loss=0.2587367]
- 15%|█▌        | 15/100 [01:23&lt;07:39,  5.41s/steps, loss=0.2587367]
- 15%|█▌        | 15/100 [01:23&lt;07:39,  5.41s/steps, loss=0.25840136]
- 16%|█▌        | 16/100 [01:28&lt;07:36,  5.43s/steps, loss=0.25840136]
- 16%|█▌        | 16/100 [01:28&lt;07:36,  5.43s/steps, loss=0.24432574]
- 17%|█▋        | 17/100 [01:33&lt;07:22,  5.33s/steps, loss=0.24432574]
- 17%|█▋        | 17/100 [01:33&lt;07:22,  5.33s/steps, loss=0.24282613]
- 18%|█▊        | 18/100 [01:38&lt;07:14,  5.30s/steps, loss=0.24282613]
- 18%|█▊        | 18/100 [01:39&lt;07:14,  5.30s/steps, loss=0.25041828]
- 19%|█▉        | 19/100 [01:43&lt;06:59,  5.18s/steps, loss=0.25041828]
- 19%|█▉        | 19/100 [01:43&lt;06:59,  5.18s/steps, loss=0.2491603]
- 20%|██        | 20/100 [01:48&lt;06:47,  5.09s/steps, loss=0.2491603]
- 20%|██        | 20/100 [01:48&lt;06:47,  5.09s/steps, loss=0.24226953]
- 21%|██        | 21/100 [01:54&lt;06:45,  5.13s/steps, loss=0.24226953]
- 21%|██        | 21/100 [01:54&lt;06:45,  5.13s/steps, loss=0.2377491]
- 22%|██▏       | 22/100 [01:58&lt;06:34,  5.06s/steps, loss=0.2377491]
- 22%|██▏       | 22/100 [01:59&lt;06:34,  5.06s/steps, loss=0.24150531]
- 23%|██▎       | 23/100 [02:04&lt;06:32,  5.10s/steps, loss=0.24150531]
- 23%|██▎       | 23/100 [02:04&lt;06:32,  5.10s/steps, loss=0.2428468]
- 24%|██▍       | 24/100 [02:09&lt;06:24,  5.06s/steps, loss=0.2428468]
- 24%|██▍       | 24/100 [02:09&lt;06:24,  5.06s/steps, loss=0.24018337]
- 25%|██▌       | 25/100 [02:13&lt;06:16,  5.02s/steps, loss=0.24018337]
- 25%|██▌       | 25/100 [02:14&lt;06:16,  5.02s/steps, loss=0.23490725]
- 26%|██▌       | 26/100 [02:19&lt;06:15,  5.08s/steps, loss=0.23490725]
- 26%|██▌       | 26/100 [02:19&lt;06:15,  5.08s/steps, loss=0.23435962]
- 27%|██▋       | 27/100 [02:24&lt;06:08,  5.04s/steps, loss=0.23435962]
- 27%|██▋       | 27/100 [02:24&lt;06:08,  5.04s/steps, loss=0.23831569]
- 28%|██▊       | 28/100 [02:29&lt;06:06,  5.09s/steps, loss=0.23831569]
- 28%|██▊       | 28/100 [02:29&lt;06:06,  5.09s/steps, loss=0.23833875]
- 29%|██▉       | 29/100 [02:34&lt;05:57,  5.04s/steps, loss=0.23833875]
- 29%|██▉       | 29/100 [02:34&lt;05:57,  5.04s/steps, loss=0.23504543]
- 30%|███       | 30/100 [02:39&lt;05:51,  5.02s/steps, loss=0.23504543]
- 30%|███       | 30/100 [02:39&lt;05:51,  5.02s/steps, loss=0.23293109]
- 31%|███       | 31/100 [02:44&lt;05:50,  5.09s/steps, loss=0.23293109]
- 31%|███       | 31/100 [02:44&lt;05:50,  5.09s/steps, loss=0.23186736]
- 32%|███▏      | 32/100 [02:49&lt;05:42,  5.04s/steps, loss=0.23186736]
- 32%|███▏      | 32/100 [02:49&lt;05:42,  5.04s/steps, loss=0.23142512]
- 33%|███▎      | 33/100 [02:54&lt;05:41,  5.09s/steps, loss=0.23142512]
- 33%|███▎      | 33/100 [02:54&lt;05:41,  5.09s/steps, loss=0.2302377]
- 34%|███▍      | 34/100 [02:59&lt;05:31,  5.03s/steps, loss=0.2302377]
- 34%|███▍      | 34/100 [02:59&lt;05:31,  5.03s/steps, loss=0.22929704]
- 35%|███▌      | 35/100 [03:04&lt;05:23,  4.98s/steps, loss=0.22929704]
- 35%|███▌      | 35/100 [03:04&lt;05:23,  4.98s/steps, loss=0.23058823]
- 36%|███▌      | 36/100 [03:09&lt;05:24,  5.06s/steps, loss=0.23058823]
- 36%|███▌      | 36/100 [03:09&lt;05:24,  5.06s/steps, loss=0.22982956]
- 37%|███▋      | 37/100 [03:14&lt;05:15,  5.01s/steps, loss=0.22982956]
- 37%|███▋      | 37/100 [03:14&lt;05:15,  5.01s/steps, loss=0.22609065]
- 38%|███▊      | 38/100 [03:19&lt;05:12,  5.04s/steps, loss=0.22609065]
- 38%|███▊      | 38/100 [03:19&lt;05:12,  5.04s/steps, loss=0.2248209]
- 39%|███▉      | 39/100 [03:24&lt;05:03,  4.98s/steps, loss=0.2248209]
- 39%|███▉      | 39/100 [03:24&lt;05:03,  4.98s/steps, loss=0.22465526]
- 40%|████      | 40/100 [03:29&lt;04:56,  4.94s/steps, loss=0.22465526]
- 40%|████      | 40/100 [03:29&lt;04:56,  4.94s/steps, loss=0.22574458]
- 41%|████      | 41/100 [03:34&lt;04:54,  5.00s/steps, loss=0.22574458]
- 41%|████      | 41/100 [03:34&lt;04:54,  5.00s/steps, loss=0.22156742]
- 42%|████▏     | 42/100 [03:39&lt;04:47,  4.95s/steps, loss=0.22156742]
- 42%|████▏     | 42/100 [03:39&lt;04:47,  4.95s/steps, loss=0.21997468]
- 43%|████▎     | 43/100 [03:44&lt;04:40,  4.92s/steps, loss=0.21997468]
- 43%|████▎     | 43/100 [03:44&lt;04:40,  4.92s/steps, loss=0.22046821]
- 44%|████▍     | 44/100 [03:49&lt;04:39,  4.99s/steps, loss=0.22046821]
- 44%|████▍     | 44/100 [03:49&lt;04:39,  4.99s/steps, loss=0.22153479]
- 45%|████▌     | 45/100 [03:54&lt;04:32,  4.95s/steps, loss=0.22153479]
- 45%|████▌     | 45/100 [03:54&lt;04:32,  4.95s/steps, loss=0.22394218]
- 46%|████▌     | 46/100 [03:59&lt;04:29,  5.00s/steps, loss=0.22394218]
- 46%|████▌     | 46/100 [03:59&lt;04:29,  5.00s/steps, loss=0.22424273]
- 47%|████▋     | 47/100 [04:04&lt;04:22,  4.96s/steps, loss=0.22424273]
- 47%|████▋     | 47/100 [04:04&lt;04:22,  4.96s/steps, loss=0.22739999]
- 48%|████▊     | 48/100 [04:09&lt;04:20,  5.00s/steps, loss=0.22739999]
- 48%|████▊     | 48/100 [04:09&lt;04:20,  5.00s/steps, loss=0.22585206]
- 49%|████▉     | 49/100 [04:14&lt;04:13,  4.97s/steps, loss=0.22585206]
- 49%|████▉     | 49/100 [04:14&lt;04:13,  4.97s/steps, loss=0.22555183]
- 50%|█████     | 50/100 [04:18&lt;04:06,  4.93s/steps, loss=0.22555183]
- 50%|█████     | 50/100 [04:19&lt;04:06,  4.93s/steps, loss=0.22333415]
- 51%|█████     | 51/100 [04:24&lt;04:04,  5.00s/steps, loss=0.22333415]
- 51%|█████     | 51/100 [04:24&lt;04:04,  5.00s/steps, loss=0.22547172]
- 52%|█████▏    | 52/100 [04:24&lt;02:55,  3.65s/steps, loss=0.22547172]
- 52%|█████▏    | 52/100 [04:24&lt;02:55,  3.65s/steps, loss=0.224012]
- 53%|█████▎    | 53/100 [04:25&lt;02:07,  2.70s/steps, loss=0.224012]
- 53%|█████▎    | 53/100 [04:25&lt;02:07,  2.70s/steps, loss=0.22091569]
- 54%|█████▍    | 54/100 [04:25&lt;01:33,  2.04s/steps, loss=0.22091569]
- 54%|█████▍    | 54/100 [04:25&lt;01:33,  2.04s/steps, loss=0.22019917]
- 55%|█████▌    | 55/100 [04:26&lt;01:10,  1.58s/steps, loss=0.22019917]
- 55%|█████▌    | 55/100 [04:26&lt;01:10,  1.58s/steps, loss=0.2198336]
- 56%|█████▌    | 56/100 [04:26&lt;00:55,  1.25s/steps, loss=0.2198336]
- 56%|█████▌    | 56/100 [04:26&lt;00:55,  1.25s/steps, loss=0.2194524]
- 57%|█████▋    | 57/100 [04:27&lt;00:44,  1.03s/steps, loss=0.2194524]
- 57%|█████▋    | 57/100 [04:27&lt;00:44,  1.03s/steps, loss=0.21867868]
- 58%|█████▊    | 58/100 [04:27&lt;00:36,  1.15steps/s, loss=0.21867868]
- 58%|█████▊    | 58/100 [04:27&lt;00:36,  1.15steps/s, loss=0.22036457]
- 59%|█████▉    | 59/100 [04:28&lt;00:34,  1.19steps/s, loss=0.22036457]
- 59%|█████▉    | 59/100 [04:28&lt;00:34,  1.19steps/s, loss=0.22076806]
- 60%|██████    | 60/100 [04:28&lt;00:29,  1.36steps/s, loss=0.22076806]
- 60%|██████    | 60/100 [04:28&lt;00:29,  1.36steps/s, loss=0.22142038]
- 61%|██████    | 61/100 [04:29&lt;00:26,  1.50steps/s, loss=0.22142038]
- 61%|██████    | 61/100 [04:29&lt;00:26,  1.50steps/s, loss=0.22183372]
- 62%|██████▏   | 62/100 [04:29&lt;00:23,  1.62steps/s, loss=0.22183372]
- 62%|██████▏   | 62/100 [04:29&lt;00:23,  1.62steps/s, loss=0.22245438]
- 63%|██████▎   | 63/100 [04:30&lt;00:21,  1.71steps/s, loss=0.22245438]
- 63%|██████▎   | 63/100 [04:30&lt;00:21,  1.71steps/s, loss=0.22283603]
- 64%|██████▍   | 64/100 [04:30&lt;00:20,  1.79steps/s, loss=0.22283603]
- 64%|██████▍   | 64/100 [04:30&lt;00:20,  1.79steps/s, loss=0.22297302]
- 65%|██████▌   | 65/100 [04:31&lt;00:18,  1.85steps/s, loss=0.22297302]
- 65%|██████▌   | 65/100 [04:31&lt;00:18,  1.85steps/s, loss=0.2225285]
- 66%|██████▌   | 66/100 [04:31&lt;00:18,  1.88steps/s, loss=0.2225285]
- 66%|██████▌   | 66/100 [04:31&lt;00:18,  1.88steps/s, loss=0.22213641]
- 67%|██████▋   | 67/100 [04:32&lt;00:17,  1.91steps/s, loss=0.22213641]
- 67%|██████▋   | 67/100 [04:32&lt;00:17,  1.91steps/s, loss=0.22175673]
- 68%|██████▊   | 68/100 [04:32&lt;00:16,  1.93steps/s, loss=0.22175673]
- 68%|██████▊   | 68/100 [04:33&lt;00:16,  1.93steps/s, loss=0.22136767]
- 69%|██████▉   | 69/100 [04:33&lt;00:18,  1.69steps/s, loss=0.22136767]
- 69%|██████▉   | 69/100 [04:33&lt;00:18,  1.69steps/s, loss=0.22106002]
- 70%|███████   | 70/100 [04:34&lt;00:17,  1.76steps/s, loss=0.22106002]
- 70%|███████   | 70/100 [04:34&lt;00:17,  1.76steps/s, loss=0.22075468]
- 71%|███████   | 71/100 [04:34&lt;00:15,  1.82steps/s, loss=0.22075468]
- 71%|███████   | 71/100 [04:34&lt;00:15,  1.82steps/s, loss=0.22066125]
- 72%|███████▏  | 72/100 [04:35&lt;00:15,  1.86steps/s, loss=0.22066125]
- 72%|███████▏  | 72/100 [04:35&lt;00:15,  1.86steps/s, loss=0.22074954]
- 73%|███████▎  | 73/100 [04:35&lt;00:14,  1.89steps/s, loss=0.22074954]
- 73%|███████▎  | 73/100 [04:35&lt;00:14,  1.89steps/s, loss=0.2210519]
- 74%|███████▍  | 74/100 [04:36&lt;00:13,  1.94steps/s, loss=0.2210519]
- 74%|███████▍  | 74/100 [04:36&lt;00:13,  1.94steps/s, loss=0.22120364]
- 75%|███████▌  | 75/100 [04:36&lt;00:12,  1.97steps/s, loss=0.22120364]
- 75%|███████▌  | 75/100 [04:36&lt;00:12,  1.97steps/s, loss=0.22116]
- 76%|███████▌  | 76/100 [04:37&lt;00:12,  1.99steps/s, loss=0.22116]
- 76%|███████▌  | 76/100 [04:37&lt;00:12,  1.99steps/s, loss=0.22108358]
- 77%|███████▋  | 77/100 [04:37&lt;00:11,  2.01steps/s, loss=0.22108358]
- 77%|███████▋  | 77/100 [04:37&lt;00:11,  2.01steps/s, loss=0.2207292]
- 78%|███████▊  | 78/100 [04:38&lt;00:10,  2.02steps/s, loss=0.2207292]
- 78%|███████▊  | 78/100 [04:38&lt;00:10,  2.02steps/s, loss=0.22046599]
- 79%|███████▉  | 79/100 [04:38&lt;00:12,  1.75steps/s, loss=0.22046599]
- 79%|███████▉  | 79/100 [04:38&lt;00:12,  1.75steps/s, loss=0.2205757]
- 80%|████████  | 80/100 [04:39&lt;00:11,  1.81steps/s, loss=0.2205757]
- 80%|████████  | 80/100 [04:39&lt;00:11,  1.81steps/s, loss=0.22082865]
- 81%|████████  | 81/100 [04:39&lt;00:10,  1.87steps/s, loss=0.22082865]
- 81%|████████  | 81/100 [04:40&lt;00:10,  1.87steps/s, loss=0.22100863]
- 82%|████████▏ | 82/100 [04:40&lt;00:09,  1.90steps/s, loss=0.22100863]
- 82%|████████▏ | 82/100 [04:40&lt;00:09,  1.90steps/s, loss=0.22112654]
- 83%|████████▎ | 83/100 [04:40&lt;00:08,  1.93steps/s, loss=0.22112654]
- 83%|████████▎ | 83/100 [04:41&lt;00:08,  1.93steps/s, loss=0.22100243]
- 84%|████████▍ | 84/100 [04:41&lt;00:08,  1.96steps/s, loss=0.22100243]
- 84%|████████▍ | 84/100 [04:41&lt;00:08,  1.96steps/s, loss=0.22068009]
- 85%|████████▌ | 85/100 [04:41&lt;00:07,  1.98steps/s, loss=0.22068009]
- 85%|████████▌ | 85/100 [04:41&lt;00:07,  1.98steps/s, loss=0.22063684]
- 86%|████████▌ | 86/100 [04:42&lt;00:07,  1.99steps/s, loss=0.22063684]
- 86%|████████▌ | 86/100 [04:42&lt;00:07,  1.99steps/s, loss=0.22042258]
- 87%|████████▋ | 87/100 [04:42&lt;00:06,  2.00steps/s, loss=0.22042258]
- 87%|████████▋ | 87/100 [04:42&lt;00:06,  2.00steps/s, loss=0.22013517]
- 88%|████████▊ | 88/100 [04:43&lt;00:05,  2.01steps/s, loss=0.22013517]
- 88%|████████▊ | 88/100 [04:43&lt;00:05,  2.01steps/s, loss=0.22009774]
- 89%|████████▉ | 89/100 [04:44&lt;00:06,  1.73steps/s, loss=0.22009774]
- 89%|████████▉ | 89/100 [04:44&lt;00:06,  1.73steps/s, loss=0.22044058]
- 90%|█████████ | 90/100 [04:44&lt;00:05,  1.80steps/s, loss=0.22044058]
- 90%|█████████ | 90/100 [04:44&lt;00:05,  1.80steps/s, loss=0.22052854]
- 91%|█████████ | 91/100 [04:45&lt;00:04,  1.86steps/s, loss=0.22052854]
- 91%|█████████ | 91/100 [04:45&lt;00:04,  1.86steps/s, loss=0.22081454]
- 92%|█████████▏| 92/100 [04:45&lt;00:04,  1.91steps/s, loss=0.22081454]
- 92%|█████████▏| 92/100 [04:45&lt;00:04,  1.91steps/s, loss=0.22063048]
- 93%|█████████▎| 93/100 [04:46&lt;00:03,  1.94steps/s, loss=0.22063048]
- 93%|█████████▎| 93/100 [04:46&lt;00:03,  1.94steps/s, loss=0.22046556]
- 94%|█████████▍| 94/100 [04:46&lt;00:03,  1.96steps/s, loss=0.22046556]
- 94%|█████████▍| 94/100 [04:46&lt;00:03,  1.96steps/s, loss=0.22051749]
- 95%|█████████▌| 95/100 [04:47&lt;00:02,  1.88steps/s, loss=0.22051749]
- 95%|█████████▌| 95/100 [04:47&lt;00:02,  1.88steps/s, loss=0.22037709]
- 96%|█████████▌| 96/100 [04:47&lt;00:02,  1.92steps/s, loss=0.22037709]
- 96%|█████████▌| 96/100 [04:47&lt;00:02,  1.92steps/s, loss=0.22051139]
- 97%|█████████▋| 97/100 [04:48&lt;00:01,  1.94steps/s, loss=0.22051139]
- 97%|█████████▋| 97/100 [04:48&lt;00:01,  1.94steps/s, loss=0.220523]
- 98%|█████████▊| 98/100 [04:48&lt;00:01,  1.96steps/s, loss=0.220523]
- 98%|█████████▊| 98/100 [04:48&lt;00:01,  1.96steps/s, loss=0.22045226]
- 99%|█████████▉| 99/100 [04:49&lt;00:00,  1.97steps/s, loss=0.22045226]
- 99%|█████████▉| 99/100 [04:49&lt;00:00,  1.97steps/s, loss=0.22055171]
-100%|██████████| 100/100 [04:49&lt;00:00,  1.72steps/s, loss=0.22055171]
-100%|██████████| 100/100 [04:49&lt;00:00,  2.90s/steps, loss=0.22055171]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/40 [00:00&lt;?, ?steps/s]
+  0%|          | 0/40 [00:00&lt;?, ?steps/s, loss=0.3028292]
+  2%|▎         | 1/40 [00:05&lt;03:30,  5.39s/steps, loss=0.3028292]
+  2%|▎         | 1/40 [00:05&lt;03:30,  5.39s/steps, loss=0.29138073]
+  5%|▌         | 2/40 [00:10&lt;03:16,  5.18s/steps, loss=0.29138073]
+  5%|▌         | 2/40 [00:10&lt;03:16,  5.18s/steps, loss=0.27525514]
+  8%|▊         | 3/40 [00:15&lt;03:09,  5.13s/steps, loss=0.27525514]
+  8%|▊         | 3/40 [00:15&lt;03:09,  5.13s/steps, loss=0.26825818]
+ 10%|█         | 4/40 [00:20&lt;03:08,  5.22s/steps, loss=0.26825818]
+ 10%|█         | 4/40 [00:20&lt;03:08,  5.22s/steps, loss=0.26069048]
+ 12%|█▎        | 5/40 [00:25&lt;03:00,  5.16s/steps, loss=0.26069048]
+ 12%|█▎        | 5/40 [00:25&lt;03:00,  5.16s/steps, loss=0.2559676]
+ 15%|█▌        | 6/40 [00:31&lt;02:58,  5.25s/steps, loss=0.2559676]
+ 15%|█▌        | 6/40 [00:31&lt;02:58,  5.25s/steps, loss=0.25364676]
+ 18%|█▊        | 7/40 [00:36&lt;02:54,  5.28s/steps, loss=0.25364676]
+ 18%|█▊        | 7/40 [00:36&lt;02:54,  5.28s/steps, loss=0.24876437]
+ 20%|██        | 8/40 [00:41&lt;02:48,  5.27s/steps, loss=0.24876437]
+ 20%|██        | 8/40 [00:42&lt;02:48,  5.27s/steps, loss=0.24594326]
+ 22%|██▎       | 9/40 [00:47&lt;02:46,  5.36s/steps, loss=0.24594326]
+ 22%|██▎       | 9/40 [00:47&lt;02:46,  5.36s/steps, loss=0.24408361]
+ 25%|██▌       | 10/40 [00:52&lt;02:38,  5.30s/steps, loss=0.24408361]
+ 25%|██▌       | 10/40 [00:52&lt;02:38,  5.30s/steps, loss=0.24018016]
+ 28%|██▊       | 11/40 [00:58&lt;02:34,  5.33s/steps, loss=0.24018016]
+ 28%|██▊       | 11/40 [00:58&lt;02:34,  5.33s/steps, loss=0.23644711]
+ 30%|███       | 12/40 [01:03&lt;02:27,  5.28s/steps, loss=0.23644711]
+ 30%|███       | 12/40 [01:03&lt;02:27,  5.28s/steps, loss=0.23541115]
+ 32%|███▎      | 13/40 [01:08&lt;02:21,  5.24s/steps, loss=0.23541115]
+ 32%|███▎      | 13/40 [01:08&lt;02:21,  5.24s/steps, loss=0.23473267]
+ 35%|███▌      | 14/40 [01:13&lt;02:18,  5.31s/steps, loss=0.23473267]
+ 35%|███▌      | 14/40 [01:13&lt;02:18,  5.31s/steps, loss=0.2341421]
+ 38%|███▊      | 15/40 [01:19&lt;02:11,  5.27s/steps, loss=0.2341421]
+ 38%|███▊      | 15/40 [01:19&lt;02:11,  5.27s/steps, loss=0.2333454]
+ 40%|████      | 16/40 [01:24&lt;02:07,  5.30s/steps, loss=0.2333454]
+ 40%|████      | 16/40 [01:24&lt;02:07,  5.30s/steps, loss=0.23194969]
+ 42%|████▎     | 17/40 [01:29&lt;02:00,  5.24s/steps, loss=0.23194969]
+ 42%|████▎     | 17/40 [01:29&lt;02:00,  5.24s/steps, loss=0.230639]
+ 45%|████▌     | 18/40 [01:34&lt;01:54,  5.18s/steps, loss=0.230639]
+ 45%|████▌     | 18/40 [01:34&lt;01:54,  5.18s/steps, loss=0.22948842]
+ 48%|████▊     | 19/40 [01:39&lt;01:49,  5.20s/steps, loss=0.22948842]
+ 48%|████▊     | 19/40 [01:39&lt;01:49,  5.20s/steps, loss=0.2283881]
+ 50%|█████     | 20/40 [01:44&lt;01:42,  5.12s/steps, loss=0.2283881]
+ 50%|█████     | 20/40 [01:44&lt;01:42,  5.12s/steps, loss=0.22643027]
+ 52%|█████▎    | 21/40 [01:49&lt;01:37,  5.14s/steps, loss=0.22643027]
+ 52%|█████▎    | 21/40 [01:49&lt;01:37,  5.14s/steps, loss=0.22495316]
+ 55%|█████▌    | 22/40 [01:50&lt;01:07,  3.76s/steps, loss=0.22495316]
+ 55%|█████▌    | 22/40 [01:50&lt;01:07,  3.76s/steps, loss=0.22470844]
+ 57%|█████▊    | 23/40 [01:50&lt;00:47,  2.78s/steps, loss=0.22470844]
+ 57%|█████▊    | 23/40 [01:51&lt;00:47,  2.78s/steps, loss=0.22400607]
+ 60%|██████    | 24/40 [01:51&lt;00:33,  2.10s/steps, loss=0.22400607]
+ 60%|██████    | 24/40 [01:51&lt;00:33,  2.10s/steps, loss=0.222968]
+ 62%|██████▎   | 25/40 [01:51&lt;00:24,  1.63s/steps, loss=0.222968]
+ 62%|██████▎   | 25/40 [01:52&lt;00:24,  1.63s/steps, loss=0.22194906]
+ 65%|██████▌   | 26/40 [01:52&lt;00:18,  1.30s/steps, loss=0.22194906]
+ 65%|██████▌   | 26/40 [01:52&lt;00:18,  1.30s/steps, loss=0.22063896]
+ 68%|██████▊   | 27/40 [01:53&lt;00:13,  1.06s/steps, loss=0.22063896]
+ 68%|██████▊   | 27/40 [01:53&lt;00:13,  1.06s/steps, loss=0.21997239]
+ 70%|███████   | 28/40 [01:53&lt;00:10,  1.12steps/s, loss=0.21997239]
+ 70%|███████   | 28/40 [01:53&lt;00:10,  1.12steps/s, loss=0.21980652]
+ 72%|███████▎  | 29/40 [01:54&lt;00:08,  1.28steps/s, loss=0.21980652]
+ 72%|███████▎  | 29/40 [01:54&lt;00:08,  1.28steps/s, loss=0.21954139]
+ 75%|███████▌  | 30/40 [01:54&lt;00:07,  1.28steps/s, loss=0.21954139]
+ 75%|███████▌  | 30/40 [01:54&lt;00:07,  1.28steps/s, loss=0.2189289]
+ 78%|███████▊  | 31/40 [01:55&lt;00:06,  1.43steps/s, loss=0.2189289]
+ 78%|███████▊  | 31/40 [01:55&lt;00:06,  1.43steps/s, loss=0.21860924]
+ 80%|████████  | 32/40 [01:55&lt;00:05,  1.55steps/s, loss=0.21860924]
+ 80%|████████  | 32/40 [01:55&lt;00:05,  1.55steps/s, loss=0.21840295]
+ 82%|████████▎ | 33/40 [01:56&lt;00:04,  1.65steps/s, loss=0.21840295]
+ 82%|████████▎ | 33/40 [01:56&lt;00:04,  1.65steps/s, loss=0.21783617]
+ 85%|████████▌ | 34/40 [01:56&lt;00:03,  1.73steps/s, loss=0.21783617]
+ 85%|████████▌ | 34/40 [01:56&lt;00:03,  1.73steps/s, loss=0.21835212]
+ 88%|████████▊ | 35/40 [01:57&lt;00:02,  1.79steps/s, loss=0.21835212]
+ 88%|████████▊ | 35/40 [01:57&lt;00:02,  1.79steps/s, loss=0.21803792]
+ 90%|█████████ | 36/40 [01:57&lt;00:02,  1.83steps/s, loss=0.21803792]
+ 90%|█████████ | 36/40 [01:58&lt;00:02,  1.83steps/s, loss=0.21743102]
+ 92%|█████████▎| 37/40 [01:58&lt;00:01,  1.86steps/s, loss=0.21743102]
+ 92%|█████████▎| 37/40 [01:58&lt;00:01,  1.86steps/s, loss=0.21687275]
+ 95%|█████████▌| 38/40 [01:58&lt;00:01,  1.90steps/s, loss=0.21687275]
+ 95%|█████████▌| 38/40 [01:59&lt;00:01,  1.90steps/s, loss=0.21635947]
+ 98%|█████████▊| 39/40 [01:59&lt;00:00,  1.93steps/s, loss=0.21635947]
+ 98%|█████████▊| 39/40 [01:59&lt;00:00,  1.93steps/s, loss=0.21614887]
+100%|██████████| 40/40 [02:00&lt;00:00,  1.69steps/s, loss=0.21614887]
+100%|██████████| 40/40 [02:00&lt;00:00,  3.00s/steps, loss=0.21614887]
 </pre></div>
 </div>
 <img src="../../../_images/mrinufft_learn_2d_sampling_pattern.gif" srcset="../../../_images/mrinufft_learn_2d_sampling_pattern.gif" alt="example learn_samples" class = "sphx-glr-single-img"/></section>
@@ -1224,7 +1118,7 @@ through Projection” Bioengineering 10, no. 2: 158.
 <a class="reference external" href="https://doi.org/10.3390/bioengineering10020158">https://doi.org/10.3390/bioengineering10020158</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (4 minutes 59.725 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 7.951 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-learn-straight-line-readouts-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_learn_straight_line_readouts.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -1281,8 +1175,7 @@ through Projection” Bioengineering 10, no. 2: 158.
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1349,8 +1242,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

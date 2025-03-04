@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
@@ -56,7 +53,6 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -72,8 +68,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -81,6 +88,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -88,8 +96,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -107,8 +115,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -138,17 +145,21 @@
     
     
     <img src="_static/mri-nufft.png" class="logo__image only-light" alt="MRI-nufft Documentation - Home"/>
-    <img src="_static/mri-nufft.png" class="logo__image only-dark pst-js-only" alt="MRI-nufft Documentation - Home"/>
+    <script>document.write(`<img src="_static/mri-nufft.png" class="logo__image only-dark" alt="MRI-nufft Documentation - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -534,14 +545,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -702,16 +708,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 
 </div></div>
       
@@ -739,7 +753,7 @@
                   
   <section id="computation-times">
 <span id="sphx-glr-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Link to this heading">#</a></h1>
-<p><strong>19:10.259</strong> total execution time for 19 files <strong>from all galleries</strong>:</p>
+<p><strong>16:12.114</strong> total execution time for 19 files <strong>from all galleries</strong>:</p>
 <div class="docutils container">
 <style scoped>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
@@ -760,80 +774,80 @@ $(document).ready( function () {
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_straight_line_readouts.html#sphx-glr-generated-autoexamples-gpu-example-learn-straight-line-readouts-py"><span class="std std-ref">Learn Straight line readout pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_straight_line_readouts.py</span></code>)</p></td>
-<td><p>04:59.725</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_sampling_densities.html#sphx-glr-generated-autoexamples-example-sampling-densities-py"><span class="std std-ref">Sampling densities</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_sampling_densities.py</span></code>)</p></td>
+<td><p>02:10.482</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_sampling_densities.html#sphx-glr-generated-autoexamples-example-sampling-densities-py"><span class="std std-ref">Sampling densities</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_sampling_densities.py</span></code>)</p></td>
-<td><p>02:06.196</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_straight_line_readouts.html#sphx-glr-generated-autoexamples-gpu-example-learn-straight-line-readouts-py"><span class="std std-ref">Learn Straight line readout pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_straight_line_readouts.py</span></code>)</p></td>
+<td><p>02:07.951</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_3D.html#sphx-glr-generated-autoexamples-example-gif-3d-py"><span class="std std-ref">Animated 3D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_3D.py</span></code>)</p></td>
-<td><p>02:03.956</p></td>
+<td><p>02:00.155</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_fastMRI_UNet.html#sphx-glr-generated-autoexamples-gpu-example-fastmri-unet-py"><span class="std std-ref">Simple UNet model.</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_fastMRI_UNet.py</span></code>)</p></td>
-<td><p>01:34.275</p></td>
+<td><p>01:35.445</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples_multicoil.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-multicoil-py"><span class="std std-ref">Learn Sampling pattern for multi-coil MRI</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_samples_multicoil.py</span></code>)</p></td>
-<td><p>01:26.742</p></td>
+<td><p>01:23.226</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_gif_2D.html#sphx-glr-generated-autoexamples-example-gif-2d-py"><span class="std std-ref">Animated 2D trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_gif_2D.py</span></code>)</p></td>
-<td><p>01:19.497</p></td>
+<td><p>01:18.132</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples.html#sphx-glr-generated-autoexamples-gpu-example-learn-samples-py"><span class="std std-ref">Learn Sampling pattern</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_learn_samples.py</span></code>)</p></td>
-<td><p>01:12.666</p></td>
+<td><p>01:14.266</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_learn_samples_multires.html#sphx-glr-generated-autoexamples-example-learn-samples-multires-py"><span class="std std-ref">Learning sampling pattern with decimation</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_learn_samples_multires.py</span></code>)</p></td>
-<td><p>01:05.421</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_3D_trajectories.html#sphx-glr-generated-autoexamples-example-3d-trajectories-py"><span class="std std-ref">3D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_3D_trajectories.py</span></code>)</p></td>
+<td><p>01:03.968</p></td>
 <td><p>0.0</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_3D_trajectories.html#sphx-glr-generated-autoexamples-example-3d-trajectories-py"><span class="std std-ref">3D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_3D_trajectories.py</span></code>)</p></td>
-<td><p>01:02.225</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_learn_samples_multires.html#sphx-glr-generated-autoexamples-example-learn-samples-multires-py"><span class="std std-ref">Learning sampling pattern with decimation</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_learn_samples_multires.py</span></code>)</p></td>
+<td><p>01:03.401</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_trajectory_tools.html#sphx-glr-generated-autoexamples-example-trajectory-tools-py"><span class="std std-ref">Trajectory tools</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_trajectory_tools.py</span></code>)</p></td>
-<td><p>00:52.975</p></td>
+<td><p>00:51.651</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_subspace.html#sphx-glr-generated-autoexamples-example-subspace-py"><span class="std std-ref">Subspace NUFFT Operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_subspace.py</span></code>)</p></td>
-<td><p>00:38.077</p></td>
+<td><p>00:36.075</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_2D_trajectories.html#sphx-glr-generated-autoexamples-example-2d-trajectories-py"><span class="std std-ref">2D Trajectories</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_2D_trajectories.py</span></code>)</p></td>
-<td><p>00:22.415</p></td>
+<td><p>00:22.248</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_3d_trajectory_display.html#sphx-glr-generated-autoexamples-gpu-example-3d-trajectory-display-py"><span class="std std-ref">Gridded trajectory display</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_3d_trajectory_display.py</span></code>)</p></td>
-<td><p>00:07.471</p></td>
+<td><p>00:06.769</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_display_config.html#sphx-glr-generated-autoexamples-example-display-config-py"><span class="std std-ref">Trajectory display configuration</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_display_config.py</span></code>)</p></td>
-<td><p>00:05.796</p></td>
+<td><p>00:05.804</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_density.html#sphx-glr-generated-autoexamples-gpu-example-density-py"><span class="std std-ref">Density Compensation Routines</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_density.py</span></code>)</p></td>
-<td><p>00:04.391</p></td>
+<td><p>00:04.234</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_stacked.html#sphx-glr-generated-autoexamples-example-stacked-py"><span class="std std-ref">Stacked NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_stacked.py</span></code>)</p></td>
-<td><p>00:03.131</p></td>
+<td><p>00:03.171</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/example_readme.html#sphx-glr-generated-autoexamples-example-readme-py"><span class="std std-ref">Minimal example script</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_readme.py</span></code>)</p></td>
-<td><p>00:02.196</p></td>
+<td><p>00:02.146</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/autoexamples/example_offresonance.html#sphx-glr-generated-autoexamples-example-offresonance-py"><span class="std std-ref">Off-resonance corrected NUFFT operator</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/example_offresonance.py</span></code>)</p></td>
-<td><p>00:01.950</p></td>
+<td><p>00:01.926</p></td>
 <td><p>0.0</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/autoexamples/GPU/example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a> (<code class="docutils literal notranslate"><span class="pre">../examples/GPU/example_cg.py</span></code>)</p></td>
-<td><p>00:01.153</p></td>
+<td><p>00:01.063</p></td>
 <td><p>0.0</p></td>
 </tr>
 </tbody>
@@ -903,8 +917,8 @@ By MRI-NUFFT Contributors
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

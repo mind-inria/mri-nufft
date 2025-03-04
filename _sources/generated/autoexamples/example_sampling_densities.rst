@@ -402,7 +402,7 @@ or as a custom ``pywt.Wavelet`` object.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/site-packages/pywt/_multilevel.py:43: UserWarning: Level value of 3 is too high: all coefficients will experience boundary effects.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/pywt/_multilevel.py:43: UserWarning: Level value of 3 is too high: all coefficients will experience boundary effects.
       warnings.warn(
 
 
@@ -856,7 +856,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 6.196 seconds)
+   **Total running time of the script:** (2 minutes 10.482 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_sampling_densities.py:
