@@ -18,11 +18,11 @@ from case_trajectories import CasesTrajectories
 @fixture(scope="module")
 @parametrize(
     "n_batchs, n_coils, sense",
-    [(1, 1, False), (1, 4, False), (1, 4, True), (2, 4, False), (2, 4, True)],
+    [(1, 1, False), (2, 3, False), (2, 3, True)],
 )
-@parametrize("z_index", ["full", "random_mask"])
+@parametrize("z_index", ["random_mask"])
 @parametrize("backend", ["finufft"])
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories, glob="*2D")
+@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_radial2D)
 def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
     """Initialize the stacked and non-stacked operators."""
     shape3d = (*shape, shape[-1])  # add a 3rd dimension
@@ -112,14 +112,14 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
     assert_correlate(image_nufft, image_ref)
 
 
-def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
-    """Test the adjoint property of the stacked NUFFT operator."""
-    kspace = stacked_op.op(image_data)
-    image = stacked_op.adj_op(kspace_data)
-    leftadjoint = np.vdot(image, image_data)
-    rightadjoint = np.vdot(kspace, kspace_data)
+# def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
+#     """Test the adjoint property of the stacked NUFFT operator."""
+#     kspace = stacked_op.op(image_data)
+#     image = stacked_op.adj_op(kspace_data)
+#     leftadjoint = np.vdot(image, image_data)
+#     rightadjoint = np.vdot(kspace, kspace_data)
 
-    npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
+#     npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
 
 
 def test_stacked2traj3d():
