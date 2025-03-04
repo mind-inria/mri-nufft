@@ -126,7 +126,7 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
     axs[0].axis("off")
     axs[0].set_title("MR Image")
     if traj.shape[-1] == 3:
-        if i is not None and i > 50:
+        if i is not None and i > 20:
             axs[1].scatter(*traj.T[1:3, 0], s=10, color="blue")
         else:
             fig_kwargs = {}
