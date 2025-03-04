@@ -206,6 +206,7 @@ jobs:
         shell: bash
         run: |
           ${{ env.activate_venv }}
+          export COVERAGE_FILE=coverage_other
           python -m pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
 
       - name: Upload coverage
@@ -281,7 +282,7 @@ jobs:
         run: |
           ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
-          pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term --durations=10
+          pytest examples tests -n=4 -k="not operators" --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
         uses: actions/cache/save@v4
