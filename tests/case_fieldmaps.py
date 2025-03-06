@@ -13,7 +13,7 @@ class CasesB0maps:
         """Create a real (B0 only) 2D field map."""
         return make_b0map(2 * [N])
 
-    def case_real3D(self, N=64, b0range=(-300, 300)):
+    def case_real3D(self, N=32, b0range=(-300, 300)):
         """Create a real (B0 only) 3D field map."""
         return make_b0map(3 * [N])
 
@@ -40,7 +40,7 @@ class CasesZmaps:
 
         return zmap, mask
 
-    def case_complex3D(self, N=64, b0range=(-300, 300), t2svalue=15.0):
+    def case_complex3D(self, N=32, b0range=(-300, 300), t2svalue=15.0):
         """Create a complex (R2* + 1j * B0) 3D field map."""
         # Generate real and imaginary parts
         t2smap, _ = make_t2smap(3 * [N])

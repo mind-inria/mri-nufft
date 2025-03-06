@@ -16,6 +16,9 @@ env:
   PYTHON_VERSION: "3.10"
   BART_VERSION: "0.8.00"
   ref_backend: "finufft"
+  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
+  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
+  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda-12.1/;export PATH=/usr/local/cuda-12.1/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
   test-cpu:
@@ -44,6 +47,9 @@ jobs:
       - name: Install Python Deps
         shell: bash
         run: |
+          python --version
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
@@ -51,21 +57,28 @@ jobs:
         if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
         shell: bash
         run: |
+          ${{ env.activate_venv }}
           python -m pip install "pynfft2>=1.4.3"
 
       - name: Install pynufft
         if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
-        run: python -m pip install pynufft
+        run: |
+          ${{ env.activate_venv }}
+          python -m pip install pynufft
 
       - name: Install finufft
         if: ${{ matrix.backend == 'finufft'  || env.ref_backend == 'finufft'}}
         shell: bash
-        run: python -m pip install finufft
+        run: |
+          ${{ env.activate_venv }}
+          python -m pip install finufft
 
       - name: Install Sigpy
         if: ${{ matrix.backend == 'sigpy'  || env.ref_backend == 'sigpy'}}
         shell: bash
-        run: python -m pip install sigpy
+        run: |
+          ${{ env.activate_venv }}
+          python -m pip install sigpy
 
       - name: Install BART
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
@@ -81,14 +94,17 @@ jobs:
 
       - name: Install torchkbnufft-cpu
         if: ${{ matrix.backend == 'torchkbnufft-cpu'  || env.ref_backend == 'torchkbnufft-cpu'}}
-        run: python -m pip install torchkbnufft
+        run: |
+          ${{ env.activate_venv }}
+          python -m pip install torchkbnufft
 
 
       - name: Run Tests
         shell: bash
         run: |
+          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term
+          python -m pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term --durations=10
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
@@ -111,45 +127,41 @@ jobs:
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          cd $RUNNER_WORKSPACE
-          python --version
-          python -m venv venv
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install --upgrade pip wheel
-          pip install -e mri-nufft[test]
-          pip install cupy-cuda12x finufft "numpy<2.0"
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
+          python -m pip install --upgrade pip wheel
+          python -m pip install -e .[test]
+          python -m pip install cupy-cuda12x finufft "numpy<2.0"
 
       - name: Install torch with CUDA 12.1
         shell: bash
         if: ${{ matrix.backend != 'tensorflow'}}
         run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install torch
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
+          python -m pip install torch
 
       - name: Install backend
         shell: bash
         run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          ${{ env.activate_venv }}
           if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
-            pip install torchkbnufft
+            python -m pip install torchkbnufft
           elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
-            pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
+            python -m pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
           elif [[ ${{ matrix.backend }} == "cufinufft" ]]; then
-            pip install "cufinufft<2.3" 
+            python -m pip install "cufinufft<2.3"
           else
-            pip install ${{ matrix.backend }}
+            python -m pip install ${{ matrix.backend }}
           fi
 
       - name: Run Tests
         shell: bash
         run: |
+          ${{ env.activate_venv }}
           cd $RUNNER_WORKSPACE/mri-nufft
-          source $RUNNER_WORKSPACE/venv/bin/activate
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          python -m pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term
+          python -m pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
@@ -167,7 +179,54 @@ jobs:
           rm -rf finufft
           rm -rf gpuNUFFT
           rm -rf venv
- 
+
+  test-other:
+    runs-on: [gpu]
+    if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mri-nufft and finufft
+        shell: bash
+        run: |
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
+          python -m pip install --upgrade pip wheel
+          python -m pip install -e .[test]
+          python -m pip install cupy-cuda12x finufft "numpy<2.0"
+
+      - name: Install torch with CUDA 12.1
+        shell: bash
+        run: |
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
+          python -m pip install torch
+
+      - name: Run non operators tests
+        shell: bash
+        run: |
+          ${{ env.activate_venv }}
+          export COVERAGE_FILE=coverage_other
+          python -m pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
+
+      - name: Upload coverage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_other
+          path: coverage_other
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: |
+          cd $RUNNER_WORKSPACE
+          ls -al
+          rm -rf finufft
+          rm -rf gpuNUFFT
+          rm -rf venv
+
+
   get-commit-message:
     runs-on: ubuntu-latest
     outputs:
@@ -182,7 +241,7 @@ jobs:
             COMMIT_MESSAGE=$(git log -1 --pretty=%B)
             echo "Commit message $COMMIT_MESSAGE"
             echo "::set-output name=message::$COMMIT_MESSAGE"
-    
+
   test-examples:
     runs-on: gpu
     needs: get-commit-message
@@ -205,23 +264,25 @@ jobs:
       - name: Install Python deps
         shell: bash
         run: |
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install -e .[extra,test,dev]
           python -m pip install finufft pooch brainweb-dl torch fastmri
-        
+
       - name: Install GPU related interfaces
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
           pip install cupy-cuda12x torch
           python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image fastmri
 
       - name: Run examples
         shell: bash
         run: |
+          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
-          pytest examples tests -k="not operators" --cov --cov-branch --cov-report=term
+          python -m pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
         uses: actions/cache/save@v4
@@ -256,16 +317,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          
+
       - name: add the coverage tool
         shell: bash
         run: |
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install coverage[toml]
           python -m pip install -e .
 
       - name: Combine coverage
         run: |
+          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
           coverage combine -a coverage_data/*
 
@@ -277,6 +341,7 @@ jobs:
 
       - name: Reports
         run: |
+          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
           coverage xml
           coverage report
@@ -302,7 +367,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Get history and tags for SCM versioning to work
         run: |
           git fetch --prune --unshallow
@@ -312,30 +377,32 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-        
+
       - name: Install dependencies
         shell: bash -l {0}
         run: |
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
           python -m pip install --upgrade pip
-          python -m pip install .[doc]
+          python -m pip install .[doc,extra]
           python -m pip install finufft
-      
+
       - name: Install GPU related interfaces
         run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.1/
-          export PATH=/usr/local/cuda-12.1/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
           pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT "cufinufft<2.3"
-      
+          python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image fastmri
+
       - name: Build API documentation
         run: |
+          ${{ env.activate_venv }}
           python -m sphinx docs docs_build
-      
+
       - name: Display data
         run: ls -R
         working-directory: docs_build/_static
-      
+
       - name: Upload artifact
         id: artifact-upload-step
         uses: actions/upload-artifact@v4
@@ -344,7 +411,7 @@ jobs:
           name: docs
           path: 'docs_build'
           retention-days: 5
-    
+
   CompileDocs:
     name: Compile the coverage badge in docs
     runs-on: ubuntu-latest
@@ -357,14 +424,14 @@ jobs:
           name: docs
           path: docs_build
           overwrite: true
-    
+
       - name: Get the badge from CI
         uses: actions/download-artifact@v4
         with:
           name: coverage_badge
           path: docs_build/_static
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: ReUpload artifacts
         uses: actions/upload-artifact@v4
         with:
