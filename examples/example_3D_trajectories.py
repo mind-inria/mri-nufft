@@ -641,7 +641,8 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # This is a reproduction of the proposition from [Kla+24]_.
 # It creates trajectories as uniformly distributed circles,
 # with a pseudo rosette-like structure at the center to ensure
-# its coverage.
+# its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+# TRajectorIes for Compressed sensing.
 #
 # Arguments:
 #

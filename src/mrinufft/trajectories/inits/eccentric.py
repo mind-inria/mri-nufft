@@ -125,7 +125,8 @@ def initialize_2D_eccentric(
     This is a reproduction of the proposition from [Kla+24]_.
     It creates trajectories as uniformly distributed circles,
     with a pseudo rosette-like structure at the center to ensure
-    its coverage.
+    its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+    TRajectorIes for Compressed sensing.
 
     Notes
     -----
@@ -201,6 +202,8 @@ def initialize_3D_eccentric(
     It creates trajectories as uniformly distributed circles
     stacked spherically over the :math:`k_z`-axis, with a pseudo
     rosette-like structure at the center to ensure its coverage.
+    ECCENTRIC stands for ECcentric Circle ENcoding TRajectorIes
+    for Compressed sensing.
 
     Notes
     -----
