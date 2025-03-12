@@ -8,6 +8,7 @@ from .inits import (
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
+from .projection import fit_arc_length
 from .sampling import (
     create_chauffert_density,
     create_cutoff_decay_density,
@@ -116,4 +117,6 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    # projection
+    "fit_arc_length",
 ]
