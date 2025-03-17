@@ -79,7 +79,10 @@ def sample_from_density(
     density = density / np.sum(density)
 
     if nb_samples > max_nb_samples:
-        raise ValueError("`nb_samples` must be lower than the number of non-zero entries in `density`.")
+        raise ValueError(
+            "`nb_samples` must be lower than the "
+            "number of non-zero entries in `density`."
+        )
 
     # Check for dimensionality compensation
     if isinstance(dim_compensation, str) and dim_compensation != "auto":
