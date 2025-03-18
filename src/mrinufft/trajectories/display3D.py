@@ -1,14 +1,15 @@
 """Utils for displaying 3D trajectories."""
 
-from mrinufft import get_operator, get_density
-from mrinufft.trajectories.utils import (
-    convert_trajectory_to_gradients,
-    convert_gradients_to_slew_rates,
-    KMAX,
-    DEFAULT_RASTER_TIME,
-)
-from mrinufft.density.utils import flat_traj
 import numpy as np
+
+from mrinufft import get_density, get_operator
+from mrinufft.density.utils import flat_traj
+from mrinufft.trajectories.utils import (
+    DEFAULT_RASTER_TIME,
+    KMAX,
+    convert_gradients_to_slew_rates,
+    convert_trajectory_to_gradients,
+)
 
 
 def get_gridded_trajectory(

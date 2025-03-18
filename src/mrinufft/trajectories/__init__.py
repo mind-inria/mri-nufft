@@ -19,12 +19,14 @@ from .sampling import (
 from .tools import (
     conify,
     duplicate_along_axes,
+    get_random_loc_1d,
     oversample,
     precess,
     radialize_center,
     rotate,
     shellify,
     stack,
+    stack_random,
     stack_spherically,
 )
 from .trajectory2D import (
@@ -55,12 +57,6 @@ from .trajectory3D import (
     initialize_3D_wave_caipi,
     initialize_3D_wong_radial,
 )
-
-from .tools import (
-    stack_random,
-    get_random_loc_1d,
-)
-
 
 __all__ = [
     # trajectories
