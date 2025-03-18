@@ -43,6 +43,8 @@ from .trajectories import (
     initialize_3D_repi,
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
+    initialize_2D_eccentric,
+    initialize_3D_eccentric,
     # tools
     stack,
     rotate,
@@ -108,6 +110,8 @@ __all__ = [
     "initialize_3D_repi",
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
+    "initialize_2D_eccentric",
+    "initialize_3D_eccentric",
     # tools
     "stack",
     "rotate",
