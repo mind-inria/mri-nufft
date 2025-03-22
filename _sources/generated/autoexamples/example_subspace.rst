@@ -515,7 +515,7 @@ The projected k-space is equivalent to the regular reconstruction followed by pr
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 38.775 seconds)
+   **Total running time of the script:** (0 minutes 52.010 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_subspace.py:
