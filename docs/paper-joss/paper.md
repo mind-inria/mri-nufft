@@ -66,7 +66,7 @@ Furthermore, there has been a growing interest in using deep learning to jointly
 ![MRI-NUFFT as an interface for non-Cartesian MRI](../_static/mri-nufft-scheme.svg){width=10cm}
 
 ## NUFFT Library compatibility 
-MRI-NUFFT is compatible with the following NUFFT librairies: FINUFFT[@barnett_parallel_2019], CUFINUFFT[@shih_cufinufft_2021], gpuNUFFT[@knoll_gpunufft_2014], TorchKbNufft[@muckley_torchkbnufft_2020], pyNFFT, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
+MRI-NUFFT is compatible with the following NUFFT librairies: FINUFFT[@barnett_nufft_2019][@barnett_aliasing_2020], CUFINUFFT[@shih_cufinufft_2021], gpuNUFFT[@knoll_gpunufft_2014], TorchKbNufft[@muckley_torchkbnufft_2020], pyNFFT, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
 Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determine which NUFFT implementation provides the best performances both in term of computation time and memory footprint. At the time of writing, cufinufft and gpunufft provide the best performances by leveraging CUDA acceleration. MRI-NUFFT supports as well standard array libraries (NumPy, CuPy, PyTorch, TensorFlow, etc.) and optimizes data copies, relying on the array-API standard. 
 It also provides several enhancements on top of these backends, notably an optimized 2.5D NUFFT (for stacks of 2D non uniform trajectories, commonly used in MRI), and a data-consistency term for iterative reconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$).
 
