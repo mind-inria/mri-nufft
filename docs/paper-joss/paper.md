@@ -115,7 +115,7 @@ $$y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \
 
 where $t_i$ is the time at which the frequency $\nu_i$ is acquired.
 With these mixed-domain field perturbations, the Fourier model does not hold anymore and the FFT algorithm can no longer be used. 
-The main solution [@sutton_fast_2003] is to interpolate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
+The main solution [@sutton_fast_2003] is to interpolate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}$, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
 
 $$x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}$$
 
