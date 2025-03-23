@@ -278,7 +278,7 @@ Animation rendering
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 51.354 seconds)
+   **Total running time of the script:** (2 minutes 5.725 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_gif_3D.py:

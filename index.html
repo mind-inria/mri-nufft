@@ -819,6 +819,7 @@ document.write(`
 
 <span class="c1">## The real deal starts here ##</span>
 <span class="c1"># Choose your NUFFT backend (installed independently from the package)</span>
+<span class="c1"># pip install mri-nufft[finufft] will be just fine here</span>
 <span class="n">NufftOperator</span> <span class="o">=</span> <span class="n">mrinufft</span><span class="o">.</span><span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;finufft&quot;</span><span class="p">)</span>
 
 <span class="c1"># For improved image reconstruction, use density compensation</span>
@@ -845,7 +846,12 @@ document.write(`
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mri</span><span class="o">-</span><span class="n">nufft</span>
 </pre></div>
 </div>
-<p>Additionally, you will have to install at least one NUFFT computation backend. See the <a class="reference external" href="https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend">Documentation</a> for more guidance.</p>
+<p>Additionally, you will have to install at least one NUFFT computation backend. See the <a class="reference external" href="https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend">Documentation</a> for more guidance.
+Typically we recommend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mri</span><span class="o">-</span><span class="n">nufft</span><span class="p">[</span><span class="n">finufft</span><span class="p">]</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">mri</span><span class="o">-</span><span class="n">nufft</span><span class="p">[</span><span class="n">cufinufft</span><span class="p">]</span> <span class="c1"># if you have a NVIDIA GPU and CUDA&gt;=12</span>
+</pre></div>
+</div>
 </section>
 <section id="benchmark">
 <h3>Benchmark<a class="headerlink" href="#benchmark" title="Link to this heading">#</a></h3>
