@@ -60,21 +60,42 @@ nufft = NufftOperator(
 # %%
 # Reconstruct the image using the CG method
 kspace_data = nufft.op(image)  # get the k-space data
-reconstructed_image = cg(nufft, kspace_data)  # reconstruct the image
+reconstructed_image, loss = cg(operator=nufft, kspace_data=kspace_data,num_iter=50, compute_loss=True)  # reconstruct the image
 
-# %%
 # Display the results
-plt.figure(figsize=(9, 3))
-plt.subplot(1, 3, 1)
+def normalize(img, vmin, vmax):
+    return (img - vmin) / (vmax - vmin)
+
+plt.figure(figsize=(15, 10))
+plt.subplot(2, 3, 1)
 plt.title("Original image")
-plt.imshow(abs(image), cmap="gray")
+plt.imshow(normalize(abs(image), abs(image).min(), abs(image).max()), cmap="gray")
+plt.colorbar()
 
-plt.subplot(1, 3, 2)
+plt.subplot(2, 3, 2)
 plt.title("Conjugate gradient")
-plt.imshow(abs(reconstructed_image), cmap="gray")
+plt.imshow(normalize(abs(reconstructed_image), abs(reconstructed_image).min(), abs(reconstructed_image).max()), cmap="gray")
+plt.colorbar()
 
-plt.subplot(1, 3, 3)
+plt.subplot(2, 3, 3)
 plt.title("Adjoint NUFFT")
-plt.imshow(abs(nufft.adj_op(kspace_data)), cmap="gray")
+plt.imshow(normalize(abs(nufft.adj_op(kspace_data)), abs(nufft.adj_op(kspace_data)).min(), abs(nufft.adj_op(kspace_data)).max()), cmap="gray")
+plt.colorbar()
 
-plt.show()
+plt.subplot(2, 3, 4)
+plt.title("Loss")
+plt.plot(loss)
+plt.grid()
+
+plt.subplot(2, 3, 5)
+plt.title("kspace from conjugate gradient")
+
+plt.plot(kspace_data, label="acquired kspace")
+plt.plot(nufft.op(reconstructed_image), alpha=0.7,label="reconstructed kspace")
+plt.legend(loc="lower left", fontsize=8)
+
+plt.subplot(2, 3, 6)
+plt.title("kspace from adjoint NUFFT")
+plt.plot(kspace_data, label="acquired kspace")
+plt.plot(nufft.op(image), alpha=0.7,label="reconstructed kspace")
+plt.legend(loc="lower left", fontsize=8)

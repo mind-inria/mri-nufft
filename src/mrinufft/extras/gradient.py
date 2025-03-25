@@ -6,7 +6,7 @@ from mrinufft.operators.base import with_numpy
 
 
 @with_numpy
-def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
+def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=False):
     """
     Perform conjugate gradient (CG) optimization for image reconstruction.
 
@@ -47,16 +47,23 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
     velocity = tol * velocity + grad / Lipschitz_cst
     image = image - velocity
 
+    def compute_loss(image):
+        residual = operator.op(image) - kspace_data
+        return np.linalg.norm(residual) ** 2
+
+    loss = [compute_loss(image)] if compute_loss else None
     for _ in range(num_iter):
         grad_new = operator.data_consistency(image, kspace_data)
         if np.linalg.norm(grad_new) <= tol:
             break
 
-        beta = np.dot(grad_new.flatten(), grad_new.flatten()) / np.dot(
+        beta = np.dot(grad_new.flatten(), (grad_new.flatten()-grad.flatten())) / np.dot(
             grad.flatten(), grad.flatten()
         )
+        beta = max(0, beta) #Polak-Ribiere formula is used to compute the beta 
         velocity = grad_new + beta * velocity
 
         image = image - velocity / Lipschitz_cst
-
-    return image
+        loss.append(compute_loss(image)) if loss is not None else None
+   
+    return image, np.array(loss) if loss is not None else image
