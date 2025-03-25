@@ -381,9 +381,9 @@ class FourierOperatorBase(ABC):
         Returns
         -------
         np.ndarray
-            Reconstructed image 
+            Reconstructed image
         np.ndarray, optional
-            array of loss at each iteration, if compute_loss is True. 
+            array of loss at each iteration, if compute_loss is True.
         """
         from ..extras.gradient import cg
 
