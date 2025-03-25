@@ -360,6 +360,28 @@ class FourierOperatorBase(ABC):
             tmp_op = self
         return power_method(max_iter, tmp_op)
 
+    def cg(self, kspace_data, compute_loss=False, **kwargs):
+        """Conjugate Gradient method to solve the inverse problem.
+
+        Parameters
+        ----------
+        kspace_data: np.ndarray
+            The k-space data to reconstruct.
+        computer_loss: bool
+            Whether to compute the loss at each iteration. 
+            If True, loss is calculated and returned, otherwise, it's skipped.
+        **kwargs:
+            Extra arguments to pass to the conjugate gradient method.
+
+        Returns
+        -------
+        np.ndarray, np.ndarray
+            Reconstructed image and loss value if compute_loss is True. 
+        """
+        from ..extras.gradient import cg
+
+        return cg(operator=self, kspace_data=kspace_data, compute_loss=compute_loss, **kwargs)
+    
     @property
     def uses_sense(self):
         """Return True if the operator uses sensitivity maps."""

@@ -60,7 +60,7 @@ nufft = NufftOperator(
 # %%
 # Reconstruct the image using the CG method
 kspace_data = nufft.op(image)  # get the k-space data
-reconstructed_image, loss = cg(operator=nufft, kspace_data=kspace_data,num_iter=50, compute_loss=True)  # reconstruct the image
+reconstructed_image, loss = nufft.cg(kspace_data=kspace_data, num_iter=50, compute_loss=True)  # reconstruct the image
 
 # Display the results
 def normalize(img, vmin, vmax):
@@ -99,3 +99,4 @@ plt.title("kspace from adjoint NUFFT")
 plt.plot(kspace_data, label="acquired kspace")
 plt.plot(nufft.op(image), alpha=0.7,label="reconstructed kspace")
 plt.legend(loc="lower left", fontsize=8)
+# %%

@@ -47,11 +47,11 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
     velocity = tol * velocity + grad / Lipschitz_cst
     image = image - velocity
 
-    def compute_loss(image):
+    def calculate_loss(image):
         residual = operator.op(image) - kspace_data
         return np.linalg.norm(residual) ** 2
 
-    loss = [compute_loss(image)] if compute_loss else None
+    loss = [calculate_loss(image)] if compute_loss else None
     for _ in range(num_iter):
         grad_new = operator.data_consistency(image, kspace_data)
         if np.linalg.norm(grad_new) <= tol:
@@ -64,6 +64,7 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
         velocity = grad_new + beta * velocity
 
         image = image - velocity / Lipschitz_cst
-        loss.append(compute_loss(image)) if loss is not None else None
+        loss.append(calculate_loss(image)) if loss is not None else None
    
-    return image, np.array(loss) if loss is not None else image
+    return image if loss is None else (image, np.array(loss))
+
