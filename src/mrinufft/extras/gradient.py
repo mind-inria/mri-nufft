@@ -57,14 +57,13 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
         if np.linalg.norm(grad_new) <= tol:
             break
 
-        beta = np.dot(grad_new.flatten(), (grad_new.flatten()-grad.flatten())) / np.dot(
-            grad.flatten(), grad.flatten()
-        )
-        beta = max(0, beta) #Polak-Ribiere formula is used to compute the beta 
+        beta = np.dot(
+            grad_new.flatten(), (grad_new.flatten() - grad.flatten())
+        ) / np.dot(grad.flatten(), grad.flatten())
+        beta = max(0, beta)  # Polak-Ribiere formula is used to compute the beta
         velocity = grad_new + beta * velocity
 
         image = image - velocity / Lipschitz_cst
         loss.append(calculate_loss(image)) if loss is not None else None
-   
-    return image if loss is None else (image, np.array(loss))
 
+    return image if loss is None else (image, np.array(loss))
