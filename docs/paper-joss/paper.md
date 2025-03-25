@@ -32,15 +32,15 @@ authors:
     affiliation: "1,2"
     
 affiliations:
- - name: MIND, Inria
+ - name: MIND, Inria, France
    index: 1
- - name: Université Paris-Saclay / CEA 
+ - name: Université Paris-Saclay / CEA, France
    index: 2
- - name: Chipiron
+ - name: Chipiron, France
    index: 3
- - name: INFN, Pisa Division 
+ - name: INFN, Pisa Division, Italy
    index: 4 
- - name: Siemens Healthineers 
+ - name: Siemens Healthineers, Princeton, United States of America
    index: 5
    
 date: 20 September 2024
@@ -66,7 +66,7 @@ Furthermore, there has been a growing interest in using deep learning to jointly
 ![MRI-NUFFT as an interface for non-Cartesian MRI](../_static/mri-nufft-scheme.svg){width=10cm}
 
 ## NUFFT Library compatibility 
-MRI-NUFFT is compatible with the following NUFFT librairies: FINUFFT[@barnett_parallel_2019], CUFINUFFT[@shih_cufinufft_2021], gpuNUFFT[@knoll_gpunufft_2014], TorchKbNufft[@muckley_torchkbnufft_2020], pyNFFT, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
+MRI-NUFFT is compatible with the following NUFFT librairies: FINUFFT[@barnett_nufft_2019][@barnett_aliasing_2020], CUFINUFFT[@shih_cufinufft_2021], gpuNUFFT[@knoll_gpunufft_2014], TorchKbNufft[@muckley_torchkbnufft_2020], pyNFFT, sigpy[@ong_frank_sigpy_2019] and BART[@uecker_berkley_2015]. 
 Using our [benchmark](https://github.com/mind-inria/mri-nufft-benchmark/) we can also determine which NUFFT implementation provides the best performances both in term of computation time and memory footprint. At the time of writing, cufinufft and gpunufft provide the best performances by leveraging CUDA acceleration. MRI-NUFFT supports as well standard array libraries (NumPy, CuPy, PyTorch, TensorFlow, etc.) and optimizes data copies, relying on the array-API standard. 
 It also provides several enhancements on top of these backends, notably an optimized 2.5D NUFFT (for stacks of 2D non uniform trajectories, commonly used in MRI), and a data-consistency term for iterative reconstruction ($\mathcal{F}_\Omega^*(\mathcal{F}_\Omega x - y)$).
 
@@ -115,7 +115,7 @@ $$y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \
 
 where $t_i$ is the time at which the frequency $\nu_i$ is acquired.
 With these mixed-domain field perturbations, the Fourier model does not hold anymore and the FFT algorithm can no longer be used. 
-The main solution [@sutton_fast_2003] is to interpolate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
+The main solution [@sutton_fast_2003] is to interpolate the mixed-domain exponential term by splitting it into single-domain weights $b_{m, \ell}$ and $c_{\ell, n}$, where $L \ll M, N$ regular Fourier transforms are performed to approximate the non-Fourier transform.
 
 $$x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}$$
 

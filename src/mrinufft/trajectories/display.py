@@ -57,6 +57,8 @@ class displayConfig:
     This can be any of the matplotlib colormaps, or a list of colors."""
     one_shot_color: str = "k"
     """Matplotlib color for the highlighted shot, by default ``"k"`` (black)."""
+    one_shot_linewidth_factor: float = 2
+    """Factor to multiply the linewidth of the highlighted shot, by default ``2``."""
     gradient_point_color: str = "r"
     """Matplotlib color for gradient constraint points, by default ``"r"`` (red)."""
     slewrate_point_color: str = "b"
@@ -243,7 +245,7 @@ def display_2D_trajectory(
             trajectory[shot_id, :, 0],
             trajectory[shot_id, :, 1],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
 
     # Point out violated constraints if requested
@@ -379,7 +381,7 @@ def display_3D_trajectory(
             trajectory[shot_id, :, 1],
             trajectory[shot_id, :, 2],
             color=displayConfig.one_shot_color,
-            linewidth=2 * displayConfig.linewidth,
+            linewidth=displayConfig.one_shot_linewidth_factor * displayConfig.linewidth,
         )
         trajectory = trajectory.reshape((-1, Nc, Ns, 3))
 
@@ -513,12 +515,12 @@ def display_gradients_simply(
 
     # Show signal as modulated distance to center
     distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
-    distances = np.tile(distances.reshape((len(shot_ids), -1, 1)), (1, 1, 10))
+    distances = distances / np.max(distances)
     signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
     signal = (
-        signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))
-    ).real
-    signal = signal * np.abs(signal) ** 3
+        signal**2
+        * np.cos(figsize * 8 * 2 * np.pi * np.linspace(0, 1, signal.shape[-1]))[None, :]
+    )
 
     colors = displayConfig.get_colorlist()
     # Show signal for each requested shot

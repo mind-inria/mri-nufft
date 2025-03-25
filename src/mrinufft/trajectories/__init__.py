@@ -19,12 +19,14 @@ from .sampling import (
 from .tools import (
     conify,
     duplicate_along_axes,
+    get_random_loc_1d,
     oversample,
     precess,
     radialize_center,
     rotate,
     shellify,
     stack,
+    stack_random,
     stack_spherically,
 )
 from .trajectory2D import (
@@ -88,7 +90,9 @@ __all__ = [
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
     # tools
+    "get_random_loc_1d",
     "stack",
+    "stack_random",
     "rotate",
     "precess",
     "conify",

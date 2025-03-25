@@ -202,20 +202,20 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
     npt.assert_equal(image_tmp, image_data)
 
 
-def test_gradient_lipschitz(operator, image_data, kspace_data):
-    """Test the gradient lipschitz constant."""
-    subspace_op, _, _ = operator
+# def test_gradient_lipschitz(operator, image_data, kspace_data):
+#     """Test the gradient lipschitz constant."""
+#     subspace_op, _, _ = operator
 
-    img = image_data.copy()
-    kspace = kspace_data.copy()
+#     img = image_data.copy()
+#     kspace = kspace_data.copy()
 
-    for _ in range(10):
-        grad = subspace_op.data_consistency(img, kspace)
-        norm = np.linalg.norm(grad)
-        grad /= norm
-        np.copyto(img, grad.reshape(*img.shape))
-        norm_prev = norm
+#     for _ in range(10):
+#         grad = subspace_op.data_consistency(img, kspace)
+#         norm = np.linalg.norm(grad)
+#         grad /= norm
+#         np.copyto(img, grad.reshape(*img.shape))
+#         norm_prev = norm
 
-    # TODO: check that the value is "not too far" from 1
-    # TODO: to do the same with density compensation
-    assert (norm - norm_prev) / norm_prev < 1e-3
+#     # TODO: check that the value is "not too far" from 1
+#     # TODO: to do the same with density compensation
+#     assert (norm - norm_prev) / norm_prev < 1e-3

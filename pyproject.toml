@@ -23,7 +23,7 @@ autodiff = ["torch"]
 
 test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
-doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl"]
+doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl", "coverage"]
 # pooch is for scipy.datasets
 
 [build-system]
@@ -76,3 +76,9 @@ live_mode = false
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pyright]
+reportPossiblyUnboundVariable = false
+typeCheckingMode = "basic"
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false

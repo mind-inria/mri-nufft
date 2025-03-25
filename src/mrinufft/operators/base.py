@@ -10,18 +10,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-
+from typing import ClassVar, Callable
 import numpy as np
+from numpy.typing import NDArray
 
 from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE
 from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
-
-if AUTOGRAD_AVAILABLE:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad
-
 
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
@@ -92,7 +89,10 @@ def get_operator(
         operator = partial(operator, backend=backend)
 
     if not available:
-        raise ValueError(f"backend {backend_name} found, but dependencies are not met.")
+        raise ValueError(
+            f"backend {backend_name} found, but dependencies are not met."
+            f" ``pip install mri-nufft[{backend_name}]`` may solve the issue."
+        )
 
     if args or kwargs:
         operator = operator(*args, **kwargs)
@@ -121,6 +121,9 @@ class FourierOperatorBase(ABC):
     _density_method = None
     _grad_wrt_data = False
     _grad_wrt_traj = False
+
+    backend: ClassVar[str]
+    available: ClassVar[bool]
 
     def __init__(self):
         if not self.available:
@@ -207,21 +210,21 @@ class FourierOperatorBase(ABC):
         """
         pass
 
-    def data_consistency(self, image, obs_data):
+    def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 
         This is the naive implementation using adj_op(op(x)-y).
         Specific backend can (and should!) implement a more efficient version.
         """
-        return self.adj_op(self.op(image) - obs_data)
+        return self.adj_op(self.op(image_data) - obs_data)
 
     def with_off_resonance_correction(self, B, C, indices):
         """Return a new operator with Off Resonnance Correction."""
-        from ..off_resonance import MRIFourierCorrected
+        from .off_resonance import MRIFourierCorrected
 
         return MRIFourierCorrected(self, B, C, indices)
 
-    def compute_smaps(self, method=None):
+    def compute_smaps(self, method: NDArray | Callable | str | dict | None = None):
         """Compute the sensitivity maps and set it.
 
         Parameters
@@ -286,6 +289,8 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
+        from mrinufft.operators.autodiff import MRINufftAutoGrad
+
         return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
 
     def compute_density(self, method=None):
@@ -329,7 +334,7 @@ class FourierOperatorBase(ABC):
                 shape,
                 **kwargs,
             )
-        self._density = method(self.samples, self.shape, **kwargs)
+        self.density = method(self.samples, self.shape, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
@@ -423,9 +428,9 @@ class FourierOperatorBase(ABC):
         return self._smaps
 
     @smaps.setter
-    def smaps(self, smaps):
-        self._check_smaps_shape(smaps)
-        self._smaps = smaps
+    def smaps(self, new_smaps):
+        self._check_smaps_shape(new_smaps)
+        self._smaps = new_smaps
 
     def _check_smaps_shape(self, smaps):
         """Check the shape of the sensitivity maps."""
@@ -443,13 +448,13 @@ class FourierOperatorBase(ABC):
         return self._density
 
     @density.setter
-    def density(self, density):
-        if density is None:
+    def density(self, new_density):
+        if new_density is None:
             self._density = None
-        elif len(density) != self.n_samples:
+        elif len(new_density) != self.n_samples:
             raise ValueError("Density and samples should have the same length")
         else:
-            self._density = density
+            self._density = new_density
 
     @property
     def dtype(self):
@@ -457,8 +462,8 @@ class FourierOperatorBase(ABC):
         return self._dtype
 
     @dtype.setter
-    def dtype(self, dtype):
-        self._dtype = np.dtype(dtype)
+    def dtype(self, new_dtype):
+        self._dtype = np.dtype(new_dtype)
 
     @property
     def cpx_dtype(self):
@@ -471,8 +476,8 @@ class FourierOperatorBase(ABC):
         return self._samples
 
     @samples.setter
-    def samples(self, samples):
-        self._samples = samples
+    def samples(self, new_samples):
+        self._samples = new_samples
 
     @property
     def n_samples(self):

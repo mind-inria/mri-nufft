@@ -43,6 +43,12 @@ class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
     pass
 
 
+class StrEnum(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """An Enum for str that is case insensitive for its attributes."""
+
+    pass
+
+
 class Gammas(FloatEnum):
     """Enumerate gyromagnetic ratios for common nuclei in MR."""
 
@@ -94,7 +100,7 @@ class NormShapes(FloatEnum):
     OCTAHEDRON = L1
 
 
-class Tilts(str, Enum):
+class Tilts(StrEnum):
     r"""Enumerate available tilts.
 
     Notes
@@ -120,7 +126,7 @@ class Tilts(str, Enum):
     MRI = MRI_GOLDEN
 
 
-class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+class Packings(StrEnum):
     """Enumerate available packing method for shots.
 
     It is mostly used for wave-CAIPI trajectory
@@ -144,6 +150,27 @@ class Packings(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     HEXAGONAL = HEXAGON
     UNIFORM = RANDOM
     SPIRAL = FIBONACCI
+
+
+#############################
+# Variable Density Sampling #
+#############################
+
+
+class VDSorder(StrEnum):
+    """Available ordering for variable density sampling."""
+
+    CENTER_OUT = "center-out"
+    RANDOM = "random"
+    TOP_DOWN = "top-down"
+
+
+class VDSpdf(StrEnum):
+    """Available law for variable density sampling."""
+
+    GAUSSIAN = "gaussian"
+    UNIFORM = "uniform"
+    EQUISPACED = "equispaced"
 
 
 ###############

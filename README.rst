@@ -9,7 +9,7 @@ Doing non-Cartesian MR Imaging has never been so easy.
    :header-rows: 0
 
    * - .. image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
-     - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CI/badge.svg
+     - .. image:: https://github.com/mind-inria/mri-nufft/actions/workflows/test-ci.yml/badge.svg
      - .. image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
    * - .. image:: https://img.shields.io/badge/style-black-black
      - .. image:: https://img.shields.io/badge/docs-Sphinx-blue
@@ -55,6 +55,7 @@ Usage
 
       ## The real deal starts here ##
       # Choose your NUFFT backend (installed independently from the package)
+      # pip install mri-nufft[finufft] will be just fine here 
       NufftOperator = mrinufft.get_operator("finufft")
 
       # For improved image reconstruction, use density compensation
@@ -88,6 +89,10 @@ MRI-nufft is available on Pypi and can be installed with::
   pip install mri-nufft
 
 Additionally, you will have to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`_ for more guidance.
+Typically we recommend:: 
+
+  pip install mri-nufft[finufft] 
+  pip install mri-nufft[cufinufft] # if you have a NVIDIA GPU and CUDA>=12
 
 
 Benchmark
