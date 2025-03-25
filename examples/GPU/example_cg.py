@@ -10,6 +10,10 @@ for solving systems of linear equations of the form Ax = b, where A is a symmetr
 positive-definite matrix. The CG method is an iterative algorithm that is particularly
 useful for large, sparse systems where direct methods are computationally expensive.
 
+The Conjugate Gradient method is widely used in various scientific and engineering
+applications, including solving partial differential equations, optimization problems,
+and machine learning tasks.
+
 This method is inspired by techniques from [SigPy]_ and
 [Aquaulb's MOOC]_, as well as general knowledge in [Wikipedia Conjugate Gradient]_.
 
