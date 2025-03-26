@@ -15,7 +15,7 @@ applications, including solving partial differential equations, optimization pro
 and machine learning tasks.
 
 This method is inspired by techniques from [SigPy]_ and
-[Aquaulb]_'s MOOC, as well as general knowledge in [Wikipedia Conjugate Gradient]_.
+[Aquaulb]_ MOOC, as well as general knowledge in [Wikipedia]_.
 
 """
 
@@ -100,12 +100,8 @@ plt.legend(loc="lower left", fontsize=8)
 #
 # .. [SigPy] SigPy Documentation. Conjugate Gradient Method.
 #    https://sigpy.readthedocs.io/en/latest/_modules/sigpy/alg.html#ConjugateGradient
-
 # .. [Aquaulb] Aquaulb's MOOC: Solving PDE with Iterative Methods.
 #    https://aquaulb.github.io/book_solving_pde_mooc/solving_pde_mooc/notebooks/05_IterativeMethods/05_02_Conjugate_Gradient.html
-
-# .. [Wikipedia Conjugate Gradient] Wikipedia: Conjugate Gradient Method.
+# .. [Wikipedia] Wikipedia: Conjugate Gradient Method.
 #    https://en.wikipedia.org/wiki/Conjugate_gradient_method
 
-# .. [Wikipedia Momentum] Wikipedia: Momentum.
-#    https://en.wikipedia.org/wiki/Momentum
