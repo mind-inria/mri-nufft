@@ -30,34 +30,32 @@ This method is inspired by techniques from [SigPy]_ and
 import numpy as np
 import mrinufft
 from brainweb_dl import get_mri
-from mrinufft.extras.gradient import cg
 from mrinufft.density import voronoi
 from matplotlib import pyplot as plt
 
 # %%
 # Setup Inputs
-samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=256)
+samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=512, nb_revolutions=8)
 image = get_mri(sub_id=4)
 image = np.flipud(image[90])
 
 # %%
 # Setup the NUFFT operator
 NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
-density = voronoi(samples_loc)  # get the density
 
 nufft = NufftOperator(
     samples_loc,
     shape=image.shape,
-    density=density,
-    n_coils=1,
+    density=True,
 )  # create the NUFFT operator
 
 # %%
 # Reconstruct the image using the CG method
-kspace_data = nufft.op(image) # get the k-space data
+kspace_data = nufft.op(image)  # get the k-space data
+dc_adjoint = nufft.adj_op(kspace_data)
 reconstructed_image, loss = nufft.cg(
-    kspace_data=kspace_data, x_init=nufft.adj_op(kspace_data).copy(), num_iter=50, compute_loss=True
-)  
+    kspace_data=kspace_data, x_init=dc_adjoint.copy(), num_iter=50, compute_loss=True
+)
 
 
 # Display the results
@@ -70,12 +68,14 @@ plt.colorbar()
 
 plt.subplot(2, 3, 2)
 plt.title("Conjugate gradient")
-plt.imshow(abs(reconstructed_image),vmin=image.min(),vmax=image.max(),cmap="gray")
+plt.imshow(abs(reconstructed_image), vmin=image.min(), vmax=image.max(), cmap="gray")
 plt.colorbar()
 
 plt.subplot(2, 3, 3)
 plt.title("Adjoint NUFFT")
-plt.imshow(abs(nufft.adj_op(kspace_data)),vmin=image.min(),vmax=image.max(),cmap="gray")
+plt.imshow(
+    abs(nufft.adj_op(kspace_data)), vmin=image.min(), vmax=image.max(), cmap="gray"
+)
 plt.colorbar()
 
 plt.subplot(2, 3, 4)
@@ -84,16 +84,15 @@ plt.plot(loss)
 plt.grid()
 
 plt.subplot(2, 3, 5)
-plt.title("kspace from conjugate gradient")
-
-plt.plot(np.log(abs(kspace_data)), label="acquired kspace")
-plt.plot(np.log(abs(nufft.op(reconstructed_image))), alpha=0.7, label="reconstructed kspace")
+plt.title("K-space from conjugate gradient (CG)")
+plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
+plt.plot(np.log(abs(nufft.op(reconstructed_image))), label="CG k-space")
 plt.legend(loc="lower left", fontsize=8)
 
 plt.subplot(2, 3, 6)
-plt.title("kspace from adjoint NUFFT")
-plt.plot(np.log(abs(kspace_data)), label="acquired kspace")
-plt.plot(np.log(abs(nufft.op(image))), alpha=0.7, label="reconstructed kspace")
+plt.title("K-space from DC adjoint NUFFT")
+plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
+plt.plot(np.log(abs(nufft.op(dc_adjoint))), label="DC adjoint k-space")
 plt.legend(loc="lower left", fontsize=8)
 # %%
 # References
