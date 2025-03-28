@@ -104,4 +104,3 @@ plt.legend(loc="lower left", fontsize=8)
 #    https://aquaulb.github.io/book_solving_pde_mooc/solving_pde_mooc/notebooks/05_IterativeMethods/05_02_Conjugate_Gradient.html
 # .. [Wikipedia] Wikipedia: Conjugate Gradient Method.
 #    https://en.wikipedia.org/wiki/Conjugate_gradient_method
-
