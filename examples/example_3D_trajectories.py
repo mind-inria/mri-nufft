@@ -44,6 +44,7 @@ in_out = False  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Angular distance between shots
 nb_repetitions = 6  # Number of stacks, rotations, cones, shells etc.
 nb_revolutions = 1  # Number of revolutions for base trajectories
+seed = 0  # Seed for random trajectories
 
 # Display parameters
 figure_size = 10  # Figure size for trajectory plots
@@ -633,6 +634,80 @@ function = lambda x: mn.initialize_3D_seiffert_spiral(
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
+# %%
+# ECCENTRIC
+# ---------
+#
+# This is a reproduction of the proposition from [Kla+24]_.
+# It creates trajectories as uniformly distributed circles,
+# with a pseudo rosette-like structure at the center to ensure
+# its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+# TRajectorIes for Compressed sensing.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``nb_stacks (int)``: number of stack layers along the
+#   :math:`k_z`-axis
+# - ``radius_ratio (float)``: radius of each circle relatively
+#   to the k-space radius.
+# - ``center_ratio (float)``: proportion of shots positioned around
+#   the center into a pseudo-rosette pattern (default 0).
+# - ``nb_revolutions (float)``: number of revolutions per circle
+#   (default 1). See spiral
+# - ``min_distance (float)``: minimum allowed distance between
+#   consecutive circles relatively to the k-space radius (default 0).
+# - ``seed (int)``: random seed for reproducibility, used only
+#   to draw the circle centers (default None).
+
+trajectory = mn.initialize_3D_eccentric(
+    Nc, Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, seed=seed
+)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# ``nb_stacks (int)``
+# ~~~~~~~~~~~~~~~~~~~
+#
+# The number of stack layers along the :math:`k_z`-axis. The number
+# of shot varies per stack to match the density of a sphere.
+#
+
+arguments = [2, 5, 7, 13]
+function = lambda x: mn.initialize_3D_eccentric(
+    Nc=Nc, Ns=Ns, nb_stacks=x, radius_ratio=0.3, seed=seed
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``radius_ratio (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The radius of each circle relatively to the k-space radius. It should be below
+# 0.5 otherwise the shots are not able to cross the k-space center.
+#
+
+arguments = [0.05, 0.2, 0.35, 0.5]
+function = lambda x: mn.initialize_3D_eccentric(
+    Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=x, seed=seed
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``center_ratio (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The proportion of shots positioned around the center into a pseudo-rosette pattern.
+# The goal is to ensure its coverage despite the trajectories being random otherwise.
+#
+
+arguments = [0, 0.3, 0.6, 1]
+function = lambda x: mn.initialize_3D_eccentric(
+    Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, center_ratio=x, seed=seed
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
 
 # %%
 # Shell trajectories
@@ -1139,3 +1214,9 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
 #    "Three dimensional radial echo planar imaging for functional MRI."
 #    Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.
+# .. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
+#    Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
+#    Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
+#    "ECCENTRIC: a fast and unrestrained approach for high-resolution
+#    in vivo metabolic imaging at ultra-high field MR".
+#    Imaging Neuroscience 2 (2024): 1-20.
