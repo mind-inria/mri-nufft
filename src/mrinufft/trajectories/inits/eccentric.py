@@ -32,17 +32,19 @@ def _initialize_2D_eccentric(
     Ns : int
         Number of samples per shot/circle.
     radius_ratio : float
-        Radius of each circle relatively to the k-space radius.
+        Radius of each circle relatively to the k-space radius,
+        between 0 and 0.5.
     center_ratio : float, optional
-        Proportion of shots positioned around the center into a
-        pseudo-rosette pattern. Default to 0.
+        Proportion between 0 and 1 of shots positioned around
+        the center into a pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
         Minimum allowed distance between consecutive circles relatively
-        to the k-space radius. Defaults to 0.
+        to the k-space radius between 0 and 0.5. Defaults to 0.
     max_radius : float, optional
-        Maximum radius for circle placement as ratio. Defaults to 1.
+        Maximum radius for circle placement relative to the k-space radius,
+        between 0 and 1. Defaults to 1.
     seed : int | None, optional
         Random seed for reproducibility, used only to draw the circle centers.
         Defaults to None.
@@ -53,14 +55,14 @@ def _initialize_2D_eccentric(
         The generated 2D trajectory with shape (Nc, Ns, 2).
     """
     # Check arguments validity
-    if radius_ratio <= 0 or radius_ratio > 0.5:
+    if not (0 < radius_ratio <= 0.5):
         raise ValueError("The `radius_ratio` should be strictly between 0 and 0.5.")
-    if center_ratio < 0 or center_ratio > 1:
+    if not (0 <= center_ratio <= 1):
         raise ValueError("The `center_ratio` should be between 0 and 1.")
-    if max_radius < 0 or max_radius > 1:
-        raise ValueError("The `max_radius` should be between 0 and 1.")
-    if min_distance < 0 or min_distance > 0.5:
+    if not (0 <= min_distance <= 0.5):
         raise ValueError("The `min_distance` should be between 0 and 0.5.")
+    if not (0 <= max_radius <= 1):
+        raise ValueError("The `max_radius` should be between 0 and 1.")
 
     # Define a single circle
     circle_angles = np.linspace(0, 2 * np.pi * nb_revolutions, Ns, endpoint=False)
@@ -147,15 +149,16 @@ def initialize_2D_eccentric(
     Ns : int
         Number of samples per shot/circle.
     radius_ratio : float
-        Radius of each circle relatively to the k-space radius.
+        Radius of each circle relatively to the k-space radius,
+        between 0 and 0.5.
     center_ratio : float, optional
-        Proportion of shots positioned around the center into a
-        pseudo-rosette pattern. Default to 0.
+        Proportion between 0 and 1 of shots positioned around
+        the center into a pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
-        Minimum allowed distance between consecutive circles relative
-        to the k-space radius. Defaults to 0.
+        Minimum allowed distance between consecutive circles relatively
+        to the k-space radius between 0 and 0.5. Defaults to 0.
     seed : int | None, optional
         Random seed for reproducibility, used only to draw the circle centers.
         Defaults to None.
@@ -226,15 +229,19 @@ def initialize_3D_eccentric(
     nb_stacks : int
         Number of stack layers along the :math:`k_z`-axis.
     radius_ratio : float
-        Radius of each circle relatively to the k-space radius.
+        Radius of each circle relatively to the k-space radius,
+        between 0 and 0.5.
     center_ratio : float, optional
-        Proportion of shots positioned around the center into a
-        pseudo-rosette pattern. Default to 0.
+        Proportion between 0 and 1 of shots positioned around
+        the center into a pseudo-rosette pattern. Default to 0.
     nb_revolutions : float, optional
         Number of revolutions per circle. Defaults to 1.
     min_distance : float, optional
-        Minimum allowed distance between consecutive circles relative
-        to the k-space radius. Defaults to 0.
+        Minimum allowed distance between consecutive circles relatively
+        to the k-space radius between 0 and 0.5. Defaults to 0.
+    max_radius : float, optional
+        Maximum radius for circle placement relative to the k-space radius,
+        between 0 and 1. Defaults to 1.
     seed : int | None, optional
         Random seed for reproducibility, used only to draw the circle centers.
         Defaults to None.
