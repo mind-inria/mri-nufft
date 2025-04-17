@@ -219,6 +219,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         r2star_map=None,
         B=None,
         tl=None,
+        negate=True,
         backend="cpu",
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
@@ -233,7 +234,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
 
         self._fourier_op = fourier_op
-
+        self.negate = negate
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
@@ -253,7 +254,8 @@ class MRIFourierCorrected(FourierOperatorBase):
                 r2star_map,
             )
         if self.B is None or self.tl is None:
-            raise ValueError("Please either provide fieldmap and t or B and tl")
+            raise ValueError(
+                "Please either provide fieldmap and t or B and tl")
         self.n_interpolators = self.B.shape[0]
 
         # create spatial interpolator
@@ -262,7 +264,8 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.C = None
             self.field_map = field_map
         else:
-            self.C = _get_spatial_coefficients(field_map, self.tl)
+            self.C = _get_spatial_coefficients(
+                field_map, self.tl, negate=self.negate)
             self.field_map = None
 
     def op(self, data, *args):
@@ -285,7 +288,8 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = self.xp.asarray(data)
         if self.C is not None:
             for idx in range(self.n_interpolators):
-                y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
+                y += self.B[idx] * \
+                    self._fourier_op.op(self.C[idx] * data_d, *args)
         else:
             for idx in range(self.n_interpolators):
                 C = self.xp.exp(-self.field_map * self.tl[idx].item())
@@ -364,11 +368,12 @@ def _get_complex_fieldmap(b0_map, r2star_map=None):
     return field_map
 
 
-def _get_spatial_coefficients(field_map, tl):
+def _get_spatial_coefficients(field_map, tl, negate=True):
     xp = get_array_module(field_map)
-
+    exponent = get_array_module(field_map)
+    exponent = -tl if negate else tl
     # get spatial coeffs
-    C = xp.exp(-tl * field_map[..., None])
+    C = xp.exp(exponent * field_map[..., None])
     C = C[None, ...].swapaxes(0, -1)[
         ..., 0
     ]  # (..., n_time_segments) -> (n_time_segments, ...)
