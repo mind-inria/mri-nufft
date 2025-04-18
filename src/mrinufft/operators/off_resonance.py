@@ -199,7 +199,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         The default is ``None`` (purely imaginary field).
         Also supports Cupy arrays and Torch tensors.
     isign : int, optional
-        Sign convention for spatial phase. 
+        Sign convention for spatial phase.
         Either `-1` (default, e^{-iωt}) or `1` (e^{iωt}).
     backend: str, optional
         The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
