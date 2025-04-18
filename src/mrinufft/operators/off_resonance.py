@@ -257,8 +257,7 @@ class MRIFourierCorrected(FourierOperatorBase):
                 r2star_map,
             )
         if self.B is None or self.tl is None:
-            raise ValueError(
-                "Please either provide fieldmap and t or B and tl")
+            raise ValueError("Please either provide fieldmap and t or B and tl")
         self.n_interpolators = self.B.shape[0]
 
         # create spatial interpolator
@@ -267,8 +266,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.C = None
             self.field_map = field_map
         else:
-            self.C = _get_spatial_coefficients(
-                field_map, self.tl, isign=self.isign)
+            self.C = _get_spatial_coefficients(field_map, self.tl, isign=self.isign)
             self.field_map = None
 
     def op(self, data, *args):
@@ -291,8 +289,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = self.xp.asarray(data)
         if self.C is not None:
             for idx in range(self.n_interpolators):
-                y += self.B[idx] * \
-                    self._fourier_op.op(self.C[idx] * data_d, *args)
+                y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
         else:
             for idx in range(self.n_interpolators):
                 C = self.xp.exp(-self.field_map * self.tl[idx].item())
