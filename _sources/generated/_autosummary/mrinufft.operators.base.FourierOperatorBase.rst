@@ -18,6 +18,7 @@ FourierOperatorBase
    
       ~FourierOperatorBase.__init__
       ~FourierOperatorBase.adj_op
+      ~FourierOperatorBase.cg
       ~FourierOperatorBase.check_shape
       ~FourierOperatorBase.compute_density
       ~FourierOperatorBase.compute_smaps

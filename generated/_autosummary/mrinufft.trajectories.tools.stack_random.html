@@ -322,6 +322,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -779,7 +784,7 @@ document.write(`
 “uniform” (default), “gaussian” or np.array</p></li>
 <li><p><strong>rng</strong> (<em>random state</em>)</p></li>
 <li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Order of the lines, “center-out” (default), “random” or “top-down”</p></li>
-<li><p><strong>trajectory</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>ndarray</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.2)"><em>dtype</em></a><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>trajectory</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><em>ndarray</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>...</em><em>]</em><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.2)"><em>dtype</em></a><em>[</em><em>_ScalarType_co</em><em>]</em><em>]</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

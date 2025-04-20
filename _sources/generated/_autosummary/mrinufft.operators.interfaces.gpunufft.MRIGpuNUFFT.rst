@@ -18,6 +18,7 @@ MRIGpuNUFFT
    
       ~MRIGpuNUFFT.__init__
       ~MRIGpuNUFFT.adj_op
+      ~MRIGpuNUFFT.cg
       ~MRIGpuNUFFT.check_shape
       ~MRIGpuNUFFT.compute_density
       ~MRIGpuNUFFT.compute_smaps

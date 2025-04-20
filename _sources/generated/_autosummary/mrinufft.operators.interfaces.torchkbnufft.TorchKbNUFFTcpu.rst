@@ -18,6 +18,7 @@ TorchKbNUFFTcpu
    
       ~TorchKbNUFFTcpu.__init__
       ~TorchKbNUFFTcpu.adj_op
+      ~TorchKbNUFFTcpu.cg
       ~TorchKbNUFFTcpu.check_shape
       ~TorchKbNUFFTcpu.compute_density
       ~TorchKbNUFFTcpu.compute_smaps

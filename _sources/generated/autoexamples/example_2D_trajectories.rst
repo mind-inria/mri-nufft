@@ -60,7 +60,7 @@ Script options
 ==============
 These options are used in the examples below as default values for all trajectories.
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-45
+.. GENERATED FROM PYTHON SOURCE LINES 31-46
 
 .. code-block:: Python
 
@@ -71,6 +71,7 @@ These options are used in the examples below as default values for all trajector
     in_out = True  # Choose between in-out or center-out trajectories
     tilt = "uniform"  # Choose the angular distance between shots
     nb_repetitions = 6  # Number of strips when relevant
+    seed = 0  # Seed for random trajectories
 
     # Display parameters
     figure_size = 6  # Figure size for trajectory plots
@@ -85,7 +86,7 @@ These options are used in the examples below as default values for all trajector
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-63
+.. GENERATED FROM PYTHON SOURCE LINES 47-64
 
 Circular patterns
 ==================
@@ -105,7 +106,7 @@ Arguments:
   then outside (in-out) or not (center-out). ``(default False)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-68
+.. GENERATED FROM PYTHON SOURCE LINES 64-69
 
 .. code-block:: Python
 
@@ -126,7 +127,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-75
+.. GENERATED FROM PYTHON SOURCE LINES 70-76
 
 ``Nc (int)``
 ~~~~~~~~~~~~
@@ -135,7 +136,7 @@ The number of individual shots, here straight lines, used to cover the
 k-space. More shots means better coverage but also longer acquisitions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-81
+.. GENERATED FROM PYTHON SOURCE LINES 76-82
 
 .. code-block:: Python
 
@@ -157,7 +158,7 @@ k-space. More shots means better coverage but also longer acquisitions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-89
+.. GENERATED FROM PYTHON SOURCE LINES 83-90
 
 ``Ns (int)``
 ~~~~~~~~~~~~
@@ -167,7 +168,7 @@ into more smaller segments, and therefore either the acquisition window
 is lengthened or the sampling rate is increased.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-95
+.. GENERATED FROM PYTHON SOURCE LINES 90-96
 
 .. code-block:: Python
 
@@ -189,7 +190,7 @@ is lengthened or the sampling rate is increased.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-105
+.. GENERATED FROM PYTHON SOURCE LINES 97-106
 
 ``tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -201,7 +202,7 @@ common definitions of golden angles. The angle is automatically adapted
 when the ``in_out`` argument is switched to keep the same behavior.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-111
+.. GENERATED FROM PYTHON SOURCE LINES 106-112
 
 .. code-block:: Python
 
@@ -223,7 +224,7 @@ when the ``in_out`` argument is switched to keep the same behavior.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-128
+.. GENERATED FROM PYTHON SOURCE LINES 113-129
 
 ``in_out (bool)``
 ~~~~~~~~~~~~~~~~~
@@ -242,7 +243,7 @@ Note that the behavior of ``tilt`` is automatically adapted to the changes to av
 to update it too when switching ``in_out``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-134
+.. GENERATED FROM PYTHON SOURCE LINES 129-135
 
 .. code-block:: Python
 
@@ -264,7 +265,7 @@ to update it too when switching ``in_out``.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-156
+.. GENERATED FROM PYTHON SOURCE LINES 136-157
 
 Spiral
 ------
@@ -288,7 +289,7 @@ Arguments:
   ``(default "archimedes")``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 156-161
+.. GENERATED FROM PYTHON SOURCE LINES 157-162
 
 .. code-block:: Python
 
@@ -309,7 +310,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-168
+.. GENERATED FROM PYTHON SOURCE LINES 163-169
 
 ``nb_revolutions (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -318,7 +319,7 @@ The number of revolutions performed from the center (i.e. performed
 twice for in-out trajectories).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 168-176
+.. GENERATED FROM PYTHON SOURCE LINES 169-177
 
 .. code-block:: Python
 
@@ -342,7 +343,7 @@ twice for in-out trajectories).
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 177-194
+.. GENERATED FROM PYTHON SOURCE LINES 178-195
 
 ``spiral (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -362,7 +363,7 @@ such as hyperbolic or lithuus spirals, are not considered relevant because
 of their asymptotic behavior around the center.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 194-200
+.. GENERATED FROM PYTHON SOURCE LINES 195-201
 
 .. code-block:: Python
 
@@ -384,7 +385,7 @@ of their asymptotic behavior around the center.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 201-217
+.. GENERATED FROM PYTHON SOURCE LINES 202-218
 
 ``patch_center (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -403,7 +404,7 @@ over the first few samples. However the difference is extremely
 subtle, as shown below.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 217-227
+.. GENERATED FROM PYTHON SOURCE LINES 218-228
 
 .. code-block:: Python
 
@@ -429,7 +430,7 @@ subtle, as shown below.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 228-246
+.. GENERATED FROM PYTHON SOURCE LINES 229-247
 
 Fibonacci spiral
 ----------------
@@ -450,7 +451,7 @@ Arguments:
   ``(default True)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 246-252
+.. GENERATED FROM PYTHON SOURCE LINES 247-253
 
 .. code-block:: Python
 
@@ -472,7 +473,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 253-263
+.. GENERATED FROM PYTHON SOURCE LINES 254-264
 
 ``spiral_reduction (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -485,7 +486,7 @@ strong gradients, and therefore we provide this factor to reduce the
 spiral length, which makes k-space denser along the shorter shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 263-273
+.. GENERATED FROM PYTHON SOURCE LINES 264-274
 
 .. code-block:: Python
 
@@ -511,7 +512,7 @@ spiral length, which makes k-space denser along the shorter shots.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 274-289
+.. GENERATED FROM PYTHON SOURCE LINES 275-290
 
 ``patch_center (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -529,7 +530,7 @@ but generally the difference is extremely subtle, as shown
 below.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 289-299
+.. GENERATED FROM PYTHON SOURCE LINES 290-300
 
 .. code-block:: Python
 
@@ -555,7 +556,7 @@ below.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 300-319
+.. GENERATED FROM PYTHON SOURCE LINES 301-320
 
 Cones
 -----
@@ -577,7 +578,7 @@ Arguments:
   ``(default 1)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 319-324
+.. GENERATED FROM PYTHON SOURCE LINES 320-325
 
 .. code-block:: Python
 
@@ -598,7 +599,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 325-331
+.. GENERATED FROM PYTHON SOURCE LINES 326-332
 
 ``nb_zigzags (float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -607,7 +608,7 @@ The number of “zigzags”, or sinusoidal patterns present over a center-out sh
 (doubled overall for in-out trajectories)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 331-339
+.. GENERATED FROM PYTHON SOURCE LINES 332-340
 
 .. code-block:: Python
 
@@ -631,7 +632,7 @@ The number of “zigzags”, or sinusoidal patterns present over a center-out sh
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 340-348
+.. GENERATED FROM PYTHON SOURCE LINES 341-349
 
 ``width (float)``
 ~~~~~~~~~~~~~~~~~
@@ -642,7 +643,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 ``width < 1`` tends to more radial patterns.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 348-354
+.. GENERATED FROM PYTHON SOURCE LINES 349-355
 
 .. code-block:: Python
 
@@ -664,7 +665,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 355-374
+.. GENERATED FROM PYTHON SOURCE LINES 356-375
 
 Sinusoide
 ---------
@@ -686,7 +687,7 @@ Arguments:
   ``(default 1)``. See cones
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 374-379
+.. GENERATED FROM PYTHON SOURCE LINES 375-380
 
 .. code-block:: Python
 
@@ -707,7 +708,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 380-400
+.. GENERATED FROM PYTHON SOURCE LINES 381-401
 
 PROPELLER
 ---------
@@ -730,7 +731,7 @@ Arguments:
   ``(default "uniform")``. See radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 400-405
+.. GENERATED FROM PYTHON SOURCE LINES 401-406
 
 .. code-block:: Python
 
@@ -751,7 +752,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 406-413
+.. GENERATED FROM PYTHON SOURCE LINES 407-414
 
 ``nb_strips (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -761,7 +762,7 @@ the number of shots ``Nc``, and it is recommended to choose it such that the
 ratio is even to cover the center.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 413-419
+.. GENERATED FROM PYTHON SOURCE LINES 414-420
 
 .. code-block:: Python
 
@@ -783,16 +784,14 @@ ratio is even to cover the center.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 420-436
+.. GENERATED FROM PYTHON SOURCE LINES 421-435
 
 Rings
--------
+-----
 
 A pattern composed of concentric circles like a target, with each
 ring composed of one or more shots . This trajectory was initially
-proposed by Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
-"MRI using a concentric rings trajectory." Magnetic Resonance in Medicine
-59, no. 1 (2008): 102-112.
+proposed in [WLN08]_.
 
 Arguments:
 
@@ -802,7 +801,7 @@ Arguments:
   It should be lower than or equal to ``Nc``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 436-441
+.. GENERATED FROM PYTHON SOURCE LINES 435-440
 
 .. code-block:: Python
 
@@ -823,7 +822,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 442-450
+.. GENERATED FROM PYTHON SOURCE LINES 441-449
 
 ``nb_rings (int)``
 ~~~~~~~~~~~~~~~~~~
@@ -834,7 +833,7 @@ several rings. Note that to fully sample a k-space circle, it should be
 set around :math:`FOV / (2 * resolution)`.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 450-455
+.. GENERATED FROM PYTHON SOURCE LINES 449-454
 
 .. code-block:: Python
 
@@ -855,14 +854,14 @@ set around :math:`FOV / (2 * resolution)`.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 456-460
+.. GENERATED FROM PYTHON SOURCE LINES 455-459
 
 This implementation allows using more shots than rings, and it will automatically
 attribute the additional shots to the longest rings to reduce the top gradient
 amplitude and slew rate.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 461-467
+.. GENERATED FROM PYTHON SOURCE LINES 460-466
 
 .. code-block:: Python
 
@@ -884,7 +883,117 @@ amplitude and slew rate.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 468-483
+.. GENERATED FROM PYTHON SOURCE LINES 467-490
+
+ECCENTRIC
+---------
+
+This is a reproduction of the proposition from [Kla+24]_.
+It creates trajectories as uniformly distributed circles,
+with a pseudo rosette-like structure at the center to ensure
+its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+TRajectorIes for Compressed sensing.
+
+Arguments:
+
+- ``Nc (int)``: number of individual shots. See radial
+- ``Ns (int)``: number of samples per shot. See radial
+- ``radius_ratio (float)``: radius of each circle relatively
+  to the k-space radius.
+- ``center_ratio (float)``: proportion of shots positioned around
+  the center into a pseudo-rosette pattern (default 0).
+- ``nb_revolutions (float)``: number of revolutions per circle
+  (default 1). See spiral
+- ``min_distance (float)``: minimum allowed distance between
+  consecutive circles relatively to the k-space radius (default 0).
+- ``seed (int)``: random seed for reproducibility, used only
+  to draw the circle centers (default None).
+
+.. GENERATED FROM PYTHON SOURCE LINES 490-495
+
+.. code-block:: Python
+
+
+    trajectory = mn.initialize_2D_eccentric(Nc, Ns, radius_ratio=0.3, seed=seed)
+    show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_022.png
+   :alt: example 2D trajectories
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_022.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 496-502
+
+``radius_ratio (float)``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The radius of each circle relatively to the k-space radius. It should be below
+0.5 otherwise the shots are not able to cross the k-space center.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 502-507
+
+.. code-block:: Python
+
+
+    arguments = [0.05, 0.2, 0.35, 0.5]
+    function = lambda x: mn.initialize_2D_eccentric(Nc=Nc, Ns=Ns, radius_ratio=x, seed=seed)
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_023.png
+   :alt: 0.05, 0.2, 0.35, 0.5
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_023.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 508-514
+
+``center_ratio (float)``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The proportion of shots positioned around the center into a pseudo-rosette pattern.
+The goal is to ensure its coverage despite the trajectories being random otherwise.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 514-522
+
+.. code-block:: Python
+
+
+    arguments = [0, 0.3, 0.6, 1]
+    function = lambda x: mn.initialize_2D_eccentric(
+        Nc=Nc, Ns=Ns, radius_ratio=0.3, center_ratio=x, seed=seed
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_024.png
+   :alt: 0, 0.3, 0.6, 1
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_024.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 523-538
 
 Rosette
 -------
@@ -902,7 +1011,7 @@ Arguments:
   to define the shot curvature. ``(default 0)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 483-488
+.. GENERATED FROM PYTHON SOURCE LINES 538-543
 
 .. code-block:: Python
 
@@ -914,23 +1023,23 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_022.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_025.png
    :alt: example 2D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_022.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_025.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 489-501
+.. GENERATED FROM PYTHON SOURCE LINES 544-556
 
 ``coprime_index (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The index used to select a compatible coprime factor, parameterized such
 that trajectories keep :math:`N_c` petals while increasing their width,
-i.e. increasing the curvature of the shots. This argument is quite
+i.e. increasing the curvature of the shots. This argument is quite
 complex with regard to the original formula in order to remain easily
 interpretable, user-friendly and optimal for MR use cases. For more
 details, please consult this `Wikipedia page`_.
@@ -938,7 +1047,7 @@ details, please consult this `Wikipedia page`_.
 .. _Wikipedia page: https://en.wikipedia.org/wiki/Rose\_(mathematics)#Roses_with_rational_number_values_for_k.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 501-507
+.. GENERATED FROM PYTHON SOURCE LINES 556-562
 
 .. code-block:: Python
 
@@ -951,16 +1060,16 @@ details, please consult this `Wikipedia page`_.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_023.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_026.png
    :alt: 0, 1, 5, 10
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_023.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_026.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 508-526
+.. GENERATED FROM PYTHON SOURCE LINES 563-581
 
 Polar Lissajous
 ---------------
@@ -981,7 +1090,7 @@ Arguments:
   different segments of the k-space. ``(default 1)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 526-531
+.. GENERATED FROM PYTHON SOURCE LINES 581-586
 
 .. code-block:: Python
 
@@ -993,16 +1102,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_024.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_027.png
    :alt: example 2D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_024.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_027.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 532-539
+.. GENERATED FROM PYTHON SOURCE LINES 587-594
 
 ``coprime_index (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1012,7 +1121,7 @@ shot curvature. For now, it is less trivial to select than for rosette
 but it will be updated in the future.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 539-547
+.. GENERATED FROM PYTHON SOURCE LINES 594-602
 
 .. code-block:: Python
 
@@ -1027,16 +1136,16 @@ but it will be updated in the future.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_025.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_028.png
    :alt: 0, 3, 12, 15
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_025.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_028.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 548-562
+.. GENERATED FROM PYTHON SOURCE LINES 603-617
 
 ``nb_segments (int)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1053,7 +1162,7 @@ opposing quarters of the k-space. It implies that ``nb_segments`` should
 be a divider of ``Nc``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 562-570
+.. GENERATED FROM PYTHON SOURCE LINES 617-625
 
 .. code-block:: Python
 
@@ -1068,16 +1177,16 @@ be a divider of ``Nc``.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_026.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_029.png
    :alt: 1, 2, 3, 4, 6, 8, 12
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_026.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_029.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 571-584
+.. GENERATED FROM PYTHON SOURCE LINES 626-639
 
 Comments
 ~~~~~~~~
@@ -1093,7 +1202,7 @@ unexploited geometries.
 .. _MathCurve page: https://mathcurve.com/courbes2d.gb/lissajous/lissajous.shtml
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 584-596
+.. GENERATED FROM PYTHON SOURCE LINES 639-651
 
 .. code-block:: Python
 
@@ -1117,37 +1226,37 @@ unexploited geometries.
 
     *
 
-      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_027.png
-         :alt: 1, 2, 4, 12
-         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_027.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_028.png
-         :alt: 1, 2, 4, 12
-         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_028.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_029.png
-         :alt: 1, 2, 4, 12
-         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_029.png
-         :class: sphx-glr-multi-img
-
-    *
-
       .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_030.png
          :alt: 1, 2, 4, 12
          :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_030.png
          :class: sphx-glr-multi-img
 
+    *
+
+      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_031.png
+         :alt: 1, 2, 4, 12
+         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_031.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_032.png
+         :alt: 1, 2, 4, 12
+         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_032.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_033.png
+         :alt: 1, 2, 4, 12
+         :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_033.png
+         :class: sphx-glr-multi-img
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 597-614
+
+.. GENERATED FROM PYTHON SOURCE LINES 652-669
 
 Non-circular patterns
 =====================
@@ -1167,7 +1276,7 @@ Arguments:
   to covering the full band without overlapping other bands. ``(default 1)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 614-619
+.. GENERATED FROM PYTHON SOURCE LINES 669-674
 
 .. code-block:: Python
 
@@ -1179,16 +1288,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_031.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_034.png
    :alt: example 2D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_031.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_034.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 620-625
+.. GENERATED FROM PYTHON SOURCE LINES 675-680
 
 ``nb_zigzags (float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1196,7 +1305,7 @@ Arguments:
 The number of sinusoidal patterns along a line, similar to cones and sinusoidal trajectories.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 625-631
+.. GENERATED FROM PYTHON SOURCE LINES 680-686
 
 .. code-block:: Python
 
@@ -1209,16 +1318,16 @@ The number of sinusoidal patterns along a line, similar to cones and sinusoidal 
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_032.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_035.png
    :alt: 1, 2.5, 5, 10
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_032.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_035.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 632-644
+.. GENERATED FROM PYTHON SOURCE LINES 687-699
 
 ``width (float)``
 ~~~~~~~~~~~~~~~~~
@@ -1233,7 +1342,7 @@ resulting in non-covered areas with large widths. This behavior might be subject
 changes in future versions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 644-650
+.. GENERATED FROM PYTHON SOURCE LINES 699-705
 
 .. code-block:: Python
 
@@ -1246,16 +1355,16 @@ changes in future versions.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_033.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_036.png
    :alt: 0, 1, 1.5, 3
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_033.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_036.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 651-667
+.. GENERATED FROM PYTHON SOURCE LINES 706-722
 
 Lissajous
 ---------
@@ -1274,7 +1383,7 @@ Arguments:
   ``(default "1")``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 667-672
+.. GENERATED FROM PYTHON SOURCE LINES 722-727
 
 .. code-block:: Python
 
@@ -1286,16 +1395,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_034.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_037.png
    :alt: example 2D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_034.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_037.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 673-679
+.. GENERATED FROM PYTHON SOURCE LINES 728-734
 
 ``density (float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1304,7 +1413,7 @@ It relates to both the curve length and curvature, normalized such that
 ``density = 1`` corresponds to pseudo-diagonal curves for any given :math:`N_c`.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 679-685
+.. GENERATED FROM PYTHON SOURCE LINES 734-740
 
 .. code-block:: Python
 
@@ -1317,16 +1426,16 @@ It relates to both the curve length and curvature, normalized such that
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_035.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_038.png
    :alt: 1, 1.5, 2, 3
-   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_035.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_2D_trajectories_038.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 686-692
+.. GENERATED FROM PYTHON SOURCE LINES 741-756
 
 References
 ==========
@@ -1334,11 +1443,20 @@ References
 .. [Pip99] Pipe, James G. "Motion correction with PROPELLER MRI:
    application to head motion and free‐breathing cardiac imaging."
    Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.
+.. [WLN08] Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
+   "MRI using a concentric rings trajectory." Magnetic Resonance
+   in Medicine 59, no. 1 (2008): 102-112.
+.. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
+   Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
+   Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
+   "ECCENTRIC: a fast and unrestrained approach for high-resolution
+   in vivo metabolic imaging at ultra-high field MR".
+   Imaging Neuroscience 2 (2024): 1-20.
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 22.594 seconds)
+   **Total running time of the script:** (0 minutes 25.809 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_2D_trajectories.py:

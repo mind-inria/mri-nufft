@@ -18,6 +18,7 @@ MRISigpyNUFFT
    
       ~MRISigpyNUFFT.__init__
       ~MRISigpyNUFFT.adj_op
+      ~MRISigpyNUFFT.cg
       ~MRISigpyNUFFT.check_shape
       ~MRISigpyNUFFT.compute_density
       ~MRISigpyNUFFT.compute_smaps

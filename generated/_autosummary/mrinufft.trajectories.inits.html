@@ -47,11 +47,12 @@
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/_autosummary/mrinufft.trajectories.inits';</script>
     <link rel="icon" href="../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="inits.random_walk" href="mrinufft.trajectories.inits.random_walk.html" />
+    <link rel="next" title="inits.eccentric" href="mrinufft.trajectories.inits.eccentric.html" />
     <link rel="prev" title="patch_center_anomaly" href="mrinufft.trajectories.gradients.patch_center_anomaly.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -321,6 +322,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -756,10 +762,13 @@ document.write(`
 <p>Module containing all trajectories.</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html#module-mrinufft.trajectories.inits.random_walk" title="mrinufft.trajectories.inits.random_walk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_walk</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html#module-mrinufft.trajectories.inits.eccentric" title="mrinufft.trajectories.inits.eccentric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eccentric</span></code></a></p></td>
+<td><p>Trajectories based on the ECCENTRIC formulation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html#module-mrinufft.trajectories.inits.random_walk" title="mrinufft.trajectories.inits.random_walk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_walk</span></code></a></p></td>
 <td><p>Trajectories based on random walks.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.travelling_salesman.html#module-mrinufft.trajectories.inits.travelling_salesman" title="mrinufft.trajectories.inits.travelling_salesman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">travelling_salesman</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.trajectories.inits.travelling_salesman.html#module-mrinufft.trajectories.inits.travelling_salesman" title="mrinufft.trajectories.inits.travelling_salesman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">travelling_salesman</span></code></a></p></td>
 <td><p>Trajectories based on the Travelling Salesman Problem.</p></td>
 </tr>
 </tbody>
@@ -788,11 +797,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="mrinufft.trajectories.inits.random_walk.html"
+       href="mrinufft.trajectories.inits.eccentric.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

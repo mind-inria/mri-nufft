@@ -321,6 +321,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -750,7 +755,6 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.extras.gradient.cg"><code class="docutils literal notranslate"><span class="pre">cg()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-mrinufft-extras-gradient-cg">Examples using <code class="docutils literal notranslate"><span class="pre">mrinufft.extras.gradient.cg</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -766,7 +770,7 @@ document.write(`
 <h1>cg<a class="headerlink" href="#cg" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="mrinufft.extras.gradient.cg">
-<span class="sig-prename descclassname"><span class="pre">mrinufft.extras.gradient.</span></span><span class="sig-name descname"><span class="pre">cg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kspace_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/extras/gradient.html#cg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.extras.gradient.cg" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mrinufft.extras.gradient.</span></span><span class="sig-name descname"><span class="pre">cg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kspace_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/extras/gradient.html#cg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.extras.gradient.cg" title="Link to this definition">#</a></dt>
 <dd><p>Perform conjugate gradient (CG) optimization for image reconstruction.</p>
 <p>The image is updated using the gradient of a data consistency term,
 and a velocity vector is used to accelerate convergence.</p>
@@ -791,13 +795,7 @@ non-positive, the iterations stop. Default is 1e-4.</p></li>
 </dl>
 </dd></dl>
 
-<section id="examples-using-mrinufft-extras-gradient-cg">
-<span id="sphx-glr-backref-mrinufft-extras-gradient-cg"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">mrinufft.extras.gradient.cg</span></code><a class="headerlink" href="#examples-using-mrinufft-extras-gradient-cg" title="Link to this heading">#</a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="An example to show how to reconstruct volumes using conjugate gradient method."><img alt="" src="../../_images/sphx_glr_example_cg_thumb.png" />
-<p><a class="reference internal" href="../autoexamples/GPU/example_cg.html#sphx-glr-generated-autoexamples-gpu-example-cg-py"><span class="std std-ref">Reconstruction with conjugate gradient</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Reconstruction with conjugate gradient</div>
-</div></div></section>
-</section>
+<span class="target" id="sphx-glr-backref-mrinufft-extras-gradient-cg"></span></section>
 
 
                 </article>
@@ -845,7 +843,6 @@ non-positive, the iterations stop. Default is 1e-4.</p></li>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.extras.gradient.cg"><code class="docutils literal notranslate"><span class="pre">cg()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-mrinufft-extras-gradient-cg">Examples using <code class="docutils literal notranslate"><span class="pre">mrinufft.extras.gradient.cg</span></code></a></li>
 </ul>
   </nav></div>
 

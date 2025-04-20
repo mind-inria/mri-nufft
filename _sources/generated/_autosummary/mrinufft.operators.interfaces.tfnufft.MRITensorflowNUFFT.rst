@@ -18,6 +18,7 @@ MRITensorflowNUFFT
    
       ~MRITensorflowNUFFT.__init__
       ~MRITensorflowNUFFT.adj_op
+      ~MRITensorflowNUFFT.cg
       ~MRITensorflowNUFFT.check_shape
       ~MRITensorflowNUFFT.compute_density
       ~MRITensorflowNUFFT.compute_smaps

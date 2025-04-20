@@ -322,6 +322,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -784,12 +789,17 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-rings-int"><code class="docutils literal notranslate"><span class="pre">nb_rings</span> <span class="pre">(int)</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eccentric">ECCENTRIC</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#radius-ratio-float"><code class="docutils literal notranslate"><span class="pre">radius_ratio</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#center-ratio-float"><code class="docutils literal notranslate"><span class="pre">center_ratio</span> <span class="pre">(float)</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rosette">Rosette</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#coprime-index-int"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polar-lissajous">Polar Lissajous</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-segments-int"><code class="docutils literal notranslate"><span class="pre">nb_segments</span> <span class="pre">(int)</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#comments">Comments</a></li>
 </ul>
@@ -798,8 +808,8 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-circular-patterns">Non-circular patterns</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#waves">Waves</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lissajous">Lissajous</a><ul class="nav section-nav flex-column">
@@ -852,6 +862,7 @@ will refer to previous patterns for explanation.</p>
 <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">in_out</span></a> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Choose between in-out or center-out trajectories</span>
 <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tilt</span></a> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span>  <span class="c1"># Choose the angular distance between shots</span>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nb_repetitions</span></a> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># Number of strips when relevant</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Seed for random trajectories</span>
 
 <span class="c1"># Display parameters</span>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># Figure size for trajectory plots</span>
@@ -1176,9 +1187,7 @@ ratio is even to cover the center.</p>
 <h3>Rings<a class="headerlink" href="#rings" title="Link to this heading">#</a></h3>
 <p>A pattern composed of concentric circles like a target, with each
 ring composed of one or more shots . This trajectory was initially
-proposed by Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
-“MRI using a concentric rings trajectory.” Magnetic Resonance in Medicine
-59, no. 1 (2008): 102-112.</p>
+proposed in <a class="reference internal" href="#wln08" id="id4"><span>[WLN08]</span></a>.</p>
 <p>Arguments:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Nc</span> <span class="pre">(int)</span></code>: number of individual shots. See radial</p></li>
@@ -1211,6 +1220,55 @@ amplitude and slew rate.</p>
 </div>
 <img src="../../_images/sphx_glr_example_2D_trajectories_021.png" srcset="../../_images/sphx_glr_example_2D_trajectories_021.png" alt="24, 32, 48" class = "sphx-glr-single-img"/></section>
 </section>
+<section id="eccentric">
+<h3>ECCENTRIC<a class="headerlink" href="#eccentric" title="Link to this heading">#</a></h3>
+<p>This is a reproduction of the proposition from <a class="reference internal" href="example_3D_trajectories.html#kla-24" id="id5"><span>[Kla+24]</span></a>.
+It creates trajectories as uniformly distributed circles,
+with a pseudo rosette-like structure at the center to ensure
+its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+TRajectorIes for Compressed sensing.</p>
+<p>Arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Nc</span> <span class="pre">(int)</span></code>: number of individual shots. See radial</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ns</span> <span class="pre">(int)</span></code>: number of samples per shot. See radial</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radius_ratio</span> <span class="pre">(float)</span></code>: radius of each circle relatively
+to the k-space radius.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">center_ratio</span> <span class="pre">(float)</span></code>: proportion of shots positioned around
+the center into a pseudo-rosette pattern (default 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nb_revolutions</span> <span class="pre">(float)</span></code>: number of revolutions per circle
+(default 1). See spiral</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_distance</span> <span class="pre">(float)</span></code>: minimum allowed distance between
+consecutive circles relatively to the k-space radius (default 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seed</span> <span class="pre">(int)</span></code>: random seed for reproducibility, used only
+to draw the circle centers (default None).</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a> <span class="o">=</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_eccentric</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <span class="n">radius_ratio</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a><span class="p">)</span>
+<span class="n">show_trajectory</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_2D_trajectories_022.png" srcset="../../_images/sphx_glr_example_2D_trajectories_022.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="radius-ratio-float">
+<h4><code class="docutils literal notranslate"><span class="pre">radius_ratio</span> <span class="pre">(float)</span></code><a class="headerlink" href="#radius-ratio-float" title="Link to this heading">#</a></h4>
+<p>The radius of each circle relatively to the k-space radius. It should be below
+0.5 otherwise the shots are not able to cross the k-space center.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_eccentric</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <span class="n">radius_ratio</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a><span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_2D_trajectories_023.png" srcset="../../_images/sphx_glr_example_2D_trajectories_023.png" alt="0.05, 0.2, 0.35, 0.5" class = "sphx-glr-single-img"/></section>
+<section id="center-ratio-float">
+<h4><code class="docutils literal notranslate"><span class="pre">center_ratio</span> <span class="pre">(float)</span></code><a class="headerlink" href="#center-ratio-float" title="Link to this heading">#</a></h4>
+<p>The proportion of shots positioned around the center into a pseudo-rosette pattern.
+The goal is to ensure its coverage despite the trajectories being random otherwise.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_eccentric</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <span class="n">radius_ratio</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">center_ratio</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seed</span></a>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_example_2D_trajectories_024.png" srcset="../../_images/sphx_glr_example_2D_trajectories_024.png" alt="0, 0.3, 0.6, 1" class = "sphx-glr-single-img"/></section>
+</section>
 <section id="rosette">
 <h3>Rosette<a class="headerlink" href="#rosette" title="Link to this heading">#</a></h3>
 <p>A repeating pattern composed of a single long curve going through the
@@ -1228,11 +1286,11 @@ to define the shot curvature. <code class="docutils literal notranslate"><span c
 <span class="n">show_trajectory</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_022.png" srcset="../../_images/sphx_glr_example_2D_trajectories_022.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="coprime-index-int">
+<img src="../../_images/sphx_glr_example_2D_trajectories_025.png" srcset="../../_images/sphx_glr_example_2D_trajectories_025.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="coprime-index-int">
 <h4><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code><a class="headerlink" href="#coprime-index-int" title="Link to this heading">#</a></h4>
 <p>The index used to select a compatible coprime factor, parameterized such
 that trajectories keep <span class="math notranslate nohighlight">\(N_c\)</span> petals while increasing their width,
-i.e. increasing the curvature of the shots. This argument is quite
+i.e. increasing the curvature of the shots. This argument is quite
 complex with regard to the original formula in order to remain easily
 interpretable, user-friendly and optimal for MR use cases. For more
 details, please consult this <a class="reference external" href="https://en.wikipedia.org/wiki/Rose_(mathematics)#Roses_with_rational_number_values_for_k.">Wikipedia page</a>.</p>
@@ -1241,7 +1299,7 @@ details, please consult this <a class="reference external" href="https://en.wiki
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_023.png" srcset="../../_images/sphx_glr_example_2D_trajectories_023.png" alt="0, 1, 5, 10" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_example_2D_trajectories_026.png" srcset="../../_images/sphx_glr_example_2D_trajectories_026.png" alt="0, 1, 5, 10" class = "sphx-glr-single-img"/></section>
 </section>
 <section id="polar-lissajous">
 <h3>Polar Lissajous<a class="headerlink" href="#polar-lissajous" title="Link to this heading">#</a></h3>
@@ -1263,8 +1321,8 @@ different segments of the k-space. <code class="docutils literal notranslate"><s
 <span class="n">show_trajectory</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_024.png" srcset="../../_images/sphx_glr_example_2D_trajectories_024.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code><a class="headerlink" href="#id4" title="Link to this heading">#</a></h4>
+<img src="../../_images/sphx_glr_example_2D_trajectories_027.png" srcset="../../_images/sphx_glr_example_2D_trajectories_027.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code><a class="headerlink" href="#id6" title="Link to this heading">#</a></h4>
 <p>The index used to select a compatible coprime factor, and impacting the
 shot curvature. For now, it is less trivial to select than for rosette
 but it will be updated in the future.</p>
@@ -1275,7 +1333,7 @@ but it will be updated in the future.</p>
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_025.png" srcset="../../_images/sphx_glr_example_2D_trajectories_025.png" alt="0, 3, 12, 15" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_example_2D_trajectories_028.png" srcset="../../_images/sphx_glr_example_2D_trajectories_028.png" alt="0, 3, 12, 15" class = "sphx-glr-single-img"/></section>
 <section id="nb-segments-int">
 <h4><code class="docutils literal notranslate"><span class="pre">nb_segments</span> <span class="pre">(int)</span></code><a class="headerlink" href="#nb-segments-int" title="Link to this heading">#</a></h4>
 <p>The number of Lissajous curves and segmented regions of the k-space. The
@@ -1294,7 +1352,7 @@ be a divider of <code class="docutils literal notranslate"><span class="pre">Nc<
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_026.png" srcset="../../_images/sphx_glr_example_2D_trajectories_026.png" alt="1, 2, 3, 4, 6, 8, 12" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_example_2D_trajectories_029.png" srcset="../../_images/sphx_glr_example_2D_trajectories_029.png" alt="1, 2, 3, 4, 6, 8, 12" class = "sphx-glr-single-img"/></section>
 <section id="comments">
 <h4>Comments<a class="headerlink" href="#comments" title="Link to this heading">#</a></h4>
 <p>This specific curve has never been used in MRI to the best of our
@@ -1316,10 +1374,10 @@ unexploited geometries.</p>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_example_2D_trajectories_027.png" srcset="../../_images/sphx_glr_example_2D_trajectories_027.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_example_2D_trajectories_028.png" srcset="../../_images/sphx_glr_example_2D_trajectories_028.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_example_2D_trajectories_029.png" srcset="../../_images/sphx_glr_example_2D_trajectories_029.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_example_2D_trajectories_030.png" srcset="../../_images/sphx_glr_example_2D_trajectories_030.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_2D_trajectories_031.png" srcset="../../_images/sphx_glr_example_2D_trajectories_031.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_2D_trajectories_032.png" srcset="../../_images/sphx_glr_example_2D_trajectories_032.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_example_2D_trajectories_033.png" srcset="../../_images/sphx_glr_example_2D_trajectories_033.png" alt="1, 2, 4, 12" class = "sphx-glr-multi-img"/></li>
 </ul>
 </section>
 </section>
@@ -1342,17 +1400,17 @@ to covering the full band without overlapping other bands. <code class="docutils
 <span class="n">show_trajectory</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_031.png" srcset="../../_images/sphx_glr_example_2D_trajectories_031.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code><a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
+<img src="../../_images/sphx_glr_example_2D_trajectories_034.png" srcset="../../_images/sphx_glr_example_2D_trajectories_034.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code><a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
 <p>The number of sinusoidal patterns along a line, similar to cones and sinusoidal trajectories.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
 <span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_waves</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <span class="n">nb_zigzags</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_032.png" srcset="../../_images/sphx_glr_example_2D_trajectories_032.png" alt="1, 2.5, 5, 10" class = "sphx-glr-single-img"/></section>
-<section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code><a class="headerlink" href="#id6" title="Link to this heading">#</a></h4>
+<img src="../../_images/sphx_glr_example_2D_trajectories_035.png" srcset="../../_images/sphx_glr_example_2D_trajectories_035.png" alt="1, 2.5, 5, 10" class = "sphx-glr-single-img"/></section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code><a class="headerlink" href="#id8" title="Link to this heading">#</a></h4>
 <p>The line width normalized such that <code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">=</span> <span class="pre">1</span></code> corresponds to
 non-overlapping lines covering (almost) uniformly the whole k-space, and
 therefore <code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> creates overlap between regions and
@@ -1366,7 +1424,7 @@ changes in future versions.</p>
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_033.png" srcset="../../_images/sphx_glr_example_2D_trajectories_033.png" alt="0, 1, 1.5, 3" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_example_2D_trajectories_036.png" srcset="../../_images/sphx_glr_example_2D_trajectories_036.png" alt="0, 1, 1.5, 3" class = "sphx-glr-single-img"/></section>
 </section>
 <section id="lissajous">
 <h3>Lissajous<a class="headerlink" href="#lissajous" title="Link to this heading">#</a></h3>
@@ -1386,7 +1444,7 @@ to match MR purposes, with a balanced distribution and minimal overlapping.</p>
 <span class="n">show_trajectory</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectory</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_034.png" srcset="../../_images/sphx_glr_example_2D_trajectories_034.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="density-float">
+<img src="../../_images/sphx_glr_example_2D_trajectories_037.png" srcset="../../_images/sphx_glr_example_2D_trajectories_037.png" alt="example 2D trajectories" class = "sphx-glr-single-img"/><section id="density-float">
 <h4><code class="docutils literal notranslate"><span class="pre">density</span> <span class="pre">(float)</span></code><a class="headerlink" href="#density-float" title="Link to this heading">#</a></h4>
 <p>It relates to both the curve length and curvature, normalized such that
 <code class="docutils literal notranslate"><span class="pre">density</span> <span class="pre">=</span> <span class="pre">1</span></code> corresponds to pseudo-diagonal curves for any given <span class="math notranslate nohighlight">\(N_c\)</span>.</p>
@@ -1395,7 +1453,7 @@ to match MR purposes, with a balanced distribution and minimal overlapping.</p>
 <span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_example_2D_trajectories_035.png" srcset="../../_images/sphx_glr_example_2D_trajectories_035.png" alt="1, 1.5, 2, 3" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_example_2D_trajectories_038.png" srcset="../../_images/sphx_glr_example_2D_trajectories_038.png" alt="1, 1.5, 2, 3" class = "sphx-glr-single-img"/></section>
 </section>
 </section>
 <section id="references">
@@ -1407,8 +1465,23 @@ to match MR purposes, with a balanced distribution and minimal overlapping.</p>
 application to head motion and free‐breathing cardiac imaging.”
 Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.</p>
 </div>
+<div class="citation" id="wln08" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">WLN08</a><span class="fn-bracket">]</span></span>
+<p>Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
+“MRI using a concentric rings trajectory.” Magnetic Resonance
+in Medicine 59, no. 1 (2008): 102-112.</p>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 22.594 seconds)</p>
+<div class="citation" id="kla-24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">Kla+24</a><span class="fn-bracket">]</span></span>
+<p>Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
+Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
+Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
+“ECCENTRIC: a fast and unrestrained approach for high-resolution
+in vivo metabolic imaging at ultra-high field MR”.
+Imaging Neuroscience 2 (2024): 1-20.</p>
+</div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 25.809 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-example-2d-trajectories-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/example_2D_trajectories.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo1.svg" style="width: 150px;" />
@@ -1507,12 +1580,17 @@ Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-rings-int"><code class="docutils literal notranslate"><span class="pre">nb_rings</span> <span class="pre">(int)</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eccentric">ECCENTRIC</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#radius-ratio-float"><code class="docutils literal notranslate"><span class="pre">radius_ratio</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#center-ratio-float"><code class="docutils literal notranslate"><span class="pre">center_ratio</span> <span class="pre">(float)</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rosette">Rosette</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#coprime-index-int"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polar-lissajous">Polar Lissajous</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">coprime_index</span> <span class="pre">(int)</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-segments-int"><code class="docutils literal notranslate"><span class="pre">nb_segments</span> <span class="pre">(int)</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#comments">Comments</a></li>
 </ul>
@@ -1521,8 +1599,8 @@ Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#non-circular-patterns">Non-circular patterns</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#waves">Waves</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">nb_zigzags</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">(float)</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lissajous">Lissajous</a><ul class="nav section-nav flex-column">

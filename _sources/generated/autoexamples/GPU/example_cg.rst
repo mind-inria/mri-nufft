@@ -33,34 +33,27 @@ The Conjugate Gradient method is widely used in various scientific and engineeri
 applications, including solving partial differential equations, optimization problems,
 and machine learning tasks.
 
-References
-----------
-- Inpirations:
-        - https://sigpy.readthedocs.io/en/latest/_modules/sigpy/alg.html#ConjugateGradient
-        - https://aquaulb.github.io/book_solving_pde_mooc/solving_pde_mooc/notebooks/05_IterativeMethods/05_02_Conjugate_Gradient.html
-- Wikipedia:
-        - https://en.wikipedia.org/wiki/Conjugate_gradient_method
-        - https://en.wikipedia.org/wiki/Momentum
+This method is inspired by techniques from [SigPy]_ and
+[Aquaulb]_ MOOC, as well as general knowledge in [Wikipedia]_.
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-32
+.. GENERATED FROM PYTHON SOURCE LINES 23-27
 
 .. colab-link::
    :needs_gpu: 1
 
    !pip install mri-nufft[gpunufft] scikit-image
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-35
+.. GENERATED FROM PYTHON SOURCE LINES 29-30
 
 Imports
 
-.. GENERATED FROM PYTHON SOURCE LINES 35-42
+.. GENERATED FROM PYTHON SOURCE LINES 30-36
 
 .. code-block:: Python
 
     import numpy as np
     import mrinufft
     from brainweb_dl import get_mri
-    from mrinufft.extras.gradient import cg
     from mrinufft.density import voronoi
     from matplotlib import pyplot as plt
 
@@ -71,15 +64,15 @@ Imports
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-44
+.. GENERATED FROM PYTHON SOURCE LINES 37-38
 
 Setup Inputs
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-48
+.. GENERATED FROM PYTHON SOURCE LINES 38-42
 
 .. code-block:: Python
 
-    samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=256)
+    samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=512, nb_revolutions=8)
     image = get_mri(sub_id=4)
     image = np.flipud(image[90])
 
@@ -90,22 +83,20 @@ Setup Inputs
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 49-50
+.. GENERATED FROM PYTHON SOURCE LINES 43-44
 
 Setup the NUFFT operator
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-60
+.. GENERATED FROM PYTHON SOURCE LINES 44-52
 
 .. code-block:: Python
 
     NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
-    density = voronoi(samples_loc)  # get the density
 
     nufft = NufftOperator(
         samples_loc,
         shape=image.shape,
-        density=density,
-        n_coils=1,
+        density=True,
     )  # create the NUFFT operator
 
 
@@ -115,62 +106,91 @@ Setup the NUFFT operator
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-62
+.. GENERATED FROM PYTHON SOURCE LINES 53-54
 
 Reconstruct the image using the CG method
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-65
+.. GENERATED FROM PYTHON SOURCE LINES 54-97
 
 .. code-block:: Python
 
     kspace_data = nufft.op(image)  # get the k-space data
-    reconstructed_image = cg(nufft, kspace_data)  # reconstruct the image
+    dc_adjoint = nufft.adj_op(kspace_data)
+    reconstructed_image, loss = nufft.cg(
+        kspace_data=kspace_data, x_init=dc_adjoint.copy(), num_iter=50, compute_loss=True
+    )
 
 
+    # Display the results
 
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 66-67
-
-Display the results
-
-.. GENERATED FROM PYTHON SOURCE LINES 67-81
-
-.. code-block:: Python
-
-    plt.figure(figsize=(9, 3))
-    plt.subplot(1, 3, 1)
+    plt.figure(figsize=(15, 10))
+    plt.subplot(2, 3, 1)
     plt.title("Original image")
-    plt.imshow(abs(image), cmap="gray")
+    plt.imshow(image, cmap="gray")
+    plt.colorbar()
 
-    plt.subplot(1, 3, 2)
+    plt.subplot(2, 3, 2)
     plt.title("Conjugate gradient")
-    plt.imshow(abs(reconstructed_image), cmap="gray")
+    plt.imshow(abs(reconstructed_image), vmin=image.min(), vmax=image.max(), cmap="gray")
+    plt.colorbar()
 
-    plt.subplot(1, 3, 3)
+    plt.subplot(2, 3, 3)
     plt.title("Adjoint NUFFT")
-    plt.imshow(abs(nufft.adj_op(kspace_data)), cmap="gray")
+    plt.imshow(
+        abs(nufft.adj_op(kspace_data)), vmin=image.min(), vmax=image.max(), cmap="gray"
+    )
+    plt.colorbar()
 
-    plt.show()
+    plt.subplot(2, 3, 4)
+    plt.title("Loss")
+    plt.plot(loss)
+    plt.grid()
+
+    plt.subplot(2, 3, 5)
+    plt.title("K-space from conjugate gradient (CG)")
+    plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
+    plt.plot(np.log(abs(nufft.op(reconstructed_image))), label="CG k-space")
+    plt.legend(loc="lower left", fontsize=8)
+
+    plt.subplot(2, 3, 6)
+    plt.title("K-space from DC adjoint NUFFT")
+    plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
+    plt.plot(np.log(abs(nufft.op(dc_adjoint))), label="DC adjoint k-space")
+    plt.legend(loc="lower left", fontsize=8)
 
 
 
 .. image-sg:: /generated/autoexamples/GPU/images/sphx_glr_example_cg_001.png
-   :alt: Original image, Conjugate gradient, Adjoint NUFFT
+   :alt: Original image, Conjugate gradient, Adjoint NUFFT, Loss, K-space from conjugate gradient (CG), K-space from DC adjoint NUFFT
    :srcset: /generated/autoexamples/GPU/images/sphx_glr_example_cg_001.png
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
 
 
+    <matplotlib.legend.Legend object at 0x7b3a692c9150>
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 98-107
+
+References
+==========
+
+.. [SigPy] SigPy Documentation. Conjugate Gradient Method.
+   https://sigpy.readthedocs.io/en/latest/_modules/sigpy/alg.html#ConjugateGradient
+.. [Aquaulb] Aquaulb's MOOC: Solving PDE with Iterative Methods.
+   https://aquaulb.github.io/book_solving_pde_mooc/solving_pde_mooc/notebooks/05_IterativeMethods/05_02_Conjugate_Gradient.html
+.. [Wikipedia] Wikipedia: Conjugate Gradient Method.
+   https://en.wikipedia.org/wiki/Conjugate_gradient_method
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.049 seconds)
+   **Total running time of the script:** (0 minutes 1.970 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:

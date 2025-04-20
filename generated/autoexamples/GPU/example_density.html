@@ -321,6 +321,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -820,12 +825,12 @@ of the operator roughly equal to 1.</p>
 </pre></div>
 </div>
 <img src="../../../_images/sphx_glr_example_density_001.png" srcset="../../../_images/sphx_glr_example_density_001.png" alt="example density" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(256, 256)
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
   warnings.warn(f&quot;Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)&quot;)
 
-&lt;matplotlib.image.AxesImage object at 0x7fe5a59467a0&gt;
+&lt;matplotlib.image.AxesImage object at 0x7b3a69e52ef0&gt;
 </pre></div>
 </div>
 <p>As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.</p>
@@ -857,7 +862,7 @@ proportional to its voronoi cell area.</p>
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Voronoi density compensation&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_002.png" srcset="../../../_images/sphx_glr_example_density_002.png" alt="Ground Truth, no density compensation, Voronoi density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<img src="../../../_images/sphx_glr_example_density_002.png" srcset="../../../_images/sphx_glr_example_density_002.png" alt="Ground Truth, no density compensation, Voronoi density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
 
 Text(0.5, 1.0, &#39;Voronoi density compensation&#39;)
@@ -889,7 +894,7 @@ This can be viewed as an approximation to the voronoi neth</p>
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;cell_count density compensation&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_003.png" srcset="../../../_images/sphx_glr_example_density_003.png" alt="Ground Truth, no density compensation, cell_count density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<img src="../../../_images/sphx_glr_example_density_003.png" srcset="../../../_images/sphx_glr_example_density_003.png" alt="Ground Truth, no density compensation, cell_count density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
 
 Text(0.5, 1.0, &#39;cell_count density compensation&#39;)
@@ -913,7 +918,7 @@ In radial trajectory for instance, a sample’s weight can be determined from it
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;manual density compensation&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_004.png" srcset="../../../_images/sphx_glr_example_density_004.png" alt="Ground Truth, no density compensation, manual density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<img src="../../../_images/sphx_glr_example_density_004.png" srcset="../../../_images/sphx_glr_example_density_004.png" alt="Ground Truth, no density compensation, manual density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
 
 Text(0.5, 1.0, &#39;manual density compensation&#39;)
@@ -949,10 +954,10 @@ Text(0.5, 1.0, &#39;manual density compensation&#39;)
 <span class="nb">print</span><span class="p">(</span><a href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.density" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.density" class="sphx-glr-backref-module-mrinufft-operators-interfaces-gpunufft sphx-glr-backref-type-py-property"><span class="n">nufft</span><span class="o">.</span><span class="n">density</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00879562 0.0401402  0.0809361  ... 3.2297883  2.6584117  3.4429407 ]
+<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00879711 0.04014872 0.08094604 ... 3.229895   2.6584997  3.4430547 ]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.705 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.430 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-density-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_density.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />

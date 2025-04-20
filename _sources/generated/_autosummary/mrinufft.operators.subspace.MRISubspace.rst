@@ -18,6 +18,7 @@ MRISubspace
    
       ~MRISubspace.__init__
       ~MRISubspace.adj_op
+      ~MRISubspace.cg
       ~MRISubspace.check_shape
       ~MRISubspace.compute_density
       ~MRISubspace.compute_smaps

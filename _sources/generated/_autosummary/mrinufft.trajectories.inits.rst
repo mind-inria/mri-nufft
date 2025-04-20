@@ -25,6 +25,7 @@
    :toctree:
    :recursive:
 
+   eccentric
    random_walk
    travelling_salesman
 

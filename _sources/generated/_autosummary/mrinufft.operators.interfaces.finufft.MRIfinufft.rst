@@ -18,6 +18,7 @@ MRIfinufft
    
       ~MRIfinufft.__init__
       ~MRIfinufft.adj_op
+      ~MRIfinufft.cg
       ~MRIfinufft.check_shape
       ~MRIfinufft.compute_density
       ~MRIfinufft.compute_smaps

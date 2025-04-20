@@ -320,6 +320,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -696,7 +701,7 @@ document.write(`
 <div class="viewcode-block" id="cg">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html#mrinufft.extras.gradient.cg">[docs]</a>
 <span class="nd">@with_numpy</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cg</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">,</span> <span class="n">x_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cg</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">,</span> <span class="n">x_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform conjugate gradient (CG) optimization for image reconstruction.</span>
 
@@ -725,7 +730,7 @@ document.write(`
 <span class="sd">    image : numpy.ndarray</span>
 <span class="sd">              The reconstructed image after the optimization process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Lipschitz_cst</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">get_lipschitz_cst</span><span class="p">()</span>
+    <span class="n">lipschitz_cst</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">get_lipschitz_cst</span><span class="p">()</span>
     <span class="n">image</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">kspace_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">x_init</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -734,22 +739,29 @@ document.write(`
     <span class="n">velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
     <span class="n">grad</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">data_consistency</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">)</span>
-    <span class="n">velocity</span> <span class="o">=</span> <span class="n">tol</span> <span class="o">*</span> <span class="n">velocity</span> <span class="o">+</span> <span class="n">grad</span> <span class="o">/</span> <span class="n">Lipschitz_cst</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">tol</span> <span class="o">*</span> <span class="n">velocity</span> <span class="o">+</span> <span class="n">grad</span> <span class="o">/</span> <span class="n">lipschitz_cst</span>
     <span class="n">image</span> <span class="o">=</span> <span class="n">image</span> <span class="o">-</span> <span class="n">velocity</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_loss</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="o">-</span> <span class="n">kspace_data</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">[</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">image</span><span class="p">)]</span> <span class="k">if</span> <span class="n">compute_loss</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">):</span>
         <span class="n">grad_new</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">data_consistency</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">grad_new</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">:</span>
             <span class="k">break</span>
 
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad_new</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">grad_new</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
-            <span class="n">grad</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">grad</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
+            <span class="n">grad_new</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="p">(</span><span class="n">grad_new</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">-</span> <span class="n">grad</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">grad</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>  <span class="c1"># Polak-Ribiere formula is used to compute the beta</span>
         <span class="n">velocity</span> <span class="o">=</span> <span class="n">grad_new</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">velocity</span>
 
-        <span class="n">image</span> <span class="o">=</span> <span class="n">image</span> <span class="o">-</span> <span class="n">velocity</span> <span class="o">/</span> <span class="n">Lipschitz_cst</span>
-
-    <span class="k">return</span> <span class="n">image</span></div>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">image</span> <span class="o">-</span> <span class="n">velocity</span> <span class="o">/</span> <span class="n">lipschitz_cst</span>
+        <span class="k">if</span> <span class="n">compute_loss</span><span class="p">:</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">image</span> <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span></div>
 
 </pre></div>
 

@@ -18,6 +18,7 @@ TorchKbNUFFTgpu
    
       ~TorchKbNUFFTgpu.__init__
       ~TorchKbNUFFTgpu.adj_op
+      ~TorchKbNUFFTgpu.cg
       ~TorchKbNUFFTgpu.check_shape
       ~TorchKbNUFFTgpu.compute_density
       ~TorchKbNUFFTgpu.compute_smaps

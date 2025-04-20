@@ -18,6 +18,7 @@ MRInumpy
    
       ~MRInumpy.__init__
       ~MRInumpy.adj_op
+      ~MRInumpy.cg
       ~MRInumpy.check_shape
       ~MRInumpy.compute_density
       ~MRInumpy.compute_smaps

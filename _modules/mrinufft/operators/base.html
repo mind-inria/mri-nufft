@@ -320,6 +320,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -1089,6 +1094,35 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tmp_op</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">return</span> <span class="n">power_method</span><span class="p">(</span><span class="n">max_iter</span><span class="p">,</span> <span class="n">tmp_op</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FourierOperatorBase.cg">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.cg">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Conjugate Gradient method to solve the inverse problem.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kspace_data: np.ndarray</span>
+<span class="sd">            The k-space data to reconstruct.</span>
+<span class="sd">        computer_loss: bool</span>
+<span class="sd">            Whether to compute the loss at each iteration.</span>
+<span class="sd">            If True, loss is calculated and returned, otherwise, it&#39;s skipped.</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            Extra arguments to pass to the conjugate gradient method.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Reconstructed image</span>
+<span class="sd">        np.ndarray, optional</span>
+<span class="sd">            array of loss at each iteration, if compute_loss is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..extras.gradient</span><span class="w"> </span><span class="kn">import</span> <span class="n">cg</span>
+
+        <span class="k">return</span> <span class="n">cg</span><span class="p">(</span>
+            <span class="n">operator</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">kspace_data</span><span class="o">=</span><span class="n">kspace_data</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="n">compute_loss</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
 
 
     <span class="nd">@property</span>

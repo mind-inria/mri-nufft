@@ -18,6 +18,7 @@ MRIFourierCorrected
    
       ~MRIFourierCorrected.__init__
       ~MRIFourierCorrected.adj_op
+      ~MRIFourierCorrected.cg
       ~MRIFourierCorrected.check_shape
       ~MRIFourierCorrected.compute_density
       ~MRIFourierCorrected.compute_smaps

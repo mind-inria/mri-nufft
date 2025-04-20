@@ -68,7 +68,7 @@ Script options
 ==============
 These options are used in the examples below as default values for all trajectories.
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-54
+.. GENERATED FROM PYTHON SOURCE LINES 39-55
 
 .. code-block:: Python
 
@@ -80,6 +80,7 @@ These options are used in the examples below as default values for all trajector
     tilt = "uniform"  # Angular distance between shots
     nb_repetitions = 6  # Number of stacks, rotations, cones, shells etc.
     nb_revolutions = 1  # Number of revolutions for base trajectories
+    seed = 0  # Seed for random trajectories
 
     # Display parameters
     figure_size = 10  # Figure size for trajectory plots
@@ -94,7 +95,7 @@ These options are used in the examples below as default values for all trajector
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-81
+.. GENERATED FROM PYTHON SOURCE LINES 56-82
 
 Radial trajectories
 ===================
@@ -123,7 +124,7 @@ Arguments:
   the center then outside (in-out) or not (center-out). ``(default False)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-86
+.. GENERATED FROM PYTHON SOURCE LINES 82-87
 
 .. code-block:: Python
 
@@ -144,7 +145,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-93
+.. GENERATED FROM PYTHON SOURCE LINES 88-94
 
 ``Nc (int)``
 ~~~~~~~~~~~~
@@ -153,7 +154,7 @@ The number of individual shots, here 3D radial lines, used to cover the
 k-space. More shots means better coverage but also longer acquisitions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 93-99
+.. GENERATED FROM PYTHON SOURCE LINES 94-100
 
 .. code-block:: Python
 
@@ -175,7 +176,7 @@ k-space. More shots means better coverage but also longer acquisitions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-106
+.. GENERATED FROM PYTHON SOURCE LINES 101-107
 
 ``Ns (int)``
 ~~~~~~~~~~~~
@@ -184,7 +185,7 @@ The number of samples per shot. More samples means that either
 the acquisition window is lengthened or the sampling rate is increased.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-112
+.. GENERATED FROM PYTHON SOURCE LINES 107-113
 
 .. code-block:: Python
 
@@ -206,7 +207,7 @@ the acquisition window is lengthened or the sampling rate is increased.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-129
+.. GENERATED FROM PYTHON SOURCE LINES 114-130
 
 ``in_out (bool)``
 ~~~~~~~~~~~~~~~~~
@@ -225,7 +226,7 @@ Note that the behavior of both ``tilt`` and ``width`` are automatically adapted
 to the changes to avoid having to update them too when switching ``in_out``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-135
+.. GENERATED FROM PYTHON SOURCE LINES 130-136
 
 .. code-block:: Python
 
@@ -247,7 +248,7 @@ to the changes to avoid having to update them too when switching ``in_out``.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-158
+.. GENERATED FROM PYTHON SOURCE LINES 137-159
 
 Golden means radial
 -------------------
@@ -272,7 +273,7 @@ Arguments:
   ``(default False)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 158-163
+.. GENERATED FROM PYTHON SOURCE LINES 159-164
 
 .. code-block:: Python
 
@@ -293,7 +294,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-187
+.. GENERATED FROM PYTHON SOURCE LINES 165-188
 
 Wong radial
 -------------------
@@ -319,7 +320,7 @@ Arguments:
   ``(default False)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 187-192
+.. GENERATED FROM PYTHON SOURCE LINES 188-193
 
 .. code-block:: Python
 
@@ -340,7 +341,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 193-217
+.. GENERATED FROM PYTHON SOURCE LINES 194-218
 
 Park radial
 -------------------
@@ -367,7 +368,7 @@ Arguments:
   ``(default False)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 217-222
+.. GENERATED FROM PYTHON SOURCE LINES 218-223
 
 .. code-block:: Python
 
@@ -388,7 +389,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 223-250
+.. GENERATED FROM PYTHON SOURCE LINES 224-251
 
 Freeform trajectories
 =====================
@@ -418,7 +419,7 @@ Arguments:
   by default. ``(default 1)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 250-255
+.. GENERATED FROM PYTHON SOURCE LINES 251-256
 
 .. code-block:: Python
 
@@ -439,7 +440,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 256-265
+.. GENERATED FROM PYTHON SOURCE LINES 257-266
 
 ``tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -451,7 +452,7 @@ common definitions of golden angles. The angle is automatically adapted
 when the ``in_out`` argument is switched to keep the same behavior.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 265-271
+.. GENERATED FROM PYTHON SOURCE LINES 266-272
 
 .. code-block:: Python
 
@@ -473,7 +474,7 @@ when the ``in_out`` argument is switched to keep the same behavior.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 272-278
+.. GENERATED FROM PYTHON SOURCE LINES 273-279
 
 ``nb_zigzags (float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -482,7 +483,7 @@ The number of “zigzags”, or revolutions around the 3D cone on a center-out s
 (doubled overall for in-out trajectories)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 278-284
+.. GENERATED FROM PYTHON SOURCE LINES 279-285
 
 .. code-block:: Python
 
@@ -504,7 +505,7 @@ The number of “zigzags”, or revolutions around the 3D cone on a center-out s
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 285-293
+.. GENERATED FROM PYTHON SOURCE LINES 286-294
 
 ``spiral (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -515,7 +516,7 @@ The shape of the spiral defined and documented in
 spirals are available as string options for convenience.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 293-299
+.. GENERATED FROM PYTHON SOURCE LINES 294-300
 
 .. code-block:: Python
 
@@ -537,7 +538,7 @@ spirals are available as string options for convenience.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 300-308
+.. GENERATED FROM PYTHON SOURCE LINES 301-309
 
 ``width (float)``
 ~~~~~~~~~~~~~~~~~
@@ -548,7 +549,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 ``width < 1`` tends to more radial patterns.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 308-314
+.. GENERATED FROM PYTHON SOURCE LINES 309-315
 
 .. code-block:: Python
 
@@ -570,7 +571,7 @@ therefore ``width > 1`` creates overlap between cone regions and
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 315-340
+.. GENERATED FROM PYTHON SOURCE LINES 316-341
 
 FLORET
 ------
@@ -598,7 +599,7 @@ Arguments:
 - ``axes (tuple)``: axes over which cones are created, by default (2,)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 340-350
+.. GENERATED FROM PYTHON SOURCE LINES 341-351
 
 .. code-block:: Python
 
@@ -624,7 +625,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 351-364
+.. GENERATED FROM PYTHON SOURCE LINES 352-365
 
 ``axes (tuple)``
 ~~~~~~~~~~~~~~~~
@@ -640,7 +641,7 @@ k-space sphere by duplicating cones along several axes, as initially
 proposed by [Pip+11]_.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 365-377
+.. GENERATED FROM PYTHON SOURCE LINES 366-378
 
 .. code-block:: Python
 
@@ -668,7 +669,7 @@ proposed by [Pip+11]_.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 378-384
+.. GENERATED FROM PYTHON SOURCE LINES 379-385
 
 .. code-block:: Python
 
@@ -690,7 +691,7 @@ proposed by [Pip+11]_.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 385-408
+.. GENERATED FROM PYTHON SOURCE LINES 386-409
 
 Wave-CAIPI
 ----------
@@ -716,7 +717,7 @@ Arguments:
 - ``spacing (tuple(int, int))``: Spacing between helices over the
   2D :math:`k_x`-:math:`k_y` plane normalized similarly to `width`. ``(default (1, 1))``
 
-.. GENERATED FROM PYTHON SOURCE LINES 408-412
+.. GENERATED FROM PYTHON SOURCE LINES 409-413
 
 .. code-block:: Python
 
@@ -736,7 +737,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 413-418
+.. GENERATED FROM PYTHON SOURCE LINES 414-419
 
 ``nb_revolutions (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -744,7 +745,7 @@ Arguments:
 The number of revolutions of the helices from bottom to top.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 418-423
+.. GENERATED FROM PYTHON SOURCE LINES 419-424
 
 .. code-block:: Python
 
@@ -765,7 +766,7 @@ The number of revolutions of the helices from bottom to top.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 424-434
+.. GENERATED FROM PYTHON SOURCE LINES 425-435
 
 ``width (float)``
 ~~~~~~~~~~~~~~~~~
@@ -778,7 +779,7 @@ and therefore ``width > 1`` creates overlap between cone regions and
 See ``packing`` for more details about coverage.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 434-439
+.. GENERATED FROM PYTHON SOURCE LINES 435-440
 
 .. code-block:: Python
 
@@ -799,7 +800,7 @@ See ``packing`` for more details about coverage.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 440-456
+.. GENERATED FROM PYTHON SOURCE LINES 441-457
 
 ``packing (str)``
 ~~~~~~~~~~~~~~~~~
@@ -818,7 +819,7 @@ The ``"random"`` packing also naturally overlaps as the positions are determined
 following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 456-461
+.. GENERATED FROM PYTHON SOURCE LINES 457-462
 
 .. code-block:: Python
 
@@ -839,7 +840,7 @@ following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 462-467
+.. GENERATED FROM PYTHON SOURCE LINES 463-468
 
 .. code-block:: Python
 
@@ -860,7 +861,7 @@ following a uniform distribution over :math:`k_x` and :math:`k_y` dimensions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 468-482
+.. GENERATED FROM PYTHON SOURCE LINES 469-483
 
 ``shape (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -877,7 +878,7 @@ a minimal 2-norm (eliminating the diagonals) except for circles with infinity-no
 (accumulating over the diagonals).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 482-487
+.. GENERATED FROM PYTHON SOURCE LINES 483-488
 
 .. code-block:: Python
 
@@ -898,7 +899,7 @@ a minimal 2-norm (eliminating the diagonals) except for circles with infinity-no
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 488-493
+.. GENERATED FROM PYTHON SOURCE LINES 489-494
 
 .. code-block:: Python
 
@@ -919,7 +920,7 @@ a minimal 2-norm (eliminating the diagonals) except for circles with infinity-no
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 494-503
+.. GENERATED FROM PYTHON SOURCE LINES 495-504
 
 ``spacing (tuple(int, int))``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -931,7 +932,7 @@ complex behaviors for other packing methods as the diameters are normalized to
 fit within the cubic k-space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 503-508
+.. GENERATED FROM PYTHON SOURCE LINES 504-509
 
 .. code-block:: Python
 
@@ -952,7 +953,7 @@ fit within the cubic k-space.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 509-515
+.. GENERATED FROM PYTHON SOURCE LINES 510-516
 
 .. code-block:: Python
 
@@ -974,7 +975,7 @@ fit within the cubic k-space.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 516-546
+.. GENERATED FROM PYTHON SOURCE LINES 517-547
 
 Seiffert spirals / Yarnball
 ---------------------------
@@ -1007,7 +1008,7 @@ Arguments:
   then outside (in-out) or not (center-out). ``(default False)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 546-551
+.. GENERATED FROM PYTHON SOURCE LINES 547-552
 
 .. code-block:: Python
 
@@ -1028,7 +1029,7 @@ Arguments:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 552-559
+.. GENERATED FROM PYTHON SOURCE LINES 553-560
 
 ``curve_index (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1038,7 +1039,7 @@ corresponding to a planar spiral, and increasing the length and exploration of
 the curve while asymptotically approaching :math:`1`.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 559-567
+.. GENERATED FROM PYTHON SOURCE LINES 560-568
 
 .. code-block:: Python
 
@@ -1062,7 +1063,7 @@ the curve while asymptotically approaching :math:`1`.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 568-576
+.. GENERATED FROM PYTHON SOURCE LINES 569-577
 
 ``nb_revolutions (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1073,7 +1074,7 @@ number of times the shot reaches the starting pole of the sphere. It
 subsequently defines the length of the curve.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 576-587
+.. GENERATED FROM PYTHON SOURCE LINES 577-588
 
 .. code-block:: Python
 
@@ -1100,7 +1101,7 @@ subsequently defines the length of the curve.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 588-599
+.. GENERATED FROM PYTHON SOURCE LINES 589-600
 
 ``axis_tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1114,7 +1115,7 @@ Note that in the examples below, the ``spiral_tilt`` argument is set to 0
 for clarity.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 599-611
+.. GENERATED FROM PYTHON SOURCE LINES 600-612
 
 .. code-block:: Python
 
@@ -1142,7 +1143,7 @@ for clarity.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 612-625
+.. GENERATED FROM PYTHON SOURCE LINES 613-626
 
 ``spiral_tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1158,7 +1159,7 @@ Rather than picking random angles, we decided to provide the conventional "tilt"
 argument.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 625-637
+.. GENERATED FROM PYTHON SOURCE LINES 626-637
 
 .. code-block:: Python
 
@@ -1176,7 +1177,6 @@ argument.
 
 
 
-
 .. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_029.png
    :alt: 0, uniform, golden, 1.0471975511965976
    :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_029.png
@@ -1186,7 +1186,154 @@ argument.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 638-667
+.. GENERATED FROM PYTHON SOURCE LINES 638-663
+
+ECCENTRIC
+---------
+
+This is a reproduction of the proposition from [Kla+24]_.
+It creates trajectories as uniformly distributed circles,
+with a pseudo rosette-like structure at the center to ensure
+its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+TRajectorIes for Compressed sensing.
+
+Arguments:
+
+- ``Nc (int)``: number of individual shots. See radial
+- ``Ns (int)``: number of samples per shot. See radial
+- ``nb_stacks (int)``: number of stack layers along the
+  :math:`k_z`-axis
+- ``radius_ratio (float)``: radius of each circle relatively
+  to the k-space radius.
+- ``center_ratio (float)``: proportion of shots positioned around
+  the center into a pseudo-rosette pattern (default 0).
+- ``nb_revolutions (float)``: number of revolutions per circle
+  (default 1). See spiral
+- ``min_distance (float)``: minimum allowed distance between
+  consecutive circles relatively to the k-space radius (default 0).
+- ``seed (int)``: random seed for reproducibility, used only
+  to draw the circle centers (default None).
+
+.. GENERATED FROM PYTHON SOURCE LINES 663-669
+
+.. code-block:: Python
+
+
+    trajectory = mn.initialize_3D_eccentric(
+        Nc, Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, seed=seed
+    )
+    show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_030.png
+   :alt: example 3D trajectories
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_030.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 670-676
+
+``nb_stacks (int)``
+~~~~~~~~~~~~~~~~~~~
+
+The number of stack layers along the :math:`k_z`-axis. The number
+of shot varies per stack to match the density of a sphere.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 676-683
+
+.. code-block:: Python
+
+
+    arguments = [2, 5, 7, 13]
+    function = lambda x: mn.initialize_3D_eccentric(
+        Nc=Nc, Ns=Ns, nb_stacks=x, radius_ratio=0.3, seed=seed
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_031.png
+   :alt: 2, 5, 7, 13
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_031.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 684-690
+
+``radius_ratio (float)``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The radius of each circle relatively to the k-space radius. It should be below
+0.5 otherwise the shots are not able to cross the k-space center.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 690-697
+
+.. code-block:: Python
+
+
+    arguments = [0.05, 0.2, 0.35, 0.5]
+    function = lambda x: mn.initialize_3D_eccentric(
+        Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=x, seed=seed
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_032.png
+   :alt: 0.05, 0.2, 0.35, 0.5
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_032.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 698-704
+
+``center_ratio (float)``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The proportion of shots positioned around the center into a pseudo-rosette pattern.
+The goal is to ensure its coverage despite the trajectories being random otherwise.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 704-712
+
+.. code-block:: Python
+
+
+    arguments = [0, 0.3, 0.6, 1]
+    function = lambda x: mn.initialize_3D_eccentric(
+        Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, center_ratio=x, seed=seed
+    )
+    show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+
+
+
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_033.png
+   :alt: 0, 0.3, 0.6, 1
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_033.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 713-742
 
 Shell trajectories
 ==================
@@ -1218,7 +1365,7 @@ Arguments:
   over a sphere (in radians). ``(default "uniform")``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 667-672
+.. GENERATED FROM PYTHON SOURCE LINES 742-747
 
 .. code-block:: Python
 
@@ -1230,16 +1377,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_030.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_034.png
    :alt: example 3D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_030.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_034.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 673-678
+.. GENERATED FROM PYTHON SOURCE LINES 748-753
 
 ``nb_shells (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -1247,7 +1394,7 @@ Arguments:
 Number of shells, i.e. concentric spheres, used to partition the k-space sphere.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 678-686
+.. GENERATED FROM PYTHON SOURCE LINES 753-761
 
 .. code-block:: Python
 
@@ -1262,16 +1409,16 @@ Number of shells, i.e. concentric spheres, used to partition the k-space sphere.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_031.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_035.png
    :alt: 1, 2, 3, 6
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_031.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_035.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 687-697
+.. GENERATED FROM PYTHON SOURCE LINES 762-772
 
 ``spiral_reduction (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1284,7 +1431,7 @@ Therefore we provided ``spiral_reduction`` to reduce (or increase) the pre-deter
 spiral curvature.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 697-705
+.. GENERATED FROM PYTHON SOURCE LINES 772-780
 
 .. code-block:: Python
 
@@ -1299,16 +1446,16 @@ spiral curvature.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_032.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_036.png
    :alt: 0.5, 1, 2, 4
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_032.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_036.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 706-711
+.. GENERATED FROM PYTHON SOURCE LINES 781-786
 
 ``shell_tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1316,7 +1463,7 @@ spiral curvature.
 Angle between each consecutive shells (in radians).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 711-719
+.. GENERATED FROM PYTHON SOURCE LINES 786-794
 
 .. code-block:: Python
 
@@ -1331,16 +1478,16 @@ Angle between each consecutive shells (in radians).
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_033.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_037.png
    :alt: uniform, intergaps, golden, 3.1415
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_033.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_037.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 720-728
+.. GENERATED FROM PYTHON SOURCE LINES 795-803
 
 ``shot_tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1351,7 +1498,7 @@ for each individual shell following a density provided in [YRB06]_, it
 is advised to use adaptive keywords such as "uniform" rather than hard values.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 728-736
+.. GENERATED FROM PYTHON SOURCE LINES 803-811
 
 .. code-block:: Python
 
@@ -1366,16 +1513,16 @@ is advised to use adaptive keywords such as "uniform" rather than hard values.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_034.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_038.png
    :alt: uniform, intergaps, golden, 0.1
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_034.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_038.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 737-757
+.. GENERATED FROM PYTHON SOURCE LINES 812-832
 
 Annular shells
 --------------
@@ -1398,7 +1545,7 @@ Arguments:
   (in radians). ``(default pi / 2)``
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 757-762
+.. GENERATED FROM PYTHON SOURCE LINES 832-837
 
 .. code-block:: Python
 
@@ -1410,16 +1557,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_035.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_039.png
    :alt: example 3D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_035.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_039.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 763-780
+.. GENERATED FROM PYTHON SOURCE LINES 838-855
 
 ``ring_tilt (float)``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1439,7 +1586,7 @@ and it partitions the spheres into several connex curves composed of exactly
 two shots.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 780-788
+.. GENERATED FROM PYTHON SOURCE LINES 855-863
 
 .. code-block:: Python
 
@@ -1454,16 +1601,16 @@ two shots.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_036.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_040.png
    :alt: 0, 0.7853981633974483, 1.5707963267948966, 2.356194490192345
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_036.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_040.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 789-812
+.. GENERATED FROM PYTHON SOURCE LINES 864-887
 
 Seiffert shells
 ---------------
@@ -1489,7 +1636,7 @@ Arguments:
   over a sphere (in radians). ``(default "uniform")``. See helical shells
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 812-817
+.. GENERATED FROM PYTHON SOURCE LINES 887-892
 
 .. code-block:: Python
 
@@ -1501,16 +1648,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_037.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_041.png
    :alt: example 3D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_037.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_041.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 818-857
+.. GENERATED FROM PYTHON SOURCE LINES 893-932
 
 fMRI trajectories
 =================
@@ -1552,7 +1699,7 @@ Arguments:
   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 857-865
+.. GENERATED FROM PYTHON SOURCE LINES 932-940
 
 .. code-block:: Python
 
@@ -1567,16 +1714,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_038.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_042.png
    :alt: example 3D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_038.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_042.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 866-873
+.. GENERATED FROM PYTHON SOURCE LINES 941-948
 
 ``Ns_transitions (int)``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1586,7 +1733,7 @@ Smoother transitions are achieved with more points, but it means longer
 waiting times between readouts if they are split during acquisition.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 873-884
+.. GENERATED FROM PYTHON SOURCE LINES 948-959
 
 .. code-block:: Python
 
@@ -1604,16 +1751,16 @@ waiting times between readouts if they are split during acquisition.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_039.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_043.png
    :alt: 1, 50, 100, 200
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_039.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_043.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 885-892
+.. GENERATED FROM PYTHON SOURCE LINES 960-967
 
 ``nb_blades (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -1623,7 +1770,7 @@ and partition the k-space. More blades means fewer lines per blade.
 It should be lower than ``Nc`` and divide it.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 892-903
+.. GENERATED FROM PYTHON SOURCE LINES 967-978
 
 .. code-block:: Python
 
@@ -1641,16 +1788,16 @@ It should be lower than ``Nc`` and divide it.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_040.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_044.png
    :alt: 24, 8, 4, 2
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_040.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_044.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 904-909
+.. GENERATED FROM PYTHON SOURCE LINES 979-984
 
 ``blade_tilt (str, float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1658,7 +1805,7 @@ It should be lower than ``Nc`` and divide it.
 Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 909-920
+.. GENERATED FROM PYTHON SOURCE LINES 984-995
 
 .. code-block:: Python
 
@@ -1676,16 +1823,16 @@ Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_041.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_045.png
    :alt: uniform, golden
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_041.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_045.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 921-927
+.. GENERATED FROM PYTHON SOURCE LINES 996-1002
 
 .. code-block:: Python
 
@@ -1698,16 +1845,16 @@ Angle between each consecutive blades over the :math:`k_z`-axis (in radians)
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_042.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_046.png
    :alt: uniform, golden
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_042.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_046.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 928-935
+.. GENERATED FROM PYTHON SOURCE LINES 1003-1010
 
 ``nb_trains (int)``
 ~~~~~~~~~~~~~~~~~~~
@@ -1717,7 +1864,7 @@ will be composed of :math:`n` readouts with ``Nc = n * nb_trains``.
 If ``"auto"`` then ``nb_trains`` is set to ``nb_blades``.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 935-947
+.. GENERATED FROM PYTHON SOURCE LINES 1010-1022
 
 .. code-block:: Python
 
@@ -1736,16 +1883,16 @@ If ``"auto"`` then ``nb_trains`` is set to ``nb_blades``.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_043.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_047.png
    :alt: 8, 24, 40, 120
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_043.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_047.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 948-959
+.. GENERATED FROM PYTHON SOURCE LINES 1023-1034
 
 ``skip_factor (int)``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1759,7 +1906,7 @@ factor. Note that using ``skip_factor`` superior to ``nb_blades``
 as below results in k-space areas being not covered by any blade.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 959-970
+.. GENERATED FROM PYTHON SOURCE LINES 1034-1045
 
 .. code-block:: Python
 
@@ -1777,16 +1924,16 @@ as below results in k-space areas being not covered by any blade.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_044.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_048.png
    :alt: 1, 2, 4, 10
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_044.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_048.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 971-982
+.. GENERATED FROM PYTHON SOURCE LINES 1046-1057
 
 .. code-block:: Python
 
@@ -1804,16 +1951,16 @@ as below results in k-space areas being not covered by any blade.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_045.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_049.png
    :alt: 1, 2, 4, 10
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_045.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_049.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 983-1023
+.. GENERATED FROM PYTHON SOURCE LINES 1058-1098
 
 REPI
 ----
@@ -1856,7 +2003,7 @@ Arguments:
   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1024-1036
+.. GENERATED FROM PYTHON SOURCE LINES 1099-1111
 
 .. code-block:: Python
 
@@ -1875,16 +2022,16 @@ Arguments:
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_046.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_050.png
    :alt: example 3D trajectories
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_046.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_050.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1037-1047
+.. GENERATED FROM PYTHON SOURCE LINES 1112-1122
 
 ``nb_blade_revolutions (float)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1897,7 +2044,7 @@ between consecutive lines/spirals, requiring higher gradients
 and slew rates.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1047-1060
+.. GENERATED FROM PYTHON SOURCE LINES 1122-1135
 
 .. code-block:: Python
 
@@ -1917,21 +2064,21 @@ and slew rates.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_047.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_051.png
    :alt: 0, 0.5, 1, 2
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_047.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_051.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1061-1063
+.. GENERATED FROM PYTHON SOURCE LINES 1136-1138
 
 Same but with a spiral pattern instead of radial.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1064-1077
+.. GENERATED FROM PYTHON SOURCE LINES 1139-1152
 
 .. code-block:: Python
 
@@ -1951,16 +2098,16 @@ Same but with a spiral pattern instead of radial.
 
 
 
-.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_048.png
+.. image-sg:: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_052.png
    :alt: 0, 0.5, 1, 2
-   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_048.png
+   :srcset: /generated/autoexamples/images/sphx_glr_example_3D_trajectories_052.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 1078-1142
+.. GENERATED FROM PYTHON SOURCE LINES 1153-1223
 
 References
 ==========
@@ -2026,11 +2173,17 @@ References
 .. [RMS22] Rettenmeier, Christoph A., Danilo Maziero, and V. Andrew Stenger.
    "Three dimensional radial echo planar imaging for functional MRI."
    Magnetic Resonance in Medicine 87, no. 1 (2022): 193-206.
+.. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
+   Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
+   Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
+   "ECCENTRIC: a fast and unrestrained approach for high-resolution
+   in vivo metabolic imaging at ultra-high field MR".
+   Imaging Neuroscience 2 (2024): 1-20.
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 3.125 seconds)
+   **Total running time of the script:** (1 minutes 14.030 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_3D_trajectories.py:

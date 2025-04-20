@@ -321,6 +321,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
@@ -810,37 +815,40 @@ only in gpuNUFFT</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.adj_op" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.adj_op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adj_op</span></code></a></p></td>
 <td><p>Compute adjoint Non Uniform Fourier Transform.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_shape</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cg</span></code></p></td>
+<td><p>Conjugate Gradient method to solve the inverse problem.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_shape</span></code></p></td>
 <td><p>Validate the shapes of the image or k-space data against operator shapes.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_density</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_density</span></code></p></td>
 <td><p>Compute the density compensation weights and set it.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_smaps</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_smaps</span></code></p></td>
 <td><p>Compute the sensitivity maps and set it.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.data_consistency" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.data_consistency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_consistency</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.data_consistency" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.data_consistency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_consistency</span></code></a></p></td>
 <td><p>Compute the data consistency estimation directly on gpu.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_lipschitz_cst</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_lipschitz_cst</span></code></a></p></td>
 <td><p>Return the Lipschitz constant of the operator.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_autograd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_autograd</span></code></p></td>
 <td><p>Make a new Operator with autodiff support.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">op</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">op</span></code></a></p></td>
 <td><p>Compute forward non-uniform Fourier Transform.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe</span></code></a></p></td>
 <td><p>Compute the density compensation weights for a given set of kspace locations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.toggle_grad_traj" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.toggle_grad_traj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_grad_traj</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.toggle_grad_traj" title="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.toggle_grad_traj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_grad_traj</span></code></a></p></td>
 <td><p>Toggle the gradient trajectory of the operator.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_autograd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_autograd</span></code></p></td>
 <td><p>Return a Fourier operator with autograd capabilities.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_off_resonance_correction</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_off_resonance_correction</span></code></p></td>
 <td><p>Return a new operator with Off Resonnance Correction.</p></td>
 </tr>
 </tbody>
