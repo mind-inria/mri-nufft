@@ -35,6 +35,7 @@ Ns = 256  # Number of samples per shot
 in_out = True  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Choose the angular distance between shots
 nb_repetitions = 6  # Number of strips when relevant
+seed = 0  # Seed for random trajectories
 
 # Display parameters
 figure_size = 6  # Figure size for trajectory plots
@@ -418,13 +419,11 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 # %%
 # Rings
-# -------
+# -----
 #
 # A pattern composed of concentric circles like a target, with each
 # ring composed of one or more shots . This trajectory was initially
-# proposed by Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
-# "MRI using a concentric rings trajectory." Magnetic Resonance in Medicine
-# 59, no. 1 (2008): 102-112.
+# proposed in [WLN08]_.
 #
 # Arguments:
 #
@@ -465,6 +464,62 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 
 # %%
+# ECCENTRIC
+# ---------
+#
+# This is a reproduction of the proposition from [Kla+24]_.
+# It creates trajectories as uniformly distributed circles,
+# with a pseudo rosette-like structure at the center to ensure
+# its coverage. ECCENTRIC stands for ECcentric Circle ENcoding
+# TRajectorIes for Compressed sensing.
+#
+# Arguments:
+#
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``Ns (int)``: number of samples per shot. See radial
+# - ``radius_ratio (float)``: radius of each circle relatively
+#   to the k-space radius.
+# - ``center_ratio (float)``: proportion of shots positioned around
+#   the center into a pseudo-rosette pattern (default 0).
+# - ``nb_revolutions (float)``: number of revolutions per circle
+#   (default 1). See spiral
+# - ``min_distance (float)``: minimum allowed distance between
+#   consecutive circles relatively to the k-space radius (default 0).
+# - ``seed (int)``: random seed for reproducibility, used only
+#   to draw the circle centers (default None).
+
+trajectory = mn.initialize_2D_eccentric(Nc, Ns, radius_ratio=0.3, seed=seed)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+
+# %%
+# ``radius_ratio (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The radius of each circle relatively to the k-space radius. It should be below
+# 0.5 otherwise the shots are not able to cross the k-space center.
+#
+
+arguments = [0.05, 0.2, 0.35, 0.5]
+function = lambda x: mn.initialize_2D_eccentric(Nc=Nc, Ns=Ns, radius_ratio=x, seed=seed)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# ``center_ratio (float)``
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# The proportion of shots positioned around the center into a pseudo-rosette pattern.
+# The goal is to ensure its coverage despite the trajectories being random otherwise.
+#
+
+arguments = [0, 0.3, 0.6, 1]
+function = lambda x: mn.initialize_2D_eccentric(
+    Nc=Nc, Ns=Ns, radius_ratio=0.3, center_ratio=x, seed=seed
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+
+# %%
 # Rosette
 # -------
 #
@@ -491,7 +546,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 # The index used to select a compatible coprime factor, parameterized such
 # that trajectories keep :math:`N_c` petals while increasing their width,
-# i.e. increasing the curvature of the shots. This argument is quite
+# i.e. increasing the curvature of the shots. This argument is quite
 # complex with regard to the original formula in order to remain easily
 # interpretable, user-friendly and optimal for MR use cases. For more
 # details, please consult this `Wikipedia page`_.
@@ -689,3 +744,12 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # .. [Pip99] Pipe, James G. "Motion correction with PROPELLER MRI:
 #    application to head motion and free‐breathing cardiac imaging."
 #    Magnetic Resonance in Medicine 42, no. 5 (1999): 963-969.
+# .. [WLN08] Wu, Hochong H., Jin Hyung Lee, and Dwight G. Nishimura.
+#    "MRI using a concentric rings trajectory." Magnetic Resonance
+#    in Medicine 59, no. 1 (2008): 102-112.
+# .. [Kla+24] Klauser, Antoine, Bernhard Strasser, Wolfgang Bogner,
+#    Lukas Hingerl, Sebastien Courvoisier, Claudiu Schirda,
+#    Bruce R. Rosen, Francois Lazeyras, and Ovidiu C. Andronesi.
+#    "ECCENTRIC: a fast and unrestrained approach for high-resolution
+#    in vivo metabolic imaging at ultra-high field MR".
+#    Imaging Neuroscience 2 (2024): 1-20.
