@@ -250,8 +250,7 @@ class MRIFourierCorrected(FourierOperatorBase):
                         Please ensure orientation is correct.",
                     UserWarning,
                 )
-                zoom_factors = tuple(
-                    t / c for t, c in zip(self.shape, b0_map.shape))
+                zoom_factors = tuple(t / c for t, c in zip(self.shape, b0_map.shape))
                 b0_map = zoom(b0_map, zoom_factors, order=1)
         if B is not None and tl is not None:
             self.B = self.xp.asarray(B)
@@ -267,8 +266,7 @@ class MRIFourierCorrected(FourierOperatorBase):
                 r2star_map,
             )
         if self.B is None or self.tl is None:
-            raise ValueError(
-                "Please either provide fieldmap and t or B and tl")
+            raise ValueError("Please either provide fieldmap and t or B and tl")
         self.n_interpolators = self.B.shape[0]
 
         # create spatial interpolator
@@ -300,8 +298,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = self.xp.asarray(data)
         if self.C is not None:
             for idx in range(self.n_interpolators):
-                y += self.B[idx] * \
-                    self._fourier_op.op(self.C[idx] * data_d, *args)
+                y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
         else:
             for idx in range(self.n_interpolators):
                 C = self.xp.exp(-self.field_map * self.tl[idx].item())
