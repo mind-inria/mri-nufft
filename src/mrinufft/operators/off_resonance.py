@@ -13,6 +13,8 @@ from .._utils import get_array_module
 from .base import FourierOperatorBase
 
 from .interfaces.utils import is_cuda_array
+import warnings
+from scipy.ndimage import zoom
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -238,7 +240,19 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
         self.autograd_available = fourier_op.autograd_available
-
+        if b0_map is not None:
+            b0_map = np.asarray(b0_map, dtype=np.float32)
+            if b0_map.shape != self.shape:
+                warnings.warn(
+                    f"B0 map shape {b0_map.shape} does not match operator \
+                    shape {self.shape}. "
+                    "Upsampling will be performed automatically.\
+                        Please ensure orientation is correct.",
+                    UserWarning,
+                )
+                zoom_factors = tuple(
+                    t / c for t, c in zip(self.shape, b0_map.shape))
+                b0_map = zoom(b0_map, zoom_factors, order=1)
         if B is not None and tl is not None:
             self.B = self.xp.asarray(B)
             self.tl = self.xp.asarray(tl)
@@ -253,7 +267,8 @@ class MRIFourierCorrected(FourierOperatorBase):
                 r2star_map,
             )
         if self.B is None or self.tl is None:
-            raise ValueError("Please either provide fieldmap and t or B and tl")
+            raise ValueError(
+                "Please either provide fieldmap and t or B and tl")
         self.n_interpolators = self.B.shape[0]
 
         # create spatial interpolator
@@ -285,7 +300,8 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = self.xp.asarray(data)
         if self.C is not None:
             for idx in range(self.n_interpolators):
-                y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
+                y += self.B[idx] * \
+                    self._fourier_op.op(self.C[idx] * data_d, *args)
         else:
             for idx in range(self.n_interpolators):
                 C = self.xp.exp(-self.field_map * self.tl[idx].item())
