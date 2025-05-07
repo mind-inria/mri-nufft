@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**10:16.293** total execution time for 12 files **from generated/autoexamples**:
+**09:44.384** total execution time for 12 files **from generated/autoexamples**:
 
 .. container::
 
@@ -33,38 +33,38 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``example_sampling_densities.py``)
-     - 02:13.137
+     - 02:13.609
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_3D.py` (``example_gif_3D.py``)
-     - 02:06.993
+     - 01:58.211
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_2D.py` (``example_gif_2D.py``)
-     - 01:24.816
+     - 01:18.240
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` (``example_3D_trajectories.py``)
-     - 01:14.030
+     - 01:09.799
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_learn_samples_multires.py` (``example_learn_samples_multires.py``)
-     - 01:11.072
+     - 01:02.209
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py` (``example_trajectory_tools.py``)
-     - 00:51.281
+     - 00:49.460
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_subspace.py` (``example_subspace.py``)
-     - 00:35.656
+     - 00:37.282
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_2D_trajectories.py` (``example_2D_trajectories.py``)
-     - 00:25.809
+     - 00:22.906
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_display_config.py` (``example_display_config.py``)
-     - 00:05.867
+     - 00:05.723
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``example_stacked.py``)
-     - 00:03.333
+     - 00:02.981
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_readme.py` (``example_readme.py``)
-     - 00:02.258
+     - 00:02.050
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_offresonance.py` (``example_offresonance.py``)
-     - 00:02.041
+     - 00:01.914
      - 0.0
