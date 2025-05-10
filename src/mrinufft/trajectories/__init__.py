@@ -3,8 +3,10 @@
 from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
 from .gradients import patch_center_anomaly
 from .inits import (
+    initialize_2D_eccentric,
     initialize_2D_random_walk,
     initialize_2D_travelling_salesman,
+    initialize_3D_eccentric,
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
@@ -89,6 +91,8 @@ __all__ = [
     "initialize_3D_repi",
     "initialize_3D_random_walk",
     "initialize_3D_travelling_salesman",
+    "initialize_2D_eccentric",
+    "initialize_3D_eccentric",
     # tools
     "get_random_loc_1d",
     "stack",
