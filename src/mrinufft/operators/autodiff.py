@@ -109,9 +109,15 @@ class MRINufftAutoGrad(torch.nn.Module):
     Parameters
     ----------
     nufft_op: Classic Non differentiable MRI-NUFFT operator.
+
+    batch_size : int, default None
+        Number of batches to process simultaneously. if it is not None, the wrapped NUfft operator will support different data/smaps pairs in a batched mode
+
     """
 
-    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
+    # TODO Future improvements may include support for varying trajectories across batches.
+
+    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False, batch_size=None):
         super().__init__()
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not supported for autodiff.")
@@ -127,57 +133,22 @@ class MRINufftAutoGrad(torch.nn.Module):
             # used for update also.
             self._samples_torch = torch.Tensor(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
+        self.batch_size = batch_size
+        self.paired_batch_mode = batch_size is not None
 
-    def op(self, x):
+    def op(self, x, smaps=None):
         r"""Compute the forward image -> k-space."""
+        if self.paired_batch_mode:
+            return self.op_batched(x, smaps)
         return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
 
-    def adj_op(self, kspace):
+    def adj_op(self, kspace, smaps=None):
         r"""Compute the adjoint k-space -> image."""
+        if self.paired_batch_mode:
+            return self.adj_op_batched(kspace, smaps)
         return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
 
-    @property
-    def samples(self):
-        """Get the samples."""
-        try:
-            return self._samples_torch
-        except AttributeError:
-            return self.nufft_op.samples
-
-    @samples.setter
-    def samples(self, value):
-        self._samples_torch = value
-        self.nufft_op.samples = value.detach().cpu().numpy()
-
-    def __getattr__(self, name):
-        """Forward all other attributes to the nufft_op."""
-        return getattr(self.nufft_op, name)
-
-
-class BatchedNufftAutoGrad(MRINufftAutoGrad):
-    """
-    A batched wrapper for NUFFT operator with support for autodifferentiation
-    and varying sensitivity maps (smaps) across batches.
-
-    Parameters
-    ----------
-    nufft : object
-        An instance of a standard NUFFT operator.
-    batch_size : int
-        Number of batches to process simultaneously.
-    **kwargs : dict, optional
-        Additional arguments.
-
-    Notes
-    -----
-    #TODO Future improvements may include support for varying trajectories across batches.
-    """
-
-    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False, batch_size=1, **kwargs):
-        super().__init__(nufft_op=nufft_op, wrt_data=wrt_data, wrt_traj=wrt_traj)
-        self.batch_size = batch_size
-
-    def op(self, batched_smaps, batched_imgs):
+    def op_batched(self, batched_imgs, batched_smaps):
         """Compute the forward batched_imgs -> batched_kspace."""
         self._check_input_shape(imgs=batched_imgs)
         self._check_input_shape(imgs=batched_smaps)
@@ -195,7 +166,7 @@ class BatchedNufftAutoGrad(MRINufftAutoGrad):
                 )  # For an easier debugging
         return torch.stack(batched_kspace, dim=0)
 
-    def adj_op(self, batched_smaps, batched_kspace):
+    def adj_op_batched(self, batched_kspace, batched_smaps):
         """Compute the adjoint batched_kspace -> batched_imgs."""
         self._check_input_shape(ksps=batched_kspace)
         self._check_input_shape(imgs=batched_smaps)
@@ -209,6 +180,23 @@ class BatchedNufftAutoGrad(MRINufftAutoGrad):
             except Exception as e:
                 raise RuntimeError(f"Failed at batch index {i+1}") from e
         return torch.stack(batched_imgs, dim=0)
+
+    @property
+    def samples(self):
+        """Get the samples."""
+        try:
+            return self._samples_torch
+        except AttributeError:
+            return self.nufft_op.samples
+
+    @samples.setter
+    def samples(self, value):
+        self._samples_torch = value
+        self.nufft_op.samples = value.detach().cpu().numpy()
+
+    def __getattr__(self, name):
+        """Forward all other attributes to the nufft_op."""
+        return getattr(self.nufft_op, name)
 
     def _check_input_shape(self, *, imgs=None, ksps=None):
         """
