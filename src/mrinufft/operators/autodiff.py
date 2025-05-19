@@ -174,9 +174,7 @@ class BatchedNufftAutoGrad(MRINufftAutoGrad):
     """
 
     def __init__(self, nufft_op, wrt_data=True, wrt_traj=False, batch_size=1, **kwargs):
-        super().__init__(
-            nufft_op=nufft_op, wrt_data=wrt_data, wrt_traj=wrt_traj
-        )
+        super().__init__(nufft_op=nufft_op, wrt_data=wrt_data, wrt_traj=wrt_traj)
         self.batch_size = batch_size
 
     def op(self, batched_smaps, batched_imgs):
