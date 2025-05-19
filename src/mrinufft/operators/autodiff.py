@@ -209,7 +209,7 @@ class BatchedNufftAutoGrad(MRINufftAutoGrad):
                     _NUFFT_ADJOP.apply(batched_kspace[i], self.samples, self.nufft_op)
                 )
             except Exception as e:
-                raise RuntimeError(f"Failed at batch index {i+1}: {e}")
+                raise RuntimeError(f"Failed at batch index {i+1}") from e
         return torch.stack(batched_imgs, dim=0)
 
     def _check_input_shape(self, *, imgs=None, ksps=None):
