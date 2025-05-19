@@ -152,3 +152,94 @@ class MRINufftAutoGrad(torch.nn.Module):
     def __getattr__(self, name):
         """Forward all other attributes to the nufft_op."""
         return getattr(self.nufft_op, name)
+
+
+class BatchedNufftAutoGrad(MRINufftAutoGrad):
+    """
+    A batched wrapper for NUFFT operator with support for autodifferentiation
+    and varying sensitivity maps (smaps) across batches.
+
+    Parameters
+    ----------
+    nufft : object
+        An instance of a standard NUFFT operator.
+    batch_size : int
+        Number of batches to process simultaneously.
+    **kwargs : dict, optional
+        Additional arguments.
+
+    Notes
+    -----
+    #TODO Future improvements may include support for varying trajectories across batches.
+    """
+
+    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False, batch_size=1, **kwargs):
+        super().__init__(
+            nufft_op=nufft_op, wrt_data=wrt_data, wrt_traj=wrt_traj
+        )
+        self.batch_size = batch_size
+
+    def op(self, batched_smaps, batched_imgs):
+        """Compute the forward batched_imgs -> batched_kspace."""
+        self._check_input_shape(imgs=batched_imgs)
+        self._check_input_shape(imgs=batched_smaps)
+        batched_kspace = []
+        for i in range(self.batch_size):
+            try:
+                # update smaps for proper backward computation
+                self.nufft_op.smaps = batched_smaps[i]
+                batched_kspace.append(
+                    _NUFFT_OP.apply(batched_imgs[i], self.samples, self.nufft_op)
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed at batch index {i+1}: {e}"
+                )  # For an easier debugging
+        return torch.stack(batched_kspace, dim=0)
+
+    def adj_op(self, batched_smaps, batched_kspace):
+        """Compute the adjoint batched_kspace -> batched_imgs."""
+        self._check_input_shape(ksps=batched_kspace)
+        self._check_input_shape(imgs=batched_smaps)
+        batched_imgs = []
+        for i in range(self.batch_size):
+            try:
+                self.nufft_op.smaps = batched_smaps[i]
+                batched_imgs.append(
+                    _NUFFT_ADJOP.apply(batched_kspace[i], self.samples, self.nufft_op)
+                )
+            except Exception as e:
+                raise RuntimeError(f"Failed at batch index {i+1}: {e}")
+        return torch.stack(batched_imgs, dim=0)
+
+    def _check_input_shape(self, *, imgs=None, ksps=None):
+        """
+        Validates the batch size of either image or k-space input against the expected batch size.
+
+        Parameters
+        ----------
+        imgs : np.ndarray, optional
+            Image data array. If provided, its batch dimension will be validated.
+
+        ksps : np.ndarray or object, optional
+            K-space data array or compatible object. If provided, its batch dimension will be validated.
+
+        Raises
+        ------
+        ValueError
+            If the batch size of the image or k-space input does not match the expected batch size.
+        """
+        if imgs is not None:
+            if imgs.shape[0] != self.batch_size:
+                raise ValueError(
+                    f"Image batch size mismatch: got {imgs.shape[0]}, expected {self.batch_size}. "
+                    f"Image shape: {imgs.shape}"
+                )
+        if ksps is not None:
+            if ksps.shape[0] != self.batch_size:
+                raise ValueError(
+                    f"K-space batch size mismatch: got {ksps.shape[0]}, expected {self.batch_size}. "
+                    f"K-space shape: {ksps.shape}"
+                )
+        if imgs is None and ksps is None:
+            raise ValueError("Provide either `imgs` or `ksps` as input.")

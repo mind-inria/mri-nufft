@@ -19,12 +19,13 @@ except ImportError:
 
 def image_from_op(operator):
     """Generate a random image."""
+    batch_dim = (operator.batch_size,) if hasattr(operator, "batch_size") else ()
     if operator.smaps is None:
-        img = np.random.randn(operator.n_coils, *operator.shape).astype(
+        img = np.random.randn(*batch_dim, operator.n_coils, *operator.shape).astype(
             operator.cpx_dtype
         )
     elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.randn(*operator.shape).astype(operator.cpx_dtype)
+        img = np.random.randn(*batch_dim, *operator.shape).astype(operator.cpx_dtype)
 
     img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
     return img
@@ -32,13 +33,26 @@ def image_from_op(operator):
 
 def kspace_from_op(operator):
     """Generate a random kspace data."""
-    kspace = (1j * np.random.randn(operator.n_coils, operator.n_samples)).astype(
-        operator.cpx_dtype
-    )
-    kspace += np.random.randn(operator.n_coils, operator.n_samples).astype(
+    batch_dim = (operator.batch_size,) if hasattr(operator, "batch_size") else ()
+    kspace = (
+        1j * np.random.randn(*batch_dim, operator.n_coils, operator.n_samples)
+    ).astype(operator.cpx_dtype)
+    kspace += np.random.randn(*batch_dim, operator.n_coils, operator.n_samples).astype(
         operator.cpx_dtype
     )
     return kspace
+
+
+def batchedSmpas_from_op(operator):
+    """Generate random batched smaps."""
+    smaps = 1j * np.random.randn(
+        operator.batch_size, operator.n_coils, *operator.shape
+    ).astype(np.complex64)
+    smaps += np.random.randn(
+        operator.batch_size, operator.n_coils, *operator.shape
+    ).astype(np.complex64)
+    smaps /= np.linalg.norm(smaps, axis=1, keepdims=True)
+    return smaps
 
 
 def to_interface(data, interface):

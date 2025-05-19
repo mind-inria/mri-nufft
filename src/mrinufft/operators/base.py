@@ -50,7 +50,13 @@ def list_backends(available_only=False):
 
 
 def get_operator(
-    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
+    backend_name: str,
+    wrt_data: bool = False,
+    wrt_traj: bool = False,
+    use_batched_mode: bool = False,
+    batch_size: int = 1,
+    *args,
+    **kwargs,
 ):
     """Return an MRI Fourier operator interface using the correct backend.
 
@@ -62,6 +68,10 @@ def get_operator(
         if set gradients wrt to data and images will be available.
     wrt_traj: bool, default False
         if set gradients wrt to trajectory will be available.
+    use_batched_mode : bool, optional
+        If True, uses a batched version of the NUFFT operator that supports varying data/smaps pairs.
+    batch_size : int, optional
+        Batch size to be used in batched mode. Only relevant if `use_batched_mode=True`. Default is 1.
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -97,10 +107,14 @@ def get_operator(
     # if autograd:
     if wrt_data or wrt_traj:
         if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(wrt_data, wrt_traj)
+            operator = operator.make_autograd(
+                wrt_data, wrt_traj, use_batched_mode, batch_size
+            )
         else:
             # instance will be created later
-            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+            operator = partial(
+                operator.with_autograd, wrt_data, wrt_traj, use_batched_mode, batch_size
+            )
 
     return operator
 
@@ -257,7 +271,9 @@ class FourierOperatorBase(ABC):
             **kwargs,
         )
 
-    def make_autograd(self, wrt_data=True, wrt_traj=False):
+    def make_autograd(
+        self, wrt_data=True, wrt_traj=False, use_batched_mode=False, batch_size=1
+    ):
         """Make a new Operator with autodiff support.
 
         Parameters
@@ -270,6 +286,12 @@ class FourierOperatorBase(ABC):
 
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
+
+        use_batched_mode : bool, optional
+            If True, uses a batched version of the NUFFT operator that supports varying smaps
+
+        batch_size : int, optional
+            Batch size to be used in batched mode. Only relevant if `use_batched_mode=True`. Default is 1.
 
         Returns
         -------
@@ -286,9 +308,20 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
-        from mrinufft.operators.autodiff import MRINufftAutoGrad
+        if use_batched_mode:
+            if batch_size < 1:
+                raise ValueError(
+                    "Provide a valid batch size." f"Batch size : {batch_size}"
+                )
+            from mrinufft.operators.autodiff import BatchedNufftAutoGrad
 
-        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
+            return BatchedNufftAutoGrad(
+                self, wrt_data=wrt_data, wrt_traj=wrt_traj, batch_size=batch_size
+            )
+        else:
+            from mrinufft.operators.autodiff import MRINufftAutoGrad
+
+            return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
@@ -476,9 +509,19 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
+    def with_autograd(
+        cls,
+        wrt_data=True,
+        wrt_traj=False,
+        use_batched_mode=False,
+        batch_size=1,
+        *args,
+        **kwargs,
+    ):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
+        return cls(*args, **kwargs).make_autograd(
+            wrt_data, wrt_traj, use_batched_mode, batch_size
+        )
 
 
 class FourierOperatorCPU(FourierOperatorBase):
