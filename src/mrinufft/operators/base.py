@@ -68,7 +68,7 @@ def get_operator(
     wrt_traj: bool, default False
         if set gradients wrt to trajectory will be available.
     paired_batch_size : int, optional
-        If provided, enables batching. Specifies the batch size for varying data/smaps pairs.
+        If provided, specifies batch size for varying data/smaps pairs.
         Default is None, which means no batching
     *args, **kwargs:
         Arguments to pass to the operator constructor.
@@ -282,7 +282,7 @@ class FourierOperatorBase(ABC):
             If the gradient with respect to the trajectory is computed, default is false
 
         paired_batch_size : int, optional
-            If provided, enables batching. Specifies the batch size for varying data/smaps pairs.
+            If provided, specifies batch size for varying data/smaps pairs.
             Default is None, which means no batching
 
         Returns

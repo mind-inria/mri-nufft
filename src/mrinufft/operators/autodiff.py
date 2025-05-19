@@ -111,11 +111,13 @@ class MRINufftAutoGrad(torch.nn.Module):
     nufft_op: Classic Non differentiable MRI-NUFFT operator.
 
     batch_size : int, default None
-        Number of batches to process simultaneously. if it is not None, the wrapped NUfft operator will support different data/smaps pairs in a batched mode
+        Number of batches to process simultaneously.
+        if Provided, the Nufft operator will support different data/smaps pairs
+            in a batched mode
 
     """
 
-    # TODO Future improvements may include support for varying trajectories across batches.
+    # TODO Future improvements may include support for varying trajs across batches.
 
     def __init__(self, nufft_op, wrt_data=True, wrt_traj=False, batch_size=None):
         super().__init__()
@@ -162,8 +164,8 @@ class MRINufftAutoGrad(torch.nn.Module):
                 )
             except Exception as e:
                 raise RuntimeError(
-                    f"Failed at batch index {i+1}: {e}"
-                )  # For an easier debugging
+                    f"Failed at batch index {i+1}"
+                ) from e  # For an easier debugging
         return torch.stack(batched_kspace, dim=0)
 
     def adj_op_batched(self, batched_kspace, batched_smaps):
@@ -199,8 +201,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         return getattr(self.nufft_op, name)
 
     def _check_input_shape(self, *, imgs=None, ksps=None):
-        """
-        Validates the batch size of either image or k-space input against the expected batch size.
+        """Validate the batch size of either image or k-space input.
 
         Parameters
         ----------
@@ -208,23 +209,26 @@ class MRINufftAutoGrad(torch.nn.Module):
             Image data array. If provided, its batch dimension will be validated.
 
         ksps : np.ndarray or object, optional
-            K-space data array or compatible object. If provided, its batch dimension will be validated.
+            K-space data array or compatible object. If provided, its batch
+            dimension will be validated.
 
         Raises
         ------
         ValueError
-            If the batch size of the image or k-space input does not match the expected batch size.
+            If the batch size of input data does not match the expected batch size.
         """
         if imgs is not None:
             if imgs.shape[0] != self.batch_size:
                 raise ValueError(
-                    f"Image batch size mismatch: got {imgs.shape[0]}, expected {self.batch_size}. "
-                    f"Image shape: {imgs.shape}"
+                    "Image batch size mismatch:"
+                    f"Got {imgs.shape[0]}, expected {self.batch_size}. "
+                    f"K-space shape: {imgs.shape}"
                 )
         if ksps is not None:
             if ksps.shape[0] != self.batch_size:
                 raise ValueError(
-                    f"K-space batch size mismatch: got {ksps.shape[0]}, expected {self.batch_size}. "
+                    "K-space batch size mismatch:"
+                    f"Got {ksps.shape[0]}, expected {self.batch_size}. "
                     f"K-space shape: {ksps.shape}"
                 )
         if imgs is None and ksps is None:
