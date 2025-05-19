@@ -19,7 +19,8 @@ except ImportError:
 
 def image_from_op(operator):
     """Generate a random image."""
-    batch_dim = (operator.batch_size,) if hasattr(operator, "batch_size") else ()
+    is_batched = hasattr(operator, "batch_size") and operator.batch_size is not None
+    batch_dim = (operator.batch_size,) if is_batched else ()
     if operator.smaps is None:
         img = np.random.randn(*batch_dim, operator.n_coils, *operator.shape).astype(
             operator.cpx_dtype
@@ -33,7 +34,8 @@ def image_from_op(operator):
 
 def kspace_from_op(operator):
     """Generate a random kspace data."""
-    batch_dim = (operator.batch_size,) if hasattr(operator, "batch_size") else ()
+    is_batched = hasattr(operator, "batch_size") and operator.batch_size is not None
+    batch_dim = (operator.batch_size,) if is_batched else ()
     kspace = (
         1j * np.random.randn(*batch_dim, operator.n_coils, operator.n_samples)
     ).astype(operator.cpx_dtype)
@@ -43,7 +45,7 @@ def kspace_from_op(operator):
     return kspace
 
 
-def batchedSmpas_from_op(operator):
+def batchedSmaps_from_op(operator):
     """Generate random batched smaps."""
     smaps = 1j * np.random.randn(
         operator.batch_size, operator.n_coils, *operator.shape

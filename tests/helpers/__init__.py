@@ -4,7 +4,7 @@ from .asserts import assert_almost_allclose, assert_correlate, assert_allclose
 from .factories import (
     kspace_from_op,
     image_from_op,
-    batchedSmpas_from_op,
+    batchedSmaps_from_op,
     to_interface,
     from_interface,
     CUPY_AVAILABLE,
@@ -22,5 +22,5 @@ __all__ = [
     "CUPY_AVAILABLE",
     "TORCH_AVAILABLE",
     "param_array_interface",
-    "batchedSmpas_from_op",
+    "batchedSmaps_from_op",
 ]
