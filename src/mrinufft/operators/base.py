@@ -309,9 +309,9 @@ class FourierOperatorBase(ABC):
             raise ValueError("Backend does not support auto-differentiation.")
 
         if use_batched_mode:
-            if batch_size < 1:
+            if not isinstance(batch_size,int) or batch_size < 1:
                 raise ValueError(
-                    "Provide a valid batch size." f"Batch size : {batch_size}"
+                    "Batch size ={batch_size} must be a positive integer"
                 )
             from mrinufft.operators.autodiff import BatchedNufftAutoGrad
 
