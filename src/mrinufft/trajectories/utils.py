@@ -350,7 +350,9 @@ def convert_gradients_to_slew_rates(
         Gradients at the beginning of the readout window.
     """
     # Compute slew rates and starting gradients
-    slewrates = np.diff(gradients, axis=1) / raster_time
+    slewrates = np.zeros_like(gradients)
+    slewrates[:, 0] = gradients[:, 0] / raster_time
+    slewrates[:, 1:] = np.diff(gradients, axis=1) / raster_time
     initial_gradients = gradients[:, 0, :]
     return slewrates, initial_gradients
 
