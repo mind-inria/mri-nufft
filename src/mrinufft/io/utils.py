@@ -61,6 +61,67 @@ def siemens_quat_to_rot_mat(quat):
     R[-1, -1] = 1
     return R
 
+def nifti_affine(twixObj):
+    """
+    Calculate the affine transformation matrix from Siemens Twix object.
+
+    Parameters
+    ----------
+    twixObj : twixObj
+        The twix object returned by mapVBVD.
+
+    Returns
+    -------
+    np.ndarray
+        The affine transformation matrix which is a 4x4 matrix.
+        This can be passed as input to `affine` parameter in `nibabel`.
+    """
+    # required keys
+    keys = {
+            'dthick': ('sSliceArray', 'asSlice', '0', 'dThickness'),
+            'dread' : ('sSliceArray', 'asSlice', '0', 'dReadoutFOV'),
+            'dphase': ('sSliceArray', 'asSlice', '0', 'dPhaseFOV'),
+            'lbase' : ('sKSpace', 'lBaseResolution'),
+            'lphase': ('sKSpace', 'lPhaseEncodingLines'),
+            'ucdim' : ('sKSpace', 'ucDimension'),
+            }
+    sos = ('sKSpace', 'dSliceOversamplingForDialog')
+    rot = siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:])
+    my = twixObj.hdr.MeasYaps
+
+    for k in keys.keys():
+        if keys[k] not in my:
+            return rot
+
+    dthick = my[keys['dthick']]
+    fov = np.array([
+            my[keys['dread']],
+            my[keys['dphase']],
+            dthick * (1 + my[sos] if sos in my else 1),
+            ])
+
+    lpart = ('sKSpace', 'lPartitions')
+    res = np.array([
+            my[keys['lbase']],
+            my[keys['lphase']],
+            my[lpart] if my[keys['ucdim']] == 4 and lpart in my else 1,
+            ])
+
+    scale = np.diag([*(fov / res), 1])
+
+    offset = twixObj.image.slicePos[0][:3]
+
+    center = [-fov[0]/2,
+              -fov[1]/2,
+              -(fov[2] - (my[sos] * dthick if sos in my else 0))/2,
+              1]
+
+    t = (rot @ center)[:3] - offset
+
+    full_mat = rot @ scale
+    full_mat[:3, 3] = t
+
+    return full_mat
 
 def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
     """Remove extra samples from k-space data.
