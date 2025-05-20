@@ -152,6 +152,10 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def op_batched(self, batched_imgs, batched_smaps):
         """Compute the forward batched_imgs -> batched_kspace."""
+        # Each batch element independently calls NUFFT_OP.apply(...).
+        # The NUFFT operator is stored via ctx.nufft_op, which already saves both
+        # kspace_loc and smaps as attributes. Since ctx is isolated per element,
+        # the correct smaps are used during backpropagation.
         self._check_input_shape(imgs=batched_imgs)
         self._check_input_shape(imgs=batched_smaps)
         batched_kspace = []
@@ -170,6 +174,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def adj_op_batched(self, batched_kspace, batched_smaps):
         """Compute the adjoint batched_kspace -> batched_imgs."""
+        # NUFFT op is saved per batch element in ctx to ensure correct backpropagation.
         self._check_input_shape(ksps=batched_kspace)
         self._check_input_shape(imgs=batched_smaps)
         batched_imgs = []
