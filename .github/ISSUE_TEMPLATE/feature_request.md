@@ -1,7 +1,7 @@
 ---
 name: 💡 Feature
 about: Suggest an idea
-labels: 'feature'
+labels: 'feature request'
 ---
 
 ### Problem
