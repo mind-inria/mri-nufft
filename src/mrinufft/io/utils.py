@@ -38,7 +38,7 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
     return kspace_data * phase
 
 
-def siemens_quat_to_rot_mat(quat):
+def siemens_quat_to_rot_mat(quat, return_det=False):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
 
@@ -46,6 +46,8 @@ def siemens_quat_to_rot_mat(quat):
     ----------
     quat : np.ndarray
         The quaternion from the Siemens Twix file.
+    return_det : bool
+        Whether to return the determinent of the rotation before norm
 
     Returns
     -------
@@ -56,9 +58,12 @@ def siemens_quat_to_rot_mat(quat):
     R = np.zeros((4, 4))
     R[:3, :3] = Rotation.from_quat([quat[1], quat[2], quat[3], quat[0]]).as_matrix()
     R[:, (0, 1)] = R[:, (1, 0)]
-    if np.linalg.det(R[:3, :3]) < 0:
+    det = np.linalg.det(R[:3, :3])
+    if det < 0:
         R[2] = -R[2]
     R[-1, -1] = 1
+    if return_det:
+        return R, det
     return R
 
 def nifti_affine(twixObj):
@@ -86,7 +91,7 @@ def nifti_affine(twixObj):
             'ucdim' : ('sKSpace', 'ucDimension'),
             }
     sos = ('sKSpace', 'dSliceOversamplingForDialog')
-    rot = siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:])
+    rot, det = siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], True)
     my = twixObj.hdr.MeasYaps
 
     for k in keys.keys():
@@ -111,12 +116,15 @@ def nifti_affine(twixObj):
 
     offset = twixObj.image.slicePos[0][:3]
 
+    fovz = fov[2] - (my[sos] * dthick if sos in my else 0)
     center = [-fov[0]/2,
               -fov[1]/2,
-              -(fov[2] - (my[sos] * dthick if sos in my else 0))/2,
+              -fovz/2,
               1]
 
     t = (rot @ center)[:3] - offset
+    if det < 0:
+        t[2] = fovz - t[2]
 
     full_mat = rot @ scale
     full_mat[:3, 3] = t
