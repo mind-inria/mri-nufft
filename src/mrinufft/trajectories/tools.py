@@ -8,7 +8,16 @@ from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
 
 from .maths import Rv, Rx, Ry, Rz
-from .utils import KMAX, VDSorder, VDSpdf, initialize_tilt
+from .utils import (
+    KMAX,
+    VDSorder,
+    VDSpdf,
+    initialize_tilt,
+    DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
+    DEFAULT_SMAX,
+    Gammas,
+)
 
 ################
 # DIRECT TOOLS #
@@ -367,6 +376,232 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory[:, readout_mask, :]
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
+
+
+def _gradients_to_change_velocity(
+    new_velocity: float | NDArray,
+    Ns_transitions: int,
+    start_velocity: float = 0.0,
+) -> NDArray:
+    """Get the gradients to be played to change the velocity of the trajectory.
+
+    Note that this is not a trajectory but only the gradients.
+    The trajectory is expected to be played at the new velocity after the
+    transition.
+
+    Parameters
+    ----------
+    new_velocity : float
+        New velocity to apply to the trajectory.
+    Ns_transitions : int
+        Number of samples/steps to change the velocity
+    start_velocity : float, optional
+        Initial velocity of the trajectory. By default 0.0.
+    raster_time : float, optional
+        Raster time for the trajectory, by default DEFAULT_RASTER_TIME
+
+    Returns
+    -------
+    NDArray
+        Trajectory with the new velocity.
+    """
+    gradients_to_play = np.linspace(
+        start_velocity, new_velocity, Ns_transitions, endpoint=False
+    )
+    return gradients_to_play
+
+
+def min_time_to_change_location_and_velocity(
+    end_locations: NDArray,
+    start_locations: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    gamma: float = Gammas.Hydrogen,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+) -> tuple[float, tuple[NDArray, NDArray, NDArray]]:
+    """Returns the maximum time required across all trajectories to move from a
+    `start_locations` with `start_gradients` to `end_locations` with
+    `end_gradients` under gmax/smax limits.
+
+    Parameters
+    ----------
+    end_locations : NDArray
+        Ending locations of the trajectories.
+    start_locations : NDArray, optional default=None
+        Starting locations of the trajectories.
+        If not provided, it is assumed to be 0, i.e. trajectories start at the
+        k-space center.
+    start_gradients : NDArray, optional default=None
+        Starting gradients of the trajectories.
+        If not provided, it is assumed to be 0.
+    end_gradients : NDArray, optional default=None
+        Ending gradients of the trajectories.
+        If not provided, it is assumed to be 0.
+    gamma : float, optional
+        Gyromagnetic ratio, by default Gammas.Hydrogen
+    gmax : float, optional
+        Maximum gradient strength, by default DEFAULT_GMAX
+    smax : float, optional
+        Maximum slew rate, by default DEFAULT_SMAX
+
+    Returns
+    -------
+    float
+        Maximum time required across all trajectories to move from a
+        `start_locations` with `start_gradients` to `end_locations` with
+        `end_gradients` under gmax/smax limits.
+    tuple[NDArray, NDArray, NDArray]
+        tuple of the start locations, start gradients,
+        and end gradients.
+    """
+    end_locations = np.atleast_2d(end_locations)
+    if start_locations is None:
+        start_locations = np.zeros_like(end_locations)
+    if start_gradients is None:
+        start_gradients = np.zeros_like(end_locations)
+    if end_gradients is None:
+        end_gradients = np.zeros_like(end_locations)
+    start_locations = np.atleast_2d(start_locations)
+    start_gradients = np.atleast_2d(start_gradients)
+    end_gradients = np.atleast_2d(end_gradients)
+
+    assert (
+        start_locations.shape
+        == end_locations.shape
+        == start_gradients.shape
+        == end_gradients.shape
+    ), "All input arrays must have shape (num_shots, dimension)"
+
+    num_shots, dimension = start_locations.shape
+    max_time = 0.0
+
+    for i in range(num_shots):
+        segment_time = 0.0
+        for d in range(dimension):
+            dk = (end_locations[i, d] - start_locations[i, d]) / gamma
+            G0 = start_gradients[i, d]
+            Gf = end_gradients[i, d]
+
+            Gpeak_slew = np.sqrt(smax * abs(dk)) if dk != 0 else 0
+            Gpeak = min(gmax, Gpeak_slew)
+
+            t_ramp_up = abs(Gpeak - G0) / smax
+            t_ramp_down = abs(Gpeak - Gf) / smax
+
+            ramp_area = (
+                0.5 * (Gpeak + G0) * t_ramp_up + 0.5 * (Gpeak + Gf) * t_ramp_down
+            )
+            plateau_area = abs(dk) - ramp_area
+            t_plateau = plateau_area / Gpeak if Gpeak > 0 and plateau_area > 0 else 0
+
+            t_dim = t_ramp_up + t_plateau + t_ramp_down
+            segment_time = max(segment_time, t_dim)
+        max_time = max(max_time, segment_time)
+    return max_time, (start_locations, start_gradients, end_gradients)
+
+
+def change_trajectory_location_and_velocity(
+    end_locations: NDArray,
+    end_gradients: NDArray | None = None,
+    start_locations: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.Hydrogen,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
+):
+    """
+        Parameters
+    ----------
+    end_locations : NDArray
+        Ending locations of the trajectories.
+    start_locations : NDArray, optional default=None
+        Starting locations of the trajectories.
+        If not provided, it is assumed to be 0, i.e. trajectories start at the
+        k-space center.
+    start_gradients : NDArray, optional default=None
+        Starting gradients of the trajectories.
+        If not provided, it is assumed to be 0.
+    end_gradients : NDArray, optional default=None
+        Ending gradients of the trajectories.
+        If not provided, it is assumed to be 0.
+    gamma : float, optional
+        Gyromagnetic ratio, by default Gammas.Hydrogen
+    gmax : float, optional
+        Maximum gradient strength, by default DEFAULT_GMAX
+    smax : float, optional
+        Maximum slew rate, by default DEFAULT_SMAX
+
+    Returns
+    -------
+    float
+        Maximum time required across all trajectories to move from a
+        `start_locations` with `start_gradients` to `end_locations` with
+        `end_gradients` under gmax/smax limits.
+    """
+    # Get common minimal feasible time across all segments
+    total_time, (start_locations, start_gradients, end_gradients) = (
+        min_time_to_change_location_and_velocity(
+            end_locations,
+            start_locations,
+            start_gradients,
+            end_gradients,
+            gamma,
+            gmax,
+            smax,
+        )
+    )
+    num_shots, dimension = start_locations.shape
+    N = int(np.ceil(total_time / raster_time))
+    t = np.arange(N) * raster_time
+
+    G = np.zeros((num_shots, N, dimension))
+    for i in range(num_shots):
+        for d in range(dimension):
+            k0 = start_locations[i, d] / gamma
+            kf = end_locations[i, d] / gamma
+            dk = kf - k0
+            sign = np.sign(dk)
+            dk = abs(dk)
+
+            G0 = start_gradients[i, d]
+            Gf = end_gradients[i, d]
+
+            Gpeak = min(gmax, np.sqrt(smax * dk)) if dk != 0 else max(G0, Gf)
+
+            t_ramp_up = abs(Gpeak - G0) / smax
+            t_ramp_down = abs(Gpeak - Gf) / smax
+
+            ramp_area = (
+                0.5 * (Gpeak + G0) * t_ramp_up + 0.5 * (Gpeak + Gf) * t_ramp_down
+            )
+            plateau_area = dk - ramp_area
+            t_plateau = plateau_area / Gpeak if Gpeak > 0 and plateau_area > 0 else 0
+
+            # Round to raster grid
+            ramp_up_end = int(np.round(t_ramp_up / raster_time))
+            plateau_end = int(np.round((t_ramp_up + t_plateau) / raster_time))
+
+            # Ramp up
+            if ramp_up_end > 0:
+                G[i, :ramp_up_end, d] = G0 + (Gpeak - G0) * t[:ramp_up_end] / t_ramp_up
+            # Plateau
+            if plateau_end > ramp_up_end:
+                G[i, ramp_up_end:plateau_end, d] = Gpeak
+            # Ramp down
+            if N > plateau_end and t_ramp_down > 0:
+                G[i, plateau_end:, d] = (
+                    Gpeak
+                    - (Gpeak - Gf)
+                    * (t[plateau_end:] - t_ramp_up - t_plateau)
+                    / t_ramp_down
+                )
+
+            # Apply direction
+            G[i, :, d] *= sign
+
+    return G
 
 
 def prewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:
