@@ -273,7 +273,7 @@ def write_trajectory(
             initial_positions = initial_positions - kstart_mismatch
         gradients = np.hstack([start_gradients, gradients])
     if postgrad is not None:
-        if postgrad == "slowdown_to_edge":
+        if postgrad == "slowdown":
             final_gradients = gradients[:, -1]
             # Find the number of samples needed to ramp down speed from GEnd to 0mt/m
             rampdown_num_samples = np.ceil(np.abs(final_gradients) / smax / raster_time)
