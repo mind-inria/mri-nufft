@@ -40,7 +40,7 @@ class CasesIO:
     "name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag",
     cases=CasesIO,
 )
-@parametrize("version", [4.2, 5.0])
+@parametrize("version", [4.2, 5.0, 5.1])
 def test_write_n_read(
     name,
     trajectory,

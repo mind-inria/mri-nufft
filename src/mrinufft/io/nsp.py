@@ -19,6 +19,7 @@ from mrinufft.trajectories.utils import (
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
 )
+from mrinufft.trajectories.tools import _gradients_to_change_velocity
 
 from .siemens import read_siemens_rawdat
 
@@ -202,7 +203,9 @@ def write_trajectory(
     check_constraints: bool = True,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    version: float = 5,
+    pregrad: str = "speedup",
+    postgrad: str = "slowdown_to_edge",
+    version: float = 5.1,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -230,6 +233,12 @@ def write_trajectory(
         Maximum gradient magnitude in T/m, by default 0.04
     smax : float, optional
         Maximum slew rate in T/m/ms, by default 0.1
+    pregrad : str, optional
+        Pregrad method, by default 'speedup'
+        Can be one of 'speedup' or 'prephase'
+    postgrad : str, optional
+        Postgrad method, by default 'slowdown_to_edge'
+        Can be one of 'slowdown_to_edge' or 'slowdown_to_center'
     version: float, optional
         Trajectory versioning, by default 5
     kwargs : dict, optional
@@ -245,7 +254,39 @@ def write_trajectory(
         gamma=gamma,
         get_final_positions=True,
     )
-
+    if version >= 5.1:
+        Ns_to_skip_at_start = 0
+        Ns_to_skip_at_end = 0
+    if pregrad is not None:
+        if pregrad == "speedup":
+            initial_gradients = gradients[:, 0]
+            # Find the number of samples needed to ramp up speed from 0mt/m to GStart
+            rampup_num_samples = np.ceil(np.abs(initial_gradients) / smax / raster_time)
+            Ns_to_skip_at_start = int(np.max(rampup_num_samples)) 
+            start_gradients = np.swapaxes(
+                _gradients_to_change_velocity(initial_gradients, Ns_to_skip_at_start),
+                0,
+                1,
+            )
+            # update the KStarts to account for extra speedup gradients
+            kstart_mismatch = np.sum(start_gradients, axis=1) * gamma * raster_time
+            initial_positions = initial_positions - kstart_mismatch
+        gradients = np.hstack([start_gradients, gradients])
+    if postgrad is not None:
+        if postgrad == "slowdown_to_edge":
+            final_gradients = gradients[:, -1]
+            # Find the number of samples needed to ramp down speed from GEnd to 0mt/m
+            rampdown_num_samples = np.ceil(np.abs(final_gradients) / smax / raster_time)
+            Ns_to_skip_at_end = int(np.max(rampdown_num_samples))
+            end_gradients = np.swapaxes(
+                _gradients_to_change_velocity(final_gradients, Ns_to_skip_at_end),
+                0,
+                1,
+            )
+            # update the KEnds to account for extra slowdown gradients
+            kend_mismatch = np.sum(end_gradients, axis=1) * gamma * raster_time
+            final_positions = final_positions + kend_mismatch
+        gradients = np.hstack([gradients, end_gradients])
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
