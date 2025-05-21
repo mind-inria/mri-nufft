@@ -1,6 +1,6 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -378,41 +378,8 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     return trajectory
 
 
-def _gradients_to_change_velocity(
-    new_velocity: float | NDArray,
-    Ns_transitions: int,
-    start_velocity: float = 0.0,
-) -> NDArray:
-    """Get the gradients to be played to change the velocity of the trajectory.
-
-    Note that this is not a trajectory but only the gradients.
-    The trajectory is expected to be played at the new velocity after the
-    transition.
-
-    Parameters
-    ----------
-    new_velocity : float
-        New velocity to apply to the trajectory.
-    Ns_transitions : int
-        Number of samples/steps to change the velocity
-    start_velocity : float, optional
-        Initial velocity of the trajectory. By default 0.0.
-    raster_time : float, optional
-        Raster time for the trajectory, by default DEFAULT_RASTER_TIME
-
-    Returns
-    -------
-    NDArray
-        Trajectory with the new velocity.
-    """
-    gradients_to_play = np.linspace(
-        start_velocity, new_velocity, Ns_transitions, endpoint=False
-    )
-    return gradients_to_play
-
-
 def min_time_to_change_location_and_velocity(
-    end_locations: NDArray,
+    end_locations: NDArray | None = None,
     start_locations: NDArray | None = None,
     start_gradients: NDArray | None = None,
     end_gradients: NDArray | None = None,
@@ -462,11 +429,12 @@ def min_time_to_change_location_and_velocity(
         raise ValueError(
             "Either `end_locations` or `end_gradients` must be provided."
         )
-    return_new_end_locations = False
+    only_ramps = False
     if end_locations is None:
-        return_new_end_locations = True
+        only_ramps = True
         end_gradients = np.atleast_2d(end_gradients)
         data_shape = end_gradients.shape
+        end_locations = np.zeros_like(end_gradients)
     else:
         end_locations = np.atleast_2d(end_locations)
         data_shape = end_locations.shape
@@ -488,7 +456,7 @@ def min_time_to_change_location_and_velocity(
     ), "All input arrays must have shape (num_shots, dimension)"
     num_shots, dimension = start_locations.shape
     max_time = 0.0
-    if return_new_end_locations:
+    if only_ramps:
         segment_times = (end_gradients - start_gradients) / smax
     else:
         dk = (end_locations - start_locations) / gamma
@@ -496,7 +464,7 @@ def min_time_to_change_location_and_velocity(
         G0 = start_gradients
         Gf = end_gradients
         Gpeak_slew = np.sqrt(smax * abs_dk, where=dk != 0, out=np.zeros_like(dk))
-        Gpeak = min(gmax, Gpeak_slew)
+        Gpeak = np.min([gmax*np.ones_like(Gpeak_slew), Gpeak_slew], axis=0)
         t_ramp_up = np.abs(Gpeak - G0) / smax
         t_ramp_down = abs(Gpeak - Gf) / smax
         ramp_area = 0.5 * (Gpeak + G0) * t_ramp_up + 0.5 * (Gpeak + Gf) * t_ramp_down
@@ -504,7 +472,7 @@ def min_time_to_change_location_and_velocity(
         t_plateau = np.where((Gpeak > 0) & (plateau_area > 0), plateau_area / Gpeak, 0)
         segment_times = np.max(t_ramp_up + t_plateau + t_ramp_down, axis=-1)
     max_time = np.max(segment_times)
-    return max_time, (start_locations, end_locations, start_gradients, end_gradients)
+    return max_time, (start_locations, start_gradients, end_gradients)
 
 
 def change_trajectory_location_and_velocity(
@@ -516,12 +484,15 @@ def change_trajectory_location_and_velocity(
     gamma: float = Gammas.Hydrogen,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-):
+) -> Union[tuple[float, float]|tuple[float, float]]:
     """
         Parameters
     ----------
     end_locations : NDArray, optional default is None 
         Ending locations of the trajectories.
+        If not provided, it is assumed that end_location does not matter,
+        we will only change the velocity of the trajectory and return the 
+        new end_locations.
     start_locations : NDArray, optional default is None
         Starting locations of the trajectories.
         If not provided, it is assumed to be 0, i.e. trajectories start at the
@@ -541,10 +512,13 @@ def change_trajectory_location_and_velocity(
 
     Returns
     -------
-    float
+    float,float,int
         Maximum time required across all trajectories to move from a
         `start_locations` with `start_gradients` to `end_locations` with
         `end_gradients` under gmax/smax limits.
+        If end_locations was not provided, we return the end_locations of the trajectory post change 
+        in gradients.
+        The number of samples required for the change is the last value returned.
     """
     # Get common minimal feasible time across all segments
     total_time, (start_locations, start_gradients, end_gradients) = (
@@ -563,6 +537,12 @@ def change_trajectory_location_and_velocity(
     t = np.arange(N) * raster_time
     G = np.zeros((num_shots, N, dimension))
 
+    if end_locations is None:
+        # Specific case where we dont care about the change in end_locations, but rather that we hit the end_gradients
+        G = np.swapaxes(np.linspace(start_gradients, end_gradients, N, endpoint=False), 0, 1)
+        kstart_mismatch = np.sum(G, axis=1) * gamma * raster_time
+        return G, start_locations - kstart_mismatch, N
+
     k0 = start_locations / gamma
     kf = end_locations / gamma
     dk = kf - k0
@@ -572,19 +552,22 @@ def change_trajectory_location_and_velocity(
     G0 = start_gradients
     Gf = end_gradients
 
-    # Avoid divide-by-zero
-    Gpeak_slew = np.sqrt(smax * abs_dk, where=abs_dk != 0, out=np.zeros_like(abs_dk))
+    Gpeak_slew = np.sqrt(smax * abs_dk * raster_time, where=abs_dk != 0, out=np.zeros_like(abs_dk))
     Gpeak = np.where(abs_dk != 0, np.minimum(gmax, Gpeak_slew), np.maximum(G0, Gf))
 
-    t_ramp_up = np.abs(Gpeak - G0) / smax
-    t_ramp_down = np.abs(Gpeak - Gf) / smax
+    ramp_up = np.ceil(np.abs(Gpeak - G0) / smax / raster_time).astype('int')
+    ramp_down = np.ceil(np.abs(Gpeak - Gf) / smax / raster_time).astype('int')
 
-    ramp_area = 0.5 * (Gpeak + G0) * t_ramp_up + 0.5 * (Gpeak + Gf) * t_ramp_down
+    ramp_area = (0.5 * (Gpeak + G0) * ramp_up + 0.5 * (Gpeak + Gf) * ramp_down) * raster_time
     plateau_area = abs_dk - ramp_area
     t_plateau = np.where((Gpeak > 0) & (plateau_area > 0), plateau_area / Gpeak, 0)
 
     ramp_up_end = np.ceil(t_ramp_up / raster_time).astype(int)
     plateau_end = np.ceil((t_ramp_up + t_plateau) / raster_time).astype(int)
+
+    t_ramp_up = ramp_up_end * raster_time
+
+
     for i in range(num_shots):
         for d in range(dimension):
             ru_end = ramp_up_end[i, d]
@@ -608,7 +591,7 @@ def change_trajectory_location_and_velocity(
             if N > pl_end and tr_down > 0:
                 t_down = t[pl_end:] - tr_up - tp
                 G[i, pl_end:, d] = gp - (gp - gf) * t_down / tr_down
-    return G * sign[:, np.newaxis, :]
+    return G * sign[:, np.newaxis, :], N
 
 
 def prewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:

@@ -19,7 +19,7 @@ from mrinufft.trajectories.utils import (
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import _gradients_to_change_velocity
+from mrinufft.trajectories.tools import change_trajectory_location_and_velocity
 
 from .siemens import read_siemens_rawdat
 
@@ -259,33 +259,38 @@ def write_trajectory(
         Ns_to_skip_at_end = 0
     if pregrad is not None:
         if pregrad == "speedup":
-            initial_gradients = gradients[:, 0]
-            # Find the number of samples needed to ramp up speed from 0mt/m to GStart
-            rampup_num_samples = np.ceil(np.abs(initial_gradients) / smax / raster_time)
-            Ns_to_skip_at_start = int(np.max(rampup_num_samples)) 
-            start_gradients = np.swapaxes(
-                _gradients_to_change_velocity(initial_gradients, Ns_to_skip_at_start),
-                0,
-                1,
+            start_gradients, initial_positions, Ns_to_skip_at_start = change_trajectory_location_and_velocity(
+                end_gradients=gradients[:, 0],
+                start_locations=initial_positions,
             )
-            # update the KStarts to account for extra speedup gradients
-            kstart_mismatch = np.sum(start_gradients, axis=1) * gamma * raster_time
-            initial_positions = initial_positions - kstart_mismatch
+        if pregrad == "prephase":
+            start_gradients, Ns_to_skip_at_start = change_trajectory_location_and_velocity(
+                end_locations=initial_positions,
+                end_gradients=gradients[:, 0],
+            )
+            initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
     if postgrad is not None:
         if postgrad == "slowdown":
-            final_gradients = gradients[:, -1]
-            # Find the number of samples needed to ramp down speed from GEnd to 0mt/m
-            rampdown_num_samples = np.ceil(np.abs(final_gradients) / smax / raster_time)
-            Ns_to_skip_at_end = int(np.max(rampdown_num_samples))
-            end_gradients = np.swapaxes(
-                _gradients_to_change_velocity(final_gradients, Ns_to_skip_at_end),
-                0,
-                1,
+            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
+                start_gradients=gradients[:, -1],
+                start_locations=final_positions,
             )
-            # update the KEnds to account for extra slowdown gradients
-            kend_mismatch = np.sum(end_gradients, axis=1) * gamma * raster_time
-            final_positions = final_positions + kend_mismatch
+        if postgrad == "slowdown_to_edge":
+            edge_locations = np.zeros_like(final_positions)
+            # Always end at KMax, the spoilers can be handeled by the sequence.
+            edge_locations[..., 0] = img_size[0]/FOV[0]/2
+            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
+                end_locations=edge_locations,
+                start_gradients=gradients[:, -1],
+                start_locations=final_positions,
+            )
+        if postgrad == "slowdown_to_center":
+            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
+                end_locations=np.zeros_like(final_positions),
+                start_gradients=gradients[:, -1],
+                start_locations=final_positions,
+            )
         gradients = np.hstack([gradients, end_gradients])
     # Check constraints if requested
     if check_constraints:
