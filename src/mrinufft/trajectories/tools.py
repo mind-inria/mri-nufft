@@ -491,6 +491,84 @@ def min_time_to_change_location_and_velocity(
     return (t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau), Gpeak
 
 
+def get_timing_values(ks, ke, gs, ge, gamma, gmax, smax, raster_time):
+    area_under_curve_needed = (ke - ks) / gamma / raster_time
+    n_direct = np.ceil((ge - gs) / smax / raster_time).astype('int')
+    area_direct = 0.5 * n_direct * (ge + gs)
+    gi = gmax  * np.sign(area_direct - area_under_curve_needed)
+    i = np.sign(area_direct - area_under_curve_needed)
+    n_ramp_down = np.ceil((gmax+i*gs)/smax/raster_time).astype('int')
+    n_ramp_up = np.ceil((gmax+i*ge)/smax/raster_time).astype('int')
+    area_lowest = n_ramp_down * 0.5 * (gs-gmax) + n_ramp_up * 0.5 * (ge-gmax)
+    n_plateau = 0
+    if area_lowest >= area_under_curve_needed:
+        gi = (2 * area_under_curve_needed - n_ramp_down * gs - n_ramp_up * ge) / (n_ramp_down + n_ramp_up)
+    else:
+        remaining_area = area_under_curve_needed - area_lowest
+        n_plateau = np.ceil(remaining_area / gmax / raster_time).astype('int')
+        gi = (2 * area_under_curve_needed - n_ramp_down * gs - n_ramp_up * ge) / (n_ramp_down + n_ramp_up + n_plateau)
+    return n_ramp_down, n_ramp_up, n_plateau, gi
+
+
+def get_timing_values_vectorized(ks, ke, gs, ge, gamma, gmax, smax, raster_time):
+    """
+    Vectorized version to compute gradient timing values for 2D arrays of ks, ke, gs, ge.
+
+    Parameters:
+    - ks, ke, gs, ge: 2D arrays of same shape
+    - gamma: gyromagnetic ratio
+    - gmax: max gradient (scalar)
+    - smax: max slew rate (scalar)
+    - raster_time: gradient raster time (scalar)
+
+    Returns:
+    - n_ramp_down, n_ramp_up, n_plateau, gi: 2D arrays of same shape
+    """
+    area_needed = (ke - ks) / gamma / raster_time
+
+    # Direct ramp steps
+    n_direct = np.ceil((ge - gs) / smax / raster_time).astype(int)
+    area_direct = 0.5 * n_direct * (ge + gs)
+
+    i = np.sign(area_direct - area_needed)
+
+    n_ramp_down = np.ceil((gmax + i * gs) / smax / raster_time).astype(int)
+    n_ramp_up = np.ceil((gmax + i * ge) / smax / raster_time).astype(int)
+
+    area_lowest = (
+        n_ramp_down * 0.5 * (gs - i * gmax) +
+        n_ramp_up * 0.5 * (ge - i * gmax)
+    )
+
+    n_plateau = np.zeros_like(n_ramp_down)
+
+    # Condition: ramp-only sufficient
+    ramp_only_mask = area_lowest >= area_needed
+    gi[ramp_only_mask] = (
+        (2 * area_needed[ramp_only_mask] -
+         n_ramp_down[ramp_only_mask] * gs[ramp_only_mask] -
+         n_ramp_up[ramp_only_mask] * ge[ramp_only_mask])
+        / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
+    )
+
+    # Else: need plateau
+    plateau_mask = ~ramp_only_mask
+    remaining_area = np.zeros_like(area_needed)
+    remaining_area[plateau_mask] = area_needed[plateau_mask] - area_lowest[plateau_mask]
+    n_plateau[plateau_mask] = np.ceil(
+        remaining_area[plateau_mask] / gmax / raster_time
+    ).astype(int)
+
+    gi[plateau_mask] = (
+        (2 * area_needed[plateau_mask] -
+         n_ramp_down[plateau_mask] * gs[plateau_mask] -
+         n_ramp_up[plateau_mask] * ge[plateau_mask]) /
+        total_steps
+    )
+
+    return n_ramp_down, n_ramp_up, n_plateau, gi
+    
+
 
 def change_trajectory_location_and_velocity(
     end_locations: NDArray | None = None,
