@@ -377,6 +377,17 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
 
+def hello():
+    if only_ramps:
+        segment_times = np.ceil((end_gradients - start_gradients) / smax / raster_time)
+        return segment_times
+    
+    if end_locations is None:
+        # Specific case where we dont care about the change in end_locations, but rather that we hit the end_gradients
+        G = np.swapaxes(np.linspace(start_gradients, end_gradients, N, endpoint=False), 0, 1)
+        kstart_mismatch = np.sum(G, axis=1) * gamma * raster_time
+        return G, start_locations - kstart_mismatch, N
+
 
 def min_time_to_change_location_and_velocity(
     end_locations: NDArray | None = None,
@@ -384,6 +395,7 @@ def min_time_to_change_location_and_velocity(
     start_gradients: NDArray | None = None,
     end_gradients: NDArray | None = None,
     gamma: float = Gammas.Hydrogen,
+    raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
 ) -> tuple[float, tuple[NDArray, NDArray, NDArray]]:
@@ -408,6 +420,8 @@ def min_time_to_change_location_and_velocity(
     end_gradients : NDArray, optional default is None
         Ending gradients of the trajectories.
         If not provided, it is assumed to be 0.
+    raster_time: float, optional default DEFAULT_RASTER_TIME
+        The scanner raster time.
     gamma : float, optional
         Gyromagnetic ratio, by default Gammas.Hydrogen
     gmax : float, optional
@@ -454,25 +468,28 @@ def min_time_to_change_location_and_velocity(
         == start_gradients.shape
         == end_gradients.shape
     ), "All input arrays must have shape (num_shots, dimension)"
-    num_shots, dimension = start_locations.shape
-    max_time = 0.0
-    if only_ramps:
-        segment_times = (end_gradients - start_gradients) / smax
-    else:
-        dk = (end_locations - start_locations) / gamma
-        abs_dk = np.abs(dk)
-        G0 = start_gradients
-        Gf = end_gradients
-        Gpeak_slew = np.sqrt(smax * abs_dk, where=dk != 0, out=np.zeros_like(dk))
-        Gpeak = np.min([gmax*np.ones_like(Gpeak_slew), Gpeak_slew], axis=0)
-        t_ramp_up = np.abs(Gpeak - G0) / smax
-        t_ramp_down = abs(Gpeak - Gf) / smax
-        ramp_area = 0.5 * (Gpeak + G0) * t_ramp_up + 0.5 * (Gpeak + Gf) * t_ramp_down
-        plateau_area = abs_dk - ramp_area
-        t_plateau = np.where((Gpeak > 0) & (plateau_area > 0), plateau_area / Gpeak, 0)
-        segment_times = np.max(t_ramp_up + t_plateau + t_ramp_down, axis=-1)
-    max_time = np.max(segment_times)
-    return max_time, (start_locations, start_gradients, end_gradients)
+    
+    G0 = start_gradients
+    Gf = end_gradients
+    t_ramp_to_zero = np.ceil(np.abs(G0) / smax / raster_time).astype('int')
+    t_ramp_from_zero = np.ceil(np.abs(Gf) / smax / raster_time).astype('int')
+    extra_area = raster_time * 0.5 * (t_ramp_to_zero * G0 + t_ramp_from_zero * Gf)
+
+    dk = (end_locations - start_locations) / gamma
+    new_dk = dk - extra_area
+    abs_new_dk = np.abs(new_dk)
+    
+    Gpeak_slew = np.sqrt(smax * abs_new_dk)
+    Gpeak = np.minimum(gmax, Gpeak_slew)
+
+    t_ramp = np.ceil(Gpeak / smax / raster_time).astype('int')
+    ramp_area = Gpeak * raster_time * t_ramp
+
+    plateau_area = abs_new_dk - ramp_area
+    t_plateau = np.ceil(np.abs(plateau_area) / Gpeak / raster_time).astype('int')
+    Gpeak = plateau_area / t_plateau
+    return (t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau), Gpeak
+
 
 
 def change_trajectory_location_and_velocity(
@@ -521,77 +538,42 @@ def change_trajectory_location_and_velocity(
         The number of samples required for the change is the last value returned.
     """
     # Get common minimal feasible time across all segments
-    total_time, (start_locations, start_gradients, end_gradients) = (
-        min_time_to_change_location_and_velocity(
-            end_locations,
-            start_locations,
-            start_gradients,
-            end_gradients,
-            gamma,
-            gmax,
-            smax,
-        )
+    timings, Gpeak = min_time_to_change_location_and_velocity(
+        end_locations,
+        start_locations,
+        start_gradients,
+        end_gradients,
+        gamma,
+        gmax,
+        smax,
     )
-    num_shots, dimension = start_locations.shape
-    N = int(np.ceil(total_time / raster_time))
-    t = np.arange(N) * raster_time
+    t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau = timings
+    num_shots, dimension = t_plateau.shape
+    N = int(np.max(np.sum(timings, axis=0))) + 1
     G = np.zeros((num_shots, N, dimension))
-
-    if end_locations is None:
-        # Specific case where we dont care about the change in end_locations, but rather that we hit the end_gradients
-        G = np.swapaxes(np.linspace(start_gradients, end_gradients, N, endpoint=False), 0, 1)
-        kstart_mismatch = np.sum(G, axis=1) * gamma * raster_time
-        return G, start_locations - kstart_mismatch, N
-
-    k0 = start_locations / gamma
-    kf = end_locations / gamma
-    dk = kf - k0
-    sign = np.sign(dk)
-    abs_dk = np.abs(dk)
-
-    G0 = start_gradients
-    Gf = end_gradients
-
-    Gpeak_slew = np.sqrt(smax * abs_dk * raster_time, where=abs_dk != 0, out=np.zeros_like(abs_dk))
-    Gpeak = np.where(abs_dk != 0, np.minimum(gmax, Gpeak_slew), np.maximum(G0, Gf))
-
-    ramp_up = np.ceil(np.abs(Gpeak - G0) / smax / raster_time).astype('int')
-    ramp_down = np.ceil(np.abs(Gpeak - Gf) / smax / raster_time).astype('int')
-
-    ramp_area = (0.5 * (Gpeak + G0) * ramp_up + 0.5 * (Gpeak + Gf) * ramp_down) * raster_time
-    plateau_area = abs_dk - ramp_area
-    t_plateau = np.where((Gpeak > 0) & (plateau_area > 0), plateau_area / Gpeak, 0)
-
-    ramp_up_end = np.ceil(t_ramp_up / raster_time).astype(int)
-    plateau_end = np.ceil((t_ramp_up + t_plateau) / raster_time).astype(int)
-
-    t_ramp_up = ramp_up_end * raster_time
-
-
-    for i in range(num_shots):
+    
+    for s in range(num_shots):
         for d in range(dimension):
-            ru_end = ramp_up_end[i, d]
-            pl_end = plateau_end[i, d]
-            tr_up = t_ramp_up[i, d]
-            tr_down = t_ramp_down[i, d]
-            tp = t_plateau[i, d]
-            gp = Gpeak[i, d]
-            g0 = G0[i, d]
-            gf = Gf[i, d]
-
-            # Ramp up
-            if ru_end > 0:
-                G[i, :ru_end, d] = g0 + (gp - g0) * t[:ru_end] / tr_up
-
-            # Plateau
-            if pl_end > ru_end:
-                G[i, ru_end:pl_end, d] = gp
-
-            # Ramp down
-            if N > pl_end and tr_down > 0:
-                t_down = t[pl_end:] - tr_up - tp
-                G[i, pl_end:, d] = gp - (gp - gf) * t_down / tr_down
-    return G * sign[:, np.newaxis, :], N
+            start = 0
+            if t_ramp_to_zero[s, d] > 0:
+                G[:, :t_ramp_to_zero[s, d]] = np.linspace(
+                    start_gradients, 0, t_ramp_from_zero[s, d], endpoint=False
+                )
+                start += t_ramp_to_zero[s, d]
+            if t_ramp[s, d] > 0:
+                G[:, start:t_ramp[s, d]] = np.linspace(0, Gpeak[s, d], t_ramp[s, d], endpoint=False)
+                start += t_ramp[s, d]
+            if t_plateau[s, d] > 0:
+                G[:, start:t_plateau[s, d]] = Gpeak[s, d]
+                start += t_plateau[s, d]
+            if t_ramp[s, d] > 0:
+                G[:, start:t_ramp[s, d]] = np.linspace(Gpeak, 0, t_ramp[s, d], endpoint=False)
+                start += t_ramp[s, d]
+            if t_ramp_to_zero[s, d] > 0:
+                G[:, -t_ramp_to_zero[s, d]:] = np.linspace(
+                    0, end_gradients, t_ramp_to_zero[s, d], endpoint=False
+                )
+    return G
 
 
 def prewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:
