@@ -19,7 +19,7 @@ from mrinufft.trajectories.utils import (
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import change_trajectory_location_and_velocity
+from mrinufft.trajectories.tools import change_trajectory_location_and_velocity, get_timing_values, get_gradients_for_set_time
 
 from .siemens import read_siemens_rawdat
 
@@ -257,6 +257,15 @@ def write_trajectory(
     if version >= 5.1:
         Ns_to_skip_at_start = 0
         Ns_to_skip_at_end = 0
+    A = get_timing_values(ks=np.zeros_like(initial_positions), ke=final_positions, ge=gradients[:, 0], gs=np.zeros_like(gradients[:, 0]))
+    max_time = np.max(np.sum([A[0], A[1], A[2]], axis=0))
+    G = get_gradients_for_set_time(
+        ks=np.zeros_like(initial_positions),
+        ke=final_positions,
+        ge=gradients[:, 0],
+        gs=np.zeros_like(gradients[:, 0]),
+        N=max_time
+    )
     if pregrad is not None:
         if pregrad == "speedup":
             start_gradients, initial_positions, Ns_to_skip_at_start = change_trajectory_location_and_velocity(

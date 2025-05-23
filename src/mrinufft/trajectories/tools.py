@@ -491,26 +491,12 @@ def min_time_to_change_location_and_velocity(
     return (t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau), Gpeak
 
 
-def get_timing_values(ks, ke, gs, ge, gamma, gmax, smax, raster_time):
-    area_under_curve_needed = (ke - ks) / gamma / raster_time
-    n_direct = np.ceil((ge - gs) / smax / raster_time).astype('int')
-    area_direct = 0.5 * n_direct * (ge + gs)
-    gi = gmax  * np.sign(area_direct - area_under_curve_needed)
-    i = np.sign(area_direct - area_under_curve_needed)
-    n_ramp_down = np.ceil((gmax+i*gs)/smax/raster_time).astype('int')
-    n_ramp_up = np.ceil((gmax+i*ge)/smax/raster_time).astype('int')
-    area_lowest = n_ramp_down * 0.5 * (gs-gmax) + n_ramp_up * 0.5 * (ge-gmax)
-    n_plateau = 0
-    if area_lowest >= area_under_curve_needed:
-        gi = (2 * area_under_curve_needed - n_ramp_down * gs - n_ramp_up * ge) / (n_ramp_down + n_ramp_up)
-    else:
-        remaining_area = area_under_curve_needed - area_lowest
-        n_plateau = np.ceil(remaining_area / gmax / raster_time).astype('int')
-        gi = (2 * area_under_curve_needed - n_ramp_down * gs - n_ramp_up * ge) / (n_ramp_down + n_ramp_up + n_plateau)
-    return n_ramp_down, n_ramp_up, n_plateau, gi
 
-
-def get_timing_values_vectorized(ks, ke, gs, ge, gamma, gmax, smax, raster_time):
+def get_timing_values(ks, ke, gs, ge, gamma: float = Gammas.Hydrogen,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX
+    ):
     """
     Vectorized version to compute gradient timing values for 2D arrays of ks, ke, gs, ge.
 
@@ -540,10 +526,11 @@ def get_timing_values_vectorized(ks, ke, gs, ge, gamma, gmax, smax, raster_time)
         n_ramp_up * 0.5 * (ge - i * gmax)
     )
 
+    gi = np.zeros_like(n_ramp_down, dtype=np.float32)
     n_plateau = np.zeros_like(n_ramp_down)
 
     # Condition: ramp-only sufficient
-    ramp_only_mask = area_lowest >= area_needed
+    ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
     gi[ramp_only_mask] = (
         (2 * area_needed[ramp_only_mask] -
          n_ramp_down[ramp_only_mask] * gs[ramp_only_mask] -
@@ -563,11 +550,68 @@ def get_timing_values_vectorized(ks, ke, gs, ge, gamma, gmax, smax, raster_time)
         (2 * area_needed[plateau_mask] -
          n_ramp_down[plateau_mask] * gs[plateau_mask] -
          n_ramp_up[plateau_mask] * ge[plateau_mask]) /
-        total_steps
+        (n_ramp_down[plateau_mask] + n_ramp_up[plateau_mask] + n_plateau[plateau_mask])
     )
 
     return n_ramp_down, n_ramp_up, n_plateau, gi
+
+
+def get_gradients_for_set_time(ks, ke, gs, ge, N, gamma: float = Gammas.Hydrogen,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX
+    ):
+
+    area_needed = (ke - ks) / gamma / raster_time
+
+    # Direct ramp steps
+    area_direct = 0.5 * N * (ge + gs)
+    i = np.sign(area_direct - area_needed)
     
+    n_ramp_down = np.ceil((gmax + i * gs) / smax / raster_time).astype(int)
+    n_ramp_up = np.ceil((gmax + i * ge) / smax / raster_time).astype(int)
+    n_plateau = np.zeros_like(n_ramp_down)
+
+    area_lowest = (
+        n_ramp_down * 0.5 * (gs - i * gmax) +
+        n_ramp_up * 0.5 * (ge - i * gmax)
+    )
+
+    gi = np.zeros_like(n_ramp_down, dtype=np.float32)
+
+    # Condition: ramp-only sufficient
+    ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
+    gi[ramp_only_mask] = (
+        (2 * area_needed[ramp_only_mask] -
+         n_ramp_down[ramp_only_mask] * gs[ramp_only_mask] -
+         n_ramp_up[ramp_only_mask] * ge[ramp_only_mask])
+        / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
+    )
+
+    # Else: need plateau
+    plateau_mask = ~ramp_only_mask
+    remaining_area = np.zeros_like(area_needed)
+    remaining_area[plateau_mask] = area_needed[plateau_mask] - area_lowest[plateau_mask]
+    n_plateau[plateau_mask] = N - n_ramp_down[plateau_mask] - n_ramp_up[plateau_mask]
+    gi[plateau_mask] = (
+        (2 * area_needed[plateau_mask] -
+         n_ramp_down[plateau_mask] * gs[plateau_mask] -
+         n_ramp_up[plateau_mask] * ge[plateau_mask]) /
+        (n_ramp_down[plateau_mask] + n_ramp_up[plateau_mask] + n_plateau[plateau_mask])
+    )
+    num_shots, dimension = ke.shape
+    G = np.zeros((num_shots, N, dimension), dtype=np.float32)
+    for i in range(num_shots):
+        for d in range(dimension):
+            start = 0
+            G[i, :n_ramp_down[i, d], d] = np.linspace(gs[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False)
+            start += n_ramp_down[i, d]
+            G[i, start:start+n_plateau[i, d], d] = gi[i, d]
+            start += n_plateau[i, d]
+            G[i, start:start+n_ramp_up[i, d], d] = np.linspace(gi[i, d], ge[i, d], n_ramp_up[i, d], endpoint=False)
+    return G
+
+
 
 
 def change_trajectory_location_and_velocity(
