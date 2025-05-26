@@ -30,16 +30,16 @@ class CasesIO:
     def case_trajectory_3D(self):
         """Test the 3D Trajectory."""
         trajectory = initialize_3D_cones(
-            Nc=32, Ns=256, tilt="uniform", in_out=True
+            Nc=32, Ns=512, tilt="uniform", in_out=True
         ).astype(np.float32)
         return (
             "3D",
             trajectory,
             (0.23, 0.23, 0.1248),
-            (256, 256, 128),
+            (64, 64, 32),
             True,
             5,
-            10e3,
+            Gammas.Na,
             1.2,
         )
 
@@ -112,6 +112,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
 )
 @parametrize("version", [4.2, 5.0, 5.1])
 @parametrize("postgrad", [None, "slowdown_to_center", "slowdown_to_edge"])
+@parametrize("pregrad", [None, "prephase"])
 def test_write_n_read(
     name,
     trajectory,
@@ -124,10 +125,14 @@ def test_write_n_read(
     tmp_path,
     version,
     postgrad,
+    pregrad,
 ):
-    if version < 5.0 and (postgrad is not None):
+    if version < 5.1 and (postgrad is not None or pregrad is not None):
         pytest.skip("postgrad 'slowdown_to_edge' is not supported in version < 5.0")
     """Test function which writes the trajectory and reads it back."""
+    if np.all(trajectory[:, 0]==0) and pregrad is not None:
+        pytest.skip("We dont need prephasors for UTE trajectories")
+        
     write_trajectory(
         trajectory=trajectory,
         FOV=FOV,
@@ -139,7 +144,7 @@ def test_write_n_read(
         min_osf=min_osf,
         recon_tag=recon_tag,
         gamma=gamma,
-        pregrad="prephase" if version < 5.0 else None,
+        pregrad=pregrad,
         postgrad=postgrad,
     )
     read_traj, params = read_trajectory(
