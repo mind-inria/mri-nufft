@@ -342,6 +342,14 @@ def write_trajectory(
                 f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
                 f"Maximum slew rate: {maxS:.3f} > {smax:.3f}"
             )
+        if pregrad != "prephase":
+            border_slew_rate = gradients[:, 0] / raster_time
+            if np.any(np.abs(border_slew_rate) > smax):
+                warnings.warn(
+                    "Slew rate at start of trajectory exceeds maximum slew rate!"
+                    f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f} > {smax:.3f}"
+                    f"Please use prephase gradient to avoid this issue."
+                )
 
     # Write gradients in file
     write_gradients(
