@@ -184,7 +184,7 @@ def write_gradients(
         os.remove(grad_filename + ".txt")
 
 
-def _pop_elements(array, num_elements=1, type="float"):
+def _pop_elements(array, num_elements=1, type=np.float32):
     """Pop elements from an array.
 
     Parameters
@@ -205,9 +205,9 @@ def _pop_elements(array, num_elements=1, type="float"):
         Array with elements popped.
     """
     if num_elements == 1:
-        return array[0].astype(type, copy=False), array[1:]
+        return np.copy(array[0]).view(type), array[1:]
     else:
-        return array[0:num_elements].astype(type, copy=False), array[num_elements:]
+        return np.copy(array[0:num_elements]).view(type), array[num_elements:]
 
 
 def write_trajectory(
@@ -279,9 +279,8 @@ def write_trajectory(
         gamma=gamma,
         get_final_positions=True,
     )
-    if version >= 5.1:
-        Ns_to_skip_at_start = 0
-        Ns_to_skip_at_end = 0
+    Ns_to_skip_at_start = 0
+    Ns_to_skip_at_end = 0
     scan_consts = {
         "gamma": gamma,
         "gmax": gmax,
@@ -326,7 +325,7 @@ def write_trajectory(
                 **scan_consts,
             )
         gradients = np.hstack([gradients, end_gradients])
-        Ns_to_skip_at_end = start_gradients.shape[1]
+        Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
@@ -372,7 +371,7 @@ def write_trajectory(
 def read_trajectory(
     grad_filename: str,
     dwell_time: float | str = DEFAULT_RASTER_TIME,
-    num_adc_samples: int = None,
+    num_adc_samples: int | None = None,
     gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
@@ -408,7 +407,7 @@ def read_trajectory(
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
     with open(grad_filename, "rb") as binfile:
-        data = np.fromfile(binfile, dtype=np.float32)
+        data = np.fromfile(binfile, dtype=np.uint32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
             version = np.around(version, 2)
@@ -424,11 +423,6 @@ def read_trajectory(
             if dwell_time == "min_osf":
                 dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
-        if num_adc_samples is None:
-            if read_shots:
-                num_adc_samples = num_samples_per_shot + 1
-            else:
-                num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
         if version >= 4.1:
             TE, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
@@ -439,6 +433,14 @@ def read_trajectory(
                 timestamp, data = _pop_elements(data)
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
+            if version >= 5.1:
+                packed_skips, data = _pop_elements(data, type="int")
+                start_skip_samples = (packed_skips >> 16) & 0xFFFF
+                end_skip_samples = packed_skips & 0xFFFF
+                left_over -= 1
+            else:
+                start_skip_samples = 0
+                end_skip_samples = 0
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
@@ -454,10 +456,20 @@ def read_trajectory(
             dimension * num_samples_per_shot * num_shots,
         )
         gradients = np.reshape(
-            grad_max * gradients, (num_shots * num_samples_per_shot, dimension)
+            grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
-        # Convert gradients from mT/m to T/m
-        gradients = np.reshape(gradients * 1e-3, (-1, num_samples_per_shot, dimension))
+        if start_skip_samples>0:
+            start_location_updates = np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+            initial_positions += start_location_updates
+            gradients = gradients[:, start_skip_samples:, :]
+        if end_skip_samples>0:
+           gradients = gradients[:, :-end_skip_samples, :] 
+        num_samples_per_shot -= start_skip_samples + end_skip_samples
+        if num_adc_samples is None:
+            if read_shots:
+                num_adc_samples = num_samples_per_shot + 1
+            else:
+                num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
         kspace_loc = np.zeros((num_shots, num_adc_samples, dimension))
         kspace_loc[:, 0, :] = initial_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
