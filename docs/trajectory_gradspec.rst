@@ -36,7 +36,7 @@ The binary file format is specified as follows:
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | ADC post-skip  | UINT16| 1       | n.a.    | Gradient samples to skip at the end of trajectory by turning off ADC   |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
-| Empty places   | FLOAT | 9       | n.a.    | Yet unused : Default initialized with 0                                |
+| Empty places   | FLOAT | 8       | n.a.    | Yet unused : Default initialized with 0                                |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | kStarts        | FLOAT | D*Nc    | 1/m     | K-space location start                                                 |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
