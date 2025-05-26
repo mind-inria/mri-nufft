@@ -29,6 +29,11 @@ class CasesTrajectories:
         # Have assymetric image size to better catch shape mismatch issues
         return samples, (N, N * 2, N + 10)
 
+    def case_in_out_radial2D(self, Nc=10, Ns=500, N=64):
+        """Create a 2D radial trajectory with in-out sampling."""
+        trajectory = initialize_2D_radial(Nc, Ns, in_out=True)
+        return trajectory, (N, N)
+    
     def case_radial2D(self, Nc=10, Ns=500, N=64):
         """Create a 2D radial trajectory."""
         trajectory = initialize_2D_radial(Nc, Ns)

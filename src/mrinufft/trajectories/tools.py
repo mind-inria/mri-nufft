@@ -452,7 +452,7 @@ def get_gradient_timing_values(
     remaining_area = np.zeros_like(area_needed)
     remaining_area[plateau_mask] = area_needed[plateau_mask] - area_lowest[plateau_mask]
     n_plateau[plateau_mask] = np.ceil(
-        remaining_area[plateau_mask] / gmax / raster_time
+        np.abs(remaining_area[plateau_mask]) / gmax / raster_time
     ).astype(int)
 
     gi[plateau_mask] = (
@@ -544,7 +544,7 @@ def get_gradients_for_set_time(
             ks=ks, ke=ke, ge=ge, gs=gs, gamma=gamma, raster_time=raster_time, gmax=gmax, smax=smax
         )
         N = np.max(
-            n_ramp_down + n_ramp_up + n_plateau, axis=0
+            np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=0)
         ) + 2      # Extra 2 buffer samples
         
         
