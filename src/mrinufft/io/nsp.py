@@ -57,8 +57,8 @@ def write_gradients(
     FOV : tuple[float, ...]
         Field of view.
     TE : int, optional
-        The ratio of trajectory when TE occurs, with 0 as start of 
-        trajectory and 1 as end. By default 0.5, which is the 
+        The ratio of trajectory when TE occurs, with 0 as start of
+        trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
     min_osf : int, optional
         Minimum oversampling factor needed at ADC, by default 5
@@ -249,8 +249,8 @@ def write_trajectory(
     check_constraints : bool, optional
         Check scanner constraints, by default True
     TE : int, optional
-        The ratio of trajectory when TE occurs, with 0 as start of 
-        trajectory and 1 as end. By default 0.5, which is the 
+        The ratio of trajectory when TE occurs, with 0 as start of
+        trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
     gmax : float, optional
         Maximum gradient magnitude in T/m, by default 0.04
@@ -295,10 +295,10 @@ def write_trajectory(
                 "please set version to 5.1 or higher."
             )
         start_gradients = get_gradients_for_set_time(
-                ke=initial_positions,
-                ge=gradients[:, 0],
-                **scan_consts,
-            )
+            ke=initial_positions,
+            ge=gradients[:, 0],
+            **scan_consts,
+        )
         initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
         Ns_to_skip_at_start = start_gradients.shape[1]
@@ -347,8 +347,9 @@ def write_trajectory(
             if np.any(np.abs(border_slew_rate) > smax):
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
-                    f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f} > {smax:.3f}"
-                    f"Please use prephase gradient to avoid this issue."
+                    f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
+                    " > {smax:.3f}. Please use prephase gradient to avoid this " 
+                    " issue."
                 )
 
     # Write gradients in file
