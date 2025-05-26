@@ -377,6 +377,7 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
 
+
 def get_gradient_timing_values(
     ks: NDArray | None = None,
     ke: NDArray | None = None,
@@ -387,8 +388,9 @@ def get_gradient_timing_values(
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
 ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
-    """
-    Compute gradient timing values for 2D arrays for taking k-space trajectory 
+    """Get gradient timing values for trapezoidal or triangular waveforms.
+
+    Compute gradient timing values for 2D arrays for taking k-space trajectory
     from ks with gradient gs to ke with gradient ge, while being hardware compliant.
     This function calculates the number of time steps required for the ramp down,
     ramp up, and plateau phases of the gradient waveform, ensuring that the area
@@ -414,8 +416,9 @@ def get_gradient_timing_values(
     smax : float, optional
         Maximum slew rate (T/m/s). Default is DEFAULT_SMAX.
 
-        
-    Returns:
+
+    Returns
+    -------
     n_ramp_down: The timing values for the ramp down phase.
     n_ramp_up: The timing values for the ramp up phase.
     n_plateau: The timing values for the plateau phase.
@@ -479,13 +482,15 @@ def get_gradients_for_set_time(
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
 ) -> NDArray:
-    """
-    Computes the gradient waveforms required to traverse from a starting k-space position (ks) 
-    to an ending k-space position (ke) in a fixed number of time steps (N), subject to 
-    hardware constraints on maximum gradient amplitude (gmax) and slew rate (smax).
-    The function supports both trapezoidal and triangular gradient shapes, automatically 
-    adjusting the waveform to meet the area constraint imposed by the desired k-space 
-    traversal and the specified timing and hardware limits.
+    """Calculate timings for trapezoidal or triangular gradient waveforms.
+
+    Computes the gradient waveforms required to traverse from a starting k-space 
+    position (ks) to an ending k-space position (ke) in a fixed number of time 
+    steps (N), subject to hardware constraints on maximum gradient amplitude 
+    (gmax) and slew rate (smax). The function supports both trapezoidal 
+    and triangular gradient shapes, automatically adjusting the waveform to 
+    meet the area constraint imposed by the desired k-space traversal 
+    and the specified timing and hardware limits.
 
     Parameters
     ----------
@@ -512,13 +517,14 @@ def get_gradients_for_set_time(
     Returns
     -------
     G : NDArray
-        Gradient waveforms, shape (num_shots, N, dimension), where each entry contains 
+        Gradient waveforms, shape (num_shots, N, dimension), where each entry contains
         the gradient value at each time step for each shot and dimension.
+
     Notes
     -----
-    - The function automatically determines whether a trapezoidal or triangular waveform 
+    - The function automatically determines whether a trapezoidal or triangular waveform
       is needed based on the area constraint and hardware limits.
-    - The returned gradients are suitable for use in MRI pulse sequence design, 
+    - The returned gradients are suitable for use in MRI pulse sequence design,
       ensuring compliance with specified hardware constraints.
     """
     ke = np.atleast_2d(ke)
@@ -533,21 +539,24 @@ def get_gradients_for_set_time(
     ge = np.atleast_2d(ge)
 
     assert (
-        ks.shape
-        == ke.shape
-        == gs.shape
-        == ge.shape
+        ks.shape == ke.shape == gs.shape == ge.shape
     ), "All input arrays must have shape (num_shots, dimension)"
     if N is None:
         # Calculate the number of time steps based on the area needed
         n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_timing_values(
-            ks=ks, ke=ke, ge=ge, gs=gs, gamma=gamma, raster_time=raster_time, gmax=gmax, smax=smax
+            ks=ks,
+            ke=ke,
+            ge=ge,
+            gs=gs,
+            gamma=gamma,
+            raster_time=raster_time,
+            gmax=gmax,
+            smax=smax,
         )
-        N = np.max(
-            np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=0)
-        ) + 2      # Extra 2 buffer samples
-        
-        
+        N = (
+            np.max(np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=0)) + 2
+        )  # Extra 2 buffer samples
+
     area_needed = (ke - ks) / gamma / raster_time
     # Intermediate gradient values. This is value of plateau or triangle gradients
     gi = np.zeros_like(ks, dtype=np.float32)
