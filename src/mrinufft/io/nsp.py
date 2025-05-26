@@ -17,9 +17,14 @@ from mrinufft.trajectories.utils import (
     Gammas,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
+    unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import change_trajectory_location_and_velocity, get_timing_values, get_gradients_for_set_time
+from mrinufft.trajectories.tools import (
+    change_trajectory_location_and_velocity,
+    get_gradient_timing_values,
+    get_gradients_for_set_time,
+)
 
 from .siemens import read_siemens_rawdat
 
@@ -257,25 +262,37 @@ def write_trajectory(
     if version >= 5.1:
         Ns_to_skip_at_start = 0
         Ns_to_skip_at_end = 0
-    A = get_timing_values(ks=np.zeros_like(initial_positions), ke=final_positions, ge=gradients[:, 0], gs=np.zeros_like(gradients[:, 0]))
-    max_time = np.max(np.sum([A[0], A[1], A[2]], axis=0))
-    G = get_gradients_for_set_time(
+    A = get_gradient_timing_values(
         ks=np.zeros_like(initial_positions),
         ke=final_positions,
         ge=gradients[:, 0],
         gs=np.zeros_like(gradients[:, 0]),
-        N=max_time
+    )
+    u_trajectory = unnormalize_trajectory(
+        trajectory, norm_factor, np.asarray(FOV) / np.asarray(img_size)
+    )
+    max_time = np.max(np.sum([A[0], A[1], A[2]], axis=0))
+    G = get_gradients_for_set_time(
+        ks=np.zeros_like(initial_positions),
+        ke=u_trajectory[:, 1],
+        ge=gradients[:, 0],
+        gs=np.zeros_like(gradients[:, 0]),
+        N=max_time,
     )
     if pregrad is not None:
         if pregrad == "speedup":
-            start_gradients, initial_positions, Ns_to_skip_at_start = change_trajectory_location_and_velocity(
-                end_gradients=gradients[:, 0],
-                start_locations=initial_positions,
+            start_gradients, initial_positions, Ns_to_skip_at_start = (
+                change_trajectory_location_and_velocity(
+                    end_gradients=gradients[:, 0],
+                    start_locations=initial_positions,
+                )
             )
         if pregrad == "prephase":
-            start_gradients, Ns_to_skip_at_start = change_trajectory_location_and_velocity(
-                end_locations=initial_positions,
-                end_gradients=gradients[:, 0],
+            start_gradients, Ns_to_skip_at_start = (
+                change_trajectory_location_and_velocity(
+                    end_locations=initial_positions,
+                    end_gradients=gradients[:, 0],
+                )
             )
             initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
@@ -288,7 +305,7 @@ def write_trajectory(
         if postgrad == "slowdown_to_edge":
             edge_locations = np.zeros_like(final_positions)
             # Always end at KMax, the spoilers can be handeled by the sequence.
-            edge_locations[..., 0] = img_size[0]/FOV[0]/2
+            edge_locations[..., 0] = img_size[0] / FOV[0] / 2
             end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
                 end_locations=edge_locations,
                 start_gradients=gradients[:, -1],

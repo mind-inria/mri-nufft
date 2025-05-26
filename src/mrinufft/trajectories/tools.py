@@ -377,138 +377,49 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
 
-def hello():
-    if only_ramps:
-        segment_times = np.ceil((end_gradients - start_gradients) / smax / raster_time)
-        return segment_times
-    
-    if end_locations is None:
-        # Specific case where we dont care about the change in end_locations, but rather that we hit the end_gradients
-        G = np.swapaxes(np.linspace(start_gradients, end_gradients, N, endpoint=False), 0, 1)
-        kstart_mismatch = np.sum(G, axis=1) * gamma * raster_time
-        return G, start_locations - kstart_mismatch, N
-
-
-def min_time_to_change_location_and_velocity(
-    end_locations: NDArray | None = None,
-    start_locations: NDArray | None = None,
-    start_gradients: NDArray | None = None,
-    end_gradients: NDArray | None = None,
+def get_gradient_timing_values(
+    ks: NDArray | None = None,
+    ke: NDArray | None = None,
+    gs: NDArray | None = None,
+    ge: NDArray | None = None,
     gamma: float = Gammas.Hydrogen,
     raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-) -> tuple[float, tuple[NDArray, NDArray, NDArray]]:
-    """Returns the maximum time required across all trajectories to move from a
-    `start_locations` with `start_gradients` to `end_locations` with
-    `end_gradients` under gmax/smax limits.
+) -> tuple[NDArray, NDArray, NDArray, NDArray]:
+    """
+    Compute gradient timing values for 2D arrays for taking k-space trajectory 
+    from ks with gradient gs to ke with gradient ge, while being hardware compliant.
+    This function calculates the number of time steps required for the ramp down,
+    ramp up, and plateau phases of the gradient waveform, ensuring that the area
+    traversed in k-space matches the desired trajectory while adhering to the
+    maximum gradient amplitude and slew rate constraints.
 
     Parameters
     ----------
-    end_locations : NDArray
-        Ending locations of the trajectories.
-        If not provided, it is assumed that end_location does not matter,
-        we will only change the velocity of the trajectory and return the 
-        new end_locations.
-    start_locations : NDArray, optional default is None
-        Starting locations of the trajectories.
-        If not provided, it is assumed to be 0, i.e. trajectories start at the
-        k-space center.
-    start_gradients : NDArray, optional default is None
-        Starting gradients of the trajectories.
-        If not provided, it is assumed to be 0.
-    end_gradients : NDArray, optional default is None
-        Ending gradients of the trajectories.
-        If not provided, it is assumed to be 0.
-    raster_time: float, optional default DEFAULT_RASTER_TIME
-        The scanner raster time.
+    ks : NDArray
+        Starting k-space positions, shape (num_shots, dimension).
+    ke : NDArray
+        Ending k-space positions, shape (num_shots, dimension).
+    gs : NDArray
+        Starting gradient values, shape (num_shots, dimension).
+    ge : NDArray
+        Ending gradient values, shape (num_shots, dimension).
     gamma : float, optional
-        Gyromagnetic ratio, by default Gammas.Hydrogen
+        Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
+    raster_time : float, optional
+        Time interval between gradient samples (s). Default is DEFAULT_RASTER_TIME.
     gmax : float, optional
-        Maximum gradient strength, by default DEFAULT_GMAX
+        Maximum gradient amplitude (T/m). Default is DEFAULT_GMAX.
     smax : float, optional
-        Maximum slew rate, by default DEFAULT_SMAX
+        Maximum slew rate (T/m/s). Default is DEFAULT_SMAX.
 
-    Returns
-    -------
-    float
-        Maximum time required across all trajectories to move from a
-        `start_locations` with `start_gradients` to `end_locations` with
-        `end_gradients` under gmax/smax limits.
-    tuple[NDArray, NDArray, NDArray]
-        tuple of the start locations, start gradients,
-        and end gradients.
-    """
-    if end_locations is None and end_gradients is None:
-        raise ValueError(
-            "Either `end_locations` or `end_gradients` must be provided."
-        )
-    only_ramps = False
-    if end_locations is None:
-        only_ramps = True
-        end_gradients = np.atleast_2d(end_gradients)
-        data_shape = end_gradients.shape
-        end_locations = np.zeros_like(end_gradients)
-    else:
-        end_locations = np.atleast_2d(end_locations)
-        data_shape = end_locations.shape
-    if start_locations is None:
-        start_locations = np.zeros(data_shape)
-    if start_gradients is None:
-        start_gradients = np.zeros(data_shape)
-    if end_gradients is None:
-        end_gradients = np.zeros(data_shape)
-    start_locations = np.atleast_2d(start_locations)
-    start_gradients = np.atleast_2d(start_gradients)
-    end_gradients = np.atleast_2d(end_gradients)
-
-    assert (
-        start_locations.shape
-        == end_locations.shape
-        == start_gradients.shape
-        == end_gradients.shape
-    ), "All input arrays must have shape (num_shots, dimension)"
-    
-    G0 = start_gradients
-    Gf = end_gradients
-    t_ramp_to_zero = np.ceil(np.abs(G0) / smax / raster_time).astype('int')
-    t_ramp_from_zero = np.ceil(np.abs(Gf) / smax / raster_time).astype('int')
-    extra_area = raster_time * 0.5 * (t_ramp_to_zero * G0 + t_ramp_from_zero * Gf)
-
-    dk = (end_locations - start_locations) / gamma
-    new_dk = dk - extra_area
-    abs_new_dk = np.abs(new_dk)
-    
-    Gpeak_slew = np.sqrt(smax * abs_new_dk)
-    Gpeak = np.minimum(gmax, Gpeak_slew)
-
-    t_ramp = np.ceil(Gpeak / smax / raster_time).astype('int')
-    ramp_area = Gpeak * raster_time * t_ramp
-
-    plateau_area = abs_new_dk - ramp_area
-    t_plateau = np.ceil(np.abs(plateau_area) / Gpeak / raster_time).astype('int')
-    Gpeak = plateau_area / t_plateau
-    return (t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau), Gpeak
-
-
-
-def get_timing_values(ks, ke, gs, ge, gamma: float = Gammas.Hydrogen,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX
-    ):
-    """
-    Vectorized version to compute gradient timing values for 2D arrays of ks, ke, gs, ge.
-
-    Parameters:
-    - ks, ke, gs, ge: 2D arrays of same shape
-    - gamma: gyromagnetic ratio
-    - gmax: max gradient (scalar)
-    - smax: max slew rate (scalar)
-    - raster_time: gradient raster time (scalar)
-
+        
     Returns:
-    - n_ramp_down, n_ramp_up, n_plateau, gi: 2D arrays of same shape
+    n_ramp_down: The timing values for the ramp down phase.
+    n_ramp_up: The timing values for the ramp up phase.
+    n_plateau: The timing values for the plateau phase.
+    gi: The intermediate gradient values for trapezoidal or triangular waveforms.
     """
     area_needed = (ke - ks) / gamma / raster_time
 
@@ -521,9 +432,8 @@ def get_timing_values(ks, ke, gs, ge, gamma: float = Gammas.Hydrogen,
     n_ramp_down = np.ceil((gmax + i * gs) / smax / raster_time).astype(int)
     n_ramp_up = np.ceil((gmax + i * ge) / smax / raster_time).astype(int)
 
-    area_lowest = (
-        n_ramp_down * 0.5 * (gs - i * gmax) +
-        n_ramp_up * 0.5 * (ge - i * gmax)
+    area_lowest = n_ramp_down * 0.5 * (gs - i * gmax) + n_ramp_up * 0.5 * (
+        ge - i * gmax
     )
 
     gi = np.zeros_like(n_ramp_down, dtype=np.float32)
@@ -532,11 +442,10 @@ def get_timing_values(ks, ke, gs, ge, gamma: float = Gammas.Hydrogen,
     # Condition: ramp-only sufficient
     ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
     gi[ramp_only_mask] = (
-        (2 * area_needed[ramp_only_mask] -
-         n_ramp_down[ramp_only_mask] * gs[ramp_only_mask] -
-         n_ramp_up[ramp_only_mask] * ge[ramp_only_mask])
-        / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
-    )
+        2 * area_needed[ramp_only_mask]
+        - (n_ramp_down[ramp_only_mask] + 1) * gs[ramp_only_mask]
+        - (n_ramp_up[ramp_only_mask] - 1) * ge[ramp_only_mask]
+    ) / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
 
     # Else: need plateau
     plateau_mask = ~ramp_only_mask
@@ -547,154 +456,138 @@ def get_timing_values(ks, ke, gs, ge, gamma: float = Gammas.Hydrogen,
     ).astype(int)
 
     gi[plateau_mask] = (
-        (2 * area_needed[plateau_mask] -
-         n_ramp_down[plateau_mask] * gs[plateau_mask] -
-         n_ramp_up[plateau_mask] * ge[plateau_mask]) /
-        (n_ramp_down[plateau_mask] + n_ramp_up[plateau_mask] + n_plateau[plateau_mask])
+        2 * area_needed[plateau_mask]
+        - (n_ramp_down[plateau_mask] + 1) * gs[plateau_mask]
+        - (n_ramp_up[plateau_mask] - 1) * ge[plateau_mask]
+    ) / (
+        n_ramp_down[plateau_mask]
+        + n_ramp_up[plateau_mask]
+        + 2 * n_plateau[plateau_mask]
     )
 
     return n_ramp_down, n_ramp_up, n_plateau, gi
 
 
-def get_gradients_for_set_time(ks, ke, gs, ge, N, gamma: float = Gammas.Hydrogen,
+def get_gradients_for_set_time(
+    N: int,
+    ke: NDArray,
+    ks: NDArray | None = None,
+    gs: NDArray | None = None,
+    ge: NDArray | None = None,
+    gamma: float = Gammas.Hydrogen,
     raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX
-    ):
+    smax: float = DEFAULT_SMAX,
+) -> NDArray:
+    """
+    Computes the gradient waveforms required to traverse from a starting k-space position (ks) 
+    to an ending k-space position (ke) in a fixed number of time steps (N), subject to 
+    hardware constraints on maximum gradient amplitude (gmax) and slew rate (smax).
+    The function supports both trapezoidal and triangular gradient shapes, automatically 
+    adjusting the waveform to meet the area constraint imposed by the desired k-space 
+    traversal and the specified timing and hardware limits.
+
+    Parameters
+    ----------
+    N : int
+        Number of time steps (samples) for the gradient waveform.
+    ke : NDArray
+        Ending k-space positions, shape (num_shots, dimension).
+    ks : NDArray, default None when it is 0
+        Starting k-space positions, shape (num_shots, dimension).
+    gs : NDArray, default None when it is 0
+        Starting gradient values, shape (num_shots, dimension).
+    ge : NDArray, default None when it is 0
+        Ending gradient values, shape (num_shots, dimension).
+    gamma : float, optional
+        Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
+    raster_time : float, optional
+        Time interval between gradient samples (s). Default is DEFAULT_RASTER_TIME.
+    gmax : float, optional
+        Maximum gradient amplitude (T/m). Default is DEFAULT_GMAX.
+    smax : float, optional
+        Maximum slew rate (T/m/s). Default is DEFAULT_SMAX.
+
+    Returns
+    -------
+    G : NDArray
+        Gradient waveforms, shape (num_shots, N, dimension), where each entry contains 
+        the gradient value at each time step for each shot and dimension.
+    Notes
+    -----
+    - The function automatically determines whether a trapezoidal or triangular waveform 
+      is needed based on the area constraint and hardware limits.
+    - The returned gradients are suitable for use in MRI pulse sequence design, 
+      ensuring compliance with specified hardware constraints.
+    """
+    ke = np.atleast_2d(ke)
+    if ks is None:
+        ks = np.zeros_like(ke)
+    if gs is None:
+        gs = np.zeros_like(ke)
+    if ge is None:
+        ge = np.zeros_like(ke)
+    ks = np.atleast_2d(ks)
+    gs = np.atleast_2d(gs)
+    ge = np.atleast_2d(ge)
+
+    assert (
+        ks.shape
+        == ke.shape
+        == gs.shape
+        == ge.shape
+    ), "All input arrays must have shape (num_shots, dimension)"
+
 
     area_needed = (ke - ks) / gamma / raster_time
+    # Intermediate gradient values. This is value of plateau or triangle gradients
+    gi = np.zeros_like(ks, dtype=np.float32)
 
-    # Direct ramp steps
+    # Get the area for direct and estimate n_ramps
     area_direct = 0.5 * N * (ge + gs)
     i = np.sign(area_direct - area_needed)
-    
+
     n_ramp_down = np.ceil((gmax + i * gs) / smax / raster_time).astype(int)
     n_ramp_up = np.ceil((gmax + i * ge) / smax / raster_time).astype(int)
-    n_plateau = np.zeros_like(n_ramp_down)
+    n_plateau = N - n_ramp_up - n_ramp_down
 
-    area_lowest = (
-        n_ramp_down * 0.5 * (gs - i * gmax) +
-        n_ramp_up * 0.5 * (ge - i * gmax)
+    # Get intermediate gradients for triangle waveform, when n_plateau<0
+    no_trapazoid = n_plateau <= 0
+    n_plateau[no_trapazoid] = 0
+
+    # Initial approximate calculation of gi
+    gi[no_trapazoid] = (
+        2 * area_needed[no_trapazoid]
+        - N * ge[no_trapazoid] * smax
+        - ge[no_trapazoid] * gs[no_trapazoid]
+        + ge[no_trapazoid] * smax
+        - gs[no_trapazoid] * smax
+        + gs[no_trapazoid] * gs[no_trapazoid]
+    ) / (N * smax - ge[no_trapazoid] + gs[no_trapazoid])
+    n_ramp_down[no_trapazoid] = np.ceil(
+        np.abs(gi[no_trapazoid] - gs[no_trapazoid]) / smax
     )
+    n_ramp_up[no_trapazoid] = N - n_ramp_down[no_trapazoid]
 
-    gi = np.zeros_like(n_ramp_down, dtype=np.float32)
-
-    # Condition: ramp-only sufficient
-    ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
-    gi[ramp_only_mask] = (
-        (2 * area_needed[ramp_only_mask] -
-         n_ramp_down[ramp_only_mask] * gs[ramp_only_mask] -
-         n_ramp_up[ramp_only_mask] * ge[ramp_only_mask])
-        / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
-    )
-
-    # Else: need plateau
-    plateau_mask = ~ramp_only_mask
-    remaining_area = np.zeros_like(area_needed)
-    remaining_area[plateau_mask] = area_needed[plateau_mask] - area_lowest[plateau_mask]
-    n_plateau[plateau_mask] = N - n_ramp_down[plateau_mask] - n_ramp_up[plateau_mask]
-    gi[plateau_mask] = (
-        (2 * area_needed[plateau_mask] -
-         n_ramp_down[plateau_mask] * gs[plateau_mask] -
-         n_ramp_up[plateau_mask] * ge[plateau_mask]) /
-        (n_ramp_down[plateau_mask] + n_ramp_up[plateau_mask] + n_plateau[plateau_mask])
+    # Get intermediate gradients for trapazoids
+    gi = (2 * area_needed - (n_ramp_down + 1) * gs - (n_ramp_up - 1) * ge) / (
+        n_ramp_down + n_ramp_up + 2 * n_plateau
     )
     num_shots, dimension = ke.shape
     G = np.zeros((num_shots, N, dimension), dtype=np.float32)
     for i in range(num_shots):
         for d in range(dimension):
             start = 0
-            G[i, :n_ramp_down[i, d], d] = np.linspace(gs[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False)
+            G[i, : n_ramp_down[i, d], d] = np.linspace(
+                gs[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False
+            )
             start += n_ramp_down[i, d]
-            G[i, start:start+n_plateau[i, d], d] = gi[i, d]
-            start += n_plateau[i, d]
-            G[i, start:start+n_ramp_up[i, d], d] = np.linspace(gi[i, d], ge[i, d], n_ramp_up[i, d], endpoint=False)
-    return G
-
-
-
-
-def change_trajectory_location_and_velocity(
-    end_locations: NDArray | None = None,
-    end_gradients: NDArray | None = None,
-    start_locations: NDArray | None = None,
-    start_gradients: NDArray | None = None,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gamma: float = Gammas.Hydrogen,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
-) -> Union[tuple[float, float]|tuple[float, float]]:
-    """
-        Parameters
-    ----------
-    end_locations : NDArray, optional default is None 
-        Ending locations of the trajectories.
-        If not provided, it is assumed that end_location does not matter,
-        we will only change the velocity of the trajectory and return the 
-        new end_locations.
-    start_locations : NDArray, optional default is None
-        Starting locations of the trajectories.
-        If not provided, it is assumed to be 0, i.e. trajectories start at the
-        k-space center.
-    start_gradients : NDArray, optional default is None
-        Starting gradients of the trajectories.
-        If not provided, it is assumed to be 0.
-    end_gradients : NDArray, optional default=None
-        Ending gradients of the trajectories.
-        If not provided, it is assumed to be 0.
-    gamma : float, optional
-        Gyromagnetic ratio, by default Gammas.Hydrogen
-    gmax : float, optional
-        Maximum gradient strength, by default DEFAULT_GMAX
-    smax : float, optional
-        Maximum slew rate, by default DEFAULT_SMAX
-
-    Returns
-    -------
-    float,float,int
-        Maximum time required across all trajectories to move from a
-        `start_locations` with `start_gradients` to `end_locations` with
-        `end_gradients` under gmax/smax limits.
-        If end_locations was not provided, we return the end_locations of the trajectory post change 
-        in gradients.
-        The number of samples required for the change is the last value returned.
-    """
-    # Get common minimal feasible time across all segments
-    timings, Gpeak = min_time_to_change_location_and_velocity(
-        end_locations,
-        start_locations,
-        start_gradients,
-        end_gradients,
-        gamma,
-        gmax,
-        smax,
-    )
-    t_ramp_to_zero, t_ramp_from_zero, t_ramp, t_plateau = timings
-    num_shots, dimension = t_plateau.shape
-    N = int(np.max(np.sum(timings, axis=0))) + 1
-    G = np.zeros((num_shots, N, dimension))
-    
-    for s in range(num_shots):
-        for d in range(dimension):
-            start = 0
-            if t_ramp_to_zero[s, d] > 0:
-                G[:, :t_ramp_to_zero[s, d]] = np.linspace(
-                    start_gradients, 0, t_ramp_from_zero[s, d], endpoint=False
-                )
-                start += t_ramp_to_zero[s, d]
-            if t_ramp[s, d] > 0:
-                G[:, start:t_ramp[s, d]] = np.linspace(0, Gpeak[s, d], t_ramp[s, d], endpoint=False)
-                start += t_ramp[s, d]
-            if t_plateau[s, d] > 0:
-                G[:, start:t_plateau[s, d]] = Gpeak[s, d]
-                start += t_plateau[s, d]
-            if t_ramp[s, d] > 0:
-                G[:, start:t_ramp[s, d]] = np.linspace(Gpeak, 0, t_ramp[s, d], endpoint=False)
-                start += t_ramp[s, d]
-            if t_ramp_to_zero[s, d] > 0:
-                G[:, -t_ramp_to_zero[s, d]:] = np.linspace(
-                    0, end_gradients, t_ramp_to_zero[s, d], endpoint=False
-                )
+            if n_plateau[i, d] > 0:
+                G[i, start : start + n_plateau[i, d], d] = gi[i, d]
+                start += n_plateau[i, d]
+            G[i, start : start + n_ramp_up[i, d], d] = np.linspace(
+                gi[i, d], ge[i, d], n_ramp_up[i, d], endpoint=False
+            )
     return G
 
 
