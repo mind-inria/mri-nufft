@@ -4,9 +4,12 @@ import numpy as np
 from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.io.utils import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
+from mrinufft.trajectories.utils import Gammas, DEFAULT_GMAX, DEFAULT_SMAX, DEFAULT_RASTER_TIME
+from mrinufft.trajectories.tools import get_gradients_for_set_time
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 from pytest_cases import parametrize, parametrize_with_cases
 from case_trajectories import CasesTrajectories
+import pytest
 
 
 class CasesIO:
@@ -35,12 +38,62 @@ class CasesIO:
             1.2,
         )
 
+@parametrize("gamma", [Gammas.Hydrogen])
+@parametrize("raster_time", [DEFAULT_RASTER_TIME])
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[CasesTrajectories.case_radial2D, CasesTrajectories.case_radial3D, CasesTrajectories.case_in_out_radial2D],
+)
+@parametrize("gmax", [0.1, DEFAULT_GMAX])
+@parametrize("smax", [0.7, DEFAULT_SMAX])
+def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, smax):
+    """Test the trajectory state changer."""
+    dimension = len(shape)
+    resolution = dimension * (0.23/256, )
+    trajectory = kspace_loc / resolution
+    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
+    GS = get_gradients_for_set_time(
+        ke=trajectory[:, 0],
+        ge=gradients[:, 0],
+        gamma=gamma,
+        raster_time=raster_time,
+        gmax=gmax,
+        smax=smax,
+    )
+    # Hardware constraints check
+    assert np.all(np.abs(GS) <= gmax)
+    assert np.all(np.abs(np.diff(GS, axis=1)/raster_time) <= smax)
+    assert np.all(np.abs(GS[:, -1] - gradients[:, 0])/raster_time < smax)
+    # Check that ending location matches.
+    np.testing.assert_allclose(np.sum(GS, axis=1) * gamma * raster_time, trajectory[:, 0], atol=1e-2/min(resolution)/2)
+    # Check that gradients match.
+    np.testing.assert_allclose(GS[:, 0], 0, atol=1e-5)
 
+    GE = get_gradients_for_set_time(
+        ks=trajectory[:, -1],
+        ke=np.zeros_like(trajectory[:, -1]),
+        gs=gradients[:, -1],
+        gamma=gamma,
+        raster_time=raster_time,
+        gmax=gmax,
+        smax=smax,
+    )
+    # Hardware constraints check
+    assert np.all(np.abs(GE) <= gmax)
+    assert np.all(np.abs(np.diff(GE, axis=1)/raster_time) <= smax)
+    assert np.all(np.abs(GE[:, -1])/raster_time < smax)
+    # Check that ending location matches.
+    np.testing.assert_allclose(0, trajectory[:, -1] + np.sum(GE, axis=1) * gamma * raster_time, atol=1e-2/min(resolution)/2)
+    # Check that gradients match.
+    np.testing.assert_allclose(GE[:, 0], gradients[:, -1], atol=1e-5)
+    
+    
 @parametrize_with_cases(
     "name, trajectory, FOV, img_size, in_out, min_osf, gamma, recon_tag",
     cases=CasesIO,
 )
 @parametrize("version", [4.2, 5.0, 5.1])
+@parametrize("postgrad", [None, "slowdown_to_center", "slowdown_to_edge"])
 def test_write_n_read(
     name,
     trajectory,
@@ -52,7 +105,12 @@ def test_write_n_read(
     recon_tag,
     tmp_path,
     version,
+    postgrad,
 ):
+    if version < 5.0 and (postgrad is not None):
+        pytest.skip(
+            "postgrad 'slowdown_to_edge' is not supported in version < 5.0"
+        )
     """Test function which writes the trajectory and reads it back."""
     write_trajectory(
         trajectory=trajectory,
@@ -60,11 +118,13 @@ def test_write_n_read(
         img_size=img_size,
         check_constraints=True,
         grad_filename=str(tmp_path / name),
-        in_out=in_out,
+        TE=0.5 if in_out else 0,
         version=version,
         min_osf=min_osf,
         recon_tag=recon_tag,
         gamma=gamma,
+        pregrad="prephase" if version < 5.0 else None,
+        postgrad=postgrad,
     )
     read_traj, params = read_trajectory(
         str((tmp_path / name).with_suffix(".bin")), gamma=gamma, read_shots=True

@@ -20,7 +20,7 @@ from mrinufft.trajectories.utils import (
     unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import get_gradients_for_set_time,
+from mrinufft.trajectories.tools import get_gradients_for_set_time
 
 from .siemens import read_siemens_rawdat
 
@@ -222,8 +222,8 @@ def write_trajectory(
     TE: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    pregrad: str = "speedup",
-    postgrad: str = "slowdown_to_edge",
+    pregrad: str | None = "speedup",
+    postgrad: str | None = "slowdown_to_edge",
     version: float = 5.1,
     **kwargs,
 ):
