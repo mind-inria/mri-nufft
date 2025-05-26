@@ -20,11 +20,7 @@ from mrinufft.trajectories.utils import (
     unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import (
-    change_trajectory_location_and_velocity,
-    get_gradient_timing_values,
-    get_gradients_for_set_time,
-)
+from mrinufft.trajectories.tools import get_gradients_for_set_time,
 
 from .siemens import read_siemens_rawdat
 
@@ -35,7 +31,7 @@ def write_gradients(
     grad_filename: str,
     img_size: tuple[int, ...],
     FOV: tuple[float, ...],
-    in_out: bool = True,
+    TE: float = 0.5,
     min_osf: int = 5,
     gamma: float = Gammas.HYDROGEN,
     version: float = 4.2,
@@ -43,6 +39,8 @@ def write_gradients(
     timestamp: float | None = None,
     keep_txt_file: bool = False,
     final_positions: np.ndarray | None = None,
+    start_skip_samples: int = 0,
+    end_skip_samples: int = 0,
 ):
     """Create gradient file from gradients and initial positions.
 
@@ -58,8 +56,10 @@ def write_gradients(
         Image size.
     FOV : tuple[float, ...]
         Field of view.
-    in_out : bool, optional
-        Whether it is In-Out trajectory?, by default True
+    TE : int, optional
+        The ratio of trajectory when TE occurs, with 0 as start of 
+        trajectory and 1 as end. By default 0.5, which is the 
+        center of the trajectory (in-out trajectory).
     min_osf : int, optional
         Minimum oversampling factor needed at ADC, by default 5
     gamma : float, optional
@@ -75,6 +75,12 @@ def write_gradients(
         binary file, by default False
     final_positions : np.ndarray, optional
         Final positions. Shape (num_shots, dimension), by default None
+    start_skip_samples : int, optional
+        Number of samples to skip in ADC at start of each shot, by default 0
+        This works only for version >= 5.1.
+    end_skip_samples : int, optional
+        Number of samples to skip in ADC at end of each shot, by default 0
+        This works only for version >= 5.1.
 
     """
     num_shots = gradients.shape[0]
@@ -106,14 +112,12 @@ def write_gradients(
     file.write(str(num_shots) + "\n")
     file.write(str(num_samples_per_shot) + "\n")
     if version >= 4.1:
-        if not in_out:
+        if TE == 0:
             if np.sum(initial_positions) != 0:
                 warnings.warn(
                     "The initial positions are not all zero for center-out trajectory"
                 )
-            file.write("0\n")
-        else:
-            file.write("0.5\n")
+        file.write(str(TE) + "\n")
         # Write the maximum Gradient
         file.write(str(max_grad) + "\n")
         # Write recon Pipeline version tag
@@ -124,6 +128,15 @@ def write_gradients(
             if timestamp is None:
                 timestamp = float(datetime.now().timestamp())
             file.write(str(timestamp) + "\n")
+            left_over -= 1
+        if version >= 5.1:
+            # Write number of samples to skip at start and end
+            if not (0 <= start_skip_samples <= 0xFFFF):
+                raise ValueError("start_skip_samples must fit in uint16 (0-65535)")
+            if not (0 <= end_skip_samples <= 0xFFFF):
+                raise ValueError("end_skip_samples must fit in uint16 (0-65535)")
+            packed_skips = (start_skip_samples << 16) | end_skip_samples
+            file.write(str(packed_skips) + "\n")
             left_over -= 1
         file.write(str("0\n" * left_over))
     # Write all the k0 values
@@ -206,6 +219,7 @@ def write_trajectory(
     gamma: float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
+    TE: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     pregrad: str = "speedup",
@@ -234,16 +248,22 @@ def write_trajectory(
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
         Check scanner constraints, by default True
+    TE : int, optional
+        The ratio of trajectory when TE occurs, with 0 as start of 
+        trajectory and 1 as end. By default 0.5, which is the 
+        center of the trajectory (in-out trajectory).
     gmax : float, optional
         Maximum gradient magnitude in T/m, by default 0.04
     smax : float, optional
         Maximum slew rate in T/m/ms, by default 0.1
     pregrad : str, optional
-        Pregrad method, by default 'speedup'
-        Can be one of 'speedup' or 'prephase'
+        Pregrad method, by default `prephase`
+        `prephase` will add a prephase gradient to the start of the trajectory.
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
-        Can be one of 'slowdown_to_edge' or 'slowdown_to_center'
+        `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
+        `slowdown_to_center` will add a gradient to slow down to the center of the FOV.
+        While this can be used to add spoilers, it is not recommended.
     version: float, optional
         Trajectory versioning, by default 5
     kwargs : dict, optional
@@ -262,62 +282,51 @@ def write_trajectory(
     if version >= 5.1:
         Ns_to_skip_at_start = 0
         Ns_to_skip_at_end = 0
-    A = get_gradient_timing_values(
-        ks=np.zeros_like(initial_positions),
-        ke=final_positions,
-        ge=gradients[:, 0],
-        gs=np.zeros_like(gradients[:, 0]),
-    )
-    u_trajectory = unnormalize_trajectory(
-        trajectory, norm_factor, np.asarray(FOV) / np.asarray(img_size)
-    )
-    max_time = np.max(np.sum([A[0], A[1], A[2]], axis=0))
-    G = get_gradients_for_set_time(
-        ks=np.zeros_like(initial_positions),
-        ke=u_trajectory[:, 1],
-        ge=gradients[:, 0],
-        gs=np.zeros_like(gradients[:, 0]),
-        N=max_time,
-    )
-    if pregrad is not None:
-        if pregrad == "speedup":
-            start_gradients, initial_positions, Ns_to_skip_at_start = (
-                change_trajectory_location_and_velocity(
-                    end_gradients=gradients[:, 0],
-                    start_locations=initial_positions,
-                )
+    scan_consts = {
+        "gamma": gamma,
+        "gmax": gmax,
+        "smax": smax,
+        "raster_time": raster_time,
+    }
+    if pregrad == "prephase":
+        if version < 5.1:
+            raise ValueError(
+                "pregrad is only supported for version >= 5.1, "
+                "please set version to 5.1 or higher."
             )
-        if pregrad == "prephase":
-            start_gradients, Ns_to_skip_at_start = (
-                change_trajectory_location_and_velocity(
-                    end_locations=initial_positions,
-                    end_gradients=gradients[:, 0],
-                )
+        start_gradients = get_gradients_for_set_time(
+                ke=initial_positions,
+                ge=gradients[:, 0],
+                **scan_consts,
             )
-            initial_positions = np.zeros_like(initial_positions)
+        initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
+        Ns_to_skip_at_start = start_gradients.shape[1]
     if postgrad is not None:
-        if postgrad == "slowdown":
-            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
-                start_gradients=gradients[:, -1],
-                start_locations=final_positions,
+        if version < 5.1:
+            raise ValueError(
+                "postgrad is only supported for version >= 5.1, "
+                "please set version to 5.1 or higher."
             )
         if postgrad == "slowdown_to_edge":
             edge_locations = np.zeros_like(final_positions)
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
-            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
-                end_locations=edge_locations,
-                start_gradients=gradients[:, -1],
-                start_locations=final_positions,
+            end_gradients = get_gradients_for_set_time(
+                ke=edge_locations,
+                gs=gradients[:, -1],
+                ks=final_positions,
+                **scan_consts,
             )
         if postgrad == "slowdown_to_center":
-            end_gradients, Ns_to_skip_at_end = change_trajectory_location_and_velocity(
-                end_locations=np.zeros_like(final_positions),
-                start_gradients=gradients[:, -1],
-                start_locations=final_positions,
+            end_gradients = get_gradients_for_set_time(
+                ke=np.zeros_like(final_positions),
+                gs=gradients[:, -1],
+                ks=final_positions,
+                **scan_consts,
             )
         gradients = np.hstack([gradients, end_gradients])
+        Ns_to_skip_at_end = start_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
@@ -342,8 +351,11 @@ def write_trajectory(
         grad_filename=grad_filename,
         img_size=img_size,
         FOV=FOV,
+        TE=TE,
         gamma=gamma,
         version=version,
+        start_skip_samples=Ns_to_skip_at_start,
+        end_skip_samples=Ns_to_skip_at_end,
         **kwargs,
     )
 

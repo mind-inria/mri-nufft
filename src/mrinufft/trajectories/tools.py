@@ -469,11 +469,11 @@ def get_gradient_timing_values(
 
 
 def get_gradients_for_set_time(
-    N: int,
     ke: NDArray,
     ks: NDArray | None = None,
     gs: NDArray | None = None,
     ge: NDArray | None = None,
+    N: int | None = None,
     gamma: float = Gammas.Hydrogen,
     raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
@@ -489,8 +489,6 @@ def get_gradients_for_set_time(
 
     Parameters
     ----------
-    N : int
-        Number of time steps (samples) for the gradient waveform.
     ke : NDArray
         Ending k-space positions, shape (num_shots, dimension).
     ks : NDArray, default None when it is 0
@@ -499,6 +497,9 @@ def get_gradients_for_set_time(
         Starting gradient values, shape (num_shots, dimension).
     ge : NDArray, default None when it is 0
         Ending gradient values, shape (num_shots, dimension).
+    N : int, default None
+        Number of time steps (samples) for the gradient waveform.
+        If None, timing is calculated based on the area needed and hardware limits.
     gamma : float, optional
         Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
     raster_time : float, optional
@@ -537,8 +538,16 @@ def get_gradients_for_set_time(
         == gs.shape
         == ge.shape
     ), "All input arrays must have shape (num_shots, dimension)"
-
-
+    if N is None:
+        # Calculate the number of time steps based on the area needed
+        n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_timing_values(
+            ks=ks, ke=ke, ge=ge, gs=gs, gamma=gamma, raster_time=raster_time, gmax=gmax, smax=smax
+        )
+        N = np.max(
+            n_ramp_down + n_ramp_up + n_plateau, axis=0
+        ) + 2      # Extra 2 buffer samples
+        
+        
     area_needed = (ke - ks) / gamma / raster_time
     # Intermediate gradient values. This is value of plateau or triangle gradients
     gi = np.zeros_like(ks, dtype=np.float32)
