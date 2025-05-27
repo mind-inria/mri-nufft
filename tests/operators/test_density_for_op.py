@@ -31,7 +31,7 @@ def test_pipe(backend, traj, shape, osf):
     distance = radial_distance(traj, shape)
     if osf != 2 and backend == "tensorflow":
         pytest.skip("OSF < 2 not supported for tensorflow.")
-    if osf == 1 and 'finufft' in backend:
+    if osf == 1 and "finufft" in backend:
         pytest.skip("cufinufft and finufft dont support OSF=1")
     result = pipe(traj, shape, backend=backend, osf=osf, num_iterations=10)
     if backend == "cufinufft":
@@ -43,7 +43,7 @@ def test_pipe(backend, traj, shape, osf):
     if osf == 2:
         r_err = 0.1
         slope_err = 0.1
-    if 'finufft' in backend:
+    if "finufft" in backend:
         r_err *= 3
         slope_err = slope_err * 4 if slope_err is not None else None
     elif backend == "tensorflow":
