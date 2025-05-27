@@ -60,7 +60,7 @@ def test_cg(operator, array_interface, image_data):
     """Compare the interface to the raw NUDFT implementation."""
     kspace_nufft = operator.op(image_data).squeeze()
 
-    image_cg = cg(operator, kspace_nufft)
+    image_cg = operator.cg(kspace_nufft, compute_loss=False)
     kspace_cg = operator.op(image_cg).squeeze()
 
     assert_almost_allclose(
