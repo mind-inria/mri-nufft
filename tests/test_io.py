@@ -130,9 +130,9 @@ def test_write_n_read(
     if version < 5.1 and (postgrad is not None or pregrad is not None):
         pytest.skip("postgrad 'slowdown_to_edge' is not supported in version < 5.0")
     """Test function which writes the trajectory and reads it back."""
-    if np.all(trajectory[:, 0]==0) and pregrad is not None:
+    if np.all(trajectory[:, 0] == 0) and pregrad is not None:
         pytest.skip("We dont need prephasors for UTE trajectories")
-        
+
     write_trajectory(
         trajectory=trajectory,
         FOV=FOV,
