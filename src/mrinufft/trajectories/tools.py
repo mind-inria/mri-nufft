@@ -1,6 +1,6 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Callable, Literal, Union
+from typing import Any, Callable, Literal
 
 import numpy as np
 from numpy.typing import NDArray
