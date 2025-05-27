@@ -139,7 +139,7 @@ def test_write_n_read(
         img_size=img_size,
         check_constraints=True,
         grad_filename=str(tmp_path / name),
-        TE=TE_pos,
+        TE_pos=TE_pos,
         version=version,
         min_osf=min_osf,
         recon_tag=recon_tag,
