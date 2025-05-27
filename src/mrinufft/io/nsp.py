@@ -130,14 +130,9 @@ def write_gradients(
             file.write(str(timestamp) + "\n")
             left_over -= 1
         if version >= 5.1:
-            # Write number of samples to skip at start and end
-            if not (0 <= start_skip_samples <= 0xFFFF):
-                raise ValueError("start_skip_samples must fit in uint16 (0-65535)")
-            if not (0 <= end_skip_samples <= 0xFFFF):
-                raise ValueError("end_skip_samples must fit in uint16 (0-65535)")
-            packed_skips = (start_skip_samples << 16) | end_skip_samples
-            file.write(str(packed_skips) + "\n")
-            left_over -= 1
+            file.write(str(start_skip_samples) + "\n")
+            file.write(str(end_skip_samples) + "\n")
+            left_over -= 2
         file.write(str("0\n" * left_over))
     # Write all the k0 values
     file.write(
@@ -205,9 +200,9 @@ def _pop_elements(array, num_elements=1, type=np.float32):
         Array with elements popped.
     """
     if num_elements == 1:
-        return np.copy(array[0]).view(type), array[1:]
+        return array[0].astype(type, copy=False), array[1:]
     else:
-        return np.copy(array[0:num_elements]).view(type), array[num_elements:]
+        return array[0:num_elements].astype(type, copy=False), array[num_elements:]
 
 
 def write_trajectory(
@@ -347,7 +342,7 @@ def write_trajectory(
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
-                    " > {smax:.3f}. Please use prephase gradient to avoid this " 
+                    " > {smax:.3f}. Please use prephase gradient to avoid this "
                     " issue."
                 )
 
@@ -407,7 +402,7 @@ def read_trajectory(
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
     with open(grad_filename, "rb") as binfile:
-        data = np.fromfile(binfile, dtype=np.uint32)
+        data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
             version = np.around(version, 2)
@@ -423,28 +418,27 @@ def read_trajectory(
             if dwell_time == "min_osf":
                 dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
-        if version >= 4.1:
+        if version > 4:
             TE, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
             recon_tag, data = _pop_elements(data)
             recon_tag = np.around(recon_tag, 2)
             left_over = 10
-            if version >= 4.2:
+            if version > 4.1:
                 timestamp, data = _pop_elements(data)
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
-            if version >= 5.1:
-                packed_skips, data = _pop_elements(data, type="int")
-                start_skip_samples = (packed_skips >> 16) & 0xFFFF
-                end_skip_samples = packed_skips & 0xFFFF
-                left_over -= 1
+            if version > 5:
+                packed_skips, data = _pop_elements(data, num_elements=2, type="int")
+                start_skip_samples, end_skip_samples = packed_skips
+                left_over -= 2
             else:
                 start_skip_samples = 0
                 end_skip_samples = 0
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
-        if version >= 5:
+        if version > 4.5:
             final_positions, data = _pop_elements(data, dimension * num_shots)
             final_positions = np.reshape(final_positions, (num_shots, dimension))
         dwell_time_ns = dwell_time * 1e6
@@ -458,19 +452,21 @@ def read_trajectory(
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
-        if start_skip_samples>0:
-            start_location_updates = np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+        if start_skip_samples > 0:
+            start_location_updates = (
+                np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+            )
             initial_positions += start_location_updates
             gradients = gradients[:, start_skip_samples:, :]
-        if end_skip_samples>0:
-           gradients = gradients[:, :-end_skip_samples, :] 
+        if end_skip_samples > 0:
+            gradients = gradients[:, :-end_skip_samples, :]
         num_samples_per_shot -= start_skip_samples + end_skip_samples
         if num_adc_samples is None:
             if read_shots:
                 num_adc_samples = num_samples_per_shot + 1
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
-        kspace_loc = np.zeros((num_shots, num_adc_samples, dimension))
+        kspace_loc = np.zeros((num_shots, num_adc_samples, dimension), dtype=np.float32)
         kspace_loc[:, 0, :] = initial_positions
         adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
         Q, R = divmod(adc_times, gradient_raster_time_ns)
