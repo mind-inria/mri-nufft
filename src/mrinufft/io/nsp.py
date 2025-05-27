@@ -304,23 +304,16 @@ def write_trajectory(
                 "postgrad is only supported for version >= 5.1, "
                 "please set version to 5.1 or higher."
             )
+        edge_locations = np.zeros_like(final_positions)
         if postgrad == "slowdown_to_edge":
-            edge_locations = np.zeros_like(final_positions)
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
-            end_gradients = get_gradients_for_set_time(
-                ke=edge_locations,
-                gs=gradients[:, -1],
-                ks=final_positions,
-                **scan_consts,
-            )
-        if postgrad == "slowdown_to_center":
-            end_gradients = get_gradients_for_set_time(
-                ke=np.zeros_like(final_positions),
-                gs=gradients[:, -1],
-                ks=final_positions,
-                **scan_consts,
-            )
+        end_gradients = get_gradients_for_set_time(
+            ke=edge_locations,
+            gs=gradients[:, -1],
+            ks=final_positions,
+            **scan_consts,
+        )
         gradients = np.hstack([gradients, end_gradients])
         Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
