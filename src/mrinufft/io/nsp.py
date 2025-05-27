@@ -31,7 +31,7 @@ def write_gradients(
     grad_filename: str,
     img_size: tuple[int, ...],
     FOV: tuple[float, ...],
-    TE: float = 0.5,
+    TE_pos: float = 0.5,
     min_osf: int = 5,
     gamma: float = Gammas.HYDROGEN,
     version: float = 4.2,
@@ -56,7 +56,7 @@ def write_gradients(
         Image size.
     FOV : tuple[float, ...]
         Field of view.
-    TE : int, optional
+    TE_pos : int, optional
         The ratio of trajectory when TE occurs, with 0 as start of
         trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
@@ -112,12 +112,12 @@ def write_gradients(
     file.write(str(num_shots) + "\n")
     file.write(str(num_samples_per_shot) + "\n")
     if version >= 4.1:
-        if TE == 0:
+        if TE_pos == 0:
             if np.sum(initial_positions) != 0:
                 warnings.warn(
                     "The initial positions are not all zero for center-out trajectory"
                 )
-        file.write(str(TE) + "\n")
+        file.write(str(TE_pos) + "\n")
         # Write the maximum Gradient
         file.write(str(max_grad) + "\n")
         # Write recon Pipeline version tag
@@ -214,7 +214,7 @@ def write_trajectory(
     gamma: float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
-    TE: float = 0.5,
+    TE_pos: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
     pregrad: str | None = "speedup",
@@ -243,7 +243,7 @@ def write_trajectory(
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
         Check scanner constraints, by default True
-    TE : int, optional
+    TE_pos : int, optional
         The ratio of trajectory when TE occurs, with 0 as start of
         trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
@@ -257,8 +257,10 @@ def write_trajectory(
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
         `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
+        This is useful for sequences needing a spoiler at the end of the trajectory.
+        However, spoiler is still not added, it is expected that the sequence
+        handles the spoilers, which can be variable.
         `slowdown_to_center` will add a gradient to slow down to the center of the FOV.
-        While this can be used to add spoilers, it is not recommended.
     version: float, optional
         Trajectory versioning, by default 5
     kwargs : dict, optional
@@ -354,7 +356,7 @@ def write_trajectory(
         grad_filename=grad_filename,
         img_size=img_size,
         FOV=FOV,
-        TE=TE,
+        TE_pos=TE_pos,
         gamma=gamma,
         version=version,
         start_skip_samples=Ns_to_skip_at_start,
