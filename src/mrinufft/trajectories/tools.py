@@ -484,12 +484,12 @@ def get_gradients_for_set_time(
 ) -> NDArray:
     """Calculate timings for trapezoidal or triangular gradient waveforms.
 
-    Computes the gradient waveforms required to traverse from a starting k-space 
-    position (ks) to an ending k-space position (ke) in a fixed number of time 
-    steps (N), subject to hardware constraints on maximum gradient amplitude 
-    (gmax) and slew rate (smax). The function supports both trapezoidal 
-    and triangular gradient shapes, automatically adjusting the waveform to 
-    meet the area constraint imposed by the desired k-space traversal 
+    Computes the gradient waveforms required to traverse from a starting k-space
+    position (ks) to an ending k-space position (ke) in a fixed number of time
+    steps (N), subject to hardware constraints on maximum gradient amplitude
+    (gmax) and slew rate (smax). The function supports both trapezoidal
+    and triangular gradient shapes, automatically adjusting the waveform to
+    meet the area constraint imposed by the desired k-space traversal
     and the specified timing and hardware limits.
 
     Parameters
