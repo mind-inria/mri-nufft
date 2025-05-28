@@ -112,7 +112,9 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     batch_size : int, default None
         Number of batches to process simultaneously.
-        if Provided, the Nufft operator will support different data/smaps pairs
+        if provided, the NUFFT operator will support different processing
+        different k-space / image data and corresponding sensitivity map pairs.
+        This is particularly useful for multi-contrast reconstructions
             in a batched mode
 
     """
