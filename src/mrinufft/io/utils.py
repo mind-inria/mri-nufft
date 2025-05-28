@@ -124,7 +124,7 @@ def nifti_affine(twixObj):
 
     t = (rot @ center)[:3] - offset
     if det < 0:
-        t[2] = fovz - t[2]
+        t[2] = (rot @ center)[2]*2 - t[2]
 
     full_mat = rot @ scale
     full_mat[:3, 3] = t
