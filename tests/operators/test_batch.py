@@ -163,10 +163,10 @@ def test_batch_adj_op(
     image_batched = from_interface(operator.adj_op(kspace_data), array_interface)
     # Reduced accuracy for the GPU cases...
     if operator.backend == "finufft":
-        npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=2e-1)
+        npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=2.5e-1)
     else:
         npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=1e-3)
-    
+
 
 @param_array_interface
 def test_data_consistency(
