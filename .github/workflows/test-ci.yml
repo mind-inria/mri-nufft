@@ -225,7 +225,7 @@ jobs:
           python -m pip install -e .[extra,test,dev]
           python -m pip install finufft pooch brainweb-dl torch fastmri
 
-      - name: Install GPU related interfaces
+      - name: Point to CUDA 12.4
         run: |
           export CUDA_BIN_PATH=/usr/local/cuda-12.4/
           export PATH=/usr/local/cuda-12.4/bin/:${PATH}

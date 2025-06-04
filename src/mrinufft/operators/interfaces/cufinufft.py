@@ -18,7 +18,6 @@ from .utils import (
     pin_memory,
     sizeof_fmt,
 )
-from .utils.utils import _next235beven
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
