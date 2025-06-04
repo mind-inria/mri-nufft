@@ -98,7 +98,7 @@ jobs:
           python -m venv venv
           source $RUNNER_WORKSPACE/venv/bin/activate
           pip install --upgrade pip wheel
-          pip install -e mri-nufft[test]
+          pip install -e mri-nufft[test,finufft]
 
 
       - name: Install backend
