@@ -154,7 +154,7 @@ def test_subspace_op_adj(operator, array_interface, kspace_data):
     # actual computation
     kspace_data = to_interface(kspace_data, array_interface)
     image = from_interface(subspace_op.adj_op(kspace_data), array_interface)
-    if subspace_op.fourier_op.backend == "finufft":
+    if subspace_op.backend == "finufft":
         npt.assert_allclose(image, image_ref, rtol=0.5, atol=1e-3)
     else:
         npt.assert_allclose(image, image_ref, rtol=1e-3, atol=1e-3)
