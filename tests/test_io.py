@@ -10,7 +10,7 @@ from mrinufft.trajectories.utils import (
     DEFAULT_SMAX,
     DEFAULT_RASTER_TIME,
 )
-from mrinufft.trajectories.tools import get_gradients_for_set_time
+from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
 from pytest_cases import parametrize, parametrize_with_cases
 from case_trajectories import CasesTrajectories
@@ -62,7 +62,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     resolution = dimension * (0.23 / 256,)
     trajectory = kspace_loc / resolution
     gradients = np.diff(trajectory, axis=1) / gamma / raster_time
-    GS = get_gradients_for_set_time(
+    GS = get_gradient_amplitudes_to_travel_for_set_time(
         ke=trajectory[:, 0],
         ge=gradients[:, 0],
         gamma=gamma,
@@ -83,7 +83,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     # Check that gradients match.
     np.testing.assert_allclose(GS[:, 0], 0, atol=1e-5)
 
-    GE = get_gradients_for_set_time(
+    GE = get_gradient_amplitudes_to_travel_for_set_time(
         ks=trajectory[:, -1],
         ke=np.zeros_like(trajectory[:, -1]),
         gs=gradients[:, -1],

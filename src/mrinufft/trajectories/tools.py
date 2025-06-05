@@ -378,7 +378,7 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     return trajectory
 
 
-def get_gradient_timing_values(
+def get_gradient_times_to_travel(
     ks: NDArray | None = None,
     ke: NDArray | None = None,
     gs: NDArray | None = None,
@@ -400,13 +400,13 @@ def get_gradient_timing_values(
     Parameters
     ----------
     ks : NDArray
-        Starting k-space positions, shape (num_shots, dimension).
+        Starting k-space positions, shape (nb_shots, nb_dimension).
     ke : NDArray, default None when it is 0
-        Ending k-space positions, shape (num_shots, dimension).
+        Ending k-space positions, shape (nb_shots, nb_dimension).
     gs : NDArray, default None when it is 0
-        Starting gradient values, shape (num_shots, dimension).
+        Starting gradient values, shape (nb_shots, nb_dimension).
     ge : NDArray, default None when it is 0
-        Ending gradient values, shape (num_shots, dimension).
+        Ending gradient values, shape (nb_shots, nb_dimension).
     gamma : float, optional
         Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
     raster_time : float, optional
@@ -471,7 +471,7 @@ def get_gradient_timing_values(
     return n_ramp_down, n_ramp_up, n_plateau, gi
 
 
-def get_gradients_for_set_time(
+def get_gradient_amplitudes_to_travel_for_set_time(
     ke: NDArray,
     ks: NDArray | None = None,
     gs: NDArray | None = None,
@@ -495,13 +495,13 @@ def get_gradients_for_set_time(
     Parameters
     ----------
     ke : NDArray
-        Ending k-space positions, shape (num_shots, dimension).
+        Ending k-space positions, shape (nb_shots, nb_dimension).
     ks : NDArray, default None when it is 0
-        Starting k-space positions, shape (num_shots, dimension).
+        Starting k-space positions, shape (nb_shots, nb_dimension).
     gs : NDArray, default None when it is 0
-        Starting gradient values, shape (num_shots, dimension).
+        Starting gradient values, shape (nb_shots, nb_dimension).
     ge : NDArray, default None when it is 0
-        Ending gradient values, shape (num_shots, dimension).
+        Ending gradient values, shape (nb_shots, nb_dimension).
     N : int, default None
         Number of time steps (samples) for the gradient waveform.
         If None, timing is calculated based on the area needed and hardware limits.
@@ -517,8 +517,9 @@ def get_gradients_for_set_time(
     Returns
     -------
     G : NDArray
-        Gradient waveforms, shape (num_shots, N, dimension), where each entry contains
-        the gradient value at each time step for each shot and dimension.
+        Gradient waveforms, shape (nb_shots, nb_samples_per_shot, nb_dimension)
+        , where each entry contains the gradient value at each time step
+         for each shot and dimension.
 
     Notes
     -----
@@ -540,10 +541,10 @@ def get_gradients_for_set_time(
 
     assert (
         ks.shape == ke.shape == gs.shape == ge.shape
-    ), "All input arrays must have shape (num_shots, dimension)"
+    ), "All input arrays must have shape (nb_shots, nb_dimension)"
     if N is None:
         # Calculate the number of time steps based on the area needed
-        n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_timing_values(
+        n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
             ks=ks,
             ke=ke,
             ge=ge,
@@ -591,10 +592,10 @@ def get_gradients_for_set_time(
     gi = (2 * area_needed - (n_ramp_down + 1) * gs - (n_ramp_up - 1) * ge) / (
         n_ramp_down + n_ramp_up + 2 * n_plateau
     )
-    num_shots, dimension = ke.shape
-    G = np.zeros((num_shots, N, dimension), dtype=np.float32)
-    for i in range(num_shots):
-        for d in range(dimension):
+    nb_shots, nb_dimension = ke.shape
+    G = np.zeros((nb_shots, N, nb_dimension), dtype=np.float32)
+    for i in range(nb_shots):
+        for d in range(nb_dimension):
             start = 0
             G[i, : n_ramp_down[i, d], d] = np.linspace(
                 gs[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False

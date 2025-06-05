@@ -20,7 +20,7 @@ from mrinufft.trajectories.utils import (
     unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.tools import get_gradients_for_set_time
+from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
 from .siemens import read_siemens_rawdat
 
@@ -290,7 +290,7 @@ def write_trajectory(
                 "pregrad is only supported for version >= 5.1, "
                 "please set version to 5.1 or higher."
             )
-        start_gradients = get_gradients_for_set_time(
+        start_gradients = get_gradient_amplitudes_to_travel_for_set_time(
             ke=initial_positions,
             ge=gradients[:, 0],
             **scan_consts,
@@ -308,7 +308,7 @@ def write_trajectory(
         if postgrad == "slowdown_to_edge":
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
-        end_gradients = get_gradients_for_set_time(
+        end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
             ke=edge_locations,
             gs=gradients[:, -1],
             ks=final_positions,
