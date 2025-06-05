@@ -390,8 +390,8 @@ def get_gradient_timing_values(
 ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """Get gradient timing values for trapezoidal or triangular waveforms.
 
-    Compute gradient timing values for 2D arrays for taking k-space trajectory
-    from ks with gradient gs to ke with gradient ge, while being hardware compliant.
+    Compute gradient timing values to take k-space trajectories
+    from position ``ks`` with gradient ``gs`` to position ``ke`` with gradient ``ge``, while being hardware compliant.
     This function calculates the number of time steps required for the ramp down,
     ramp up, and plateau phases of the gradient waveform, ensuring that the area
     traversed in k-space matches the desired trajectory while adhering to the
