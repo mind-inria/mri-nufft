@@ -88,7 +88,6 @@ def flat_operator(operator):
 
 @fixture(scope="module")
 def image_data(operator):
-    np.random.seed(0)
     """Generate a random image."""
     if operator.uses_sense:
         shape = (operator.n_batchs, *operator.shape)
