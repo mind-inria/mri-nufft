@@ -401,11 +401,11 @@ def get_gradient_timing_values(
     ----------
     ks : NDArray
         Starting k-space positions, shape (num_shots, dimension).
-    ke : NDArray
+    ke : NDArray, default None when it is 0
         Ending k-space positions, shape (num_shots, dimension).
-    gs : NDArray
+    gs : NDArray, default None when it is 0
         Starting gradient values, shape (num_shots, dimension).
-    ge : NDArray
+    ge : NDArray, default None when it is 0
         Ending gradient values, shape (num_shots, dimension).
     gamma : float, optional
         Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
@@ -414,7 +414,7 @@ def get_gradient_timing_values(
     gmax : float, optional
         Maximum gradient amplitude (T/m). Default is DEFAULT_GMAX.
     smax : float, optional
-        Maximum slew rate (T/m/s). Default is DEFAULT_SMAX.
+        Maximum slew rate ``T/m/s``. Default is DEFAULT_SMAX.
 
 
     Returns
@@ -485,9 +485,9 @@ def get_gradients_for_set_time(
     """Calculate timings for trapezoidal or triangular gradient waveforms.
 
     Computes the gradient waveforms required to traverse from a starting k-space
-    position (ks) to an ending k-space position (ke) in a fixed number of time
-    steps (N), subject to hardware constraints on maximum gradient amplitude
-    (gmax) and slew rate (smax). The function supports both trapezoidal
+    position ``ks`` to an ending k-space position ``ke`` in a fixed number of time
+    steps ``N``, subject to hardware constraints on maximum gradient amplitude
+    ``gmax`` and slew rate ``smax``. The function supports both trapezoidal
     and triangular gradient shapes, automatically adjusting the waveform to
     meet the area constraint imposed by the desired k-space traversal
     and the specified timing and hardware limits.
