@@ -4,7 +4,6 @@ import numpy as np
 
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU, FourierOperatorBase
-from .utils.utils import _next235beven
 
 FINUFFT_AVAILABLE = True
 try:
