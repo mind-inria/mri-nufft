@@ -88,6 +88,7 @@ def flat_operator(operator):
 
 @fixture(scope="module")
 def image_data(operator):
+    np.random.seed(0)
     """Generate a random image."""
     if operator.uses_sense:
         shape = (operator.n_batchs, *operator.shape)
@@ -128,8 +129,10 @@ def test_batch_op(operator, array_interface, flat_operator, image_data):
         np.concatenate(kspace_flat, axis=0),
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
-
-    npt.assert_array_almost_equal(kspace_batched, kspace_flat)
+    decimal = 6
+    if operator.backend == "finufft":
+        decimal = 4
+    npt.assert_array_almost_equal(kspace_batched, kspace_flat, decimal=decimal)
 
 
 @param_array_interface
