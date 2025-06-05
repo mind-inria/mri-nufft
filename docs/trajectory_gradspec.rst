@@ -32,7 +32,11 @@ The binary file format is specified as follows:
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | timestamp      | FLOAT | 1       | n.a.    | Time stamp when the binary is created                                  |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
-| Empty places   | FLOAT | 9       | n.a.    | Yet unused : Default initialized with 0                                |
+| ADC pre-skip   | FLOAT | 1       | n.a.    | Gradient samples to skip before starting ADC, for pre-phasors          |
++----------------+-------+---------+---------+------------------------------------------------------------------------+
+| ADC post-skip  | FLOAT | 1       | n.a.    | Gradient samples to skip at the end of trajectory by turning off ADC   |
++----------------+-------+---------+---------+------------------------------------------------------------------------+
+| Empty places   | FLOAT | 7       | n.a.    | Yet unused : Default initialized with 0                                |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
 | kStarts        | FLOAT | D*Nc    | 1/m     | K-space location start                                                 |
 +----------------+-------+---------+---------+------------------------------------------------------------------------+
