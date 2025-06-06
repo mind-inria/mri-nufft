@@ -54,7 +54,7 @@ class Model(torch.nn.Module):
             data=torch.Tensor(inital_trajectory),
             requires_grad=True,
         )
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
             self.trajectory.detach().cpu().numpy(),
             shape=(256, 256),
             density=True,
