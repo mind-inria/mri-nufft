@@ -44,19 +44,19 @@ def get_gridded_trajectory(
     grid_type : str, optional
         The type of gridded trajectory to compute. Default is "density".
         It can be one of the following:
-        "density" : Get the sampling density in closest number of samples per voxel.
-            Helps understand suboptimal sampling, by showcasing regions with strong
-            oversampling.
-        "time" : Showcases when the k-space data is acquired in time.
-            This is helpful to view and understand off-resonance effects.
-            Generally, lower off-resonance effects occur when the sampling trajectory
-            has smoother k-space sampling time over the k-space.
-        "inversion" : Relative inversion time at the sampling location. Needs
-            `turbo_factor` to be set. This is useful for analyzing the exact inversion
-            time when the k-space is acquired, for sequences like MP(2)RAGE.
-        "holes": Show the k-space missing coverage, or holes, within a ellipsoid of the
-            k-space.
-        "gradients": Show the gradient strengths of the k-space trajectory.
+        - ``"density"`` : Get the sampling density in closest number of samples per voxel.
+        Helps understand suboptimal sampling, by showcasing regions with strong
+        oversampling.
+        - ``"time"`` : Showcases when the k-space data is acquired in time.
+        This is helpful to view and understand off-resonance effects.
+        Generally, lower off-resonance effects occur when the sampling trajectory
+        has smoother k-space sampling time over the k-space.
+        - ``"inversion"`` : Relative inversion time at the sampling location. Needs
+        `turbo_factor` to be set. This is useful for analyzing the exact inversion
+        time when the k-space is acquired, for sequences like MP(2)RAGE.
+        - ``"holes"``: Show the k-space missing coverage, or holes, within a ellipsoid of the
+        k-space.
+        - ``"gradients"``: Show the gradient strengths of the k-space trajectory.
         "slew": Show the slew rate of the k-space trajectory.
     osf : int, optional
         The oversampling factor for the gridded trajectory. Default is 1.

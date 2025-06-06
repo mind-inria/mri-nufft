@@ -9,21 +9,20 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
 
     Parameters
     ----------
-    shape : tuple[int]
+    shape: tuple[int]
         Matrix size.
-    b0range : tuple[float], optional
+    b0range: tuple[float], optional
         Frequency shift range in [Hz]. The default is (-300, 300).
-    mask : np.ndarray
+    mask: np.ndarray
         Spatial support of the object. If not provided,
-        build a radial mask with radius = 0.3 * shape
+        build a radial mask with radius ``radius=0.3*shape``
 
     Returns
     -------
     np.ndarray
-        B0 map of shape (*shape) in [Hz],
-        with values included in (*b0range).
-    mask : np.ndarray, optional
-        Spatial support binary mask.
+        B0 map in Hz, values included in ``b0range``, and shape ``shape``
+    np.ndarray
+        Spatial support binary mask
 
     """
     ndim = len(shape)
@@ -51,13 +50,13 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
 
     Parameters
     ----------
-    shape : tuple[int]
+    shape: tuple[int]
         Matrix size.
-    t2svalue : float, optional
-        Object T2* in [ms]. The default is 15.0.
-    mask : np.ndarray
+    t2svalue: float, optional
+        Object T2* in ms. The default is 15.0.
+    mask: np.ndarray
         Spatial support of the object. If not provided,
-        build a radial mask with radius = 0.3 * shape
+        build a radial mask with ``radius = 0.3 * shape``
 
     Returns
     -------
