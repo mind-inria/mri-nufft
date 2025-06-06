@@ -90,7 +90,6 @@ class MRISubspace(FourierOperatorBase):
         # perform computation
         y = 0.0
         for idx in range(self.n_coeffs):
-
             # select basis element
             basis_element = subspace_basis[idx]
 
@@ -139,7 +138,6 @@ class MRISubspace(FourierOperatorBase):
         # perform computation
         y = []
         for idx in range(self.n_coeffs):
-
             # select basis element
             basis_element = subspace_basis[idx]
 
