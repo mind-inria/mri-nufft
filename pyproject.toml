@@ -21,7 +21,7 @@ cufinufft = ["cufinufft==2.4.0b1", "cupy-cuda12x"]
 tensorflow = ["tensorflow-mri==0.21.0", "tensorflow-probability==0.17.0", "tensorflow-io==0.27.0", "matplotlib==3.7"]
 finufft = ["finufft==2.4.0rc1"]
 sigpy = ["sigpy"]
-pynfft = ["pynfft2>=1.4.3; python_version < '3.12'", "numpy>=2.0.0; python_version < '3.12'"]
+pynfft = ["pynfft3"]
 
 pynufft = ["pynufft"]
 pynufft-cpu = ["pynufft"]
