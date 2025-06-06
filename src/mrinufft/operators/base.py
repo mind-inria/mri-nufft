@@ -312,14 +312,18 @@ class FourierOperatorBase(ABC):
         ----------
         method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
-            If a string, the method should be registered in the density registry.
-            If a callable, it should take the samples and the shape as input.
-            If a dict, it should have a key 'name', to determine which method to use.
+            - If a string, the method should be registered in the density registry.
+            - If a callable, it should take the samples and the shape as input.
+            - If a dict, it should have a key 'name', to determine which method to use.
             other items will be used as kwargs.
-            If an array, it should be of shape (Nsamples,) and will be used as is.
-            If `True`, the method `pipe` is chosen as default estimation method,
-            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
-                or `torchkbnufft-gpu`.
+            - If an array, it should be of shape (Nsamples,) and will be used as is.
+            - If `True`, the method `pipe` is chosen as default estimation method.
+
+
+        Notes
+        -----
+        The "pipe" method is only available for the following backends:
+        `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu` and `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray) or (
             CUPY_AVAILABLE and isinstance(method, cp.ndarray)

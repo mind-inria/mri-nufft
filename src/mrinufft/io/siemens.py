@@ -52,8 +52,9 @@ def read_siemens_rawdat(
     Notes
     -----
     This function requires the mapVBVD module to be installed.
-    You can install it using the following command:
-        `pip install pymapVBVD`
+    You can install it using the following command::
+
+        pip install pymapVBVD
     """
     try:
         from mapvbvd import mapVBVD
