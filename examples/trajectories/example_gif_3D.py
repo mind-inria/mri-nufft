@@ -211,7 +211,7 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
+        Path(os.getcwd()).parent.parent / "docs" / "generated" / "autoexamples" / "trajectories" / "images"
     )
     shutil.copyfile("mrinufft_3D_traj.gif", final_dir / "mrinufft_3D_traj.gif")
 except FileNotFoundError:
@@ -219,10 +219,10 @@ except FileNotFoundError:
 
 # sphinx_gallery_end_ignore
 
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/images/mrinufft_3D_traj.gif'
+# sphinx_gallery_thumbnail_path = 'generated/autoexamples/trajectories/images/mrinufft_3D_traj.gif'
 
 # %%
-# .. image-sg:: /generated/autoexamples/images/mrinufft_3D_traj.gif
+# .. image-sg:: /generated/autoexamples/trajectories/images/mrinufft_3D_traj.gif
 #    :alt: example density
-#    :srcset: /generated/autoexamples/images/mrinufft_3D_traj.gif
+#    :srcset: /generated/autoexamples/trajectories/images/mrinufft_3D_traj.gif
 #    :class: sphx-glr-single-img
