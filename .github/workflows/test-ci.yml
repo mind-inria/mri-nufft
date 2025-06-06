@@ -225,15 +225,11 @@ jobs:
           python -m pip install -e .[extra,test,dev]
           python -m pip install finufft pooch brainweb-dl torch fastmri
 
-      - name: Point to CUDA 12.4
-        run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
-          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
-
       - name: Install Python deps
         shell: bash
         run: |
+          ${{ env.activate_venv }}
+          ${{ env.setup_cuda }}
           python -m pip install --upgrade pip
           python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,smaps,autodiff,doc]
         
