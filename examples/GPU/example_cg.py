@@ -6,7 +6,7 @@ Reconstruction with conjugate gradient
 An example to show how to reconstruct volumes using conjugate gradient method.
 
 This script demonstrates the use of the Conjugate Gradient (CG) method
-for solving systems of linear equations of the form Ax = b, where A is a symmetric
+for solving systems of linear equations of the form :math:`Ax = b`, where :math:`A`` is a symmetric
 positive-definite matrix. The CG method is an iterative algorithm that is particularly
 useful for large, sparse systems where direct methods are computationally expensive.
 
