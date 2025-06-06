@@ -440,7 +440,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         if smaps is not None:
             if not (is_host_array(smaps) or is_cuda_array(smaps)):
                 raise ValueError(
-                    "Smaps should be either a C-ordered ndarray, " "or a GPUArray."
+                    "Smaps should be either a C-ordered ndarray, or a GPUArray."
                 )
             if smaps_cached:
                 warnings.warn(
