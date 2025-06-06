@@ -206,7 +206,12 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent.parent / "docs" / "generated" / "autoexamples" / "trajectories" / "images"
+        Path(os.getcwd()).parent.parent
+        / "docs"
+        / "generated"
+        / "autoexamples"
+        / "trajectories"
+        / "images"
     )
     shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
 except FileNotFoundError:

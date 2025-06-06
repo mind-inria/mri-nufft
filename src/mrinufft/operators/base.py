@@ -323,7 +323,8 @@ class FourierOperatorBase(ABC):
         Notes
         -----
         The "pipe" method is only available for the following backends:
-        `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu` and `torchkbnufft-gpu`.
+        `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu`
+        and `torchkbnufft-gpu`.
         """
         if isinstance(method, np.ndarray) or (
             CUPY_AVAILABLE and isinstance(method, cp.ndarray)
