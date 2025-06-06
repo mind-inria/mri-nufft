@@ -211,9 +211,6 @@ try:
     shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
 except FileNotFoundError:
     pass
-raise ValueError(
-">>>>>>>>>>" + str(final_dir)
-)
 # sphinx_gallery_end_ignore
 
 # sphinx_gallery_thumbnail_path = 'generated/autoexamples/trajectories/images/mrinufft_2D_traj.gif'
