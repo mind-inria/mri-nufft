@@ -4,7 +4,7 @@
 
 .. autofunction:: {{ objname }}
 
-..  _sphx_glr_backref_{{fullname}}:
+..  _sphx_glr_backref_{{fullname}}.{{objname}}:
 
-.. minigallery:: {{fullname}}
+.. minigallery:: {{fullname}}.{{objname}}
    :add-heading:
