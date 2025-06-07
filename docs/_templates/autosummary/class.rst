@@ -30,3 +30,8 @@
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
+   .. _sphx_glr_backref_{{fullname}}.{{objname}}:
+
+   .. minigallery:: {{fullname}}.{{objname}}
+      :add-heading:
