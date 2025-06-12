@@ -142,7 +142,7 @@ axs[2].set_title("manual density compensation")
 #    If this method is widely used in the literature, there exists no convergence guarantees for it.
 #
 # .. note::
-#    The Pipe method is currently only implemented for gpuNUFFT.
+#    The Pipe method is currently only implemented for gpuNUFFT and cufinufft backend.
 
 # %%
 flat_traj = traj.reshape(-1, 2)
@@ -156,5 +156,23 @@ axs[0].set_title("Ground Truth")
 axs[1].imshow(abs(adjoint))
 axs[1].set_title("no density compensation")
 axs[2].imshow(abs(adjoint_manual))
+axs[2].set_title("Pipe density compensation")
+print(nufft.density)
+
+# %%
+# We can also do density compensation using cufinufft backend
+
+# %%
+flat_traj = traj.reshape(-1, 2)
+nufft = get_operator("cufinufft")(
+    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+)
+adjoint_manual = nufft.adj_op(kspace)
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+axs[0].imshow(abs(mri_2D))
+axs[0].set_title("Ground Truth")
+axs[1].imshow(abs(adjoint))
+axs[1].set_title("no density compensation")
+axs[2].imshow(np.squeeze(abs(adjoint_manual)))
 axs[2].set_title("Pipe density compensation")
 print(nufft.density)
