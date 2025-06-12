@@ -128,7 +128,9 @@ def test_batch_op(operator, array_interface, flat_operator, image_data):
         np.concatenate(kspace_flat, axis=0),
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
-    npt.assert_array_almost_equal(kspace_batched, kspace_flat, decimal=3 if operator.backend == 'finufft' else 6)
+    npt.assert_array_almost_equal(
+        kspace_batched, kspace_flat, decimal=3 if operator.backend == "finufft" else 6
+    )
 
 
 @param_array_interface
@@ -160,8 +162,9 @@ def test_batch_adj_op(
     )
 
     image_batched = from_interface(operator.adj_op(kspace_data), array_interface)
-    npt.assert_allclose(image_batched, image_flat, rtol=1e-1 if operator.backend == 'finufft' else 1e-3)
-
+    npt.assert_allclose(
+        image_batched, image_flat, rtol=1e-1 if operator.backend == "finufft" else 1e-3
+    )
 
 
 @param_array_interface
