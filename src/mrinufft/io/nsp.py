@@ -56,7 +56,7 @@ def write_gradients(
         Image size.
     FOV : tuple[float, ...]
         Field of view.
-    TE_pos : int, optional
+    TE_pos : float, optional
         The ratio of trajectory when TE occurs, with 0 as start of
         trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
@@ -243,7 +243,7 @@ def write_trajectory(
         Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
         Check scanner constraints, by default True
-    TE_pos : int, optional
+    TE_pos : float, optional
         The ratio of trajectory when TE occurs, with 0 as start of
         trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
