@@ -346,7 +346,7 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
-          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft] fastmri pywavelets
+          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft,extra] fastmri
       
           
       - name: Build API documentation

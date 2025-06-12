@@ -10,3 +10,4 @@ dependencies:
       - joblib
       - brainweb-dl
       - torch
+      - pywavelets
