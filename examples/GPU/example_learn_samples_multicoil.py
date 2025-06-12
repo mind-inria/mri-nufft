@@ -103,7 +103,7 @@ class Model(torch.nn.Module):
             self.trajectory.detach().numpy(),
             self.img_size,
             kspace.detach(),
-            backend="gpunufft",
+            backend="cufinufft",
             density=self.sense_op.density,
             blurr_factor=20,
         )
