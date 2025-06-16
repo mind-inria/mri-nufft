@@ -168,3 +168,55 @@ class MRIfinufft(FourierOperatorCPU):
         if self.uses_sense:
             self.smaps = self.smaps.conj()
         self.raw_op.toggle_grad_traj()
+
+    @classmethod
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
+        """Compute the density compensation weights for a given set of kspace locations.
+
+        Parameters
+        ----------
+        kspace_loc: np.ndarray
+            the kspace locations
+        volume_shape: np.ndarray
+            the volume shape
+        num_iterations: int default 10
+            the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
+        """
+        if FINUFFT_AVAILABLE is False:
+            raise ValueError(
+                "finufft is not available, cannot estimate the density compensation"
+            )
+        grid_op = MRIfinufft(
+            samples=kspace_loc,
+            shape=volume_shape,
+            upsampfac=osf,
+            spreadinterponly=1,
+            spread_kerevalmeth=0,
+            **kwargs,
+        )
+        density_comp = np.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
+        for _ in range(num_iterations):
+            density_comp /= np.abs(
+                grid_op.op(
+                    grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
+                ).squeeze()
+            )
+        if normalize:
+            test_op = MRIfinufft(samples=kspace_loc, shape=volume_shape, **kwargs)
+            test_im = np.ones(volume_shape, dtype=test_op.cpx_dtype)
+            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
+            density_comp /= np.mean(np.abs(test_im_recon))
+        return density_comp.squeeze()
