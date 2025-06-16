@@ -598,7 +598,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             )
         original_shape = volume_shape
         volume_shape = (np.array(volume_shape) * osf).astype(int)
-        grid_op = MRIGpuNUFFT(
+        grid_op = cls(
             samples=kspace_loc,
             shape=volume_shape,
             osf=1,
@@ -608,7 +608,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             max_iter=num_iterations
         )
         if normalize:
-            test_op = MRIGpuNUFFT(samples=kspace_loc, shape=original_shape, **kwargs)
+            test_op = cls(samples=kspace_loc, shape=original_shape, **kwargs)
             test_im = np.ones(original_shape, dtype=np.complex64)
             test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
             density_comp /= np.mean(np.abs(test_im_recon))
