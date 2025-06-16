@@ -26,6 +26,7 @@ MRIfinufft
       ~MRIfinufft.get_lipschitz_cst
       ~MRIfinufft.make_autograd
       ~MRIfinufft.op
+      ~MRIfinufft.pipe
       ~MRIfinufft.toggle_grad_traj
       ~MRIfinufft.with_autograd
       ~MRIfinufft.with_off_resonance_correction

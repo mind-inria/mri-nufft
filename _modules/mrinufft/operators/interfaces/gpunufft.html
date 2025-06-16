@@ -245,7 +245,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -486,6 +486,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -1331,7 +1332,7 @@ document.write(`
             <span class="p">)</span>
         <span class="n">original_shape</span> <span class="o">=</span> <span class="n">volume_shape</span>
         <span class="n">volume_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">volume_shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">osf</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">grid_op</span> <span class="o">=</span> <span class="n">MRIGpuNUFFT</span><span class="p">(</span>
+        <span class="n">grid_op</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">samples</span><span class="o">=</span><span class="n">kspace_loc</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">volume_shape</span><span class="p">,</span>
             <span class="n">osf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -1341,7 +1342,7 @@ document.write(`
             <span class="n">max_iter</span><span class="o">=</span><span class="n">num_iterations</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
-            <span class="n">test_op</span> <span class="o">=</span> <span class="n">MRIGpuNUFFT</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">kspace_loc</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">original_shape</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">test_op</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">kspace_loc</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">original_shape</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">test_im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">original_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
             <span class="n">test_im_recon</span> <span class="o">=</span> <span class="n">test_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="n">density_comp</span> <span class="o">*</span> <span class="n">test_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">test_im</span><span class="p">))</span>
             <span class="n">density_comp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">test_im_recon</span><span class="p">))</span>

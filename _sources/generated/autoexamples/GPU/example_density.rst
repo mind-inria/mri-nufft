@@ -98,12 +98,12 @@ Create sample data
  .. code-block:: none
 
     (256, 256)
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:329: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
 
-    <matplotlib.image.AxesImage object at 0x73ef60de9030>
+    <matplotlib.image.AxesImage object at 0x7ecedddd4730>
 
 
 
@@ -171,7 +171,7 @@ proportional to its voronoi cell area.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'Voronoi density compensation')
@@ -235,7 +235,7 @@ This can be viewed as an approximation to the voronoi neth
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'cell_count density compensation')
@@ -279,7 +279,7 @@ In radial trajectory for instance, a sample's weight can be determined from its 
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'manual density compensation')
@@ -299,9 +299,9 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
    If this method is widely used in the literature, there exists no convergence guarantees for it.
 
 .. note::
-   The Pipe method is currently only implemented for gpuNUFFT.
+   The Pipe method is currently only implemented for gpuNUFFT and cufinufft backend.
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-161
+.. GENERATED FROM PYTHON SOURCE LINES 148-162
 
 .. code-block:: Python
 
@@ -321,6 +321,7 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
 
 
+
 .. image-sg:: /generated/autoexamples/GPU/images/sphx_glr_example_density_005.png
    :alt: Ground Truth, no density compensation, Pipe density compensation
    :srcset: /generated/autoexamples/GPU/images/sphx_glr_example_density_005.png
@@ -331,7 +332,51 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
  .. code-block:: none
 
-    [0.00880057 0.04016259 0.08096183 ... 3.2308934  2.6593213  3.444119  ]
+    [0.00879697 0.04013839 0.08091018 ... 3.230138   2.6586995  3.4433136 ]
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 163-164
+
+We can also do density compensation using cufinufft backend
+
+.. GENERATED FROM PYTHON SOURCE LINES 166-179
+
+.. code-block:: Python
+
+    flat_traj = traj.reshape(-1, 2)
+    nufft = get_operator("cufinufft")(
+        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+    )
+    adjoint_manual = nufft.adj_op(kspace)
+    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+    axs[0].imshow(abs(mri_2D))
+    axs[0].set_title("Ground Truth")
+    axs[1].imshow(abs(adjoint))
+    axs[1].set_title("no density compensation")
+    axs[2].imshow(np.squeeze(abs(adjoint_manual)))
+    axs[2].set_title("Pipe density compensation")
+    print(nufft.density)
+
+
+
+.. image-sg:: /generated/autoexamples/GPU/images/sphx_glr_example_density_006.png
+   :alt: Ground Truth, no density compensation, Pipe density compensation
+   :srcset: /generated/autoexamples/GPU/images/sphx_glr_example_density_006.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+      warnings.warn(
+    [0.01538814+0.j 0.020558  +0.j 0.03999042+0.j ... 3.424799  +0.j
+     2.9435494 +0.j 2.6805587 +0.j]
 
 
 
@@ -339,7 +384,7 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.255 seconds)
+   **Total running time of the script:** (0 minutes 8.670 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_density.py:

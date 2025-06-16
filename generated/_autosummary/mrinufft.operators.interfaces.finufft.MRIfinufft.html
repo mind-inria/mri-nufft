@@ -246,7 +246,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -487,6 +487,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -757,6 +758,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft"><code class="docutils literal notranslate"><span class="pre">MRIfinufft</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.samples"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.samples</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.toggle_grad_traj()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.pipe"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.pipe()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -835,13 +837,16 @@ and batch dimension will be squeezed.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">op</span></code></p></td>
 <td><p>Non Cartesian MRI forward operator.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj" title="mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_grad_traj</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.pipe" title="mrinufft.operators.interfaces.finufft.MRIfinufft.pipe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe</span></code></a></p></td>
+<td><p>Compute the density compensation weights for a given set of kspace locations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj" title="mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toggle_grad_traj</span></code></a></p></td>
 <td><p>Toggle between the gradient trajectory and the plan for type 1 transform.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_autograd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_autograd</span></code></p></td>
 <td><p>Return a Fourier operator with autograd capabilities.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_off_resonance_correction</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_off_resonance_correction</span></code></p></td>
 <td><p>Return a new operator with Off Resonnance Correction.</p></td>
 </tr>
 </tbody>
@@ -913,6 +918,24 @@ and batch dimension will be squeezed.</p></li>
 <dd><p>Toggle between the gradient trajectory and the plan for type 1 transform.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="mrinufft.operators.interfaces.finufft.MRIfinufft.pipe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kspace_loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/finufft.html#MRIfinufft.pipe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.pipe" title="Link to this definition">#</a></dt>
+<dd><p>Compute the density compensation weights for a given set of kspace locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kspace_loc</strong> (<em>np.ndarray</em>) – the kspace locations</p></li>
+<li><p><strong>volume_shape</strong> (<em>np.ndarray</em>) – the volume shape</p></li>
+<li><p><strong>num_iterations</strong> (<em>int default 10</em>) – the number of iterations for density estimation</p></li>
+<li><p><strong>osf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The oversampling factor the volume shape</p></li>
+<li><p><strong>normalize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to normalize the density compensation.
+We normalize such that the energy of PSF = 1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -965,6 +988,7 @@ and batch dimension will be squeezed.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft"><code class="docutils literal notranslate"><span class="pre">MRIfinufft</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.samples"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.samples</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.toggle_grad_traj"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.toggle_grad_traj()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.pipe"><code class="docutils literal notranslate"><span class="pre">MRIfinufft.pipe()</span></code></a></li>
 </ul>
 </li>
 </ul>

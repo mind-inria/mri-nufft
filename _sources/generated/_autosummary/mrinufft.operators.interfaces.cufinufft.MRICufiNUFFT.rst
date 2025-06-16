@@ -26,6 +26,7 @@ MRICufiNUFFT
       ~MRICufiNUFFT.get_lipschitz_cst
       ~MRICufiNUFFT.make_autograd
       ~MRICufiNUFFT.op
+      ~MRICufiNUFFT.pipe
       ~MRICufiNUFFT.toggle_grad_traj
       ~MRICufiNUFFT.with_autograd
       ~MRICufiNUFFT.with_off_resonance_correction

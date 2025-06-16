@@ -245,7 +245,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -486,6 +486,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -736,7 +737,7 @@ document.write(`
 
 <div class="viewcode-block" id="siemens_quat_to_rot_mat">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html#mrinufft.io.utils.siemens_quat_to_rot_mat">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">siemens_quat_to_rot_mat</span><span class="p">(</span><span class="n">quat</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">siemens_quat_to_rot_mat</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">return_det</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the rotation matrix from Siemens Twix quaternion.</span>
 
@@ -744,6 +745,8 @@ document.write(`
 <span class="sd">    ----------</span>
 <span class="sd">    quat : np.ndarray</span>
 <span class="sd">        The quaternion from the Siemens Twix file.</span>
+<span class="sd">    return_det : bool</span>
+<span class="sd">        Whether to return the determinent of the rotation before norm</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -754,10 +757,83 @@ document.write(`
     <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
     <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_quat</span><span class="p">([</span><span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
     <span class="n">R</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">R</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">det</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">R</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">return_det</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">det</span>
     <span class="k">return</span> <span class="n">R</span></div>
+
+
+
+<div class="viewcode-block" id="nifti_affine">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.io.utils.nifti_affine.html#mrinufft.io.utils.nifti_affine">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">nifti_affine</span><span class="p">(</span><span class="n">twixObj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the affine transformation matrix from Siemens Twix object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    twixObj : twixObj</span>
+<span class="sd">        The twix object returned by mapVBVD.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        The affine transformation matrix which is a 4x4 matrix.</span>
+<span class="sd">        This can be passed as input to `affine` parameter in `nibabel`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># required keys</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dthick&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sSliceArray&quot;</span><span class="p">,</span> <span class="s2">&quot;asSlice&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;dThickness&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;dread&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sSliceArray&quot;</span><span class="p">,</span> <span class="s2">&quot;asSlice&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;dReadoutFOV&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;dphase&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sSliceArray&quot;</span><span class="p">,</span> <span class="s2">&quot;asSlice&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;dPhaseFOV&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;lbase&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sKSpace&quot;</span><span class="p">,</span> <span class="s2">&quot;lBaseResolution&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;lphase&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sKSpace&quot;</span><span class="p">,</span> <span class="s2">&quot;lPhaseEncodingLines&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;ucdim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;sKSpace&quot;</span><span class="p">,</span> <span class="s2">&quot;ucDimension&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">sos</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;sKSpace&quot;</span><span class="p">,</span> <span class="s2">&quot;dSliceOversamplingForDialog&quot;</span><span class="p">)</span>
+    <span class="n">rot</span><span class="p">,</span> <span class="n">det</span> <span class="o">=</span> <span class="n">siemens_quat_to_rot_mat</span><span class="p">(</span><span class="n">twixObj</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">slicePos</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:],</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">my</span> <span class="o">=</span> <span class="n">twixObj</span><span class="o">.</span><span class="n">hdr</span><span class="o">.</span><span class="n">MeasYaps</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">keys</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">my</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">rot</span>
+
+    <span class="n">dthick</span> <span class="o">=</span> <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;dthick&quot;</span><span class="p">]]</span>
+    <span class="n">fov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;dread&quot;</span><span class="p">]],</span>
+            <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;dphase&quot;</span><span class="p">]],</span>
+            <span class="n">dthick</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">my</span><span class="p">[</span><span class="n">sos</span><span class="p">]</span> <span class="k">if</span> <span class="n">sos</span> <span class="ow">in</span> <span class="n">my</span> <span class="k">else</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">lpart</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;sKSpace&quot;</span><span class="p">,</span> <span class="s2">&quot;lPartitions&quot;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;lbase&quot;</span><span class="p">]],</span>
+            <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;lphase&quot;</span><span class="p">]],</span>
+            <span class="n">my</span><span class="p">[</span><span class="n">lpart</span><span class="p">]</span> <span class="k">if</span> <span class="n">my</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="s2">&quot;ucdim&quot;</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">lpart</span> <span class="ow">in</span> <span class="n">my</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="o">*</span><span class="p">(</span><span class="n">fov</span> <span class="o">/</span> <span class="n">res</span><span class="p">),</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">twixObj</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">slicePos</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">fovz</span> <span class="o">=</span> <span class="n">fov</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">my</span><span class="p">[</span><span class="n">sos</span><span class="p">]</span> <span class="o">*</span> <span class="n">dthick</span> <span class="k">if</span> <span class="n">sos</span> <span class="ow">in</span> <span class="n">my</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">fov</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">fov</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">fovz</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">rot</span> <span class="o">@</span> <span class="n">center</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">offset</span>
+    <span class="k">if</span> <span class="n">det</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rot</span> <span class="o">@</span> <span class="n">center</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">full_mat</span> <span class="o">=</span> <span class="n">rot</span> <span class="o">@</span> <span class="n">scale</span>
+    <span class="n">full_mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+
+    <span class="k">return</span> <span class="n">full_mat</span></div>
 
 
 

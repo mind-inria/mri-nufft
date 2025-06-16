@@ -28,7 +28,7 @@
       :nosignatures:
    
       MRInfft
-      RawPyNFFT
+      RawPyNFFT3
    
    
 

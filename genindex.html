@@ -245,7 +245,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -486,6 +486,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -793,7 +794,7 @@ document.write(`
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.adj_op">(mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT method)</a>
 </li>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op">(mrinufft.operators.interfaces.nfft.RawPyNFFT method)</a>
+        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3.adj_op">(mrinufft.operators.interfaces.nfft.RawPyNFFT3 method)</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html#mrinufft.operators.interfaces.nudft_numpy.RawNDFT.adj_op">(mrinufft.operators.interfaces.nudft_numpy.RawNDFT method)</a>
 </li>
@@ -1718,6 +1719,8 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.ndim">ndim (mrinufft.operators.base.FourierOperatorBase property)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft.io.utils.nifti_affine.html#mrinufft.io.utils.nifti_affine">nifti_affine() (in module mrinufft.io.utils)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.norm_factor">norm_factor (mrinufft.operators.base.FourierOperatorBase property)</a>
 
       <ul>
@@ -1769,7 +1772,7 @@ document.write(`
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.op">(mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT method)</a>
 </li>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT.op">(mrinufft.operators.interfaces.nfft.RawPyNFFT method)</a>
+        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3.op">(mrinufft.operators.interfaces.nfft.RawPyNFFT3 method)</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html#mrinufft.operators.interfaces.nudft_numpy.RawNDFT.op">(mrinufft.operators.interfaces.nudft_numpy.RawNDFT method)</a>
 </li>
@@ -1815,6 +1818,10 @@ document.write(`
       <li><a href="generated/_autosummary/mrinufft.density.nufft_based.pipe.html#mrinufft.density.nufft_based.pipe">pipe() (in module mrinufft.density.nufft_based)</a>
 
       <ul>
+        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.pipe">(mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT class method)</a>
+</li>
+        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.finufft.MRIfinufft.html#mrinufft.operators.interfaces.finufft.MRIfinufft.pipe">(mrinufft.operators.interfaces.finufft.MRIfinufft class method)</a>
+</li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.pipe">(mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT class method)</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.html#mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.pipe">(mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT class method)</a>
@@ -1856,7 +1863,7 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html#mrinufft.operators.interfaces.nudft_numpy.RawNDFT">RawNDFT (class in mrinufft.operators.interfaces.nudft_numpy)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT">RawPyNFFT (class in mrinufft.operators.interfaces.nfft)</a>
+      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3">RawPyNFFT3 (class in mrinufft.operators.interfaces.nfft)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.html#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT">RawPyNUFFT (class in mrinufft.operators.interfaces.pynufft_cpu)</a>
 </li>

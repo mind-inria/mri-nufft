@@ -245,7 +245,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -486,6 +486,7 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -699,9 +700,9 @@ document.write(`
 
 <span class="n">PYNFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">pynfft</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pyNFFT3</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pynfft3</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">PYNUFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">PYNFFT_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="get_fourier_matrix">
@@ -720,35 +721,34 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="RawPyNFFT">
-<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">RawPyNFFT</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the NUDFT using numpy.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RawPyNFFT3">
+<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawPyNFFT3</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Binding for the pyNFFT3 package.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">samples</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span> <span class="o">=</span> <span class="n">pynfft</span><span class="o">.</span><span class="n">NFFT</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span> <span class="o">=</span> <span class="n">pynfft3</span><span class="o">.</span><span class="n">NFFT</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">),</span> <span class="n">M</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">precompute</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
 
-<div class="viewcode-block" id="RawPyNFFT.op">
-<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT.op">[docs]</a>
+<div class="viewcode-block" id="RawPyNFFT3.op">
+<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3.op">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the forward NUDFT.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">f_hat</span> <span class="o">=</span> <span class="n">image</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">trafo</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">fhat</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">trafo</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">coeffs</span></div>
 
 
-<div class="viewcode-block" id="RawPyNFFT.adj_op">
-<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op">[docs]</a>
+<div class="viewcode-block" id="RawPyNFFT3.adj_op">
+<a class="viewcode-back" href="../../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html#mrinufft.operators.interfaces.nfft.RawPyNFFT3.adj_op">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the adjoint NUDFT.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">coeffs</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">adjoint</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">adjoint</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">fhat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">image</span></div>
 </div>
 
@@ -778,7 +778,7 @@ document.write(`
             <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
             <span class="n">raw_op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># is set later, after normalizing samples.</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span> <span class="o">=</span> <span class="n">RawPyNFFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_op</span> <span class="o">=</span> <span class="n">RawPyNFFT3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span></div>
 
 </pre></div>
 

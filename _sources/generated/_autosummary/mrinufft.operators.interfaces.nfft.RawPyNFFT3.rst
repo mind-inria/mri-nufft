@@ -1,9 +1,9 @@
-RawPyNFFT
-=========
+RawPyNFFT3
+==========
 
 .. currentmodule:: mrinufft.operators.interfaces.nfft
 
-.. autoclass:: RawPyNFFT
+.. autoclass:: RawPyNFFT3
    :members:
    :private-members:
    :show-inheritance:
@@ -16,9 +16,9 @@ RawPyNFFT
    .. autosummary::
       :nosignatures:
    
-      ~RawPyNFFT.__init__
-      ~RawPyNFFT.adj_op
-      ~RawPyNFFT.op
+      ~RawPyNFFT3.__init__
+      ~RawPyNFFT3.adj_op
+      ~RawPyNFFT3.op
    
    
 

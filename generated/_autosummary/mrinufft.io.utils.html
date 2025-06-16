@@ -246,7 +246,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT.html">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -487,6 +487,7 @@
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -765,10 +766,13 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html#mrinufft.io.utils.add_phase_to_kspace_with_shifts" title="mrinufft.io.utils.add_phase_to_kspace_with_shifts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_phase_to_kspace_with_shifts</span></code></a></p></td>
 <td><p>Add phase shifts to k-space data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html#mrinufft.io.utils.remove_extra_kspace_samples" title="mrinufft.io.utils.remove_extra_kspace_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_extra_kspace_samples</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.io.utils.nifti_affine.html#mrinufft.io.utils.nifti_affine" title="mrinufft.io.utils.nifti_affine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nifti_affine</span></code></a></p></td>
+<td><p>Calculate the affine transformation matrix from Siemens Twix object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html#mrinufft.io.utils.remove_extra_kspace_samples" title="mrinufft.io.utils.remove_extra_kspace_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_extra_kspace_samples</span></code></a></p></td>
 <td><p>Remove extra samples from k-space data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html#mrinufft.io.utils.siemens_quat_to_rot_mat" title="mrinufft.io.utils.siemens_quat_to_rot_mat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">siemens_quat_to_rot_mat</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html#mrinufft.io.utils.siemens_quat_to_rot_mat" title="mrinufft.io.utils.siemens_quat_to_rot_mat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">siemens_quat_to_rot_mat</span></code></a></p></td>
 <td><p>Calculate the rotation matrix from Siemens Twix quaternion.</p></td>
 </tr>
 </tbody>

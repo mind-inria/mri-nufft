@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>RawPyNFFT &#8212; MRI-nufft Documentation</title>
+    <title>nifti_affine &#8212; MRI-nufft Documentation</title>
   
   
   
@@ -47,12 +47,12 @@
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/_autosummary/mrinufft.io.utils.nifti_affine';</script>
     <link rel="icon" href="../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="interfaces.nudft_numpy" href="mrinufft.operators.interfaces.nudft_numpy.html" />
-    <link rel="prev" title="MRInfft" href="mrinufft.operators.interfaces.nfft.MRInfft.html" />
+    <link rel="next" title="remove_extra_kspace_samples" href="mrinufft.io.utils.remove_extra_kspace_samples.html" />
+    <link rel="prev" title="add_phase_to_kspace_with_shifts" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -208,7 +208,7 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="mrinufft.operators.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.operators</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.operators.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.operators</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.autodiff.html"><code class="docutils literal notranslate"><span class="pre">operators.autodiff</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.autodiff.MRINufftAutoGrad.html">MRINufftAutoGrad</a></li>
 </ul>
@@ -221,7 +221,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="mrinufft.operators.interfaces.html"><code class="docutils literal notranslate"><span class="pre">operators.interfaces</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.html"><code class="docutils literal notranslate"><span class="pre">operators.interfaces</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.bart.html"><code class="docutils literal notranslate"><span class="pre">interfaces.bart</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.bart.MRIBartNUFFT.html">MRIBartNUFFT</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.bart.RawBartNUFFT.html">RawBartNUFFT</a></li>
@@ -243,10 +243,10 @@
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html">RawGpuNUFFT</a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 current active has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
-<li class="toctree-l4 current active"><a class="current reference internal" href="#">RawPyNFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -468,7 +468,7 @@
 </details></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.io.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.io</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="mrinufft.io.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.io</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.cfl.html"><code class="docutils literal notranslate"><span class="pre">io.cfl</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.cfl.cfl2traj.html">cfl2traj</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.cfl.traj2cfl.html">traj2cfl</a></li>
@@ -485,8 +485,9 @@
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.siemens.read_siemens_rawdat.html">read_siemens_rawdat</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">nifti_affine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
 </ul>
@@ -613,7 +614,7 @@
       
       
       
-      <li><a href="https://github.com/mind-inria/mri-nufft/edit/main/generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.rst" target="_blank"
+      <li><a href="https://github.com/mind-inria/mri-nufft/edit/main/generated/_autosummary/mrinufft.io.utils.nifti_affine.rst" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -630,7 +631,7 @@
       
       
       
-      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2Fgenerated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2Fgenerated/_autosummary/mrinufft.io.utils.nifti_affine.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -660,7 +661,7 @@
       
       
       
-      <li><a href="../../_sources/generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT.rst" target="_blank"
+      <li><a href="../../_sources/generated/_autosummary/mrinufft.io.utils.nifti_affine.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -744,7 +745,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>RawPyNFFT</h1>
+    <h1>nifti_affine</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -754,11 +755,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.op"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT.op()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT.adj_op()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.io.utils.nifti_affine"><code class="docutils literal notranslate"><span class="pre">nifti_affine()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -770,43 +767,27 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="rawpynfft">
-<h1>RawPyNFFT<a class="headerlink" href="#rawpynfft" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="mrinufft.operators.interfaces.nfft.RawPyNFFT">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mrinufft.operators.interfaces.nfft.</span></span><span class="sig-name descname"><span class="pre">RawPyNFFT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/nfft.html#RawPyNFFT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Implementation of the NUDFT using numpy.</p>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op" title="mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adj_op</span></code></a></p></td>
-<td><p>Compute the adjoint NUDFT.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.op" title="mrinufft.operators.interfaces.nfft.RawPyNFFT.op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">op</span></code></a></p></td>
-<td><p>Compute the forward NUDFT.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="mrinufft.operators.interfaces.nfft.RawPyNFFT.op">
-<span class="sig-name descname"><span class="pre">op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/nfft.html#RawPyNFFT.op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.op" title="Link to this definition">#</a></dt>
-<dd><p>Compute the forward NUDFT.</p>
+  <section id="nifti-affine">
+<h1>nifti_affine<a class="headerlink" href="#nifti-affine" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="mrinufft.io.utils.nifti_affine">
+<span class="sig-prename descclassname"><span class="pre">mrinufft.io.utils.</span></span><span class="sig-name descname"><span class="pre">nifti_affine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">twixObj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/io/utils.html#nifti_affine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.io.utils.nifti_affine" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the affine transformation matrix from Siemens Twix object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>twixObj</strong> (<em>twixObj</em>) – The twix object returned by mapVBVD.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The affine transformation matrix which is a 4x4 matrix.
+This can be passed as input to <cite>affine</cite> parameter in <cite>nibabel</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op">
-<span class="sig-name descname"><span class="pre">adj_op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/nfft.html#RawPyNFFT.adj_op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op" title="Link to this definition">#</a></dt>
-<dd><p>Compute the adjoint NUDFT.</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
+<span class="target" id="sphx-glr-backref-mrinufft-io-utils-nifti-affine"></span></section>
 
 
                 </article>
@@ -820,20 +801,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mrinufft.operators.interfaces.nfft.MRInfft.html"
+       href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">MRInfft</p>
+        <p class="prev-next-title">add_phase_to_kspace_with_shifts</p>
       </div>
     </a>
     <a class="right-next"
-       href="mrinufft.operators.interfaces.nudft_numpy.html"
+       href="mrinufft.io.utils.remove_extra_kspace_samples.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></p>
+        <p class="prev-next-title">remove_extra_kspace_samples</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -853,11 +834,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.op"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT.op()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.nfft.RawPyNFFT.adj_op"><code class="docutils literal notranslate"><span class="pre">RawPyNFFT.adj_op()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.io.utils.nifti_affine"><code class="docutils literal notranslate"><span class="pre">nifti_affine()</span></code></a></li>
 </ul>
   </nav></div>
 
