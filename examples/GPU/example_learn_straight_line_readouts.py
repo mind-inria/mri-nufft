@@ -28,6 +28,7 @@ The image resolution is kept small to reduce computation time.
 # %%
 # Imports
 # -------
+import os
 import time
 import joblib
 
@@ -40,6 +41,7 @@ from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 # %%
 # Setup a simple class to learn trajectory
@@ -74,7 +76,7 @@ class Model(torch.nn.Module):
             ),
             requires_grad=True,
         )
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
             )

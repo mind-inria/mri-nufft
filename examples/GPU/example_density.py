@@ -20,6 +20,7 @@ of the operator roughly equal to 1.
 # %%
 # Imports
 # -------
+import os
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,13 +33,15 @@ from mrinufft.trajectories.display import display_2D_trajectory
 # Create sample data
 # ------------------
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "finufft")
+
 mri_2D = np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32)
 
 print(mri_2D.shape)
 
 traj = initialize_2D_radial(192, 192).astype(np.float32)
 
-nufft = get_operator("finufft")(traj, mri_2D.shape, density=False)
+nufft = get_operator(BACKEND)(traj, mri_2D.shape, density=False)
 kspace = nufft.op(mri_2D)
 adjoint = nufft.adj_op(kspace)
 
@@ -68,7 +71,7 @@ axs[2].imshow(abs(adjoint))
 # %%
 voronoi_weights = get_density("voronoi", traj)
 
-nufft_voronoi = get_operator("finufft")(
+nufft_voronoi = get_operator(BACKEND)(
     traj, shape=mri_2D.shape, density=voronoi_weights
 )
 adjoint_voronoi = nufft_voronoi.adj_op(kspace)
@@ -97,7 +100,7 @@ axs[2].set_title("Voronoi density compensation")
 # %%
 cell_count_weights = get_density("cell_count", traj, shape=mri_2D.shape, osf=2.0)
 
-nufft_cell_count = get_operator("finufft")(
+nufft_cell_count = get_operator(BACKEND)(
     traj, shape=mri_2D.shape, density=cell_count_weights, upsampfac=2.0
 )
 adjoint_cell_count = nufft_cell_count.adj_op(kspace)
@@ -120,7 +123,7 @@ axs[2].set_title("cell_count density compensation")
 # %%
 flat_traj = traj.reshape(-1, 2)
 weights = np.sqrt(np.sum(flat_traj**2, axis=1))
-nufft = get_operator("finufft")(traj, shape=mri_2D.shape, density=weights)
+nufft = get_operator(BACKEND)(traj, shape=mri_2D.shape, density=weights)
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
@@ -142,11 +145,11 @@ axs[2].set_title("manual density compensation")
 #    If this method is widely used in the literature, there exists no convergence guarantees for it.
 #
 # .. note::
-#    The Pipe method is currently only implemented for gpuNUFFT and cufinufft backend.
+#    The Pipe method is currently only implemented for gpuNUFFT, finufft, and cufinufft backends.
 
 # %%
 flat_traj = traj.reshape(-1, 2)
-nufft = get_operator("gpunufft")(
+nufft = get_operator(BACKEND)(
     traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
 )
 adjoint_manual = nufft.adj_op(kspace)
