@@ -1,11 +1,13 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, Optional
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
+import inspect
+from functools import wraps
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import (
@@ -13,9 +15,13 @@ from .utils import (
     VDSorder,
     VDSpdf,
     initialize_tilt,
+    DEFAULT_RESOLUTION,
     DEFAULT_GMAX,
     DEFAULT_RASTER_TIME,
     DEFAULT_SMAX,
+    unnormalize_trajectory,
+    convert_gradients_to_trajectory,
+    convert_trajectory_to_gradients,
     Gammas,
 )
 
@@ -425,10 +431,21 @@ def get_gradient_times_to_travel(
     n_plateau: The timing values for the plateau phase.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
     """
+    def _solve_gi_float(locs, area_needed):
+        """Solve for gi such that ramps are as fast as possible"""
+        delta_g = ge[locs] - gs[locs]
+        if np.abs(delta_g) < 1e-12:
+            return gs
+        numerator = ge[locs]**2 - gs[locs]**2 + 2 * area_needed[locs] * smax * raster_time
+        denominator = 2 * delta_g
+        gi = numerator / denominator
+        
+        return gi
+
     area_needed = (ke - ks) / gamma / raster_time
 
     # Direct ramp steps
-    n_direct = np.ceil((ge - gs) / smax / raster_time).astype(int)
+    n_direct = np.ceil(abs(ge - gs) / smax / raster_time).astype(int)
     area_direct = 0.5 * n_direct * (ge + gs)
 
     i = np.sign(area_direct - area_needed)
@@ -445,11 +462,22 @@ def get_gradient_times_to_travel(
 
     # Condition: ramp-only sufficient
     ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
+    # Re-Calculate the n_ramp_up and n_ramp_down to make it time efficient.
+    gi[ramp_only_mask] = (
+        0.5 * raster_time * smax * (
+            2 * area_needed[ramp_only_mask] + ge[ramp_only_mask] - gs[ramp_only_mask]
+        ) / 
+        (ge[ramp_only_mask] - gs[ramp_only_mask] + np.finfo(gi.dtype).eps)
+    )
+    n_ramp_down[ramp_only_mask] = np.ceil(np.abs(gi[ramp_only_mask] - gs[ramp_only_mask]) / (smax * raster_time)).astype(int)
+    n_ramp_up[ramp_only_mask] = np.ceil(np.abs(ge[ramp_only_mask] - gi[ramp_only_mask]) / (smax * raster_time)).astype(int)
+    # Re-Calculate the updated gi based on new ramp down and ramp up values
     gi[ramp_only_mask] = (
         2 * area_needed[ramp_only_mask]
         - (n_ramp_down[ramp_only_mask] + 1) * gs[ramp_only_mask]
         - (n_ramp_up[ramp_only_mask] - 1) * ge[ramp_only_mask]
     ) / (n_ramp_down[ramp_only_mask] + n_ramp_up[ramp_only_mask])
+    gi[np.isnan(gi)] = gs[np.isnan(gi)]
 
     # Else: need plateau
     plateau_mask = ~ramp_only_mask
@@ -556,7 +584,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             smax=smax,
         )
         N = (
-            np.max(np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=0)) + 2
+            np.max(np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=-1)) + 2
         )  # Extra 2 buffer samples
 
     area_needed = (ke - ks) / gamma / raster_time
@@ -1207,3 +1235,59 @@ def stack_random(
             new_trajectory[i, :, :, 2] = loc
 
     return new_trajectory.reshape(-1, Ns, 3)
+
+
+def add_slew_ramp(
+    func: Optional[Callable] = None,
+    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gamma: float = Gammas.Hydrogen,
+    smax: float = DEFAULT_SMAX,
+) -> Callable:
+    def decorator(trajectory_func):
+        sig = inspect.signature(trajectory_func)
+        @wraps(trajectory_func)
+        def wrapped(*args, **kwargs) -> NDArray:
+            # This allows users to also call the function directly.
+            _smax = kwargs.pop("smax", smax)
+            _resolution = kwargs.pop("resolution", resolution)
+            _raster_time = kwargs.pop("raster_time", raster_time)
+            _gamma = kwargs.pop("gamma", gamma)
+            # Bind all args (positional and keyword)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            in_out = bound.arguments.get("in_out", False)
+            traj = trajectory_func(*args, **kwargs)
+            if in_out:
+                # Send the trajectory as is for in-out trajectories
+                return traj
+            unnormalized_traj = unnormalize_trajectory(traj, resolution=_resolution)
+            gradients, initial_positions = convert_trajectory_to_gradients(
+                traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma
+            )
+            gradients_to_reach = gradients[:, 1]
+            # Calculate the number of time steps based on the area needed
+            ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+                ke=unnormalized_traj[:, 1],
+                ge=gradients_to_reach,
+                gamma=_gamma,
+                raster_time=_raster_time,
+                smax=_smax,
+            )[:, 1:-1]
+            # Update the Ns of the trajectory to ensure we still give same Ns as users expect
+            bound.arguments["Ns"] -= ramp_up_gradients.shape[1]
+            new_traj = trajectory_func(**bound.arguments)
+            ramp_up_traj = convert_gradients_to_trajectory(
+                gradients=ramp_up_gradients,
+                initial_positions=initial_positions,
+                resolution=_resolution,
+                raster_time=_raster_time,
+                gamma=_gamma,
+            )
+            return np.hstack([ramp_up_traj, new_traj[:, 1:]])
+        return wrapped
+
+    if func is not None and callable(func):
+        return decorator(func)
+
+    return decorator

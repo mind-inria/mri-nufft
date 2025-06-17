@@ -17,7 +17,6 @@ from mrinufft.trajectories.utils import (
     Gammas,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
-    unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time

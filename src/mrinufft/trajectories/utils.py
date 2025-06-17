@@ -1,8 +1,10 @@
 """Utility functions in general."""
 
+import inspect
+from functools import wraps
 from enum import Enum, EnumMeta
 from numbers import Real
-from typing import Any, Literal
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray

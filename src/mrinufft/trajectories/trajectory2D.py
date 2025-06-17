@@ -9,14 +9,14 @@ from scipy.interpolate import CubicSpline
 
 from .gradients import patch_center_anomaly
 from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
-from .tools import rotate
+from .tools import rotate, add_slew_ramp
 from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 
 #####################
 # CIRCULAR PATTERNS #
 #####################
 
-
+@add_slew_ramp
 def initialize_2D_radial(
     Nc: int, Ns: int, tilt: str | float = "uniform", in_out: bool = False
 ) -> NDArray:
