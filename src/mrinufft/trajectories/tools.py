@@ -431,18 +431,9 @@ def get_gradient_times_to_travel(
     n_plateau: The timing values for the plateau phase.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
     """
-    def _solve_gi_float(locs, area_needed):
-        """Solve for gi such that ramps are as fast as possible"""
-        delta_g = ge[locs] - gs[locs]
-        if np.abs(delta_g) < 1e-12:
-            return gs
-        numerator = ge[locs]**2 - gs[locs]**2 + 2 * area_needed[locs] * smax * raster_time
-        denominator = 2 * delta_g
-        gi = numerator / denominator
-        
-        return gi
-
     area_needed = (ke - ks) / gamma / raster_time
+
+    n_direct = int(2 * abs(area_needed / (gs + ge)))
 
     # Direct ramp steps
     n_direct = np.ceil(abs(ge - gs) / smax / raster_time).astype(int)
@@ -1268,7 +1259,7 @@ def add_slew_ramp(
             gradients_to_reach = gradients[:, 1]
             # Calculate the number of time steps based on the area needed
             ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-                ke=unnormalized_traj[:, 1],
+                ke=unnormalized_traj[:, 10],
                 ge=gradients_to_reach,
                 gamma=_gamma,
                 raster_time=_raster_time,
@@ -1284,7 +1275,7 @@ def add_slew_ramp(
                 raster_time=_raster_time,
                 gamma=_gamma,
             )
-            return np.hstack([ramp_up_traj, new_traj[:, 1:]])
+            return np.hstack([ramp_up_traj, new_traj[:, 10:]])
         return wrapped
 
     if func is not None and callable(func):
