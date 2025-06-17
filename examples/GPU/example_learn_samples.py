@@ -26,6 +26,7 @@ where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_
 #
 #    !pip install mri-nufft[gpunufft] scikit-image
 
+import os
 import time
 import joblib
 
@@ -46,6 +47,7 @@ from mrinufft.trajectories import initialize_2D_radial
 #     While we are only learning the NUFFT operator, we still need the gradient ``wrt_data=True`` to be setup in ``get_operator`` to have all the gradients computed correctly.
 #     See [Projector]_ for more details.
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory):
@@ -54,7 +56,7 @@ class Model(torch.nn.Module):
             data=torch.Tensor(inital_trajectory),
             requires_grad=True,
         )
-        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             self.trajectory.detach().cpu().numpy(),
             shape=(256, 256),
             density=True,

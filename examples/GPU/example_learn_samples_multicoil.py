@@ -37,6 +37,7 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 # -------
 import time
 import joblib
+import os
 
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
@@ -58,6 +59,8 @@ from sigpy.mri import birdcage_maps
 #     See [Projector]_ for more details.
 
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
+
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
         super(Model, self).__init__()
@@ -68,14 +71,14 @@ class Model(torch.nn.Module):
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
         # A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.
         # The trajectory is scaled by 2*pi for cufinufft backend.
-        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             sample_points * 2 * np.pi,
             shape=img_size,
             n_coils=n_coils,
             squeeze_dims=False,
         )
         # A simple density compensated adjoint SENSE operator with sensitivity maps `smaps`.
-        self.sense_op = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.sense_op = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             density=True,

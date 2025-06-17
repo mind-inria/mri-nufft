@@ -32,6 +32,9 @@ import mrinufft
 from brainweb_dl import get_mri
 from mrinufft.density import voronoi
 from matplotlib import pyplot as plt
+import os
+
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 # %%
 # Setup Inputs
@@ -41,7 +44,7 @@ image = np.flipud(image[90])
 
 # %%
 # Setup the NUFFT operator
-NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
+NufftOperator = mrinufft.get_operator(BACKEND)  # get the operator
 
 nufft = NufftOperator(
     samples_loc,
