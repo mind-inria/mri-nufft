@@ -455,13 +455,12 @@ def get_gradient_times_to_travel(
     n_direct: The timing values in case we can do direct gradients.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
     """
-    ks, ke, gs, ge = _set_defaults_gradient_calc(ke, ks, gs, ge)
+    ke, ks, gs, ge = _set_defaults_gradient_calc(ke, ks, gs, ge)
     area_needed = (ke - ks) / gamma / raster_time
 
     # Number of steps for direct ramp.
-    n_direct = np.ceil(2 * area_needed / (gs + ge)) - 1
-    n_direct[np.isnan(n_direct)] = 0
-    n_direct = n_direct.astype('int')
+    n_direct = np.ceil(2 * area_needed / (gs + ge + np.finfo(np.float32).eps)).astype('int')
+    n_direct[n_direct>0] -= 1
     # Minimum number of steps + 2  (as buffer)
     n_direct_min = np.ceil(abs(ge - gs) / smax / raster_time).astype(int) + 2
     direct_possible_mask = n_direct > n_direct_min
@@ -516,8 +515,11 @@ def get_gradient_times_to_travel(
         + 2 * n_plateau[plateau_mask]
     )
     # Update n_ramp when direct is possible. We still need gi to ensure we satisfy area constraints.
-    gi_view = gi[direct_possible_mask].copy()
+    n_ramps_total = (n_ramp_down + n_ramp_up + n_plateau)
+    direct_is_faster_mask = n_direct < n_ramps_total
+    direct_possible_mask = direct_possible_mask & direct_is_faster_mask
     n_direct = n_direct[direct_possible_mask]
+    gi_view = gi[direct_possible_mask].copy()
     direct_ramp_down = n_direct // 2
     direct_ramp_up = n_direct - direct_ramp_down
     gi_view = (
@@ -1258,7 +1260,7 @@ def stack_random(
 
 def add_slew_ramp(
     func: Optional[Callable] = None,
-    ramp_to_index: int = 10,
+    ramp_to_index: int = 5,
     resolution: float | NDArray = DEFAULT_RESOLUTION,
     raster_time: float = DEFAULT_RASTER_TIME,
     gamma: float = Gammas.Hydrogen,
@@ -1283,13 +1285,13 @@ def add_slew_ramp(
             if in_out:
                 # Send the trajectory as is for in-out trajectories
                 return traj
-            # Calculate
+            
             unnormalized_traj = unnormalize_trajectory(traj, resolution=_resolution)
             gradients, initial_positions = convert_trajectory_to_gradients(
                 traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma
             )
             gradients_to_reach = gradients[:, _ramp_to_index]
-            # Calculate the number of time steps based on the area needed
+            # Calculate the number of time steps for ramps
             n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
                 ke=unnormalized_traj[:, _ramp_to_index],
                 ge=gradients_to_reach,
@@ -1300,7 +1302,7 @@ def add_slew_ramp(
             # Update the Ns of the trajectory to ensure we still give same Ns as users expect
             # We use extra 2 points as buffer.
             n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
-            bound.arguments["Ns"] -= n_slew_ramp
+            bound.arguments["Ns"] -= n_slew_ramp - _ramp_to_index
             new_traj = trajectory_func(**bound.arguments)
 
             # Re-calculate the gradients
@@ -1312,11 +1314,11 @@ def add_slew_ramp(
             ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
                 ke=unnormalized_traj[:, _ramp_to_index],
                 ge=gradients_to_reach,
-                N=n_slew_ramp+2,
+                N=n_slew_ramp,
                 gamma=_gamma,
                 raster_time=_raster_time,
                 smax=_smax,
-            )[:, 1:-1]
+            )[:, :-1]
             ramp_up_traj = convert_gradients_to_trajectory(
                 gradients=ramp_up_gradients,
                 initial_positions=initial_positions,
