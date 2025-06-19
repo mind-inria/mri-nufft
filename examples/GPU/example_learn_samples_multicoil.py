@@ -38,6 +38,7 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 import time
 import os
 import sys
+
 print(sys.path)
 print("Using backend:", os.environ.get("MRINUFFT_BACKEND"))
 import joblib
@@ -64,6 +65,7 @@ from sigpy.mri import birdcage_maps
 
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
+
 
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
@@ -147,7 +149,9 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
 # Setup model and optimizer
 # -------------------------
 n_coils = 6
-init_traj = initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2).astype(np.float32)
+init_traj = (
+    initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2).astype(np.float32)
+)
 model = Model(init_traj, n_coils=n_coils, img_size=(256, 256))
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(

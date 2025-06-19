@@ -98,13 +98,20 @@ def get_gridded_trajectory(
         gridder = get_operator(backend)(
             trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
         )
+
         def _gridder_adj_op(x):
             return gridder.raw_op.adj_op(x, None, True)
+
     else:
         gridder = get_operator(backend)(
-            trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf,
-            spreadinterponly=1, spread_kerevalmeth=0,
+            trajectory,
+            [sh * osf for sh in shape],
+            density=dcomp,
+            upsampfac=osf,
+            spreadinterponly=1,
+            spread_kerevalmeth=0,
         )
+
         def _gridder_adj_op(x):
             return gridder.adj_op(x)
 
@@ -132,7 +139,7 @@ def get_gridded_trajectory(
             data[
                 np.linalg.norm(
                     np.meshgrid(
-                        *[np.linspace(-1, 1, sh*osf) for sh in shape], indexing="ij"
+                        *[np.linspace(-1, 1, sh * osf) for sh in shape], indexing="ij"
                     ),
                     axis=0,
                 )
@@ -154,7 +161,5 @@ def get_gridded_trajectory(
         else:
             slews, _ = convert_gradients_to_slew_rates(gradients, DEFAULT_RASTER_TIME)
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
-        data = grid_op.raw_op.adj_op(
-            np.linalg.norm(data, axis=-1).flatten(), None, True
-        ) / (gridded_ones + np.finfo(np.float32).eps)
+        data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten())/ (gridded_ones + np.finfo(np.float32).eps)
     return np.squeeze(np.abs(data))
