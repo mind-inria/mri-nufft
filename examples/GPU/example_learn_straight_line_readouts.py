@@ -62,8 +62,8 @@ class Model(torch.nn.Module):
         self.central_points = torch.nn.Parameter(
             data=torch.stack(
                 torch.meshgrid(
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
+                    torch.linspace(-edge_center, edge_center, num_cart_points, dtype=torch.float32),
+                    torch.linspace(-edge_center, edge_center, num_cart_points, dtype=torch.float32),
                     indexing="ij",
                 ),
                 axis=-1,
@@ -72,14 +72,14 @@ class Model(torch.nn.Module):
         )
         self.non_center_points = torch.nn.Parameter(
             data=torch.Tensor(
-                np.random.random((num_shots - self.central_points.shape[0], 2)) - 0.5
+                np.random.random((num_shots - self.central_points.shape[0], 2)).astype(np.float32) - 0.5
             ),
             requires_grad=True,
         )
         self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
-            )
+            ).astype(np.float32)
             - 0.5,
             shape=img_size,
             density=True,

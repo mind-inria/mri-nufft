@@ -167,7 +167,7 @@ print(nufft.density)
 
 # %%
 flat_traj = traj.reshape(-1, 2)
-nufft = get_operator("cufinufft")(
+nufft = get_operator(BACKEND)(
     traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
 )
 adjoint_manual = nufft.adj_op(kspace)

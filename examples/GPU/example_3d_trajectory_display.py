@@ -60,6 +60,7 @@ def create_grid(grid_type, trajectories, traj_params, **kwargs):
             grid_type=grid_type,
             traj_params=traj_params,
             backend=BACKEND,
+            osf=2,
             **kwargs,
         )
         plot_slices(axs[:, i], grid, title=name)
