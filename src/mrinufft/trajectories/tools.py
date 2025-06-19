@@ -612,16 +612,34 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     # Intermediate gradient values. This is value of plateau or triangle gradients
     gi = np.zeros_like(ks, dtype=np.float32)
 
+    # Assume direct solution first
+    n_ramp_up = np.ones(gs.shape , dtype=int) * N // 2
+    n_ramp_down = N - n_ramp_up
+    gi = (
+        2 * area_needed
+        - (n_ramp_down + 1) * gs
+        - (n_ramp_up - 1) * ge
+    ) / (n_ramp_down + n_ramp_up)
+    max_slew_needed = raster_time * np.max(
+        [abs(gi - gs)/n_ramp_down, abs(ge-gi)/n_ramp_up],
+        axis=0
+    )
+    # FIXME: Becareful of rotating FOV boxes.
+    gmax_not_met = np.abs(gi) > gmax
+    smax_not_met = max_slew_needed > smax
+    direct_not_possible = gmax_not_met | smax_not_met
+
     # Get the area for direct and estimate n_ramps
     area_direct = 0.5 * N * (ge + gs)
     i = np.sign(area_direct - area_needed)
 
-    n_ramp_down = np.ceil((gmax + i * gs) / smax / raster_time).astype(int)
-    n_ramp_up = np.ceil((gmax + i * ge) / smax / raster_time).astype(int)
-    n_plateau = N - n_ramp_up - n_ramp_down
+    n_ramp_down[direct_not_possible] = np.ceil((gmax + i[direct_not_possible] * gs[direct_not_possible]) / smax / raster_time).astype(int)
+    n_ramp_up[direct_not_possible] = np.ceil((gmax + i[direct_not_possible] * ge[direct_not_possible]) / smax / raster_time).astype(int)
+    n_plateau = np.zeros_like(n_ramp_down)
+    n_plateau[direct_not_possible] = N - n_ramp_up[direct_not_possible] - n_ramp_down[direct_not_possible]
 
     # Get intermediate gradients for triangle waveform, when n_plateau<0
-    no_trapazoid = n_plateau <= 0
+    no_trapazoid = (n_plateau <= 0) & direct_not_possible
     n_plateau[no_trapazoid] = 0
 
     # Initial approximate calculation of gi
@@ -1301,7 +1319,7 @@ def add_slew_ramp(
             )
             # Update the Ns of the trajectory to ensure we still give same Ns as users expect
             # We use extra 2 points as buffer.
-            n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
+            n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
             bound.arguments["Ns"] -= n_slew_ramp - _ramp_to_index
             new_traj = trajectory_func(**bound.arguments)
 
