@@ -17,7 +17,7 @@ from .maths import (
     Rz,
     generate_fibonacci_circle,
 )
-from .tools import conify, duplicate_along_axes, epify, precess, stack
+from .tools import conify, duplicate_along_axes, epify, precess, stack, add_slew_ramp
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_tilt
 
@@ -26,6 +26,7 @@ from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_ti
 ##############
 
 
+@add_slew_ramp
 def initialize_3D_phyllotaxis_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -75,6 +76,7 @@ def initialize_3D_phyllotaxis_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_golden_means_radial(
     Nc: int, Ns: int, in_out: bool = False
 ) -> NDArray:
@@ -129,6 +131,7 @@ def initialize_3D_golden_means_radial(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_wong_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -189,6 +192,7 @@ def initialize_3D_wong_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_park_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -242,6 +246,7 @@ def initialize_3D_park_radial(
 ############################
 
 
+@add_slew_ramp
 def initialize_3D_cones(
     Nc: int,
     Ns: int,
@@ -328,6 +333,7 @@ def initialize_3D_cones(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_floret(
     Nc: int,
     Ns: int,
@@ -525,6 +531,7 @@ def initialize_3D_wave_caipi(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_seiffert_spiral(
     Nc: int,
     Ns: int,
@@ -933,6 +940,7 @@ def initialize_3D_seiffert_shells(
 #####################
 
 
+@add_slew_ramp
 def initialize_3D_turbine(
     Nc: int,
     Ns_readouts: int,
@@ -1041,6 +1049,7 @@ def initialize_3D_turbine(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_repi(
     Nc: int,
     Ns_readouts: int,

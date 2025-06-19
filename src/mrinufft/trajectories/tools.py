@@ -405,7 +405,7 @@ def _set_defaults_gradient_calc(
         ks.shape == ke.shape == gs.shape == ge.shape
     ), "All input arrays must have shape (nb_shots, nb_dimension)"
     return ke, ks, gs, ge
-    
+
 
 def get_gradient_times_to_travel(
     ke: NDArray,
@@ -459,8 +459,10 @@ def get_gradient_times_to_travel(
     area_needed = (ke - ks) / gamma / raster_time
 
     # Number of steps for direct ramp.
-    n_direct = np.ceil(2 * area_needed / (gs + ge + np.finfo(np.float32).eps)).astype('int')
-    n_direct[n_direct>0] -= 1
+    n_direct = np.ceil(2 * area_needed / (gs + ge + np.finfo(np.float32).eps)).astype(
+        "int"
+    )
+    n_direct[n_direct > 0] -= 1
     # Minimum number of steps + 2  (as buffer)
     n_direct_min = np.ceil(abs(ge - gs) / smax / raster_time).astype(int) + 2
     direct_possible_mask = n_direct > n_direct_min
@@ -483,13 +485,18 @@ def get_gradient_times_to_travel(
     ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
     # Re-Calculate the n_ramp_up and n_ramp_down to make it time efficient.
     gi[ramp_only_mask] = (
-        0.5 * raster_time * smax * (
-            2 * area_needed[ramp_only_mask] + ge[ramp_only_mask] - gs[ramp_only_mask]
-        ) / 
-        (ge[ramp_only_mask] - gs[ramp_only_mask] + np.finfo(gi.dtype).eps)
+        0.5
+        * raster_time
+        * smax
+        * (2 * area_needed[ramp_only_mask] + ge[ramp_only_mask] - gs[ramp_only_mask])
+        / (ge[ramp_only_mask] - gs[ramp_only_mask] + np.finfo(gi.dtype).eps)
     )
-    n_ramp_down[ramp_only_mask] = np.ceil(np.abs(gi[ramp_only_mask] - gs[ramp_only_mask]) / (smax * raster_time)).astype(int)
-    n_ramp_up[ramp_only_mask] = np.ceil(np.abs(ge[ramp_only_mask] - gi[ramp_only_mask]) / (smax * raster_time)).astype(int)
+    n_ramp_down[ramp_only_mask] = np.ceil(
+        np.abs(gi[ramp_only_mask] - gs[ramp_only_mask]) / (smax * raster_time)
+    ).astype(int)
+    n_ramp_up[ramp_only_mask] = np.ceil(
+        np.abs(ge[ramp_only_mask] - gi[ramp_only_mask]) / (smax * raster_time)
+    ).astype(int)
     # Re-Calculate the updated gi based on new ramp down and ramp up values
     gi[ramp_only_mask] = (
         2 * area_needed[ramp_only_mask]
@@ -515,7 +522,7 @@ def get_gradient_times_to_travel(
         + 2 * n_plateau[plateau_mask]
     )
     # Update n_ramp when direct is possible. We still need gi to ensure we satisfy area constraints.
-    n_ramps_total = (n_ramp_down + n_ramp_up + n_plateau)
+    n_ramps_total = n_ramp_down + n_ramp_up + n_plateau
     direct_is_faster_mask = n_direct < n_ramps_total
     direct_possible_mask = direct_possible_mask & direct_is_faster_mask
     n_direct = n_direct[direct_possible_mask]
@@ -613,16 +620,13 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     gi = np.zeros_like(ks, dtype=np.float32)
 
     # Assume direct solution first
-    n_ramp_up = np.ones(gs.shape , dtype=int) * N // 2
+    n_ramp_up = np.ones(gs.shape, dtype=int) * N // 2
     n_ramp_down = N - n_ramp_up
-    gi = (
-        2 * area_needed
-        - (n_ramp_down + 1) * gs
-        - (n_ramp_up - 1) * ge
-    ) / (n_ramp_down + n_ramp_up)
+    gi = (2 * area_needed - (n_ramp_down + 1) * gs - (n_ramp_up - 1) * ge) / (
+        n_ramp_down + n_ramp_up
+    )
     max_slew_needed = raster_time * np.max(
-        [abs(gi - gs)/n_ramp_down, abs(ge-gi)/n_ramp_up],
-        axis=0
+        [abs(gi - gs) / n_ramp_down, abs(ge - gi) / n_ramp_up], axis=0
     )
     # FIXME: Becareful of rotating FOV boxes.
     gmax_not_met = np.abs(gi) > gmax
@@ -633,10 +637,16 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     area_direct = 0.5 * N * (ge + gs)
     i = np.sign(area_direct - area_needed)
 
-    n_ramp_down[direct_not_possible] = np.ceil((gmax + i[direct_not_possible] * gs[direct_not_possible]) / smax / raster_time).astype(int)
-    n_ramp_up[direct_not_possible] = np.ceil((gmax + i[direct_not_possible] * ge[direct_not_possible]) / smax / raster_time).astype(int)
+    n_ramp_down[direct_not_possible] = np.ceil(
+        (gmax + i[direct_not_possible] * gs[direct_not_possible]) / smax / raster_time
+    ).astype(int)
+    n_ramp_up[direct_not_possible] = np.ceil(
+        (gmax + i[direct_not_possible] * ge[direct_not_possible]) / smax / raster_time
+    ).astype(int)
     n_plateau = np.zeros_like(n_ramp_down)
-    n_plateau[direct_not_possible] = N - n_ramp_up[direct_not_possible] - n_ramp_down[direct_not_possible]
+    n_plateau[direct_not_possible] = (
+        N - n_ramp_up[direct_not_possible] - n_ramp_down[direct_not_possible]
+    )
 
     # Get intermediate gradients for triangle waveform, when n_plateau<0
     no_trapazoid = (n_plateau <= 0) & direct_not_possible
@@ -1286,9 +1296,10 @@ def add_slew_ramp(
 ) -> Callable:
     def decorator(trajectory_func):
         sig = inspect.signature(trajectory_func)
+
         @wraps(trajectory_func)
         def wrapped(*args, **kwargs) -> NDArray:
-            # This allows users to also call the trajectory function 
+            # This allows users to also call the trajectory function
             # directly giving these args.
             _smax = kwargs.pop("smax", smax)
             _resolution = kwargs.pop("resolution", resolution)
@@ -1303,7 +1314,7 @@ def add_slew_ramp(
             if in_out:
                 # Send the trajectory as is for in-out trajectories
                 return traj
-            
+
             unnormalized_traj = unnormalize_trajectory(traj, resolution=_resolution)
             gradients, initial_positions = convert_trajectory_to_gradients(
                 traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma
@@ -1345,6 +1356,7 @@ def add_slew_ramp(
                 gamma=_gamma,
             )
             return np.hstack([ramp_up_traj, new_traj[:, _ramp_to_index:]])
+
         return wrapped
 
     if func is not None and callable(func):
