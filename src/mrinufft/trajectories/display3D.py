@@ -89,27 +89,38 @@ def get_gridded_trajectory(
         The gridded trajectory of shape `shape`.
     """
     samples = trajectory.reshape(-1, trajectory.shape[-1])
-    dcomp = get_density("pipe")(trajectory, shape)
-    grid_op = get_operator(backend)(
-        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=1
+    dcomp = get_density("pipe")(trajectory, shape, backend=backend)
+    gridder = get_operator(backend)(
+        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
     )
-    gridded_ones = grid_op.raw_op.adj_op(np.ones(samples.shape[0]), None, True)
+    if backend == "gpunufft":
+        # For gpunufft, we need to interface directly with the raw operator
+        gridder = get_operator(backend)(
+            trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
+        )
+        def _gridder_adj_op(x):
+            return gridder.raw_op.adj_op(x, None, True)
+    else:
+        gridder = get_operator(backend)(
+            trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf,
+            spreadinterponly=1, spread_kerevalmeth=0,
+        )
+        def _gridder_adj_op(x):
+            return gridder.adj_op(x)
+
+    gridded_ones = _gridder_adj_op(np.ones(samples.shape[0]))
     if grid_type == "density":
         return np.abs(gridded_ones).squeeze()
     elif grid_type == "time":
-        data = grid_op.raw_op.adj_op(
-            np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],)),
-            None,
-            True,
+        data = _gridder_adj_op(
+            np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],))
         )
     elif grid_type == "inversion":
-        data = grid_op.raw_op.adj_op(
+        data = _gridder_adj_op(
             np.repeat(
                 np.linspace(1, 10, turbo_factor),
                 samples.shape[0] // turbo_factor + 1,
-            )[: samples.shape[0]],
-            None,
-            True,
+            )[: samples.shape[0]]
         )
     elif grid_type == "holes":
         data = np.abs(gridded_ones).squeeze() < threshold
@@ -119,7 +130,7 @@ def get_gridded_trajectory(
             data[
                 np.linalg.norm(
                     np.meshgrid(
-                        *[np.linspace(-1, 1, sh) for sh in shape], indexing="ij"
+                        *[np.linspace(-1, 1, sh*osf) for sh in shape], indexing="ij"
                     ),
                     axis=0,
                 )
@@ -141,7 +152,7 @@ def get_gridded_trajectory(
         else:
             slews, _ = convert_gradients_to_slew_rates(gradients, DEFAULT_RASTER_TIME)
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
-        data = grid_op.raw_op.adj_op(
-            np.linalg.norm(data, axis=-1).flatten(), None, True
+        data = _gridder_adj_op(
+            np.linalg.norm(data, axis=-1).flatten()
         )
     return np.squeeze(np.abs(data))

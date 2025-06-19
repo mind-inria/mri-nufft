@@ -36,6 +36,10 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 # Imports
 # -------
 import time
+import os
+import sys
+print(sys.path)
+print("Using backend:", os.environ.get("MRINUFFT_BACKEND"))
 import joblib
 import os
 
@@ -84,7 +88,7 @@ class Model(torch.nn.Module):
             density=True,
             n_coils=n_coils,
             smaps=np.ones(
-                (n_coils, *img_size)
+                (n_coils, *img_size), dtype=np.complex64
             ),  # Dummy smaps, this is updated in forward pass
             squeeze_dims=False,
         )
@@ -106,7 +110,7 @@ class Model(torch.nn.Module):
             self.trajectory.detach().numpy(),
             self.img_size,
             kspace.detach(),
-            backend="cufinufft",
+            backend=BACKEND,
             density=self.sense_op.density,
             blurr_factor=20,
         )
@@ -143,7 +147,7 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
 # Setup model and optimizer
 # -------------------------
 n_coils = 6
-init_traj = initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2)
+init_traj = initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2).astype(np.float32)
 model = Model(init_traj, n_coils=n_coils, img_size=(256, 256))
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(
