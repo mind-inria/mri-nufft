@@ -4,7 +4,5 @@
 
 .. autofunction:: {{ objname }}
 
-..  _sphx_glr_backref_{{fullname}}.{{objname}}:
-
-.. minigallery:: {{fullname}}.{{objname}}
-   :add-heading:
+.. minigallery:: {{module}}.{{objname}}
+   :add-heading: Example using ``{{objname}}``:

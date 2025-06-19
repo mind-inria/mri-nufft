@@ -31,7 +31,7 @@
    {% endif %}
    {% endblock %}
 
-   .. _sphx_glr_backref_{{fullname}}.{{objname}}:
+   .. _sphx_glr_backref_{{fullname}}:
 
-   .. minigallery:: {{fullname}}.{{objname}}
+   .. minigallery:: {{fullname}}
       :add-heading:
