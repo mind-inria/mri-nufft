@@ -21,6 +21,7 @@ import numpy as np
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
+
 # %%
 # Helper function to Displaying 3D Gridded Trajectories
 # =====================================================

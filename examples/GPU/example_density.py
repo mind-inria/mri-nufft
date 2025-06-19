@@ -71,9 +71,7 @@ axs[2].imshow(abs(adjoint))
 # %%
 voronoi_weights = get_density("voronoi", traj)
 
-nufft_voronoi = get_operator(BACKEND)(
-    traj, shape=mri_2D.shape, density=voronoi_weights
-)
+nufft_voronoi = get_operator(BACKEND)(traj, shape=mri_2D.shape, density=voronoi_weights)
 adjoint_voronoi = nufft_voronoi.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))

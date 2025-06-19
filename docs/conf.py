@@ -81,7 +81,7 @@ sphinx_gallery_conf = {
     "within_subsection_order": "ExampleTitleSortKey",
     "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
-    "prefer_full_module": {r'.*'},
+    "prefer_full_module": {r".*"},
     "nested_sections": True,
     "binder": {
         "org": "mind-inria",

@@ -49,6 +49,7 @@ from mrinufft.trajectories import initialize_2D_radial
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
+
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory):
         super(Model, self).__init__()

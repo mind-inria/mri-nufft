@@ -62,6 +62,7 @@ from mrinufft.trajectories import initialize_2D_cones
 # Setup a simple class for the U-Net model
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
+
 class Model(torch.nn.Module):
     """Model for MRI reconstruction using a U-Net."""
 
