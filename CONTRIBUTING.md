@@ -146,6 +146,8 @@ To build the documentation locally, you can run the following commands :
     cd mri-nufft/docs
     # do your changes 
     cd .. 
+    # you can specify a specfic backend to run the example with an environment variable:
+    export MRINUFFT_BACKEND=finufft
     python -m sphinx-build docs docs_build 
     # view the documentation in your browser
     python -m http.server --directory docs_build 8080
@@ -154,6 +156,8 @@ To build the documentation locally, you can run the following commands :
 
 
 ## Styleguides
+### Code
+The code base is formatted with [`black`](https://github.com/psf/black) and style guide is enforced with [`ruff`](https://github.com/astral-sh/ruff). You can run `black .` and `ruff check src` to ensure your changes will pass the [linter-check](https://github.com/mind-inria/.github/workflows/style.yml) CI.
 ### Docstrings 
 We use Numpy style docstrings. You can find more information about them [here](https://numpydoc.readthedocs.io/en/latest/format.html).
 
