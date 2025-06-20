@@ -26,7 +26,6 @@ from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_ti
 ##############
 
 
-@add_slew_ramp
 def initialize_3D_phyllotaxis_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -192,7 +191,6 @@ def initialize_3D_wong_radial(
     return trajectory
 
 
-@add_slew_ramp
 def initialize_3D_park_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -246,7 +244,6 @@ def initialize_3D_park_radial(
 ############################
 
 
-@add_slew_ramp
 def initialize_3D_cones(
     Nc: int,
     Ns: int,
@@ -333,7 +330,6 @@ def initialize_3D_cones(
     return trajectory
 
 
-@add_slew_ramp
 def initialize_3D_floret(
     Nc: int,
     Ns: int,
@@ -940,7 +936,6 @@ def initialize_3D_seiffert_shells(
 #####################
 
 
-@add_slew_ramp
 def initialize_3D_turbine(
     Nc: int,
     Ns_readouts: int,
@@ -1049,7 +1044,6 @@ def initialize_3D_turbine(
     return trajectory
 
 
-@add_slew_ramp
 def initialize_3D_repi(
     Nc: int,
     Ns_readouts: int,
