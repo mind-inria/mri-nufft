@@ -29,7 +29,7 @@ def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
         raise ValueError(
             f"Invalid `coord`='{coord}' for arrays with less than 3 dimensions."
         )
-    if c := coord.lower() == "x":
+    if (c := coord.lower()) == "x":
         coor_arr = array[..., 0]
     elif c == "y":
         coor_arr = array[..., 1]
