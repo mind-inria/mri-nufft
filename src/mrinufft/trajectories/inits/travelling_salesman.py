@@ -29,25 +29,23 @@ def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
         raise ValueError(
             f"Invalid `coord`='{coord}' for arrays with less than 3 dimensions."
         )
-
-    match coord.lower():
-        case "x":
-            coord = array[..., 0]
-        case "y":
-            coord = array[..., 1]
-        case "z":
-            coord = array[..., 2]
-        case "r":
-            coord = np.linalg.norm(array, axis=-1)
-        case "phi":
-            coord = np.sign(array[..., 1]) * np.arccos(
-                array[..., 0] / nl.norm(array[..., :2], axis=-1)
-            )
-        case "theta":
-            coord = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
-        case _:
-            raise ValueError(f"Unknown coordinate `{coord}`")
-    order = np.argsort(coord)
+    if (c := coord.lower()) == "x":
+        coor_arr = array[..., 0]
+    elif c == "y":
+        coor_arr = array[..., 1]
+    elif c == "z":
+        coor_arr = array[..., 2]
+    elif c == "r":
+        coor_arr = np.linalg.norm(array, axis=-1)
+    elif c == "phi":
+        coor_arr = np.sign(array[..., 1]) * np.arccos(
+            array[..., 0] / nl.norm(array[..., :2], axis=-1)
+        )
+    elif c == "theta":
+        coor_arr = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
+    else:
+        raise ValueError(f"Unknown coordinate `{c}`")
+    order = np.argsort(coor_arr)
     return array[order]
 
 

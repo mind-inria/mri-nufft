@@ -1,4 +1,7 @@
-"""Collection of trajectories and tools used for non-Cartesian MRI."""
+"""Collection of trajectories and tools used for non-Cartesian MRI.
+
+See also the trajectories examples: :ref:`sphx_glr_generated_autoexamples_trajectories`
+"""
 
 from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
 from .gradients import patch_center_anomaly

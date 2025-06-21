@@ -42,7 +42,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         Density compensation support. Default is False.
         - If a Tensor, it will be used for density.
         - If True, the density compensation will be automatically estimated
-            using the fixed point method.
+        using the fixed point method ("pipe").
         - If False, density compensation will not be used.
     n_coils : int, optional
         Number of coils. Default is 1.

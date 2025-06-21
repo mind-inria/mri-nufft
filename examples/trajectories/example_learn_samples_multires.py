@@ -1,5 +1,5 @@
 # %%
-"""
+r"""
 =========================================
 Learning sampling pattern with decimation
 =========================================
@@ -319,7 +319,12 @@ for f in image_files:
 # don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
 try:
     final_dir = (
-        Path(os.getcwd()).parent / "docs" / "generated" / "autoexamples" / "images"
+        Path(os.getcwd()).parent.parent
+        / "docs"
+        / "generated"
+        / "autoexamples"
+        / "trajectories"
+        / "images"
     )
     shutil.copyfile(
         "mrinufft_learn_traj_multires.gif",
@@ -331,9 +336,9 @@ except FileNotFoundError:
 # sphinx_gallery_end_ignore
 
 # %%
-# .. image-sg:: /generated/autoexamples/images/mrinufft_learn_traj_multires.gif
+# .. image-sg:: /generated/autoexamples/trajectories/images/mrinufft_learn_traj_multires.gif
 #    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/images/mrinufft_learn_traj_multires.gif
+#    :srcset: /generated/autoexamples/trajectories/images/mrinufft_learn_traj_multires.gif
 #    :class: sphx-glr-single-img
 
 # %%

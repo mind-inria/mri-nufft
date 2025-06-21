@@ -1,5 +1,5 @@
 # %%
-"""
+r"""
 =========================================
 Learn Sampling pattern for multi-coil MRI
 =========================================
@@ -16,7 +16,7 @@ Briefly, in this example we try to learn the k-space samples :math:`\mathbf{K}` 
 
 where :math:`S_\ell` is the sensitivity map for the :math:`\ell`-th coil, :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}_\ell` is the image for the :math:`\ell`-th coil, and :math:`\mathbf{x}_{sos} = \sqrt{\sum_{\ell=1}^L x_\ell^2}` is the sum-of-squares image as target image to be reconstructed.
 
-In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is implemented with `model.operator` while the SENSE operator :math:`model.sense_op` models the term :math:`\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}`.
+In this example, the forward NUFFT operator :math:`\mathcal{F}_\mathbf{K}` is implemented with `model.operator` while the SENSE operator ``model.sense_op`` models the term :math:`\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}`.
 For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and the sensitivity maps are simulated using the `birdcage_maps` function from `sigpy.mri`.
 
 .. note::
@@ -36,7 +36,13 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 # Imports
 # -------
 import time
+import os
+import sys
+
+print(sys.path)
+print("Using backend:", os.environ.get("MRINUFFT_BACKEND"))
 import joblib
+import os
 
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
@@ -58,6 +64,9 @@ from sigpy.mri import birdcage_maps
 #     See [Projector]_ for more details.
 
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
+
+
 class Model(torch.nn.Module):
     def __init__(self, inital_trajectory, n_coils, img_size=(256, 256)):
         super(Model, self).__init__()
@@ -68,20 +77,20 @@ class Model(torch.nn.Module):
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
         # A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.
         # The trajectory is scaled by 2*pi for cufinufft backend.
-        self.operator = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             sample_points * 2 * np.pi,
             shape=img_size,
             n_coils=n_coils,
             squeeze_dims=False,
         )
         # A simple density compensated adjoint SENSE operator with sensitivity maps `smaps`.
-        self.sense_op = get_operator("cufinufft", wrt_data=True, wrt_traj=True)(
+        self.sense_op = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             density=True,
             n_coils=n_coils,
             smaps=np.ones(
-                (n_coils, *img_size)
+                (n_coils, *img_size), dtype=np.complex64
             ),  # Dummy smaps, this is updated in forward pass
             squeeze_dims=False,
         )
@@ -103,7 +112,7 @@ class Model(torch.nn.Module):
             self.trajectory.detach().numpy(),
             self.img_size,
             kspace.detach(),
-            backend="cufinufft",
+            backend=BACKEND,
             density=self.sense_op.density,
             blurr_factor=20,
         )
@@ -140,7 +149,9 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
 # Setup model and optimizer
 # -------------------------
 n_coils = 6
-init_traj = initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2)
+init_traj = (
+    initialize_2D_radial(32, 256).astype(np.float32).reshape(-1, 2).astype(np.float32)
+)
 model = Model(init_traj, n_coils=n_coils, img_size=(256, 256))
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 schedulder = torch.optim.lr_scheduler.LinearLR(
