@@ -284,7 +284,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ)
+            self.raw_op._set_pts(typ, self._samples)
         self.compute_density(self._density_method)
 
     @FourierOperatorBase.density.setter
