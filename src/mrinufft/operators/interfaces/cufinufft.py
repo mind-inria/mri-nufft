@@ -70,7 +70,7 @@ class RawCufinufftPlan:
 
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i, samples)
+            self._set_pts(i)
 
     @property
     def dtype(self):
@@ -96,7 +96,7 @@ class RawCufinufftPlan:
         if self.ndim == 3:
             self._kz.set(samples[:, 2])
 
-    def _set_pts(self, typ, samples):
+    def _set_pts(self, typ):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
         plan.setpts(self._kx, self._ky, self._kz)
 
@@ -280,6 +280,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 np.float32, copy=False
             )
         )
+        self.raw_op._set_kxyz(self._samples)
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
@@ -816,7 +817,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             isign=1,
             **kwargs,
         )
-        self.raw_op._set_pts(typ="grad", samples=self.samples)
+        self.raw_op._set_pts(typ="grad")
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
