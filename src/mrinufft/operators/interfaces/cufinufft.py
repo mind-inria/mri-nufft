@@ -39,6 +39,11 @@ OPTS_FIELD_DECODE = {
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
 
+def _error_check(ier, msg):
+    if ier != 0:
+        raise RuntimeError(msg)
+
+
 class RawCufinufftPlan:
     """Light wrapper around the guru interface of finufft."""
 
@@ -62,6 +67,7 @@ class RawCufinufftPlan:
         self._kx = cp.array(samples[:, 0], copy=False)
         self._ky = cp.array(samples[:, 1], copy=False)
         self._kz = cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None
+
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
             self._set_pts(i, samples)
@@ -84,13 +90,15 @@ class RawCufinufftPlan:
             **kwargs,
         )
 
+    def _set_kxyz(self, samples):
+        self._kx.set(samples[:, 0])
+        self._ky.set(samples[:, 1])
+        if self.ndim == 3:
+            self._kz.set(samples[:, 2])
+
     def _set_pts(self, typ, samples):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
-        plan.setpts(
-            cp.array(samples[:, 0], copy=False),
-            cp.array(samples[:, 1], copy=False),
-            cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None,
-        )
+        plan.setpts(self._kx, self._ky, self._kz)
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
@@ -275,7 +283,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ, samples=self._samples)
+            self.raw_op._set_pts(typ)
         self.compute_density(self._density_method)
 
     @FourierOperatorBase.density.setter
