@@ -14,11 +14,23 @@ from typing import ClassVar, Callable
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import with_numpy, with_numpy_cupy, AUTOGRAD_AVAILABLE
+from mrinufft._array_compat import (
+    with_numpy,
+    with_numpy_cupy,
+    AUTOGRAD_AVAILABLE,
+    CUPY_AVAILABLE,
+)
 from mrinufft._utils import auto_cast, power_method
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+
+
+if AUTOGRAD_AVAILABLE:
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+if CUPY_AVAILABLE:
+    import cupy as cp
+
 
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
@@ -309,8 +321,10 @@ class FourierOperatorBase(ABC):
             if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`
                 or `torchkbnufft-gpu`.
         """
-        if isinstance(method, np.ndarray):
-            self._density = method
+        if isinstance(method, np.ndarray) or (
+            CUPY_AVAILABLE and isinstance(method, cp.ndarray)
+        ):
+            self.density = method
             return None
         if not method:
             self._density = None
@@ -364,6 +378,32 @@ class FourierOperatorBase(ABC):
         else:
             tmp_op = self
         return power_method(max_iter, tmp_op)
+
+    def cg(self, kspace_data, compute_loss=False, **kwargs):
+        """Conjugate Gradient method to solve the inverse problem.
+
+        Parameters
+        ----------
+        kspace_data: np.ndarray
+            The k-space data to reconstruct.
+        computer_loss: bool
+            Whether to compute the loss at each iteration.
+            If True, loss is calculated and returned, otherwise, it's skipped.
+        **kwargs:
+            Extra arguments to pass to the conjugate gradient method.
+
+        Returns
+        -------
+        np.ndarray
+            Reconstructed image
+        np.ndarray, optional
+            array of loss at each iteration, if compute_loss is True.
+        """
+        from ..extras.gradient import cg
+
+        return cg(
+            operator=self, kspace_data=kspace_data, compute_loss=compute_loss, **kwargs
+        )
 
     @property
     def uses_sense(self):
