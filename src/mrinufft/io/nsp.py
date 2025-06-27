@@ -284,6 +284,7 @@ def read_trajectory(
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
+    skip_first_Nsamples: int = 0,
 ):
     """Get k-space locations from gradient file.
 
@@ -305,9 +306,13 @@ def read_trajectory(
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
-    normalize : float, optional
+    normalize_factor : float, optional
         Whether to normalize the k-space locations, by default 0.5
         When None, normalization is not done.
+    skip_first_Nsamples: int, optional
+        Number of samples to skip from the start of each shot,
+        by default 0. This is useful when we want to avoid artifacts
+        from ADC switching in UTE sequences.
 
     Returns
     -------
@@ -424,6 +429,15 @@ def read_trajectory(
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
+        if skip_first_Nsamples > 0:
+            if skip_first_Nsamples >= num_samples_per_shot:
+                raise ValueError(
+                    "skip_first_Nsamples should be less than num_adc_samples"
+                )
+            oversample_factor = num_adc_samples / num_samples_per_shot
+            skip_samples = skip_first_Nsamples * int(oversample_factor)
+            kspace_loc = kspace_loc[:, skip_samples:]
+            params["num_adc_samples"] = num_adc_samples - skip_samples
         return kspace_loc, params
 
 
@@ -434,6 +448,7 @@ def read_arbgrad_rawdat(
     squeeze: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
+    skip_adc_start: int = 0,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
@@ -452,6 +467,10 @@ def read_arbgrad_rawdat(
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
         The contrast to read, by default None.
+    skip_adc_start : int, optional
+        Number of samples to skip from the start of each shot,
+        by default 0. This is useful when we want to avoid artifacts
+        from ADC switching in UTE sequences.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
 
@@ -500,4 +519,11 @@ def read_arbgrad_rawdat(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]
             hdr["type"] = "ARBGRAD_MP2RAGE"
+    if skip_adc_start > 0:
+        if skip_adc_start >= hdr["n_samples"]:
+            raise ValueError(
+                "skip_first_Nsamples should be less than n_samples in the data"
+            )
+        data = data[:, skip_adc_start:]
+        hdr["n_adc_samples"] -= skip_adc_start
     return data, hdr
