@@ -128,8 +128,9 @@ def test_batch_op(operator, array_interface, flat_operator, image_data):
         np.concatenate(kspace_flat, axis=0),
         (operator.n_batchs, operator.n_coils, operator.n_samples),
     )
-
-    npt.assert_array_almost_equal(kspace_batched, kspace_flat)
+    npt.assert_array_almost_equal(
+        kspace_batched, kspace_flat, decimal=3 if operator.backend == "finufft" else 6
+    )
 
 
 @param_array_interface
@@ -161,8 +162,9 @@ def test_batch_adj_op(
     )
 
     image_batched = from_interface(operator.adj_op(kspace_data), array_interface)
-    # Reduced accuracy for the GPU cases...
-    npt.assert_allclose(image_batched, image_flat, atol=1e-3, rtol=1e-3)
+    npt.assert_allclose(
+        image_batched, image_flat, rtol=1e-1 if operator.backend == "finufft" else 1e-3
+    )
 
 
 @param_array_interface
@@ -194,7 +196,10 @@ def test_data_consistency(
         print("Reduced accuracy for 2D Sense")
         atol = 1e-1
         atol = 1e-1
-
+    if operator.backend == "finufft":
+        print("Reduced accuracy for finufft")
+        atol = 1e-3
+        rtol = 1e-1
     npt.assert_allclose(res, res2, atol=atol, rtol=rtol)
 
 

@@ -1,7 +1,5 @@
 """Utility functions for GPU Interface."""
 
-import numpy as np
-
 
 def check_error(ier, message):  # noqa: D103
     if ier != 0:

@@ -6,9 +6,9 @@ from ..base import FourierOperatorCPU
 
 PYNFFT_AVAILABLE = True
 try:
-    import pynfft
+    import pyNFFT3 as pynfft3
 except ImportError:
-    PYNUFFT_AVAILABLE = False
+    PYNFFT_AVAILABLE = False
 
 
 def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
@@ -24,28 +24,27 @@ def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
     return matrix / np.sqrt(n)
 
 
-class RawPyNFFT:
-    """Implementation of the NUDFT using numpy."""
+class RawPyNFFT3:
+    """Binding for the pyNFFT3 package."""
 
     def __init__(self, samples, shape):
         self.samples = samples
         self.shape = shape
-        self.ndim = len(shape)
-        self.plan = pynfft.NFFT(N=shape, M=len(samples))
+        self.plan = pynfft3.NFFT(N=np.array(shape, dtype="int32"), M=len(samples))
         self.plan.x = self.samples
-        self.plan.precompute()
-        self.shape = shape
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""
-        self.plan.f_hat = image
-        np.copyto(coeffs, self.plan.trafo())
+        self.plan.fhat = image.ravel()
+        self.plan.trafo()
+        np.copyto(coeffs, self.plan.f.reshape(-1))
         return coeffs
 
     def adj_op(self, coeffs, image):
         """Compute the adjoint NUDFT."""
-        self.plan.f = coeffs
-        np.copyto(image, self.plan.adjoint())
+        self.plan.f = coeffs.ravel()
+        self.plan.adjoint()
+        np.copyto(image, self.plan.fhat.reshape(self.shape))
         return image
 
 
@@ -71,4 +70,4 @@ class MRInfft(FourierOperatorCPU):
             density=density,
             raw_op=None,  # is set later, after normalizing samples.
         )
-        self.raw_op = RawPyNFFT(self.samples, shape)
+        self.raw_op = RawPyNFFT3(self.samples, shape)
