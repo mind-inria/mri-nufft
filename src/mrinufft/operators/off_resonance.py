@@ -198,9 +198,8 @@ class MRIFourierCorrected(FourierOperatorBase):
         Must have same shape as ``b0_map``.
         The default is ``None`` (purely imaginary field).
         Also supports Cupy arrays and Torch tensors.
-    isign : int, optional
-        Sign convention for spatial phase.
-        Either `-1` (default, e^{-iωt}) or `1` (e^{iωt}).
+    negate: bool, optional, default=False
+        If True, negate the field map. Useful for matching the convention of your field map generation.
     backend: str, optional
         The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
         The default is `cpu`.
@@ -224,7 +223,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         r2star_map=None,
         B=None,
         tl=None,
-        isign=-1,
+        negate=False,
         backend="cpu",
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
@@ -239,7 +238,9 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
 
         self._fourier_op = fourier_op
-        self.isign = isign
+        if not isinstance(negate, bool):
+            raise ValueError("negate must be a boolean value.")
+        self.isign = -1 if negate else 1
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
@@ -383,8 +384,6 @@ def _get_complex_fieldmap(b0_map, r2star_map=None):
 
 def _get_spatial_coefficients(field_map, tl, isign=-1):
     xp = get_array_module(field_map)
-    if isign not in (-1, 1):
-        raise ValueError("isign must be -1 or 1.")
     # get spatial coeffs
     C = xp.exp(isign * tl * field_map[..., None])
     C = C[None, ...].swapaxes(0, -1)[
