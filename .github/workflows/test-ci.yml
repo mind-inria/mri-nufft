@@ -238,6 +238,7 @@ jobs:
         run: |
           ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
+          export MRINUFFT_BACKEND=cufinufft
           python -m pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
