@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**32:01.338** total execution time for 19 files **from all galleries**:
+**24:25.259** total execution time for 19 files **from all galleries**:
 
 .. container::
 
@@ -32,60 +32,60 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_fastMRI_UNet.py` (``../examples/GPU/example_fastMRI_UNet.py``)
-     - 07:21.928
-     - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``../examples/GPU/example_learn_straight_line_readouts.py``)
-     - 04:05.131
+     - 03:59.273
      - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``../examples/example_sampling_densities.py``)
-     - 03:14.768
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_fastMRI_UNet.py` (``../examples/GPU/example_fastMRI_UNet.py``)
+     - 03:51.406
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_3D.py` (``../examples/example_gif_3D.py``)
-     - 02:55.248
+     - 02:31.650
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``../examples/example_sampling_densities.py``)
+     - 02:31.587
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_learn_samples_multires.py` (``../examples/example_learn_samples_multires.py``)
-     - 02:54.182
+     - 02:01.196
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples_multicoil.py` (``../examples/GPU/example_learn_samples_multicoil.py``)
-     - 02:34.008
+     - 01:58.346
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_2D.py` (``../examples/example_gif_2D.py``)
-     - 01:54.582
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` (``../examples/GPU/example_learn_samples.py``)
-     - 01:51.719
+     - 01:47.072
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` (``../examples/example_3D_trajectories.py``)
-     - 01:38.043
+     - 01:36.492
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` (``../examples/GPU/example_learn_samples.py``)
+     - 01:28.475
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py` (``../examples/example_trajectory_tools.py``)
-     - 01:14.843
+     - 00:54.905
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_subspace.py` (``../examples/example_subspace.py``)
-     - 00:55.869
+     - 00:41.349
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_2D_trajectories.py` (``../examples/example_2D_trajectories.py``)
-     - 00:32.604
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``../examples/example_stacked.py``)
-     - 00:12.908
+     - 00:33.440
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_3d_trajectory_display.py` (``../examples/GPU/example_3d_trajectory_display.py``)
-     - 00:09.341
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_density.py` (``../examples/GPU/example_density.py``)
-     - 00:08.670
+     - 00:07.449
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_display_config.py` (``../examples/example_display_config.py``)
-     - 00:08.415
+     - 00:06.210
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_density.py` (``../examples/GPU/example_density.py``)
+     - 00:04.983
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_offresonance.py` (``../examples/example_offresonance.py``)
-     - 00:03.425
+     - 00:03.309
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_readme.py` (``../examples/example_readme.py``)
-     - 00:03.099
+     - 00:03.255
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``../examples/example_stacked.py``)
+     - 00:02.996
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_cg.py` (``../examples/GPU/example_cg.py``)
-     - 00:02.554
+     - 00:01.868
      - 0.0

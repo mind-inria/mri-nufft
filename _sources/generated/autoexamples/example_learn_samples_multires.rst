@@ -343,13 +343,13 @@ Initialisation
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
 
@@ -385,15 +385,15 @@ of the trajectory.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
 
 
@@ -461,1692 +461,1692 @@ Training loop
 
  .. code-block:: none
 
-      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.54169774, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
+      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.5417098, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
       grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      3%|▎         | 1/30 [00:01<00:42,  1.48s/steps, loss=(array(0.54169774, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      3%|▎         | 1/30 [00:01<00:36,  1.25s/steps, loss=(array(0.5417098, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      3%|▎         | 1/30 [00:02<00:42,  1.48s/steps, loss=(array(0.28933096, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      3%|▎         | 1/30 [00:01<00:36,  1.25s/steps, loss=(array(0.289332, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      7%|▋         | 2/30 [00:02<00:38,  1.37s/steps, loss=(array(0.28933096, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      7%|▋         | 2/30 [00:01<00:25,  1.09steps/s, loss=(array(0.289332, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      7%|▋         | 2/30 [00:03<00:38,  1.37s/steps, loss=(array(0.32130992, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      7%|▋         | 2/30 [00:02<00:25,  1.09steps/s, loss=(array(0.32130808, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     10%|█         | 3/30 [00:03<00:34,  1.28s/steps, loss=(array(0.32130992, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     10%|█         | 3/30 [00:03<00:27,  1.01s/steps, loss=(array(0.32130808, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     10%|█         | 3/30 [00:04<00:34,  1.28s/steps, loss=(array(0.570969, dtype=float32),)]  /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     10%|█         | 3/30 [00:03<00:27,  1.01s/steps, loss=(array(0.57096833, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     13%|█▎        | 4/30 [00:05<00:34,  1.33s/steps, loss=(array(0.570969, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     13%|█▎        | 4/30 [00:04<00:31,  1.22s/steps, loss=(array(0.57096833, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     13%|█▎        | 4/30 [00:05<00:34,  1.33s/steps, loss=(array(0.6651886, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     13%|█▎        | 4/30 [00:05<00:31,  1.22s/steps, loss=(array(0.66518784, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     17%|█▋        | 5/30 [00:06<00:34,  1.37s/steps, loss=(array(0.6651886, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     17%|█▋        | 5/30 [00:05<00:30,  1.24s/steps, loss=(array(0.66518784, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     17%|█▋        | 5/30 [00:07<00:34,  1.37s/steps, loss=(array(0.63610744, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     17%|█▋        | 5/30 [00:06<00:30,  1.24s/steps, loss=(array(0.6360986, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     20%|██        | 6/30 [00:08<00:31,  1.33s/steps, loss=(array(0.63610744, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     20%|██        | 6/30 [00:07<00:29,  1.22s/steps, loss=(array(0.6360986, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     20%|██        | 6/30 [00:08<00:31,  1.33s/steps, loss=(array(0.5450231, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     20%|██        | 6/30 [00:07<00:29,  1.22s/steps, loss=(array(0.5450144, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     23%|██▎       | 7/30 [00:09<00:33,  1.45s/steps, loss=(array(0.5450231, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     23%|██▎       | 7/30 [00:08<00:31,  1.36s/steps, loss=(array(0.5450144, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     23%|██▎       | 7/30 [00:10<00:33,  1.45s/steps, loss=(array(0.4305522, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     23%|██▎       | 7/30 [00:09<00:31,  1.36s/steps, loss=(array(0.4305501, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     27%|██▋       | 8/30 [00:11<00:31,  1.41s/steps, loss=(array(0.4305522, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     27%|██▋       | 8/30 [00:10<00:30,  1.41s/steps, loss=(array(0.4305501, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     27%|██▋       | 8/30 [00:11<00:31,  1.41s/steps, loss=(array(0.29558885, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     27%|██▋       | 8/30 [00:10<00:30,  1.41s/steps, loss=(array(0.29559892, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     30%|███       | 9/30 [00:12<00:28,  1.37s/steps, loss=(array(0.29558885, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     30%|███       | 9/30 [00:11<00:28,  1.36s/steps, loss=(array(0.29559892, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     30%|███       | 9/30 [00:13<00:28,  1.37s/steps, loss=(array(0.20528626, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     30%|███       | 9/30 [00:11<00:28,  1.36s/steps, loss=(array(0.2053093, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     33%|███▎      | 10/30 [00:13<00:28,  1.42s/steps, loss=(array(0.20528626, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     33%|███▎      | 10/30 [00:12<00:26,  1.35s/steps, loss=(array(0.2053093, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     33%|███▎      | 10/30 [00:14<00:28,  1.42s/steps, loss=(array(0.20900296, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     33%|███▎      | 10/30 [00:13<00:26,  1.35s/steps, loss=(array(0.20891221, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     37%|███▋      | 11/30 [00:15<00:30,  1.59s/steps, loss=(array(0.20900296, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     37%|███▋      | 11/30 [00:14<00:25,  1.34s/steps, loss=(array(0.20891221, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     37%|███▋      | 11/30 [00:16<00:30,  1.59s/steps, loss=(array(0.23116598, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     37%|███▋      | 11/30 [00:14<00:25,  1.34s/steps, loss=(array(0.23081625, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     40%|████      | 12/30 [00:16<00:25,  1.43s/steps, loss=(array(0.23116598, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     40%|████      | 12/30 [00:15<00:23,  1.31s/steps, loss=(array(0.23081625, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     40%|████      | 12/30 [00:17<00:25,  1.43s/steps, loss=(array(0.22359744, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     40%|████      | 12/30 [00:15<00:23,  1.31s/steps, loss=(array(0.22303924, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     43%|████▎     | 13/30 [00:18<00:23,  1.37s/steps, loss=(array(0.22359744, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     43%|████▎     | 13/30 [00:16<00:20,  1.23s/steps, loss=(array(0.22303924, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     43%|████▎     | 13/30 [00:18<00:23,  1.37s/steps, loss=(array(0.1994223, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     43%|████▎     | 13/30 [00:16<00:20,  1.23s/steps, loss=(array(0.19869569, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     47%|████▋     | 14/30 [00:19<00:20,  1.28s/steps, loss=(array(0.1994223, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     47%|████▋     | 14/30 [00:17<00:20,  1.26s/steps, loss=(array(0.19869569, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     47%|████▋     | 14/30 [00:19<00:20,  1.28s/steps, loss=(array(0.18064573, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     47%|████▋     | 14/30 [00:18<00:20,  1.26s/steps, loss=(array(0.18011364, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     50%|█████     | 15/30 [00:20<00:19,  1.29s/steps, loss=(array(0.18064573, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     50%|█████     | 15/30 [00:18<00:18,  1.24s/steps, loss=(array(0.18011364, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     50%|█████     | 15/30 [00:21<00:19,  1.29s/steps, loss=(array(0.17737287, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     50%|█████     | 15/30 [00:19<00:18,  1.24s/steps, loss=(array(0.17721364, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     53%|█████▎    | 16/30 [00:21<00:18,  1.30s/steps, loss=(array(0.17737287, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     53%|█████▎    | 16/30 [00:20<00:16,  1.21s/steps, loss=(array(0.17721364, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     53%|█████▎    | 16/30 [00:22<00:18,  1.30s/steps, loss=(array(0.18255669, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     53%|█████▎    | 16/30 [00:20<00:16,  1.21s/steps, loss=(array(0.18236381, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     57%|█████▋    | 17/30 [00:23<00:16,  1.30s/steps, loss=(array(0.18255669, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     57%|█████▋    | 17/30 [00:21<00:15,  1.23s/steps, loss=(array(0.18236381, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     57%|█████▋    | 17/30 [00:23<00:16,  1.30s/steps, loss=(array(0.18278837, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     57%|█████▋    | 17/30 [00:21<00:15,  1.23s/steps, loss=(array(0.1822865, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     60%|██████    | 18/30 [00:24<00:16,  1.40s/steps, loss=(array(0.18278837, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     60%|██████    | 18/30 [00:22<00:15,  1.31s/steps, loss=(array(0.1822865, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     60%|██████    | 18/30 [00:25<00:16,  1.40s/steps, loss=(array(0.17662594, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     60%|██████    | 18/30 [00:23<00:15,  1.31s/steps, loss=(array(0.17576236, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     63%|██████▎   | 19/30 [00:26<00:15,  1.39s/steps, loss=(array(0.17662594, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     63%|██████▎   | 19/30 [00:24<00:15,  1.37s/steps, loss=(array(0.17576236, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     63%|██████▎   | 19/30 [00:26<00:15,  1.39s/steps, loss=(array(0.17404726, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     63%|██████▎   | 19/30 [00:24<00:15,  1.37s/steps, loss=(array(0.17279789, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     67%|██████▋   | 20/30 [00:27<00:14,  1.49s/steps, loss=(array(0.17404726, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     67%|██████▋   | 20/30 [00:25<00:13,  1.32s/steps, loss=(array(0.17279789, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     67%|██████▋   | 20/30 [00:28<00:14,  1.49s/steps, loss=(array(0.17727235, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     67%|██████▋   | 20/30 [00:26<00:13,  1.32s/steps, loss=(array(0.17592342, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     70%|███████   | 21/30 [00:29<00:13,  1.47s/steps, loss=(array(0.17727235, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     70%|███████   | 21/30 [00:26<00:12,  1.36s/steps, loss=(array(0.17592342, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     70%|███████   | 21/30 [00:29<00:13,  1.47s/steps, loss=(array(0.17683004, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     70%|███████   | 21/30 [00:27<00:12,  1.36s/steps, loss=(array(0.17556393, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     73%|███████▎  | 22/30 [00:30<00:11,  1.41s/steps, loss=(array(0.17683004, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     73%|███████▎  | 22/30 [00:28<00:10,  1.31s/steps, loss=(array(0.17556393, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     73%|███████▎  | 22/30 [00:31<00:11,  1.41s/steps, loss=(array(0.17163825, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     73%|███████▎  | 22/30 [00:28<00:10,  1.31s/steps, loss=(array(0.17032316, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     77%|███████▋  | 23/30 [00:32<00:10,  1.43s/steps, loss=(array(0.17163825, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     77%|███████▋  | 23/30 [00:29<00:08,  1.27s/steps, loss=(array(0.17032316, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     77%|███████▋  | 23/30 [00:32<00:10,  1.43s/steps, loss=(array(0.16470608, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     77%|███████▋  | 23/30 [00:29<00:08,  1.27s/steps, loss=(array(0.16386414, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     80%|████████  | 24/30 [00:33<00:08,  1.38s/steps, loss=(array(0.16470608, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     80%|████████  | 24/30 [00:30<00:07,  1.33s/steps, loss=(array(0.16386414, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     80%|████████  | 24/30 [00:33<00:08,  1.38s/steps, loss=(array(0.1626614, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     80%|████████  | 24/30 [00:31<00:07,  1.33s/steps, loss=(array(0.16290098, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     83%|████████▎ | 25/30 [00:34<00:06,  1.35s/steps, loss=(array(0.1626614, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     83%|████████▎ | 25/30 [00:32<00:06,  1.37s/steps, loss=(array(0.16290098, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     83%|████████▎ | 25/30 [00:35<00:06,  1.35s/steps, loss=(array(0.16427039, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     83%|████████▎ | 25/30 [00:32<00:06,  1.37s/steps, loss=(array(0.16466942, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     87%|████████▋ | 26/30 [00:35<00:05,  1.35s/steps, loss=(array(0.16427039, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     87%|████████▋ | 26/30 [00:33<00:05,  1.33s/steps, loss=(array(0.16466942, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     87%|████████▋ | 26/30 [00:36<00:05,  1.35s/steps, loss=(array(0.16347271, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     87%|████████▋ | 26/30 [00:33<00:05,  1.33s/steps, loss=(array(0.16306825, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     90%|█████████ | 27/30 [00:37<00:04,  1.39s/steps, loss=(array(0.16347271, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     90%|█████████ | 27/30 [00:34<00:03,  1.28s/steps, loss=(array(0.16306825, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     90%|█████████ | 27/30 [00:37<00:04,  1.39s/steps, loss=(array(0.16347432, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     90%|█████████ | 27/30 [00:35<00:03,  1.28s/steps, loss=(array(0.1625875, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     93%|█████████▎| 28/30 [00:39<00:02,  1.48s/steps, loss=(array(0.16347432, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     93%|█████████▎| 28/30 [00:36<00:02,  1.36s/steps, loss=(array(0.1625875, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     93%|█████████▎| 28/30 [00:40<00:02,  1.48s/steps, loss=(array(0.16488881, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     93%|█████████▎| 28/30 [00:36<00:02,  1.36s/steps, loss=(array(0.1641148, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     97%|█████████▋| 29/30 [00:41<00:01,  1.66s/steps, loss=(array(0.16488881, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     97%|█████████▋| 29/30 [00:37<00:01,  1.34s/steps, loss=(array(0.1641148, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     97%|█████████▋| 29/30 [00:42<00:01,  1.66s/steps, loss=(array(0.16544649, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     97%|█████████▋| 29/30 [00:37<00:01,  1.34s/steps, loss=(array(0.16494828, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-    100%|██████████| 30/30 [00:42<00:00,  1.61s/steps, loss=(array(0.16544649, dtype=float32),)]    100%|██████████| 30/30 [00:42<00:00,  1.42s/steps, loss=(array(0.16544649, dtype=float32),)]
-      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    100%|██████████| 30/30 [00:38<00:00,  1.35s/steps, loss=(array(0.16494828, dtype=float32),)]    100%|██████████| 30/30 [00:38<00:00,  1.30s/steps, loss=(array(0.16494828, dtype=float32),)]
+      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.16390383, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.16435714, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      3%|▎         | 1/30 [00:01<00:33,  1.14s/steps, loss=(array(0.16390383, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      3%|▎         | 1/30 [00:01<00:40,  1.41s/steps, loss=(array(0.16435714, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      3%|▎         | 1/30 [00:01<00:33,  1.14s/steps, loss=(array(0.1621668, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      3%|▎         | 1/30 [00:01<00:40,  1.41s/steps, loss=(array(0.16408986, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      7%|▋         | 2/30 [00:02<00:32,  1.15s/steps, loss=(array(0.1621668, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      7%|▋         | 2/30 [00:02<00:29,  1.06s/steps, loss=(array(0.16408986, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      7%|▋         | 2/30 [00:02<00:32,  1.15s/steps, loss=(array(0.1556435, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      7%|▋         | 2/30 [00:02<00:29,  1.06s/steps, loss=(array(0.15815622, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     10%|█         | 3/30 [00:03<00:31,  1.16s/steps, loss=(array(0.1556435, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     10%|█         | 3/30 [00:03<00:31,  1.17s/steps, loss=(array(0.15815622, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     10%|█         | 3/30 [00:04<00:31,  1.16s/steps, loss=(array(0.15082106, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     10%|█         | 3/30 [00:04<00:31,  1.17s/steps, loss=(array(0.15324116, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     13%|█▎        | 4/30 [00:04<00:33,  1.28s/steps, loss=(array(0.15082106, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     13%|█▎        | 4/30 [00:05<00:34,  1.31s/steps, loss=(array(0.15324116, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     13%|█▎        | 4/30 [00:05<00:33,  1.28s/steps, loss=(array(0.148215, dtype=float32),)]  /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     13%|█▎        | 4/30 [00:05<00:34,  1.31s/steps, loss=(array(0.1505197, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     17%|█▋        | 5/30 [00:06<00:31,  1.26s/steps, loss=(array(0.148215, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     17%|█▋        | 5/30 [00:06<00:35,  1.43s/steps, loss=(array(0.1505197, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     17%|█▋        | 5/30 [00:06<00:31,  1.26s/steps, loss=(array(0.14466394, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     17%|█▋        | 5/30 [00:07<00:35,  1.43s/steps, loss=(array(0.14658064, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     20%|██        | 6/30 [00:07<00:30,  1.28s/steps, loss=(array(0.14466394, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     20%|██        | 6/30 [00:08<00:33,  1.41s/steps, loss=(array(0.14658064, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     20%|██        | 6/30 [00:08<00:30,  1.28s/steps, loss=(array(0.14311664, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     20%|██        | 6/30 [00:08<00:33,  1.41s/steps, loss=(array(0.14464411, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     23%|██▎       | 7/30 [00:08<00:30,  1.31s/steps, loss=(array(0.14311664, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     23%|██▎       | 7/30 [00:09<00:32,  1.43s/steps, loss=(array(0.14464411, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     23%|██▎       | 7/30 [00:09<00:30,  1.31s/steps, loss=(array(0.14056465, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     23%|██▎       | 7/30 [00:10<00:32,  1.43s/steps, loss=(array(0.14180014, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     27%|██▋       | 8/30 [00:10<00:31,  1.42s/steps, loss=(array(0.14056465, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     27%|██▋       | 8/30 [00:10<00:29,  1.36s/steps, loss=(array(0.14180014, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     27%|██▋       | 8/30 [00:11<00:31,  1.42s/steps, loss=(array(0.13835092, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     27%|██▋       | 8/30 [00:11<00:29,  1.36s/steps, loss=(array(0.13906828, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     30%|███       | 9/30 [00:11<00:28,  1.38s/steps, loss=(array(0.13835092, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     30%|███       | 9/30 [00:12<00:30,  1.44s/steps, loss=(array(0.13906828, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     30%|███       | 9/30 [00:12<00:28,  1.38s/steps, loss=(array(0.1374428, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     30%|███       | 9/30 [00:12<00:30,  1.44s/steps, loss=(array(0.13828786, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     33%|███▎      | 10/30 [00:12<00:26,  1.32s/steps, loss=(array(0.1374428, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     33%|███▎      | 10/30 [00:13<00:28,  1.41s/steps, loss=(array(0.13828786, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     33%|███▎      | 10/30 [00:13<00:26,  1.32s/steps, loss=(array(0.1371926, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     33%|███▎      | 10/30 [00:14<00:28,  1.41s/steps, loss=(array(0.13855326, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     37%|███▋      | 11/30 [00:14<00:26,  1.42s/steps, loss=(array(0.1371926, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     37%|███▋      | 11/30 [00:15<00:27,  1.46s/steps, loss=(array(0.13855326, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     37%|███▋      | 11/30 [00:15<00:26,  1.42s/steps, loss=(array(0.13627982, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     37%|███▋      | 11/30 [00:15<00:27,  1.46s/steps, loss=(array(0.13767974, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     40%|████      | 12/30 [00:15<00:24,  1.34s/steps, loss=(array(0.13627982, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     40%|████      | 12/30 [00:16<00:25,  1.41s/steps, loss=(array(0.13767974, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     40%|████      | 12/30 [00:16<00:24,  1.34s/steps, loss=(array(0.13499919, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     40%|████      | 12/30 [00:17<00:25,  1.41s/steps, loss=(array(0.13598192, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     43%|████▎     | 13/30 [00:17<00:22,  1.31s/steps, loss=(array(0.13499919, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     43%|████▎     | 13/30 [00:17<00:23,  1.36s/steps, loss=(array(0.13598192, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     43%|████▎     | 13/30 [00:17<00:22,  1.31s/steps, loss=(array(0.13574606, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     43%|████▎     | 13/30 [00:18<00:23,  1.36s/steps, loss=(array(0.13646558, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     47%|████▋     | 14/30 [00:18<00:20,  1.28s/steps, loss=(array(0.13574606, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     47%|████▋     | 14/30 [00:18<00:20,  1.26s/steps, loss=(array(0.13646558, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     47%|████▋     | 14/30 [00:18<00:20,  1.28s/steps, loss=(array(0.13570088, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     47%|████▋     | 14/30 [00:19<00:20,  1.26s/steps, loss=(array(0.13616852, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     50%|█████     | 15/30 [00:19<00:18,  1.23s/steps, loss=(array(0.13570088, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     50%|█████     | 15/30 [00:20<00:18,  1.23s/steps, loss=(array(0.13616852, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     50%|█████     | 15/30 [00:19<00:18,  1.23s/steps, loss=(array(0.13444902, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     50%|█████     | 15/30 [00:20<00:18,  1.23s/steps, loss=(array(0.13482168, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     53%|█████▎    | 16/30 [00:20<00:17,  1.24s/steps, loss=(array(0.13444902, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     53%|█████▎    | 16/30 [00:21<00:17,  1.24s/steps, loss=(array(0.13482168, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     53%|█████▎    | 16/30 [00:21<00:17,  1.24s/steps, loss=(array(0.13302356, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     53%|█████▎    | 16/30 [00:21<00:17,  1.24s/steps, loss=(array(0.13349122, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     57%|█████▋    | 17/30 [00:21<00:16,  1.28s/steps, loss=(array(0.13302356, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     57%|█████▋    | 17/30 [00:22<00:16,  1.26s/steps, loss=(array(0.13349122, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     57%|█████▋    | 17/30 [00:22<00:16,  1.28s/steps, loss=(array(0.13213581, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     57%|█████▋    | 17/30 [00:23<00:16,  1.26s/steps, loss=(array(0.13264737, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     60%|██████    | 18/30 [00:22<00:14,  1.18s/steps, loss=(array(0.13213581, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     60%|██████    | 18/30 [00:23<00:15,  1.29s/steps, loss=(array(0.13264737, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     60%|██████    | 18/30 [00:23<00:14,  1.18s/steps, loss=(array(0.13094926, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     60%|██████    | 18/30 [00:24<00:15,  1.29s/steps, loss=(array(0.13115415, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     63%|██████▎   | 19/30 [00:24<00:14,  1.31s/steps, loss=(array(0.13094926, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     63%|██████▎   | 19/30 [00:25<00:13,  1.27s/steps, loss=(array(0.13115415, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     63%|██████▎   | 19/30 [00:25<00:14,  1.31s/steps, loss=(array(0.1295346, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     63%|██████▎   | 19/30 [00:25<00:13,  1.27s/steps, loss=(array(0.12948453, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     67%|██████▋   | 20/30 [00:25<00:13,  1.31s/steps, loss=(array(0.1295346, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     67%|██████▋   | 20/30 [00:26<00:13,  1.38s/steps, loss=(array(0.12948453, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     67%|██████▋   | 20/30 [00:26<00:13,  1.31s/steps, loss=(array(0.12891212, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     67%|██████▋   | 20/30 [00:27<00:13,  1.38s/steps, loss=(array(0.12859935, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     70%|███████   | 21/30 [00:27<00:11,  1.28s/steps, loss=(array(0.12891212, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     70%|███████   | 21/30 [00:28<00:12,  1.34s/steps, loss=(array(0.12859935, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     70%|███████   | 21/30 [00:27<00:11,  1.28s/steps, loss=(array(0.12838626, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     70%|███████   | 21/30 [00:28<00:12,  1.34s/steps, loss=(array(0.12778325, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     73%|███████▎  | 22/30 [00:28<00:10,  1.33s/steps, loss=(array(0.12838626, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     73%|███████▎  | 22/30 [00:29<00:10,  1.36s/steps, loss=(array(0.12778325, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     73%|███████▎  | 22/30 [00:28<00:10,  1.33s/steps, loss=(array(0.12780203, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     73%|███████▎  | 22/30 [00:29<00:10,  1.36s/steps, loss=(array(0.12666644, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     77%|███████▋  | 23/30 [00:29<00:09,  1.30s/steps, loss=(array(0.12780203, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     77%|███████▋  | 23/30 [00:30<00:09,  1.33s/steps, loss=(array(0.12666644, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     77%|███████▋  | 23/30 [00:30<00:09,  1.30s/steps, loss=(array(0.12699284, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     77%|███████▋  | 23/30 [00:31<00:09,  1.33s/steps, loss=(array(0.12535349, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     80%|████████  | 24/30 [00:31<00:08,  1.38s/steps, loss=(array(0.12699284, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     80%|████████  | 24/30 [00:31<00:07,  1.27s/steps, loss=(array(0.12535349, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     80%|████████  | 24/30 [00:31<00:08,  1.38s/steps, loss=(array(0.12666637, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     80%|████████  | 24/30 [00:32<00:07,  1.27s/steps, loss=(array(0.12486979, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     83%|████████▎ | 25/30 [00:32<00:06,  1.33s/steps, loss=(array(0.12666637, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     83%|████████▎ | 25/30 [00:33<00:06,  1.39s/steps, loss=(array(0.12486979, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     83%|████████▎ | 25/30 [00:33<00:06,  1.33s/steps, loss=(array(0.12594077, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     83%|████████▎ | 25/30 [00:34<00:06,  1.39s/steps, loss=(array(0.12393014, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     87%|████████▋ | 26/30 [00:33<00:05,  1.30s/steps, loss=(array(0.12594077, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     87%|████████▋ | 26/30 [00:34<00:05,  1.38s/steps, loss=(array(0.12393014, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     87%|████████▋ | 26/30 [00:34<00:05,  1.30s/steps, loss=(array(0.12517552, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     87%|████████▋ | 26/30 [00:35<00:05,  1.38s/steps, loss=(array(0.12295793, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     90%|█████████ | 27/30 [00:34<00:03,  1.28s/steps, loss=(array(0.12517552, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     90%|█████████ | 27/30 [00:35<00:03,  1.29s/steps, loss=(array(0.12295793, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     90%|█████████ | 27/30 [00:35<00:03,  1.28s/steps, loss=(array(0.1246697, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     90%|█████████ | 27/30 [00:36<00:03,  1.29s/steps, loss=(array(0.12243161, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     93%|█████████▎| 28/30 [00:36<00:02,  1.25s/steps, loss=(array(0.1246697, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     93%|█████████▎| 28/30 [00:37<00:02,  1.32s/steps, loss=(array(0.12243161, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     93%|█████████▎| 28/30 [00:36<00:02,  1.25s/steps, loss=(array(0.12396979, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     93%|█████████▎| 28/30 [00:37<00:02,  1.32s/steps, loss=(array(0.12167448, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     97%|█████████▋| 29/30 [00:37<00:01,  1.21s/steps, loss=(array(0.12396979, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     97%|█████████▋| 29/30 [00:38<00:01,  1.27s/steps, loss=(array(0.12167448, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     97%|█████████▋| 29/30 [00:37<00:01,  1.21s/steps, loss=(array(0.12344128, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     97%|█████████▋| 29/30 [00:38<00:01,  1.27s/steps, loss=(array(0.12096349, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-    100%|██████████| 30/30 [00:38<00:00,  1.32s/steps, loss=(array(0.12344128, dtype=float32),)]    100%|██████████| 30/30 [00:38<00:00,  1.30s/steps, loss=(array(0.12344128, dtype=float32),)]
-      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    100%|██████████| 30/30 [00:40<00:00,  1.34s/steps, loss=(array(0.12096349, dtype=float32),)]    100%|██████████| 30/30 [00:40<00:00,  1.33s/steps, loss=(array(0.12096349, dtype=float32),)]
+      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.12286855, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.1204821, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      3%|▎         | 1/30 [00:01<00:37,  1.30s/steps, loss=(array(0.12286855, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      3%|▎         | 1/30 [00:01<00:37,  1.28s/steps, loss=(array(0.1204821, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      3%|▎         | 1/30 [00:01<00:37,  1.30s/steps, loss=(array(0.12157726, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      3%|▎         | 1/30 [00:01<00:37,  1.28s/steps, loss=(array(0.1191958, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      7%|▋         | 2/30 [00:02<00:36,  1.30s/steps, loss=(array(0.12157726, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      7%|▋         | 2/30 [00:01<00:22,  1.22steps/s, loss=(array(0.1191958, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      7%|▋         | 2/30 [00:03<00:36,  1.30s/steps, loss=(array(0.11990298, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      7%|▋         | 2/30 [00:01<00:22,  1.22steps/s, loss=(array(0.11710189, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     10%|█         | 3/30 [00:03<00:35,  1.31s/steps, loss=(array(0.11990298, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     10%|█         | 3/30 [00:02<00:18,  1.49steps/s, loss=(array(0.11710189, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     10%|█         | 3/30 [00:04<00:35,  1.31s/steps, loss=(array(0.11821881, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     10%|█         | 3/30 [00:02<00:18,  1.49steps/s, loss=(array(0.11522672, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     13%|█▎        | 4/30 [00:05<00:32,  1.26s/steps, loss=(array(0.11821881, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     13%|█▎        | 4/30 [00:02<00:15,  1.66steps/s, loss=(array(0.11522672, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     13%|█▎        | 4/30 [00:05<00:32,  1.26s/steps, loss=(array(0.11665191, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     13%|█▎        | 4/30 [00:02<00:15,  1.66steps/s, loss=(array(0.11388714, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     17%|█▋        | 5/30 [00:06<00:30,  1.23s/steps, loss=(array(0.11665191, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     17%|█▋        | 5/30 [00:03<00:14,  1.78steps/s, loss=(array(0.11388714, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     17%|█▋        | 5/30 [00:06<00:30,  1.23s/steps, loss=(array(0.11527538, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     17%|█▋        | 5/30 [00:03<00:14,  1.78steps/s, loss=(array(0.11266527, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     20%|██        | 6/30 [00:07<00:30,  1.27s/steps, loss=(array(0.11527538, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     20%|██        | 6/30 [00:03<00:12,  1.86steps/s, loss=(array(0.11266527, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     20%|██        | 6/30 [00:08<00:30,  1.27s/steps, loss=(array(0.11410134, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     20%|██        | 6/30 [00:03<00:12,  1.86steps/s, loss=(array(0.11158741, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     23%|██▎       | 7/30 [00:08<00:29,  1.27s/steps, loss=(array(0.11410134, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     23%|██▎       | 7/30 [00:04<00:12,  1.88steps/s, loss=(array(0.11158741, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     23%|██▎       | 7/30 [00:09<00:29,  1.27s/steps, loss=(array(0.11293651, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     23%|██▎       | 7/30 [00:04<00:12,  1.88steps/s, loss=(array(0.11070962, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     27%|██▋       | 8/30 [00:10<00:28,  1.27s/steps, loss=(array(0.11293651, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     27%|██▋       | 8/30 [00:04<00:12,  1.72steps/s, loss=(array(0.11070962, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     27%|██▋       | 8/30 [00:10<00:28,  1.27s/steps, loss=(array(0.11174488, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     27%|██▋       | 8/30 [00:05<00:12,  1.72steps/s, loss=(array(0.10984939, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     30%|███       | 9/30 [00:11<00:27,  1.30s/steps, loss=(array(0.11174488, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     30%|███       | 9/30 [00:05<00:11,  1.80steps/s, loss=(array(0.10984939, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     30%|███       | 9/30 [00:11<00:27,  1.30s/steps, loss=(array(0.11063935, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     30%|███       | 9/30 [00:05<00:11,  1.80steps/s, loss=(array(0.10899784, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     33%|███▎      | 10/30 [00:13<00:27,  1.36s/steps, loss=(array(0.11063935, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     33%|███▎      | 10/30 [00:05<00:10,  1.88steps/s, loss=(array(0.10899784, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     33%|███▎      | 10/30 [00:14<00:27,  1.36s/steps, loss=(array(0.10956445, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     33%|███▎      | 10/30 [00:05<00:10,  1.88steps/s, loss=(array(0.10808228, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     37%|███▋      | 11/30 [00:15<00:31,  1.66s/steps, loss=(array(0.10956445, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     37%|███▋      | 11/30 [00:06<00:11,  1.61steps/s, loss=(array(0.10808228, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     37%|███▋      | 11/30 [00:16<00:31,  1.66s/steps, loss=(array(0.10844908, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     37%|███▋      | 11/30 [00:06<00:11,  1.61steps/s, loss=(array(0.10719049, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     40%|████      | 12/30 [00:17<00:29,  1.67s/steps, loss=(array(0.10844908, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     40%|████      | 12/30 [00:07<00:10,  1.72steps/s, loss=(array(0.10719049, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     40%|████      | 12/30 [00:17<00:29,  1.67s/steps, loss=(array(0.10726884, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     40%|████      | 12/30 [00:07<00:10,  1.72steps/s, loss=(array(0.10641219, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     43%|████▎     | 13/30 [00:18<00:27,  1.63s/steps, loss=(array(0.10726884, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     43%|████▎     | 13/30 [00:07<00:09,  1.79steps/s, loss=(array(0.10641219, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     43%|████▎     | 13/30 [00:19<00:27,  1.63s/steps, loss=(array(0.10610142, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     43%|████▎     | 13/30 [00:07<00:09,  1.79steps/s, loss=(array(0.10555577, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     47%|████▋     | 14/30 [00:20<00:25,  1.62s/steps, loss=(array(0.10610142, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     47%|████▋     | 14/30 [00:08<00:08,  1.85steps/s, loss=(array(0.10555577, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     47%|████▋     | 14/30 [00:20<00:25,  1.62s/steps, loss=(array(0.10509175, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     47%|████▋     | 14/30 [00:08<00:08,  1.85steps/s, loss=(array(0.10454251, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     50%|█████     | 15/30 [00:21<00:23,  1.58s/steps, loss=(array(0.10509175, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     50%|█████     | 15/30 [00:08<00:07,  1.90steps/s, loss=(array(0.10454251, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     50%|█████     | 15/30 [00:22<00:23,  1.58s/steps, loss=(array(0.10422537, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     50%|█████     | 15/30 [00:08<00:07,  1.90steps/s, loss=(array(0.10354787, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     53%|█████▎    | 16/30 [00:22<00:20,  1.45s/steps, loss=(array(0.10422537, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     53%|█████▎    | 16/30 [00:09<00:07,  1.94steps/s, loss=(array(0.10354787, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     53%|█████▎    | 16/30 [00:23<00:20,  1.45s/steps, loss=(array(0.10342838, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     53%|█████▎    | 16/30 [00:09<00:07,  1.94steps/s, loss=(array(0.10277044, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     57%|█████▋    | 17/30 [00:24<00:18,  1.44s/steps, loss=(array(0.10342838, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     57%|█████▋    | 17/30 [00:09<00:06,  1.95steps/s, loss=(array(0.10277044, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     57%|█████▋    | 17/30 [00:24<00:18,  1.44s/steps, loss=(array(0.102764, dtype=float32),)]  /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     57%|█████▋    | 17/30 [00:09<00:06,  1.95steps/s, loss=(array(0.10228398, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     60%|██████    | 18/30 [00:25<00:16,  1.37s/steps, loss=(array(0.102764, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     60%|██████    | 18/30 [00:10<00:06,  1.96steps/s, loss=(array(0.10228398, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     60%|██████    | 18/30 [00:25<00:16,  1.37s/steps, loss=(array(0.10217278, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     60%|██████    | 18/30 [00:10<00:06,  1.96steps/s, loss=(array(0.1017876, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     63%|██████▎   | 19/30 [00:26<00:15,  1.37s/steps, loss=(array(0.10217278, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     63%|██████▎   | 19/30 [00:10<00:05,  1.97steps/s, loss=(array(0.1017876, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     63%|██████▎   | 19/30 [00:27<00:15,  1.37s/steps, loss=(array(0.1015256, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     63%|██████▎   | 19/30 [00:10<00:05,  1.97steps/s, loss=(array(0.10098048, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     67%|██████▋   | 20/30 [00:28<00:14,  1.42s/steps, loss=(array(0.1015256, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     67%|██████▋   | 20/30 [00:11<00:05,  1.98steps/s, loss=(array(0.10098048, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     67%|██████▋   | 20/30 [00:28<00:14,  1.42s/steps, loss=(array(0.1008734, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     67%|██████▋   | 20/30 [00:11<00:05,  1.98steps/s, loss=(array(0.10009673, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     70%|███████   | 21/30 [00:29<00:11,  1.30s/steps, loss=(array(0.1008734, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     70%|███████   | 21/30 [00:11<00:04,  1.97steps/s, loss=(array(0.10009673, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     70%|███████   | 21/30 [00:29<00:11,  1.30s/steps, loss=(array(0.1003578, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     70%|███████   | 21/30 [00:11<00:04,  1.97steps/s, loss=(array(0.09944488, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     73%|███████▎  | 22/30 [00:30<00:10,  1.34s/steps, loss=(array(0.1003578, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     73%|███████▎  | 22/30 [00:12<00:05,  1.55steps/s, loss=(array(0.09944488, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     73%|███████▎  | 22/30 [00:31<00:10,  1.34s/steps, loss=(array(0.09990059, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     73%|███████▎  | 22/30 [00:12<00:05,  1.55steps/s, loss=(array(0.09901585, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     77%|███████▋  | 23/30 [00:32<00:09,  1.34s/steps, loss=(array(0.09990059, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     77%|███████▋  | 23/30 [00:13<00:04,  1.64steps/s, loss=(array(0.09901585, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     77%|███████▋  | 23/30 [00:32<00:09,  1.34s/steps, loss=(array(0.0993141, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     77%|███████▋  | 23/30 [00:13<00:04,  1.64steps/s, loss=(array(0.09857497, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     80%|████████  | 24/30 [00:33<00:07,  1.27s/steps, loss=(array(0.0993141, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     80%|████████  | 24/30 [00:13<00:03,  1.73steps/s, loss=(array(0.09857497, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     80%|████████  | 24/30 [00:33<00:07,  1.27s/steps, loss=(array(0.09869492, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     80%|████████  | 24/30 [00:13<00:03,  1.73steps/s, loss=(array(0.09806994, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     83%|████████▎ | 25/30 [00:34<00:06,  1.25s/steps, loss=(array(0.09869492, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     83%|████████▎ | 25/30 [00:14<00:02,  1.79steps/s, loss=(array(0.09806994, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     83%|████████▎ | 25/30 [00:35<00:06,  1.25s/steps, loss=(array(0.09818743, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     83%|████████▎ | 25/30 [00:14<00:02,  1.79steps/s, loss=(array(0.09766509, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     87%|████████▋ | 26/30 [00:35<00:05,  1.25s/steps, loss=(array(0.09818743, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     87%|████████▋ | 26/30 [00:14<00:02,  1.82steps/s, loss=(array(0.09766509, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     87%|████████▋ | 26/30 [00:36<00:05,  1.25s/steps, loss=(array(0.09771806, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     87%|████████▋ | 26/30 [00:14<00:02,  1.82steps/s, loss=(array(0.09741854, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     90%|█████████ | 27/30 [00:36<00:03,  1.24s/steps, loss=(array(0.09771806, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     90%|█████████ | 27/30 [00:15<00:01,  1.85steps/s, loss=(array(0.09741854, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     90%|█████████ | 27/30 [00:37<00:03,  1.24s/steps, loss=(array(0.0972435, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     90%|█████████ | 27/30 [00:15<00:01,  1.85steps/s, loss=(array(0.09724872, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     93%|█████████▎| 28/30 [00:38<00:02,  1.25s/steps, loss=(array(0.0972435, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     93%|█████████▎| 28/30 [00:15<00:01,  1.84steps/s, loss=(array(0.09724872, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     93%|█████████▎| 28/30 [00:39<00:02,  1.25s/steps, loss=(array(0.09676144, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     93%|█████████▎| 28/30 [00:15<00:01,  1.84steps/s, loss=(array(0.09710097, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     97%|█████████▋| 29/30 [00:39<00:01,  1.37s/steps, loss=(array(0.09676144, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     97%|█████████▋| 29/30 [00:16<00:00,  1.87steps/s, loss=(array(0.09710097, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     97%|█████████▋| 29/30 [00:40<00:01,  1.37s/steps, loss=(array(0.0963394, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     97%|█████████▋| 29/30 [00:16<00:00,  1.87steps/s, loss=(array(0.09693094, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-    100%|██████████| 30/30 [00:40<00:00,  1.27s/steps, loss=(array(0.0963394, dtype=float32),)]    100%|██████████| 30/30 [00:40<00:00,  1.36s/steps, loss=(array(0.0963394, dtype=float32),)]
-      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    100%|██████████| 30/30 [00:16<00:00,  1.91steps/s, loss=(array(0.09693094, dtype=float32),)]    100%|██████████| 30/30 [00:16<00:00,  1.78steps/s, loss=(array(0.09693094, dtype=float32),)]
+      0%|          | 0/30 [00:00<?, ?steps/s]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.09608214, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      0%|          | 0/30 [00:00<?, ?steps/s, loss=(array(0.09666865, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      3%|▎         | 1/30 [00:01<00:37,  1.30s/steps, loss=(array(0.09608214, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      3%|▎         | 1/30 [00:00<00:14,  2.01steps/s, loss=(array(0.09666865, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      3%|▎         | 1/30 [00:01<00:37,  1.30s/steps, loss=(array(0.09318495, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      3%|▎         | 1/30 [00:00<00:14,  2.01steps/s, loss=(array(0.09338337, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-      7%|▋         | 2/30 [00:02<00:36,  1.31s/steps, loss=(array(0.09318495, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      7%|▋         | 2/30 [00:00<00:14,  2.00steps/s, loss=(array(0.09338337, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-      7%|▋         | 2/30 [00:03<00:36,  1.31s/steps, loss=(array(0.09066228, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+      7%|▋         | 2/30 [00:01<00:14,  2.00steps/s, loss=(array(0.09046184, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     10%|█         | 3/30 [00:04<00:41,  1.54s/steps, loss=(array(0.09066228, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     10%|█         | 3/30 [00:01<00:17,  1.56steps/s, loss=(array(0.09046184, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     10%|█         | 3/30 [00:05<00:41,  1.54s/steps, loss=(array(0.08951312, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     10%|█         | 3/30 [00:01<00:17,  1.56steps/s, loss=(array(0.08920133, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     13%|█▎        | 4/30 [00:06<00:41,  1.59s/steps, loss=(array(0.08951312, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     13%|█▎        | 4/30 [00:02<00:15,  1.71steps/s, loss=(array(0.08920133, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     13%|█▎        | 4/30 [00:06<00:41,  1.59s/steps, loss=(array(0.08874686, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     13%|█▎        | 4/30 [00:02<00:15,  1.71steps/s, loss=(array(0.08875691, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     17%|█▋        | 5/30 [00:07<00:35,  1.42s/steps, loss=(array(0.08874686, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     17%|█▋        | 5/30 [00:02<00:13,  1.80steps/s, loss=(array(0.08875691, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     17%|█▋        | 5/30 [00:07<00:35,  1.42s/steps, loss=(array(0.087819, dtype=float32),)]  /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     17%|█▋        | 5/30 [00:02<00:13,  1.80steps/s, loss=(array(0.08838595, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     20%|██        | 6/30 [00:08<00:34,  1.43s/steps, loss=(array(0.087819, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     20%|██        | 6/30 [00:03<00:12,  1.85steps/s, loss=(array(0.08838595, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     20%|██        | 6/30 [00:09<00:34,  1.43s/steps, loss=(array(0.08688375, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     20%|██        | 6/30 [00:03<00:12,  1.85steps/s, loss=(array(0.08772989, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     23%|██▎       | 7/30 [00:10<00:33,  1.45s/steps, loss=(array(0.08688375, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     23%|██▎       | 7/30 [00:03<00:12,  1.90steps/s, loss=(array(0.08772989, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     23%|██▎       | 7/30 [00:10<00:33,  1.45s/steps, loss=(array(0.08598077, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     23%|██▎       | 7/30 [00:03<00:12,  1.90steps/s, loss=(array(0.08669016, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     27%|██▋       | 8/30 [00:11<00:30,  1.38s/steps, loss=(array(0.08598077, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     27%|██▋       | 8/30 [00:04<00:11,  1.92steps/s, loss=(array(0.08669016, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     27%|██▋       | 8/30 [00:11<00:30,  1.38s/steps, loss=(array(0.08520594, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     27%|██▋       | 8/30 [00:04<00:11,  1.92steps/s, loss=(array(0.08554328, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     30%|███       | 9/30 [00:12<00:29,  1.39s/steps, loss=(array(0.08520594, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     30%|███       | 9/30 [00:04<00:10,  1.94steps/s, loss=(array(0.08554328, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     30%|███       | 9/30 [00:13<00:29,  1.39s/steps, loss=(array(0.08454543, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     30%|███       | 9/30 [00:04<00:10,  1.94steps/s, loss=(array(0.08451654, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     33%|███▎      | 10/30 [00:13<00:26,  1.32s/steps, loss=(array(0.08454543, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     33%|███▎      | 10/30 [00:05<00:10,  1.96steps/s, loss=(array(0.08451654, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     33%|███▎      | 10/30 [00:14<00:26,  1.32s/steps, loss=(array(0.0836559, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     33%|███▎      | 10/30 [00:05<00:10,  1.96steps/s, loss=(array(0.08366554, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     37%|███▋      | 11/30 [00:15<00:24,  1.29s/steps, loss=(array(0.0836559, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     37%|███▋      | 11/30 [00:05<00:09,  1.92steps/s, loss=(array(0.08366554, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     37%|███▋      | 11/30 [00:15<00:24,  1.29s/steps, loss=(array(0.0825943, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     37%|███▋      | 11/30 [00:05<00:09,  1.92steps/s, loss=(array(0.08294053, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     40%|████      | 12/30 [00:16<00:25,  1.41s/steps, loss=(array(0.0825943, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     40%|████      | 12/30 [00:06<00:09,  1.89steps/s, loss=(array(0.08294053, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     40%|████      | 12/30 [00:17<00:25,  1.41s/steps, loss=(array(0.08164643, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     40%|████      | 12/30 [00:06<00:09,  1.89steps/s, loss=(array(0.08211707, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     43%|████▎     | 13/30 [00:18<00:25,  1.47s/steps, loss=(array(0.08164643, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     43%|████▎     | 13/30 [00:06<00:08,  1.92steps/s, loss=(array(0.08211707, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     43%|████▎     | 13/30 [00:19<00:25,  1.47s/steps, loss=(array(0.08091293, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     43%|████▎     | 13/30 [00:06<00:08,  1.92steps/s, loss=(array(0.08114301, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     47%|████▋     | 14/30 [00:19<00:23,  1.47s/steps, loss=(array(0.08091293, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     47%|████▋     | 14/30 [00:07<00:09,  1.63steps/s, loss=(array(0.08114301, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     47%|████▋     | 14/30 [00:20<00:23,  1.47s/steps, loss=(array(0.08025898, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     47%|████▋     | 14/30 [00:07<00:09,  1.63steps/s, loss=(array(0.08034742, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     50%|█████     | 15/30 [00:21<00:21,  1.45s/steps, loss=(array(0.08025898, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     50%|█████     | 15/30 [00:08<00:08,  1.72steps/s, loss=(array(0.08034742, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     50%|█████     | 15/30 [00:21<00:21,  1.45s/steps, loss=(array(0.07956423, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     50%|█████     | 15/30 [00:08<00:08,  1.72steps/s, loss=(array(0.0798137, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     53%|█████▎    | 16/30 [00:22<00:18,  1.33s/steps, loss=(array(0.07956423, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     53%|█████▎    | 16/30 [00:08<00:07,  1.80steps/s, loss=(array(0.0798137, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     53%|█████▎    | 16/30 [00:22<00:18,  1.33s/steps, loss=(array(0.07881958, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     53%|█████▎    | 16/30 [00:08<00:07,  1.80steps/s, loss=(array(0.07933123, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     57%|█████▋    | 17/30 [00:23<00:16,  1.24s/steps, loss=(array(0.07881958, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     57%|█████▋    | 17/30 [00:09<00:07,  1.85steps/s, loss=(array(0.07933123, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     57%|█████▋    | 17/30 [00:23<00:16,  1.24s/steps, loss=(array(0.07812418, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     57%|█████▋    | 17/30 [00:09<00:07,  1.85steps/s, loss=(array(0.07883579, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     60%|██████    | 18/30 [00:24<00:14,  1.20s/steps, loss=(array(0.07812418, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     60%|██████    | 18/30 [00:09<00:06,  1.90steps/s, loss=(array(0.07883579, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     60%|██████    | 18/30 [00:25<00:14,  1.20s/steps, loss=(array(0.07755722, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     60%|██████    | 18/30 [00:09<00:06,  1.90steps/s, loss=(array(0.07827111, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     63%|██████▎   | 19/30 [00:25<00:13,  1.21s/steps, loss=(array(0.07755722, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     63%|██████▎   | 19/30 [00:10<00:05,  1.93steps/s, loss=(array(0.07827111, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     63%|██████▎   | 19/30 [00:26<00:13,  1.21s/steps, loss=(array(0.07703114, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     63%|██████▎   | 19/30 [00:10<00:05,  1.93steps/s, loss=(array(0.07767029, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     67%|██████▋   | 20/30 [00:27<00:12,  1.25s/steps, loss=(array(0.07703114, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     67%|██████▋   | 20/30 [00:10<00:05,  1.96steps/s, loss=(array(0.07767029, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     67%|██████▋   | 20/30 [00:27<00:12,  1.25s/steps, loss=(array(0.07644749, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     67%|██████▋   | 20/30 [00:10<00:05,  1.96steps/s, loss=(array(0.0771506, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     70%|███████   | 21/30 [00:28<00:10,  1.15s/steps, loss=(array(0.07644749, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     70%|███████   | 21/30 [00:11<00:04,  1.97steps/s, loss=(array(0.0771506, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     70%|███████   | 21/30 [00:28<00:10,  1.15s/steps, loss=(array(0.07577264, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     70%|███████   | 21/30 [00:11<00:04,  1.97steps/s, loss=(array(0.076602, dtype=float32),)] /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     73%|███████▎  | 22/30 [00:29<00:10,  1.30s/steps, loss=(array(0.07577264, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     73%|███████▎  | 22/30 [00:11<00:04,  1.99steps/s, loss=(array(0.076602, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     73%|███████▎  | 22/30 [00:30<00:10,  1.30s/steps, loss=(array(0.07500708, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     73%|███████▎  | 22/30 [00:11<00:04,  1.99steps/s, loss=(array(0.0759555, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     77%|███████▋  | 23/30 [00:31<00:09,  1.42s/steps, loss=(array(0.07500708, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     77%|███████▋  | 23/30 [00:12<00:03,  2.00steps/s, loss=(array(0.0759555, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     77%|███████▋  | 23/30 [00:32<00:09,  1.42s/steps, loss=(array(0.07421581, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     77%|███████▋  | 23/30 [00:12<00:03,  2.00steps/s, loss=(array(0.07541937, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     80%|████████  | 24/30 [00:33<00:09,  1.55s/steps, loss=(array(0.07421581, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     80%|████████  | 24/30 [00:12<00:03,  2.00steps/s, loss=(array(0.07541937, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     80%|████████  | 24/30 [00:33<00:09,  1.55s/steps, loss=(array(0.07351583, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     80%|████████  | 24/30 [00:12<00:03,  2.00steps/s, loss=(array(0.07493688, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     83%|████████▎ | 25/30 [00:34<00:07,  1.50s/steps, loss=(array(0.07351583, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     83%|████████▎ | 25/30 [00:13<00:02,  1.71steps/s, loss=(array(0.07493688, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     83%|████████▎ | 25/30 [00:35<00:07,  1.50s/steps, loss=(array(0.07295816, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     83%|████████▎ | 25/30 [00:13<00:02,  1.71steps/s, loss=(array(0.07433534, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     87%|████████▋ | 26/30 [00:35<00:05,  1.44s/steps, loss=(array(0.07295816, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     87%|████████▋ | 26/30 [00:14<00:02,  1.80steps/s, loss=(array(0.07433534, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     87%|████████▋ | 26/30 [00:36<00:05,  1.44s/steps, loss=(array(0.07251285, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     87%|████████▋ | 26/30 [00:14<00:02,  1.80steps/s, loss=(array(0.07384674, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     90%|█████████ | 27/30 [00:37<00:04,  1.48s/steps, loss=(array(0.07251285, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     90%|█████████ | 27/30 [00:14<00:01,  1.87steps/s, loss=(array(0.07384674, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     90%|█████████ | 27/30 [00:38<00:04,  1.48s/steps, loss=(array(0.07211037, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     90%|█████████ | 27/30 [00:14<00:01,  1.87steps/s, loss=(array(0.07344548, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     93%|█████████▎| 28/30 [00:38<00:02,  1.41s/steps, loss=(array(0.07211037, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     93%|█████████▎| 28/30 [00:14<00:01,  1.93steps/s, loss=(array(0.07344548, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     93%|█████████▎| 28/30 [00:39<00:02,  1.41s/steps, loss=(array(0.07173611, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     93%|█████████▎| 28/30 [00:15<00:01,  1.93steps/s, loss=(array(0.07292058, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-     97%|█████████▋| 29/30 [00:40<00:01,  1.42s/steps, loss=(array(0.07173611, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+     97%|█████████▋| 29/30 [00:15<00:00,  1.96steps/s, loss=(array(0.07292058, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:260: UserWarning: Using a target size (torch.Size([1, 1, 1, 256, 256])) that is different to the input size (torch.Size([1, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
       loss = torch.nn.functional.mse_loss(out, image[None, None])
-     97%|█████████▋| 29/30 [00:40<00:01,  1.42s/steps, loss=(array(0.07137462, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
+     97%|█████████▋| 29/30 [00:15<00:00,  1.96steps/s, loss=(array(0.07236104, dtype=float32),)]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:276: UserWarning: Ignoring specified arguments in this call because figure with num: 1 already exists
       fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
-    100%|██████████| 30/30 [00:41<00:00,  1.38s/steps, loss=(array(0.07137462, dtype=float32),)]    100%|██████████| 30/30 [00:41<00:00,  1.38s/steps, loss=(array(0.07137462, dtype=float32),)]
+    100%|██████████| 30/30 [00:16<00:00,  1.85steps/s, loss=(array(0.07236104, dtype=float32),)]    100%|██████████| 30/30 [00:16<00:00,  1.87steps/s, loss=(array(0.07236104, dtype=float32),)]
 
 
 
@@ -2204,13 +2204,13 @@ Results
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
 
 
@@ -2238,7 +2238,7 @@ Results
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/example_learn_samples_multires.py:137: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(image[0]), cmap="gray")
 
 
@@ -2275,7 +2275,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 54.182 seconds)
+   **Total running time of the script:** (2 minutes 1.196 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_learn_samples_multires.py:

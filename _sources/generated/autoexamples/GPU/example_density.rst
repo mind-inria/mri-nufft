@@ -98,12 +98,12 @@ Create sample data
  .. code-block:: none
 
     (256, 256)
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
 
-    <matplotlib.image.AxesImage object at 0x7ecedddd4730>
+    <matplotlib.image.AxesImage object at 0x7979b7bd4bb0>
 
 
 
@@ -171,7 +171,7 @@ proportional to its voronoi cell area.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'Voronoi density compensation')
@@ -235,7 +235,7 @@ This can be viewed as an approximation to the voronoi neth
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'cell_count density compensation')
@@ -279,7 +279,7 @@ In radial trajectory for instance, a sample's weight can be determined from its 
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
     Text(0.5, 1.0, 'manual density compensation')
@@ -332,7 +332,7 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
  .. code-block:: none
 
-    [0.00879697 0.04013839 0.08091018 ... 3.230138   2.6586995  3.4433136 ]
+    [0.00888181 0.04007696 0.08096308 ... 3.2304347  2.6589437  3.4436297 ]
 
 
 
@@ -371,12 +371,12 @@ We can also do density compensation using cufinufft backend
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    [0.01538814+0.j 0.020558  +0.j 0.03999042+0.j ... 3.424799  +0.j
-     2.9435494 +0.j 2.6805587 +0.j]
+    [0.01538814+0.j 0.020558  +0.j 0.03999041+0.j ... 3.424799  +0.j
+     2.9435487 +0.j 2.6805584 +0.j]
 
 
 
@@ -384,7 +384,7 @@ We can also do density compensation using cufinufft backend
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.670 seconds)
+   **Total running time of the script:** (0 minutes 4.983 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_density.py:
