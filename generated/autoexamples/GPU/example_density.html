@@ -831,7 +831,7 @@ of the operator roughly equal to 1.</p>
 /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
   warnings.warn(f&quot;Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)&quot;)
 
-&lt;matplotlib.image.AxesImage object at 0x7979b7bd4bb0&gt;
+&lt;matplotlib.image.AxesImage object at 0x7cc572ba3610&gt;
 </pre></div>
 </div>
 <p>As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.</p>
@@ -955,7 +955,7 @@ Text(0.5, 1.0, &#39;manual density compensation&#39;)
 <span class="nb">print</span><span class="p">(</span><a href="../../_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.density" title="mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.density" class="sphx-glr-backref-module-mrinufft-operators-interfaces-cufinufft sphx-glr-backref-type-py-property"><span class="n">nufft</span><span class="o">.</span><span class="n">density</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00888181 0.04007696 0.08096308 ... 3.2304347  2.6589437  3.4436297 ]
+<img src="../../../_images/sphx_glr_example_density_005.png" srcset="../../../_images/sphx_glr_example_density_005.png" alt="Ground Truth, no density compensation, Pipe density compensation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.00880937 0.04014581 0.08099604 ... 3.2310498  2.65945    3.4442856 ]
 </pre></div>
 </div>
 <p>We can also do density compensation using cufinufft backend</p>
@@ -978,11 +978,11 @@ Text(0.5, 1.0, &#39;manual density compensation&#39;)
   warnings.warn(
 /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
   warnings.warn(
-[0.01538814+0.j 0.020558  +0.j 0.03999041+0.j ... 3.424799  +0.j
- 2.9435487 +0.j 2.6805584 +0.j]
+[0.01538814+0.j 0.020558  +0.j 0.0399904 +0.j ... 3.4247987 +0.j
+ 2.943549  +0.j 2.6805582 +0.j]
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.983 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.196 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-density-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_density.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />
