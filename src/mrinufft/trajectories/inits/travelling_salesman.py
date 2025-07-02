@@ -50,7 +50,6 @@ def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
     return array[order]
 
 
-
 def _cluster_by_coordinate(
     locations: NDArray,
     nb_clusters: int,
