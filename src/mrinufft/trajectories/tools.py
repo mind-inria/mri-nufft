@@ -491,12 +491,24 @@ def get_gradient_times_to_travel(
         * (2 * area_needed[ramp_only_mask] + ge[ramp_only_mask] - gs[ramp_only_mask])
         / (ge[ramp_only_mask] - gs[ramp_only_mask] + np.finfo(gi.dtype).eps)
     )
-    n_ramp_down[ramp_only_mask] = np.ceil(
-        np.abs(gi[ramp_only_mask] - gs[ramp_only_mask]) / (smax * raster_time)
-    ).astype(int)
-    n_ramp_up[ramp_only_mask] = np.ceil(
-        np.abs(ge[ramp_only_mask] - gi[ramp_only_mask]) / (smax * raster_time)
-    ).astype(int)
+    n_ramp_down[ramp_only_mask] = np.min(
+        [
+            n_ramp_down[ramp_only_mask],
+            np.ceil(
+                np.abs(gi[ramp_only_mask] - gs[ramp_only_mask]) / (smax * raster_time)
+            ).astype(int),
+        ],
+        axis=0,
+    )
+    n_ramp_up[ramp_only_mask] = np.min(
+        [
+            n_ramp_up[ramp_only_mask],
+            np.ceil(
+                np.abs(ge[ramp_only_mask] - gi[ramp_only_mask]) / (smax * raster_time)
+            ).astype(int),
+        ],
+        axis=0,
+    )
     # Re-Calculate the updated gi based on new ramp down and ramp up values
     gi[ramp_only_mask] = (
         2 * area_needed[ramp_only_mask]
@@ -1293,6 +1305,7 @@ def add_slew_ramp(
     raster_time: float = DEFAULT_RASTER_TIME,
     gamma: float = Gammas.Hydrogen,
     smax: float = DEFAULT_SMAX,
+    slew_ramp_disable: bool = False,
 ) -> Callable:
     def decorator(trajectory_func):
         sig = inspect.signature(trajectory_func)
@@ -1306,15 +1319,15 @@ def add_slew_ramp(
             _raster_time = kwargs.pop("raster_time", raster_time)
             _gamma = kwargs.pop("gamma", gamma)
             _ramp_to_index = kwargs.pop("ramp_to_index", ramp_to_index)
+            _slew_ramp_disable = kwargs.pop("slew_ramp_disable", slew_ramp_disable)
             # Bind all args (positional and keyword)
             bound = sig.bind(*args, **kwargs)
             bound.apply_defaults()
             in_out = bound.arguments.get("in_out", False)
             traj = trajectory_func(*args, **kwargs)
-            if in_out:
+            if in_out or _slew_ramp_disable:
                 # Send the trajectory as is for in-out trajectories
                 return traj
-
             unnormalized_traj = unnormalize_trajectory(traj, resolution=_resolution)
             gradients, initial_positions = convert_trajectory_to_gradients(
                 traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma

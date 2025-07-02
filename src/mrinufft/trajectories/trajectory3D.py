@@ -244,6 +244,7 @@ def initialize_3D_park_radial(
 ############################
 
 
+@add_slew_ramp
 def initialize_3D_cones(
     Nc: int,
     Ns: int,
@@ -298,6 +299,7 @@ def initialize_3D_cones(
         spiral=spiral,
         in_out=in_out,
         nb_revolutions=nb_zigzags,
+        slew_ramp_disable=True,
     )
 
     # Estimate best cone angle based on the ratio between
