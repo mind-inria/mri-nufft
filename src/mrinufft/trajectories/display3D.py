@@ -101,7 +101,7 @@ def get_gridded_trajectory(
             np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],)),
             None,
             True,
-        )
+        ) / (gridded_ones + np.finfo(np.float32).eps)
     elif grid_type == "inversion":
         data = grid_op.raw_op.adj_op(
             np.repeat(
@@ -110,7 +110,7 @@ def get_gridded_trajectory(
             )[: samples.shape[0]],
             None,
             True,
-        )
+        ) / (gridded_ones + np.finfo(np.float32).eps)
     elif grid_type == "holes":
         data = np.abs(gridded_ones).squeeze() < threshold
         if elliptical_samp:
@@ -143,5 +143,5 @@ def get_gridded_trajectory(
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
         data = grid_op.raw_op.adj_op(
             np.linalg.norm(data, axis=-1).flatten(), None, True
-        )
+        ) / (gridded_ones + np.finfo(np.float32).eps)
     return np.squeeze(np.abs(data))
