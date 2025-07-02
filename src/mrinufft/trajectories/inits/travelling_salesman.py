@@ -30,25 +30,25 @@ def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
             f"Invalid `coord`='{coord}' for arrays with less than 3 dimensions."
         )
 
-    match coord.lower():
-        case "x":
-            coord = array[..., 0]
-        case "y":
-            coord = array[..., 1]
-        case "z":
-            coord = array[..., 2]
-        case "r":
-            coord = np.linalg.norm(array, axis=-1)
-        case "phi":
-            coord = np.sign(array[..., 1]) * np.arccos(
-                array[..., 0] / nl.norm(array[..., :2], axis=-1)
-            )
-        case "theta":
-            coord = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
-        case _:
-            raise ValueError(f"Unknown coordinate `{coord}`")
+    if coord == "x":
+        coord = array[..., 0]
+    elif coord == "y":
+        coord = array[..., 1]
+    elif coord == "z":
+        coord = array[..., 2]
+    elif coord == "r":
+        coord = np.linalg.norm(array, axis=-1)
+    elif coord == "phi":
+        coord = np.sign(array[..., 1]) * np.arccos(
+            array[..., 0] / nl.norm(array[..., :2], axis=-1)
+        )
+    elif coord == "theta":
+        coord = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
+    else:
+        raise ValueError(f"Unknown coordinate `{coord}`")
     order = np.argsort(coord)
     return array[order]
+
 
 
 def _cluster_by_coordinate(
