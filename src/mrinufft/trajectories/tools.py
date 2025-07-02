@@ -555,9 +555,8 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             gmax=gmax,
             smax=smax,
         )
-        N = (
-            np.max(np.sum(n_ramp_down + n_ramp_up + n_plateau, axis=0)) + 2
-        )  # Extra 2 buffer samples
+        # Extra 2 buffer samples
+        N = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
 
     area_needed = (ke - ks) / gamma / raster_time
     # Intermediate gradient values. This is value of plateau or triangle gradients
