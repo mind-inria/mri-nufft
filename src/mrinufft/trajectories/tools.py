@@ -625,6 +625,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             gmax=gmax,
             smax=smax,
         )
+        # Extra 2 buffer samples
         N = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
 
     area_needed = (ke - ks) / gamma / raster_time
