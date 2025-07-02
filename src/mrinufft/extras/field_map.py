@@ -90,7 +90,7 @@ def _make_disk(shape, frac_radius=0.3):
     yy, xx = np.mgrid[:ny, :nx]
     yy, xx = yy - ny // 2, xx - nx // 2
     yy, xx = yy / ny, xx / nx
-    rr = (xx**2 + yy**2) ** 0.5
+    rr = (xx ** 2 + yy ** 2) ** 0.5
     return rr < frac_radius, rr
 
 
@@ -100,5 +100,5 @@ def _make_sphere(shape, frac_radius=0.3):
     zz, yy, xx = np.mgrid[:nz, :ny, :nx]
     zz, yy, xx = zz - nz // 2, yy - ny // 2, xx - nx // 2
     zz, yy, xx = zz / nz, yy / ny, xx / nx
-    rr = (xx**2 + yy**2 + zz**2) ** 0.5
+    rr = (xx ** 2 + yy ** 2 + zz ** 2) ** 0.5
     return rr < frac_radius, rr
