@@ -25,7 +25,8 @@ def is_from_fibonacci_sequence(n: int) -> bool:
         r = int(np.sqrt(n))
         return r * r == n
 
-    return _is_perfect_square(5 * n**2 + 4) or _is_perfect_square(5 * n**2 - 4)
+    return _is_perfect_square(5 * n ** 2 + 4) or _is_perfect_square(5 * n ** 2 - 4)
+
 
 
 def get_closest_fibonacci_number(x: float) -> int:
