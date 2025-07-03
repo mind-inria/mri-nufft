@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**27:46.649** total execution time for 19 files **from all galleries**:
+**42:01.150** total execution time for 19 files **from all galleries**:
 
 .. container::
 
@@ -32,60 +32,60 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``../examples/example_sampling_densities.py``)
-     - 03:27.282
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``../examples/GPU/example_learn_straight_line_readouts.py``)
-     - 03:20.561
-     - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_learn_samples_multires.py` (``../examples/example_learn_samples_multires.py``)
-     - 03:13.155
+     - 06:56.136
      - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_example_gif_3D.py` (``../examples/example_gif_3D.py``)
-     - 03:09.895
+   * - :ref:`sphx_glr_generated_autoexamples_example_sampling_densities.py` (``../examples/example_sampling_densities.py``)
+     - 05:00.322
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_fastMRI_UNet.py` (``../examples/GPU/example_fastMRI_UNet.py``)
-     - 03:01.756
+     - 04:37.726
      - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples_multicoil.py` (``../examples/GPU/example_learn_samples_multicoil.py``)
-     - 02:19.812
+   * - :ref:`sphx_glr_generated_autoexamples_example_gif_3D.py` (``../examples/example_gif_3D.py``)
+     - 04:35.001
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``../examples/GPU/example_learn_straight_line_readouts.py``)
+     - 03:55.683
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_gif_2D.py` (``../examples/example_gif_2D.py``)
-     - 02:02.087
+     - 03:16.208
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples_multicoil.py` (``../examples/GPU/example_learn_samples_multicoil.py``)
+     - 02:56.508
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` (``../examples/example_3D_trajectories.py``)
-     - 01:45.170
+     - 02:43.259
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` (``../examples/GPU/example_learn_samples.py``)
-     - 01:45.043
+     - 02:16.105
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py` (``../examples/example_trajectory_tools.py``)
-     - 01:18.230
+     - 01:58.688
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_subspace.py` (``../examples/example_subspace.py``)
-     - 00:58.134
+     - 01:38.107
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_2D_trajectories.py` (``../examples/example_2D_trajectories.py``)
-     - 00:35.257
+     - 00:52.499
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_stacked.py` (``../examples/example_stacked.py``)
-     - 00:13.735
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_3d_trajectory_display.py` (``../examples/GPU/example_3d_trajectory_display.py``)
-     - 00:11.509
+     - 00:26.246
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_display_config.py` (``../examples/example_display_config.py``)
-     - 00:08.831
+     - 00:14.603
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_3d_trajectory_display.py` (``../examples/GPU/example_3d_trajectory_display.py``)
+     - 00:11.175
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_density.py` (``../examples/GPU/example_density.py``)
-     - 00:06.872
+     - 00:09.713
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_offresonance.py` (``../examples/example_offresonance.py``)
-     - 00:03.381
+     - 00:06.469
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_example_readme.py` (``../examples/example_readme.py``)
-     - 00:03.086
+     - 00:04.093
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_cg.py` (``../examples/GPU/example_cg.py``)
-     - 00:02.856
+     - 00:02.608
      - 0.0

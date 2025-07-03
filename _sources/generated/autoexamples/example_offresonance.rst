@@ -287,7 +287,7 @@ Operator setup
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
       warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
 
 
@@ -332,7 +332,7 @@ is significantly reduced using the off-resonance corrected NUFFT operator (right
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.381 seconds)
+   **Total running time of the script:** (0 minutes 6.469 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_offresonance.py:

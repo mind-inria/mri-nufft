@@ -218,7 +218,7 @@ Operator setup
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 13.735 seconds)
+   **Total running time of the script:** (0 minutes 26.246 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_stacked.py:

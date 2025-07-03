@@ -64,7 +64,7 @@ An example to show how to perform a simple NUFFT.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
 
@@ -123,7 +123,7 @@ An example to show how to perform a simple NUFFT.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.086 seconds)
+   **Total running time of the script:** (0 minutes 4.093 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_example_readme.py:

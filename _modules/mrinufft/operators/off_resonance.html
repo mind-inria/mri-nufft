@@ -897,6 +897,9 @@ document.write(`
 <span class="sd">        Must have same shape as ``b0_map``.</span>
 <span class="sd">        The default is ``None`` (purely imaginary field).</span>
 <span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
+<span class="sd">    negate: bool, optional, default=False</span>
+<span class="sd">        If True, negate the field map. Useful for matching the convention of</span>
+<span class="sd">        your field map generation.</span>
 <span class="sd">    backend: str, optional</span>
 <span class="sd">        The backend to use for computations. Either &#39;cpu&#39;, &#39;gpu&#39; or &#39;torch&#39;.</span>
 <span class="sd">        The default is `cpu`.</span>
@@ -920,6 +923,7 @@ document.write(`
         <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">B</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">negate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">CUPY_AVAILABLE</span><span class="p">:</span>
@@ -934,7 +938,9 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported backend.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span> <span class="o">=</span> <span class="n">fourier_op</span>
-
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">negate</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;negate must be a boolean value.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">negate</span> <span class="k">else</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">n_coils</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">smaps</span>
@@ -974,7 +980,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">=</span> <span class="n">field_map</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span><span class="p">,</span> <span class="n">isign</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">isign</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="MRIFourierCorrected.op">
@@ -1086,11 +1092,10 @@ document.write(`
     <span class="k">return</span> <span class="n">field_map</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">,</span> <span class="n">isign</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
-
     <span class="c1"># get spatial coeffs</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">tl</span> <span class="o">*</span> <span class="n">field_map</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">isign</span> <span class="o">*</span> <span class="n">tl</span> <span class="o">*</span> <span class="n">field_map</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
     <span class="n">C</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span>
         <span class="o">...</span><span class="p">,</span> <span class="mi">0</span>
     <span class="p">]</span>  <span class="c1"># (..., n_time_segments) -&gt; (n_time_segments, ...)</span>
