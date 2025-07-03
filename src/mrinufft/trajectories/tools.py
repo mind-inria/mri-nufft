@@ -485,7 +485,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
 ) -> NDArray:
     """Calculate timings for trapezoidal or triangular gradient waveforms.
 
-    Computes the gradient waveforms required to traverse from a starting k-space
+    Compute the gradient waveforms required to traverse from a starting k-space
     position ``ks`` to an ending k-space position ``ke`` in a fixed number of time
     steps ``N``, subject to hardware constraints on maximum gradient amplitude
     ``gmax`` and slew rate ``smax``. The function supports both trapezoidal
