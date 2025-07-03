@@ -353,6 +353,7 @@ jobs:
       - name: Build API documentation
         run: |
           ${{ env.activate_venv }}
+          export MRINUFFT_BACKEND=cufinufft
           python -m sphinx docs docs_build
 
       - name: Display data
