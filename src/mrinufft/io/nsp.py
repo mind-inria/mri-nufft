@@ -337,7 +337,7 @@ def write_trajectory(
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
-                    " > {smax:.3f}. Please use prephase gradient to avoid this "
+                    f" > {smax:.3f}. Please use prephase gradient to avoid this "
                     " issue."
                 )
 
