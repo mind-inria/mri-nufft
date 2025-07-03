@@ -447,15 +447,15 @@ def read_trajectory(
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
+        # Handle skipped samples
         if start_skip_samples > 0:
             start_location_updates = (
                 np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
             )
             initial_positions += start_location_updates
-            gradients = gradients[:, start_skip_samples:, :]
-        if end_skip_samples > 0:
-            gradients = gradients[:, :-end_skip_samples, :]
+        gradients = gradients[:, start_skip_samples:-end_skip_samples, :]
         num_samples_per_shot -= start_skip_samples + end_skip_samples
+        
         if num_adc_samples is None:
             if read_shots:
                 num_adc_samples = num_samples_per_shot + 1
