@@ -312,6 +312,7 @@ class FourierOperatorBase(ABC):
         ----------
         method: str or callable or array or dict or bool
             The method to use to compute the density compensation.
+
             - If a string, the method should be registered in the density registry.
             - If a callable, it should take the samples and the shape as input.
             - If a dict, it should have a key 'name', to determine which method to use.

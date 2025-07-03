@@ -4,4 +4,4 @@
 Operators Examples
 ------------------
 
-This is a collection of example showcasing the use of MRI-NUFFT operators for different MR imaging modality and specificities.
+This is a collection of examples showcasing the use of MRI-NUFFT operators for different MR imaging modalities and specificities.

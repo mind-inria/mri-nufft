@@ -4,4 +4,4 @@
 Trajectories Examples
 ---------------------
 
-This is a collection of examples showing features of mri-nufft to generate k-space sampling trajectories and how to display them.
+This collection of examples shows how to use MRI-nufft to generate and display k-space sampling trajectories.

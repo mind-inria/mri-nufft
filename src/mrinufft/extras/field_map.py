@@ -62,7 +62,7 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
     -------
     np.ndarray
         T2* map of shape (*shape) in [ms].
-    mask : np.ndarray, optional
+    np.ndarray, optional
         Spatial support binary mask.
 
     """
