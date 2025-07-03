@@ -171,7 +171,7 @@ Reconstruct the image using the CG method
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7cc5741a7b50>
+    <matplotlib.legend.Legend object at 0x77b5431c7d90>
 
 
 
@@ -190,7 +190,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.308 seconds)
+   **Total running time of the script:** (0 minutes 2.856 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:
