@@ -257,9 +257,9 @@ def write_trajectory(
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
         `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
-        This is useful for sequences needing a spoiler at the end of the trajectory.
-        However, spoiler is still not added, it is expected that the sequence
-        handles the spoilers, which can be variable.
+        This is useful for sequences with a spoiler after the readout.
+        Note that spoilers are not added here but should be handled
+        by the sequence.
         `slowdown_to_center` will add a gradient to slow down to the center of the FOV.
     version: float, optional
         Trajectory versioning, by default 5
