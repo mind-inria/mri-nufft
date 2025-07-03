@@ -5,19 +5,22 @@ facilitate the integration of arbitrary k-space trajectories into Pulseq
 sequences. Requires the `pypulseq` package to be installed.
 """
 
+import warnings
+from types import SimpleNamespace
+from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 import numpy as np
 import pypulseq as pp
+from numpy.typing import NDArray
+from .utils import prepare_trajectory_for_seq
 
 
-def read_pulseq_traj(filename):
+def read_pulseq_traj(filename, traj_delay=0.0, grad_offset=0.0):
     """Extract k-space trajectory from a Pulseq sequence file.
 
     The sequence should be a valid Pulseq `.seq` file, with arbitrary gradient
     waveforms, which all have the same length.
 
-    Unlike `Sequence.calculate_kspace`, this function returns the k-space
-    trajectory segmented in shots ("blocks" from Pulseq), and works directly
-    from the gradients waveforms stored in the `.seq` file.
+    Note
 
     Parameters
     ----------
@@ -37,5 +40,166 @@ def read_pulseq_traj(filename):
     seq = pp.Sequence()
     seq.read(filename)
 
+    kspace_adc, kspace, t_exc, t_refocus, t_adc = seq.calculate_kspace(
+        traj_delay, grad_offset
+    )
 
-    gradient_waveforms = seq.waveforms()
+    # split t_adc with t_exc and t_refocus, the index are then used to split kspace_adc
+
+    t_splits = sorted(np.concatenate([t_exc, t_refocus]))
+    idx_prev = 0
+    kspace_shots = []
+    for t in t_splits:
+        idx_next = np.searchsorted(t_adc, t, side="left")
+        if idx_next == idx_prev:
+            continue
+        if idx_next == len(kspace_adc) and t > t_adc[-1]:  # last useful point
+            break
+        kspace_shots.append(kspace_adc[idx_prev:idx_next, :])
+        idx_prev = idx_next
+    kspace_shots = np.asarray(kspace_shots)
+    return kspace_shots
+
+
+def _check_timings(seq):
+    # Check whether the timing of the sequence is correct
+    ok, error_report = seq.check_timing()
+    if ok:
+        return None
+    else:
+        warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
+
+
+def gre_3D(
+        trajectory: NDArray,
+        fov: tuple[float, float, float],
+        img_size: tuple[int, int, int],
+        TR: float,
+        TE: float,
+        TE_pos: float = 0.5,
+        FA: float | None = None,
+        rf_pulse: SimpleNamespace | None =None,
+        rf_spoiling_inc: float = 0.0,
+        system: pp.Opts = pp.Opts.default,
+        osf: int = 1,
+) -> pp.Sequence:
+    """Create a Pulseq 3D-GRE sequence with arbitrary gradient waveform designed
+    to follow a given k-space trajectory.
+
+    The sequence is designed to
+    The
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
+        where the last dimension corresponds to the x, y, and z coordinates in k-space.
+    TR: float
+        The repetition time in milliseconds (ms).
+    TE: float
+        The echo time in milliseconds (ms).
+    FA: float, optional, incompatible with `rf_pulse`
+        The flip angle in degrees (°).
+    TE_pos: float, optional
+        The relative (0-1) position of the echo time within each kspace_shot.
+    rf_pulse: SimpleNamespace, optional, incompatible with `FA`
+        A custom radio-frequency pulse object. If not provided, a block pulse with the specified flip angle and a duration of 4 ms will be created. see `pypulseq.make_block_pulse` or `pypulseq.make_arbitrary_rf` for more details.
+    rf_spoiling_inc: float, optional
+        The increment in the RF phase (in degree) for spoiling. Default is 0.0, which means no spoiling.
+
+    osf: int, optional
+        The oversampling factor for the ADC. Default is 1, which means no oversampling.
+
+    system : pypulseq.Opts, optional
+        The system options for the Pulseq sequence. Default is `pp.Opts.default`.
+
+    Notes
+    -----
+    The  Sequence cycle can be summarized as follows:
+     1. RF pulse
+     2. Delay to sync TE
+     3. Gradients plays: The gradients consist in a prewind to the first point of the trajectory, the trajectory itself, and a rewind to the edge of k-space.
+     3bis.  The ADC is opened on the trajectory points (ignoring the prewind and rewinds parts)
+     4. Gradient spoilers
+     5. Delay to sync the next TR
+
+    Returns
+    -------
+    pp.Sequence
+        A Pulseq sequence object with the specified arbitrary gradient waveform.
+
+
+    See Also
+    --------
+
+    """
+    TR = TR / 1000.0  # convert to seconds
+    TE = TE / 1000.0  # convert to seconds
+    seq = pp.Sequence(system=system)
+
+    if rf_pulse is None and FA is not None:
+        rf_pulse = pp.make_block_pulse(flip_angle=FA, system=system, use="excitation")
+    elif rf_pulse is not None and FA is not None:
+        raise ValueError(
+            "Cannot specify both `rf_pulse` and `FA`. Please provide only one."
+        )
+    elif rf_pulse is None and FA is None:
+        raise ValueError("Either `rf_pulse` or `FA` must be provided.")
+    if not isinstance(rf_pulse, SimpleNamespace):
+        raise TypeError(
+            "The `rf_pulse` parameter must be a SimpleNamespace object, "
+            "as returned by `pypulseq.make_block_pulse` or `pypulseq.make_arbitrary_rf`."
+        )
+
+    full_grads, skip_start, skip_end = prepare_trajectory_for_seq(trajectory, fov=fov, img_size=img_size, raster_time=system.grad_raster_time, gamma=system.gamma, gmax=system.max_grad, smax=system.max_slew, pregrad="prephase", postgrad="slowdown_to_edge")
+    traj_length = full_grads.shape[1] - skip_start - skip_end
+
+    shot_duration = system.grad_raster_time * traj_length  # in seconds
+    adc = pp.make_adc(num_samples=traj_length*osf, system=system, duration=shot_duration, delay=skip_start * system.grad_raster_time)
+
+    # Add a spoiler gradient that move to twice the edge of k-space in the x direction.
+    spoiler = pp.make_trapezoid(channel="x", area=2*img_size[0]/fov[0], system=system)
+
+    delay_before_grad = pp.make_delay(TE - pp.calc_rf_center(rf_pulse)[0] - rf_pulse.delay - TE_pos*shot_duration - skip_start*system.grad_raster_time)
+    delay_end_TR = pp.make_delay(TR - rf_pulse.duration - delay_before_grad - full_grads.shape[1] * system.grad_raster_time)
+
+    rf_phase = 0.0
+    for grad_xyz in full_grads:
+        rf_phase = divmod(rf_phase + rf_spoiling_inc, 360.0)[1]
+        rf_pulse.phase_offset = rf_phase / 180 * np.pi
+        adc.phase_offset = rf_phase / 180 * np.pi
+        seq.add_block(rf_pulse)  # RF pulse
+        seq.add_block(delay_before_grad)  # delay to sync TE
+        seq.add_block(*[pp.make_arbitrary_grad(channel=c, waveform=grad_xyz[i], system=system)  for i,c in enumerate("xyz")], adc)  # pause for tuning echo time
+        seq.add_block(spoiler, delay_end_TR)
+
+    _check_timings(seq)
+    return seq
+
+
+def gre_2D(trajectory, TR, TE, FA, pulse, system=pp.Opts.default):
+    """Create a Pulseq 2D-GRE sequence with arbitrary gradient waveform designed
+    to follow a given k-space trajectory.
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
+        where the last dimension corresponds to the x, y, and z coordinates in k-space.
+    TR: float
+        The repetition time in milliseconds (ms).
+    TE: float
+        The echo time in milliseconds (ms).
+    FA: float
+        The flip angle in degrees (°).
+    pulse: SimpleNamespace
+        A custom radio-frequency pulse object.
+    system : pypulseq.Opts, optional
+        The system options for the Pulseq sequence. Default is `pp.Opts.default`.
+
+    Returns
+    -------
+    pp.Sequence
+        A Pulseq sequence object with the specified arbitrary gradient waveform.
+    """
+    ...
