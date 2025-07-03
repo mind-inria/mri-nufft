@@ -17,6 +17,9 @@ from .maths import (
     Rz,
     generate_fibonacci_circle,
 )
+
+import math
+
 from .tools import conify, duplicate_along_axes, epify, precess, stack
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_tilt
@@ -235,6 +238,234 @@ def initialize_3D_park_radial(
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
     return trajectory
+
+
+def initialize_AZTEK_trajectory(Nc: int, Ns: int, twist: float, shuffle: float, speed: int) -> NDArray:
+    """
+    Compute the 3D radial trajectory for AZTEK imaging.
+
+    The radial shots are oriented according to an adaptive zero TE k-space trajectory,
+    which sustains the sequence overall 3D radial trajectory in k-space. This function
+    generates the amplitude values of the three gradient components Gx, Gy, Gz, and the
+    orientation sign.
+
+    Parameters
+    ----------
+    Nc : int
+        Number of shots (spokes).
+    Ns : int
+        Number of samples per shot (spoke).
+    twist : float
+        Twist parameter for trajectory.
+    shuffle : float
+        Shuffle parameter for trajectory.
+    speed : int
+        Speed parameter for trajectory.
+
+    Returns
+    -------
+    NDArray
+        3D matrix containing the trajectory points.
+
+    References
+    ----------
+    .. [Boucneau+20] Boucneau, Tanguy, Brice Fernandez, Florent Besson,
+       Anne Menini, Florian Wiesinger, Emmanuel Durand, Caroline Caramella,
+       Luc Darrasse, and Xavier Maître.
+       "AZTEK: Adaptive Zero TE K-space trajectories."
+       Journal of Magnetic Resonance Imaging, 2020.
+    """
+    
+    MAX_GRADIENT = 32767
+    scale_factor = 1
+    
+    gx, gy, gz = [0] * Nc, [0] * Nc, [0] * Nc
+    max_gradient = [MAX_GRADIENT]
+    
+    # Constants
+    goldenRatioInv = 2 / (1 + math.sqrt(5))  # Inverse of the golden ratio
+    tmp_scale = MAX_GRADIENT / scale_factor  # Temporary scaling factor
+
+    # Set maximum gradient amplitude
+    max_gradient[0] = MAX_GRADIENT
+
+    # Compute number of phi angles
+    N_phi = math.ceil(2 * math.sqrt(Nc) / (1 + twist))
+    N_phi_corrShift = 13  # Correction shift for phi angles
+
+    # Adjust correction shift if necessary
+    if N_phi < (2 * N_phi_corrShift):
+        N_phi_corrShift = 1
+    if N_phi % 2 == 1:
+        N_phi_corrShift += 1
+
+    # Compute golden ratio adjustments
+    goldenRatioAccDecim = [0.0] * (2 * N_phi_corrShift)
+    for n in range(N_phi_corrShift):
+        goldenRatioAcc = goldenRatioInv * (N_phi + 2 * n - N_phi_corrShift + 1)
+        goldenRatioAccDecim[n] = math.floor(goldenRatioAcc) - goldenRatioAcc
+        goldenRatioAccDecim[N_phi_corrShift + n] = math.ceil(goldenRatioAcc) - goldenRatioAcc
+
+    # Find the best golden ratio adjustment
+    m = 0
+    bestGoldenRatioAccDecim = goldenRatioAccDecim[m]
+    for n in range(1, 2 * N_phi_corrShift):
+        if abs(goldenRatioAccDecim[n]) < abs(goldenRatioAccDecim[m]):
+            m = n
+            bestGoldenRatioAccDecim = goldenRatioAccDecim[m]
+
+    # Adjust N_phi and compute golden ratio correction
+    N_phi += 2 * (m % N_phi_corrShift) - N_phi_corrShift + 1
+    goldenRatioCorr = bestGoldenRatioAccDecim / N_phi
+
+    # Compute mean number of theta angles per phi
+    mean_N_theta = Nc / N_phi
+    dPhi = 2 * math.pi / N_phi  # Delta phi
+    twist_factor = (twist * N_phi) / 4  # Twist factor
+
+    # Initialize theta and phi arrays
+    theta = [0.0] * Nc
+    phi = [0.0] * Nc
+    nbThetaTable = [0] * N_phi  # Number of theta angles per phi
+    nbThetaTableCumul = [0] * (N_phi + 1)  # Cumulative sum of theta angles
+    nbThetaTableCumul[0] = 0
+    N_theta_cumul = 0
+    theta_pos_shift = 0.5  # Initial shift for theta positions
+
+    # Compute theta and phi angles
+    for i_phi in range(N_phi):
+        N_theta = math.ceil((i_phi + 1) * mean_N_theta) - math.ceil(i_phi * mean_N_theta)
+        for i_theta in range(N_theta):
+            theta_pos = (i_theta + theta_pos_shift) / N_theta
+            thetaTmp = math.acos(1 - 2 * theta_pos)
+            theta[N_theta_cumul + i_theta] = thetaTmp
+            phi[N_theta_cumul + i_theta] = (i_phi + twist_factor * math.cos(thetaTmp)) * dPhi
+
+        # Update theta position shift
+        theta_pos_shift += goldenRatioInv + goldenRatioCorr
+        theta_pos_shift -= math.floor(theta_pos_shift)
+
+        # Update theta table and cumulative sum
+        nbThetaTable[i_phi] = N_theta
+        nbThetaTableCumul[i_phi + 1] = nbThetaTableCumul[i_phi] + N_theta
+        N_theta_cumul += N_theta
+
+    # Compute shuffle step and initialize shuffle selection
+    shufflePhiStep = N_phi * (0.5 + shuffle * (goldenRatioInv - 0.5))
+    phiSelected = [0] * N_phi
+    i_phi_shuffle_double = -shufflePhiStep
+    i_phi_shuffle = 0
+    N_theta_cumul = 0
+
+    # Temporary arrays for gradient scales
+    gxSTmp = [0] * Nc
+    gySTmp = [0] * Nc
+    gzSTmp = [0] * Nc
+
+    # Compute gradient scales
+    for i_phi in range(N_phi):
+        i_phi_shuffle_double += shufflePhiStep
+        i_phi_shuffle = math.floor(i_phi_shuffle_double)
+        i_phi_shuffle %= N_phi
+        counter = 0
+        increment = 0
+
+        # Find the next unselected phi angle
+        while phiSelected[i_phi_shuffle] == 1:
+            counter += 1
+            increment = counter * (1 - 2 * ((counter - 1) % 2))
+            i_phi_shuffle += increment
+            if i_phi_shuffle < 0:
+                i_phi_shuffle += N_phi
+            i_phi_shuffle %= N_phi
+
+        i_phi_shuffle_double += increment
+        if i_phi_shuffle_double < 0:
+            i_phi_shuffle_double += N_phi
+
+        # Compute gradient scales for the selected phi angle
+        for i_theta_shuffle in range(nbThetaTable[i_phi_shuffle]):
+            gradPos = N_theta_cumul + i_theta_shuffle
+            if i_phi % 2 == 0:
+                angPos = nbThetaTableCumul[i_phi_shuffle] + i_theta_shuffle
+            else:
+                angPos = nbThetaTableCumul[i_phi_shuffle + 1] - 1 - i_theta_shuffle
+
+            gxSTmp[gradPos] = int(tmp_scale * (math.sin(theta[angPos]) * math.cos(phi[angPos])))
+            gySTmp[gradPos] = int(tmp_scale * (math.sin(theta[angPos]) * math.sin(phi[angPos])))
+            gzSTmp[gradPos] = int(tmp_scale * math.cos(theta[angPos]))
+
+        phiSelected[i_phi_shuffle] = 1
+        N_theta_cumul += nbThetaTable[i_phi_shuffle]
+
+    # Apply speed ordering
+    speed += 1
+    totSpkOverSpdFac = Nc // speed
+    totSpkModSpdFac = Nc % speed
+
+    speedOrder = [0] * speed
+    speedOrderSelected = [0] * speed
+
+    # Compute speed order
+    speedOrder_double = 0
+    goldenRatioSpeedStep = speed * goldenRatioInv
+    for n in range(speed):
+        speedOrder_double += goldenRatioSpeedStep
+        speedOrder[n] = math.floor(speedOrder_double)
+        speedOrder[n] %= speed
+        counter = 0
+        increment = 0
+
+        # Find the next unselected speed order
+        while speedOrderSelected[speedOrder[n]] == 1:
+            counter += 1
+            increment = counter * (1 - 2 * ((counter - 1) % 2))
+            speedOrder[n] += increment
+            if speedOrder[n] < 0:
+                speedOrder[n] += speed
+            speedOrder[n] %= speed
+
+        speedOrder_double += increment
+        if speedOrder_double < 0:
+            speedOrder_double += speed
+
+        speedOrderSelected[speedOrder[n]] = 1
+
+    # Apply speed correction
+    speedOrderCorr = [0] * speed
+    for n in range(speed):
+        if speedOrder[n] > 0:
+            for m in range(speedOrder[n]):
+                for p in range(totSpkModSpdFac):
+                    if m == speedOrder[p]:
+                        speedOrderCorr[n] += 1
+
+    # Reorder gradients based on speed
+    for n in range(Nc):
+        nModSpdFac = n % speed
+        nWithSpdFac = n // speed + speedOrder[nModSpdFac] * totSpkOverSpdFac + speedOrderCorr[nModSpdFac]
+
+        gx[nWithSpdFac] = gxSTmp[n]
+        gy[nWithSpdFac] = gySTmp[n]
+        gz[nWithSpdFac] = gzSTmp[n]
+
+    # Normalize the gradients to be within -0.5 to 0.5
+    max_val = max(max(abs(max(gx)), abs(min(gx))), max(abs(max(gy)), abs(min(gy))), max(abs(max(gz)), abs(min(gz))))
+    gx = [g / (2 * max_val) for g in gx]
+    gy = [g / (2 * max_val) for g in gy]
+    gz = [g / (2 * max_val) for g in gz]
+
+    trajectory = np.zeros((Nc, Ns, 3))
+    
+    for i in range(Nc):
+        for j in range(Ns):
+            fraction = (j + 1) / Ns
+            trajectory[i, j, 0] = gx[i] * fraction
+            trajectory[i, j, 1] = gy[i] * fraction
+            trajectory[i, j, 2] = gz[i] * fraction
+
+    return trajectory
+
 
 
 ############################
