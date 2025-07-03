@@ -198,6 +198,9 @@ class MRIFourierCorrected(FourierOperatorBase):
         Must have same shape as ``b0_map``.
         The default is ``None`` (purely imaginary field).
         Also supports Cupy arrays and Torch tensors.
+    negate: bool, optional, default=False
+        If True, negate the field map. Useful for matching the convention of
+        your field map generation.
     backend: str, optional
         The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
         The default is `cpu`.
@@ -221,6 +224,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         r2star_map=None,
         B=None,
         tl=None,
+        negate=False,
         backend="cpu",
     ):
         if backend == "gpu" and not CUPY_AVAILABLE:
@@ -235,7 +239,9 @@ class MRIFourierCorrected(FourierOperatorBase):
             raise ValueError("Unsupported backend.")
 
         self._fourier_op = fourier_op
-
+        if not isinstance(negate, bool):
+            raise ValueError("negate must be a boolean value.")
+        self.isign = -1 if negate else 1
         self.n_coils = fourier_op.n_coils
         self.shape = fourier_op.shape
         self.smaps = fourier_op.smaps
@@ -275,7 +281,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.C = None
             self.field_map = field_map
         else:
-            self.C = _get_spatial_coefficients(field_map, self.tl)
+            self.C = _get_spatial_coefficients(field_map, self.tl, isign=self.isign)
             self.field_map = None
 
     def op(self, data, *args):
@@ -377,11 +383,10 @@ def _get_complex_fieldmap(b0_map, r2star_map=None):
     return field_map
 
 
-def _get_spatial_coefficients(field_map, tl):
+def _get_spatial_coefficients(field_map, tl, isign=-1):
     xp = get_array_module(field_map)
-
     # get spatial coeffs
-    C = xp.exp(-tl * field_map[..., None])
+    C = xp.exp(isign * tl * field_map[..., None])
     C = C[None, ...].swapaxes(0, -1)[
         ..., 0
     ]  # (..., n_time_segments) -> (n_time_segments, ...)
