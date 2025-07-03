@@ -223,7 +223,7 @@ jobs:
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install -e .[extra,test,dev]
-          python -m pip install finufft pooch brainweb-dl torch fastmri
+          python -m pip install pooch brainweb-dl torch fastmri
 
       - name: Install Python deps
         shell: bash
