@@ -293,8 +293,8 @@ def write_trajectory(
                 "please set version to 5.1 or higher."
             )
         start_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-            ke=initial_positions,
-            ge=gradients[:, 0],
+            kspace_end_loc=initial_positions,
+            end_gradients=gradients[:, 0],
             **scan_consts,
         )
         initial_positions = np.zeros_like(initial_positions)
@@ -311,9 +311,9 @@ def write_trajectory(
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
         end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-            ke=edge_locations,
-            gs=gradients[:, -1],
-            ks=final_positions,
+            kspace_end_loc=edge_locations,
+            start_gradients=gradients[:, -1],
+            kspace_start_loc=final_positions,
             **scan_consts,
         )
         gradients = np.hstack([gradients, end_gradients])
