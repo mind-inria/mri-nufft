@@ -48,7 +48,7 @@ adjoint = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
 display_2D_trajectory(traj, subfigure=axs[1])
-axs[2].imshow(abs(adjoint))
+axs[2].imshow(abs(adjoint).squeeze())
 
 # %%
 # As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.
