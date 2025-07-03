@@ -256,11 +256,13 @@ def write_trajectory(
         `prephase` will add a prephase gradient to the start of the trajectory.
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
-        `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
+        `slowdown_to_edge` will add a gradient to slow down to the edge of the k-space
+        along x-axis for all the shots i.e. go to (Kmax, 0, 0). 
         This is useful for sequences needing a spoiler at the end of the trajectory.
         However, spoiler is still not added, it is expected that the sequence
         handles the spoilers, which can be variable.
-        `slowdown_to_center` will add a gradient to slow down to the center of the FOV.
+        `slowdown_to_center` will add a gradient to slow down to the center 
+        of the k-space.
     version: float, optional
         Trajectory versioning, by default 5
     kwargs : dict, optional
