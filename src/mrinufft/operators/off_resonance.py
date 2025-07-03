@@ -199,7 +199,8 @@ class MRIFourierCorrected(FourierOperatorBase):
         The default is ``None`` (purely imaginary field).
         Also supports Cupy arrays and Torch tensors.
     negate: bool, optional, default=False
-        If True, negate the field map. Useful for matching the convention of your field map generation.
+        If True, negate the field map. Useful for matching the convention of
+        your field map generation.
     backend: str, optional
         The backend to use for computations. Either 'cpu', 'gpu' or 'torch'.
         The default is `cpu`.
