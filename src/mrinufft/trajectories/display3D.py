@@ -102,7 +102,7 @@ def get_gridded_trajectory(
         def _gridder_adj_op(x):
             return gridder.raw_op.adj_op(x, None, True)
 
-    else:
+    elif backend == "finufft":
         gridder = get_operator(backend)(
             trajectory,
             [sh * osf for sh in shape],
@@ -111,7 +111,19 @@ def get_gridded_trajectory(
             spreadinterponly=1,
             spread_kerevalmeth=0,
         )
+    elif backend == "cufinufft":
+        gridder = get_operator(backend)(
+            trajectory,
+            [sh * osf for sh in shape],
+            density=dcomp,
+            upsampfac=osf,
+            gpu_spreadinterponly=1,
+            spread_kerevalmeth=0,
+        )
+    else:
+        raise ValueError(f"Unsupported backend: {backend}")
 
+    if backend in ["finufft", "cufinufft"]:
         def _gridder_adj_op(x):
             return gridder.adj_op(x)
 
