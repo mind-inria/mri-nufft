@@ -253,7 +253,7 @@ def write_trajectory(
         Maximum slew rate in T/m/ms, by default 0.1
     pregrad : str, optional
         Pregrad method, by default `prephase`
-        `prephase` will add a prephase gradient to the start of the trajectory.
+        `prephase` will add a prephasing gradient to the start of the trajectory.
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
         `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
