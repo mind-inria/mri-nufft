@@ -298,7 +298,7 @@ def write_trajectory(
         initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
         Ns_to_skip_at_start = start_gradients.shape[1]
-    if postgrad is not None:
+    if postgrad:
         if version < 5.1:
             raise ValueError(
                 "postgrad is only supported for version >= 5.1, "
