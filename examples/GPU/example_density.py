@@ -41,14 +41,14 @@ print(mri_2D.shape)
 
 traj = initialize_2D_radial(192, 192).astype(np.float32)
 
-nufft = get_operator(BACKEND)(traj, mri_2D.shape, density=False)
+nufft = get_operator(BACKEND)(traj, mri_2D.shape, density=False, squeeze_dims=True)
 kspace = nufft.op(mri_2D)
 adjoint = nufft.adj_op(kspace)
 
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
 display_2D_trajectory(traj, subfigure=axs[1])
-axs[2].imshow(abs(adjoint).squeeze())
+axs[2].imshow(abs(adjoint))
 
 # %%
 # As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.
@@ -71,7 +71,9 @@ axs[2].imshow(abs(adjoint).squeeze())
 # %%
 voronoi_weights = get_density("voronoi", traj)
 
-nufft_voronoi = get_operator(BACKEND)(traj, shape=mri_2D.shape, density=voronoi_weights)
+nufft_voronoi = get_operator(BACKEND)(
+    traj, shape=mri_2D.shape, density=voronoi_weights, squeeze_dims=True
+)
 adjoint_voronoi = nufft_voronoi.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
@@ -99,7 +101,11 @@ axs[2].set_title("Voronoi density compensation")
 cell_count_weights = get_density("cell_count", traj, shape=mri_2D.shape, osf=2.0)
 
 nufft_cell_count = get_operator(BACKEND)(
-    traj, shape=mri_2D.shape, density=cell_count_weights, upsampfac=2.0
+    traj,
+    shape=mri_2D.shape,
+    density=cell_count_weights,
+    upsampfac=2.0,
+    squeeze_dims=True,
 )
 adjoint_cell_count = nufft_cell_count.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -121,7 +127,9 @@ axs[2].set_title("cell_count density compensation")
 # %%
 flat_traj = traj.reshape(-1, 2)
 weights = np.sqrt(np.sum(flat_traj**2, axis=1))
-nufft = get_operator(BACKEND)(traj, shape=mri_2D.shape, density=weights)
+nufft = get_operator(BACKEND)(
+    traj, shape=mri_2D.shape, density=weights, squeeze_dims=True
+)
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 axs[0].imshow(abs(mri_2D))
@@ -148,7 +156,7 @@ axs[2].set_title("manual density compensation")
 # %%
 flat_traj = traj.reshape(-1, 2)
 nufft = get_operator(BACKEND)(
-    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}, squeeze_dims=True
 )
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -166,7 +174,7 @@ print(nufft.density)
 # %%
 flat_traj = traj.reshape(-1, 2)
 nufft = get_operator(BACKEND)(
-    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+    traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}, squeeze_dims=True
 )
 adjoint_manual = nufft.adj_op(kspace)
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))

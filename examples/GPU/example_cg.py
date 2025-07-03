@@ -50,6 +50,7 @@ nufft = NufftOperator(
     samples_loc,
     shape=image.shape,
     density=True,
+    squeeze_dims=True,
 )  # create the NUFFT operator
 
 # %%
@@ -71,15 +72,13 @@ plt.colorbar()
 
 plt.subplot(2, 3, 2)
 plt.title("Conjugate gradient")
-plt.imshow(
-    abs(reconstructed_image).squeeze(), vmin=image.min(), vmax=image.max(), cmap="gray"
-)
+plt.imshow(abs(reconstructed_image), vmin=image.min(), vmax=image.max(), cmap="gray")
 plt.colorbar()
 
 plt.subplot(2, 3, 3)
 plt.title("Adjoint NUFFT")
 plt.imshow(
-    abs(nufft.adj_op(kspace_data)).squeeze(),
+    abs(nufft.adj_op(kspace_data)),
     vmin=image.min(),
     vmax=image.max(),
     cmap="gray",

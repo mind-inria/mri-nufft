@@ -118,12 +118,13 @@ def get_gridded_trajectory(
             density=dcomp,
             upsampfac=osf,
             gpu_spreadinterponly=1,
-            spread_kerevalmeth=0,
+            gpu_kerevalmeth=0,
         )
     else:
         raise ValueError(f"Unsupported backend: {backend}")
 
     if backend in ["finufft", "cufinufft"]:
+
         def _gridder_adj_op(x):
             return gridder.adj_op(x)
 
@@ -140,8 +141,6 @@ def get_gridded_trajectory(
                 np.linspace(1, 10, turbo_factor),
                 samples.shape[0] // turbo_factor + 1,
             )[: samples.shape[0]],
-            None,
-            True,
         ) / (gridded_ones + np.finfo(np.float32).eps)
     elif grid_type == "holes":
         data = np.abs(gridded_ones).squeeze() < threshold
