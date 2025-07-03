@@ -161,5 +161,7 @@ def get_gridded_trajectory(
         else:
             slews, _ = convert_gradients_to_slew_rates(gradients, DEFAULT_RASTER_TIME)
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
-        data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten())/ (gridded_ones + np.finfo(np.float32).eps)
+        data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten()) / (
+            gridded_ones + np.finfo(np.float32).eps
+        )
     return np.squeeze(np.abs(data))
