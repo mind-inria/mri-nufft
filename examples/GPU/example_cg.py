@@ -71,13 +71,18 @@ plt.colorbar()
 
 plt.subplot(2, 3, 2)
 plt.title("Conjugate gradient")
-plt.imshow(abs(reconstructed_image).squeeze(), vmin=image.min(), vmax=image.max(), cmap="gray")
+plt.imshow(
+    abs(reconstructed_image).squeeze(), vmin=image.min(), vmax=image.max(), cmap="gray"
+)
 plt.colorbar()
 
 plt.subplot(2, 3, 3)
 plt.title("Adjoint NUFFT")
 plt.imshow(
-    abs(nufft.adj_op(kspace_data)).squeeze(), vmin=image.min(), vmax=image.max(), cmap="gray"
+    abs(nufft.adj_op(kspace_data)).squeeze(),
+    vmin=image.min(),
+    vmax=image.max(),
+    cmap="gray",
 )
 plt.colorbar()
 
