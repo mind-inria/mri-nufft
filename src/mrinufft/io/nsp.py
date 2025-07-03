@@ -253,7 +253,7 @@ def write_trajectory(
         Maximum slew rate in T/m/ms, by default 0.1
     pregrad : str, optional
         Pregrad method, by default `prephase`
-        `prephase` will add a prephase gradient to the start of the trajectory.
+        `prephase` will add a prephasing gradient to the start of the trajectory.
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
         `slowdown_to_edge` will add a gradient to slow down to the edge of the k-space
@@ -300,7 +300,7 @@ def write_trajectory(
         initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
         Ns_to_skip_at_start = start_gradients.shape[1]
-    if postgrad is not None:
+    if postgrad:
         if version < 5.1:
             raise ValueError(
                 "postgrad is only supported for version >= 5.1, "
@@ -339,7 +339,7 @@ def write_trajectory(
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
-                    " > {smax:.3f}. Please use prephase gradient to avoid this "
+                    f" > {smax:.3f}. Please use prephase gradient to avoid this "
                     " issue."
                 )
 
@@ -449,15 +449,15 @@ def read_trajectory(
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
+        # Handle skipped samples
         if start_skip_samples > 0:
             start_location_updates = (
                 np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
             )
             initial_positions += start_location_updates
-            gradients = gradients[:, start_skip_samples:, :]
-        if end_skip_samples > 0:
-            gradients = gradients[:, :-end_skip_samples, :]
+        gradients = gradients[:, start_skip_samples:-end_skip_samples, :]
         num_samples_per_shot -= start_skip_samples + end_skip_samples
+        
         if num_adc_samples is None:
             if read_shots:
                 num_adc_samples = num_samples_per_shot + 1
