@@ -34,7 +34,7 @@ class CaseInsensitiveEnumMeta(EnumMeta):
 
     def __getattr__(cls, name):
         """
-        Return the enum member matching `name`
+        Return the enum member matching `name`.
 
         We use __getattr__ instead of descriptors or inserting into the enum
         class' __dict__ in order to support `name` and `value` being both
