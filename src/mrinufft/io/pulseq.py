@@ -152,8 +152,7 @@ def gre_3D(
         )
 
     full_grads, skip_start, skip_end = prepare_trajectory_for_seq(trajectory, fov=fov, img_size=img_size, raster_time=system.grad_raster_time, gamma=system.gamma, gmax=system.max_grad, smax=system.max_slew, pregrad="prephase", postgrad="slowdown_to_edge")
-    traj_length = full_grads.shape[1] - skip_start - skip_end
-
+    traj_length = full_grads.shape[1] - skip_start - skip_end + 1
     shot_duration = system.grad_raster_time * traj_length  # in seconds
     adc = pp.make_adc(num_samples=traj_length*osf, system=system, duration=shot_duration, delay=skip_start * system.grad_raster_time)
 
@@ -161,7 +160,7 @@ def gre_3D(
     spoiler = pp.make_trapezoid(channel="x", area=2*img_size[0]/fov[0], system=system)
 
     delay_before_grad = pp.make_delay(TE - pp.calc_rf_center(rf_pulse)[0] - rf_pulse.delay - TE_pos*shot_duration - skip_start*system.grad_raster_time)
-    delay_end_TR = pp.make_delay(TR - rf_pulse.duration - delay_before_grad - full_grads.shape[1] * system.grad_raster_time)
+    delay_end_TR = pp.make_delay(TR - pp.calc_duration(rf_pulse) - delay_before_grad.delay - full_grads.shape[1] * system.grad_raster_time)
 
     rf_phase = 0.0
     for grad_xyz in full_grads:
@@ -170,7 +169,7 @@ def gre_3D(
         adc.phase_offset = rf_phase / 180 * np.pi
         seq.add_block(rf_pulse)  # RF pulse
         seq.add_block(delay_before_grad)  # delay to sync TE
-        seq.add_block(*[pp.make_arbitrary_grad(channel=c, waveform=grad_xyz[i], system=system)  for i,c in enumerate("xyz")], adc)  # pause for tuning echo time
+        seq.add_block(*[pp.make_arbitrary_grad(channel=c, waveform=grad_xyz[:,i], system=system)  for i,c in enumerate("xyz")], adc)  # pause for tuning echo time
         seq.add_block(spoiler, delay_end_TR)
 
     _check_timings(seq)
