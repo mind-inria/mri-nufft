@@ -216,8 +216,8 @@ def prepare_trajectory_for_seq(
     # from #276 : We need to prewind the gradients to the first point of the
     # trajectory, and rewind them to the edge of k-space.
 
-    # We will move from init_pos -[prewind]-> start_pos -> trajectory -> end_pos -[postgrad]-> final_pos
-
+    # We will move from
+    # init_pos -[prewind]-> start_pos -> trajectory -> end_pos -[postgrad]-> final_pos
 
     grads, start_pos, end_pos = convert_trajectory_to_gradients(
         trajectory,
@@ -246,7 +246,7 @@ def prepare_trajectory_for_seq(
 
     final_pos = np.zeros_like(end_pos)
     if postgrad == "slowdown_to_edge":
-    # Set the edge location to [Kmax, 0,0], to prepare for gradient spoiling.
+        # Set the edge location to [Kmax, 0,0], to prepare for gradient spoiling.
         final_pos[..., 0] = img_size[0] / fov[0] / 2
     else:
         raise ValueError("Only 'slowdown_to_edge' is supported for postgrad.")
