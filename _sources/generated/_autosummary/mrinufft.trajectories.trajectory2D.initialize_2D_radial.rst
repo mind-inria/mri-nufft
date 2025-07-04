@@ -5,7 +5,5 @@ initialize\_2D\_radial
 
 .. autofunction:: initialize_2D_radial
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory2D.initialize_2D_radial:
-
 .. minigallery:: mrinufft.trajectories.trajectory2D.initialize_2D_radial
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_radial``:

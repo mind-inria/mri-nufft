@@ -56,3 +56,8 @@ TorchKbNUFFTcpu
       ~TorchKbNUFFTcpu.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTcpu:
+
+   .. minigallery:: mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTcpu
+      :add-heading:

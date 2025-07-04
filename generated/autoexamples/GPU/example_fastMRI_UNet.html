@@ -52,7 +52,7 @@
     <link rel="icon" href="../../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="The NUFFT Operator" href="../../../nufft.html" />
+    <link rel="next" title="Operators Examples" href="../operators/index.html" />
     <link rel="prev" title="Reconstruction with conjugate gradient" href="example_cg.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -176,18 +176,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">GPU Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -196,6 +184,24 @@
 <li class="toctree-l3"><a class="reference internal" href="example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -824,12 +830,15 @@ the field of medical imaging using machine learning techniques.</p>
 </pre></div>
 </div>
 <p>Setup a simple class for the U-Net model</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MRINUFFT_BACKEND&quot;</span><span class="p">,</span> <span class="s2">&quot;cufinufft&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Model for MRI reconstruction using a U-Net.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_trajectory</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;gpunufft&quot;</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
             <span class="n">initial_trajectory</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span>
             <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -887,7 +896,12 @@ the field of medical imaging using machine learning techniques.</p>
 <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Model(
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+  warnings.warn(
+
+Model(
   (operator): MRINufftAutoGrad()
   (unet): Unet(
     (down_sample_layers): ModuleList(
@@ -1053,9 +1067,9 @@ the field of medical imaging using machine learning techniques.</p>
 <span class="n">plot_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">,</span> <span class="n">mri_2D</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">init_traj</span></a><span class="p">,</span> <span class="n">dc_adjoint</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_fastMRI_UNet_001.png" srcset="../../../_images/sphx_glr_example_fastMRI_UNet_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:131: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
+<img src="../../../_images/sphx_glr_example_fastMRI_UNet_001.png" srcset="../../../_images/sphx_glr_example_fastMRI_UNet_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:132: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
   mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, &quot;T1&quot;)[80, ...]).astype(np.complex64))[
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:104: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:105: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
   axs[0].imshow(np.abs(mri_2D[0]), cmap=&quot;gray&quot;)
 </pre></div>
 </div>
@@ -1108,209 +1122,209 @@ the field of medical imaging using machine learning techniques.</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/100 [00:00&lt;?, ?steps/s]
-  0%|          | 0/100 [00:01&lt;?, ?steps/s, loss=0.964]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:104: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+  0%|          | 0/100 [00:00&lt;?, ?steps/s, loss=1.09]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_fastMRI_UNet.py:105: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
   axs[0].imshow(np.abs(mri_2D[0]), cmap=&quot;gray&quot;)
 
-  1%|          | 1/100 [00:03&lt;06:34,  3.98s/steps, loss=0.964]
-  1%|          | 1/100 [00:05&lt;06:34,  3.98s/steps, loss=0.891]
-  2%|▏         | 2/100 [00:08&lt;07:03,  4.33s/steps, loss=0.891]
-  2%|▏         | 2/100 [00:10&lt;07:03,  4.33s/steps, loss=0.831]
-  3%|▎         | 3/100 [00:13&lt;07:33,  4.67s/steps, loss=0.831]
-  3%|▎         | 3/100 [00:14&lt;07:33,  4.67s/steps, loss=0.784]
-  4%|▍         | 4/100 [00:19&lt;07:58,  4.98s/steps, loss=0.784]
-  4%|▍         | 4/100 [00:19&lt;07:58,  4.98s/steps, loss=0.748]
-  5%|▌         | 5/100 [00:21&lt;06:33,  4.15s/steps, loss=0.748]
-  5%|▌         | 5/100 [00:23&lt;06:33,  4.15s/steps, loss=0.723]
-  6%|▌         | 6/100 [00:28&lt;08:04,  5.15s/steps, loss=0.723]
-  6%|▌         | 6/100 [00:29&lt;08:04,  5.15s/steps, loss=0.685]
-  7%|▋         | 7/100 [00:33&lt;07:49,  5.04s/steps, loss=0.685]
-  7%|▋         | 7/100 [00:35&lt;07:49,  5.04s/steps, loss=0.649]
-  8%|▊         | 8/100 [00:39&lt;07:52,  5.14s/steps, loss=0.649]
-  8%|▊         | 8/100 [00:39&lt;07:52,  5.14s/steps, loss=0.618]
-  9%|▉         | 9/100 [00:43&lt;07:21,  4.85s/steps, loss=0.618]
-  9%|▉         | 9/100 [00:44&lt;07:21,  4.85s/steps, loss=0.591]
- 10%|█         | 10/100 [00:48&lt;07:20,  4.90s/steps, loss=0.591]
- 10%|█         | 10/100 [00:48&lt;07:20,  4.90s/steps, loss=0.567]
- 11%|█         | 11/100 [00:51&lt;06:21,  4.28s/steps, loss=0.567]
- 11%|█         | 11/100 [00:52&lt;06:21,  4.28s/steps, loss=0.544]
- 12%|█▏        | 12/100 [00:57&lt;07:03,  4.82s/steps, loss=0.544]
- 12%|█▏        | 12/100 [00:57&lt;07:03,  4.82s/steps, loss=0.523]
- 13%|█▎        | 13/100 [00:59&lt;06:05,  4.20s/steps, loss=0.523]
- 13%|█▎        | 13/100 [01:01&lt;06:05,  4.20s/steps, loss=0.503]
- 14%|█▍        | 14/100 [01:02&lt;05:26,  3.79s/steps, loss=0.503]
- 14%|█▍        | 14/100 [01:03&lt;05:26,  3.79s/steps, loss=0.484]
- 15%|█▌        | 15/100 [01:05&lt;04:56,  3.49s/steps, loss=0.484]
- 15%|█▌        | 15/100 [01:06&lt;04:56,  3.49s/steps, loss=0.466]
- 16%|█▌        | 16/100 [01:11&lt;05:48,  4.15s/steps, loss=0.466]
- 16%|█▌        | 16/100 [01:12&lt;05:48,  4.15s/steps, loss=0.448]
- 17%|█▋        | 17/100 [01:14&lt;05:33,  4.02s/steps, loss=0.448]
- 17%|█▋        | 17/100 [01:16&lt;05:33,  4.02s/steps, loss=0.431]
- 18%|█▊        | 18/100 [01:19&lt;05:47,  4.24s/steps, loss=0.431]
- 18%|█▊        | 18/100 [01:21&lt;05:47,  4.24s/steps, loss=0.416]
- 19%|█▉        | 19/100 [01:23&lt;05:27,  4.05s/steps, loss=0.416]
- 19%|█▉        | 19/100 [01:24&lt;05:27,  4.05s/steps, loss=0.402]
- 20%|██        | 20/100 [01:28&lt;05:56,  4.46s/steps, loss=0.402]
- 20%|██        | 20/100 [01:30&lt;05:56,  4.46s/steps, loss=0.388]
- 21%|██        | 21/100 [01:32&lt;05:23,  4.10s/steps, loss=0.388]
- 21%|██        | 21/100 [01:32&lt;05:23,  4.10s/steps, loss=0.374]
- 22%|██▏       | 22/100 [01:36&lt;05:28,  4.22s/steps, loss=0.374]
- 22%|██▏       | 22/100 [01:37&lt;05:28,  4.22s/steps, loss=0.36]
- 23%|██▎       | 23/100 [01:40&lt;05:24,  4.22s/steps, loss=0.36]
- 23%|██▎       | 23/100 [01:41&lt;05:24,  4.22s/steps, loss=0.347]
- 24%|██▍       | 24/100 [01:45&lt;05:31,  4.36s/steps, loss=0.347]
- 24%|██▍       | 24/100 [01:46&lt;05:31,  4.36s/steps, loss=0.335]
- 25%|██▌       | 25/100 [01:48&lt;04:56,  3.95s/steps, loss=0.335]
- 25%|██▌       | 25/100 [01:49&lt;04:56,  3.95s/steps, loss=0.324]
- 26%|██▌       | 26/100 [01:50&lt;04:17,  3.48s/steps, loss=0.324]
- 26%|██▌       | 26/100 [01:52&lt;04:17,  3.48s/steps, loss=0.313]
- 27%|██▋       | 27/100 [01:55&lt;04:50,  3.98s/steps, loss=0.313]
- 27%|██▋       | 27/100 [01:57&lt;04:50,  3.98s/steps, loss=0.302]
- 28%|██▊       | 28/100 [01:59&lt;04:30,  3.76s/steps, loss=0.302]
- 28%|██▊       | 28/100 [01:59&lt;04:30,  3.76s/steps, loss=0.292]
- 29%|██▉       | 29/100 [02:01&lt;04:06,  3.47s/steps, loss=0.292]
- 29%|██▉       | 29/100 [02:03&lt;04:06,  3.47s/steps, loss=0.283]
- 30%|███       | 30/100 [02:06&lt;04:23,  3.76s/steps, loss=0.283]
- 30%|███       | 30/100 [02:07&lt;04:23,  3.76s/steps, loss=0.274]
- 31%|███       | 31/100 [02:09&lt;04:02,  3.52s/steps, loss=0.274]
- 31%|███       | 31/100 [02:10&lt;04:02,  3.52s/steps, loss=0.265]
- 32%|███▏      | 32/100 [02:14&lt;04:32,  4.00s/steps, loss=0.265]
- 32%|███▏      | 32/100 [02:14&lt;04:32,  4.00s/steps, loss=0.256]
- 33%|███▎      | 33/100 [02:17&lt;03:59,  3.58s/steps, loss=0.256]
- 33%|███▎      | 33/100 [02:18&lt;03:59,  3.58s/steps, loss=0.247]
- 34%|███▍      | 34/100 [02:20&lt;03:49,  3.48s/steps, loss=0.247]
- 34%|███▍      | 34/100 [02:21&lt;03:49,  3.48s/steps, loss=0.239]
- 35%|███▌      | 35/100 [02:24&lt;04:04,  3.76s/steps, loss=0.239]
- 35%|███▌      | 35/100 [02:25&lt;04:04,  3.76s/steps, loss=0.231]
- 36%|███▌      | 36/100 [02:26&lt;03:26,  3.22s/steps, loss=0.231]
- 36%|███▌      | 36/100 [02:27&lt;03:26,  3.22s/steps, loss=0.224]
- 37%|███▋      | 37/100 [02:30&lt;03:25,  3.27s/steps, loss=0.224]
- 37%|███▋      | 37/100 [02:30&lt;03:25,  3.27s/steps, loss=0.216]
- 38%|███▊      | 38/100 [02:33&lt;03:28,  3.37s/steps, loss=0.216]
- 38%|███▊      | 38/100 [02:34&lt;03:28,  3.37s/steps, loss=0.209]
- 39%|███▉      | 39/100 [02:37&lt;03:38,  3.58s/steps, loss=0.209]
- 39%|███▉      | 39/100 [02:38&lt;03:38,  3.58s/steps, loss=0.203]
- 40%|████      | 40/100 [02:40&lt;03:22,  3.37s/steps, loss=0.203]
- 40%|████      | 40/100 [02:41&lt;03:22,  3.37s/steps, loss=0.197]
- 41%|████      | 41/100 [02:42&lt;02:59,  3.05s/steps, loss=0.197]
- 41%|████      | 41/100 [02:43&lt;02:59,  3.05s/steps, loss=0.192]
- 42%|████▏     | 42/100 [02:45&lt;02:45,  2.85s/steps, loss=0.192]
- 42%|████▏     | 42/100 [02:46&lt;02:45,  2.85s/steps, loss=0.186]
- 43%|████▎     | 43/100 [02:49&lt;03:06,  3.27s/steps, loss=0.186]
- 43%|████▎     | 43/100 [02:50&lt;03:06,  3.27s/steps, loss=0.181]
- 44%|████▍     | 44/100 [02:52&lt;03:04,  3.29s/steps, loss=0.181]
- 44%|████▍     | 44/100 [02:53&lt;03:04,  3.29s/steps, loss=0.176]
- 45%|████▌     | 45/100 [02:55&lt;02:50,  3.11s/steps, loss=0.176]
- 45%|████▌     | 45/100 [02:55&lt;02:50,  3.11s/steps, loss=0.172]
- 46%|████▌     | 46/100 [02:57&lt;02:20,  2.60s/steps, loss=0.172]
- 46%|████▌     | 46/100 [02:58&lt;02:20,  2.60s/steps, loss=0.167]
- 47%|████▋     | 47/100 [03:00&lt;02:26,  2.77s/steps, loss=0.167]
- 47%|████▋     | 47/100 [03:00&lt;02:26,  2.77s/steps, loss=0.163]
- 48%|████▊     | 48/100 [03:02&lt;02:09,  2.49s/steps, loss=0.163]
- 48%|████▊     | 48/100 [03:02&lt;02:09,  2.49s/steps, loss=0.158]
- 49%|████▉     | 49/100 [03:03&lt;01:52,  2.21s/steps, loss=0.158]
- 49%|████▉     | 49/100 [03:04&lt;01:52,  2.21s/steps, loss=0.154]
- 50%|█████     | 50/100 [03:06&lt;01:58,  2.37s/steps, loss=0.154]
- 50%|█████     | 50/100 [03:06&lt;01:58,  2.37s/steps, loss=0.15]
- 51%|█████     | 51/100 [03:07&lt;01:42,  2.10s/steps, loss=0.15]
- 51%|█████     | 51/100 [03:08&lt;01:42,  2.10s/steps, loss=0.146]
- 52%|█████▏    | 52/100 [03:09&lt;01:41,  2.12s/steps, loss=0.146]
- 52%|█████▏    | 52/100 [03:10&lt;01:41,  2.12s/steps, loss=0.144]
- 53%|█████▎    | 53/100 [03:11&lt;01:35,  2.03s/steps, loss=0.144]
- 53%|█████▎    | 53/100 [03:12&lt;01:35,  2.03s/steps, loss=0.145]
- 54%|█████▍    | 54/100 [03:13&lt;01:29,  1.94s/steps, loss=0.145]
- 54%|█████▍    | 54/100 [03:13&lt;01:29,  1.94s/steps, loss=0.141]
- 55%|█████▌    | 55/100 [03:15&lt;01:23,  1.86s/steps, loss=0.141]
- 55%|█████▌    | 55/100 [03:15&lt;01:23,  1.86s/steps, loss=0.134]
- 56%|█████▌    | 56/100 [03:16&lt;01:17,  1.77s/steps, loss=0.134]
- 56%|█████▌    | 56/100 [03:17&lt;01:17,  1.77s/steps, loss=0.132]
- 57%|█████▋    | 57/100 [03:17&lt;01:09,  1.61s/steps, loss=0.132]
- 57%|█████▋    | 57/100 [03:18&lt;01:09,  1.61s/steps, loss=0.13]
- 58%|█████▊    | 58/100 [03:19&lt;01:03,  1.51s/steps, loss=0.13]
- 58%|█████▊    | 58/100 [03:19&lt;01:03,  1.51s/steps, loss=0.124]
- 59%|█████▉    | 59/100 [03:20&lt;01:00,  1.48s/steps, loss=0.124]
- 59%|█████▉    | 59/100 [03:20&lt;01:00,  1.48s/steps, loss=0.124]
- 60%|██████    | 60/100 [03:22&lt;01:00,  1.51s/steps, loss=0.124]
- 60%|██████    | 60/100 [03:22&lt;01:00,  1.51s/steps, loss=0.12]
- 61%|██████    | 61/100 [03:23&lt;00:59,  1.53s/steps, loss=0.12]
- 61%|██████    | 61/100 [03:24&lt;00:59,  1.53s/steps, loss=0.116]
- 62%|██████▏   | 62/100 [03:25&lt;00:58,  1.54s/steps, loss=0.116]
- 62%|██████▏   | 62/100 [03:25&lt;00:58,  1.54s/steps, loss=0.115]
- 63%|██████▎   | 63/100 [03:26&lt;00:56,  1.54s/steps, loss=0.115]
- 63%|██████▎   | 63/100 [03:27&lt;00:56,  1.54s/steps, loss=0.112]
- 64%|██████▍   | 64/100 [03:28&lt;01:00,  1.67s/steps, loss=0.112]
- 64%|██████▍   | 64/100 [03:29&lt;01:00,  1.67s/steps, loss=0.11]
- 65%|██████▌   | 65/100 [03:30&lt;00:55,  1.58s/steps, loss=0.11]
- 65%|██████▌   | 65/100 [03:30&lt;00:55,  1.58s/steps, loss=0.109]
- 66%|██████▌   | 66/100 [03:31&lt;00:52,  1.55s/steps, loss=0.109]
- 66%|██████▌   | 66/100 [03:31&lt;00:52,  1.55s/steps, loss=0.106]
- 67%|██████▋   | 67/100 [03:33&lt;00:50,  1.52s/steps, loss=0.106]
- 67%|██████▋   | 67/100 [03:33&lt;00:50,  1.52s/steps, loss=0.103]
- 68%|██████▊   | 68/100 [03:34&lt;00:48,  1.53s/steps, loss=0.103]
- 68%|██████▊   | 68/100 [03:35&lt;00:48,  1.53s/steps, loss=0.102]
- 69%|██████▉   | 69/100 [03:36&lt;00:47,  1.54s/steps, loss=0.102]
- 69%|██████▉   | 69/100 [03:36&lt;00:47,  1.54s/steps, loss=0.0997]
- 70%|███████   | 70/100 [03:37&lt;00:45,  1.52s/steps, loss=0.0997]
- 70%|███████   | 70/100 [03:38&lt;00:45,  1.52s/steps, loss=0.0984]
- 71%|███████   | 71/100 [03:39&lt;00:42,  1.46s/steps, loss=0.0984]
- 71%|███████   | 71/100 [03:39&lt;00:42,  1.46s/steps, loss=0.0971]
- 72%|███████▏  | 72/100 [03:40&lt;00:40,  1.46s/steps, loss=0.0971]
- 72%|███████▏  | 72/100 [03:41&lt;00:40,  1.46s/steps, loss=0.0933]
- 73%|███████▎  | 73/100 [03:42&lt;00:43,  1.61s/steps, loss=0.0933]
- 73%|███████▎  | 73/100 [03:42&lt;00:43,  1.61s/steps, loss=0.0913]
- 74%|███████▍  | 74/100 [03:44&lt;00:45,  1.74s/steps, loss=0.0913]
- 74%|███████▍  | 74/100 [03:44&lt;00:45,  1.74s/steps, loss=0.0904]
- 75%|███████▌  | 75/100 [03:46&lt;00:43,  1.76s/steps, loss=0.0904]
- 75%|███████▌  | 75/100 [03:46&lt;00:43,  1.76s/steps, loss=0.091]
- 76%|███████▌  | 76/100 [03:47&lt;00:40,  1.70s/steps, loss=0.091]
- 76%|███████▌  | 76/100 [03:48&lt;00:40,  1.70s/steps, loss=0.09]
- 77%|███████▋  | 77/100 [03:49&lt;00:38,  1.69s/steps, loss=0.09]
- 77%|███████▋  | 77/100 [03:49&lt;00:38,  1.69s/steps, loss=0.0865]
- 78%|███████▊  | 78/100 [03:51&lt;00:35,  1.63s/steps, loss=0.0865]
- 78%|███████▊  | 78/100 [03:51&lt;00:35,  1.63s/steps, loss=0.0836]
- 79%|███████▉  | 79/100 [03:52&lt;00:33,  1.59s/steps, loss=0.0836]
- 79%|███████▉  | 79/100 [03:52&lt;00:33,  1.59s/steps, loss=0.0824]
- 80%|████████  | 80/100 [03:53&lt;00:30,  1.50s/steps, loss=0.0824]
- 80%|████████  | 80/100 [03:54&lt;00:30,  1.50s/steps, loss=0.0837]
- 81%|████████  | 81/100 [03:55&lt;00:28,  1.51s/steps, loss=0.0837]
- 81%|████████  | 81/100 [03:55&lt;00:28,  1.51s/steps, loss=0.0812]
- 82%|████████▏ | 82/100 [03:56&lt;00:26,  1.49s/steps, loss=0.0812]
- 82%|████████▏ | 82/100 [03:57&lt;00:26,  1.49s/steps, loss=0.0773]
- 83%|████████▎ | 83/100 [03:58&lt;00:25,  1.49s/steps, loss=0.0773]
- 83%|████████▎ | 83/100 [03:58&lt;00:25,  1.49s/steps, loss=0.0789]
- 84%|████████▍ | 84/100 [04:00&lt;00:25,  1.61s/steps, loss=0.0789]
- 84%|████████▍ | 84/100 [04:00&lt;00:25,  1.61s/steps, loss=0.0844]
- 85%|████████▌ | 85/100 [04:02&lt;00:25,  1.68s/steps, loss=0.0844]
- 85%|████████▌ | 85/100 [04:02&lt;00:25,  1.68s/steps, loss=0.0763]
- 86%|████████▌ | 86/100 [04:03&lt;00:22,  1.60s/steps, loss=0.0763]
- 86%|████████▌ | 86/100 [04:03&lt;00:22,  1.60s/steps, loss=0.0732]
- 87%|████████▋ | 87/100 [04:05&lt;00:21,  1.65s/steps, loss=0.0732]
- 87%|████████▋ | 87/100 [04:05&lt;00:21,  1.65s/steps, loss=0.0751]
- 88%|████████▊ | 88/100 [04:06&lt;00:19,  1.61s/steps, loss=0.0751]
- 88%|████████▊ | 88/100 [04:07&lt;00:19,  1.61s/steps, loss=0.0733]
- 89%|████████▉ | 89/100 [04:08&lt;00:16,  1.54s/steps, loss=0.0733]
- 89%|████████▉ | 89/100 [04:08&lt;00:16,  1.54s/steps, loss=0.0693]
- 90%|█████████ | 90/100 [04:09&lt;00:15,  1.52s/steps, loss=0.0693]
- 90%|█████████ | 90/100 [04:09&lt;00:15,  1.52s/steps, loss=0.0694]
- 91%|█████████ | 91/100 [04:11&lt;00:13,  1.52s/steps, loss=0.0694]
- 91%|█████████ | 91/100 [04:11&lt;00:13,  1.52s/steps, loss=0.0707]
- 92%|█████████▏| 92/100 [04:12&lt;00:11,  1.47s/steps, loss=0.0707]
- 92%|█████████▏| 92/100 [04:12&lt;00:11,  1.47s/steps, loss=0.068]
- 93%|█████████▎| 93/100 [04:14&lt;00:10,  1.50s/steps, loss=0.068]
- 93%|█████████▎| 93/100 [04:14&lt;00:10,  1.50s/steps, loss=0.0676]
- 94%|█████████▍| 94/100 [04:15&lt;00:09,  1.61s/steps, loss=0.0676]
- 94%|█████████▍| 94/100 [04:16&lt;00:09,  1.61s/steps, loss=0.0679]
- 95%|█████████▌| 95/100 [04:18&lt;00:08,  1.76s/steps, loss=0.0679]
- 95%|█████████▌| 95/100 [04:18&lt;00:08,  1.76s/steps, loss=0.0651]
- 96%|█████████▌| 96/100 [04:20&lt;00:07,  1.94s/steps, loss=0.0651]
- 96%|█████████▌| 96/100 [04:20&lt;00:07,  1.94s/steps, loss=0.0644]
- 97%|█████████▋| 97/100 [04:22&lt;00:06,  2.03s/steps, loss=0.0644]
- 97%|█████████▋| 97/100 [04:23&lt;00:06,  2.03s/steps, loss=0.0674]
- 98%|█████████▊| 98/100 [04:24&lt;00:03,  1.96s/steps, loss=0.0674]
- 98%|█████████▊| 98/100 [04:24&lt;00:03,  1.96s/steps, loss=0.0657]
- 99%|█████████▉| 99/100 [04:26&lt;00:01,  1.92s/steps, loss=0.0657]
- 99%|█████████▉| 99/100 [04:26&lt;00:01,  1.92s/steps, loss=0.0636]
-100%|██████████| 100/100 [04:28&lt;00:00,  1.89s/steps, loss=0.0636]
-100%|██████████| 100/100 [04:28&lt;00:00,  2.68s/steps, loss=0.0636]
+  1%|          | 1/100 [00:00&lt;01:34,  1.05steps/s, loss=1.09]
+  1%|          | 1/100 [00:01&lt;01:34,  1.05steps/s, loss=0.997]
+  2%|▏         | 2/100 [00:01&lt;01:28,  1.11steps/s, loss=0.997]
+  2%|▏         | 2/100 [00:01&lt;01:28,  1.11steps/s, loss=0.906]
+  3%|▎         | 3/100 [00:02&lt;01:36,  1.00steps/s, loss=0.906]
+  3%|▎         | 3/100 [00:03&lt;01:36,  1.00steps/s, loss=0.827]
+  4%|▍         | 4/100 [00:03&lt;01:31,  1.04steps/s, loss=0.827]
+  4%|▍         | 4/100 [00:03&lt;01:31,  1.04steps/s, loss=0.765]
+  5%|▌         | 5/100 [00:04&lt;01:28,  1.07steps/s, loss=0.765]
+  5%|▌         | 5/100 [00:04&lt;01:28,  1.07steps/s, loss=0.72]
+  6%|▌         | 6/100 [00:05&lt;01:26,  1.08steps/s, loss=0.72]
+  6%|▌         | 6/100 [00:05&lt;01:26,  1.08steps/s, loss=0.677]
+  7%|▋         | 7/100 [00:06&lt;01:25,  1.09steps/s, loss=0.677]
+  7%|▋         | 7/100 [00:06&lt;01:25,  1.09steps/s, loss=0.638]
+  8%|▊         | 8/100 [00:07&lt;01:26,  1.06steps/s, loss=0.638]
+  8%|▊         | 8/100 [00:07&lt;01:26,  1.06steps/s, loss=0.607]
+  9%|▉         | 9/100 [00:08&lt;01:24,  1.08steps/s, loss=0.607]
+  9%|▉         | 9/100 [00:08&lt;01:24,  1.08steps/s, loss=0.583]
+ 10%|█         | 10/100 [00:09&lt;01:22,  1.09steps/s, loss=0.583]
+ 10%|█         | 10/100 [00:09&lt;01:22,  1.09steps/s, loss=0.563]
+ 11%|█         | 11/100 [00:10&lt;01:23,  1.07steps/s, loss=0.563]
+ 11%|█         | 11/100 [00:10&lt;01:23,  1.07steps/s, loss=0.548]
+ 12%|█▏        | 12/100 [00:11&lt;01:20,  1.09steps/s, loss=0.548]
+ 12%|█▏        | 12/100 [00:11&lt;01:20,  1.09steps/s, loss=0.534]
+ 13%|█▎        | 13/100 [00:12&lt;01:26,  1.00steps/s, loss=0.534]
+ 13%|█▎        | 13/100 [00:12&lt;01:26,  1.00steps/s, loss=0.522]
+ 14%|█▍        | 14/100 [00:13&lt;01:24,  1.02steps/s, loss=0.522]
+ 14%|█▍        | 14/100 [00:13&lt;01:24,  1.02steps/s, loss=0.51]
+ 15%|█▌        | 15/100 [00:14&lt;01:24,  1.01steps/s, loss=0.51]
+ 15%|█▌        | 15/100 [00:14&lt;01:24,  1.01steps/s, loss=0.497]
+ 16%|█▌        | 16/100 [00:15&lt;01:22,  1.02steps/s, loss=0.497]
+ 16%|█▌        | 16/100 [00:15&lt;01:22,  1.02steps/s, loss=0.485]
+ 17%|█▋        | 17/100 [00:16&lt;01:18,  1.05steps/s, loss=0.485]
+ 17%|█▋        | 17/100 [00:16&lt;01:18,  1.05steps/s, loss=0.471]
+ 18%|█▊        | 18/100 [00:17&lt;01:17,  1.05steps/s, loss=0.471]
+ 18%|█▊        | 18/100 [00:17&lt;01:17,  1.05steps/s, loss=0.457]
+ 19%|█▉        | 19/100 [00:18&lt;01:17,  1.05steps/s, loss=0.457]
+ 19%|█▉        | 19/100 [00:18&lt;01:17,  1.05steps/s, loss=0.442]
+ 20%|██        | 20/100 [00:18&lt;01:14,  1.07steps/s, loss=0.442]
+ 20%|██        | 20/100 [00:19&lt;01:14,  1.07steps/s, loss=0.427]
+ 21%|██        | 21/100 [00:19&lt;01:12,  1.09steps/s, loss=0.427]
+ 21%|██        | 21/100 [00:19&lt;01:12,  1.09steps/s, loss=0.411]
+ 22%|██▏       | 22/100 [00:20&lt;01:12,  1.07steps/s, loss=0.411]
+ 22%|██▏       | 22/100 [00:20&lt;01:12,  1.07steps/s, loss=0.395]
+ 23%|██▎       | 23/100 [00:21&lt;01:16,  1.00steps/s, loss=0.395]
+ 23%|██▎       | 23/100 [00:22&lt;01:16,  1.00steps/s, loss=0.379]
+ 24%|██▍       | 24/100 [00:22&lt;01:15,  1.01steps/s, loss=0.379]
+ 24%|██▍       | 24/100 [00:23&lt;01:15,  1.01steps/s, loss=0.364]
+ 25%|██▌       | 25/100 [00:23&lt;01:13,  1.03steps/s, loss=0.364]
+ 25%|██▌       | 25/100 [00:23&lt;01:13,  1.03steps/s, loss=0.349]
+ 26%|██▌       | 26/100 [00:24&lt;01:10,  1.04steps/s, loss=0.349]
+ 26%|██▌       | 26/100 [00:24&lt;01:10,  1.04steps/s, loss=0.334]
+ 27%|██▋       | 27/100 [00:25&lt;01:09,  1.06steps/s, loss=0.334]
+ 27%|██▋       | 27/100 [00:25&lt;01:09,  1.06steps/s, loss=0.321]
+ 28%|██▊       | 28/100 [00:26&lt;01:07,  1.07steps/s, loss=0.321]
+ 28%|██▊       | 28/100 [00:26&lt;01:07,  1.07steps/s, loss=0.308]
+ 29%|██▉       | 29/100 [00:27&lt;01:07,  1.05steps/s, loss=0.308]
+ 29%|██▉       | 29/100 [00:27&lt;01:07,  1.05steps/s, loss=0.295]
+ 30%|███       | 30/100 [00:28&lt;01:05,  1.07steps/s, loss=0.295]
+ 30%|███       | 30/100 [00:28&lt;01:05,  1.07steps/s, loss=0.283]
+ 31%|███       | 31/100 [00:29&lt;01:04,  1.07steps/s, loss=0.283]
+ 31%|███       | 31/100 [00:29&lt;01:04,  1.07steps/s, loss=0.27]
+ 32%|███▏      | 32/100 [00:30&lt;01:03,  1.08steps/s, loss=0.27]
+ 32%|███▏      | 32/100 [00:30&lt;01:03,  1.08steps/s, loss=0.259]
+ 33%|███▎      | 33/100 [00:31&lt;01:07,  1.00s/steps, loss=0.259]
+ 33%|███▎      | 33/100 [00:31&lt;01:07,  1.00s/steps, loss=0.249]
+ 34%|███▍      | 34/100 [00:32&lt;01:04,  1.03steps/s, loss=0.249]
+ 34%|███▍      | 34/100 [00:32&lt;01:04,  1.03steps/s, loss=0.239]
+ 35%|███▌      | 35/100 [00:33&lt;01:01,  1.06steps/s, loss=0.239]
+ 35%|███▌      | 35/100 [00:33&lt;01:01,  1.06steps/s, loss=0.228]
+ 36%|███▌      | 36/100 [00:34&lt;00:59,  1.08steps/s, loss=0.228]
+ 36%|███▌      | 36/100 [00:34&lt;00:59,  1.08steps/s, loss=0.218]
+ 37%|███▋      | 37/100 [00:35&lt;00:58,  1.07steps/s, loss=0.218]
+ 37%|███▋      | 37/100 [00:35&lt;00:58,  1.07steps/s, loss=0.209]
+ 38%|███▊      | 38/100 [00:35&lt;00:56,  1.10steps/s, loss=0.209]
+ 38%|███▊      | 38/100 [00:36&lt;00:56,  1.10steps/s, loss=0.201]
+ 39%|███▉      | 39/100 [00:36&lt;00:54,  1.11steps/s, loss=0.201]
+ 39%|███▉      | 39/100 [00:36&lt;00:54,  1.11steps/s, loss=0.193]
+ 40%|████      | 40/100 [00:37&lt;00:53,  1.12steps/s, loss=0.193]
+ 40%|████      | 40/100 [00:37&lt;00:53,  1.12steps/s, loss=0.185]
+ 41%|████      | 41/100 [00:38&lt;00:51,  1.14steps/s, loss=0.185]
+ 41%|████      | 41/100 [00:38&lt;00:51,  1.14steps/s, loss=0.177]
+ 42%|████▏     | 42/100 [00:39&lt;00:50,  1.14steps/s, loss=0.177]
+ 42%|████▏     | 42/100 [00:39&lt;00:50,  1.14steps/s, loss=0.171]
+ 43%|████▎     | 43/100 [00:40&lt;00:50,  1.13steps/s, loss=0.171]
+ 43%|████▎     | 43/100 [00:40&lt;00:50,  1.13steps/s, loss=0.165]
+ 44%|████▍     | 44/100 [00:41&lt;00:54,  1.03steps/s, loss=0.165]
+ 44%|████▍     | 44/100 [00:41&lt;00:54,  1.03steps/s, loss=0.159]
+ 45%|████▌     | 45/100 [00:42&lt;00:51,  1.06steps/s, loss=0.159]
+ 45%|████▌     | 45/100 [00:42&lt;00:51,  1.06steps/s, loss=0.153]
+ 46%|████▌     | 46/100 [00:43&lt;00:49,  1.09steps/s, loss=0.153]
+ 46%|████▌     | 46/100 [00:43&lt;00:49,  1.09steps/s, loss=0.149]
+ 47%|████▋     | 47/100 [00:44&lt;00:47,  1.12steps/s, loss=0.149]
+ 47%|████▋     | 47/100 [00:44&lt;00:47,  1.12steps/s, loss=0.142]
+ 48%|████▊     | 48/100 [00:44&lt;00:45,  1.14steps/s, loss=0.142]
+ 48%|████▊     | 48/100 [00:45&lt;00:45,  1.14steps/s, loss=0.136]
+ 49%|████▉     | 49/100 [00:45&lt;00:45,  1.13steps/s, loss=0.136]
+ 49%|████▉     | 49/100 [00:45&lt;00:45,  1.13steps/s, loss=0.132]
+ 50%|█████     | 50/100 [00:46&lt;00:44,  1.11steps/s, loss=0.132]
+ 50%|█████     | 50/100 [00:46&lt;00:44,  1.11steps/s, loss=0.126]
+ 51%|█████     | 51/100 [00:47&lt;00:43,  1.12steps/s, loss=0.126]
+ 51%|█████     | 51/100 [00:47&lt;00:43,  1.12steps/s, loss=0.122]
+ 52%|█████▏    | 52/100 [00:48&lt;00:41,  1.14steps/s, loss=0.122]
+ 52%|█████▏    | 52/100 [00:48&lt;00:41,  1.14steps/s, loss=0.118]
+ 53%|█████▎    | 53/100 [00:49&lt;00:43,  1.08steps/s, loss=0.118]
+ 53%|█████▎    | 53/100 [00:49&lt;00:43,  1.08steps/s, loss=0.115]
+ 54%|█████▍    | 54/100 [00:50&lt;00:46,  1.02s/steps, loss=0.115]
+ 54%|█████▍    | 54/100 [00:50&lt;00:46,  1.02s/steps, loss=0.112]
+ 55%|█████▌    | 55/100 [00:51&lt;00:43,  1.03steps/s, loss=0.112]
+ 55%|█████▌    | 55/100 [00:51&lt;00:43,  1.03steps/s, loss=0.109]
+ 56%|█████▌    | 56/100 [00:52&lt;00:41,  1.06steps/s, loss=0.109]
+ 56%|█████▌    | 56/100 [00:52&lt;00:41,  1.06steps/s, loss=0.105]
+ 57%|█████▋    | 57/100 [00:53&lt;00:39,  1.08steps/s, loss=0.105]
+ 57%|█████▋    | 57/100 [00:53&lt;00:39,  1.08steps/s, loss=0.102]
+ 58%|█████▊    | 58/100 [00:54&lt;00:37,  1.11steps/s, loss=0.102]
+ 58%|█████▊    | 58/100 [00:54&lt;00:37,  1.11steps/s, loss=0.0981]
+ 59%|█████▉    | 59/100 [00:55&lt;00:37,  1.09steps/s, loss=0.0981]
+ 59%|█████▉    | 59/100 [00:55&lt;00:37,  1.09steps/s, loss=0.0962]
+ 60%|██████    | 60/100 [00:56&lt;00:36,  1.09steps/s, loss=0.0962]
+ 60%|██████    | 60/100 [00:56&lt;00:36,  1.09steps/s, loss=0.0957]
+ 61%|██████    | 61/100 [00:56&lt;00:35,  1.10steps/s, loss=0.0957]
+ 61%|██████    | 61/100 [00:57&lt;00:35,  1.10steps/s, loss=0.0938]
+ 62%|██████▏   | 62/100 [00:57&lt;00:34,  1.11steps/s, loss=0.0938]
+ 62%|██████▏   | 62/100 [00:57&lt;00:34,  1.11steps/s, loss=0.0913]
+ 63%|██████▎   | 63/100 [00:58&lt;00:32,  1.12steps/s, loss=0.0913]
+ 63%|██████▎   | 63/100 [00:58&lt;00:32,  1.12steps/s, loss=0.0866]
+ 64%|██████▍   | 64/100 [00:59&lt;00:31,  1.13steps/s, loss=0.0866]
+ 64%|██████▍   | 64/100 [00:59&lt;00:31,  1.13steps/s, loss=0.0832]
+ 65%|██████▌   | 65/100 [01:00&lt;00:35,  1.00s/steps, loss=0.0832]
+ 65%|██████▌   | 65/100 [01:00&lt;00:35,  1.00s/steps, loss=0.0824]
+ 66%|██████▌   | 66/100 [01:01&lt;00:32,  1.05steps/s, loss=0.0824]
+ 66%|██████▌   | 66/100 [01:01&lt;00:32,  1.05steps/s, loss=0.0816]
+ 67%|██████▋   | 67/100 [01:02&lt;00:31,  1.05steps/s, loss=0.0816]
+ 67%|██████▋   | 67/100 [01:02&lt;00:31,  1.05steps/s, loss=0.0793]
+ 68%|██████▊   | 68/100 [01:03&lt;00:29,  1.07steps/s, loss=0.0793]
+ 68%|██████▊   | 68/100 [01:03&lt;00:29,  1.07steps/s, loss=0.0791]
+ 69%|██████▉   | 69/100 [01:04&lt;00:28,  1.09steps/s, loss=0.0791]
+ 69%|██████▉   | 69/100 [01:04&lt;00:28,  1.09steps/s, loss=0.0771]
+ 70%|███████   | 70/100 [01:05&lt;00:27,  1.09steps/s, loss=0.0771]
+ 70%|███████   | 70/100 [01:05&lt;00:27,  1.09steps/s, loss=0.0731]
+ 71%|███████   | 71/100 [01:06&lt;00:26,  1.11steps/s, loss=0.0731]
+ 71%|███████   | 71/100 [01:06&lt;00:26,  1.11steps/s, loss=0.07]
+ 72%|███████▏  | 72/100 [01:07&lt;00:24,  1.12steps/s, loss=0.07]
+ 72%|███████▏  | 72/100 [01:07&lt;00:24,  1.12steps/s, loss=0.0704]
+ 73%|███████▎  | 73/100 [01:07&lt;00:23,  1.13steps/s, loss=0.0704]
+ 73%|███████▎  | 73/100 [01:08&lt;00:23,  1.13steps/s, loss=0.0695]
+ 74%|███████▍  | 74/100 [01:08&lt;00:22,  1.13steps/s, loss=0.0695]
+ 74%|███████▍  | 74/100 [01:08&lt;00:22,  1.13steps/s, loss=0.0699]
+ 75%|███████▌  | 75/100 [01:09&lt;00:24,  1.03steps/s, loss=0.0699]
+ 75%|███████▌  | 75/100 [01:10&lt;00:24,  1.03steps/s, loss=0.0668]
+ 76%|███████▌  | 76/100 [01:10&lt;00:22,  1.06steps/s, loss=0.0668]
+ 76%|███████▌  | 76/100 [01:10&lt;00:22,  1.06steps/s, loss=0.0654]
+ 77%|███████▋  | 77/100 [01:11&lt;00:21,  1.08steps/s, loss=0.0654]
+ 77%|███████▋  | 77/100 [01:11&lt;00:21,  1.08steps/s, loss=0.0634]
+ 78%|███████▊  | 78/100 [01:12&lt;00:20,  1.10steps/s, loss=0.0634]
+ 78%|███████▊  | 78/100 [01:12&lt;00:20,  1.10steps/s, loss=0.061]
+ 79%|███████▉  | 79/100 [01:13&lt;00:18,  1.12steps/s, loss=0.061]
+ 79%|███████▉  | 79/100 [01:13&lt;00:18,  1.12steps/s, loss=0.062]
+ 80%|████████  | 80/100 [01:14&lt;00:17,  1.11steps/s, loss=0.062]
+ 80%|████████  | 80/100 [01:14&lt;00:17,  1.11steps/s, loss=0.0618]
+ 81%|████████  | 81/100 [01:15&lt;00:17,  1.12steps/s, loss=0.0618]
+ 81%|████████  | 81/100 [01:15&lt;00:17,  1.12steps/s, loss=0.0599]
+ 82%|████████▏ | 82/100 [01:16&lt;00:15,  1.13steps/s, loss=0.0599]
+ 82%|████████▏ | 82/100 [01:16&lt;00:15,  1.13steps/s, loss=0.0592]
+ 83%|████████▎ | 83/100 [01:17&lt;00:15,  1.13steps/s, loss=0.0592]
+ 83%|████████▎ | 83/100 [01:17&lt;00:15,  1.13steps/s, loss=0.0618]
+ 84%|████████▍ | 84/100 [01:17&lt;00:14,  1.13steps/s, loss=0.0618]
+ 84%|████████▍ | 84/100 [01:18&lt;00:14,  1.13steps/s, loss=0.06]
+ 85%|████████▌ | 85/100 [01:18&lt;00:13,  1.13steps/s, loss=0.06]
+ 85%|████████▌ | 85/100 [01:18&lt;00:13,  1.13steps/s, loss=0.0568]
+ 86%|████████▌ | 86/100 [01:19&lt;00:13,  1.03steps/s, loss=0.0568]
+ 86%|████████▌ | 86/100 [01:20&lt;00:13,  1.03steps/s, loss=0.0548]
+ 87%|████████▋ | 87/100 [01:20&lt;00:12,  1.06steps/s, loss=0.0548]
+ 87%|████████▋ | 87/100 [01:20&lt;00:12,  1.06steps/s, loss=0.0537]
+ 88%|████████▊ | 88/100 [01:21&lt;00:11,  1.08steps/s, loss=0.0537]
+ 88%|████████▊ | 88/100 [01:21&lt;00:11,  1.08steps/s, loss=0.0559]
+ 89%|████████▉ | 89/100 [01:22&lt;00:09,  1.10steps/s, loss=0.0559]
+ 89%|████████▉ | 89/100 [01:22&lt;00:09,  1.10steps/s, loss=0.0547]
+ 90%|█████████ | 90/100 [01:23&lt;00:08,  1.14steps/s, loss=0.0547]
+ 90%|█████████ | 90/100 [01:23&lt;00:08,  1.14steps/s, loss=0.0527]
+ 91%|█████████ | 91/100 [01:24&lt;00:08,  1.12steps/s, loss=0.0527]
+ 91%|█████████ | 91/100 [01:24&lt;00:08,  1.12steps/s, loss=0.0524]
+ 92%|█████████▏| 92/100 [01:25&lt;00:07,  1.14steps/s, loss=0.0524]
+ 92%|█████████▏| 92/100 [01:25&lt;00:07,  1.14steps/s, loss=0.0498]
+ 93%|█████████▎| 93/100 [01:26&lt;00:06,  1.12steps/s, loss=0.0498]
+ 93%|█████████▎| 93/100 [01:26&lt;00:06,  1.12steps/s, loss=0.0474]
+ 94%|█████████▍| 94/100 [01:27&lt;00:05,  1.12steps/s, loss=0.0474]
+ 94%|█████████▍| 94/100 [01:27&lt;00:05,  1.12steps/s, loss=0.0485]
+ 95%|█████████▌| 95/100 [01:27&lt;00:04,  1.14steps/s, loss=0.0485]
+ 95%|█████████▌| 95/100 [01:27&lt;00:04,  1.14steps/s, loss=0.0496]
+ 96%|█████████▌| 96/100 [01:28&lt;00:03,  1.15steps/s, loss=0.0496]
+ 96%|█████████▌| 96/100 [01:28&lt;00:03,  1.15steps/s, loss=0.0494]
+ 97%|█████████▋| 97/100 [01:29&lt;00:02,  1.06steps/s, loss=0.0494]
+ 97%|█████████▋| 97/100 [01:29&lt;00:02,  1.06steps/s, loss=0.0478]
+ 98%|█████████▊| 98/100 [01:30&lt;00:01,  1.08steps/s, loss=0.0478]
+ 98%|█████████▊| 98/100 [01:30&lt;00:01,  1.08steps/s, loss=0.0486]
+ 99%|█████████▉| 99/100 [01:31&lt;00:00,  1.11steps/s, loss=0.0486]
+ 99%|█████████▉| 99/100 [01:31&lt;00:00,  1.11steps/s, loss=0.0484]
+100%|██████████| 100/100 [01:32&lt;00:00,  1.14steps/s, loss=0.0484]
+100%|██████████| 100/100 [01:32&lt;00:00,  1.08steps/s, loss=0.0484]
 </pre></div>
 </div>
 <img src="../../../_images/mrinufft_learn_unet.gif" srcset="../../../_images/mrinufft_learn_unet.gif" alt="example learn_samples" class = "sphx-glr-single-img"/><p>Reconstruction from partially trained U-Net model</p>
@@ -1334,7 +1348,7 @@ Springer, 2015.
 <a class="github reference external" href="https://github.com/facebookresearch/fastMRI/blob/main/fastmri/models/unet.py">facebookresearch/fastMRI</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (4 minutes 37.726 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 38.733 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-fastmri-unet-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_fastMRI_UNet.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -1375,11 +1389,11 @@ Springer, 2015.
       </div>
     </a>
     <a class="right-next"
-       href="../../../nufft.html"
+       href="../operators/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">The NUFFT Operator</p>
+        <p class="prev-next-title">Operators Examples</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

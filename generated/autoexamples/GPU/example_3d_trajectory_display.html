@@ -175,18 +175,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">GPU Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Gridded trajectory display</a></li>
@@ -195,6 +183,24 @@
 <li class="toctree-l3"><a class="reference internal" href="example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -786,11 +792,15 @@ to download the full example code. or to run this example in your browser via Bi
 It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc.
 Another key feature is to display the sampling density in k-space, for example to check for k-space holes or irregularities in the learning-based trajectories that would lead to artifacts in the images.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.trajectories.display3D</span><span class="w"> </span><span class="kn">import</span> <a href="../../_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html#mrinufft.trajectories.display3D.get_gridded_trajectory" title="mrinufft.trajectories.display3D.get_gridded_trajectory" class="sphx-glr-backref-module-mrinufft-trajectories-display3D sphx-glr-backref-type-py-function"><span class="n">get_gridded_trajectory</span></a>
 <span class="kn">import</span><span class="w"> </span><span class="nn">mrinufft.trajectories.trajectory3D</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mtt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.trajectories.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gammas</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MRINUFFT_BACKEND&quot;</span><span class="p">,</span> <span class="s2">&quot;gpunufft&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <section id="helper-function-to-displaying-3d-gridded-trajectories">
@@ -830,6 +840,8 @@ function and then plot the mid-plane slices of the gridded trajectory.</p>
             <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">traj_params</span></a><span class="p">[</span><span class="s2">&quot;img_size&quot;</span><span class="p">],</span>
             <span class="n">grid_type</span><span class="o">=</span><span class="n">grid_type</span><span class="p">,</span>
             <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">traj_params</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">traj_params</span></a><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span>
+            <span class="n">osf</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">plot_slices</span><span class="p">(</span><span class="n">axs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">grid</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -840,9 +852,9 @@ function and then plot the mid-plane slices of the gridded trajectory.</p>
 <h2>Trajectories to display<a class="headerlink" href="#trajectories-to-display" title="Link to this heading">#</a></h2>
 <p>We instantiate a bunch of sampling trajectories to display hereafter with <cite>get_gridded_trajectory</cite> and previous helper functions.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">trajectories</span></a> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Radial&quot;</span><span class="p">:</span> <span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_phyllotaxis_radial</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
-    <span class="s2">&quot;FLORET&quot;</span><span class="p">:</span> <span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_floret</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
-    <span class="s2">&quot;Seiffert Spirals&quot;</span><span class="p">:</span> <span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_seiffert_spiral</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
+    <span class="s2">&quot;Radial&quot;</span><span class="p">:</span> <a href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial.html#mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial" title="mrinufft.initialize_3D_phyllotaxis_radial" class="sphx-glr-backref-module-mrinufft sphx-glr-backref-type-py-function"><span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_phyllotaxis_radial</span></a><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
+    <span class="s2">&quot;FLORET&quot;</span><span class="p">:</span> <a href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_floret.html#mrinufft.trajectories.trajectory3D.initialize_3D_floret" title="mrinufft.initialize_3D_floret" class="sphx-glr-backref-module-mrinufft sphx-glr-backref-type-py-function"><span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_floret</span></a><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">nb_revolutions</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;Seiffert Spirals&quot;</span><span class="p">:</span> <a href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral.html#mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral" title="mrinufft.initialize_3D_seiffert_spiral" class="sphx-glr-backref-module-mrinufft sphx-glr-backref-type-py-function"><span class="n">mtt</span><span class="o">.</span><span class="n">initialize_3D_seiffert_spiral</span></a><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
 <span class="p">}</span>
 <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">traj_params</span></a> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;FOV&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">),</span>
@@ -860,7 +872,15 @@ function and then plot the mid-plane slices of the gridded trajectory.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_001.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_001.png" alt="Sampling Density, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/></section>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_001.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_001.png" alt="Sampling Density, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+</section>
 <section id="sampling-time">
 <h2>Sampling time<a class="headerlink" href="#sampling-time" title="Link to this heading">#</a></h2>
 <p>Display the sampling times over the trajectories. For this, make <cite>grid_type=”time”</cite>.
@@ -871,7 +891,15 @@ Note that this is just a relative visualization of sample times on a colour scal
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_002.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_002.png" alt="Sampling Time, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/></section>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_002.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_002.png" alt="Sampling Time, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+</section>
 <section id="inversion-time">
 <h2>Inversion time<a class="headerlink" href="#inversion-time" title="Link to this heading">#</a></h2>
 <p>Display the inversion time of the trajectories. For this, make <cite>grid_type=”inversion”</cite>.
@@ -882,7 +910,15 @@ and the argument <cite>turbo_factor</cite> is specified, which is the time betwe
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_003.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_003.png" alt="Inversion Time, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/></section>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_003.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_003.png" alt="Inversion Time, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+</section>
 <section id="k-space-holes">
 <h2>K-space holes<a class="headerlink" href="#k-space-holes" title="Link to this heading">#</a></h2>
 <p>Display the k-space holes in the trajectories. For this, make <cite>grid_type=”holes”</cite>.
@@ -893,7 +929,15 @@ This feature can be used to identify the k-space holes, which could lead to Gibb
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_004.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_004.png" alt="K-space Holes, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/></section>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_004.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_004.png" alt="K-space Holes, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+</section>
 <section id="gradient-strength">
 <h2>Gradient strength<a class="headerlink" href="#gradient-strength" title="Link to this heading">#</a></h2>
 <p>Display the gradient strength of the trajectories. For this, make <cite>grid_type=”gradients”</cite>.
@@ -905,7 +949,15 @@ It could be useful while characterizing spatial SNR profile in k-space</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_005.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_005.png" alt="Gradient Strength, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/></section>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_005.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_005.png" alt="Gradient Strength, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+</section>
 <section id="slew-rates">
 <h2>Slew rates<a class="headerlink" href="#slew-rates" title="Link to this heading">#</a></h2>
 <p>Display the slew rates of the trajectories. For this, make <cite>grid_type=”slew”</cite>.
@@ -917,7 +969,15 @@ It could be useful to understand potential regions in k-space with eddy current 
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_3d_trajectory_display_006.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_006.png" alt="Slew Rates, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 11.175 seconds)</p>
+<img src="../../../_images/sphx_glr_example_3d_trajectory_display_006.png" srcset="../../../_images/sphx_glr_example_3d_trajectory_display_006.png" alt="Slew Rates, Radial $k_{x}=0$, FLORET $k_{x}=0$, Seiffert Spirals $k_{x}=0$, $k_{y}=0$, $k_{y}=0$, $k_{y}=0$, $k_{z}=0$, $k_{z}=0$, $k_{z}=0$" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.889 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-3d-trajectory-display-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_3d_trajectory_display.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />

@@ -57,3 +57,8 @@ MRIGpuNUFFT
       ~MRIGpuNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT
+      :add-heading:

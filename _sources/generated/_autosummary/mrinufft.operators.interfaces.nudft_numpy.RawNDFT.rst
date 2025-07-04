@@ -25,3 +25,8 @@ RawNDFT
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.nudft_numpy.RawNDFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.nudft_numpy.RawNDFT
+      :add-heading:

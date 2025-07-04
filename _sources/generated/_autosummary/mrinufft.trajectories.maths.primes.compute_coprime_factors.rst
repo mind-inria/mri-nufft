@@ -5,7 +5,5 @@ compute\_coprime\_factors
 
 .. autofunction:: compute_coprime_factors
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.primes.compute_coprime_factors:
-
 .. minigallery:: mrinufft.trajectories.maths.primes.compute_coprime_factors
-   :add-heading:
+   :add-heading: Example using ``compute_coprime_factors``:

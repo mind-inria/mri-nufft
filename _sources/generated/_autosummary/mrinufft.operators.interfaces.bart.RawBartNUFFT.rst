@@ -25,3 +25,8 @@ RawBartNUFFT
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.bart.RawBartNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.bart.RawBartNUFFT
+      :add-heading:

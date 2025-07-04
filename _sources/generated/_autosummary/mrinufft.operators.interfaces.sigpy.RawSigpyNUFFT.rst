@@ -25,3 +25,8 @@ RawSigpyNUFFT
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.sigpy.RawSigpyNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.sigpy.RawSigpyNUFFT
+      :add-heading:

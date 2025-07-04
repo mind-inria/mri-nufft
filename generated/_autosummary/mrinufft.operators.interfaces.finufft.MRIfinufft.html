@@ -175,18 +175,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -195,6 +183,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -906,7 +912,18 @@ and batch dimension will be squeezed.</p></li>
 </tbody>
 </table>
 </div>
-<dl class="py property">
+<section id="examples-using-mrinufft-operators-interfaces-finufft-mrifinufft">
+<span id="sphx-glr-backref-mrinufft-operators-interfaces-finufft-mrifinufft"></span><h2>Examples using <code class="docutils literal notranslate"><span class="pre">mrinufft.operators.interfaces.finufft.MRIfinufft</span></code><a class="headerlink" href="#examples-using-mrinufft-operators-interfaces-finufft-mrifinufft" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="An example to show how to setup an off-resonance corrected NUFFT operator."><img alt="" src="../../_images/sphx_glr_example_offresonance_thumb.png" />
+<p><a class="reference internal" href="../autoexamples/operators/example_offresonance.html#sphx-glr-generated-autoexamples-operators-example-offresonance-py"><span class="std std-ref">Off-resonance corrected NUFFT operator</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Off-resonance corrected NUFFT operator</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="An example to show how to perform a simple NUFFT."><img alt="" src="../../_images/sphx_glr_example_readme_thumb.png" />
+<p><a class="reference internal" href="../autoexamples/operators/example_readme.html#sphx-glr-generated-autoexamples-operators-example-readme-py"><span class="std std-ref">Minimal example script</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Minimal example script</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="An example to show how to setup a subspace NUFFT operator."><img alt="" src="../../_images/sphx_glr_example_subspace_thumb.png" />
+<p><a class="reference internal" href="../autoexamples/operators/example_subspace.html#sphx-glr-generated-autoexamples-operators-example-subspace-py"><span class="std std-ref">Subspace NUFFT Operator</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Subspace NUFFT Operator</div>
+</div></div><dl class="py property">
 <dt class="sig sig-object py" id="mrinufft.operators.interfaces.finufft.MRIfinufft.samples">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">samples</span></span><a class="headerlink" href="#mrinufft.operators.interfaces.finufft.MRIfinufft.samples" title="Link to this definition">#</a></dt>
 <dd><p>Return the samples used by the operator.</p>
@@ -936,6 +953,7 @@ We normalize such that the energy of PSF = 1</p></li>
 </dl>
 </dd></dl>
 
+</section>
 </dd></dl>
 
 </section>

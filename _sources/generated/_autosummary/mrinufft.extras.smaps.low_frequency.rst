@@ -5,7 +5,5 @@ low\_frequency
 
 .. autofunction:: low_frequency
 
-..  _sphx_glr_backref_mrinufft.extras.smaps.low_frequency:
-
 .. minigallery:: mrinufft.extras.smaps.low_frequency
-   :add-heading:
+   :add-heading: Example using ``low_frequency``:

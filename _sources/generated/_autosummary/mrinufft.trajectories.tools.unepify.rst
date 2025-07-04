@@ -5,7 +5,5 @@ unepify
 
 .. autofunction:: unepify
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.unepify:
-
 .. minigallery:: mrinufft.trajectories.tools.unepify
-   :add-heading:
+   :add-heading: Example using ``unepify``:

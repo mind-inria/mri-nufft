@@ -85,3 +85,8 @@ Packings
       ~Packings.SPIRAL
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.Packings:
+
+   .. minigallery:: mrinufft.trajectories.utils.Packings
+      :add-heading:

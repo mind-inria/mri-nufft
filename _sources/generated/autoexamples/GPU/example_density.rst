@@ -40,10 +40,11 @@ of the operator roughly equal to 1.
 Imports
 -------
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-31
+.. GENERATED FROM PYTHON SOURCE LINES 23-32
 
 .. code-block:: Python
 
+    import os
     import brainweb_dl as bwdl
     import matplotlib.pyplot as plt
     import numpy as np
@@ -59,15 +60,17 @@ Imports
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-34
+.. GENERATED FROM PYTHON SOURCE LINES 33-35
 
 Create sample data
 ------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-50
+.. GENERATED FROM PYTHON SOURCE LINES 35-53
 
 .. code-block:: Python
 
+
+    BACKEND = os.environ.get("MRINUFFT_BACKEND", "finufft")
 
     mri_2D = np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.float32)
 
@@ -75,7 +78,7 @@ Create sample data
 
     traj = initialize_2D_radial(192, 192).astype(np.float32)
 
-    nufft = get_operator("finufft")(traj, mri_2D.shape, density=False)
+    nufft = get_operator(BACKEND)(traj, mri_2D.shape, density=False, squeeze_dims=True)
     kspace = nufft.op(mri_2D)
     adjoint = nufft.adj_op(kspace)
 
@@ -98,20 +101,18 @@ Create sample data
  .. code-block:: none
 
     (256, 256)
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/finufft/_interfaces.py:336: UserWarning: Argument `data` does not satisfy the following requirement: C. Copying array (this may reduce performance)
-      warnings.warn(f"Argument `{name}` does not satisfy the following requirement: {prop}. Copying array (this may reduce performance)")
 
-    <matplotlib.image.AxesImage object at 0x76c4fb7fc3d0>
+    <matplotlib.image.AxesImage object at 0x75819a99d1b0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-52
+.. GENERATED FROM PYTHON SOURCE LINES 54-55
 
 As you can see, the radial sampling pattern as a strong concentration of sampling point in the center, resulting in a  low-frequency biased adjoint reconstruction.
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-62
+.. GENERATED FROM PYTHON SOURCE LINES 57-65
 
 Geometry based methods
 ======================
@@ -122,7 +123,7 @@ Voronoi
 Voronoi Parcellation attribute a weights to each k-space coordinate, inversely
 proportional to its voronoi cell area.
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-68
+.. GENERATED FROM PYTHON SOURCE LINES 65-71
 
 .. code-block:: Python
 
@@ -139,14 +140,14 @@ proportional to its voronoi cell area.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-84
+.. GENERATED FROM PYTHON SOURCE LINES 72-87
 
 .. code-block:: Python
 
     voronoi_weights = get_density("voronoi", traj)
 
-    nufft_voronoi = get_operator("finufft")(
-        traj, shape=mri_2D.shape, density=voronoi_weights
+    nufft_voronoi = get_operator(BACKEND)(
+        traj, shape=mri_2D.shape, density=voronoi_weights, squeeze_dims=True
     )
     adjoint_voronoi = nufft_voronoi.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -171,14 +172,12 @@ proportional to its voronoi cell area.
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
-      warnings.warn(
 
     Text(0.5, 1.0, 'Voronoi density compensation')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 85-90
+.. GENERATED FROM PYTHON SOURCE LINES 88-93
 
 Cell Counting
 -------------
@@ -186,7 +185,7 @@ Cell Counting
 Cell Counting attributes weights based on the number of trajectory point lying in a same k-space nyquist voxel.
 This can be viewed as an approximation to the voronoi neth
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-97
+.. GENERATED FROM PYTHON SOURCE LINES 93-100
 
 .. code-block:: Python
 
@@ -204,14 +203,18 @@ This can be viewed as an approximation to the voronoi neth
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-112
+.. GENERATED FROM PYTHON SOURCE LINES 101-119
 
 .. code-block:: Python
 
     cell_count_weights = get_density("cell_count", traj, shape=mri_2D.shape, osf=2.0)
 
-    nufft_cell_count = get_operator("finufft")(
-        traj, shape=mri_2D.shape, density=cell_count_weights, upsampfac=2.0
+    nufft_cell_count = get_operator(BACKEND)(
+        traj,
+        shape=mri_2D.shape,
+        density=cell_count_weights,
+        upsampfac=2.0,
+        squeeze_dims=True,
     )
     adjoint_cell_count = nufft_cell_count.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -235,14 +238,12 @@ This can be viewed as an approximation to the voronoi neth
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
-      warnings.warn(
 
     Text(0.5, 1.0, 'cell_count density compensation')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-118
+.. GENERATED FROM PYTHON SOURCE LINES 120-125
 
 Manual Density Estimation
 -------------------------
@@ -250,13 +251,15 @@ Manual Density Estimation
 For some analytical trajectory it is also possible to determine the density compensation vector directly.
 In radial trajectory for instance, a sample's weight can be determined from its distance to the center.
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-133
+.. GENERATED FROM PYTHON SOURCE LINES 128-142
 
 .. code-block:: Python
 
     flat_traj = traj.reshape(-1, 2)
     weights = np.sqrt(np.sum(flat_traj**2, axis=1))
-    nufft = get_operator("finufft")(traj, shape=mri_2D.shape, density=weights)
+    nufft = get_operator(BACKEND)(
+        traj, shape=mri_2D.shape, density=weights, squeeze_dims=True
+    )
     adjoint_manual = nufft.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     axs[0].imshow(abs(mri_2D))
@@ -279,14 +282,12 @@ In radial trajectory for instance, a sample's weight can be determined from its 
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
-      warnings.warn(
 
     Text(0.5, 1.0, 'manual density compensation')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-146
+.. GENERATED FROM PYTHON SOURCE LINES 143-155
 
 Operator-based method
 =====================
@@ -299,15 +300,15 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
    If this method is widely used in the literature, there exists no convergence guarantees for it.
 
 .. note::
-   The Pipe method is currently only implemented for gpuNUFFT and cufinufft backend.
+   The Pipe method is currently only implemented for gpuNUFFT, finufft, and cufinufft backends.
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-162
+.. GENERATED FROM PYTHON SOURCE LINES 157-171
 
 .. code-block:: Python
 
     flat_traj = traj.reshape(-1, 2)
-    nufft = get_operator("gpunufft")(
-        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+    nufft = get_operator(BACKEND)(
+        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}, squeeze_dims=True
     )
     adjoint_manual = nufft.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -332,22 +333,25 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
  .. code-block:: none
 
-    [0.00880156 0.04016636 0.08103254 ... 3.2323236  2.6604986  3.4456434 ]
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+      warnings.warn(
+    [0.01538813+0.j 0.02055799+0.j 0.0399904 +0.j ... 3.4247987 +0.j
+     2.9435487 +0.j 2.6805587 +0.j]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 163-164
+.. GENERATED FROM PYTHON SOURCE LINES 172-173
 
 We can also do density compensation using cufinufft backend
 
-.. GENERATED FROM PYTHON SOURCE LINES 166-179
+.. GENERATED FROM PYTHON SOURCE LINES 175-188
 
 .. code-block:: Python
 
     flat_traj = traj.reshape(-1, 2)
-    nufft = get_operator("cufinufft")(
-        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}
+    nufft = get_operator(BACKEND)(
+        traj, shape=mri_2D.shape, density={"name": "pipe", "osf": 2}, squeeze_dims=True
     )
     adjoint_manual = nufft.adj_op(kspace)
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -371,12 +375,8 @@ We can also do density compensation using cufinufft backend
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
-      warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
-      warnings.warn(
-    [0.01538814+0.j 0.02055799+0.j 0.03999041+0.j ... 3.4247985 +0.j
-     2.9435487 +0.j 2.6805584 +0.j]
+    [0.01538813+0.j 0.02055799+0.j 0.03999041+0.j ... 3.4247987 +0.j
+     2.943549  +0.j 2.6805587 +0.j]
 
 
 
@@ -384,7 +384,7 @@ We can also do density compensation using cufinufft backend
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 9.713 seconds)
+   **Total running time of the script:** (0 minutes 8.044 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_density.py:

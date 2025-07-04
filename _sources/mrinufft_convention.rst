@@ -37,7 +37,7 @@ All MRI-NUFFT operators inherit from :class:`FourierOperatorBase` . The minimum 
 
 .. tip::
 
-   The precision of the samples array will determine the precision of the computation. See also :ref:`K-Space Trajectories`
+   The precision of the samples array will determine the precision of the computation. See also :ref:`kspace_traj`
 
 Moreover, the two following methods should be implemented for each backend
 
@@ -67,6 +67,7 @@ Adding a NUFFT Backend
 
 Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how other backends have been inplemented. CPU-based nufft interface can use the `FourierOperatorCPU` to minimize the boiler-plate.
 
+.. _kspace_traj:
 
 K-Space Trajectories
 ====================

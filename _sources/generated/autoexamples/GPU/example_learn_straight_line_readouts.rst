@@ -27,25 +27,31 @@ In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
 straight line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
 The image resolution is kept small to reduce computation time.
 
-.. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
+.. warning:: This example only showcases the autodiff capabilities, the learned
+    sampling pattern is not scanner compliant as the scanner gradients required
+    to implement it violate the hardware constraints. In practice, a projection
+    :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set
+    :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the
+    proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the
+    authors if they want to use it.
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-21
+.. GENERATED FROM PYTHON SOURCE LINES 23-27
 
 .. colab-link::
    :needs_gpu: 1
 
    !pip install mri-nufft[gpunufft]
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-25
+.. GENERATED FROM PYTHON SOURCE LINES 29-31
 
 Imports
 -------
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-38
+.. GENERATED FROM PYTHON SOURCE LINES 31-46
 
 .. code-block:: Python
 
+    import os
     import time
     import joblib
 
@@ -58,6 +64,7 @@ Imports
 
     from mrinufft import get_operator
 
+    BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 
 
@@ -66,7 +73,7 @@ Imports
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-44
+.. GENERATED FROM PYTHON SOURCE LINES 47-52
 
 Setup a simple class to learn trajectory
 ----------------------------------------
@@ -74,7 +81,7 @@ Setup a simple class to learn trajectory
     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
     See [Projector]_ for more details.
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-114
+.. GENERATED FROM PYTHON SOURCE LINES 52-129
 
 .. code-block:: Python
 
@@ -91,8 +98,12 @@ Setup a simple class to learn trajectory
             self.central_points = torch.nn.Parameter(
                 data=torch.stack(
                     torch.meshgrid(
-                        torch.linspace(-edge_center, edge_center, num_cart_points),
-                        torch.linspace(-edge_center, edge_center, num_cart_points),
+                        torch.linspace(
+                            -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                        ),
+                        torch.linspace(
+                            -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                        ),
                         indexing="ij",
                     ),
                     axis=-1,
@@ -101,14 +112,17 @@ Setup a simple class to learn trajectory
             )
             self.non_center_points = torch.nn.Parameter(
                 data=torch.Tensor(
-                    np.random.random((num_shots - self.central_points.shape[0], 2)) - 0.5
+                    np.random.random((num_shots - self.central_points.shape[0], 2)).astype(
+                        np.float32
+                    )
+                    - 0.5
                 ),
                 requires_grad=True,
             )
-            self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+            self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
                 np.random.random(
                     (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
-                )
+                ).astype(np.float32)
                 - 0.5,
                 shape=img_size,
                 density=True,
@@ -155,12 +169,12 @@ Setup a simple class to learn trajectory
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-117
+.. GENERATED FROM PYTHON SOURCE LINES 130-132
 
 Util function to plot the state of the model
 --------------------------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-162
+.. GENERATED FROM PYTHON SOURCE LINES 132-177
 
 .. code-block:: Python
 
@@ -216,12 +230,12 @@ Util function to plot the state of the model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 163-165
+.. GENERATED FROM PYTHON SOURCE LINES 178-180
 
 Setup model and optimizer
 -------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-169
+.. GENERATED FROM PYTHON SOURCE LINES 180-184
 
 .. code-block:: Python
 
@@ -233,15 +247,24 @@ Setup model and optimizer
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 170-172
+
+.. GENERATED FROM PYTHON SOURCE LINES 185-187
 
 Setup data
 ----------
 
-.. GENERATED FROM PYTHON SOURCE LINES 172-178
+.. GENERATED FROM PYTHON SOURCE LINES 187-193
 
 .. code-block:: Python
 
@@ -264,18 +287,24 @@ Setup data
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:125: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:188: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
+      mri_3D = torch.Tensor(cart_data)[None]
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:140: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
       axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap="gray")
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 179-181
+.. GENERATED FROM PYTHON SOURCE LINES 194-196
 
 Start training loop
 -------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 181-224
+.. GENERATED FROM PYTHON SOURCE LINES 196-239
 
 .. code-block:: Python
 
@@ -330,24 +359,24 @@ Start training loop
 
  .. code-block:: none
 
-      0%|          | 0/40 [00:00<?, ?steps/s]      0%|          | 0/40 [00:00<?, ?steps/s, loss=0.3009447]      2%|▎         | 1/40 [00:09<06:26,  9.91s/steps, loss=0.3009447]      2%|▎         | 1/40 [00:10<06:26,  9.91s/steps, loss=0.28402638]      5%|▌         | 2/40 [00:20<06:41, 10.57s/steps, loss=0.28402638]      5%|▌         | 2/40 [00:21<06:41, 10.57s/steps, loss=0.26602134]      8%|▊         | 3/40 [00:31<06:26, 10.44s/steps, loss=0.26602134]      8%|▊         | 3/40 [00:31<06:26, 10.44s/steps, loss=0.26149642]     10%|█         | 4/40 [00:43<06:35, 10.99s/steps, loss=0.26149642]     10%|█         | 4/40 [00:43<06:35, 10.99s/steps, loss=0.25594667]     12%|█▎        | 5/40 [00:53<06:14, 10.71s/steps, loss=0.25594667]     12%|█▎        | 5/40 [00:53<06:14, 10.71s/steps, loss=0.2526802]      15%|█▌        | 6/40 [01:04<06:11, 10.93s/steps, loss=0.2526802]     15%|█▌        | 6/40 [01:04<06:11, 10.93s/steps, loss=0.2512862]     18%|█▊        | 7/40 [01:13<05:40, 10.31s/steps, loss=0.2512862]     18%|█▊        | 7/40 [01:13<05:40, 10.31s/steps, loss=0.2473457]     20%|██        | 8/40 [01:23<05:29, 10.31s/steps, loss=0.2473457]     20%|██        | 8/40 [01:24<05:29, 10.31s/steps, loss=0.24386074]     22%|██▎       | 9/40 [01:34<05:17, 10.25s/steps, loss=0.24386074]     22%|██▎       | 9/40 [01:34<05:17, 10.25s/steps, loss=0.2405172]      25%|██▌       | 10/40 [01:44<05:10, 10.36s/steps, loss=0.2405172]     25%|██▌       | 10/40 [01:44<05:10, 10.36s/steps, loss=0.23916209]     28%|██▊       | 11/40 [01:55<05:03, 10.47s/steps, loss=0.23916209]     28%|██▊       | 11/40 [01:55<05:03, 10.47s/steps, loss=0.2395287]      30%|███       | 12/40 [02:05<04:51, 10.41s/steps, loss=0.2395287]     30%|███       | 12/40 [02:05<04:51, 10.41s/steps, loss=0.23732844]     32%|███▎      | 13/40 [02:15<04:40, 10.37s/steps, loss=0.23732844]     32%|███▎      | 13/40 [02:16<04:40, 10.37s/steps, loss=0.23550542]     35%|███▌      | 14/40 [02:26<04:28, 10.33s/steps, loss=0.23550542]     35%|███▌      | 14/40 [02:26<04:28, 10.33s/steps, loss=0.23489226]     38%|███▊      | 15/40 [02:36<04:17, 10.28s/steps, loss=0.23489226]     38%|███▊      | 15/40 [02:36<04:17, 10.28s/steps, loss=0.23414266]     40%|████      | 16/40 [02:46<04:04, 10.19s/steps, loss=0.23414266]     40%|████      | 16/40 [02:46<04:04, 10.19s/steps, loss=0.23308459]     42%|████▎     | 17/40 [02:54<03:43,  9.70s/steps, loss=0.23308459]     42%|████▎     | 17/40 [02:55<03:43,  9.70s/steps, loss=0.23177919]     45%|████▌     | 18/40 [03:04<03:30,  9.58s/steps, loss=0.23177919]     45%|████▌     | 18/40 [03:04<03:30,  9.58s/steps, loss=0.23063113]     48%|████▊     | 19/40 [03:12<03:15,  9.31s/steps, loss=0.23063113]     48%|████▊     | 19/40 [03:13<03:15,  9.31s/steps, loss=0.22962987]     50%|█████     | 20/40 [03:21<03:00,  9.05s/steps, loss=0.22962987]     50%|█████     | 20/40 [03:21<03:00,  9.05s/steps, loss=0.2287233]      52%|█████▎    | 21/40 [03:30<02:50,  8.98s/steps, loss=0.2287233]     52%|█████▎    | 21/40 [03:30<02:50,  8.98s/steps, loss=0.22784425]     55%|█████▌    | 22/40 [03:30<01:57,  6.53s/steps, loss=0.22784425]     55%|█████▌    | 22/40 [03:31<01:57,  6.53s/steps, loss=0.22719184]     57%|█████▊    | 23/40 [03:31<01:22,  4.86s/steps, loss=0.22719184]     57%|█████▊    | 23/40 [03:32<01:22,  4.86s/steps, loss=0.22623199]     60%|██████    | 24/40 [03:32<00:58,  3.63s/steps, loss=0.22623199]     60%|██████    | 24/40 [03:32<00:58,  3.63s/steps, loss=0.2247492]      62%|██████▎   | 25/40 [03:33<00:41,  2.77s/steps, loss=0.2247492]     62%|██████▎   | 25/40 [03:33<00:41,  2.77s/steps, loss=0.22377339]     65%|██████▌   | 26/40 [03:34<00:30,  2.17s/steps, loss=0.22377339]     65%|██████▌   | 26/40 [03:34<00:30,  2.17s/steps, loss=0.22277497]     68%|██████▊   | 27/40 [03:35<00:22,  1.76s/steps, loss=0.22277497]     68%|██████▊   | 27/40 [03:35<00:22,  1.76s/steps, loss=0.22188191]     70%|███████   | 28/40 [03:36<00:19,  1.60s/steps, loss=0.22188191]     70%|███████   | 28/40 [03:36<00:19,  1.60s/steps, loss=0.22193088]     72%|███████▎  | 29/40 [03:37<00:14,  1.35s/steps, loss=0.22193088]     72%|███████▎  | 29/40 [03:37<00:14,  1.35s/steps, loss=0.22109635]     75%|███████▌  | 30/40 [03:37<00:11,  1.19s/steps, loss=0.22109635]     75%|███████▌  | 30/40 [03:37<00:11,  1.19s/steps, loss=0.22048596]     78%|███████▊  | 31/40 [03:38<00:09,  1.06s/steps, loss=0.22048596]     78%|███████▊  | 31/40 [03:38<00:09,  1.06s/steps, loss=0.22024271]     80%|████████  | 32/40 [03:39<00:07,  1.03steps/s, loss=0.22024271]     80%|████████  | 32/40 [03:39<00:07,  1.03steps/s, loss=0.21945906]     82%|████████▎ | 33/40 [03:40<00:06,  1.09steps/s, loss=0.21945906]     82%|████████▎ | 33/40 [03:40<00:06,  1.09steps/s, loss=0.21917422]     85%|████████▌ | 34/40 [03:40<00:05,  1.16steps/s, loss=0.21917422]     85%|████████▌ | 34/40 [03:41<00:05,  1.16steps/s, loss=0.21869807]     88%|████████▊ | 35/40 [03:41<00:04,  1.19steps/s, loss=0.21869807]     88%|████████▊ | 35/40 [03:41<00:04,  1.19steps/s, loss=0.21780951]     90%|█████████ | 36/40 [03:42<00:03,  1.22steps/s, loss=0.21780951]     90%|█████████ | 36/40 [03:42<00:03,  1.22steps/s, loss=0.21731588]     92%|█████████▎| 37/40 [03:43<00:02,  1.24steps/s, loss=0.21731588]     92%|█████████▎| 37/40 [03:43<00:02,  1.24steps/s, loss=0.21722704]     95%|█████████▌| 38/40 [03:44<00:01,  1.09steps/s, loss=0.21722704]     95%|█████████▌| 38/40 [03:44<00:01,  1.09steps/s, loss=0.2171437]      98%|█████████▊| 39/40 [03:45<00:00,  1.16steps/s, loss=0.2171437]     98%|█████████▊| 39/40 [03:45<00:00,  1.16steps/s, loss=0.21689017]    100%|██████████| 40/40 [03:45<00:00,  1.21steps/s, loss=0.21689017]    100%|██████████| 40/40 [03:45<00:00,  5.65s/steps, loss=0.21689017]
+      0%|          | 0/40 [00:00<?, ?steps/s]      0%|          | 0/40 [00:00<?, ?steps/s, loss=0.66317254]      2%|▎         | 1/40 [00:05<03:32,  5.44s/steps, loss=0.66317254]      2%|▎         | 1/40 [00:05<03:32,  5.44s/steps, loss=0.6039756]       5%|▌         | 2/40 [00:10<03:19,  5.26s/steps, loss=0.6039756]      5%|▌         | 2/40 [00:10<03:19,  5.26s/steps, loss=0.5755593]      8%|▊         | 3/40 [00:16<03:21,  5.44s/steps, loss=0.5755593]      8%|▊         | 3/40 [00:16<03:21,  5.44s/steps, loss=0.5511944]     10%|█         | 4/40 [00:21<03:18,  5.51s/steps, loss=0.5511944]     10%|█         | 4/40 [00:21<03:18,  5.51s/steps, loss=0.5418022]     12%|█▎        | 5/40 [00:27<03:14,  5.55s/steps, loss=0.5418022]     12%|█▎        | 5/40 [00:27<03:14,  5.55s/steps, loss=0.51418555]     15%|█▌        | 6/40 [00:33<03:12,  5.67s/steps, loss=0.51418555]     15%|█▌        | 6/40 [00:33<03:12,  5.67s/steps, loss=0.4959826]      18%|█▊        | 7/40 [00:38<03:06,  5.64s/steps, loss=0.4959826]     18%|█▊        | 7/40 [00:38<03:06,  5.64s/steps, loss=0.4882997]     20%|██        | 8/40 [00:44<03:03,  5.74s/steps, loss=0.4882997]     20%|██        | 8/40 [00:44<03:03,  5.74s/steps, loss=0.47661623]     22%|██▎       | 9/40 [00:50<02:56,  5.69s/steps, loss=0.47661623]     22%|██▎       | 9/40 [00:50<02:56,  5.69s/steps, loss=0.46890557]     25%|██▌       | 10/40 [00:56<02:51,  5.73s/steps, loss=0.46890557]     25%|██▌       | 10/40 [00:56<02:51,  5.73s/steps, loss=0.46385136]     28%|██▊       | 11/40 [01:01<02:44,  5.67s/steps, loss=0.46385136]     28%|██▊       | 11/40 [01:01<02:44,  5.67s/steps, loss=0.45664862]     30%|███       | 12/40 [01:07<02:37,  5.62s/steps, loss=0.45664862]     30%|███       | 12/40 [01:07<02:37,  5.62s/steps, loss=0.45494536]     32%|███▎      | 13/40 [01:12<02:30,  5.58s/steps, loss=0.45494536]     32%|███▎      | 13/40 [01:12<02:30,  5.58s/steps, loss=0.45274037]     35%|███▌      | 14/40 [01:18<02:22,  5.49s/steps, loss=0.45274037]     35%|███▌      | 14/40 [01:18<02:22,  5.49s/steps, loss=0.4487221]      38%|███▊      | 15/40 [01:23<02:17,  5.50s/steps, loss=0.4487221]     38%|███▊      | 15/40 [01:23<02:17,  5.50s/steps, loss=0.44835338]     40%|████      | 16/40 [01:28<02:10,  5.42s/steps, loss=0.44835338]     40%|████      | 16/40 [01:28<02:10,  5.42s/steps, loss=0.44606623]     42%|████▎     | 17/40 [01:34<02:04,  5.43s/steps, loss=0.44606623]     42%|████▎     | 17/40 [01:34<02:04,  5.43s/steps, loss=0.43759358]     45%|████▌     | 18/40 [01:39<01:58,  5.37s/steps, loss=0.43759358]     45%|████▌     | 18/40 [01:39<01:58,  5.37s/steps, loss=0.43132657]     48%|████▊     | 19/40 [01:44<01:53,  5.39s/steps, loss=0.43132657]     48%|████▊     | 19/40 [01:45<01:53,  5.39s/steps, loss=0.4297195]      50%|█████     | 20/40 [01:50<01:45,  5.29s/steps, loss=0.4297195]     50%|█████     | 20/40 [01:50<01:45,  5.29s/steps, loss=0.42277884]     52%|█████▎    | 21/40 [01:55<01:39,  5.24s/steps, loss=0.42277884]     52%|█████▎    | 21/40 [01:55<01:39,  5.24s/steps, loss=0.4244627]      55%|█████▌    | 22/40 [01:55<01:08,  3.80s/steps, loss=0.4244627]     55%|█████▌    | 22/40 [01:55<01:08,  3.80s/steps, loss=0.4233177]     57%|█████▊    | 23/40 [01:56<00:49,  2.89s/steps, loss=0.4233177]     57%|█████▊    | 23/40 [01:56<00:49,  2.89s/steps, loss=0.42058837]     60%|██████    | 24/40 [01:56<00:34,  2.15s/steps, loss=0.42058837]     60%|██████    | 24/40 [01:56<00:34,  2.15s/steps, loss=0.42127946]     62%|██████▎   | 25/40 [01:57<00:24,  1.65s/steps, loss=0.42127946]     62%|██████▎   | 25/40 [01:57<00:24,  1.65s/steps, loss=0.4176745]      65%|██████▌   | 26/40 [01:57<00:17,  1.28s/steps, loss=0.4176745]     65%|██████▌   | 26/40 [01:57<00:17,  1.28s/steps, loss=0.4227654]     68%|██████▊   | 27/40 [01:58<00:13,  1.04s/steps, loss=0.4227654]     68%|██████▊   | 27/40 [01:58<00:13,  1.04s/steps, loss=0.40413246]     70%|███████   | 28/40 [01:58<00:10,  1.16steps/s, loss=0.40413246]     70%|███████   | 28/40 [01:58<00:10,  1.16steps/s, loss=0.40176976]     72%|███████▎  | 29/40 [01:59<00:08,  1.33steps/s, loss=0.40176976]     72%|███████▎  | 29/40 [01:59<00:08,  1.33steps/s, loss=0.40286782]     75%|███████▌  | 30/40 [01:59<00:06,  1.52steps/s, loss=0.40286782]     75%|███████▌  | 30/40 [01:59<00:06,  1.52steps/s, loss=0.4000531]      78%|███████▊  | 31/40 [02:00<00:05,  1.64steps/s, loss=0.4000531]     78%|███████▊  | 31/40 [02:00<00:05,  1.64steps/s, loss=0.39398116]     80%|████████  | 32/40 [02:00<00:05,  1.57steps/s, loss=0.39398116]     80%|████████  | 32/40 [02:00<00:05,  1.57steps/s, loss=0.39653653]     82%|████████▎ | 33/40 [02:01<00:04,  1.71steps/s, loss=0.39653653]     82%|████████▎ | 33/40 [02:01<00:04,  1.71steps/s, loss=0.38895333]     85%|████████▌ | 34/40 [02:01<00:03,  1.83steps/s, loss=0.38895333]     85%|████████▌ | 34/40 [02:01<00:03,  1.83steps/s, loss=0.39033723]     88%|████████▊ | 35/40 [02:02<00:02,  1.91steps/s, loss=0.39033723]     88%|████████▊ | 35/40 [02:02<00:02,  1.91steps/s, loss=0.38475725]     90%|█████████ | 36/40 [02:02<00:02,  1.99steps/s, loss=0.38475725]     90%|█████████ | 36/40 [02:02<00:02,  1.99steps/s, loss=0.3848192]      92%|█████████▎| 37/40 [02:03<00:01,  2.02steps/s, loss=0.3848192]     92%|█████████▎| 37/40 [02:03<00:01,  2.02steps/s, loss=0.37793246]     95%|█████████▌| 38/40 [02:03<00:00,  2.10steps/s, loss=0.37793246]     95%|█████████▌| 38/40 [02:03<00:00,  2.10steps/s, loss=0.3791697]      98%|█████████▊| 39/40 [02:03<00:00,  2.09steps/s, loss=0.3791697]     98%|█████████▊| 39/40 [02:04<00:00,  2.09steps/s, loss=0.37943077]    100%|██████████| 40/40 [02:04<00:00,  2.16steps/s, loss=0.37943077]    100%|██████████| 40/40 [02:04<00:00,  3.11s/steps, loss=0.37943077]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 254-258
+.. GENERATED FROM PYTHON SOURCE LINES 269-273
 
 .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
    :alt: example learn_samples
    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
    :class: sphx-glr-single-img
 
-.. GENERATED FROM PYTHON SOURCE LINES 260-262
+.. GENERATED FROM PYTHON SOURCE LINES 275-277
 
 Trained trajectory
 ------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 262-267
+.. GENERATED FROM PYTHON SOURCE LINES 277-282
 
 .. code-block:: Python
 
@@ -368,7 +397,7 @@ Trained trajectory
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 268-283
+.. GENERATED FROM PYTHON SOURCE LINES 283-298
 
 References
 ==========
@@ -389,7 +418,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (3 minutes 55.683 seconds)
+   **Total running time of the script:** (2 minutes 15.449 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_learn_straight_line_readouts.py:

@@ -5,7 +5,5 @@ write\_gradients
 
 .. autofunction:: write_gradients
 
-..  _sphx_glr_backref_mrinufft.io.nsp.write_gradients:
-
 .. minigallery:: mrinufft.io.nsp.write_gradients
-   :add-heading:
+   :add-heading: Example using ``write_gradients``:

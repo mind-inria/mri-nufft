@@ -55,3 +55,8 @@ MRInfft
       ~MRInfft.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.nfft.MRInfft:
+
+   .. minigallery:: mrinufft.operators.interfaces.nfft.MRInfft
+      :add-heading:

@@ -176,18 +176,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -196,6 +184,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -775,12 +781,12 @@ document.write(`
 <span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.trajectory3D.</span></span><span class="sig-name descname"><span class="pre">initialize_3D_turbine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns_readouts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns_transitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blade_tilt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'uniform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_trains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/trajectory3D.html#initialize_3D_turbine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.trajectory3D.initialize_3D_turbine" title="Link to this definition">#</a></dt>
 <dd><p>Initialize 3D TURBINE trajectory.</p>
 <p>This is an implementation of the TURBINE (Trajectory Using Radially
-Batched Internal Navigator Echoes) trajectory proposed in <a class="reference internal" href="../autoexamples/example_3D_trajectories.html#mgm10" id="id1"><span>[MGM10]</span></a>.
+Batched Internal Navigator Echoes) trajectory proposed in <a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html#mgm10" id="id1"><span>[MGM10]</span></a>.
 It consists of EPI-like multi-echo planes rotated around any axis
 (here <span class="math notranslate nohighlight">\(k_z\)</span>-axis) in a radial fashion.</p>
 <p>Note that our implementation also proposes to segment the planes
 into several shots instead of just one, and includes the proposition
-from <a class="reference internal" href="../autoexamples/example_3D_trajectories.html#gmc22" id="id2"><span>[GMC22]</span></a> to also accelerate within the blades by skipping lines
+from <a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html#gmc22" id="id2"><span>[GMC22]</span></a> to also accelerate within the blades by skipping lines
 but while alternating them between blades.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -826,7 +832,7 @@ Magnetic Resonance in Medicine 88, no. 5 (2022): 2058-2073.</p>
 </div>
 </dd></dl>
 
-<span class="target" id="sphx-glr-backref-mrinufft-trajectories-trajectory3d-initialize-3d-turbine"></span></section>
+</section>
 
 
                 </article>

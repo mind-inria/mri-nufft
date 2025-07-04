@@ -5,7 +5,5 @@ unnormalize\_trajectory
 
 .. autofunction:: unnormalize_trajectory
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.unnormalize_trajectory:
-
 .. minigallery:: mrinufft.trajectories.utils.unnormalize_trajectory
-   :add-heading:
+   :add-heading: Example using ``unnormalize_trajectory``:

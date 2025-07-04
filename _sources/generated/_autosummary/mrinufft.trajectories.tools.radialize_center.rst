@@ -5,7 +5,5 @@ radialize\_center
 
 .. autofunction:: radialize_center
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.radialize_center:
-
 .. minigallery:: mrinufft.trajectories.tools.radialize_center
-   :add-heading:
+   :add-heading: Example using ``radialize_center``:

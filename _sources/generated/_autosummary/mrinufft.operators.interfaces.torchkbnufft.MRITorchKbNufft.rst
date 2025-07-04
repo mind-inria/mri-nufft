@@ -56,3 +56,8 @@ MRITorchKbNufft
       ~MRITorchKbNufft.backend
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft:
+
+   .. minigallery:: mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft
+      :add-heading:

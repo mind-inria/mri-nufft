@@ -5,7 +5,5 @@ check\_error
 
 .. autofunction:: check_error
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.utils.check_error:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.utils.check_error
-   :add-heading:
+   :add-heading: Example using ``check_error``:

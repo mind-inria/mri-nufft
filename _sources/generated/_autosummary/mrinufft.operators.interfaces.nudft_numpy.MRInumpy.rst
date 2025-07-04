@@ -55,3 +55,8 @@ MRInumpy
       ~MRInumpy.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.nudft_numpy.MRInumpy:
+
+   .. minigallery:: mrinufft.operators.interfaces.nudft_numpy.MRInumpy
+      :add-heading:

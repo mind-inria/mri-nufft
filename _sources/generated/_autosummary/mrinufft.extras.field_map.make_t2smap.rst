@@ -5,7 +5,5 @@ make\_t2smap
 
 .. autofunction:: make_t2smap
 
-..  _sphx_glr_backref_mrinufft.extras.field_map.make_t2smap:
-
 .. minigallery:: mrinufft.extras.field_map.make_t2smap
-   :add-heading:
+   :add-heading: Example using ``make_t2smap``:

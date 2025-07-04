@@ -5,7 +5,5 @@ solve\_tsp\_with\_2opt
 
 .. autofunction:: solve_tsp_with_2opt
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt:
-
 .. minigallery:: mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt
-   :add-heading:
+   :add-heading: Example using ``solve_tsp_with_2opt``:

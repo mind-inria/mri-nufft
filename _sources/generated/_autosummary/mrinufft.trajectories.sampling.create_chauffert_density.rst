@@ -5,7 +5,5 @@ create\_chauffert\_density
 
 .. autofunction:: create_chauffert_density
 
-..  _sphx_glr_backref_mrinufft.trajectories.sampling.create_chauffert_density:
-
 .. minigallery:: mrinufft.trajectories.sampling.create_chauffert_density
-   :add-heading:
+   :add-heading: Example using ``create_chauffert_density``:

@@ -34,3 +34,8 @@ FloatEnum
       ~FloatEnum.imag
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.FloatEnum:
+
+   .. minigallery:: mrinufft.trajectories.utils.FloatEnum
+      :add-heading:

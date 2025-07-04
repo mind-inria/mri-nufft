@@ -5,7 +5,5 @@ check\_hardware\_constraints
 
 .. autofunction:: check_hardware_constraints
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.check_hardware_constraints:
-
 .. minigallery:: mrinufft.trajectories.utils.check_hardware_constraints
-   :add-heading:
+   :add-heading: Example using ``check_hardware_constraints``:

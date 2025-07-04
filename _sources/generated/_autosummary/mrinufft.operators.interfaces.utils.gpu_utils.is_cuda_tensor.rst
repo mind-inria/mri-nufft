@@ -5,7 +5,5 @@ is\_cuda\_tensor
 
 .. autofunction:: is_cuda_tensor
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor
-   :add-heading:
+   :add-heading: Example using ``is_cuda_tensor``:

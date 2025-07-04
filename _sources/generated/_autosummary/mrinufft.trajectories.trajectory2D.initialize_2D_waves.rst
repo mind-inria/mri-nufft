@@ -5,7 +5,5 @@ initialize\_2D\_waves
 
 .. autofunction:: initialize_2D_waves
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory2D.initialize_2D_waves:
-
 .. minigallery:: mrinufft.trajectories.trajectory2D.initialize_2D_waves
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_waves``:

@@ -5,7 +5,5 @@ read\_siemens\_rawdat
 
 .. autofunction:: read_siemens_rawdat
 
-..  _sphx_glr_backref_mrinufft.io.siemens.read_siemens_rawdat:
-
 .. minigallery:: mrinufft.io.siemens.read_siemens_rawdat
-   :add-heading:
+   :add-heading: Example using ``read_siemens_rawdat``:

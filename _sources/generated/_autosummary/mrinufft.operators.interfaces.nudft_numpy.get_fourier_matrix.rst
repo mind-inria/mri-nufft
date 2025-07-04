@@ -5,7 +5,5 @@ get\_fourier\_matrix
 
 .. autofunction:: get_fourier_matrix
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix:
-
 .. minigallery:: mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix
-   :add-heading:
+   :add-heading: Example using ``get_fourier_matrix``:

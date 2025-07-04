@@ -55,3 +55,8 @@ MRISigpyNUFFT
       ~MRISigpyNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.sigpy.MRISigpyNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.sigpy.MRISigpyNUFFT
+      :add-heading:

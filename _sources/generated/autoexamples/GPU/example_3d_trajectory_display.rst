@@ -26,12 +26,13 @@ In this example, we show some tools available to display 3D trajectories.
 It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc.
 Another key feature is to display the sampling density in k-space, for example to check for k-space holes or irregularities in the learning-based trajectories that would lead to artifacts in the images.
 
-.. GENERATED FROM PYTHON SOURCE LINES 12-21
+.. GENERATED FROM PYTHON SOURCE LINES 12-25
 
 .. code-block:: Python
 
 
     # Imports
+    import os
     from mrinufft.trajectories.display3D import get_gridded_trajectory
     import mrinufft.trajectories.trajectory3D as mtt
     from mrinufft.trajectories.utils import Gammas
@@ -39,6 +40,7 @@ Another key feature is to display the sampling density in k-space, for example t
     import numpy as np
 
 
+    BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 
 
@@ -46,13 +48,15 @@ Another key feature is to display the sampling density in k-space, for example t
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-25
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 26-29
 
 Helper function to Displaying 3D Gridded Trajectories
 =====================================================
 Utility function to plot mid-plane slices for 3D volumes
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-44
+.. GENERATED FROM PYTHON SOURCE LINES 29-48
 
 .. code-block:: Python
 
@@ -82,7 +86,7 @@ Utility function to plot mid-plane slices for 3D volumes
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-50
+.. GENERATED FROM PYTHON SOURCE LINES 49-54
 
 Helper function to Displaying 3D Trajectories
 =============================================
@@ -90,7 +94,7 @@ Helper function to showcase the features of `get_gridded_trajectory` function
 This function will first grid the trajectory using the `get_gridded_trajectory`
 function and then plot the mid-plane slices of the gridded trajectory.
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-64
+.. GENERATED FROM PYTHON SOURCE LINES 54-70
 
 .. code-block:: Python
 
@@ -103,6 +107,8 @@ function and then plot the mid-plane slices of the gridded trajectory.
                 traj_params["img_size"],
                 grid_type=grid_type,
                 traj_params=traj_params,
+                backend=BACKEND,
+                osf=2,
                 **kwargs,
             )
             plot_slices(axs[:, i], grid, title=name)
@@ -115,13 +121,13 @@ function and then plot the mid-plane slices of the gridded trajectory.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-68
+.. GENERATED FROM PYTHON SOURCE LINES 71-74
 
 Trajectories to display
 =======================
 We instantiate a bunch of sampling trajectories to display hereafter with `get_gridded_trajectory` and previous helper functions.
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-79
+.. GENERATED FROM PYTHON SOURCE LINES 74-85
 
 .. code-block:: Python
 
@@ -143,13 +149,13 @@ We instantiate a bunch of sampling trajectories to display hereafter with `get_g
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-83
+.. GENERATED FROM PYTHON SOURCE LINES 86-89
 
 Sampling density
 =================
 Display the density of the trajectories, along the 3 mid-planes. For this, make `grid_type="density"`.
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-88
+.. GENERATED FROM PYTHON SOURCE LINES 89-94
 
 .. code-block:: Python
 
@@ -167,10 +173,21 @@ Display the density of the trajectories, along the 3 mid-planes. For this, make 
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-94
+
+.. GENERATED FROM PYTHON SOURCE LINES 95-100
 
 Sampling time
 =============
@@ -178,7 +195,7 @@ Display the sampling times over the trajectories. For this, make `grid_type="tim
 It helps to check the sampling times over the k-space trajectories, which can be responsible for excessive off-resonance artifacts.
 Note that this is just a relative visualization of sample times on a colour scale, and the actual sampling time.
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-98
+.. GENERATED FROM PYTHON SOURCE LINES 100-104
 
 .. code-block:: Python
 
@@ -195,10 +212,21 @@ Note that this is just a relative visualization of sample times on a colour scal
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-104
+
+.. GENERATED FROM PYTHON SOURCE LINES 105-110
 
 Inversion time
 ==============
@@ -206,7 +234,7 @@ Display the inversion time of the trajectories. For this, make `grid_type="inver
 This helps in obtaining the inversion time when particular region of k-space is sampled, assuming the trajectories are time ordered,
 and the argument `turbo_factor` is specified, which is the time between 2 inversion pulses.
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-107
+.. GENERATED FROM PYTHON SOURCE LINES 110-113
 
 .. code-block:: Python
 
@@ -222,10 +250,21 @@ and the argument `turbo_factor` is specified, which is the time between 2 invers
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-113
+
+.. GENERATED FROM PYTHON SOURCE LINES 114-119
 
 K-space holes
 =============
@@ -233,7 +272,7 @@ Display the k-space holes in the trajectories. For this, make `grid_type="holes"
 K-space holes are areas with missing trajectory coverage, and can typically occur with learning-based trajectories when optimized using a specific loss.
 This feature can be used to identify the k-space holes, which could lead to Gibbs-like ringing artifacts in the images.
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-116
+.. GENERATED FROM PYTHON SOURCE LINES 119-122
 
 .. code-block:: Python
 
@@ -249,10 +288,21 @@ This feature can be used to identify the k-space holes, which could lead to Gibb
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-123
+
+.. GENERATED FROM PYTHON SOURCE LINES 123-129
 
 Gradient strength
 =================
@@ -261,7 +311,7 @@ This helps in displaying the gradient strength applied at specific k-space regio
 which can be used as a surrogate to k-space "velocity", i.e. how fast does trajectory pass through a given region in k-space.
 It could be useful while characterizing spatial SNR profile in k-space
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-127
+.. GENERATED FROM PYTHON SOURCE LINES 129-133
 
 .. code-block:: Python
 
@@ -278,10 +328,21 @@ It could be useful while characterizing spatial SNR profile in k-space
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-134
+
+.. GENERATED FROM PYTHON SOURCE LINES 134-140
 
 Slew rates
 ===========
@@ -290,7 +351,7 @@ This helps in displaying the slew rates applied at specific k-space region,
 which can ne used as a surrogate to k-space "acceleration", i.e. how fast does trajectory change in a given region in k-space
 It could be useful to understand potential regions in k-space with eddy current artifacts and trajectories which could lead to peripheral nerve stimulations.
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-137
+.. GENERATED FROM PYTHON SOURCE LINES 140-143
 
 .. code-block:: Python
 
@@ -306,13 +367,24 @@ It could be useful to understand potential regions in k-space with eddy current 
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 11.175 seconds)
+   **Total running time of the script:** (0 minutes 9.889 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_3d_trajectory_display.py:

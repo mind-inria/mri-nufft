@@ -5,7 +5,5 @@ initialize\_3D\_annular\_shells
 
 .. autofunction:: initialize_3D_annular_shells
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells:
-
 .. minigallery:: mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells
-   :add-heading:
+   :add-heading: Example using ``initialize_3D_annular_shells``:

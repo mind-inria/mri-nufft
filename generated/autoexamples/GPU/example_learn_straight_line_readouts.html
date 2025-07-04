@@ -176,18 +176,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">GPU Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -196,6 +184,24 @@
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -790,7 +796,13 @@ straight line readouts. This example showcases the auto-diff capabilities of the
 The image resolution is kept small to reduce computation time.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection <span class="math notranslate nohighlight">\(\Pi_\mathcal{Q}(\mathbf{K})\)</span> into the scanner constraints set <span class="math notranslate nohighlight">\(\mathcal{Q}\)</span> is recommended (see <a class="reference internal" href="#proj" id="id1"><span>[Proj]</span></a>). This is implemented in the proprietary SPARKLING package <a class="reference internal" href="#sparks" id="id2"><span>[Sparks]</span></a>. Users are encouraged to contact the authors if they want to use it.</p>
+<p>This example only showcases the autodiff capabilities, the learned
+sampling pattern is not scanner compliant as the scanner gradients required
+to implement it violate the hardware constraints. In practice, a projection
+<span class="math notranslate nohighlight">\(\Pi_\mathcal{Q}(\mathbf{K})\)</span> into the scanner constraints set
+<span class="math notranslate nohighlight">\(\mathcal{Q}\)</span> is recommended (see <a class="reference internal" href="#proj" id="id1"><span>[Proj]</span></a>). This is implemented in the
+proprietary SPARKLING package <a class="reference internal" href="#sparks" id="id2"><span>[Sparks]</span></a>. Users are encouraged to contact the
+authors if they want to use it.</p>
 </div>
 <div class="colab-button">
             <a href="https://colab.research.google.com/github/mind-inria/mri-nufft/blob/gh-pages/examples/generated/autoexamples/GPU/example_learn_straight_line_readouts.ipynb" target="_blank">
@@ -800,7 +812,8 @@ The image resolution is kept small to reduce computation time.</p>
         </div>
         <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">brainweb_dl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bwdl</span>
@@ -811,6 +824,8 @@ The image resolution is kept small to reduce computation time.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageSequence</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_operator</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MRINUFFT_BACKEND&quot;</span><span class="p">,</span> <span class="s2">&quot;gpunufft&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -832,8 +847,12 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
         <span class="bp">self</span><span class="o">.</span><span class="n">central_points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">edge_center</span><span class="p">,</span> <span class="n">edge_center</span><span class="p">,</span> <span class="n">num_cart_points</span><span class="p">),</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">edge_center</span><span class="p">,</span> <span class="n">edge_center</span><span class="p">,</span> <span class="n">num_cart_points</span><span class="p">),</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                        <span class="o">-</span><span class="n">edge_center</span><span class="p">,</span> <span class="n">edge_center</span><span class="p">,</span> <span class="n">num_cart_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">),</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                        <span class="o">-</span><span class="n">edge_center</span><span class="p">,</span> <span class="n">edge_center</span><span class="p">,</span> <span class="n">num_cart_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+                    <span class="p">),</span>
                     <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
@@ -842,14 +861,17 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">non_center_points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
-                <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">((</span><span class="n">num_shots</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span>
+                <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">((</span><span class="n">num_shots</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a>
+                <span class="p">)</span>
+                <span class="o">-</span> <span class="mf">0.5</span>
             <span class="p">),</span>
             <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;gpunufft&quot;</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
             <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_2D_points</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples_per_shot</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span>
             <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">img_size</span><span class="p">,</span>
             <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -943,6 +965,12 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+  warnings.warn(
+</pre></div>
+</div>
 </section>
 <section id="setup-data">
 <h2>Setup data<a class="headerlink" href="#setup-data" title="Link to this heading">#</a></h2>
@@ -953,7 +981,13 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 <span class="n">plot_state</span><span class="p">(</span><span class="n">mri_3D</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">get_trajectory</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">recon</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" srcset="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" alt="MR Image, Reconstruction, Trajectory" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:125: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+<img src="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" srcset="../../../_images/sphx_glr_example_learn_straight_line_readouts_001.png" alt="MR Image, Reconstruction, Trajectory" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:188: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
+  mri_3D = torch.Tensor(cart_data)[None]
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+  warnings.warn(
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_straight_line_readouts.py:140: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
   axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap=&quot;gray&quot;)
 </pre></div>
 </div>
@@ -1005,87 +1039,87 @@ See <a class="reference internal" href="#projector" id="id3"><span>[Projector]</
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/40 [00:00&lt;?, ?steps/s]
-  0%|          | 0/40 [00:00&lt;?, ?steps/s, loss=0.3009447]
-  2%|▎         | 1/40 [00:09&lt;06:26,  9.91s/steps, loss=0.3009447]
-  2%|▎         | 1/40 [00:10&lt;06:26,  9.91s/steps, loss=0.28402638]
-  5%|▌         | 2/40 [00:20&lt;06:41, 10.57s/steps, loss=0.28402638]
-  5%|▌         | 2/40 [00:21&lt;06:41, 10.57s/steps, loss=0.26602134]
-  8%|▊         | 3/40 [00:31&lt;06:26, 10.44s/steps, loss=0.26602134]
-  8%|▊         | 3/40 [00:31&lt;06:26, 10.44s/steps, loss=0.26149642]
- 10%|█         | 4/40 [00:43&lt;06:35, 10.99s/steps, loss=0.26149642]
- 10%|█         | 4/40 [00:43&lt;06:35, 10.99s/steps, loss=0.25594667]
- 12%|█▎        | 5/40 [00:53&lt;06:14, 10.71s/steps, loss=0.25594667]
- 12%|█▎        | 5/40 [00:53&lt;06:14, 10.71s/steps, loss=0.2526802]
- 15%|█▌        | 6/40 [01:04&lt;06:11, 10.93s/steps, loss=0.2526802]
- 15%|█▌        | 6/40 [01:04&lt;06:11, 10.93s/steps, loss=0.2512862]
- 18%|█▊        | 7/40 [01:13&lt;05:40, 10.31s/steps, loss=0.2512862]
- 18%|█▊        | 7/40 [01:13&lt;05:40, 10.31s/steps, loss=0.2473457]
- 20%|██        | 8/40 [01:23&lt;05:29, 10.31s/steps, loss=0.2473457]
- 20%|██        | 8/40 [01:24&lt;05:29, 10.31s/steps, loss=0.24386074]
- 22%|██▎       | 9/40 [01:34&lt;05:17, 10.25s/steps, loss=0.24386074]
- 22%|██▎       | 9/40 [01:34&lt;05:17, 10.25s/steps, loss=0.2405172]
- 25%|██▌       | 10/40 [01:44&lt;05:10, 10.36s/steps, loss=0.2405172]
- 25%|██▌       | 10/40 [01:44&lt;05:10, 10.36s/steps, loss=0.23916209]
- 28%|██▊       | 11/40 [01:55&lt;05:03, 10.47s/steps, loss=0.23916209]
- 28%|██▊       | 11/40 [01:55&lt;05:03, 10.47s/steps, loss=0.2395287]
- 30%|███       | 12/40 [02:05&lt;04:51, 10.41s/steps, loss=0.2395287]
- 30%|███       | 12/40 [02:05&lt;04:51, 10.41s/steps, loss=0.23732844]
- 32%|███▎      | 13/40 [02:15&lt;04:40, 10.37s/steps, loss=0.23732844]
- 32%|███▎      | 13/40 [02:16&lt;04:40, 10.37s/steps, loss=0.23550542]
- 35%|███▌      | 14/40 [02:26&lt;04:28, 10.33s/steps, loss=0.23550542]
- 35%|███▌      | 14/40 [02:26&lt;04:28, 10.33s/steps, loss=0.23489226]
- 38%|███▊      | 15/40 [02:36&lt;04:17, 10.28s/steps, loss=0.23489226]
- 38%|███▊      | 15/40 [02:36&lt;04:17, 10.28s/steps, loss=0.23414266]
- 40%|████      | 16/40 [02:46&lt;04:04, 10.19s/steps, loss=0.23414266]
- 40%|████      | 16/40 [02:46&lt;04:04, 10.19s/steps, loss=0.23308459]
- 42%|████▎     | 17/40 [02:54&lt;03:43,  9.70s/steps, loss=0.23308459]
- 42%|████▎     | 17/40 [02:55&lt;03:43,  9.70s/steps, loss=0.23177919]
- 45%|████▌     | 18/40 [03:04&lt;03:30,  9.58s/steps, loss=0.23177919]
- 45%|████▌     | 18/40 [03:04&lt;03:30,  9.58s/steps, loss=0.23063113]
- 48%|████▊     | 19/40 [03:12&lt;03:15,  9.31s/steps, loss=0.23063113]
- 48%|████▊     | 19/40 [03:13&lt;03:15,  9.31s/steps, loss=0.22962987]
- 50%|█████     | 20/40 [03:21&lt;03:00,  9.05s/steps, loss=0.22962987]
- 50%|█████     | 20/40 [03:21&lt;03:00,  9.05s/steps, loss=0.2287233]
- 52%|█████▎    | 21/40 [03:30&lt;02:50,  8.98s/steps, loss=0.2287233]
- 52%|█████▎    | 21/40 [03:30&lt;02:50,  8.98s/steps, loss=0.22784425]
- 55%|█████▌    | 22/40 [03:30&lt;01:57,  6.53s/steps, loss=0.22784425]
- 55%|█████▌    | 22/40 [03:31&lt;01:57,  6.53s/steps, loss=0.22719184]
- 57%|█████▊    | 23/40 [03:31&lt;01:22,  4.86s/steps, loss=0.22719184]
- 57%|█████▊    | 23/40 [03:32&lt;01:22,  4.86s/steps, loss=0.22623199]
- 60%|██████    | 24/40 [03:32&lt;00:58,  3.63s/steps, loss=0.22623199]
- 60%|██████    | 24/40 [03:32&lt;00:58,  3.63s/steps, loss=0.2247492]
- 62%|██████▎   | 25/40 [03:33&lt;00:41,  2.77s/steps, loss=0.2247492]
- 62%|██████▎   | 25/40 [03:33&lt;00:41,  2.77s/steps, loss=0.22377339]
- 65%|██████▌   | 26/40 [03:34&lt;00:30,  2.17s/steps, loss=0.22377339]
- 65%|██████▌   | 26/40 [03:34&lt;00:30,  2.17s/steps, loss=0.22277497]
- 68%|██████▊   | 27/40 [03:35&lt;00:22,  1.76s/steps, loss=0.22277497]
- 68%|██████▊   | 27/40 [03:35&lt;00:22,  1.76s/steps, loss=0.22188191]
- 70%|███████   | 28/40 [03:36&lt;00:19,  1.60s/steps, loss=0.22188191]
- 70%|███████   | 28/40 [03:36&lt;00:19,  1.60s/steps, loss=0.22193088]
- 72%|███████▎  | 29/40 [03:37&lt;00:14,  1.35s/steps, loss=0.22193088]
- 72%|███████▎  | 29/40 [03:37&lt;00:14,  1.35s/steps, loss=0.22109635]
- 75%|███████▌  | 30/40 [03:37&lt;00:11,  1.19s/steps, loss=0.22109635]
- 75%|███████▌  | 30/40 [03:37&lt;00:11,  1.19s/steps, loss=0.22048596]
- 78%|███████▊  | 31/40 [03:38&lt;00:09,  1.06s/steps, loss=0.22048596]
- 78%|███████▊  | 31/40 [03:38&lt;00:09,  1.06s/steps, loss=0.22024271]
- 80%|████████  | 32/40 [03:39&lt;00:07,  1.03steps/s, loss=0.22024271]
- 80%|████████  | 32/40 [03:39&lt;00:07,  1.03steps/s, loss=0.21945906]
- 82%|████████▎ | 33/40 [03:40&lt;00:06,  1.09steps/s, loss=0.21945906]
- 82%|████████▎ | 33/40 [03:40&lt;00:06,  1.09steps/s, loss=0.21917422]
- 85%|████████▌ | 34/40 [03:40&lt;00:05,  1.16steps/s, loss=0.21917422]
- 85%|████████▌ | 34/40 [03:41&lt;00:05,  1.16steps/s, loss=0.21869807]
- 88%|████████▊ | 35/40 [03:41&lt;00:04,  1.19steps/s, loss=0.21869807]
- 88%|████████▊ | 35/40 [03:41&lt;00:04,  1.19steps/s, loss=0.21780951]
- 90%|█████████ | 36/40 [03:42&lt;00:03,  1.22steps/s, loss=0.21780951]
- 90%|█████████ | 36/40 [03:42&lt;00:03,  1.22steps/s, loss=0.21731588]
- 92%|█████████▎| 37/40 [03:43&lt;00:02,  1.24steps/s, loss=0.21731588]
- 92%|█████████▎| 37/40 [03:43&lt;00:02,  1.24steps/s, loss=0.21722704]
- 95%|█████████▌| 38/40 [03:44&lt;00:01,  1.09steps/s, loss=0.21722704]
- 95%|█████████▌| 38/40 [03:44&lt;00:01,  1.09steps/s, loss=0.2171437]
- 98%|█████████▊| 39/40 [03:45&lt;00:00,  1.16steps/s, loss=0.2171437]
- 98%|█████████▊| 39/40 [03:45&lt;00:00,  1.16steps/s, loss=0.21689017]
-100%|██████████| 40/40 [03:45&lt;00:00,  1.21steps/s, loss=0.21689017]
-100%|██████████| 40/40 [03:45&lt;00:00,  5.65s/steps, loss=0.21689017]
+  0%|          | 0/40 [00:00&lt;?, ?steps/s, loss=0.66317254]
+  2%|▎         | 1/40 [00:05&lt;03:32,  5.44s/steps, loss=0.66317254]
+  2%|▎         | 1/40 [00:05&lt;03:32,  5.44s/steps, loss=0.6039756]
+  5%|▌         | 2/40 [00:10&lt;03:19,  5.26s/steps, loss=0.6039756]
+  5%|▌         | 2/40 [00:10&lt;03:19,  5.26s/steps, loss=0.5755593]
+  8%|▊         | 3/40 [00:16&lt;03:21,  5.44s/steps, loss=0.5755593]
+  8%|▊         | 3/40 [00:16&lt;03:21,  5.44s/steps, loss=0.5511944]
+ 10%|█         | 4/40 [00:21&lt;03:18,  5.51s/steps, loss=0.5511944]
+ 10%|█         | 4/40 [00:21&lt;03:18,  5.51s/steps, loss=0.5418022]
+ 12%|█▎        | 5/40 [00:27&lt;03:14,  5.55s/steps, loss=0.5418022]
+ 12%|█▎        | 5/40 [00:27&lt;03:14,  5.55s/steps, loss=0.51418555]
+ 15%|█▌        | 6/40 [00:33&lt;03:12,  5.67s/steps, loss=0.51418555]
+ 15%|█▌        | 6/40 [00:33&lt;03:12,  5.67s/steps, loss=0.4959826]
+ 18%|█▊        | 7/40 [00:38&lt;03:06,  5.64s/steps, loss=0.4959826]
+ 18%|█▊        | 7/40 [00:38&lt;03:06,  5.64s/steps, loss=0.4882997]
+ 20%|██        | 8/40 [00:44&lt;03:03,  5.74s/steps, loss=0.4882997]
+ 20%|██        | 8/40 [00:44&lt;03:03,  5.74s/steps, loss=0.47661623]
+ 22%|██▎       | 9/40 [00:50&lt;02:56,  5.69s/steps, loss=0.47661623]
+ 22%|██▎       | 9/40 [00:50&lt;02:56,  5.69s/steps, loss=0.46890557]
+ 25%|██▌       | 10/40 [00:56&lt;02:51,  5.73s/steps, loss=0.46890557]
+ 25%|██▌       | 10/40 [00:56&lt;02:51,  5.73s/steps, loss=0.46385136]
+ 28%|██▊       | 11/40 [01:01&lt;02:44,  5.67s/steps, loss=0.46385136]
+ 28%|██▊       | 11/40 [01:01&lt;02:44,  5.67s/steps, loss=0.45664862]
+ 30%|███       | 12/40 [01:07&lt;02:37,  5.62s/steps, loss=0.45664862]
+ 30%|███       | 12/40 [01:07&lt;02:37,  5.62s/steps, loss=0.45494536]
+ 32%|███▎      | 13/40 [01:12&lt;02:30,  5.58s/steps, loss=0.45494536]
+ 32%|███▎      | 13/40 [01:12&lt;02:30,  5.58s/steps, loss=0.45274037]
+ 35%|███▌      | 14/40 [01:18&lt;02:22,  5.49s/steps, loss=0.45274037]
+ 35%|███▌      | 14/40 [01:18&lt;02:22,  5.49s/steps, loss=0.4487221]
+ 38%|███▊      | 15/40 [01:23&lt;02:17,  5.50s/steps, loss=0.4487221]
+ 38%|███▊      | 15/40 [01:23&lt;02:17,  5.50s/steps, loss=0.44835338]
+ 40%|████      | 16/40 [01:28&lt;02:10,  5.42s/steps, loss=0.44835338]
+ 40%|████      | 16/40 [01:28&lt;02:10,  5.42s/steps, loss=0.44606623]
+ 42%|████▎     | 17/40 [01:34&lt;02:04,  5.43s/steps, loss=0.44606623]
+ 42%|████▎     | 17/40 [01:34&lt;02:04,  5.43s/steps, loss=0.43759358]
+ 45%|████▌     | 18/40 [01:39&lt;01:58,  5.37s/steps, loss=0.43759358]
+ 45%|████▌     | 18/40 [01:39&lt;01:58,  5.37s/steps, loss=0.43132657]
+ 48%|████▊     | 19/40 [01:44&lt;01:53,  5.39s/steps, loss=0.43132657]
+ 48%|████▊     | 19/40 [01:45&lt;01:53,  5.39s/steps, loss=0.4297195]
+ 50%|█████     | 20/40 [01:50&lt;01:45,  5.29s/steps, loss=0.4297195]
+ 50%|█████     | 20/40 [01:50&lt;01:45,  5.29s/steps, loss=0.42277884]
+ 52%|█████▎    | 21/40 [01:55&lt;01:39,  5.24s/steps, loss=0.42277884]
+ 52%|█████▎    | 21/40 [01:55&lt;01:39,  5.24s/steps, loss=0.4244627]
+ 55%|█████▌    | 22/40 [01:55&lt;01:08,  3.80s/steps, loss=0.4244627]
+ 55%|█████▌    | 22/40 [01:55&lt;01:08,  3.80s/steps, loss=0.4233177]
+ 57%|█████▊    | 23/40 [01:56&lt;00:49,  2.89s/steps, loss=0.4233177]
+ 57%|█████▊    | 23/40 [01:56&lt;00:49,  2.89s/steps, loss=0.42058837]
+ 60%|██████    | 24/40 [01:56&lt;00:34,  2.15s/steps, loss=0.42058837]
+ 60%|██████    | 24/40 [01:56&lt;00:34,  2.15s/steps, loss=0.42127946]
+ 62%|██████▎   | 25/40 [01:57&lt;00:24,  1.65s/steps, loss=0.42127946]
+ 62%|██████▎   | 25/40 [01:57&lt;00:24,  1.65s/steps, loss=0.4176745]
+ 65%|██████▌   | 26/40 [01:57&lt;00:17,  1.28s/steps, loss=0.4176745]
+ 65%|██████▌   | 26/40 [01:57&lt;00:17,  1.28s/steps, loss=0.4227654]
+ 68%|██████▊   | 27/40 [01:58&lt;00:13,  1.04s/steps, loss=0.4227654]
+ 68%|██████▊   | 27/40 [01:58&lt;00:13,  1.04s/steps, loss=0.40413246]
+ 70%|███████   | 28/40 [01:58&lt;00:10,  1.16steps/s, loss=0.40413246]
+ 70%|███████   | 28/40 [01:58&lt;00:10,  1.16steps/s, loss=0.40176976]
+ 72%|███████▎  | 29/40 [01:59&lt;00:08,  1.33steps/s, loss=0.40176976]
+ 72%|███████▎  | 29/40 [01:59&lt;00:08,  1.33steps/s, loss=0.40286782]
+ 75%|███████▌  | 30/40 [01:59&lt;00:06,  1.52steps/s, loss=0.40286782]
+ 75%|███████▌  | 30/40 [01:59&lt;00:06,  1.52steps/s, loss=0.4000531]
+ 78%|███████▊  | 31/40 [02:00&lt;00:05,  1.64steps/s, loss=0.4000531]
+ 78%|███████▊  | 31/40 [02:00&lt;00:05,  1.64steps/s, loss=0.39398116]
+ 80%|████████  | 32/40 [02:00&lt;00:05,  1.57steps/s, loss=0.39398116]
+ 80%|████████  | 32/40 [02:00&lt;00:05,  1.57steps/s, loss=0.39653653]
+ 82%|████████▎ | 33/40 [02:01&lt;00:04,  1.71steps/s, loss=0.39653653]
+ 82%|████████▎ | 33/40 [02:01&lt;00:04,  1.71steps/s, loss=0.38895333]
+ 85%|████████▌ | 34/40 [02:01&lt;00:03,  1.83steps/s, loss=0.38895333]
+ 85%|████████▌ | 34/40 [02:01&lt;00:03,  1.83steps/s, loss=0.39033723]
+ 88%|████████▊ | 35/40 [02:02&lt;00:02,  1.91steps/s, loss=0.39033723]
+ 88%|████████▊ | 35/40 [02:02&lt;00:02,  1.91steps/s, loss=0.38475725]
+ 90%|█████████ | 36/40 [02:02&lt;00:02,  1.99steps/s, loss=0.38475725]
+ 90%|█████████ | 36/40 [02:02&lt;00:02,  1.99steps/s, loss=0.3848192]
+ 92%|█████████▎| 37/40 [02:03&lt;00:01,  2.02steps/s, loss=0.3848192]
+ 92%|█████████▎| 37/40 [02:03&lt;00:01,  2.02steps/s, loss=0.37793246]
+ 95%|█████████▌| 38/40 [02:03&lt;00:00,  2.10steps/s, loss=0.37793246]
+ 95%|█████████▌| 38/40 [02:03&lt;00:00,  2.10steps/s, loss=0.3791697]
+ 98%|█████████▊| 39/40 [02:03&lt;00:00,  2.09steps/s, loss=0.3791697]
+ 98%|█████████▊| 39/40 [02:04&lt;00:00,  2.09steps/s, loss=0.37943077]
+100%|██████████| 40/40 [02:04&lt;00:00,  2.16steps/s, loss=0.37943077]
+100%|██████████| 40/40 [02:04&lt;00:00,  3.11s/steps, loss=0.37943077]
 </pre></div>
 </div>
 <img src="../../../_images/mrinufft_learn_2d_sampling_pattern.gif" srcset="../../../_images/mrinufft_learn_2d_sampling_pattern.gif" alt="example learn_samples" class = "sphx-glr-single-img"/></section>
@@ -1122,7 +1156,7 @@ through Projection” Bioengineering 10, no. 2: 158.
 <a class="reference external" href="https://doi.org/10.3390/bioengineering10020158">https://doi.org/10.3390/bioengineering10020158</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (3 minutes 55.683 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 15.449 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-learn-straight-line-readouts-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_learn_straight_line_readouts.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />

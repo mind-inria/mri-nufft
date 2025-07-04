@@ -55,3 +55,8 @@ MRIBartNUFFT
       ~MRIBartNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.bart.MRIBartNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.bart.MRIBartNUFFT
+      :add-heading:

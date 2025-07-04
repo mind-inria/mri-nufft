@@ -176,18 +176,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">GPU Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -196,6 +184,24 @@
 <li class="toctree-l3"><a class="reference internal" href="example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -791,7 +797,7 @@ wrt to k-space trajectory in mri-nufft.</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{\hat{K}} =  arg \min_{\mathbf{K}} ||  \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} x_\ell - \mathbf{x}_{sos} ||_2^2\]</div>
 <p>where <span class="math notranslate nohighlight">\(S_\ell\)</span> is the sensitivity map for the <span class="math notranslate nohighlight">\(\ell\)</span>-th coil, <span class="math notranslate nohighlight">\(\mathcal{F}_\mathbf{K}\)</span> is the forward NUFFT operator and <span class="math notranslate nohighlight">\(D_\mathbf{K}\)</span> is the density compensators for trajectory <span class="math notranslate nohighlight">\(\mathbf{K}\)</span>,  <span class="math notranslate nohighlight">\(\mathbf{x}_\ell\)</span> is the image for the <span class="math notranslate nohighlight">\(\ell\)</span>-th coil, and <span class="math notranslate nohighlight">\(\mathbf{x}_{sos} = \sqrt{\sum_{\ell=1}^L x_\ell^2}\)</span> is the sum-of-squares image as target image to be reconstructed.</p>
-<p>In this example, the forward NUFFT operator <span class="math notranslate nohighlight">\(\mathcal{F}_\mathbf{K}\)</span> is implemented with <cite>model.operator</cite> while the SENSE operator <span class="math notranslate nohighlight">\(model.sense_op\)</span> models the term <span class="math notranslate nohighlight">\(\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}\)</span>.
+<p>In this example, the forward NUFFT operator <span class="math notranslate nohighlight">\(\mathcal{F}_\mathbf{K}\)</span> is implemented with <cite>model.operator</cite> while the SENSE operator <code class="docutils literal notranslate"><span class="pre">model.sense_op</span></code> models the term <span class="math notranslate nohighlight">\(\mathbf{A} = \sum_{\ell=1}^LS_\ell^* \mathcal{F}_\mathbf{K}^* D_\mathbf{K}\)</span>.
 For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and the sensitivity maps are simulated using the <cite>birdcage_maps</cite> function from <cite>sigpy.mri</cite>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -811,7 +817,13 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
         <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sys</span><span class="o">.</span><span class="n">path</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using backend:&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MRINUFFT_BACKEND&quot;</span><span class="p">))</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">joblib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">brainweb_dl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bwdl</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -826,6 +838,10 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 <span class="kn">from</span><span class="w"> </span><span class="nn">sigpy.mri</span><span class="w"> </span><span class="kn">import</span> <span class="n">birdcage_maps</span>
 </pre></div>
 </div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/docs&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python310.zip&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/_tool/Python/3.10.16/x64/lib/python3.10/lib-dynload&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages&#39;, &#39;/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU&#39;]
+Using backend: cufinufft
+</pre></div>
+</div>
 </section>
 <section id="setup-a-simple-class-to-learn-trajectory">
 <h2>Setup a simple class to learn trajectory<a class="headerlink" href="#setup-a-simple-class-to-learn-trajectory" title="Link to this heading">#</a></h2>
@@ -834,7 +850,10 @@ For our data, we use a 2D slice of a 3D MRI image from the BrainWeb dataset, and
 <p>While we are only learning the NUFFT operator, we still need the gradient <cite>wrt_data=True</cite> to have all the gradients computed correctly.
 See <a class="reference internal" href="example_learn_straight_line_readouts.html#projector" id="id3"><span>[Projector]</span></a> for more details.</p>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MRINUFFT_BACKEND&quot;</span><span class="p">,</span> <span class="s2">&quot;cufinufft&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Model</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inital_trajectory</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span> <span class="n">img_size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
@@ -844,20 +863,20 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
         <span class="n">sample_points</span> <span class="o">=</span> <span class="n">inital_trajectory</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">inital_trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="c1"># A simple acquisition model simulated with a forward NUFFT operator. We dont need density compensation here.</span>
         <span class="c1"># The trajectory is scaled by 2*pi for cufinufft backend.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;cufinufft&quot;</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
             <span class="n">sample_points</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">img_size</span><span class="p">,</span>
             <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span>
             <span class="n">squeeze_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># A simple density compensated adjoint SENSE operator with sensitivity maps `smaps`.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sense_op</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;cufinufft&quot;</span><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sense_op</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span> <span class="n">wrt_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wrt_traj</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span>
             <span class="n">sample_points</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">img_size</span><span class="p">,</span>
             <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span>
             <span class="n">smaps</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a><span class="p">(</span>
-                <span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span> <span class="o">*</span><span class="n">img_size</span><span class="p">)</span>
+                <span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span> <span class="o">*</span><span class="n">img_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.complex64" title="numpy.complex64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">complex64</span></a>
             <span class="p">),</span>  <span class="c1"># Dummy smaps, this is updated in forward pass</span>
             <span class="n">squeeze_dims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
@@ -879,7 +898,7 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
             <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">img_size</span><span class="p">,</span>
             <span class="n">kspace</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;cufinufft&quot;</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BACKEND</span></a><span class="p">,</span>
             <span class="n">density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sense_op</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
             <span class="n">blurr_factor</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
         <span class="p">)</span>
@@ -916,7 +935,9 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
 <section id="setup-model-and-optimizer">
 <h2>Setup model and optimizer<a class="headerlink" href="#setup-model-and-optimizer" title="Link to this heading">#</a></h2>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a> <span class="o">=</span> <span class="mi">6</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">init_traj</span></a> <span class="o">=</span> <span class="n">initialize_2D_radial</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">init_traj</span></a> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">initialize_2D_radial</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float32" title="numpy.float32" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">np</span><span class="o">.</span><span class="n">float32</span></a><span class="p">)</span>
+<span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">init_traj</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_coils</span></a><span class="p">,</span> <span class="n">img_size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
 <span class="n">schedulder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">LinearLR</span><span class="p">(</span>
@@ -927,9 +948,9 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
   warnings.warn(
 </pre></div>
 </div>
@@ -946,13 +967,13 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
 <span class="n">plot_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axs</span></a><span class="p">,</span> <span class="n">mri_2D</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trajectory</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">recon</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_learn_samples_multicoil_001.png" srcset="../../../_images/sphx_glr_example_learn_samples_multicoil_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<img src="../../../_images/sphx_glr_example_learn_samples_multicoil_001.png" srcset="../../../_images/sphx_glr_example_learn_samples_multicoil_001.png" alt="MR Image, Trajectory, Reconstruction" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_samples_multicoil.py:120: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/mri-nufft/examples/GPU/example_learn_samples_multicoil.py:129: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
   axs[0].imshow(np.abs(mri_2D), cmap=&quot;gray&quot;)
 </pre></div>
 </div>
@@ -1008,212 +1029,212 @@ See <a class="reference internal" href="example_learn_straight_line_readouts.htm
 <span class="c1"># sphinx_gallery_thumbnail_path = &#39;generated/autoexamples/GPU/images/mrinufft_learn_traj_mc.gif&#39;</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_learn_samples_multicoil_002.png" srcset="../../../_images/sphx_glr_example_learn_samples_multicoil_002.png" alt="example learn samples multicoil" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/100 [00:00&lt;?, ?steps/s]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+<img src="../../../_images/sphx_glr_example_learn_samples_multicoil_002.png" srcset="../../../_images/sphx_glr_example_learn_samples_multicoil_002.png" alt="example learn samples multicoil" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/100 [00:00&lt;?, ?steps/s]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
   warnings.warn(
 
-  0%|          | 0/100 [00:00&lt;?, ?steps/s, loss=0.5281209]/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
+  0%|          | 0/100 [00:00&lt;?, ?steps/s, loss=0.5281209]/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/operators/autodiff.py:98: UserWarning: Casting complex values to real discards the imaginary part (Triggered internally at /pytorch/aten/src/ATen/native/Copy.cpp:307.)
   grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
 
-  1%|          | 1/100 [00:01&lt;02:51,  1.74s/steps, loss=0.5281209]
-  1%|          | 1/100 [00:02&lt;02:51,  1.74s/steps, loss=0.31584173]
-  2%|▏         | 2/100 [00:03&lt;02:37,  1.60s/steps, loss=0.31584173]
-  2%|▏         | 2/100 [00:03&lt;02:37,  1.60s/steps, loss=0.24707064]
-  3%|▎         | 3/100 [00:05&lt;02:46,  1.72s/steps, loss=0.24707064]
-  3%|▎         | 3/100 [00:05&lt;02:46,  1.72s/steps, loss=0.24464405]
-  4%|▍         | 4/100 [00:06&lt;02:32,  1.59s/steps, loss=0.24464405]
-  4%|▍         | 4/100 [00:06&lt;02:32,  1.59s/steps, loss=0.2641027]
-  5%|▌         | 5/100 [00:07&lt;02:23,  1.51s/steps, loss=0.2641027]
-  5%|▌         | 5/100 [00:08&lt;02:23,  1.51s/steps, loss=0.19632524]
-  6%|▌         | 6/100 [00:09&lt;02:32,  1.62s/steps, loss=0.19632524]
-  6%|▌         | 6/100 [00:10&lt;02:32,  1.62s/steps, loss=0.1539725]
-  7%|▋         | 7/100 [00:11&lt;02:46,  1.79s/steps, loss=0.1539725]
-  7%|▋         | 7/100 [00:12&lt;02:46,  1.79s/steps, loss=0.16401932]
-  8%|▊         | 8/100 [00:13&lt;02:47,  1.82s/steps, loss=0.16401932]
-  8%|▊         | 8/100 [00:14&lt;02:47,  1.82s/steps, loss=0.15395159]
-  9%|▉         | 9/100 [00:15&lt;02:41,  1.78s/steps, loss=0.15395159]
-  9%|▉         | 9/100 [00:15&lt;02:41,  1.78s/steps, loss=0.17037119]
- 10%|█         | 10/100 [00:16&lt;02:31,  1.68s/steps, loss=0.17037119]
- 10%|█         | 10/100 [00:17&lt;02:31,  1.68s/steps, loss=0.16881242]
- 11%|█         | 11/100 [00:18&lt;02:30,  1.69s/steps, loss=0.16881242]
- 11%|█         | 11/100 [00:19&lt;02:30,  1.69s/steps, loss=0.15189478]
- 12%|█▏        | 12/100 [00:20&lt;02:34,  1.75s/steps, loss=0.15189478]
- 12%|█▏        | 12/100 [00:20&lt;02:34,  1.75s/steps, loss=0.16082934]
- 13%|█▎        | 13/100 [00:22&lt;02:39,  1.84s/steps, loss=0.16082934]
- 13%|█▎        | 13/100 [00:23&lt;02:39,  1.84s/steps, loss=0.16977811]
- 14%|█▍        | 14/100 [00:24&lt;02:43,  1.90s/steps, loss=0.16977811]
- 14%|█▍        | 14/100 [00:24&lt;02:43,  1.90s/steps, loss=0.16408975]
- 15%|█▌        | 15/100 [00:25&lt;02:24,  1.70s/steps, loss=0.16408975]
- 15%|█▌        | 15/100 [00:26&lt;02:24,  1.70s/steps, loss=0.14949587]
- 16%|█▌        | 16/100 [00:27&lt;02:32,  1.82s/steps, loss=0.14949587]
- 16%|█▌        | 16/100 [00:28&lt;02:32,  1.82s/steps, loss=0.14262624]
- 17%|█▋        | 17/100 [00:29&lt;02:34,  1.86s/steps, loss=0.14262624]
- 17%|█▋        | 17/100 [00:30&lt;02:34,  1.86s/steps, loss=0.13967511]
- 18%|█▊        | 18/100 [00:32&lt;02:39,  1.95s/steps, loss=0.13967511]
- 18%|█▊        | 18/100 [00:32&lt;02:39,  1.95s/steps, loss=0.13232593]
- 19%|█▉        | 19/100 [00:33&lt;02:32,  1.88s/steps, loss=0.13232593]
- 19%|█▉        | 19/100 [00:34&lt;02:32,  1.88s/steps, loss=0.1256566]
- 20%|██        | 20/100 [00:35&lt;02:31,  1.90s/steps, loss=0.1256566]
- 20%|██        | 20/100 [00:36&lt;02:31,  1.90s/steps, loss=0.12429647]
- 21%|██        | 21/100 [00:37&lt;02:33,  1.95s/steps, loss=0.12429647]
- 21%|██        | 21/100 [00:38&lt;02:33,  1.95s/steps, loss=0.12274992]
- 22%|██▏       | 22/100 [00:39&lt;02:31,  1.95s/steps, loss=0.12274992]
- 22%|██▏       | 22/100 [00:40&lt;02:31,  1.95s/steps, loss=0.12104512]
- 23%|██▎       | 23/100 [00:41&lt;02:17,  1.79s/steps, loss=0.12104512]
- 23%|██▎       | 23/100 [00:41&lt;02:17,  1.79s/steps, loss=0.11668457]
- 24%|██▍       | 24/100 [00:42&lt;02:11,  1.73s/steps, loss=0.11668457]
- 24%|██▍       | 24/100 [00:43&lt;02:11,  1.73s/steps, loss=0.114599764]
- 25%|██▌       | 25/100 [00:44&lt;02:13,  1.78s/steps, loss=0.114599764]
- 25%|██▌       | 25/100 [00:44&lt;02:13,  1.78s/steps, loss=0.11391298]
- 26%|██▌       | 26/100 [00:46&lt;02:07,  1.73s/steps, loss=0.11391298]
- 26%|██▌       | 26/100 [00:46&lt;02:07,  1.73s/steps, loss=0.11033876]
- 27%|██▋       | 27/100 [00:48&lt;02:14,  1.84s/steps, loss=0.11033876]
- 27%|██▋       | 27/100 [00:48&lt;02:14,  1.84s/steps, loss=0.10748172]
- 28%|██▊       | 28/100 [00:49&lt;02:09,  1.80s/steps, loss=0.10748172]
- 28%|██▊       | 28/100 [00:50&lt;02:09,  1.80s/steps, loss=0.10632372]
- 29%|██▉       | 29/100 [00:51&lt;02:09,  1.82s/steps, loss=0.10632372]
- 29%|██▉       | 29/100 [00:52&lt;02:09,  1.82s/steps, loss=0.10976597]
- 30%|███       | 30/100 [00:53&lt;02:11,  1.88s/steps, loss=0.10976597]
- 30%|███       | 30/100 [00:54&lt;02:11,  1.88s/steps, loss=0.113510445]
- 31%|███       | 31/100 [00:55&lt;02:11,  1.90s/steps, loss=0.113510445]
- 31%|███       | 31/100 [00:56&lt;02:11,  1.90s/steps, loss=0.11259567]
- 32%|███▏      | 32/100 [00:57&lt;02:02,  1.81s/steps, loss=0.11259567]
- 32%|███▏      | 32/100 [00:57&lt;02:02,  1.81s/steps, loss=0.10708732]
- 33%|███▎      | 33/100 [00:59&lt;02:03,  1.84s/steps, loss=0.10708732]
- 33%|███▎      | 33/100 [00:59&lt;02:03,  1.84s/steps, loss=0.10132797]
- 34%|███▍      | 34/100 [01:00&lt;01:52,  1.71s/steps, loss=0.10132797]
- 34%|███▍      | 34/100 [01:01&lt;01:52,  1.71s/steps, loss=0.09896016]
- 35%|███▌      | 35/100 [01:02&lt;01:47,  1.65s/steps, loss=0.09896016]
- 35%|███▌      | 35/100 [01:02&lt;01:47,  1.65s/steps, loss=0.09806192]
- 36%|███▌      | 36/100 [01:03&lt;01:47,  1.67s/steps, loss=0.09806192]
- 36%|███▌      | 36/100 [01:04&lt;01:47,  1.67s/steps, loss=0.09713453]
- 37%|███▋      | 37/100 [01:05&lt;01:47,  1.71s/steps, loss=0.09713453]
- 37%|███▋      | 37/100 [01:06&lt;01:47,  1.71s/steps, loss=0.09565322]
- 38%|███▊      | 38/100 [01:07&lt;01:52,  1.82s/steps, loss=0.09565322]
- 38%|███▊      | 38/100 [01:08&lt;01:52,  1.82s/steps, loss=0.09306682]
- 39%|███▉      | 39/100 [01:09&lt;01:47,  1.77s/steps, loss=0.09306682]
- 39%|███▉      | 39/100 [01:09&lt;01:47,  1.77s/steps, loss=0.09121294]
- 40%|████      | 40/100 [01:10&lt;01:36,  1.61s/steps, loss=0.09121294]
- 40%|████      | 40/100 [01:11&lt;01:36,  1.61s/steps, loss=0.09164742]
- 41%|████      | 41/100 [01:12&lt;01:32,  1.57s/steps, loss=0.09164742]
- 41%|████      | 41/100 [01:12&lt;01:32,  1.57s/steps, loss=0.09168002]
- 42%|████▏     | 42/100 [01:13&lt;01:32,  1.60s/steps, loss=0.09168002]
- 42%|████▏     | 42/100 [01:14&lt;01:32,  1.60s/steps, loss=0.091500394]
- 43%|████▎     | 43/100 [01:15&lt;01:26,  1.52s/steps, loss=0.091500394]
- 43%|████▎     | 43/100 [01:15&lt;01:26,  1.52s/steps, loss=0.09278637]
- 44%|████▍     | 44/100 [01:16&lt;01:24,  1.51s/steps, loss=0.09278637]
- 44%|████▍     | 44/100 [01:17&lt;01:24,  1.51s/steps, loss=0.09375204]
- 45%|████▌     | 45/100 [01:17&lt;01:18,  1.43s/steps, loss=0.09375204]
- 45%|████▌     | 45/100 [01:18&lt;01:18,  1.43s/steps, loss=0.092689745]
- 46%|████▌     | 46/100 [01:19&lt;01:25,  1.58s/steps, loss=0.092689745]
- 46%|████▌     | 46/100 [01:20&lt;01:25,  1.58s/steps, loss=0.09179151]
- 47%|████▋     | 47/100 [01:21&lt;01:28,  1.68s/steps, loss=0.09179151]
- 47%|████▋     | 47/100 [01:22&lt;01:28,  1.68s/steps, loss=0.09361626]
- 48%|████▊     | 48/100 [01:23&lt;01:25,  1.64s/steps, loss=0.09361626]
- 48%|████▊     | 48/100 [01:23&lt;01:25,  1.64s/steps, loss=0.09558388]
- 49%|████▉     | 49/100 [01:24&lt;01:21,  1.60s/steps, loss=0.09558388]
- 49%|████▉     | 49/100 [01:25&lt;01:21,  1.60s/steps, loss=0.09489404]
- 50%|█████     | 50/100 [01:26&lt;01:21,  1.63s/steps, loss=0.09489404]
- 50%|█████     | 50/100 [01:26&lt;01:21,  1.63s/steps, loss=0.090358794]
- 51%|█████     | 51/100 [01:28&lt;01:21,  1.66s/steps, loss=0.090358794]
- 51%|█████     | 51/100 [01:28&lt;01:21,  1.66s/steps, loss=0.090426266]
- 52%|█████▏    | 52/100 [01:30&lt;01:21,  1.69s/steps, loss=0.090426266]
- 52%|█████▏    | 52/100 [01:30&lt;01:21,  1.69s/steps, loss=0.09363167]
- 53%|█████▎    | 53/100 [01:31&lt;01:20,  1.72s/steps, loss=0.09363167]
- 53%|█████▎    | 53/100 [01:32&lt;01:20,  1.72s/steps, loss=0.092095345]
- 54%|█████▍    | 54/100 [01:33&lt;01:18,  1.71s/steps, loss=0.092095345]
- 54%|█████▍    | 54/100 [01:33&lt;01:18,  1.71s/steps, loss=0.08869569]
- 55%|█████▌    | 55/100 [01:34&lt;01:12,  1.62s/steps, loss=0.08869569]
- 55%|█████▌    | 55/100 [01:35&lt;01:12,  1.62s/steps, loss=0.087504715]
- 56%|█████▌    | 56/100 [01:36&lt;01:12,  1.64s/steps, loss=0.087504715]
- 56%|█████▌    | 56/100 [01:37&lt;01:12,  1.64s/steps, loss=0.08763544]
- 57%|█████▋    | 57/100 [01:38&lt;01:15,  1.75s/steps, loss=0.08763544]
- 57%|█████▋    | 57/100 [01:39&lt;01:15,  1.75s/steps, loss=0.08493734]
- 58%|█████▊    | 58/100 [01:40&lt;01:11,  1.71s/steps, loss=0.08493734]
- 58%|█████▊    | 58/100 [01:40&lt;01:11,  1.71s/steps, loss=0.08286491]
- 59%|█████▉    | 59/100 [01:41&lt;01:10,  1.71s/steps, loss=0.08286491]
- 59%|█████▉    | 59/100 [01:42&lt;01:10,  1.71s/steps, loss=0.08357595]
- 60%|██████    | 60/100 [01:43&lt;01:03,  1.58s/steps, loss=0.08357595]
- 60%|██████    | 60/100 [01:43&lt;01:03,  1.58s/steps, loss=0.08413699]
- 61%|██████    | 61/100 [01:45&lt;01:05,  1.67s/steps, loss=0.08413699]
- 61%|██████    | 61/100 [01:45&lt;01:05,  1.67s/steps, loss=0.082829565]
- 62%|██████▏   | 62/100 [01:46&lt;01:06,  1.74s/steps, loss=0.082829565]
- 62%|██████▏   | 62/100 [01:47&lt;01:06,  1.74s/steps, loss=0.08170684]
- 63%|██████▎   | 63/100 [01:48&lt;01:02,  1.69s/steps, loss=0.08170684]
- 63%|██████▎   | 63/100 [01:48&lt;01:02,  1.69s/steps, loss=0.08117892]
- 64%|██████▍   | 64/100 [01:50&lt;01:00,  1.69s/steps, loss=0.08117892]
- 64%|██████▍   | 64/100 [01:50&lt;01:00,  1.69s/steps, loss=0.080083415]
- 65%|██████▌   | 65/100 [01:51&lt;00:57,  1.64s/steps, loss=0.080083415]
- 65%|██████▌   | 65/100 [01:52&lt;00:57,  1.64s/steps, loss=0.07884738]
- 66%|██████▌   | 66/100 [01:53&lt;00:51,  1.52s/steps, loss=0.07884738]
- 66%|██████▌   | 66/100 [01:53&lt;00:51,  1.52s/steps, loss=0.07821238]
- 67%|██████▋   | 67/100 [01:54&lt;00:50,  1.53s/steps, loss=0.07821238]
- 67%|██████▋   | 67/100 [01:54&lt;00:50,  1.53s/steps, loss=0.07781565]
- 68%|██████▊   | 68/100 [01:56&lt;00:52,  1.64s/steps, loss=0.07781565]
- 68%|██████▊   | 68/100 [01:56&lt;00:52,  1.64s/steps, loss=0.07702622]
- 69%|██████▉   | 69/100 [01:58&lt;00:49,  1.61s/steps, loss=0.07702622]
- 69%|██████▉   | 69/100 [01:58&lt;00:49,  1.61s/steps, loss=0.07589071]
- 70%|███████   | 70/100 [01:59&lt;00:47,  1.59s/steps, loss=0.07589071]
- 70%|███████   | 70/100 [01:59&lt;00:47,  1.59s/steps, loss=0.074933715]
- 71%|███████   | 71/100 [02:00&lt;00:44,  1.54s/steps, loss=0.074933715]
- 71%|███████   | 71/100 [02:01&lt;00:44,  1.54s/steps, loss=0.07422394]
- 72%|███████▏  | 72/100 [02:02&lt;00:45,  1.61s/steps, loss=0.07422394]
- 72%|███████▏  | 72/100 [02:03&lt;00:45,  1.61s/steps, loss=0.07338449]
- 73%|███████▎  | 73/100 [02:04&lt;00:43,  1.63s/steps, loss=0.07338449]
- 73%|███████▎  | 73/100 [02:04&lt;00:43,  1.63s/steps, loss=0.07237725]
- 74%|███████▍  | 74/100 [02:06&lt;00:43,  1.67s/steps, loss=0.07237725]
- 74%|███████▍  | 74/100 [02:06&lt;00:43,  1.67s/steps, loss=0.07150483]
- 75%|███████▌  | 75/100 [02:07&lt;00:41,  1.66s/steps, loss=0.07150483]
- 75%|███████▌  | 75/100 [02:08&lt;00:41,  1.66s/steps, loss=0.07091792]
- 76%|███████▌  | 76/100 [02:09&lt;00:40,  1.67s/steps, loss=0.07091792]
- 76%|███████▌  | 76/100 [02:09&lt;00:40,  1.67s/steps, loss=0.07037303]
- 77%|███████▋  | 77/100 [02:10&lt;00:35,  1.54s/steps, loss=0.07037303]
- 77%|███████▋  | 77/100 [02:11&lt;00:35,  1.54s/steps, loss=0.06966823]
- 78%|███████▊  | 78/100 [02:12&lt;00:32,  1.47s/steps, loss=0.06966823]
- 78%|███████▊  | 78/100 [02:12&lt;00:32,  1.47s/steps, loss=0.068967156]
- 79%|███████▉  | 79/100 [02:13&lt;00:30,  1.47s/steps, loss=0.068967156]
- 79%|███████▉  | 79/100 [02:13&lt;00:30,  1.47s/steps, loss=0.0684529]
- 80%|████████  | 80/100 [02:15&lt;00:31,  1.55s/steps, loss=0.0684529]
- 80%|████████  | 80/100 [02:15&lt;00:31,  1.55s/steps, loss=0.06807706]
- 81%|████████  | 81/100 [02:17&lt;00:30,  1.61s/steps, loss=0.06807706]
- 81%|████████  | 81/100 [02:17&lt;00:30,  1.61s/steps, loss=0.06772044]
- 82%|████████▏ | 82/100 [02:18&lt;00:29,  1.61s/steps, loss=0.06772044]
- 82%|████████▏ | 82/100 [02:19&lt;00:29,  1.61s/steps, loss=0.0673586]
- 83%|████████▎ | 83/100 [02:20&lt;00:28,  1.70s/steps, loss=0.0673586]
- 83%|████████▎ | 83/100 [02:20&lt;00:28,  1.70s/steps, loss=0.066979036]
- 84%|████████▍ | 84/100 [02:21&lt;00:25,  1.58s/steps, loss=0.066979036]
- 84%|████████▍ | 84/100 [02:22&lt;00:25,  1.58s/steps, loss=0.06652302]
- 85%|████████▌ | 85/100 [02:23&lt;00:24,  1.64s/steps, loss=0.06652302]
- 85%|████████▌ | 85/100 [02:24&lt;00:24,  1.64s/steps, loss=0.06596483]
- 86%|████████▌ | 86/100 [02:25&lt;00:23,  1.68s/steps, loss=0.06596483]
- 86%|████████▌ | 86/100 [02:25&lt;00:23,  1.68s/steps, loss=0.065356836]
- 87%|████████▋ | 87/100 [02:26&lt;00:20,  1.56s/steps, loss=0.065356836]
- 87%|████████▋ | 87/100 [02:26&lt;00:20,  1.56s/steps, loss=0.06478203]
- 88%|████████▊ | 88/100 [02:27&lt;00:17,  1.47s/steps, loss=0.06478203]
- 88%|████████▊ | 88/100 [02:28&lt;00:17,  1.47s/steps, loss=0.06429523]
- 89%|████████▉ | 89/100 [02:29&lt;00:16,  1.45s/steps, loss=0.06429523]
- 89%|████████▉ | 89/100 [02:29&lt;00:16,  1.45s/steps, loss=0.06389315]
- 90%|█████████ | 90/100 [02:31&lt;00:15,  1.58s/steps, loss=0.06389315]
- 90%|█████████ | 90/100 [02:31&lt;00:15,  1.58s/steps, loss=0.06354177]
- 91%|█████████ | 91/100 [02:32&lt;00:13,  1.48s/steps, loss=0.06354177]
- 91%|█████████ | 91/100 [02:32&lt;00:13,  1.48s/steps, loss=0.06321055]
- 92%|█████████▏| 92/100 [02:34&lt;00:12,  1.50s/steps, loss=0.06321055]
- 92%|█████████▏| 92/100 [02:34&lt;00:12,  1.50s/steps, loss=0.062889874]
- 93%|█████████▎| 93/100 [02:35&lt;00:11,  1.59s/steps, loss=0.062889874]
- 93%|█████████▎| 93/100 [02:36&lt;00:11,  1.59s/steps, loss=0.06258422]
- 94%|█████████▍| 94/100 [02:37&lt;00:10,  1.67s/steps, loss=0.06258422]
- 94%|█████████▍| 94/100 [02:37&lt;00:10,  1.67s/steps, loss=0.06230274]
- 95%|█████████▌| 95/100 [02:38&lt;00:07,  1.50s/steps, loss=0.06230274]
- 95%|█████████▌| 95/100 [02:39&lt;00:07,  1.50s/steps, loss=0.062046595]
- 96%|█████████▌| 96/100 [02:40&lt;00:05,  1.47s/steps, loss=0.062046595]
- 96%|█████████▌| 96/100 [02:40&lt;00:05,  1.47s/steps, loss=0.06181073]
- 97%|█████████▋| 97/100 [02:41&lt;00:04,  1.49s/steps, loss=0.06181073]
- 97%|█████████▋| 97/100 [02:42&lt;00:04,  1.49s/steps, loss=0.061589986]
- 98%|█████████▊| 98/100 [02:43&lt;00:02,  1.49s/steps, loss=0.061589986]
- 98%|█████████▊| 98/100 [02:43&lt;00:02,  1.49s/steps, loss=0.06137917]
- 99%|█████████▉| 99/100 [02:44&lt;00:01,  1.51s/steps, loss=0.06137917]
- 99%|█████████▉| 99/100 [02:45&lt;00:01,  1.51s/steps, loss=0.061173983]
-100%|██████████| 100/100 [02:45&lt;00:00,  1.37s/steps, loss=0.061173983]
-100%|██████████| 100/100 [02:45&lt;00:00,  1.66s/steps, loss=0.061173983]
+  1%|          | 1/100 [00:00&lt;01:19,  1.25steps/s, loss=0.5281209]
+  1%|          | 1/100 [00:00&lt;01:19,  1.25steps/s, loss=0.31584167]
+  2%|▏         | 2/100 [00:01&lt;01:16,  1.29steps/s, loss=0.31584167]
+  2%|▏         | 2/100 [00:01&lt;01:16,  1.29steps/s, loss=0.24707061]
+  3%|▎         | 3/100 [00:02&lt;01:14,  1.29steps/s, loss=0.24707061]
+  3%|▎         | 3/100 [00:02&lt;01:14,  1.29steps/s, loss=0.24464394]
+  4%|▍         | 4/100 [00:03&lt;01:16,  1.25steps/s, loss=0.24464394]
+  4%|▍         | 4/100 [00:03&lt;01:16,  1.25steps/s, loss=0.26410252]
+  5%|▌         | 5/100 [00:03&lt;01:15,  1.25steps/s, loss=0.26410252]
+  5%|▌         | 5/100 [00:04&lt;01:15,  1.25steps/s, loss=0.19632545]
+  6%|▌         | 6/100 [00:04&lt;01:22,  1.14steps/s, loss=0.19632545]
+  6%|▌         | 6/100 [00:05&lt;01:22,  1.14steps/s, loss=0.15397286]
+  7%|▋         | 7/100 [00:05&lt;01:19,  1.17steps/s, loss=0.15397286]
+  7%|▋         | 7/100 [00:05&lt;01:19,  1.17steps/s, loss=0.16401835]
+  8%|▊         | 8/100 [00:06&lt;01:16,  1.20steps/s, loss=0.16401835]
+  8%|▊         | 8/100 [00:06&lt;01:16,  1.20steps/s, loss=0.15395068]
+  9%|▉         | 9/100 [00:07&lt;01:14,  1.22steps/s, loss=0.15395068]
+  9%|▉         | 9/100 [00:07&lt;01:14,  1.22steps/s, loss=0.17037047]
+ 10%|█         | 10/100 [00:08&lt;01:13,  1.23steps/s, loss=0.17037047]
+ 10%|█         | 10/100 [00:08&lt;01:13,  1.23steps/s, loss=0.16881129]
+ 11%|█         | 11/100 [00:08&lt;01:12,  1.23steps/s, loss=0.16881129]
+ 11%|█         | 11/100 [00:09&lt;01:12,  1.23steps/s, loss=0.15189353]
+ 12%|█▏        | 12/100 [00:09&lt;01:11,  1.23steps/s, loss=0.15189353]
+ 12%|█▏        | 12/100 [00:09&lt;01:11,  1.23steps/s, loss=0.16083002]
+ 13%|█▎        | 13/100 [00:10&lt;01:10,  1.23steps/s, loss=0.16083002]
+ 13%|█▎        | 13/100 [00:10&lt;01:10,  1.23steps/s, loss=0.16977994]
+ 14%|█▍        | 14/100 [00:11&lt;01:10,  1.23steps/s, loss=0.16977994]
+ 14%|█▍        | 14/100 [00:11&lt;01:10,  1.23steps/s, loss=0.1640913]
+ 15%|█▌        | 15/100 [00:12&lt;01:09,  1.23steps/s, loss=0.1640913]
+ 15%|█▌        | 15/100 [00:12&lt;01:09,  1.23steps/s, loss=0.14949563]
+ 16%|█▌        | 16/100 [00:13&lt;01:17,  1.08steps/s, loss=0.14949563]
+ 16%|█▌        | 16/100 [00:13&lt;01:17,  1.08steps/s, loss=0.1426273]
+ 17%|█▋        | 17/100 [00:14&lt;01:17,  1.07steps/s, loss=0.1426273]
+ 17%|█▋        | 17/100 [00:14&lt;01:17,  1.07steps/s, loss=0.13967746]
+ 18%|█▊        | 18/100 [00:15&lt;01:15,  1.09steps/s, loss=0.13967746]
+ 18%|█▊        | 18/100 [00:15&lt;01:15,  1.09steps/s, loss=0.13233049]
+ 19%|█▉        | 19/100 [00:16&lt;01:12,  1.11steps/s, loss=0.13233049]
+ 19%|█▉        | 19/100 [00:16&lt;01:12,  1.11steps/s, loss=0.12566158]
+ 20%|██        | 20/100 [00:16&lt;01:10,  1.13steps/s, loss=0.12566158]
+ 20%|██        | 20/100 [00:17&lt;01:10,  1.13steps/s, loss=0.12429899]
+ 21%|██        | 21/100 [00:17&lt;01:07,  1.16steps/s, loss=0.12429899]
+ 21%|██        | 21/100 [00:17&lt;01:07,  1.16steps/s, loss=0.122754365]
+ 22%|██▏       | 22/100 [00:18&lt;01:05,  1.18steps/s, loss=0.122754365]
+ 22%|██▏       | 22/100 [00:18&lt;01:05,  1.18steps/s, loss=0.1210531]
+ 23%|██▎       | 23/100 [00:19&lt;01:05,  1.18steps/s, loss=0.1210531]
+ 23%|██▎       | 23/100 [00:19&lt;01:05,  1.18steps/s, loss=0.11669782]
+ 24%|██▍       | 24/100 [00:20&lt;01:03,  1.20steps/s, loss=0.11669782]
+ 24%|██▍       | 24/100 [00:20&lt;01:03,  1.20steps/s, loss=0.11462255]
+ 25%|██▌       | 25/100 [00:21&lt;01:08,  1.09steps/s, loss=0.11462255]
+ 25%|██▌       | 25/100 [00:21&lt;01:08,  1.09steps/s, loss=0.11394462]
+ 26%|██▌       | 26/100 [00:22&lt;01:05,  1.13steps/s, loss=0.11394462]
+ 26%|██▌       | 26/100 [00:22&lt;01:05,  1.13steps/s, loss=0.110373855]
+ 27%|██▋       | 27/100 [00:22&lt;01:02,  1.17steps/s, loss=0.110373855]
+ 27%|██▋       | 27/100 [00:23&lt;01:02,  1.17steps/s, loss=0.10753267]
+ 28%|██▊       | 28/100 [00:23&lt;01:00,  1.20steps/s, loss=0.10753267]
+ 28%|██▊       | 28/100 [00:23&lt;01:00,  1.20steps/s, loss=0.106347725]
+ 29%|██▉       | 29/100 [00:24&lt;00:58,  1.21steps/s, loss=0.106347725]
+ 29%|██▉       | 29/100 [00:24&lt;00:58,  1.21steps/s, loss=0.10977957]
+ 30%|███       | 30/100 [00:25&lt;00:57,  1.21steps/s, loss=0.10977957]
+ 30%|███       | 30/100 [00:25&lt;00:57,  1.21steps/s, loss=0.11353842]
+ 31%|███       | 31/100 [00:26&lt;00:56,  1.22steps/s, loss=0.11353842]
+ 31%|███       | 31/100 [00:26&lt;00:56,  1.22steps/s, loss=0.11262269]
+ 32%|███▏      | 32/100 [00:27&lt;00:56,  1.20steps/s, loss=0.11262269]
+ 32%|███▏      | 32/100 [00:27&lt;00:56,  1.20steps/s, loss=0.107096404]
+ 33%|███▎      | 33/100 [00:27&lt;00:55,  1.21steps/s, loss=0.107096404]
+ 33%|███▎      | 33/100 [00:28&lt;00:55,  1.21steps/s, loss=0.10125847]
+ 34%|███▍      | 34/100 [00:28&lt;00:53,  1.23steps/s, loss=0.10125847]
+ 34%|███▍      | 34/100 [00:28&lt;00:53,  1.23steps/s, loss=0.09892212]
+ 35%|███▌      | 35/100 [00:29&lt;00:59,  1.09steps/s, loss=0.09892212]
+ 35%|███▌      | 35/100 [00:29&lt;00:59,  1.09steps/s, loss=0.098161325]
+ 36%|███▌      | 36/100 [00:30&lt;00:56,  1.13steps/s, loss=0.098161325]
+ 36%|███▌      | 36/100 [00:30&lt;00:56,  1.13steps/s, loss=0.09727808]
+ 37%|███▋      | 37/100 [00:31&lt;00:54,  1.16steps/s, loss=0.09727808]
+ 37%|███▋      | 37/100 [00:31&lt;00:54,  1.16steps/s, loss=0.09573239]
+ 38%|███▊      | 38/100 [00:32&lt;00:51,  1.20steps/s, loss=0.09573239]
+ 38%|███▊      | 38/100 [00:32&lt;00:51,  1.20steps/s, loss=0.09306673]
+ 39%|███▉      | 39/100 [00:32&lt;00:49,  1.23steps/s, loss=0.09306673]
+ 39%|███▉      | 39/100 [00:33&lt;00:49,  1.23steps/s, loss=0.09122644]
+ 40%|████      | 40/100 [00:33&lt;00:48,  1.23steps/s, loss=0.09122644]
+ 40%|████      | 40/100 [00:33&lt;00:48,  1.23steps/s, loss=0.09174888]
+ 41%|████      | 41/100 [00:34&lt;00:48,  1.23steps/s, loss=0.09174888]
+ 41%|████      | 41/100 [00:34&lt;00:48,  1.23steps/s, loss=0.09183201]
+ 42%|████▏     | 42/100 [00:35&lt;00:46,  1.24steps/s, loss=0.09183201]
+ 42%|████▏     | 42/100 [00:35&lt;00:46,  1.24steps/s, loss=0.091626905]
+ 43%|████▎     | 43/100 [00:36&lt;00:45,  1.25steps/s, loss=0.091626905]
+ 43%|████▎     | 43/100 [00:36&lt;00:45,  1.25steps/s, loss=0.09296501]
+ 44%|████▍     | 44/100 [00:36&lt;00:44,  1.25steps/s, loss=0.09296501]
+ 44%|████▍     | 44/100 [00:37&lt;00:44,  1.25steps/s, loss=0.09405441]
+ 45%|████▌     | 45/100 [00:37&lt;00:48,  1.14steps/s, loss=0.09405441]
+ 45%|████▌     | 45/100 [00:38&lt;00:48,  1.14steps/s, loss=0.09315011]
+ 46%|████▌     | 46/100 [00:38&lt;00:46,  1.17steps/s, loss=0.09315011]
+ 46%|████▌     | 46/100 [00:38&lt;00:46,  1.17steps/s, loss=0.09220082]
+ 47%|████▋     | 47/100 [00:39&lt;00:44,  1.18steps/s, loss=0.09220082]
+ 47%|████▋     | 47/100 [00:39&lt;00:44,  1.18steps/s, loss=0.093976885]
+ 48%|████▊     | 48/100 [00:40&lt;00:43,  1.18steps/s, loss=0.093976885]
+ 48%|████▊     | 48/100 [00:40&lt;00:43,  1.18steps/s, loss=0.096183345]
+ 49%|████▉     | 49/100 [00:41&lt;00:43,  1.19steps/s, loss=0.096183345]
+ 49%|████▉     | 49/100 [00:41&lt;00:43,  1.19steps/s, loss=0.095788814]
+ 50%|█████     | 50/100 [00:42&lt;00:41,  1.19steps/s, loss=0.095788814]
+ 50%|█████     | 50/100 [00:42&lt;00:41,  1.19steps/s, loss=0.09136608]
+ 51%|█████     | 51/100 [00:42&lt;00:40,  1.21steps/s, loss=0.09136608]
+ 51%|█████     | 51/100 [00:43&lt;00:40,  1.21steps/s, loss=0.091146484]
+ 52%|█████▏    | 52/100 [00:43&lt;00:39,  1.21steps/s, loss=0.091146484]
+ 52%|█████▏    | 52/100 [00:43&lt;00:39,  1.21steps/s, loss=0.09461792]
+ 53%|█████▎    | 53/100 [00:44&lt;00:38,  1.22steps/s, loss=0.09461792]
+ 53%|█████▎    | 53/100 [00:44&lt;00:38,  1.22steps/s, loss=0.093912095]
+ 54%|█████▍    | 54/100 [00:45&lt;00:42,  1.09steps/s, loss=0.093912095]
+ 54%|█████▍    | 54/100 [00:45&lt;00:42,  1.09steps/s, loss=0.090636924]
+ 55%|█████▌    | 55/100 [00:46&lt;00:39,  1.13steps/s, loss=0.090636924]
+ 55%|█████▌    | 55/100 [00:46&lt;00:39,  1.13steps/s, loss=0.089042164]
+ 56%|█████▌    | 56/100 [00:47&lt;00:38,  1.15steps/s, loss=0.089042164]
+ 56%|█████▌    | 56/100 [00:47&lt;00:38,  1.15steps/s, loss=0.08816056]
+ 57%|█████▋    | 57/100 [00:48&lt;00:36,  1.18steps/s, loss=0.08816056]
+ 57%|█████▋    | 57/100 [00:48&lt;00:36,  1.18steps/s, loss=0.08555394]
+ 58%|█████▊    | 58/100 [00:48&lt;00:34,  1.20steps/s, loss=0.08555394]
+ 58%|█████▊    | 58/100 [00:49&lt;00:34,  1.20steps/s, loss=0.08335422]
+ 59%|█████▉    | 59/100 [00:49&lt;00:33,  1.22steps/s, loss=0.08335422]
+ 59%|█████▉    | 59/100 [00:49&lt;00:33,  1.22steps/s, loss=0.08312665]
+ 60%|██████    | 60/100 [00:50&lt;00:32,  1.23steps/s, loss=0.08312665]
+ 60%|██████    | 60/100 [00:50&lt;00:32,  1.23steps/s, loss=0.083199814]
+ 61%|██████    | 61/100 [00:51&lt;00:31,  1.23steps/s, loss=0.083199814]
+ 61%|██████    | 61/100 [00:51&lt;00:31,  1.23steps/s, loss=0.08223204]
+ 62%|██████▏   | 62/100 [00:52&lt;00:30,  1.23steps/s, loss=0.08223204]
+ 62%|██████▏   | 62/100 [00:52&lt;00:30,  1.23steps/s, loss=0.081455484]
+ 63%|██████▎   | 63/100 [00:52&lt;00:30,  1.23steps/s, loss=0.081455484]
+ 63%|██████▎   | 63/100 [00:53&lt;00:30,  1.23steps/s, loss=0.08102548]
+ 64%|██████▍   | 64/100 [00:54&lt;00:32,  1.09steps/s, loss=0.08102548]
+ 64%|██████▍   | 64/100 [00:54&lt;00:32,  1.09steps/s, loss=0.08015042]
+ 65%|██████▌   | 65/100 [00:54&lt;00:30,  1.14steps/s, loss=0.08015042]
+ 65%|██████▌   | 65/100 [00:55&lt;00:30,  1.14steps/s, loss=0.07961787]
+ 66%|██████▌   | 66/100 [00:55&lt;00:31,  1.09steps/s, loss=0.07961787]
+ 66%|██████▌   | 66/100 [00:56&lt;00:31,  1.09steps/s, loss=0.0796711]
+ 67%|██████▋   | 67/100 [00:56&lt;00:29,  1.11steps/s, loss=0.0796711]
+ 67%|██████▋   | 67/100 [00:56&lt;00:29,  1.11steps/s, loss=0.07919784]
+ 68%|██████▊   | 68/100 [00:57&lt;00:27,  1.16steps/s, loss=0.07919784]
+ 68%|██████▊   | 68/100 [00:57&lt;00:27,  1.16steps/s, loss=0.07740459]
+ 69%|██████▉   | 69/100 [00:58&lt;00:26,  1.19steps/s, loss=0.07740459]
+ 69%|██████▉   | 69/100 [00:58&lt;00:26,  1.19steps/s, loss=0.07506326]
+ 70%|███████   | 70/100 [00:59&lt;00:25,  1.17steps/s, loss=0.07506326]
+ 70%|███████   | 70/100 [00:59&lt;00:25,  1.17steps/s, loss=0.07375091]
+ 71%|███████   | 71/100 [01:00&lt;00:24,  1.19steps/s, loss=0.07375091]
+ 71%|███████   | 71/100 [01:00&lt;00:24,  1.19steps/s, loss=0.07356838]
+ 72%|███████▏  | 72/100 [01:00&lt;00:23,  1.22steps/s, loss=0.07356838]
+ 72%|███████▏  | 72/100 [01:01&lt;00:23,  1.22steps/s, loss=0.07324439]
+ 73%|███████▎  | 73/100 [01:01&lt;00:22,  1.22steps/s, loss=0.07324439]
+ 73%|███████▎  | 73/100 [01:01&lt;00:22,  1.22steps/s, loss=0.07283713]
+ 74%|███████▍  | 74/100 [01:02&lt;00:23,  1.10steps/s, loss=0.07283713]
+ 74%|███████▍  | 74/100 [01:02&lt;00:23,  1.10steps/s, loss=0.07263132]
+ 75%|███████▌  | 75/100 [01:03&lt;00:21,  1.14steps/s, loss=0.07263132]
+ 75%|███████▌  | 75/100 [01:03&lt;00:21,  1.14steps/s, loss=0.07241094]
+ 76%|███████▌  | 76/100 [01:04&lt;00:20,  1.18steps/s, loss=0.07241094]
+ 76%|███████▌  | 76/100 [01:04&lt;00:20,  1.18steps/s, loss=0.071936525]
+ 77%|███████▋  | 77/100 [01:05&lt;00:19,  1.21steps/s, loss=0.071936525]
+ 77%|███████▋  | 77/100 [01:05&lt;00:19,  1.21steps/s, loss=0.07141814]
+ 78%|███████▊  | 78/100 [01:05&lt;00:18,  1.22steps/s, loss=0.07141814]
+ 78%|███████▊  | 78/100 [01:06&lt;00:18,  1.22steps/s, loss=0.07109322]
+ 79%|███████▉  | 79/100 [01:06&lt;00:17,  1.18steps/s, loss=0.07109322]
+ 79%|███████▉  | 79/100 [01:07&lt;00:17,  1.18steps/s, loss=0.070832364]
+ 80%|████████  | 80/100 [01:07&lt;00:16,  1.20steps/s, loss=0.070832364]
+ 80%|████████  | 80/100 [01:07&lt;00:16,  1.20steps/s, loss=0.07043037]
+ 81%|████████  | 81/100 [01:08&lt;00:16,  1.17steps/s, loss=0.07043037]
+ 81%|████████  | 81/100 [01:08&lt;00:16,  1.17steps/s, loss=0.06992093]
+ 82%|████████▏ | 82/100 [01:09&lt;00:15,  1.19steps/s, loss=0.06992093]
+ 82%|████████▏ | 82/100 [01:09&lt;00:15,  1.19steps/s, loss=0.06948528]
+ 83%|████████▎ | 83/100 [01:10&lt;00:13,  1.22steps/s, loss=0.06948528]
+ 83%|████████▎ | 83/100 [01:10&lt;00:13,  1.22steps/s, loss=0.069205806]
+ 84%|████████▍ | 84/100 [01:11&lt;00:14,  1.12steps/s, loss=0.069205806]
+ 84%|████████▍ | 84/100 [01:11&lt;00:14,  1.12steps/s, loss=0.06898326]
+ 85%|████████▌ | 85/100 [01:11&lt;00:13,  1.15steps/s, loss=0.06898326]
+ 85%|████████▌ | 85/100 [01:12&lt;00:13,  1.15steps/s, loss=0.06864749]
+ 86%|████████▌ | 86/100 [01:12&lt;00:11,  1.18steps/s, loss=0.06864749]
+ 86%|████████▌ | 86/100 [01:12&lt;00:11,  1.18steps/s, loss=0.06811785]
+ 87%|████████▋ | 87/100 [01:13&lt;00:10,  1.21steps/s, loss=0.06811785]
+ 87%|████████▋ | 87/100 [01:13&lt;00:10,  1.21steps/s, loss=0.067458585]
+ 88%|████████▊ | 88/100 [01:14&lt;00:09,  1.22steps/s, loss=0.067458585]
+ 88%|████████▊ | 88/100 [01:14&lt;00:09,  1.22steps/s, loss=0.06680731]
+ 89%|████████▉ | 89/100 [01:15&lt;00:08,  1.23steps/s, loss=0.06680731]
+ 89%|████████▉ | 89/100 [01:15&lt;00:08,  1.23steps/s, loss=0.0662679]
+ 90%|█████████ | 90/100 [01:15&lt;00:08,  1.23steps/s, loss=0.0662679]
+ 90%|█████████ | 90/100 [01:16&lt;00:08,  1.23steps/s, loss=0.06587325]
+ 91%|█████████ | 91/100 [01:16&lt;00:07,  1.24steps/s, loss=0.06587325]
+ 91%|█████████ | 91/100 [01:16&lt;00:07,  1.24steps/s, loss=0.06559181]
+ 92%|█████████▏| 92/100 [01:17&lt;00:06,  1.22steps/s, loss=0.06559181]
+ 92%|█████████▏| 92/100 [01:17&lt;00:06,  1.22steps/s, loss=0.065350026]
+ 93%|█████████▎| 93/100 [01:18&lt;00:05,  1.22steps/s, loss=0.065350026]
+ 93%|█████████▎| 93/100 [01:18&lt;00:05,  1.22steps/s, loss=0.06507164]
+ 94%|█████████▍| 94/100 [01:19&lt;00:05,  1.11steps/s, loss=0.06507164]
+ 94%|█████████▍| 94/100 [01:19&lt;00:05,  1.11steps/s, loss=0.064716026]
+ 95%|█████████▌| 95/100 [01:20&lt;00:04,  1.11steps/s, loss=0.064716026]
+ 95%|█████████▌| 95/100 [01:20&lt;00:04,  1.11steps/s, loss=0.06429076]
+ 96%|█████████▌| 96/100 [01:21&lt;00:03,  1.15steps/s, loss=0.06429076]
+ 96%|█████████▌| 96/100 [01:21&lt;00:03,  1.15steps/s, loss=0.0638361]
+ 97%|█████████▋| 97/100 [01:22&lt;00:02,  1.19steps/s, loss=0.0638361]
+ 97%|█████████▋| 97/100 [01:22&lt;00:02,  1.19steps/s, loss=0.063397214]
+ 98%|█████████▊| 98/100 [01:22&lt;00:01,  1.21steps/s, loss=0.063397214]
+ 98%|█████████▊| 98/100 [01:22&lt;00:01,  1.21steps/s, loss=0.06300174]
+ 99%|█████████▉| 99/100 [01:23&lt;00:00,  1.23steps/s, loss=0.06300174]
+ 99%|█████████▉| 99/100 [01:23&lt;00:00,  1.23steps/s, loss=0.06265616]
+100%|██████████| 100/100 [01:24&lt;00:00,  1.24steps/s, loss=0.06265616]
+100%|██████████| 100/100 [01:24&lt;00:00,  1.19steps/s, loss=0.06265616]
 </pre></div>
 </div>
 <img src="../../../_images/mrinufft_learn_traj_mc.gif" srcset="../../../_images/mrinufft_learn_traj_mc.gif" alt="example learn_samples" class = "sphx-glr-single-img"/></section>
@@ -1251,7 +1272,7 @@ through Projection” Bioengineering 10, no. 2: 158.
 <a class="reference external" href="https://doi.org/10.3390/bioengineering10020158">https://doi.org/10.3390/bioengineering10020158</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 56.508 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 34.551 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-learn-samples-multicoil-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_learn_samples_multicoil.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />

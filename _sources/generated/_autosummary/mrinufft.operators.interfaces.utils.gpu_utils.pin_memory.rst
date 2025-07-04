@@ -5,7 +5,5 @@ pin\_memory
 
 .. autofunction:: pin_memory
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.gpu_utils.pin_memory:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.gpu_utils.pin_memory
-   :add-heading:
+   :add-heading: Example using ``pin_memory``:

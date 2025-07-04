@@ -5,7 +5,5 @@ get\_operator
 
 .. autofunction:: get_operator
 
-..  _sphx_glr_backref_mrinufft.operators.base.get_operator:
-
 .. minigallery:: mrinufft.operators.base.get_operator
-   :add-heading:
+   :add-heading: Example using ``get_operator``:

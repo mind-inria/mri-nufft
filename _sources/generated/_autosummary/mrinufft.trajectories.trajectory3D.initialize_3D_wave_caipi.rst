@@ -5,7 +5,5 @@ initialize\_3D\_wave\_caipi
 
 .. autofunction:: initialize_3D_wave_caipi
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi:
-
 .. minigallery:: mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi
-   :add-heading:
+   :add-heading: Example using ``initialize_3D_wave_caipi``:

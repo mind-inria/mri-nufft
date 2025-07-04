@@ -55,3 +55,8 @@ MRIStackedNUFFT
       ~MRIStackedNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.stacked.MRIStackedNUFFT:
+
+   .. minigallery:: mrinufft.operators.stacked.MRIStackedNUFFT
+      :add-heading:

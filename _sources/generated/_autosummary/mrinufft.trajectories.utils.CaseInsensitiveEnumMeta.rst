@@ -24,3 +24,8 @@ CaseInsensitiveEnumMeta
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.CaseInsensitiveEnumMeta:
+
+   .. minigallery:: mrinufft.trajectories.utils.CaseInsensitiveEnumMeta
+      :add-heading:

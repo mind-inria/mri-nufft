@@ -5,7 +5,5 @@ sizeof\_fmt
 
 .. autofunction:: sizeof_fmt
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.utils.sizeof_fmt:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.utils.sizeof_fmt
-   :add-heading:
+   :add-heading: Example using ``sizeof_fmt``:

@@ -56,3 +56,8 @@ MRITensorflowNUFFT
       ~MRITensorflowNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT
+      :add-heading:

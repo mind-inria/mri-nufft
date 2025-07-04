@@ -25,3 +25,8 @@ RawPyNUFFT
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT
+      :add-heading:

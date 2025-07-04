@@ -5,7 +5,5 @@ epify
 
 .. autofunction:: epify
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.epify:
-
 .. minigallery:: mrinufft.trajectories.tools.epify
-   :add-heading:
+   :add-heading: Example using ``epify``:

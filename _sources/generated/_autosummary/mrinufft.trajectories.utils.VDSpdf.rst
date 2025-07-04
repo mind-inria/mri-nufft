@@ -77,3 +77,8 @@ VDSpdf
       ~VDSpdf.EQUISPACED
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.VDSpdf:
+
+   .. minigallery:: mrinufft.trajectories.utils.VDSpdf
+      :add-heading:

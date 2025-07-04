@@ -69,3 +69,8 @@ StrEnum
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.StrEnum:
+
+   .. minigallery:: mrinufft.trajectories.utils.StrEnum
+      :add-heading:

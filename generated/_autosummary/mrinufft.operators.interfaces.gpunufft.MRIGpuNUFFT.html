@@ -175,18 +175,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -195,6 +183,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -909,7 +915,7 @@ only in gpuNUFFT</p></li>
 </tbody>
 </table>
 </div>
-<dl class="py method">
+<dl class="py method" id="sphx-glr-backref-mrinufft-operators-interfaces-gpunufft-mrigpunufft">
 <dt class="sig sig-object py" id="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op">
 <span class="sig-name descname"><span class="pre">op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/gpunufft.html#MRIGpuNUFFT.op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.op" title="Link to this definition">#</a></dt>
 <dd><p>Compute forward non-uniform Fourier Transform.</p>
@@ -994,18 +1000,19 @@ only in gpuNUFFT</p></li>
 <dt class="sig sig-object py" id="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst">
 <span class="sig-name descname"><span class="pre">get_lipschitz_cst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/gpunufft.html#MRIGpuNUFFT.get_lipschitz_cst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst" title="Link to this definition">#</a></dt>
 <dd><p>Return the Lipschitz constant of the operator.</p>
-<dl class="simple">
-<dt>tolerance: float, optional default 1e-5</dt><dd><p>Tolerance for the spectral radius estimation.</p>
-</dd>
-<dt>kwargs:</dt><dd><p>Extra kwargs for the operator.</p>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Lipschitz constant of the operator.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of iteration to perform to estimate the Lipschitz constant.</p></li>
+<li><p><strong>tolerance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional default 1e-5</em>) – Tolerance for the spectral radius estimation.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs for the operator.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Lipschitz constant of the operator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

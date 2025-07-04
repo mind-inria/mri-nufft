@@ -5,7 +5,5 @@ is\_cuda\_array
 
 .. autofunction:: is_cuda_array
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_array:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_array
-   :add-heading:
+   :add-heading: Example using ``is_cuda_array``:

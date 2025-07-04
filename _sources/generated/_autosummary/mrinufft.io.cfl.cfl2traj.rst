@@ -5,7 +5,5 @@ cfl2traj
 
 .. autofunction:: cfl2traj
 
-..  _sphx_glr_backref_mrinufft.io.cfl.cfl2traj:
-
 .. minigallery:: mrinufft.io.cfl.cfl2traj
-   :add-heading:
+   :add-heading: Example using ``cfl2traj``:

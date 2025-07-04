@@ -5,7 +5,5 @@ get\_gridded\_trajectory
 
 .. autofunction:: get_gridded_trajectory
 
-..  _sphx_glr_backref_mrinufft.trajectories.display3D.get_gridded_trajectory:
-
 .. minigallery:: mrinufft.trajectories.display3D.get_gridded_trajectory
-   :add-heading:
+   :add-heading: Example using ``get_gridded_trajectory``:

@@ -174,18 +174,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -194,6 +182,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -705,21 +711,20 @@ document.write(`
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple[int]</span>
+<span class="sd">    shape: tuple[int]</span>
 <span class="sd">        Matrix size.</span>
-<span class="sd">    b0range : tuple[float], optional</span>
+<span class="sd">    b0range: tuple[float], optional</span>
 <span class="sd">        Frequency shift range in [Hz]. The default is (-300, 300).</span>
-<span class="sd">    mask : np.ndarray</span>
+<span class="sd">    mask: np.ndarray</span>
 <span class="sd">        Spatial support of the object. If not provided,</span>
-<span class="sd">        build a radial mask with radius = 0.3 * shape</span>
+<span class="sd">        build a radial mask with radius ``radius=0.3*shape``</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
-<span class="sd">        B0 map of shape (*shape) in [Hz],</span>
-<span class="sd">        with values included in (*b0range).</span>
-<span class="sd">    mask : np.ndarray, optional</span>
-<span class="sd">        Spatial support binary mask.</span>
+<span class="sd">        B0 map in Hz, values included in ``b0range``, and shape ``shape``</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        Spatial support binary mask</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
@@ -750,19 +755,19 @@ document.write(`
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    shape : tuple[int]</span>
+<span class="sd">    shape: tuple[int]</span>
 <span class="sd">        Matrix size.</span>
-<span class="sd">    t2svalue : float, optional</span>
-<span class="sd">        Object T2* in [ms]. The default is 15.0.</span>
-<span class="sd">    mask : np.ndarray</span>
+<span class="sd">    t2svalue: float, optional</span>
+<span class="sd">        Object T2* in ms. The default is 15.0.</span>
+<span class="sd">    mask: np.ndarray</span>
 <span class="sd">        Spatial support of the object. If not provided,</span>
-<span class="sd">        build a radial mask with radius = 0.3 * shape</span>
+<span class="sd">        build a radial mask with ``radius = 0.3 * shape``</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    np.ndarray</span>
 <span class="sd">        T2* map of shape (*shape) in [ms].</span>
-<span class="sd">    mask : np.ndarray, optional</span>
+<span class="sd">    np.ndarray, optional</span>
 <span class="sd">        Spatial support binary mask.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>

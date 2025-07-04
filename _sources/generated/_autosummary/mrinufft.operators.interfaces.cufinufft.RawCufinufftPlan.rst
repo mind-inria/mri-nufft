@@ -32,3 +32,8 @@ RawCufinufftPlan
       ~RawCufinufftPlan.dtype
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.cufinufft.RawCufinufftPlan:
+
+   .. minigallery:: mrinufft.operators.interfaces.cufinufft.RawCufinufftPlan
+      :add-heading:

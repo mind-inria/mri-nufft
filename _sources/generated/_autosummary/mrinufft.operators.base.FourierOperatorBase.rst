@@ -55,3 +55,8 @@ FourierOperatorBase
       ~FourierOperatorBase.available
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.base.FourierOperatorBase:
+
+   .. minigallery:: mrinufft.operators.base.FourierOperatorBase
+      :add-heading:

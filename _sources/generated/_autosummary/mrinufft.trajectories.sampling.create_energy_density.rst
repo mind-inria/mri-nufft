@@ -5,7 +5,5 @@ create\_energy\_density
 
 .. autofunction:: create_energy_density
 
-..  _sphx_glr_backref_mrinufft.trajectories.sampling.create_energy_density:
-
 .. minigallery:: mrinufft.trajectories.sampling.create_energy_density
-   :add-heading:
+   :add-heading: Example using ``create_energy_density``:

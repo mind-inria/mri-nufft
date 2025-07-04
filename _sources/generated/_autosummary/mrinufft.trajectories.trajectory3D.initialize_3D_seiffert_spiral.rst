@@ -5,7 +5,5 @@ initialize\_3D\_seiffert\_spiral
 
 .. autofunction:: initialize_3D_seiffert_spiral
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral:
-
 .. minigallery:: mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral
-   :add-heading:
+   :add-heading: Example using ``initialize_3D_seiffert_spiral``:

@@ -30,3 +30,8 @@ RawGpuNUFFT
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT
+      :add-heading:

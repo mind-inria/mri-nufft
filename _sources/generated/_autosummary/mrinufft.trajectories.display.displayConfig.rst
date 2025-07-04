@@ -42,3 +42,8 @@ displayConfig
       ~displayConfig.small_fontsize
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.display.displayConfig:
+
+   .. minigallery:: mrinufft.trajectories.display.displayConfig
+      :add-heading:

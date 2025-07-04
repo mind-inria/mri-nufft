@@ -55,3 +55,8 @@ MRIPynufft
       ~MRIPynufft.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft:
+
+   .. minigallery:: mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft
+      :add-heading:

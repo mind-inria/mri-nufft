@@ -85,3 +85,8 @@ MRINufftAutoGrad
       ~MRINufftAutoGrad.training
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.autodiff.MRINufftAutoGrad:
+
+   .. minigallery:: mrinufft.operators.autodiff.MRINufftAutoGrad
+      :add-heading:

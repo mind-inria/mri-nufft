@@ -57,3 +57,8 @@ MRIfinufft
       ~MRIfinufft.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.finufft.MRIfinufft:
+
+   .. minigallery:: mrinufft.operators.interfaces.finufft.MRIfinufft
+      :add-heading:

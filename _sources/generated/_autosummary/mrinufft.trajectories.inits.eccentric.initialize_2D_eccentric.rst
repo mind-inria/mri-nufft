@@ -5,7 +5,5 @@ initialize\_2D\_eccentric
 
 .. autofunction:: initialize_2D_eccentric
 
-..  _sphx_glr_backref_mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric:
-
 .. minigallery:: mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_eccentric``:

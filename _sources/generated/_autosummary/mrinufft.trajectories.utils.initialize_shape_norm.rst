@@ -5,7 +5,5 @@ initialize\_shape\_norm
 
 .. autofunction:: initialize_shape_norm
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.initialize_shape_norm:
-
 .. minigallery:: mrinufft.trajectories.utils.initialize_shape_norm
-   :add-heading:
+   :add-heading: Example using ``initialize_shape_norm``:

@@ -5,7 +5,5 @@ proper\_trajectory
 
 .. autofunction:: proper_trajectory
 
-..  _sphx_glr_backref_mrinufft._utils.proper_trajectory:
-
 .. minigallery:: mrinufft._utils.proper_trajectory
-   :add-heading:
+   :add-heading: Example using ``proper_trajectory``:

@@ -5,7 +5,5 @@ convert\_trajectory\_to\_gradients
 
 .. autofunction:: convert_trajectory_to_gradients
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.convert_trajectory_to_gradients:
-
 .. minigallery:: mrinufft.trajectories.utils.convert_trajectory_to_gradients
-   :add-heading:
+   :add-heading: Example using ``convert_trajectory_to_gradients``:

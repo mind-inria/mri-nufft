@@ -5,7 +5,5 @@ is\_from\_fibonacci\_sequence
 
 .. autofunction:: is_from_fibonacci_sequence
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence:
-
 .. minigallery:: mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence
-   :add-heading:
+   :add-heading: Example using ``is_from_fibonacci_sequence``:

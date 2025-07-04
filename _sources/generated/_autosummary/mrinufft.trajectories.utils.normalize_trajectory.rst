@@ -5,7 +5,5 @@ normalize\_trajectory
 
 .. autofunction:: normalize_trajectory
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.normalize_trajectory:
-
 .. minigallery:: mrinufft.trajectories.utils.normalize_trajectory
-   :add-heading:
+   :add-heading: Example using ``normalize_trajectory``:

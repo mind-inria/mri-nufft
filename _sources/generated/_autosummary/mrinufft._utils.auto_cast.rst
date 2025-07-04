@@ -5,7 +5,5 @@ auto\_cast
 
 .. autofunction:: auto_cast
 
-..  _sphx_glr_backref_mrinufft._utils.auto_cast:
-
 .. minigallery:: mrinufft._utils.auto_cast
-   :add-heading:
+   :add-heading: Example using ``auto_cast``:

@@ -5,7 +5,5 @@ read\_arbgrad\_rawdat
 
 .. autofunction:: read_arbgrad_rawdat
 
-..  _sphx_glr_backref_mrinufft.io.nsp.read_arbgrad_rawdat:
-
 .. minigallery:: mrinufft.io.nsp.read_arbgrad_rawdat
-   :add-heading:
+   :add-heading: Example using ``read_arbgrad_rawdat``:

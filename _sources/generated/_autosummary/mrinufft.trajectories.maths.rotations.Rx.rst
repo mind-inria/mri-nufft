@@ -5,7 +5,5 @@ Rx
 
 .. autofunction:: Rx
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.rotations.Rx:
-
 .. minigallery:: mrinufft.trajectories.maths.rotations.Rx
-   :add-heading:
+   :add-heading: Example using ``Rx``:

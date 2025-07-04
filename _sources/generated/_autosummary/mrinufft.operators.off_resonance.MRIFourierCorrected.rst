@@ -56,3 +56,8 @@ MRIFourierCorrected
       ~MRIFourierCorrected.available
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.off_resonance.MRIFourierCorrected:
+
+   .. minigallery:: mrinufft.operators.off_resonance.MRIFourierCorrected
+      :add-heading:

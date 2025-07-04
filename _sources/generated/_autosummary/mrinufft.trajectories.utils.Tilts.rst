@@ -81,3 +81,8 @@ Tilts
       ~Tilts.MRI
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.Tilts:
+
+   .. minigallery:: mrinufft.trajectories.utils.Tilts
+      :add-heading:

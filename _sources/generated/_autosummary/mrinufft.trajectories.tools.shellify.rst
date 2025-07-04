@@ -5,7 +5,5 @@ shellify
 
 .. autofunction:: shellify
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.shellify:
-
 .. minigallery:: mrinufft.trajectories.tools.shellify
-   :add-heading:
+   :add-heading: Example using ``shellify``:

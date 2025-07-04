@@ -5,7 +5,5 @@ get\_density
 
 .. autofunction:: get_density
 
-..  _sphx_glr_backref_mrinufft.density.utils.get_density:
-
 .. minigallery:: mrinufft.density.utils.get_density
-   :add-heading:
+   :add-heading: Example using ``get_density``:

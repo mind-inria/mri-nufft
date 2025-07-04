@@ -5,7 +5,5 @@ initialize\_algebraic\_spiral
 
 .. autofunction:: initialize_algebraic_spiral
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.initialize_algebraic_spiral:
-
 .. minigallery:: mrinufft.trajectories.utils.initialize_algebraic_spiral
-   :add-heading:
+   :add-heading: Example using ``initialize_algebraic_spiral``:

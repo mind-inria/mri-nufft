@@ -5,7 +5,5 @@ initialize\_2D\_sinusoide
 
 .. autofunction:: initialize_2D_sinusoide
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide:
-
 .. minigallery:: mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_sinusoide``:

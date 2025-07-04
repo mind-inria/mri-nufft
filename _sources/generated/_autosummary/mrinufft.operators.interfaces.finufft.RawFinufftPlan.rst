@@ -26,3 +26,8 @@ RawFinufftPlan
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.finufft.RawFinufftPlan:
+
+   .. minigallery:: mrinufft.operators.interfaces.finufft.RawFinufftPlan
+      :add-heading:

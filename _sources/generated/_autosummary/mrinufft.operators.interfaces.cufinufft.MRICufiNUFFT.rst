@@ -62,3 +62,8 @@ MRICufiNUFFT
       ~MRICufiNUFFT.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT:
+
+   .. minigallery:: mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT
+      :add-heading:

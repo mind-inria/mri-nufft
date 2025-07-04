@@ -25,7 +25,7 @@ Reconstruction with conjugate gradient
 An example to show how to reconstruct volumes using conjugate gradient method.
 
 This script demonstrates the use of the Conjugate Gradient (CG) method
-for solving systems of linear equations of the form Ax = b, where A is a symmetric
+for solving systems of linear equations of the form :math:`Ax = b`, where :math:`A`` is a symmetric
 positive-definite matrix. The CG method is an iterative algorithm that is particularly
 useful for large, sparse systems where direct methods are computationally expensive.
 
@@ -47,7 +47,7 @@ This method is inspired by techniques from [SigPy]_ and
 
 Imports
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-36
+.. GENERATED FROM PYTHON SOURCE LINES 30-39
 
 .. code-block:: Python
 
@@ -56,6 +56,9 @@ Imports
     from brainweb_dl import get_mri
     from mrinufft.density import voronoi
     from matplotlib import pyplot as plt
+    import os
+
+    BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 
 
@@ -64,11 +67,11 @@ Imports
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-38
+.. GENERATED FROM PYTHON SOURCE LINES 40-41
 
 Setup Inputs
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-42
+.. GENERATED FROM PYTHON SOURCE LINES 41-45
 
 .. code-block:: Python
 
@@ -83,34 +86,44 @@ Setup Inputs
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-44
+.. GENERATED FROM PYTHON SOURCE LINES 46-47
 
 Setup the NUFFT operator
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-52
+.. GENERATED FROM PYTHON SOURCE LINES 47-56
 
 .. code-block:: Python
 
-    NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
+    NufftOperator = mrinufft.get_operator(BACKEND)  # get the operator
 
     nufft = NufftOperator(
         samples_loc,
         shape=image.shape,
         density=True,
+        squeeze_dims=True,
     )  # create the NUFFT operator
 
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+      warnings.warn(
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+      warnings.warn(
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-54
+
+.. GENERATED FROM PYTHON SOURCE LINES 57-58
 
 Reconstruct the image using the CG method
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-97
+.. GENERATED FROM PYTHON SOURCE LINES 58-104
 
 .. code-block:: Python
 
@@ -137,7 +150,10 @@ Reconstruct the image using the CG method
     plt.subplot(2, 3, 3)
     plt.title("Adjoint NUFFT")
     plt.imshow(
-        abs(nufft.adj_op(kspace_data)), vmin=image.min(), vmax=image.max(), cmap="gray"
+        abs(nufft.adj_op(kspace_data)),
+        vmin=image.min(),
+        vmax=image.max(),
+        cmap="gray",
     )
     plt.colorbar()
 
@@ -170,12 +186,14 @@ Reconstruct the image using the CG method
 
  .. code-block:: none
 
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
+      warnings.warn("Lipschitz constant did not converge")
 
-    <matplotlib.legend.Legend object at 0x76c4fb361030>
+    <matplotlib.legend.Legend object at 0x75819855ce50>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-107
+.. GENERATED FROM PYTHON SOURCE LINES 105-114
 
 References
 ==========
@@ -190,7 +208,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.608 seconds)
+   **Total running time of the script:** (0 minutes 1.320 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:

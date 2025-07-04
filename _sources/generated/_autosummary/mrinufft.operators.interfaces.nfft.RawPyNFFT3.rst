@@ -25,3 +25,8 @@ RawPyNFFT3
    
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.interfaces.nfft.RawPyNFFT3:
+
+   .. minigallery:: mrinufft.operators.interfaces.nfft.RawPyNFFT3
+      :add-heading:

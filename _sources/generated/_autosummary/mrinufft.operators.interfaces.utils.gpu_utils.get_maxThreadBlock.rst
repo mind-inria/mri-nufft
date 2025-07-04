@@ -5,7 +5,5 @@ get\_maxThreadBlock
 
 .. autofunction:: get_maxThreadBlock
 
-..  _sphx_glr_backref_mrinufft.operators.interfaces.utils.gpu_utils.get_maxThreadBlock:
-
 .. minigallery:: mrinufft.operators.interfaces.utils.gpu_utils.get_maxThreadBlock
-   :add-heading:
+   :add-heading: Example using ``get_maxThreadBlock``:

@@ -5,7 +5,5 @@ initialize\_2D\_polar\_lissajous
 
 .. autofunction:: initialize_2D_polar_lissajous
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous:
-
 .. minigallery:: mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_polar_lissajous``:

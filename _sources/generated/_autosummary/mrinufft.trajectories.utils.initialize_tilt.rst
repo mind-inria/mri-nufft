@@ -5,7 +5,5 @@ initialize\_tilt
 
 .. autofunction:: initialize_tilt
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.initialize_tilt:
-
 .. minigallery:: mrinufft.trajectories.utils.initialize_tilt
-   :add-heading:
+   :add-heading: Example using ``initialize_tilt``:

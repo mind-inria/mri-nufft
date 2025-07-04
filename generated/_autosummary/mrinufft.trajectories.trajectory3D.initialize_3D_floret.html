@@ -176,18 +176,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -196,6 +184,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -757,6 +763,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.trajectory3D.initialize_3D_floret"><code class="docutils literal notranslate"><span class="pre">initialize_3D_floret()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-using-initialize-3d-floret">Example using <code class="docutils literal notranslate"><span class="pre">initialize_3D_floret</span></code>:</a></li>
 </ul>
             </nav>
         </div>
@@ -774,7 +781,7 @@ document.write(`
 <dt class="sig sig-object py" id="mrinufft.trajectories.trajectory3D.initialize_3D_floret">
 <span class="sig-prename descclassname"><span class="pre">mrinufft.trajectories.trajectory3D.</span></span><span class="sig-name descname"><span class="pre">initialize_3D_floret</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_revolutions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spiral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fermat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cone_tilt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'golden'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5707963267948966</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/trajectories/trajectory3D.html#initialize_3D_floret"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.trajectories.trajectory3D.initialize_3D_floret" title="Link to this definition">#</a></dt>
 <dd><p>Initialize 3D trajectories with FLORET.</p>
-<p>This implementation is based on the work from <a class="reference internal" href="../autoexamples/example_trajectory_tools.html#pip-11" id="id1"><span>[Pip+11]</span></a>.
+<p>This implementation is based on the work from <a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html#pip-11" id="id1"><span>[Pip+11]</span></a>.
 The acronym FLORET stands for Fermat Looped, Orthogonally
 Encoded Trajectories. It consists of Fermat spirals
 folded into 3D cones along one or several axes.</p>
@@ -814,7 +821,16 @@ Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.</p>
 </div>
 </dd></dl>
 
-<span class="target" id="sphx-glr-backref-mrinufft-trajectories-trajectory3d-initialize-3d-floret"></span></section>
+<section id="example-using-initialize-3d-floret">
+<h2>Example using <code class="docutils literal notranslate"><span class="pre">initialize_3D_floret</span></code>:<a class="headerlink" href="#example-using-initialize-3d-floret" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show some tools available to display 3D trajectories. It can be used to understand the k-space sampling patterns, visualize the trajectories, see the sampling times, gradient strengths, slew rates etc. Another key feature is to display the sampling density in k-space, for example to check for k-space holes or irregularities in the learning-based trajectories that would lead to artifacts in the images."><img alt="" src="../../_images/sphx_glr_example_3d_trajectory_display_thumb.png" />
+<p><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html#sphx-glr-generated-autoexamples-gpu-example-3d-trajectory-display-py"><span class="std std-ref">Gridded trajectory display</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Gridded trajectory display</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="An animation to show 3D trajectory customization."><img alt="" src="../../_images/sphx_glr_example_gif_3D_thumb.gif" />
+<p><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html#sphx-glr-generated-autoexamples-trajectories-example-gif-3d-py"><span class="std std-ref">Animated 3D trajectories</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Animated 3D trajectories</div>
+</div></div></section>
+</section>
 
 
                 </article>
@@ -862,6 +878,7 @@ Magnetic resonance in medicine 66, no. 5 (2011): 1303-1311.</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.trajectories.trajectory3D.initialize_3D_floret"><code class="docutils literal notranslate"><span class="pre">initialize_3D_floret()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-using-initialize-3d-floret">Example using <code class="docutils literal notranslate"><span class="pre">initialize_3D_floret</span></code>:</a></li>
 </ul>
   </nav></div>
 

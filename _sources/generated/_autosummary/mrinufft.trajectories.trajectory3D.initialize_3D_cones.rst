@@ -5,7 +5,5 @@ initialize\_3D\_cones
 
 .. autofunction:: initialize_3D_cones
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory3D.initialize_3D_cones:
-
 .. minigallery:: mrinufft.trajectories.trajectory3D.initialize_3D_cones
-   :add-heading:
+   :add-heading: Example using ``initialize_3D_cones``:

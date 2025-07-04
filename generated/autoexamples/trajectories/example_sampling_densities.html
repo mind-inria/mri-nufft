@@ -1,0 +1,1369 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sampling densities &#8212; MRI-nufft Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/autoexamples/trajectories/example_sampling_densities';</script>
+    <link rel="icon" href="../../../_static/mri-nufft-icon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Trajectory display configuration" href="example_display_config.html" />
+    <link rel="prev" title="Learning sampling pattern with decimation" href="example_learn_samples_multires.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/mri-nufft.png" class="logo__image only-light" alt="MRI-nufft Documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/mri-nufft.png" class="logo__image only-dark" alt="MRI-nufft Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    MRI-NUFFT
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_learn_samples.html">Learn Sampling pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">Trajectories Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="example_trajectory_tools.html">Trajectory tools</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explanations</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../nufft.html">The NUFFT Operator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../trajectory_gradspec.html">The trajectory binary file specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mrinufft_convention.html">MRI-NUFFT Interfaces Convention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.operators</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.autodiff.html"><code class="docutils literal notranslate"><span class="pre">operators.autodiff</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.autodiff.MRINufftAutoGrad.html">MRINufftAutoGrad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.html"><code class="docutils literal notranslate"><span class="pre">operators.base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.html"><code class="docutils literal notranslate"><span class="pre">operators.interfaces</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.bart.html"><code class="docutils literal notranslate"><span class="pre">interfaces.bart</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.bart.MRIBartNUFFT.html">MRIBartNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html">RawBartNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.cufinufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.cufinufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html">MRICufiNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.cufinufft.RawCufinufftPlan.html">RawCufinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.finufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.finufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.finufft.MRIfinufft.html">MRIfinufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html">RawFinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.gpunufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.make_pinned_smaps.html">make_pinned_smaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html">MRIGpuNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html">RawGpuNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html">get_fourier_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix.html">get_implicit_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.implicit_type1_ndft.html">implicit_type1_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.implicit_type2_ndft.html">implicit_type2_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.MRInumpy.html">MRInumpy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html">RawNDFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.pynufft_cpu.html"><code class="docutils literal notranslate"><span class="pre">interfaces.pynufft_cpu</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft.html">MRIPynufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.html">RawPyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.sigpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.sigpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.sigpy.MRISigpyNUFFT.html">MRISigpyNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.sigpy.RawSigpyNUFFT.html">RawSigpyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.tfnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.tfnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.html">MRITensorflowNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.torchkbnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.torchkbnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft.html">MRITorchKbNufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTcpu.html">TorchKbNUFFTcpu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTgpu.html">TorchKbNUFFTgpu</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.stacked.html"><code class="docutils literal notranslate"><span class="pre">operators.stacked</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.stacked.stacked2traj3d.html">stacked2traj3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.stacked.traj3d2stacked.html">traj3d2stacked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html">MRIStackedNUFFT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html">MRIStackedNUFFTGPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.operators.subspace.html"><code class="docutils literal notranslate"><span class="pre">operators.subspace</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.operators.subspace.MRISubspace.html">MRISubspace</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.trajectories</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_2D_trajectory.html">display_2D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_3D_trajectory.html">display_3D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.gradients.patch_center_anomaly.html">patch_center_anomaly</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.travelling_salesman.html"><code class="docutils literal notranslate"><span class="pre">inits.travelling_salesman</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_2D_travelling_salesman.html">initialize_2D_travelling_salesman</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_3D_travelling_salesman.html">initialize_3D_travelling_salesman</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.html"><code class="docutils literal notranslate"><span class="pre">trajectories.maths</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.html"><code class="docutils literal notranslate"><span class="pre">maths.fibonacci</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle.html">generate_fibonacci_circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_lattice.html">generate_fibonacci_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere.html">generate_fibonacci_sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.get_closest_fibonacci_number.html">get_closest_fibonacci_number</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence.html">is_from_fibonacci_sequence</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.primes.html"><code class="docutils literal notranslate"><span class="pre">maths.primes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.primes.compute_coprime_factors.html">compute_coprime_factors</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.html"><code class="docutils literal notranslate"><span class="pre">maths.rotations</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.R2D.html">R2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.Ra.html">Ra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.Rv.html">Rv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.Rx.html">Rx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.Ry.html">Ry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.rotations.Rz.html">Rz</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.tsp_solver.html"><code class="docutils literal notranslate"><span class="pre">maths.tsp_solver</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt.html">solve_tsp_with_2opt</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.html"><code class="docutils literal notranslate"><span class="pre">trajectories.sampling</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.create_chauffert_density.html">create_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.create_cutoff_decay_density.html">create_cutoff_decay_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.create_energy_density.html">create_energy_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.create_fast_chauffert_density.html">create_fast_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.create_polynomial_density.html">create_polynomial_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.sampling.sample_from_density.html">sample_from_density</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.html"><code class="docutils literal notranslate"><span class="pre">trajectories.tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.radialize_center.html">radialize_center</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.rewind.html">rewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory2D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_cones.html">initialize_2D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral.html">initialize_2D_fibonacci_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_lissajous.html">initialize_2D_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous.html">initialize_2D_polar_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_propeller.html">initialize_2D_propeller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_radial.html">initialize_2D_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rings.html">initialize_2D_rings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rosette.html">initialize_2D_rosette</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide.html">initialize_2D_sinusoide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_spiral.html">initialize_2D_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_waves.html">initialize_2D_waves</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells.html">initialize_3D_annular_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_cones.html">initialize_3D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_floret.html">initialize_3D_floret</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_golden_means_radial.html">initialize_3D_golden_means_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_helical_shells.html">initialize_3D_helical_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_park_radial.html">initialize_3D_park_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial.html">initialize_3D_phyllotaxis_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_repi.html">initialize_3D_repi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_shells.html">initialize_3D_seiffert_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral.html">initialize_3D_seiffert_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_turbine.html">initialize_3D_turbine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi.html">initialize_3D_wave_caipi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wong_radial.html">initialize_3D_wong_radial</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.html"><code class="docutils literal notranslate"><span class="pre">trajectories.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.check_hardware_constraints.html">check_hardware_constraints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html">compute_gradients_and_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.convert_gradients_to_slew_rates.html">convert_gradients_to_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.convert_gradients_to_trajectory.html">convert_gradients_to_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.convert_slew_rates_to_gradients.html">convert_slew_rates_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.convert_trajectory_to_gradients.html">convert_trajectory_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.initialize_algebraic_spiral.html">initialize_algebraic_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.initialize_shape_norm.html">initialize_shape_norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.initialize_tilt.html">initialize_tilt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.normalize_trajectory.html">normalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.unnormalize_trajectory.html">unnormalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.CaseInsensitiveEnumMeta.html">CaseInsensitiveEnumMeta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.FloatEnum.html">FloatEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Gammas.html">Gammas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.density.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.density</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.density.geometry_based.html"><code class="docutils literal notranslate"><span class="pre">density.geometry_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.geometry_based.cell_count.html">cell_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.geometry_based.voronoi.html">voronoi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.geometry_based.voronoi_unique.html">voronoi_unique</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.density.nufft_based.html"><code class="docutils literal notranslate"><span class="pre">density.nufft_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.nufft_based.pipe.html">pipe</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.io.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.io</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.io.cfl.html"><code class="docutils literal notranslate"><span class="pre">io.cfl</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.cfl.cfl2traj.html">cfl2traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.cfl.traj2cfl.html">traj2cfl</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.io.nsp.html"><code class="docutils literal notranslate"><span class="pre">io.nsp</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.nsp.read_arbgrad_rawdat.html">read_arbgrad_rawdat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.nsp.read_trajectory.html">read_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.nsp.write_gradients.html">write_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.nsp.write_trajectory.html">write_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.io.siemens.html"><code class="docutils literal notranslate"><span class="pre">io.siemens</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.siemens.read_siemens_rawdat.html">read_siemens_rawdat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellanneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/development.html">Developing MRI-nufft</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Related Projects</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/pysap">PySAP</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/ModOpt/">ModOpt</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/paquiteau/brainweb-dl">Brainweb-dl</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/edit/main/generated/autoexamples/trajectories/example_sampling_densities.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2Fgenerated/autoexamples/trajectories/example_sampling_densities.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../_sources/generated/autoexamples/trajectories/example_sampling_densities.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Sampling densities</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#script-options">Script options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#densities">Densities</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-decay-density">Cutoff/decay density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-float"><code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#decay-float"><code class="docutils literal notranslate"><span class="pre">decay</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#resolution-tuple"><code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">(tuple)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#energy-based-density">Energy-based density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-np-ndarray"><code class="docutils literal notranslate"><span class="pre">dataset</span> <span class="pre">(np.ndarray)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chauffert-s-density">Chauffert’s density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#wavelet-basis-str"><code class="docutils literal notranslate"><span class="pre">wavelet_basis</span> <span class="pre">(str)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-wavelet-scales-int"><code class="docutils literal notranslate"><span class="pre">nb_wavelet_scales</span> <span class="pre">(int)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-density">Custom density</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling">Sampling</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-sampling">Random sampling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lloyd-s-sampling">Lloyd’s sampling</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#density-based-trajectories">Density-based trajectories</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-walks">Random walks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#travelling-salesman">Travelling Salesman</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-generated-autoexamples-trajectories-example-sampling-densities-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code. or to run this example in your browser via Binder</p>
+</div>
+<section class="sphx-glr-example-title" id="sampling-densities">
+<span id="sphx-glr-generated-autoexamples-trajectories-example-sampling-densities-py"></span><h1>Sampling densities<a class="headerlink" href="#sampling-densities" title="Link to this heading">#</a></h1>
+<p>A collection of sampling densities and density-based non-Cartesian trajectories.</p>
+<p>In this example we illustrate the use of different sampling densities,
+and show how to generate trajectories based on them, such as random
+walks and travelling-salesman trajectories.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># External</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">brainweb_dl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bwdl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">show_density</span><span class="p">,</span>
+    <span class="n">show_densities</span><span class="p">,</span>
+    <span class="n">show_locations</span><span class="p">,</span>
+    <span class="n">show_trajectory</span><span class="p">,</span>
+    <span class="n">show_trajectories</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Internal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mrinufft</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft</span><span class="w"> </span><span class="kn">import</span> <span class="n">display_2D_trajectory</span><span class="p">,</span> <span class="n">display_3D_trajectory</span>
+</pre></div>
+</div>
+<section id="script-options">
+<h2>Script options<a class="headerlink" href="#script-options" title="Link to this heading">#</a></h2>
+<p>These options are used in the examples below as default values for
+all densities and trajectories.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Density parameters</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_3d</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Trajectory parameters</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Number of shots</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Number of samples per shot</span>
+
+<span class="c1"># Display parameters</span>
+<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a> <span class="o">=</span> <span class="mf">5.5</span>  <span class="c1"># Figure size for trajectory plots</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Figure size for subplots</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Highlight one shot in particular</span>
+</pre></div>
+</div>
+</section>
+<section id="densities">
+<h2>Densities<a class="headerlink" href="#densities" title="Link to this heading">#</a></h2>
+<p>In this section we present different sampling densities
+with various properties.</p>
+<section id="cutoff-decay-density">
+<h3>Cutoff/decay density<a class="headerlink" href="#cutoff-decay-density" title="Link to this heading">#</a></h3>
+<p>Create a density composed of a central constant-value ellipsis
+defined by a cutoff ratio, followed by a polynomial decay over
+outer regions as defined in <a class="reference internal" href="#cha-22" id="id1"><span>[Cha+22]</span></a>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cutoff_density</span></a> <span class="o">=</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_cutoff_decay_density</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">show_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cutoff_density</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_001.png" srcset="../../../_images/sphx_glr_example_sampling_densities_001.png" alt="example sampling densities" class = "sphx-glr-single-img"/><section id="cutoff-float">
+<h4><code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">(float)</span></code><a class="headerlink" href="#cutoff-float" title="Link to this heading">#</a></h4>
+<p>The k-space radius cutoff ratio between 0 and 1 within
+which density remains uniform and beyond which it decays.
+It is modulated by <code class="docutils literal notranslate"><span class="pre">resolution</span></code> to create ellipsoids.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">mrinufft.create_polynomial_density</span></code>
+simply calls this function with <code class="docutils literal notranslate"><span class="pre">cutoff=0</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_cutoff_decay_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_002.png" srcset="../../../_images/sphx_glr_example_sampling_densities_002.png" alt="0, 0.1, 0.2, 0.3" class = "sphx-glr-single-img"/></section>
+<section id="decay-float">
+<h4><code class="docutils literal notranslate"><span class="pre">decay</span> <span class="pre">(float)</span></code><a class="headerlink" href="#decay-float" title="Link to this heading">#</a></h4>
+<p>The polynomial decay in density beyond the cutoff ratio.
+It can be zero or negative as shown below, but most applications
+are expected have decays in the positive range.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_cutoff_decay_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_003.png" srcset="../../../_images/sphx_glr_example_sampling_densities_003.png" alt="-1, 0, 0.5, 2" class = "sphx-glr-single-img"/></section>
+<section id="resolution-tuple">
+<h4><code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">(tuple)</span></code><a class="headerlink" href="#resolution-tuple" title="Link to this heading">#</a></h4>
+<p>Resolution scaling factors for each dimension of the density grid,
+by default <code class="docutils literal notranslate"><span class="pre">None</span></code>. Note on the example below that the unit doesn’t
+matter because <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> is a ratio and <code class="docutils literal notranslate"><span class="pre">decay</span></code> is an exponent,
+so only the relative factor between the dimensions is important.</p>
+<p>This argument can be used to handle anisotropy but also to produce
+ellipsoidal densities.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">0.5e-3</span><span class="p">)]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_cutoff_decay_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_004.png" srcset="../../../_images/sphx_glr_example_sampling_densities_004.png" alt="None, (1, 1), (1, 2), (0.001, 0.0005)" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="energy-based-density">
+<h3>Energy-based density<a class="headerlink" href="#energy-based-density" title="Link to this heading">#</a></h3>
+<p>A common intuition is to consider that the sampling density
+should be proportional to the k-space amplitude. It can be
+learned from existing datasets and used for new acquisitions.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a> <span class="o">=</span> <span class="n">bwdl</span><span class="o">.</span><span class="n">get_mri</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;T1&quot;</span><span class="p">)[:,</span> <span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">energy_density</span></a> <span class="o">=</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_energy_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a><span class="p">)</span>
+<span class="n">show_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">energy_density</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">,</span> <span class="n">log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_005.png" srcset="../../../_images/sphx_glr_example_sampling_densities_005.png" alt="example sampling densities" class = "sphx-glr-single-img"/><section id="dataset-np-ndarray">
+<h4><code class="docutils literal notranslate"><span class="pre">dataset</span> <span class="pre">(np.ndarray)</span></code><a class="headerlink" href="#dataset-np-ndarray" title="Link to this heading">#</a></h4>
+<p>The dataset from which to calculate the density
+based on its Fourier transform, with an expected
+shape (nb_volumes, dim_1, …, dim_N).
+An N-dimensional Fourier transform is then performed.</p>
+<p>In the example below, we show the resulting densities
+from different slices of a single volume for convenience.
+More relevant use cases would be to learn densities for
+different organs and/or contrasts.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_energy_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a><span class="o">=</span><span class="n">bwdl</span><span class="o">.</span><span class="n">get_mri</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;T1&quot;</span><span class="p">)[</span><span class="n">x</span> <span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">20</span><span class="p">])</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+    <span class="n">log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_006.png" srcset="../../../_images/sphx_glr_example_sampling_densities_006.png" alt="50, 100, 150" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="chauffert-s-density">
+<h3>Chauffert’s density<a class="headerlink" href="#chauffert-s-density" title="Link to this heading">#</a></h3>
+<p>This is a reproduction of the proposition from <a class="reference internal" href="#ccw13" id="id2"><span>[CCW13]</span></a>.
+A sampling density is derived from compressed sensing
+equations to maximize guarantees of exact image recovery
+for a specified sparse wavelet domain decomposition.</p>
+<p>This principle is valid for any linear transform but
+for convenience it was limited to wavelets as in the
+original implementation.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">chauffert_density</span></a> <span class="o">=</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_chauffert_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">wavelet_basis</span><span class="o">=</span><span class="s2">&quot;haar&quot;</span><span class="p">,</span>
+    <span class="n">nb_wavelet_scales</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">chauffert_density</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_007.png" srcset="../../../_images/sphx_glr_example_sampling_densities_007.png" alt="example sampling densities" class = "sphx-glr-single-img"/><section id="wavelet-basis-str">
+<h4><code class="docutils literal notranslate"><span class="pre">wavelet_basis</span> <span class="pre">(str)</span></code><a class="headerlink" href="#wavelet-basis-str" title="Link to this heading">#</a></h4>
+<p>The wavelet basis to use for wavelet decomposition, either
+as a built-in wavelet name from the PyWavelets package
+or as a custom <code class="docutils literal notranslate"><span class="pre">pywt.Wavelet</span></code> object.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;haar&quot;</span><span class="p">,</span> <span class="s2">&quot;rbio2.2&quot;</span><span class="p">,</span> <span class="s2">&quot;coif4&quot;</span><span class="p">,</span> <span class="s2">&quot;sym8&quot;</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_chauffert_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">wavelet_basis</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+    <span class="n">nb_wavelet_scales</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_008.png" srcset="../../../_images/sphx_glr_example_sampling_densities_008.png" alt="haar, rbio2.2, coif4, sym8" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/pywt/_multilevel.py:43: UserWarning: Level value of 3 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+</pre></div>
+</div>
+</section>
+<section id="nb-wavelet-scales-int">
+<h4><code class="docutils literal notranslate"><span class="pre">nb_wavelet_scales</span> <span class="pre">(int)</span></code><a class="headerlink" href="#nb-wavelet-scales-int" title="Link to this heading">#</a></h4>
+<p>The number of wavelet scales to use in decomposition.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">create_chauffert_density</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">,</span>
+    <span class="n">wavelet_basis</span><span class="o">=</span><span class="s2">&quot;haar&quot;</span><span class="p">,</span>
+    <span class="n">nb_wavelet_scales</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_densities</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span>
+    <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_009.png" srcset="../../../_images/sphx_glr_example_sampling_densities_009.png" alt="1, 2, 3, 4" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="custom-density">
+<h3>Custom density<a class="headerlink" href="#custom-density" title="Link to this heading">#</a></h3>
+<p>Any density can be defined and later used for sampling and
+trajectories.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Linear gradient</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.tile.html#numpy.tile" title="numpy.tile" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">tile</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">1</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="c1"># Square center</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="p">[</span>
+    <span class="mi">3</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span> <span class="p">:</span> <span class="mi">5</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="mi">3</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span> <span class="p">:</span> <span class="mi">5</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
+<span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># Outer circle</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.where.html#numpy.where" title="numpy.where" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">where</span></a><span class="p">(</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm" class="sphx-glr-backref-module-numpy-linalg sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.indices.html#numpy.indices" title="numpy.indices" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">indices</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">)</span> <span class="o">-</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">shape_2d</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="p">,</span>
+    <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Normalization</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">custom_density</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a> <span class="o">/</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.sum.html#numpy.sum" title="numpy.sum" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">sum</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="p">)</span>
+
+<span class="n">show_density</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">custom_density</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">figure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_010.png" srcset="../../../_images/sphx_glr_example_sampling_densities_010.png" alt="example sampling densities" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="sampling">
+<h2>Sampling<a class="headerlink" href="#sampling" title="Link to this heading">#</a></h2>
+<p>In this section we present random, pseudo-random and
+algorithm-based sampling methods. The examples are based
+on a few densities picked from the ones presented above.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Cutoff/Decay&quot;</span><span class="p">:</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cutoff_density</span></a><span class="p">,</span>
+    <span class="s2">&quot;Energy&quot;</span><span class="p">:</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">energy_density</span></a><span class="p">,</span>
+    <span class="s2">&quot;Chauffert&quot;</span><span class="p">:</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">chauffert_density</span></a><span class="p">,</span>
+    <span class="s2">&quot;Custom&quot;</span><span class="p">:</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">custom_density</span></a><span class="p">,</span>
+<span class="p">}</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+<span class="n">show_densities</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_011.png" srcset="../../../_images/sphx_glr_example_sampling_densities_011.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><section id="random-sampling">
+<h3>Random sampling<a class="headerlink" href="#random-sampling" title="Link to this heading">#</a></h3>
+<p>This sampling simply consists of weighted-random selection from the
+density grid locations.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">sample_from_density</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">)</span>
+<span class="n">show_locations</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_012.png" srcset="../../../_images/sphx_glr_example_sampling_densities_012.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/></section>
+<section id="lloyd-s-sampling">
+<h3>Lloyd’s sampling<a class="headerlink" href="#lloyd-s-sampling" title="Link to this heading">#</a></h3>
+<p>This sampling is based on a Voronoi/Dirichlet tesselation using Lloyd’s
+weighted KMeans algorithm. The implementation is based on
+<code class="docutils literal notranslate"><span class="pre">sklearn.cluster.KMeans</span></code> in 2D and <code class="docutils literal notranslate"><span class="pre">sklearn.cluster.BisectingKMeans</span></code>
+in 3D, mostly to reduce computation times in the most demanding cases.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">sample_from_density</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span><span class="p">)</span>
+<span class="n">show_locations</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_013.png" srcset="../../../_images/sphx_glr_example_sampling_densities_013.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="density-based-trajectories">
+<h2>Density-based trajectories<a class="headerlink" href="#density-based-trajectories" title="Link to this heading">#</a></h2>
+<p>In this section we present 2D and 3D trajectories based
+on arbitrary densities, and also sampling for some of them.</p>
+<section id="random-walks">
+<h3>Random walks<a class="headerlink" href="#random-walks" title="Link to this heading">#</a></h3>
+<p>This is an adaptation of the proposition from <a class="reference internal" href="#cha-14" id="id3"><span>[Cha+14]</span></a>.
+It creates a trajectory by walking randomly to neighboring points
+following a provided sampling density.</p>
+<p>This implementation is different from the original proposition:
+trajectories are continuous with a fixed length instead of
+making random jumps to other locations, and an option
+is provided to have pseudo-random walks to improve coverage.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_random_walk</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">][::</span><span class="mi">4</span><span class="p">,</span> <span class="p">::</span><span class="mi">4</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_014.png" srcset="../../../_images/sphx_glr_example_sampling_densities_014.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><p>The starting shot positions can be modified to follow Lloyd’s sampling
+method rather than the default random approach, resulting in more evenly
+spaced shots that still respect the prescribed density.
+Additional <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> can provided to set the arguments in
+<code class="docutils literal notranslate"><span class="pre">mrinufft.sample_from_density</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_random_walk</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">][::</span><span class="mi">4</span><span class="p">,</span> <span class="p">::</span><span class="mi">4</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_015.png" srcset="../../../_images/sphx_glr_example_sampling_densities_015.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><p>The random paths can be made into a smooth and continuous
+trajectory by oversampling the shots with cubic splines.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">oversample</span><span class="p">(</span>
+    <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_random_walk</span><span class="p">(</span>
+        <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">][::</span><span class="mi">4</span><span class="p">,</span> <span class="p">::</span><span class="mi">4</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span>
+    <span class="p">),</span>
+    <span class="mi">4</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_016.png" srcset="../../../_images/sphx_glr_example_sampling_densities_016.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/></section>
+<section id="travelling-salesman">
+<h3>Travelling Salesman<a class="headerlink" href="#travelling-salesman" title="Link to this heading">#</a></h3>
+<p>This is a reproduction of the work from <a class="reference internal" href="#cha-14" id="id4"><span>[Cha+14]</span></a>. The Travelling
+Salesman Problem (TSP) solution is obtained using the 2-opt method
+with a complexity in O(n²) in time and memory.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_travelling_salesman</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_017.png" srcset="../../../_images/sphx_glr_example_sampling_densities_017.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><p>It is possible to customize the sampling method using <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>
+to provide arguments to <code class="docutils literal notranslate"><span class="pre">mrinufft.sample_from_density</span></code>.
+For example, one can use Lloyd’s sampling method to create evenly
+spaced point distributions and obtain a more deterministic coverage.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_travelling_salesman</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">],</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_018.png" srcset="../../../_images/sphx_glr_example_sampling_densities_018.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><p>Similarly to random walks, the travelling paths can be smoothed
+by oversampling the shots with cubic splines. Another use case
+is to reduce the number of TSP points to reduce the computation load
+and then oversample up to the desired shot length.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">oversample</span><span class="p">(</span>
+    <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_travelling_salesman</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span><span class="p">),</span>
+    <span class="mi">4</span> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_019.png" srcset="../../../_images/sphx_glr_example_sampling_densities_019.png" alt="Cutoff/Decay, Energy, Chauffert, Custom" class = "sphx-glr-single-img"/><p>An option is provided to cluster the points before calling the TSP solver,
+reducing drastically the computation time.
+Clusters are chosen by Cartesian (<code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code>) or spherical
+(<code class="docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;phi&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;theta&quot;</span></code>) coordinate with up to two coordinates.
+Then the points can be sorted within each cluster in order to define a general
+shot direction as shown below.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a> <span class="o">=</span> <span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;phi&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">))</span>
+<span class="n">function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mn</span><span class="o">.</span><span class="n">initialize_2D_travelling_salesman</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Nc</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Ns</span></a><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">density</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">densities</span></a><span class="p">[</span><span class="s2">&quot;Custom&quot;</span><span class="p">],</span>
+    <span class="n">first_cluster_by</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">second_cluster_by</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lloyd&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">show_trajectories</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">arguments</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">one_shot</span></a><span class="p">,</span> <span class="n">subfig_size</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">subfigure_size</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_example_sampling_densities_020.png" srcset="../../../_images/sphx_glr_example_sampling_densities_020.png" alt="(None, None, None), ('y', None, 'x'), ('phi', None, 'r'), ('y', 'x', 'r')" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="ccw13" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">CCW13</a><span class="fn-bracket">]</span></span>
+<p>Chauffert, Nicolas, Philippe Ciuciu, and Pierre Weiss.
+“Variable density compressed sensing in MRI.
+Theoretical vs heuristic sampling strategies.”
+In 2013 IEEE 10th International Symposium on Biomedical Imaging,
+pp. 298-301. IEEE, 2013.</p>
+</div>
+<div class="citation" id="cha-14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Cha+14<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>Chauffert, Nicolas, Philippe Ciuciu,
+Jonas Kahn, and Pierre Weiss.
+“Variable density sampling with continuous trajectories.”
+SIAM Journal on Imaging Sciences 7, no. 4 (2014): 1962-1992.</p>
+</div>
+<div class="citation" id="cha-22" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Cha+22</a><span class="fn-bracket">]</span></span>
+<p>Chaithya, G. R., Pierre Weiss, Guillaume Daval-Frérot,
+Aurélien Massire, Alexandre Vignaud, and Philippe Ciuciu.
+“Optimizing full 3D SPARKLING trajectories for high-resolution
+magnetic resonance imaging.”
+IEEE Transactions on Medical Imaging 41, no. 8 (2022): 2105-2117.</p>
+</div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 16.587 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-trajectories-example-sampling-densities-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/trajectories/example_sampling_densities.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo2.svg" style="width: 150px;" />
+</a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/59f96219ada2cfb26019734a073a27df/example_sampling_densities.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">example_sampling_densities.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/aee427a2d68cfe3b541379769c0fdce5/example_sampling_densities.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">example_sampling_densities.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/fc0d75f5bcc37fab39983daa862f1c70/example_sampling_densities.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">example_sampling_densities.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="example_learn_samples_multires.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Learning sampling pattern with decimation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="example_display_config.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Trajectory display configuration</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#script-options">Script options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#densities">Densities</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-decay-density">Cutoff/decay density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-float"><code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#decay-float"><code class="docutils literal notranslate"><span class="pre">decay</span> <span class="pre">(float)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#resolution-tuple"><code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">(tuple)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#energy-based-density">Energy-based density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-np-ndarray"><code class="docutils literal notranslate"><span class="pre">dataset</span> <span class="pre">(np.ndarray)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chauffert-s-density">Chauffert’s density</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#wavelet-basis-str"><code class="docutils literal notranslate"><span class="pre">wavelet_basis</span> <span class="pre">(str)</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-wavelet-scales-int"><code class="docutils literal notranslate"><span class="pre">nb_wavelet_scales</span> <span class="pre">(int)</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-density">Custom density</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling">Sampling</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-sampling">Random sampling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lloyd-s-sampling">Lloyd’s sampling</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#density-based-trajectories">Density-based trajectories</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-walks">Random walks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#travelling-salesman">Travelling Salesman</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By MRI-NUFFT Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022, MRI-NUFFT Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

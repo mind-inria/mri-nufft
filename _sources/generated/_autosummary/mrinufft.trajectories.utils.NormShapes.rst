@@ -43,3 +43,8 @@ NormShapes
       ~NormShapes.OCTAHEDRON
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.NormShapes:
+
+   .. minigallery:: mrinufft.trajectories.utils.NormShapes
+      :add-heading:

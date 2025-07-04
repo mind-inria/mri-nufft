@@ -55,3 +55,8 @@ MRIStackedNUFFTGPU
       ~MRIStackedNUFFTGPU.uses_sense
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.stacked.MRIStackedNUFFTGPU:
+
+   .. minigallery:: mrinufft.operators.stacked.MRIStackedNUFFTGPU
+      :add-heading:

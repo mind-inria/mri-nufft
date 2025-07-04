@@ -77,3 +77,8 @@ VDSorder
       ~VDSorder.TOP_DOWN
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.VDSorder:
+
+   .. minigallery:: mrinufft.trajectories.utils.VDSorder
+      :add-heading:

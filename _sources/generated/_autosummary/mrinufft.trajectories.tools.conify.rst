@@ -5,7 +5,5 @@ conify
 
 .. autofunction:: conify
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.conify:
-
 .. minigallery:: mrinufft.trajectories.tools.conify
-   :add-heading:
+   :add-heading: Example using ``conify``:

@@ -5,7 +5,5 @@ initialize\_2D\_fibonacci\_spiral
 
 .. autofunction:: initialize_2D_fibonacci_spiral
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral:
-
 .. minigallery:: mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral
-   :add-heading:
+   :add-heading: Example using ``initialize_2D_fibonacci_spiral``:

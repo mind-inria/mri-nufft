@@ -5,7 +5,5 @@ stack\_spherically
 
 .. autofunction:: stack_spherically
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.stack_spherically:
-
 .. minigallery:: mrinufft.trajectories.tools.stack_spherically
-   :add-heading:
+   :add-heading: Example using ``stack_spherically``:

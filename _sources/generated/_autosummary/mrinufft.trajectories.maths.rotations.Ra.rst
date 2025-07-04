@@ -5,7 +5,5 @@ Ra
 
 .. autofunction:: Ra
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.rotations.Ra:
-
 .. minigallery:: mrinufft.trajectories.maths.rotations.Ra
-   :add-heading:
+   :add-heading: Example using ``Ra``:

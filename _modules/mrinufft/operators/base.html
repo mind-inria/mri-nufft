@@ -174,18 +174,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
 
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_2D_trajectories.html">2D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_3D_trajectories.html">3D Trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_gif_2D.html">Animated 2D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_gif_3D.html">Animated 3D trajectories</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_readme.html">Minimal example script</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_sampling_densities.html">Sampling densities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_stacked.html">Stacked NUFFT operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_subspace.html">Subspace NUFFT Operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_display_config.html">Trajectory display configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/autoexamples/example_trajectory_tools.html">Trajectory tools</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
@@ -194,6 +182,24 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
 </details></li>
 </ul>
@@ -1040,14 +1046,20 @@ document.write(`
 <span class="sd">        ----------</span>
 <span class="sd">        method: str or callable or array or dict or bool</span>
 <span class="sd">            The method to use to compute the density compensation.</span>
-<span class="sd">            If a string, the method should be registered in the density registry.</span>
-<span class="sd">            If a callable, it should take the samples and the shape as input.</span>
-<span class="sd">            If a dict, it should have a key &#39;name&#39;, to determine which method to use.</span>
+
+<span class="sd">            - If a string, the method should be registered in the density registry.</span>
+<span class="sd">            - If a callable, it should take the samples and the shape as input.</span>
+<span class="sd">            - If a dict, it should have a key &#39;name&#39;, to determine which method to use.</span>
 <span class="sd">            other items will be used as kwargs.</span>
-<span class="sd">            If an array, it should be of shape (Nsamples,) and will be used as is.</span>
-<span class="sd">            If `True`, the method `pipe` is chosen as default estimation method,</span>
-<span class="sd">            if `backend` is `tensorflow`, `gpunufft` or `torchkbnufft-cpu`</span>
-<span class="sd">                or `torchkbnufft-gpu`.</span>
+<span class="sd">            - If an array, it should be of shape (Nsamples,) and will be used as is.</span>
+<span class="sd">            - If `True`, the method `pipe` is chosen as default estimation method.</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The &quot;pipe&quot; method is only available for the following backends:</span>
+<span class="sd">        `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu`</span>
+<span class="sd">        and `torchkbnufft-gpu`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">CUPY_AVAILABLE</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">cp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>

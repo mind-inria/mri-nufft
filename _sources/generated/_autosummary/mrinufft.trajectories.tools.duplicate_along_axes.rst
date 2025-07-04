@@ -5,7 +5,5 @@ duplicate\_along\_axes
 
 .. autofunction:: duplicate_along_axes
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.duplicate_along_axes:
-
 .. minigallery:: mrinufft.trajectories.tools.duplicate_along_axes
-   :add-heading:
+   :add-heading: Example using ``duplicate_along_axes``:

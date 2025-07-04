@@ -55,3 +55,8 @@ FourierOperatorCPU
       ~FourierOperatorCPU.available
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.base.FourierOperatorCPU:
+
+   .. minigallery:: mrinufft.operators.base.FourierOperatorCPU
+      :add-heading:

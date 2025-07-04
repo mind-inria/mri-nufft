@@ -42,3 +42,8 @@ Spirals
       ~Spirals.LITHUUS
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.Spirals:
+
+   .. minigallery:: mrinufft.trajectories.utils.Spirals
+      :add-heading:

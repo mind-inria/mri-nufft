@@ -5,7 +5,5 @@ generate\_fibonacci\_circle
 
 .. autofunction:: generate_fibonacci_circle
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle:
-
 .. minigallery:: mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle
-   :add-heading:
+   :add-heading: Example using ``generate_fibonacci_circle``:

@@ -5,7 +5,5 @@ nifti\_affine
 
 .. autofunction:: nifti_affine
 
-..  _sphx_glr_backref_mrinufft.io.utils.nifti_affine:
-
 .. minigallery:: mrinufft.io.utils.nifti_affine
-   :add-heading:
+   :add-heading: Example using ``nifti_affine``:

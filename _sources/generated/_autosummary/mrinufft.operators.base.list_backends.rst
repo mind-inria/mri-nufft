@@ -5,7 +5,5 @@ list\_backends
 
 .. autofunction:: list_backends
 
-..  _sphx_glr_backref_mrinufft.operators.base.list_backends:
-
 .. minigallery:: mrinufft.operators.base.list_backends
-   :add-heading:
+   :add-heading: Example using ``list_backends``:

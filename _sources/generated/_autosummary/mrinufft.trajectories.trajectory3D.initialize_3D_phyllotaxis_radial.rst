@@ -5,7 +5,5 @@ initialize\_3D\_phyllotaxis\_radial
 
 .. autofunction:: initialize_3D_phyllotaxis_radial
 
-..  _sphx_glr_backref_mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial:
-
 .. minigallery:: mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial
-   :add-heading:
+   :add-heading: Example using ``initialize_3D_phyllotaxis_radial``:

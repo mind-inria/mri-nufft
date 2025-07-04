@@ -5,7 +5,5 @@ normalize\_weights
 
 .. autofunction:: normalize_weights
 
-..  _sphx_glr_backref_mrinufft.density.utils.normalize_weights:
-
 .. minigallery:: mrinufft.density.utils.normalize_weights
-   :add-heading:
+   :add-heading: Example using ``normalize_weights``:

@@ -5,7 +5,5 @@ display\_gradients
 
 .. autofunction:: display_gradients
 
-..  _sphx_glr_backref_mrinufft.trajectories.display.display_gradients:
-
 .. minigallery:: mrinufft.trajectories.display.display_gradients
-   :add-heading:
+   :add-heading: Example using ``display_gradients``:

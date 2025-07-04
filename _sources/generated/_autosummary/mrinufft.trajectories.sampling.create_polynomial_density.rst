@@ -5,7 +5,5 @@ create\_polynomial\_density
 
 .. autofunction:: create_polynomial_density
 
-..  _sphx_glr_backref_mrinufft.trajectories.sampling.create_polynomial_density:
-
 .. minigallery:: mrinufft.trajectories.sampling.create_polynomial_density
-   :add-heading:
+   :add-heading: Example using ``create_polynomial_density``:

@@ -5,7 +5,5 @@ R2D
 
 .. autofunction:: R2D
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.rotations.R2D:
-
 .. minigallery:: mrinufft.trajectories.maths.rotations.R2D
-   :add-heading:
+   :add-heading: Example using ``R2D``:

@@ -5,7 +5,5 @@ fse\_simulation
 
 .. autofunction:: fse_simulation
 
-..  _sphx_glr_backref_mrinufft.extras.sim.fse_simulation:
-
 .. minigallery:: mrinufft.extras.sim.fse_simulation
-   :add-heading:
+   :add-heading: Example using ``fse_simulation``:

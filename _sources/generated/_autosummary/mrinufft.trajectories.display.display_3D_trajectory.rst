@@ -5,7 +5,5 @@ display\_3D\_trajectory
 
 .. autofunction:: display_3D_trajectory
 
-..  _sphx_glr_backref_mrinufft.trajectories.display.display_3D_trajectory:
-
 .. minigallery:: mrinufft.trajectories.display.display_3D_trajectory
-   :add-heading:
+   :add-heading: Example using ``display_3D_trajectory``:

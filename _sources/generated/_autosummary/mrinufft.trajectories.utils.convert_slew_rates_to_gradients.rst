@@ -5,7 +5,5 @@ convert\_slew\_rates\_to\_gradients
 
 .. autofunction:: convert_slew_rates_to_gradients
 
-..  _sphx_glr_backref_mrinufft.trajectories.utils.convert_slew_rates_to_gradients:
-
 .. minigallery:: mrinufft.trajectories.utils.convert_slew_rates_to_gradients
-   :add-heading:
+   :add-heading: Example using ``convert_slew_rates_to_gradients``:

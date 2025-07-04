@@ -5,7 +5,5 @@ oversample
 
 .. autofunction:: oversample
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.oversample:
-
 .. minigallery:: mrinufft.trajectories.tools.oversample
-   :add-heading:
+   :add-heading: Example using ``oversample``:

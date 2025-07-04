@@ -5,7 +5,5 @@ traj3d2stacked
 
 .. autofunction:: traj3d2stacked
 
-..  _sphx_glr_backref_mrinufft.operators.stacked.traj3d2stacked:
-
 .. minigallery:: mrinufft.operators.stacked.traj3d2stacked
-   :add-heading:
+   :add-heading: Example using ``traj3d2stacked``:

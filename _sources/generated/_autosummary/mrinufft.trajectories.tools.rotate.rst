@@ -5,7 +5,5 @@ rotate
 
 .. autofunction:: rotate
 
-..  _sphx_glr_backref_mrinufft.trajectories.tools.rotate:
-
 .. minigallery:: mrinufft.trajectories.tools.rotate
-   :add-heading:
+   :add-heading: Example using ``rotate``:

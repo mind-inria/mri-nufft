@@ -59,3 +59,8 @@ Gammas
       ~Gammas.X129
    
    
+
+   .. _sphx_glr_backref_mrinufft.trajectories.utils.Gammas:
+
+   .. minigallery:: mrinufft.trajectories.utils.Gammas
+      :add-heading:

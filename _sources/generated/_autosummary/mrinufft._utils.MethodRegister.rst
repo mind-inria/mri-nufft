@@ -29,3 +29,8 @@ MethodRegister
       ~MethodRegister.registry
    
    
+
+   .. _sphx_glr_backref_mrinufft._utils.MethodRegister:
+
+   .. minigallery:: mrinufft._utils.MethodRegister
+      :add-heading:

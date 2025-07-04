@@ -5,7 +5,5 @@ generate\_fibonacci\_sphere
 
 .. autofunction:: generate_fibonacci_sphere
 
-..  _sphx_glr_backref_mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere:
-
 .. minigallery:: mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere
-   :add-heading:
+   :add-heading: Example using ``generate_fibonacci_sphere``:

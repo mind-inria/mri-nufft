@@ -55,3 +55,8 @@ MRISubspace
       ~MRISubspace.available
    
    
+
+   .. _sphx_glr_backref_mrinufft.operators.subspace.MRISubspace:
+
+   .. minigallery:: mrinufft.operators.subspace.MRISubspace
+      :add-heading:

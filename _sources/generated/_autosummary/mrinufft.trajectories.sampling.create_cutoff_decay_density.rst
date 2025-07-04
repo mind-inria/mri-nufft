@@ -5,7 +5,5 @@ create\_cutoff\_decay\_density
 
 .. autofunction:: create_cutoff_decay_density
 
-..  _sphx_glr_backref_mrinufft.trajectories.sampling.create_cutoff_decay_density:
-
 .. minigallery:: mrinufft.trajectories.sampling.create_cutoff_decay_density
-   :add-heading:
+   :add-heading: Example using ``create_cutoff_decay_density``:
