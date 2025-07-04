@@ -1,6 +1,6 @@
 """Utility functions in general."""
 
-from enum import Enum, EnumMeta
+from enum import Enum, EnumMeta, _is_dunder
 from numbers import Real
 from typing import Any, Literal
 
@@ -32,9 +32,21 @@ class CaseInsensitiveEnumMeta(EnumMeta):
         """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
         return super().__getitem__(name.upper())
 
-    def __getattr__(self, name: str) -> Any:  # noqa ANN401
-        """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
-        return super().__getattr__(name.upper())
+    def __getattr__(cls, name):
+        """
+        Return the enum member matching `name`
+
+        We use __getattr__ instead of descriptors or inserting into the enum
+        class' __dict__ in order to support `name` and `value` being both
+        properties for enum members (which live in the class' __dict__) and
+        enum members themselves.
+        """
+        if _is_dunder(name):
+            raise AttributeError(name)
+        try:
+            return cls._member_map_[name.upper()]
+        except KeyError:
+            raise AttributeError(name) from None
 
 
 class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
