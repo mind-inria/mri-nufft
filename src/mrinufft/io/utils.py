@@ -1,10 +1,22 @@
 """Module containing utility functions for IO in MRI NUFFT."""
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
+from ..trajectories.utils import (
+    convert_trajectory_to_gradients,
+    Gammas,
+    DEFAULT_SMAX,
+    DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
+    KMAX,
+)
+from ..trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
 
-def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
+def add_phase_to_kspace_with_shifts(
+    kspace_data: NDArray, kspace_loc: NDArray, normalized_shifts: NDArray
+):
     """
     Add phase shifts to k-space data.
 
@@ -38,7 +50,7 @@ def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
     return kspace_data * phase
 
 
-def siemens_quat_to_rot_mat(quat, return_det=False):
+def siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
 
@@ -134,7 +146,7 @@ def nifti_affine(twixObj):
     return full_mat
 
 
-def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
+def remove_extra_kspace_samples(kspace_data: NDArray, num_samples_per_shot: int):
     """Remove extra samples from k-space data.
 
     This function is useful when the k-space data has extra samples
@@ -159,3 +171,108 @@ def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
     if n_extra_samples > 0:
         kspace_data = kspace_data[..., :-n_extra_samples]
     return kspace_data
+
+
+def prepare_trajectory_for_seq(
+    trajectory: NDArray,
+    fov: tuple[float, float, float],
+    img_size: tuple[int, int, int],
+    norm_factor: float = KMAX,
+    pregrad: str = "prephase",
+    postgrad: str = "slowdown_to_edge",
+    gamma=Gammas.HYDROGEN,
+    raster_time=DEFAULT_RASTER_TIME,
+    gmax=DEFAULT_GMAX,
+    smax=DEFAULT_SMAX,
+):
+    """Prepare gradients from trajectory.
+
+    This function converts a k-space trajectory into full gradients with pre-
+    and post-gradients.
+
+
+    Parameters
+    ----------
+    trajectory : np.ndarray
+        The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
+        where the last dimension corresponds to the x, y, and z coordinates in k-space.
+    norm_factor : float
+        The normalization factor for the trajectory. (default is 0.5)
+    fov : tuple[float, float, float]
+        The field of view in the x, y, and z dimensions, in meters.
+    img_size : tuple[int, int, int]
+        The image size in the x, y, and z dimensions, in pixels.
+    pregrad : str, optional
+        The type of pre-gradient to apply. Only "prephase" is supported currently.
+    postgrad : str, optional
+        The type of post-gradient to apply. Defaults to "slowdown_to_edge".
+
+    Returns
+    -------
+    np.ndarray
+        The full gradients as a numpy array of shape (n_shots, n_samples, 3),
+        where the last dimension corresponds to the x, y, and z gradient amplitudes.
+    int
+        The number of samples to skip at the start of the trajectory.
+    int
+        The number of samples to skip at the end of the trajectory.
+
+
+    See Also
+    --------
+    mrinufft.io.pulseq.pulseq_gre_3D: to create a Pulseq 3D-GRE sequence
+    with arbitrary gradient waveform designed
+
+    """
+    # from #276 : We need to prewind the gradients to the first point of the
+    # trajectory, and rewind them to the edge of k-space.
+
+    # We will move from
+    # init_pos -[prewind]-> start_pos -> trajectory -> end_pos -[postgrad]-> final_pos
+
+    grads, start_pos, end_pos = convert_trajectory_to_gradients(
+        trajectory,
+        norm_factor=0.5,
+        resolution=fov,
+        raster_time=raster_time,
+        gamma=gamma,
+        get_final_positions=True,
+    )
+
+    # prewind the gradients to their first point:
+    if pregrad == "prephase":
+        init_pos = np.zeros_like(start_pos)
+    else:
+        raise ValueError("Only 'prephase' is supported for pregrad.")
+    start_grads = get_gradient_amplitudes_to_travel_for_set_time(
+        kspace_end_loc=start_pos,
+        kspace_start_loc=init_pos,
+        end_gradients=grads[:, 0, :],
+        gamma=gamma,
+        raster_time=raster_time,
+        gmax=gmax,
+        smax=smax,
+    )
+    skip_start = start_grads.shape[1]
+
+    final_pos = np.zeros_like(end_pos)
+    if postgrad == "slowdown_to_edge":
+        # Set the edge location to [Kmax, 0,0], to prepare for gradient spoiling.
+        final_pos[..., 0] = img_size[0] * fov[0] / 2
+    else:
+        raise ValueError("Only 'slowdown_to_edge' is supported for postgrad.")
+
+    end_grads = get_gradient_amplitudes_to_travel_for_set_time(
+        kspace_start_loc=end_pos,
+        kspace_end_loc=final_pos,
+        start_gradients=grads[:, -1, :],
+        gamma=gamma,
+        raster_time=raster_time,
+        gmax=gmax,
+        smax=smax,
+    )
+
+    skip_end = end_grads.shape[1]
+    full_gradients = np.hstack([start_grads, grads, end_grads])
+
+    return full_gradients, skip_start, skip_end
