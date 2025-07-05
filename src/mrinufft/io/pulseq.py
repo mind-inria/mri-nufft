@@ -12,9 +12,10 @@ import numpy as np
 import pypulseq as pp
 from numpy.typing import NDArray
 from .utils import prepare_trajectory_for_seq
+from mrinufft.trajectories.utils import KMAX
 
 
-def read_pulseq_traj(filename, traj_delay=0.0, grad_offset=0.0):
+def read_pulseq_traj(seq, traj_delay=0.0, grad_offset=0.0):
     """Extract k-space trajectory from a Pulseq sequence file.
 
     The sequence should be a valid Pulseq `.seq` file, with arbitrary gradient
@@ -24,8 +25,7 @@ def read_pulseq_traj(filename, traj_delay=0.0, grad_offset=0.0):
 
     Parameters
     ----------
-    filename : str
-        Path to the Pulseq `.seq` file.
+    sequence : pulseq Sequence, or Path to the Pulseq `.seq` file.
 
     Returns
     -------
@@ -36,28 +36,36 @@ def read_pulseq_traj(filename, traj_delay=0.0, grad_offset=0.0):
         where the last dimension corresponds to the x, y, and z coordinates in k-space.
 
     """
-    seq = pp.Sequence()
-    seq.read(filename)
+    if not isinstance(seq, pp.Sequence):
+        filename = seq
+        seq = pp.Sequence()
+        seq.read(filename)
 
-    kspace_adc, kspace, t_exc, t_refocus, t_adc = seq.calculate_kspace(
-        traj_delay, grad_offset
-    )
+    kspace_adc, _, t_exc, t_refocus, t_adc = seq.calculate_kspace()
 
+    if not t_adc:
+        raise ValueError(
+            "The sequence does not contain any ADC events. "
+            "Please ensure that the sequence has ADC events defined."
+        )
     # split t_adc with t_exc and t_refocus, the index are then used to split kspace_adc
-
-    t_splits = sorted(np.concatenate([t_exc, t_refocus]))
+    FOV = seq.get_definition("FOV")
+    t_splits = np.sort(np.concatenate([t_exc, t_refocus]))
     idx_prev = 0
     kspace_shots = []
     for t in t_splits:
         idx_next = np.searchsorted(t_adc, t, side="left")
         if idx_next == idx_prev:
             continue
-        if idx_next == len(kspace_adc) and t > t_adc[-1]:  # last useful point
+        kspace_shots.append(kspace_adc[:, idx_prev:idx_next].T)
+        if idx_next == kspace_adc.shape[1] and t > t_adc[-1]:  # last useful point
             break
-        kspace_shots.append(kspace_adc[idx_prev:idx_next, :])
         idx_prev = idx_next
-    kspace_shots = np.asarray(kspace_shots)
-    return kspace_shots
+    if idx_next < kspace_adc.shape[1]:
+        kspace_shots.append(kspace_adc[:, idx_next:].T)  # add remaining gradients.
+    # convert to KMAX standard.
+    kspace_shots = np.ascontiguousarray(kspace_shots) * KMAX * 2 * np.asarray(FOV)
+    return seq.definitions, kspace_shots
 
 
 def _check_timings(seq):
@@ -69,7 +77,7 @@ def _check_timings(seq):
         warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
 
 
-def gre_3D(
+def pulseq_gre_3D(
     trajectory: NDArray,
     fov: tuple[float, float, float],
     img_size: tuple[int, int, int],
@@ -83,9 +91,6 @@ def gre_3D(
     osf: int = 1,
 ) -> pp.Sequence:
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.
-
-    The sequence is designed to
-    The
 
     Parameters
     ----------
@@ -138,6 +143,12 @@ def gre_3D(
     TE = TE / 1000.0  # convert to seconds
     seq = pp.Sequence(system=system)
 
+    seq.set_definition("FOV", fov)
+    seq.set_definition("ImgSize", img_size)
+    seq.set_definition("TR", TR)
+    seq.set_definition("TE", TE)
+    seq.set_definition("FA", FA)
+
     if rf_pulse is None and FA is not None:
         rf_pulse = pp.make_block_pulse(flip_angle=FA, system=system, use="excitation")
     elif rf_pulse is not None and FA is not None:
@@ -163,6 +174,7 @@ def gre_3D(
         pregrad="prephase",
         postgrad="slowdown_to_edge",
     )
+    full_grads = full_grads * system.gamma  # convert to rad/s/m
     traj_length = full_grads.shape[1] - skip_start - skip_end + 1
     shot_duration = system.grad_raster_time * traj_length  # in seconds
     adc = pp.make_adc(
@@ -198,15 +210,18 @@ def gre_3D(
         adc.phase_offset = rf_phase / 180 * np.pi
         seq.add_block(rf_pulse)  # RF pulse
         seq.add_block(delay_before_grad)  # delay to sync TE
+        # Add the gradient waveform, the first/last points are set to 0
+        # to avoid accumulating offsets between shots
+        # https://github.com/imr-framework/pypulseq/discussions/175
         seq.add_block(
             *[
                 pp.make_arbitrary_grad(
-                    channel=c, waveform=grad_xyz[:, i], system=system
+                    channel=c, waveform=grad_xyz[:, i], first=0, last=0, system=system
                 )
                 for i, c in enumerate("xyz")
             ],
             adc,
-        )  # pause for tuning echo time
+        )
         seq.add_block(spoiler, delay_end_TR)
 
     _check_timings(seq)
@@ -236,6 +251,5 @@ def gre_2D(trajectory, TR, TE, FA, pulse, system=pp.Opts.default):
     -------
     pp.Sequence
         A Pulseq sequence object with the specified arbitrary gradient waveform.
-
     """
     ...
