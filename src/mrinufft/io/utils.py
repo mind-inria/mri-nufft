@@ -187,6 +187,10 @@ def prepare_trajectory_for_seq(
 ):
     """Prepare gradients from trajectory.
 
+    This function converts a k-space trajectory into full gradients with pre-
+    and post-gradients.
+
+
     Parameters
     ----------
     trajectory : np.ndarray
@@ -199,7 +203,7 @@ def prepare_trajectory_for_seq(
     img_size : tuple[int, int, int]
         The image size in the x, y, and z dimensions, in pixels.
     pregrad : str, optional
-        The type of pre-gradient to apply. ONly "prephase" is supported currently.
+        The type of pre-gradient to apply. Only "prephase" is supported currently.
     postgrad : str, optional
         The type of post-gradient to apply. Defaults to "slowdown_to_edge".
 
@@ -212,6 +216,13 @@ def prepare_trajectory_for_seq(
         The number of samples to skip at the start of the trajectory.
     int
         The number of samples to skip at the end of the trajectory.
+
+
+    See Also
+    --------
+    mrinufft.io.pulseq.pulseq_gre_3D: to create a Pulseq 3D-GRE sequence
+    with arbitrary gradient waveform designed
+
     """
     # from #276 : We need to prewind the gradients to the first point of the
     # trajectory, and rewind them to the edge of k-space.
@@ -247,7 +258,7 @@ def prepare_trajectory_for_seq(
     final_pos = np.zeros_like(end_pos)
     if postgrad == "slowdown_to_edge":
         # Set the edge location to [Kmax, 0,0], to prepare for gradient spoiling.
-        final_pos[..., 0] = img_size[0] / fov[0] / 2
+        final_pos[..., 0] = img_size[0] * fov[0] / 2
     else:
         raise ValueError("Only 'slowdown_to_edge' is supported for postgrad.")
 

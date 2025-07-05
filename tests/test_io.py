@@ -1,7 +1,13 @@
 """Test the trajectories io module."""
 
 import numpy as np
-from mrinufft.io import read_trajectory, write_trajectory
+from mrinufft.io import (
+    read_trajectory,
+    write_trajectory,
+    pulseq_gre_3D,
+    read_pulseq_traj,
+)
+
 from mrinufft.io.utils import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
 from mrinufft.trajectories.utils import (
@@ -178,3 +184,21 @@ def test_add_shift(kspace_loc, shape):
 
     phase = np.exp(-2 * np.pi * 1j * np.sum(kspace_loc * shifts, axis=-1))
     np.testing.assert_almost_equal(shifted_data / phase, kspace_data, decimal=5)
+
+
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[CasesTrajectories.case_random3D],
+)
+def test_pulseq_write_read(kspace_loc, FOV, img_size):
+    """Test the Pulseq write and read functions."""
+
+    kspace_loc = kspace_loc.astype(np.float32)
+
+    seq = pulseq_gre_3D(
+        trajectory=kspace_loc, fov=FOV, img_size=img_size, TR=1000, TE=100, FA=90
+    )
+
+    _, read_kspace = read_pulseq_traj(seq)
+
+    np.testing.assert_almost_equal(read_kspace, kspace_loc, decimal=4)
