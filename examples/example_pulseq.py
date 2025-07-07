@@ -44,7 +44,7 @@ plt.plot(grads[0])
 
 # %%
 
-# Creat a 3D GRE sequence with the trajectory:
+# Create a 3D GRE sequence with the trajectory:
 
 seq = pulseq_gre_3D(traj[:3], fov=FOV, img_size=img_size, TR=TR, TE=TE, FA=FA)
 
