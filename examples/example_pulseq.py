@@ -14,7 +14,7 @@ from mrinufft.trajectories import initialize_2D_spiral, stack
 import matplotlib.pyplot as plt
 
 # %%
-# Some Constant values
+# Defining the sequence parameters like repetition time (TR), echo time (TE), flip angle (FA), field-of-view (FOV) and image matrix size.
 
 TR = 100  # ms
 TE = 50  # ms
@@ -44,7 +44,7 @@ plt.plot(grads[0])
 
 # %%
 
-# Creat a 3D GRE sequence with the trajectory:
+# Create a 3D GRE sequence with the trajectory:
 
 seq = pulseq_gre_3D(traj[:3], fov=FOV, img_size=img_size, TR=TR, TE=TE, FA=FA)
 
