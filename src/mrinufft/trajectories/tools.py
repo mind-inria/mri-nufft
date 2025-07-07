@@ -1,6 +1,6 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -379,10 +379,10 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
 
 
 def get_gradient_times_to_travel(
-    kspace_end_loc: NDArray | None = None,
-    kspace_start_loc: NDArray | None = None,
-    end_gradients: NDArray | None = None,
-    start_gradients: NDArray | None = None,
+    kspace_end_loc: Optional[NDArray] = None,
+    kspace_start_loc: Optional[NDArray] = None,
+    end_gradients: Optional[NDArray] = None,
+    start_gradients: Optional[NDArray] = None,
     gamma: float = Gammas.Hydrogen,
     raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
@@ -474,10 +474,10 @@ def get_gradient_times_to_travel(
 
 def get_gradient_amplitudes_to_travel_for_set_time(
     kspace_end_loc: NDArray,
-    kspace_start_loc: NDArray | None = None,
-    end_gradients: NDArray | None = None,
-    start_gradients: NDArray | None = None,
-    nb_raster_points: int | None = None,
+    kspace_start_loc: Optional[NDArray] = None,
+    end_gradients: Optional[NDArray] = None,
+    start_gradients: Optional[NDArray] = None,
+    nb_raster_points: Optional[int] = None,
     gamma: float = Gammas.Hydrogen,
     raster_time: float = DEFAULT_RASTER_TIME,
     gmax: float = DEFAULT_GMAX,
