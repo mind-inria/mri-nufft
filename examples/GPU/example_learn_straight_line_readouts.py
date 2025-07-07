@@ -1,5 +1,5 @@
 # %%
-"""
+r"""
 ===================================
 Learn Straight line readout pattern
 ===================================
@@ -9,8 +9,14 @@ In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
 straight line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
 The image resolution is kept small to reduce computation time.
 
-.. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
+.. warning:: This example only showcases the autodiff capabilities, the learned
+    sampling pattern is not scanner compliant as the scanner gradients required
+    to implement it violate the hardware constraints. In practice, a projection
+    :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set
+    :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the
+    proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the
+    authors if they want to use it.
+
 """
 
 # %%
@@ -19,10 +25,10 @@ The image resolution is kept small to reduce computation time.
 #
 #    !pip install mri-nufft[gpunufft]
 
-
 # %%
 # Imports
 # -------
+import os
 import time
 import joblib
 
@@ -35,6 +41,7 @@ from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 # %%
 # Setup a simple class to learn trajectory
@@ -55,8 +62,12 @@ class Model(torch.nn.Module):
         self.central_points = torch.nn.Parameter(
             data=torch.stack(
                 torch.meshgrid(
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
+                    torch.linspace(
+                        -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                    ),
+                    torch.linspace(
+                        -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                    ),
                     indexing="ij",
                 ),
                 axis=-1,
@@ -65,14 +76,17 @@ class Model(torch.nn.Module):
         )
         self.non_center_points = torch.nn.Parameter(
             data=torch.Tensor(
-                np.random.random((num_shots - self.central_points.shape[0], 2)) - 0.5
+                np.random.random((num_shots - self.central_points.shape[0], 2)).astype(
+                    np.float32
+                )
+                - 0.5
             ),
             requires_grad=True,
         )
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
-            )
+            ).astype(np.float32)
             - 0.5,
             shape=img_size,
             density=True,
@@ -127,18 +141,18 @@ def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
     axs[0].axis("off")
     axs[0].set_title("MR Image")
     if traj.shape[-1] == 3:
-        if i is not None and i > 50:
+        if i is not None and i > 20:
             axs[1].scatter(*traj.T[1:3, 0], s=10, color="blue")
         else:
             fig_kwargs = {}
             plt_kwargs = {"s": 1, "alpha": 0.2}
             if i is not None:
                 fig_kwargs["azim"], fig_kwargs["elev"] = (
-                    i / 50 * 60 - 60,
-                    30 - i / 50 * 30,
+                    i / 25 * 60 - 60,
+                    30 - i / 25 * 30,
                 )
-                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 50
-                plt_kwargs["s"] = 1 + 9 * i / 50
+                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 20
+                plt_kwargs["s"] = 1 + 9 * i / 20
             axs[1].remove()
             axs[1] = fig.add_subplot(*fig_grid, 2, projection="3d", **fig_kwargs)
             for shot in traj:
@@ -182,7 +196,7 @@ plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon)
 losses = []
 image_files = []
 model.train()
-with tqdm(range(100), unit="steps") as tqdms:
+with tqdm(range(40), unit="steps") as tqdms:
     for i in tqdms:
         out = model(mri_3D)
         loss = torch.nn.functional.mse_loss(out, mri_3D[None])

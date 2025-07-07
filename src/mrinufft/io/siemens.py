@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from .utils import siemens_quat_to_rot_mat
+from .utils import siemens_quat_to_rot_mat, nifti_affine
 
 
 def read_siemens_rawdat(
@@ -42,6 +42,7 @@ def read_siemens_rawdat(
         Imported data formatted as n_coils X n_samples X n_slices X n_contrasts
     hdr: dict
         Extra information about the data parsed from the twix file
+        This header also contains the ACS data as "acs" if it was found in raw data.
 
     Raises
     ------
@@ -51,8 +52,9 @@ def read_siemens_rawdat(
     Notes
     -----
     This function requires the mapVBVD module to be installed.
-    You can install it using the following command:
-        `pip install pymapVBVD`
+    You can install it using the following command::
+
+        pip install pymapVBVD
     """
     try:
         from mapvbvd import mapVBVD
@@ -75,7 +77,13 @@ def read_siemens_rawdat(
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
         "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
+        "affine": nifti_affine(twixObj),
+        "acs": None,
     }
+    if "refscan" in twixObj.keys():
+        twixObj.refscan.squeeze = True
+        acs = twixObj.refscan[""].astype(np.complex64)
+        hdr["acs"] = acs.swapaxes(0, 1)
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
@@ -97,7 +105,8 @@ def read_siemens_rawdat(
 
     data = data.reshape(
         hdr["n_coils"],
-        hdr["n_shots"] * hdr["n_adc_samples"],
+        hdr["n_shots"],
+        hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
         hdr["n_contrasts"] if contrast_num is None else 1,
         hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,

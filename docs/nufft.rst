@@ -1,5 +1,5 @@
 .. include:: <isonum.txt>
-
+.. _NUFFT:
 ====================
  The NUFFT Operator
 ====================

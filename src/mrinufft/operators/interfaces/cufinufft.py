@@ -26,7 +26,6 @@ try:
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
-
 OPTS_FIELD_DECODE = {
     "gpu_method": {1: "nonuniform pts driven", 2: "shared memory"},
     "gpu_sort": {0: "no sort (GM)", 1: "sort (GM-sort)"},
@@ -38,11 +37,6 @@ OPTS_FIELD_DECODE = {
 }
 
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
-
-
-def _error_check(ier, msg):
-    if ier != 0:
-        raise RuntimeError(msg)
 
 
 class RawCufinufftPlan:
@@ -65,10 +59,12 @@ class RawCufinufftPlan:
         # and type 2 with 2.
         self.plans = [None, None, None]
         self.grad_plan = None
-
+        self._kx = cp.array(samples[:, 0], copy=False)
+        self._ky = cp.array(samples[:, 1], copy=False)
+        self._kz = cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i, samples)
+            self._set_pts(i)
 
     @property
     def dtype(self):
@@ -88,13 +84,15 @@ class RawCufinufftPlan:
             **kwargs,
         )
 
-    def _set_pts(self, typ, samples):
+    def _set_kxyz(self, samples):
+        self._kx.set(samples[:, 0])
+        self._ky.set(samples[:, 1])
+        if self.ndim == 3:
+            self._kz.set(samples[:, 2])
+
+    def _set_pts(self, typ):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
-        plan.setpts(
-            cp.array(samples[:, 0], copy=False),
-            cp.array(samples[:, 1], copy=False),
-            cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None,
-        )
+        plan.setpts(self._kx, self._ky, self._kz)
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
@@ -269,15 +267,18 @@ class MRICufiNUFFT(FourierOperatorBase):
             self._smaps = new_smaps
 
     @FourierOperatorBase.samples.setter
-    def samples(self, samples):
+    def samples(self, new_samples):
         """Update the plans when changing the samples."""
         self._samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+            proper_trajectory(new_samples, normalize="pi").astype(
+                np.float32, copy=False
+            )
         )
+        self.raw_op._set_kxyz(self._samples)
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ, self._samples)
+            self.raw_op._set_pts(typ)
         self.compute_density(self._density_method)
 
     @FourierOperatorBase.density.setter
@@ -810,7 +811,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             isign=1,
             **kwargs,
         )
-        self.raw_op._set_pts(typ="grad", samples=self.samples)
+        self.raw_op._set_pts(typ="grad")
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
@@ -849,3 +850,55 @@ class MRICufiNUFFT(FourierOperatorBase):
         if self.uses_sense:
             self.smaps = self.smaps.conj()
         self.raw_op.toggle_grad_traj()
+
+    @classmethod
+    def pipe(
+        cls,
+        kspace_loc,
+        volume_shape,
+        num_iterations=10,
+        osf=2,
+        normalize=True,
+        **kwargs,
+    ):
+        """Compute the density compensation weights for a given set of kspace locations.
+
+        Parameters
+        ----------
+        kspace_loc: np.ndarray
+            the kspace locations
+        volume_shape: np.ndarray
+            the volume shape
+        num_iterations: int default 10
+            the number of iterations for density estimation
+        osf: float or int
+            The oversampling factor the volume shape
+        normalize: bool
+            Whether to normalize the density compensation.
+            We normalize such that the energy of PSF = 1
+        """
+        if CUFINUFFT_AVAILABLE is False:
+            raise ValueError(
+                "cufinufft is not available, cannot estimate the density compensation"
+            )
+        grid_op = cls(
+            samples=kspace_loc,
+            shape=volume_shape,
+            upsampfac=osf,
+            gpu_spreadinterponly=1,
+            gpu_kerevalmeth=0,
+            **kwargs,
+        )
+        density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
+        for _ in range(num_iterations):
+            density_comp /= cp.abs(
+                grid_op.op(
+                    grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
+                ).squeeze()
+            )
+        if normalize:
+            test_op = cls(samples=kspace_loc, shape=volume_shape, **kwargs)
+            test_im = cp.ones(volume_shape, dtype=test_op.cpx_dtype)
+            test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
+            density_comp /= cp.mean(cp.abs(test_im_recon))
+        return density_comp.squeeze()
