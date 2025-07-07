@@ -6,7 +6,7 @@ from mrinufft.operators.base import with_numpy
 
 
 @with_numpy
-def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
+def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=False):
     """
     Perform conjugate gradient (CG) optimization for image reconstruction.
 
@@ -35,7 +35,7 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
     image : numpy.ndarray
               The reconstructed image after the optimization process.
     """
-    Lipschitz_cst = operator.get_lipschitz_cst()
+    lipschitz_cst = operator.get_lipschitz_cst()
     image = (
         np.zeros(operator.shape, dtype=type(kspace_data[0]))
         if x_init is None
@@ -44,19 +44,26 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4):
     velocity = np.zeros_like(image)
 
     grad = operator.data_consistency(image, kspace_data)
-    velocity = tol * velocity + grad / Lipschitz_cst
+    velocity = tol * velocity + grad / lipschitz_cst
     image = image - velocity
 
+    def calculate_loss(image):
+        residual = operator.op(image) - kspace_data
+        return np.linalg.norm(residual) ** 2
+
+    loss = [calculate_loss(image)] if compute_loss else None
     for _ in range(num_iter):
         grad_new = operator.data_consistency(image, kspace_data)
         if np.linalg.norm(grad_new) <= tol:
             break
 
-        beta = np.dot(grad_new.flatten(), grad_new.flatten()) / np.dot(
-            grad.flatten(), grad.flatten()
-        )
+        beta = np.dot(
+            grad_new.flatten(), (grad_new.flatten() - grad.flatten())
+        ) / np.dot(grad.flatten(), grad.flatten())
+        beta = max(0, beta)  # Polak-Ribiere formula is used to compute the beta
         velocity = grad_new + beta * velocity
 
-        image = image - velocity / Lipschitz_cst
-
-    return image
+        image = image - velocity / lipschitz_cst
+        if compute_loss:
+            loss.append(calculate_loss(image))
+    return image if loss is None else (image, np.array(loss))

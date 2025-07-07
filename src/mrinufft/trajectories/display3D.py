@@ -1,14 +1,15 @@
 """Utils for displaying 3D trajectories."""
 
-from mrinufft import get_operator, get_density
-from mrinufft.trajectories.utils import (
-    convert_trajectory_to_gradients,
-    convert_gradients_to_slew_rates,
-    KMAX,
-    DEFAULT_RASTER_TIME,
-)
-from mrinufft.density.utils import flat_traj
 import numpy as np
+
+from mrinufft import get_density, get_operator
+from mrinufft.density.utils import flat_traj
+from mrinufft.trajectories.utils import (
+    DEFAULT_RASTER_TIME,
+    KMAX,
+    convert_gradients_to_slew_rates,
+    convert_trajectory_to_gradients,
+)
 
 
 def get_gridded_trajectory(
@@ -43,19 +44,19 @@ def get_gridded_trajectory(
     grid_type : str, optional
         The type of gridded trajectory to compute. Default is "density".
         It can be one of the following:
-        "density" : Get the sampling density in closest number of samples per voxel.
-            Helps understand suboptimal sampling, by showcasing regions with strong
-            oversampling.
-        "time" : Showcases when the k-space data is acquired in time.
-            This is helpful to view and understand off-resonance effects.
-            Generally, lower off-resonance effects occur when the sampling trajectory
-            has smoother k-space sampling time over the k-space.
-        "inversion" : Relative inversion time at the sampling location. Needs
-            `turbo_factor` to be set. This is useful for analyzing the exact inversion
-            time when the k-space is acquired, for sequences like MP(2)RAGE.
-        "holes": Show the k-space missing coverage, or holes, within a ellipsoid of the
-            k-space.
-        "gradients": Show the gradient strengths of the k-space trajectory.
+        - ``"density"`` : Get the sampling density as number of samples per voxel.
+        Helps understand suboptimal sampling, by showcasing regions with strong
+        oversampling.
+        - ``"time"`` : Showcases when the k-space data is acquired in time.
+        This is helpful to view and understand off-resonance effects.
+        Generally, lower off-resonance effects occur when the sampling trajectory
+        has smoother k-space sampling time over the k-space.
+        - ``"inversion"`` : Relative inversion time at the sampling location. Needs
+        `turbo_factor` to be set. This is useful for analyzing the exact inversion
+        time when the k-space is acquired, for sequences like MP(2)RAGE.
+        - ``"holes"``: Show the k-space missing coverage, or holes, within a ellipsoid
+        of the k-space.
+        - ``"gradients"``: Show the gradient strengths of the k-space trajectory.
         "slew": Show the slew rate of the k-space trajectory.
     osf : int, optional
         The oversampling factor for the gridded trajectory. Default is 1.
@@ -88,28 +89,59 @@ def get_gridded_trajectory(
         The gridded trajectory of shape `shape`.
     """
     samples = trajectory.reshape(-1, trajectory.shape[-1])
-    dcomp = get_density("pipe")(trajectory, shape)
-    grid_op = get_operator(backend)(
-        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=1
+    dcomp = get_density("pipe")(trajectory, shape, backend=backend)
+    gridder = get_operator(backend)(
+        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
     )
-    gridded_ones = grid_op.raw_op.adj_op(np.ones(samples.shape[0]), None, True)
+    if backend == "gpunufft":
+        # For gpunufft, we need to interface directly with the raw operator
+        gridder = get_operator(backend)(
+            trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
+        )
+
+        def _gridder_adj_op(x):
+            return gridder.raw_op.adj_op(x, None, True)
+
+    elif backend == "finufft":
+        gridder = get_operator(backend)(
+            trajectory,
+            [sh * osf for sh in shape],
+            density=dcomp,
+            upsampfac=osf,
+            spreadinterponly=1,
+            spread_kerevalmeth=0,
+        )
+    elif backend == "cufinufft":
+        gridder = get_operator(backend)(
+            trajectory,
+            [sh * osf for sh in shape],
+            density=dcomp,
+            upsampfac=osf,
+            gpu_spreadinterponly=1,
+            gpu_kerevalmeth=0,
+        )
+    else:
+        raise ValueError(f"Unsupported backend: {backend}")
+
+    if backend in ["finufft", "cufinufft"]:
+
+        def _gridder_adj_op(x):
+            return gridder.adj_op(x)
+
+    gridded_ones = _gridder_adj_op(np.ones(samples.shape[0]))
     if grid_type == "density":
         return np.abs(gridded_ones).squeeze()
     elif grid_type == "time":
-        data = grid_op.raw_op.adj_op(
-            np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],)),
-            None,
-            True,
+        data = _gridder_adj_op(
+            np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],))
         )
     elif grid_type == "inversion":
-        data = grid_op.raw_op.adj_op(
+        data = _gridder_adj_op(
             np.repeat(
                 np.linspace(1, 10, turbo_factor),
                 samples.shape[0] // turbo_factor + 1,
             )[: samples.shape[0]],
-            None,
-            True,
-        )
+        ) / (gridded_ones + np.finfo(np.float32).eps)
     elif grid_type == "holes":
         data = np.abs(gridded_ones).squeeze() < threshold
         if elliptical_samp:
@@ -118,7 +150,7 @@ def get_gridded_trajectory(
             data[
                 np.linalg.norm(
                     np.meshgrid(
-                        *[np.linspace(-1, 1, sh) for sh in shape], indexing="ij"
+                        *[np.linspace(-1, 1, sh * osf) for sh in shape], indexing="ij"
                     ),
                     axis=0,
                 )
@@ -140,7 +172,7 @@ def get_gridded_trajectory(
         else:
             slews, _ = convert_gradients_to_slew_rates(gradients, DEFAULT_RASTER_TIME)
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
-        data = grid_op.raw_op.adj_op(
-            np.linalg.norm(data, axis=-1).flatten(), None, True
+        data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten()) / (
+            gridded_ones + np.finfo(np.float32).eps
         )
     return np.squeeze(np.abs(data))

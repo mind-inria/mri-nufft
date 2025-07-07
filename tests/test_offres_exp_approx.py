@@ -12,7 +12,7 @@ import mrinufft
 from mrinufft._array_compat import CUPY_AVAILABLE
 from mrinufft._utils import get_array_module
 from mrinufft.operators.off_resonance import MRIFourierCorrected
-
+from mrinufft import get_operator
 
 from helpers import to_interface, assert_allclose
 from helpers.factories import _param_array_interface
@@ -106,3 +106,34 @@ def test_zmap_coeff(zmap, mask, array_interface):
     )
     actual = calculate_approx_offresonance_term(B, C)
     assert_allclose(actual, expected, atol=1e-3, rtol=1e-3, interface=array_interface)
+
+
+def test_b0_map_upsampling_warns_and_matches_shape():
+    """Test that MRIFourierCorrected upscales the b0_map and warns if shape mismatch exists."""
+
+    shape_target = (16, 16, 16)
+    b0_shape = (8, 8, 8)
+
+    b0_map = np.ones(b0_shape, dtype=np.float32)
+    kspace = np.zeros((10, 3), dtype=np.float32)
+    smaps = np.ones((1, *shape_target), dtype=np.complex64)
+    readout_time = np.ones(10, dtype=np.float32)
+
+    nufft = get_operator("finufft")(
+        samples=kspace,
+        shape=shape_target,
+        n_coils=1,
+        smaps=smaps,
+        density=False,
+    )
+
+    with pytest.warns(UserWarning):
+        op = MRIFourierCorrected(
+            nufft,
+            b0_map=b0_map,
+            readout_time=readout_time,
+        )
+
+        # check that no exception is raised and internal shape matches
+        assert op.B.shape[1] == len(readout_time)
+        assert op.shape == shape_target

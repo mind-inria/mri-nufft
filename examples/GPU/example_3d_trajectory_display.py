@@ -11,11 +11,15 @@ Another key feature is to display the sampling density in k-space, for example t
 # %%
 
 # Imports
+import os
 from mrinufft.trajectories.display3D import get_gridded_trajectory
 import mrinufft.trajectories.trajectory3D as mtt
 from mrinufft.trajectories.utils import Gammas
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 
 # %%
@@ -56,6 +60,8 @@ def create_grid(grid_type, trajectories, traj_params, **kwargs):
             traj_params["img_size"],
             grid_type=grid_type,
             traj_params=traj_params,
+            backend=BACKEND,
+            osf=2,
             **kwargs,
         )
         plot_slices(axs[:, i], grid, title=name)

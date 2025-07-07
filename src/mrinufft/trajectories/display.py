@@ -515,12 +515,12 @@ def display_gradients_simply(
 
     # Show signal as modulated distance to center
     distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
-    distances = np.tile(distances.reshape((len(shot_ids), -1, 1)), (1, 1, 10))
+    distances = distances / np.max(distances)
     signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
     signal = (
-        signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))
-    ).real
-    signal = signal * np.abs(signal) ** 3
+        signal**2
+        * np.cos(figsize * 8 * 2 * np.pi * np.linspace(0, 1, signal.shape[-1]))[None, :]
+    )
 
     colors = displayConfig.get_colorlist()
     # Show signal for each requested shot

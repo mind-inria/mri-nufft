@@ -75,11 +75,14 @@ def sample_from_density(
     # Define dimension variables
     shape = density.shape
     nb_dims = len(shape)
-    max_nb_samples = np.prod(shape)
+    max_nb_samples = np.sum(density != 0)
     density = density / np.sum(density)
 
     if nb_samples > max_nb_samples:
-        raise ValueError("`nb_samples` must be lower than the size of `density`.")
+        raise ValueError(
+            "`nb_samples` must be lower than the "
+            "number of non-zero entries in `density`."
+        )
 
     # Check for dimensionality compensation
     if isinstance(dim_compensation, str) and dim_compensation != "auto":
@@ -94,14 +97,13 @@ def sample_from_density(
     rng = np.random.default_rng()
     if method == "random":
         choices = rng.choice(
-            np.arange(max_nb_samples),
+            np.arange(np.prod(shape)),
             size=nb_samples,
             p=density.flatten(),
             replace=False,
         )
         locations = np.indices(shape).reshape((nb_dims, -1))[:, choices]
-        locations = locations.T + 0.5
-        locations = locations / np.array(shape)[None, :]
+        locations = (locations.T + 0.5) / np.array(shape)
         locations = 2 * KMAX * locations - KMAX
     elif method == "lloyd":
         kmeans = (
@@ -110,11 +112,11 @@ def sample_from_density(
             else BisectingKMeans(n_clusters=nb_samples)
         )
         kmeans.fit(
-            np.indices(shape).reshape((nb_dims, -1)).T,
+            (np.indices(shape) + 0.5).reshape((nb_dims, -1)).T,
             sample_weight=density.flatten(),
         )
         locations = kmeans.cluster_centers_ - np.array(shape) / 2
-        locations = KMAX * locations / np.max(np.abs(locations))
+        locations = KMAX * locations / (np.array(shape) / 2)
     else:
         raise ValueError(f"Unknown sampling method {method}.")
     return locations
