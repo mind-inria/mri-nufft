@@ -14,7 +14,7 @@ from mrinufft.trajectories import initialize_2D_spiral, stack
 import matplotlib.pyplot as plt
 
 # %%
-# Some Constant values
+# Defining the sequence parameters like repetition time (TR), echo time (TE), flip angle (FA), field-of-view (FOV) and image matrix size.
 
 TR = 100  # ms
 TE = 50  # ms
