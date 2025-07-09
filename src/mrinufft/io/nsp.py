@@ -478,7 +478,7 @@ def read_trajectory(
                 Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
             )
         ):
-            warnings.warn("Binary file doesn't seem right! " "Proceeding anyway")
+            warnings.warn("Binary file doesn't seem right! Proceeding anyway")
         grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:

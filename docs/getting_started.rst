@@ -34,7 +34,7 @@ In order to perform Non-Uniform fast Fourier transform you need to install a spe
 
    Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
 
-   For more information , check the :ref:`Examples`
+   For more information , check the :ref:`general_examples`
 
 
 Supported Libraries
