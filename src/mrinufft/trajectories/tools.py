@@ -428,7 +428,9 @@ def get_gradient_times_to_travel(
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
 
     # Direct ramp steps
-    n_direct = np.ceil((end_gradients - start_gradients) / smax / raster_time).astype(int)
+    n_direct = np.ceil((end_gradients - start_gradients) / smax / raster_time).astype(
+        int
+    )
     area_direct = 0.5 * n_direct * (end_gradients + start_gradients)
 
     i = np.sign(area_direct - area_needed)
@@ -541,7 +543,10 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     end_gradients = np.atleast_2d(end_gradients)
 
     assert (
-        kspace_start_loc.shape == kspace_end_loc.shape == start_gradients.shape == end_gradients.shape
+        kspace_start_loc.shape
+        == kspace_end_loc.shape
+        == start_gradients.shape
+        == end_gradients.shape
     ), "All input arrays must have shape (nb_shots, nb_dimension)"
     if nb_raster_points is None:
         # Calculate the number of time steps based on the area needed
@@ -582,16 +587,22 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         + end_gradients[no_trapazoid] * smax
         - start_gradients[no_trapazoid] * smax
         + start_gradients[no_trapazoid] * start_gradients[no_trapazoid]
-    ) / (nb_raster_points * smax - end_gradients[no_trapazoid] + start_gradients[no_trapazoid])
+    ) / (
+        nb_raster_points * smax
+        - end_gradients[no_trapazoid]
+        + start_gradients[no_trapazoid]
+    )
     n_ramp_down[no_trapazoid] = np.ceil(
         np.abs(gi[no_trapazoid] - start_gradients[no_trapazoid]) / smax
     )
     n_ramp_up[no_trapazoid] = nb_raster_points - n_ramp_down[no_trapazoid]
 
     # Get intermediate gradients for trapazoids
-    gi = (2 * area_needed - (n_ramp_down + 1) * start_gradients - (n_ramp_up - 1) * end_gradients) / (
-        n_ramp_down + n_ramp_up + 2 * n_plateau
-    )
+    gi = (
+        2 * area_needed
+        - (n_ramp_down + 1) * start_gradients
+        - (n_ramp_up - 1) * end_gradients
+    ) / (n_ramp_down + n_ramp_up + 2 * n_plateau)
     nb_shots, nb_dimension = kspace_end_loc.shape
     G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
     for i in range(nb_shots):

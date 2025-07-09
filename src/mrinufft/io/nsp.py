@@ -257,11 +257,11 @@ def write_trajectory(
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
         `slowdown_to_edge` will add a gradient to slow down to the edge of the k-space
-        along x-axis for all the shots i.e. go to (Kmax, 0, 0). 
+        along x-axis for all the shots i.e. go to (Kmax, 0, 0).
         This is useful for sequences needing a spoiler at the end of the trajectory.
         However, spoiler is still not added, it is expected that the sequence
         handles the spoilers, which can be variable.
-        `slowdown_to_center` will add a gradient to slow down to the center 
+        `slowdown_to_center` will add a gradient to slow down to the center
         of the k-space.
     version: float, optional
         Trajectory versioning, by default 5
@@ -451,6 +451,7 @@ def read_trajectory(
             data,
             dimension * num_samples_per_shot * num_shots,
         )
+        # Convert gradients to T/m
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
@@ -462,9 +463,10 @@ def read_trajectory(
             initial_positions += start_location_updates
         gradients = gradients[:, start_skip_samples:-end_skip_samples, :]
         num_samples_per_shot -= start_skip_samples + end_skip_samples
-        
+
         if num_adc_samples is None:
             if read_shots:
+                # Acquire one extra sample at the end of each shot in read_shots mode
                 num_adc_samples = num_samples_per_shot + 1
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
