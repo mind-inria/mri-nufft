@@ -16,7 +16,7 @@ A collection of 3D non-Cartesian trajectories with analytical definitions.
 # Note that the examples hereafter only cover natively 3D trajectories
 # or famous 3D trajectories obtained from 2D. Examples on how to use
 # tools to make 3D trajectories out of 2D ones are presented in
-# :ref:`sphx_glr_generated_autoexamples_example_trajectory_tools.py`
+# :ref:`sphx_glr_generated_autoexamples_trajectories_example_trajectory_tools.py`
 #
 # In this page in particular, we invite the user to manually run the script
 # to be able to manipulate the plot orientations with the matplotlib interface
