@@ -180,10 +180,10 @@ def prepare_trajectory_for_seq(
     norm_factor: float = KMAX,
     pregrad: str = "prephase",
     postgrad: str = "slowdown_to_edge",
-    gamma=Gammas.HYDROGEN,
-    raster_time=DEFAULT_RASTER_TIME,
-    gmax=DEFAULT_GMAX,
-    smax=DEFAULT_SMAX,
+    gamma: float = Gammas.HYDROGEN,
+    raster_time: float = DEFAULT_RASTER_TIME,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
 ):
     """Prepare gradients from trajectory.
 
@@ -232,7 +232,7 @@ def prepare_trajectory_for_seq(
 
     grads, start_pos, end_pos = convert_trajectory_to_gradients(
         trajectory,
-        norm_factor=0.5,
+        norm_factor=norm_factor,
         resolution=fov,
         raster_time=raster_time,
         gamma=gamma,

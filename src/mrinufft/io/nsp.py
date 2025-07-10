@@ -8,6 +8,7 @@ import warnings
 from array import array
 from datetime import datetime
 
+from mrinufft.io.utils import prepare_trajectory_for_seq
 import numpy as np
 
 from mrinufft.trajectories.utils import (
@@ -210,8 +211,8 @@ def _pop_elements(array, num_elements=1, type=np.float32):
 
 def write_trajectory(
     trajectory: np.ndarray,
-    FOV: tuple[float, ...],
-    img_size: tuple[int, ...],
+    FOV: tuple[float,float, float],
+    img_size: tuple[int, int, int],
     grad_filename: str,
     norm_factor: float = KMAX,
     gamma: float = Gammas.HYDROGEN / 1e3,
@@ -317,8 +318,6 @@ def write_trajectory(
             kspace_start_loc=final_positions,
             acq=acq,
         )
-        gradients = np.hstack([gradients, end_gradients])
-        Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, acq)
