@@ -518,7 +518,8 @@ def get_gradient_times_to_travel(
         + n_ramp_up[plateau_mask]
         + 2 * n_plateau[plateau_mask]
     )
-    # Update n_ramp when direct is possible. We still need gi to ensure we satisfy area constraints.
+    # Update n_ramp when direct is possible. We still need gi to ensure
+    # we satisfy area constraints.
     n_ramps_total = n_ramp_down + n_ramp_up + n_plateau
     direct_is_faster_mask = n_direct < n_ramps_total
     direct_possible_mask = direct_possible_mask & direct_is_faster_mask

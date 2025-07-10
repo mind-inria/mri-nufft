@@ -217,9 +217,9 @@ def write_trajectory(
     TE_pos: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    pregrad: Optional[str] = "prephase",
-    postgrad: Optional[str] = "slowdown_to_edge",
-    version: float = 5.1,
+    pregrad: str | None = None,
+    postgrad: str | None = None,
+    version: float = 5,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
