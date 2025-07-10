@@ -661,7 +661,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         / raster_time
     ).astype(int)
     n_ramp_up[direct_not_possible] = np.ceil(
-        (end_gradients[direct_not_possible] - gmax * i[direct_not_possible])
+        abs(end_gradients[direct_not_possible] - gmax * i[direct_not_possible])
         / smax
         / raster_time
     ).astype(int)
