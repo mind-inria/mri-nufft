@@ -34,13 +34,14 @@ traj = stack(
 display_3D_trajectory(traj)
 
 # %%
-traj[0]
-
-# %%
 grads, Ns, Ne = prepare_trajectory_for_seq(traj, fov=FOV, img_size=img_size)
 
 # %%
-plt.plot(grads[0])
+# Each gradient shot has now a prephaser to move to the first point of the trajectory, and a rewind to the edge of k-space.
+
+plt.plot(grads[0,0,:], label="Gx")
+plt.plot(grads[0,1,:], label="Gy")
+plt.plot(grads[0,2,:], label="Gz")
 
 # %%
 
@@ -87,12 +88,5 @@ kspace_shots = np.ascontiguousarray(kspace_shots) * KMAX * 2 * np.asarray(FOV)
 
 
 # %%
-t_splits
-
-# %%
-t_adc
-
-# %%
-kspace_shots.shape
-
-# %%
+# and we can display the k-space trajectory, loaded from the sequence file.
+display_3D_trajectory(kspace_shots)
