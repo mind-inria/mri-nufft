@@ -8,6 +8,7 @@ from array import array
 from datetime import datetime
 
 import numpy as np
+from typing import Optional
 
 from mrinufft.trajectories.utils import (
     DEFAULT_GMAX,
@@ -17,7 +18,6 @@ from mrinufft.trajectories.utils import (
     Gammas,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
-    unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
@@ -217,8 +217,8 @@ def write_trajectory(
     TE_pos: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    pregrad: str | None = "speedup",
-    postgrad: str | None = "slowdown_to_edge",
+    pregrad: Optional[str] = "prephase",
+    postgrad: Optional[str] = "slowdown_to_edge",
     version: float = 5.1,
     **kwargs,
 ):
