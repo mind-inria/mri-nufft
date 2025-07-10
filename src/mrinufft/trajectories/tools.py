@@ -420,23 +420,34 @@ def get_gradient_times_to_travel(
 
     Returns
     -------
-    n_ramp_down: The timing values for the ramp down phase.
-    n_ramp_up: The timing values for the ramp up phase.
-    n_plateau: The timing values for the plateau phase.
-    gi: The intermediate gradient values for trapezoidal or triangular waveforms.
+    The timing values for the ramp down phase.
+    The timing values for the ramp up phase.
+    The timing values for the plateau phase.
+    The intermediate gradient values for trapezoidal or triangular waveforms.
     """
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
 
+    # Number of steps for direct ramp.
     # Direct ramp steps
-    n_direct = np.ceil((end_gradients - start_gradients) / smax / raster_time).astype(
-        int
+    n_direct = np.ceil(
+        2 * area_needed / (start_gradients + end_gradients + np.finfo(np.float32).eps)
+    ).astype("int")
+    n_direct[n_direct > 0] -= 1
+    # Minimum number of steps + 2  (as buffer)
+    n_direct_min = (
+        np.ceil(abs(end_gradients - start_gradients) / smax / raster_time).astype(int)
+        + 2
     )
-    area_direct = 0.5 * n_direct * (end_gradients + start_gradients)
+    direct_possible_mask = n_direct > n_direct_min
+
+    area_direct = 0.5 * n_direct_min * (end_gradients + start_gradients)
 
     i = np.sign(area_direct - area_needed)
 
-    n_ramp_down = np.ceil((gmax + i * start_gradients) / smax / raster_time).astype(int)
-    n_ramp_up = np.ceil((gmax + i * end_gradients) / smax / raster_time).astype(int)
+    n_ramp_down = np.ceil(abs(gmax * i - start_gradients) / smax / raster_time).astype(
+        int
+    )
+    n_ramp_up = np.ceil(abs(end_gradients - i * gmax) / smax / raster_time).astype(int)
 
     area_lowest = n_ramp_down * 0.5 * (start_gradients - i * gmax) + n_ramp_up * 0.5 * (
         end_gradients - i * gmax
@@ -447,6 +458,43 @@ def get_gradient_times_to_travel(
 
     # Condition: ramp-only sufficient
     ramp_only_mask = np.abs(area_lowest) >= np.abs(area_needed)
+    # Re-Calculate the n_ramp_up and n_ramp_down to make it time efficient.
+    gi[ramp_only_mask] = (
+        0.5
+        * raster_time
+        * smax
+        * (
+            2 * area_needed[ramp_only_mask]
+            + end_gradients[ramp_only_mask]
+            - start_gradients[ramp_only_mask]
+        )
+        / (
+            end_gradients[ramp_only_mask]
+            - start_gradients[ramp_only_mask]
+            + np.finfo(gi.dtype).eps
+        )
+    )
+    n_ramp_down[ramp_only_mask] = np.min(
+        [
+            n_ramp_down[ramp_only_mask],
+            np.ceil(
+                np.abs(gi[ramp_only_mask] - start_gradients[ramp_only_mask])
+                / (smax * raster_time)
+            ).astype(int),
+        ],
+        axis=0,
+    )
+    n_ramp_up[ramp_only_mask] = np.min(
+        [
+            n_ramp_up[ramp_only_mask],
+            np.ceil(
+                np.abs(end_gradients[ramp_only_mask] - gi[ramp_only_mask])
+                / (smax * raster_time)
+            ).astype(int),
+        ],
+        axis=0,
+    )
+    # Re-Calculate the updated gi based on new ramp down and ramp up values
     gi[ramp_only_mask] = (
         2 * area_needed[ramp_only_mask]
         - (n_ramp_down[ramp_only_mask] + 1) * start_gradients[ramp_only_mask]
@@ -458,7 +506,7 @@ def get_gradient_times_to_travel(
     remaining_area = np.zeros_like(area_needed)
     remaining_area[plateau_mask] = area_needed[plateau_mask] - area_lowest[plateau_mask]
     n_plateau[plateau_mask] = np.ceil(
-        np.abs(remaining_area[plateau_mask]) / gmax / raster_time
+        np.abs(remaining_area[plateau_mask]) / gmax
     ).astype(int)
 
     gi[plateau_mask] = (
@@ -470,7 +518,25 @@ def get_gradient_times_to_travel(
         + n_ramp_up[plateau_mask]
         + 2 * n_plateau[plateau_mask]
     )
-
+    # Update n_ramp when direct is possible. We still need gi to ensure we satisfy area constraints.
+    n_ramps_total = n_ramp_down + n_ramp_up + n_plateau
+    direct_is_faster_mask = n_direct < n_ramps_total
+    direct_possible_mask = direct_possible_mask & direct_is_faster_mask
+    n_direct = n_direct[direct_possible_mask]
+    gi_view = gi[direct_possible_mask].copy()
+    direct_ramp_down = n_direct // 2
+    direct_ramp_up = n_direct - direct_ramp_down
+    gi_view = (
+        2 * area_needed[direct_possible_mask]
+        - (direct_ramp_down + 1) * start_gradients[direct_possible_mask]
+        - (direct_ramp_up - 1) * end_gradients[direct_possible_mask]
+    ) / (direct_ramp_down + direct_ramp_up)
+    gi[direct_possible_mask] = gi_view
+    n_plateau[direct_possible_mask] = 0
+    n_ramp_down[direct_possible_mask] = direct_ramp_down
+    n_ramp_up[direct_possible_mask] = direct_ramp_up
+    # Replace NaNs in any calculation above
+    gi[np.isnan(gi)] = start_gradients[np.isnan(gi)]
     return n_ramp_down, n_ramp_up, n_plateau, gi
 
 
@@ -564,19 +630,50 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         nb_raster_points = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
 
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+
     # Intermediate gradient values. This is value of plateau or triangle gradients
     gi = np.zeros_like(kspace_start_loc, dtype=np.float32)
+
+    # Assume direct solution first
+    n_ramp_up = np.ones(start_gradients.shape, dtype=int) * nb_raster_points // 2
+    n_ramp_down = nb_raster_points - n_ramp_up
+    gi = (
+        2 * area_needed
+        - (n_ramp_down + 1) * start_gradients
+        - (n_ramp_up - 1) * end_gradients
+    ) / (n_ramp_down + n_ramp_up)
+    max_slew_needed = raster_time * np.max(
+        [abs(gi - start_gradients) / n_ramp_down, abs(end_gradients - gi) / n_ramp_up],
+        axis=0,
+    )
+    # FIXME: Becareful of rotating FOV boxes.
+    gmax_not_met = np.abs(gi) > gmax
+    smax_not_met = max_slew_needed > smax
+    direct_not_possible = gmax_not_met | smax_not_met
 
     # Get the area for direct and estimate n_ramps
     area_direct = 0.5 * nb_raster_points * (end_gradients + start_gradients)
     i = np.sign(area_direct - area_needed)
 
-    n_ramp_down = np.ceil((gmax + i * start_gradients) / smax / raster_time).astype(int)
-    n_ramp_up = np.ceil((gmax + i * end_gradients) / smax / raster_time).astype(int)
-    n_plateau = nb_raster_points - n_ramp_up - n_ramp_down
+    n_ramp_down[direct_not_possible] = np.ceil(
+        abs(gmax * i[direct_not_possible] - start_gradients[direct_not_possible])
+        / smax
+        / raster_time
+    ).astype(int)
+    n_ramp_up[direct_not_possible] = np.ceil(
+        (end_gradients[direct_not_possible] - gmax * i[direct_not_possible])
+        / smax
+        / raster_time
+    ).astype(int)
+    n_plateau = np.zeros_like(n_ramp_down)
+    n_plateau[direct_not_possible] = (
+        nb_raster_points
+        - n_ramp_up[direct_not_possible]
+        - n_ramp_down[direct_not_possible]
+    )
 
     # Get intermediate gradients for triangle waveform, when n_plateau<0
-    no_trapazoid = n_plateau <= 0
+    no_trapazoid = (n_plateau <= 0) & direct_not_possible
     n_plateau[no_trapazoid] = 0
 
     # Initial approximate calculation of gi
