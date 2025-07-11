@@ -455,12 +455,6 @@ def get_gradient_times_to_travel(
     n_ramp_up: The timing values for the ramp up phase.
     n_plateau: The timing values for the plateau phase.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
-
-    See Also
-    --------
-    get_gradient_amplitudes_to_travel_for_set_time :
-        To directly get the waveforms required. This is most-likely what
-        you want to use.
     """
     acq = acq or Acquisition.default
     area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time

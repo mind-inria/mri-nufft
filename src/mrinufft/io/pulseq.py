@@ -87,6 +87,7 @@ def pulseq_gre_3D(
     FA: float | None = None,
     rf_pulse: SimpleNamespace | None = None,
     rf_spoiling_inc: float = 0.0,
+    grad_spoil_factor: float = 2.0,
     system: pp.Opts = pp.Opts.default,
     osf: int = 1,
 ) -> pp.Sequence:
@@ -114,6 +115,8 @@ def pulseq_gre_3D(
         The increment in the RF phase (in degree) for spoiling. Default is 0.0,
         which means no spoiling.
 
+    grad_spoil_factor: float, optional
+        The factor by which the spoiler gradient moves to the edge of k-space. Default is 2.0.
     osf: int, optional
         The oversampling factor for the ADC. Default is 1, which means no oversampling.
 
@@ -143,11 +146,6 @@ def pulseq_gre_3D(
     TE = TE / 1000.0  # convert to seconds
     seq = pp.Sequence(system=system)
 
-    seq.set_definition("FOV", fov)
-    seq.set_definition("ImgSize", img_size)
-    seq.set_definition("TR", TR)
-    seq.set_definition("TE", TE)
-    seq.set_definition("FA", FA)
 
     if rf_pulse is None and FA is not None:
         rf_pulse = pp.make_block_pulse(flip_angle=FA, system=system, use="excitation")
@@ -157,11 +155,22 @@ def pulseq_gre_3D(
         )
     elif rf_pulse is None and FA is None:
         raise ValueError("Either `rf_pulse` or `FA` must be provided.")
+
     if not isinstance(rf_pulse, SimpleNamespace):
         raise TypeError(
             "The `rf_pulse` parameter must be a SimpleNamespace object, "
             "as returned by `pypulseq.make_block_pulse` or `pypulseq.make_arbitrary_rf`"
         )
+    if FA is None:
+        # Compute the flip angle from the RF pulse
+        # following https://github.com/imr-framework/pypulseq/tree/src/pypulseq/Sequence/ext_test_report.py#L24
+        FA = float(abs(np.sum(rf_pulse.signal[:-1]*(rf_pulse.t[1:] - rf_pulse.t[:-1]))) * 360)
+
+    seq.set_definition("FOV", fov)
+    seq.set_definition("ImgSize", img_size)
+    seq.set_definition("TR", TR)
+    seq.set_definition("TE", TE)
+    seq.set_definition("FA", FA)
 
     full_grads, skip_start, skip_end = prepare_trajectory_for_seq(
         trajectory,
@@ -186,7 +195,7 @@ def pulseq_gre_3D(
 
     # Add a spoiler gradient that move to twice the edge of k-space in the x direction.
     spoiler = pp.make_trapezoid(
-        channel="x", area=2 * img_size[0] / fov[0], system=system
+        channel="x", area=grad_spoil_factor * img_size[0] / fov[0], system=system
     )
 
     delay_before_grad = pp.make_delay(
