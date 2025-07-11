@@ -442,7 +442,7 @@ def get_gradient_times_to_travel(
 
     area_direct = 0.5 * n_direct_min * (end_gradients + start_gradients)
 
-    i = np.sign(area_direct - area_needed)
+    i = np.sign(area_needed - area_direct)
 
     n_ramp_down = np.ceil(abs(gmax * i - start_gradients) / smax / raster_time).astype(
         int
@@ -643,9 +643,15 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         - (n_ramp_down + 1) * start_gradients
         - (n_ramp_up - 1) * end_gradients
     ) / (n_ramp_down + n_ramp_up)
-    max_slew_needed = raster_time * np.max(
-        [abs(gi - start_gradients) / n_ramp_down, abs(end_gradients - gi) / n_ramp_up],
-        axis=0,
+    max_slew_needed = (
+        np.max(
+            [
+                abs(gi - start_gradients) / n_ramp_down,
+                abs(end_gradients - gi) / n_ramp_up,
+            ],
+            axis=0,
+        )
+        / raster_time
     )
     # FIXME: Becareful of rotating FOV boxes.
     gmax_not_met = np.abs(gi) > gmax
@@ -654,7 +660,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
 
     # Get the area for direct and estimate n_ramps
     area_direct = 0.5 * nb_raster_points * (end_gradients + start_gradients)
-    i = np.sign(area_direct - area_needed)
+    i = np.sign(area_needed - area_direct)
 
     n_ramp_down[direct_not_possible] = np.ceil(
         abs(gmax * i[direct_not_possible] - start_gradients[direct_not_possible])
@@ -691,7 +697,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         + start_gradients[no_trapazoid]
     )
     n_ramp_down[no_trapazoid] = np.ceil(
-        np.abs(gi[no_trapazoid] - start_gradients[no_trapazoid]) / smax
+        np.abs(gi[no_trapazoid] - start_gradients[no_trapazoid]) / smax / raster_time
     )
     n_ramp_up[no_trapazoid] = nb_raster_points - n_ramp_down[no_trapazoid]
 
