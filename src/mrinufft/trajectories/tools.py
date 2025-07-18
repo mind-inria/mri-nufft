@@ -652,20 +652,28 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     #                                                                         2
     #      2.0⋅A⋅dt⋅smax - N⋅dt⋅ge⋅smax + dt⋅ge⋅smax - dt⋅gs⋅smax - ge⋅gs + gs 
     # gi = ────────────────────────────────────────────────────────────────────
-    #                            N⋅dt⋅smax - ge + gs                         
+    #                            N⋅dt⋅smax - ge + gs          
+    gi_gt_or_lt_gs = np.asarray([-1, 1])[..., None, None]
     gi = (
         2 * area_needed * smax * raster_time
         - nb_raster_points * end_gradients * smax * raster_time
         + end_gradients * smax * raster_time
         - start_gradients * smax * raster_time
-        - end_gradients * start_gradients
-        + start_gradients * start_gradients
+        - end_gradients * start_gradients * gi_gt_or_lt_gs
+        + start_gradients * start_gradients * gi_gt_or_lt_gs
     ) / (
         nb_raster_points * smax * raster_time
-        - end_gradients
-        + start_gradients
+        - end_gradients * gi_gt_or_lt_gs
+        + start_gradients * gi_gt_or_lt_gs
     )
-    n_ramp_down = np.ceil(abs(gi - start_gradients) / (smax * raster_time)).astype(int)
+    n_ramp_down = (gi - start_gradients)*gi_gt_or_lt_gs[::-1] / (smax * raster_time)
+    # Choose the positive value of n_ramp_down
+    greater_ramp_index = np.argmax(n_ramp_down, axis=0)
+    # Select best gi and n_ramp_down using advanced indexing
+    idx = np.arange(greater_ramp_index.shape[0])[:, None]  # shots
+    jdx = np.arange(greater_ramp_index.shape[1])[None, :]  # dims
+    n_ramp_down = np.ceil(n_ramp_down[greater_ramp_index, idx, jdx]).astype(int)
+    gi = gi[greater_ramp_index, idx, jdx]
     n_ramp_up = nb_raster_points - n_ramp_down
     # Check if this direct solution is possible, by checking if smax and gmax are met.
     slew_needed = (
@@ -720,7 +728,8 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         - n_ramp_up[direct_not_possible]
         - n_ramp_down[direct_not_possible]
     )
-    # Final calculation of gi based on discritized time steps
+    # We try to solve for the gradients.
+    # We need to do this as ramp values are integers and not float
     gi = (
         2 * area_needed
         - (n_ramp_down + 1) * start_gradients
