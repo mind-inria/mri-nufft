@@ -64,7 +64,7 @@ class RawCufinufftPlan:
         self._kz = cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i, samples)
+            self._set_pts(i)
 
     @property
     def dtype(self):
@@ -84,13 +84,15 @@ class RawCufinufftPlan:
             **kwargs,
         )
 
-    def _set_pts(self, typ, samples):
+    def _set_kxyz(self, samples):
+        self._kx.set(samples[:, 0])
+        self._ky.set(samples[:, 1])
+        if self.ndim == 3:
+            self._kz.set(samples[:, 2])
+
+    def _set_pts(self, typ):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
-        plan.setpts(
-            cp.array(samples[:, 0], copy=False),
-            cp.array(samples[:, 1], copy=False),
-            cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None,
-        )
+        plan.setpts(self._kx, self._ky, self._kz)
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
@@ -272,10 +274,11 @@ class MRICufiNUFFT(FourierOperatorBase):
                 np.float32, copy=False
             )
         )
+        self.raw_op._set_kxyz(self._samples)
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ, samples=self._samples)
+            self.raw_op._set_pts(typ)
         self.compute_density(self._density_method)
 
     @FourierOperatorBase.density.setter
@@ -808,7 +811,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             isign=1,
             **kwargs,
         )
-        self.raw_op._set_pts(typ="grad", samples=self.samples)
+        self.raw_op._set_pts(typ="grad")
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

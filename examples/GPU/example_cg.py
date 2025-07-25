@@ -6,7 +6,7 @@ Reconstruction with conjugate gradient
 An example to show how to reconstruct volumes using conjugate gradient method.
 
 This script demonstrates the use of the Conjugate Gradient (CG) method
-for solving systems of linear equations of the form Ax = b, where A is a symmetric
+for solving systems of linear equations of the form :math:`Ax = b`, where :math:`A`` is a symmetric
 positive-definite matrix. The CG method is an iterative algorithm that is particularly
 useful for large, sparse systems where direct methods are computationally expensive.
 
@@ -32,6 +32,9 @@ import mrinufft
 from brainweb_dl import get_mri
 from mrinufft.density import voronoi
 from matplotlib import pyplot as plt
+import os
+
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 # %%
 # Setup Inputs
@@ -41,12 +44,13 @@ image = np.flipud(image[90])
 
 # %%
 # Setup the NUFFT operator
-NufftOperator = mrinufft.get_operator("gpunufft")  # get the operator
+NufftOperator = mrinufft.get_operator(BACKEND)  # get the operator
 
 nufft = NufftOperator(
     samples_loc,
     shape=image.shape,
     density=True,
+    squeeze_dims=True,
 )  # create the NUFFT operator
 
 # %%
@@ -74,7 +78,10 @@ plt.colorbar()
 plt.subplot(2, 3, 3)
 plt.title("Adjoint NUFFT")
 plt.imshow(
-    abs(nufft.adj_op(kspace_data)), vmin=image.min(), vmax=image.max(), cmap="gray"
+    abs(nufft.adj_op(kspace_data)),
+    vmin=image.min(),
+    vmax=image.max(),
+    cmap="gray",
 )
 plt.colorbar()
 

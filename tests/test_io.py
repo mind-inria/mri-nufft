@@ -63,8 +63,8 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     trajectory = kspace_loc / resolution
     gradients = np.diff(trajectory, axis=1) / gamma / raster_time
     GS = get_gradient_amplitudes_to_travel_for_set_time(
-        ke=trajectory[:, 0],
-        ge=gradients[:, 0],
+        kspace_end_loc=trajectory[:, 0],
+        end_gradients=gradients[:, 0],
         gamma=gamma,
         raster_time=raster_time,
         gmax=gmax,
@@ -74,6 +74,10 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     assert np.all(np.abs(GS) <= gmax)
     assert np.all(np.abs(np.diff(GS, axis=1) / raster_time) <= smax)
     assert np.all(np.abs(GS[:, -1] - gradients[:, 0]) / raster_time < smax)
+    if np.all(trajectory[:, 0] == 0):
+        # If the trajectory starts at the origin, we can check that the first gradient is zero
+        assert np.all(GS.shape[1] < 10)
+    assert GS.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
         np.sum(GS, axis=1) * gamma * raster_time,
@@ -84,9 +88,9 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     np.testing.assert_allclose(GS[:, 0], 0, atol=1e-5)
 
     GE = get_gradient_amplitudes_to_travel_for_set_time(
-        ks=trajectory[:, -1],
-        ke=np.zeros_like(trajectory[:, -1]),
-        gs=gradients[:, -1],
+        kspace_start_loc=trajectory[:, -1],
+        kspace_end_loc=np.zeros_like(trajectory[:, -1]),
+        start_gradients=gradients[:, -1],
         gamma=gamma,
         raster_time=raster_time,
         gmax=gmax,
@@ -96,6 +100,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     assert np.all(np.abs(GE) <= gmax)
     assert np.all(np.abs(np.diff(GE, axis=1) / raster_time) <= smax)
     assert np.all(np.abs(GE[:, -1]) / raster_time < smax)
+    assert GE.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
         0,

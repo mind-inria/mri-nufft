@@ -117,7 +117,9 @@ def initialize_2D_spiral(
     # have a non-monotonic gradient norm when varying the angle
     # over [0, +inf)
     def _update_shot(
-        angles: NDArray, radius: NDArray, *args: Any  # noqa ANN401
+        angles: NDArray,
+        radius: NDArray,
+        *args: Any,  # noqa ANN401
     ) -> NDArray:
         shot = np.sign(angles) * np.abs(radius) * np.exp(1j * np.abs(angles))
         return np.stack([shot.real, shot.imag], axis=-1)

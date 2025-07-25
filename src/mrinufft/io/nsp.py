@@ -8,6 +8,7 @@ from array import array
 from datetime import datetime
 
 import numpy as np
+from typing import Optional
 
 from mrinufft.trajectories.utils import (
     DEFAULT_GMAX,
@@ -216,9 +217,9 @@ def write_trajectory(
     TE_pos: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    pregrad: str | None = "speedup",
-    postgrad: str | None = "slowdown_to_edge",
-    version: float = 5.1,
+    pregrad: str | None = None,
+    postgrad: str | None = None,
+    version: float = 5,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -252,14 +253,16 @@ def write_trajectory(
         Maximum slew rate in T/m/ms, by default 0.1
     pregrad : str, optional
         Pregrad method, by default `prephase`
-        `prephase` will add a prephase gradient to the start of the trajectory.
+        `prephase` will add a prephasing gradient to the start of the trajectory.
     postgrad : str, optional
         Postgrad method, by default 'slowdown_to_edge'
-        `slowdown_to_edge` will add a gradient to slow down to the edge of the FOV.
+        `slowdown_to_edge` will add a gradient to slow down to the edge of the k-space
+        along x-axis for all the shots i.e. go to (Kmax, 0, 0).
         This is useful for sequences needing a spoiler at the end of the trajectory.
         However, spoiler is still not added, it is expected that the sequence
         handles the spoilers, which can be variable.
-        `slowdown_to_center` will add a gradient to slow down to the center of the FOV.
+        `slowdown_to_center` will add a gradient to slow down to the center
+        of the k-space.
     version: float, optional
         Trajectory versioning, by default 5
     kwargs : dict, optional
@@ -290,14 +293,14 @@ def write_trajectory(
                 "please set version to 5.1 or higher."
             )
         start_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-            ke=initial_positions,
-            ge=gradients[:, 0],
+            kspace_end_loc=initial_positions,
+            end_gradients=gradients[:, 0],
             **scan_consts,
         )
         initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
         Ns_to_skip_at_start = start_gradients.shape[1]
-    if postgrad is not None:
+    if postgrad:
         if version < 5.1:
             raise ValueError(
                 "postgrad is only supported for version >= 5.1, "
@@ -308,9 +311,9 @@ def write_trajectory(
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
         end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-            ke=edge_locations,
-            gs=gradients[:, -1],
-            ks=final_positions,
+            kspace_end_loc=edge_locations,
+            start_gradients=gradients[:, -1],
+            kspace_start_loc=final_positions,
             **scan_consts,
         )
         gradients = np.hstack([gradients, end_gradients])
@@ -336,7 +339,7 @@ def write_trajectory(
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
-                    " > {smax:.3f}. Please use prephase gradient to avoid this "
+                    f" > {smax:.3f}. Please use prephase gradient to avoid this "
                     " issue."
                 )
 
@@ -365,6 +368,7 @@ def read_trajectory(
     raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
+    pre_skip: int = 0,
 ):
     """Get k-space locations from gradient file.
 
@@ -386,9 +390,13 @@ def read_trajectory(
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
-    normalize : float, optional
+    normalize_factor : float, optional
         Whether to normalize the k-space locations, by default 0.5
         When None, normalization is not done.
+    pre_skip: int, optional
+        Number of samples to skip from the start of each shot,
+        by default 0. This is useful when we want to avoid artifacts
+        from ADC switching in UTE sequences.
 
     Returns
     -------
@@ -443,20 +451,24 @@ def read_trajectory(
             data,
             dimension * num_samples_per_shot * num_shots,
         )
+        # Convert gradients to T/m
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
+        # Handle skipped samples
         if start_skip_samples > 0:
             start_location_updates = (
                 np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
             )
             initial_positions += start_location_updates
             gradients = gradients[:, start_skip_samples:, :]
+            num_samples_per_shot -= start_skip_samples
         if end_skip_samples > 0:
             gradients = gradients[:, :-end_skip_samples, :]
-        num_samples_per_shot -= start_skip_samples + end_skip_samples
+            num_samples_per_shot -= end_skip_samples
         if num_adc_samples is None:
             if read_shots:
+                # Acquire one extra sample at the end of each shot in read_shots mode
                 num_adc_samples = num_samples_per_shot + 1
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
@@ -470,7 +482,7 @@ def read_trajectory(
                 Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
             )
         ):
-            warnings.warn("Binary file doesn't seem right! " "Proceeding anyway")
+            warnings.warn("Binary file doesn't seem right! Proceeding anyway")
         grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:
@@ -519,6 +531,15 @@ def read_trajectory(
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
+        if pre_skip > 0:
+            if pre_skip >= num_samples_per_shot:
+                raise ValueError(
+                    "skip_first_Nsamples should be less than num_adc_samples"
+                )
+            oversample_factor = num_adc_samples / num_samples_per_shot
+            skip_samples = pre_skip * int(oversample_factor)
+            kspace_loc = kspace_loc[:, skip_samples:]
+            params["num_adc_samples"] = num_adc_samples - skip_samples
         return kspace_loc, params
 
 
@@ -529,6 +550,7 @@ def read_arbgrad_rawdat(
     squeeze: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
+    pre_skip: int = 0,
     data_type: str = "ARBGRAD_VE11C",
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
@@ -547,6 +569,10 @@ def read_arbgrad_rawdat(
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
         The contrast to read, by default None.
+    pre_skip : int, optional
+        Number of samples to skip from the start of each shot,
+        by default 0. This is useful when we want to avoid artifacts
+        from ADC switching in UTE sequences.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
 
@@ -595,4 +621,12 @@ def read_arbgrad_rawdat(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]
             hdr["type"] = "ARBGRAD_MP2RAGE"
+    if pre_skip > 0:
+        samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
+        if samples_to_skip >= hdr["n_adc_samples"]:
+            raise ValueError(
+                "Samples to skip should be less than n_samples in the data"
+            )
+        data = data[:, :, samples_to_skip:]
+        hdr["n_adc_samples"] -= samples_to_skip
     return data, hdr

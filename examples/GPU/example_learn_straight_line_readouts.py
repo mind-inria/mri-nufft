@@ -1,5 +1,5 @@
 # %%
-"""
+r"""
 ===================================
 Learn Straight line readout pattern
 ===================================
@@ -9,8 +9,14 @@ In this example we learn the 2D sampling pattern for a 3D MRI image, assuming
 straight line readouts. This example showcases the auto-diff capabilities of the NUFFT operator
 The image resolution is kept small to reduce computation time.
 
-.. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
+.. warning:: This example only showcases the autodiff capabilities, the learned
+    sampling pattern is not scanner compliant as the scanner gradients required
+    to implement it violate the hardware constraints. In practice, a projection
+    :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set
+    :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the
+    proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the
+    authors if they want to use it.
+
 """
 
 # %%
@@ -22,6 +28,7 @@ The image resolution is kept small to reduce computation time.
 # %%
 # Imports
 # -------
+import os
 import time
 import joblib
 
@@ -34,6 +41,7 @@ from PIL import Image, ImageSequence
 
 from mrinufft import get_operator
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 # %%
 # Setup a simple class to learn trajectory
@@ -54,8 +62,12 @@ class Model(torch.nn.Module):
         self.central_points = torch.nn.Parameter(
             data=torch.stack(
                 torch.meshgrid(
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
-                    torch.linspace(-edge_center, edge_center, num_cart_points),
+                    torch.linspace(
+                        -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                    ),
+                    torch.linspace(
+                        -edge_center, edge_center, num_cart_points, dtype=torch.float32
+                    ),
                     indexing="ij",
                 ),
                 axis=-1,
@@ -64,14 +76,17 @@ class Model(torch.nn.Module):
         )
         self.non_center_points = torch.nn.Parameter(
             data=torch.Tensor(
-                np.random.random((num_shots - self.central_points.shape[0], 2)) - 0.5
+                np.random.random((num_shots - self.central_points.shape[0], 2)).astype(
+                    np.float32
+                )
+                - 0.5
             ),
             requires_grad=True,
         )
-        self.operator = get_operator("gpunufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             np.random.random(
                 (self.get_2D_points().shape[0] * self.num_samples_per_shot, 3)
-            )
+            ).astype(np.float32)
             - 0.5,
             shape=img_size,
             density=True,
