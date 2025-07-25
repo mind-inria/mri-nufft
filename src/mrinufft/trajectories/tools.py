@@ -403,16 +403,18 @@ def _set_defaults_gradient_calc(
     start_gradients = np.atleast_2d(start_gradients)
     end_gradients = np.atleast_2d(end_gradients)
     assert (
-    kspace_start_loc.shape
+        kspace_start_loc.shape
         == kspace_end_loc.shape
         == start_gradients.shape
         == end_gradients.shape
     ), "All input arrays must have shape (nb_shots, nb_dimension)"
     return kspace_end_loc, kspace_start_loc, start_gradients, end_gradients
 
+
 def _calculate_area(gs, ge, gi, n_down, n_up, n_pl):
     """Calculate the area traversed by the trapezoidal gradient waveform."""
     return 0.5 * (gs + gi) * (n_down + 1) + 0.5 * (ge + gi) * (n_up - 1) + n_pl * gi
+
 
 def _calculate_plateau(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0):
     """Calculate the plateau length of the trapezoidal gradient waveform."""
@@ -425,6 +427,7 @@ def _calculate_plateau(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer
         n_pl = np.ceil(n_pl).astype(int)
     return n_pl + buffer
 
+
 def _calculate_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
     """Calculate the number of time steps for the ramp down and up."""
     n_ramp_down = np.abs(gi - gs) / (smax * raster_time)
@@ -434,11 +437,13 @@ def _calculate_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
         n_ramp_up = np.ceil(n_ramp_up).astype(int)
     return n_ramp_down + buffer, n_ramp_up + buffer
 
+
 def _calculate_gi(gs, ge, n_down, n_up, n_pl, area_needed):
     """Calculate the gi value for the trapezoidal gradient waveform."""
     return (2 * area_needed - (n_down + 1) * gs - (n_up - 1) * ge) / (
         n_down + n_up + 2 * n_pl
     )
+
 
 def get_gradient_times_to_travel(
     kspace_end_loc: NDArray,
@@ -456,10 +461,10 @@ def get_gradient_times_to_travel(
     Compute gradient timing values to take k-space trajectories
     from position ``ks`` with gradient ``gs`` to position ``ke`` with gradient
     ``ge``, while being hardware compliant.
-    This function calculates the minimal number of time steps required for 
-    the ramp down, ramp up, and plateau phases of the gradient waveform, 
-    ensuring that the area traversed in k-space matches the desired 
-    trajectory while adhering to the maximum gradient amplitude and 
+    This function calculates the minimal number of time steps required for
+    the ramp down, ramp up, and plateau phases of the gradient waveform,
+    ensuring that the area traversed in k-space matches the desired
+    trajectory while adhering to the maximum gradient amplitude and
     slew rate constraints.
 
     Parameters
@@ -508,6 +513,7 @@ def get_gradient_times_to_travel(
             if n_pl < 0:
                 return np.abs(n_pl) * 10000  # Penalize negative plateau
             return n_pl * 100
+
         # Minimize the residual to find gi
         res = minimize_scalar(
             _residual,
@@ -633,6 +639,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         nb_raster_points = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
 
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
             n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time, buffer=1)
@@ -1296,7 +1303,8 @@ def add_slew_ramp(
     smax: float = DEFAULT_SMAX,
     slew_ramp_disable: bool = False,
 ) -> Callable:
-    """Decorator to add slew rate ramps to a trajectory function."""
+    """Add slew-compatible ramps to a trajectory function."""
+
     def decorator(trajectory_func):
         sig = inspect.signature(trajectory_func)
 
@@ -1331,8 +1339,8 @@ def add_slew_ramp(
                 raster_time=_raster_time,
                 smax=_smax,
             )
-            # Update the Ns of the trajectory to ensure we still give same Ns as users expect
-            # We use extra 2 points as buffer.
+            # Update the Ns of the trajectory to ensure we still give 
+            # same Ns as users expect. We use extra 2 points as buffer.
             n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
             bound.arguments["Ns"] -= n_slew_ramp - _ramp_to_index
             new_traj = trajectory_func(**bound.arguments)
