@@ -382,45 +382,36 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
 
 def _calculate_area(gs, ge, gi, n_down, n_up, n_pl):
     """Calculate the area traversed by the trapezoidal gradient waveform."""
-    return (
-        0.5 * (gs + gi) * (n_down + 1)
-        + 0.5 * (ge + gi) * (n_up - 1)
-        + n_pl * gi
-    )
+    return 0.5 * (gs + gi) * (n_down + 1) + 0.5 * (ge + gi) * (n_up - 1) + n_pl * gi
 
-def _calculate_plateau(
-    gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0
-):
+
+def _calculate_plateau(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0):
     """Calculate the plateau length of the trapezoidal gradient waveform."""
     n_pl = (
-        0.5 * (2 * area_needed - gs * (n_down + 1) - ge * (n_up - 1) + gi * (n_down + n_up))
+        0.5
+        * (2 * area_needed - gs * (n_down + 1) - ge * (n_up - 1) + gi * (n_down + n_up))
         / (gi + np.finfo(gi.dtype).eps)
     )
     if ceil:
-        return np.ceil(n_pl).astype(int)
+        n_pl = np.ceil(n_pl).astype(int)
     return n_pl + buffer
 
-def _calculate_ramps(
-    gs, ge, gi, smax, raster_time, ceil=False, buffer=0
-):
+
+def _calculate_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
     """Calculate the number of time steps for the ramp down and up."""
     n_ramp_down = np.abs(gi - gs) / (smax * raster_time)
     n_ramp_up = np.abs(ge - gi) / (smax * raster_time)
     if ceil:
         n_ramp_down = np.ceil(n_ramp_down).astype(int)
         n_ramp_up = np.ceil(n_ramp_up).astype(int)
-        return n_ramp_down, n_ramp_up
     return n_ramp_down + buffer, n_ramp_up + buffer
 
-def _calculate_gi(
-    gs, ge, n_down, n_up, n_pl, area_needed
-):
+
+def _calculate_gi(gs, ge, n_down, n_up, n_pl, area_needed):
     """Calculate the gi value for the trapezoidal gradient waveform."""
-    return (
-        2 * area_needed
-        - (n_down + 1) * gs
-        - (n_up - 1) * ge
-    ) / (n_down + n_up + 2 * n_pl)
+    return (2 * area_needed - (n_down + 1) * gs - (n_up - 1) * ge) / (
+        n_down + n_up + 2 * n_pl
+    )
 
 
 def get_gradient_times_to_travel(
@@ -473,21 +464,24 @@ def get_gradient_times_to_travel(
     The intermediate gradient values for trapezoidal or triangular waveforms.
     """
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+
     def solve_gi_min_plateau(gs, ge, area):
         def _residual(gi):
             n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time)
             n_pl = _calculate_plateau(gs, ge, gi, n_down, n_up, area)
             if n_pl < 0:
-                return np.abs(n_pl) * 100 # Penalize negative plateau
-            return n_pl
+                return np.abs(n_pl) * 10000  # Penalize negative plateau
+            return n_pl * 100
+
         res = minimize_scalar(
             _residual,
             bounds=(-gmax, gmax),
-            method='bounded',    
+            method="bounded",
         )
         if not res.success:
             raise RuntimeError(f"Minimization failed: {res.message}")
         return res.x
+
     gi = Parallel(n_jobs=n_jobs)(
         delayed(solve_gi_min_plateau)(
             start_gradients[i, j],
@@ -499,10 +493,22 @@ def get_gradient_times_to_travel(
     )
     gi = np.reshape(gi, start_gradients.shape)
     n_ramp_down, n_ramp_up = _calculate_ramps(
-        start_gradients, end_gradients, gi, smax, raster_time, ceil=True, buffer=1,
+        start_gradients,
+        end_gradients,
+        gi,
+        smax,
+        raster_time,
+        ceil=True,
+        buffer=1,
     )
     n_plateau = _calculate_plateau(
-        start_gradients, end_gradients, gi, n_ramp_down, n_ramp_up, area_needed, ceil=True
+        start_gradients,
+        end_gradients,
+        gi,
+        n_ramp_down,
+        n_ramp_up,
+        area_needed,
+        ceil=True,
     )
     return n_ramp_down, n_ramp_up, n_plateau, gi
 
@@ -597,27 +603,26 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             smax=smax,
         )
         # Extra 2 buffer samples
-        nb_raster_points = np.max(n_ramp_down + n_ramp_up + n_plateau) + 3
+        nb_raster_points = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
 
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time)
+            n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time, buffer=1)
             n_pl = nb_raster_points - n_down - n_up
             if n_pl < 0:
-                return np.abs(n_pl) # Penalize this
+                return np.abs(n_pl)  # Penalize this
             area_expr = _calculate_area(gs, ge, gi, n_down, n_up, n_pl)
             return np.abs(area - area_expr)
 
         res = minimize_scalar(
-            _residual,
-            bounds=(-gmax, gmax),
-            method='bounded',    
-            options={'xatol': 1e-10}
+            _residual, bounds=(-gmax, gmax), method="bounded", options={"xatol": 1e-10}
         )
         if not res.success:
             raise RuntimeError(f"Minimization failed: {res.message}")
         return res.x
+
     gi = Parallel(n_jobs=n_jobs)(
         delayed(solve_gi_fixed_N)(
             start_gradients[i, j],
@@ -629,10 +634,17 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     )
     gi = np.reshape(gi, start_gradients.shape)
     n_ramp_down, n_ramp_up = _calculate_ramps(
-        start_gradients, end_gradients, gi, smax, raster_time, ceil=True, buffer=1,
+        start_gradients,
+        end_gradients,
+        gi,
+        smax,
+        raster_time,
+        ceil=True,
     )
     n_plateau = nb_raster_points - n_ramp_down - n_ramp_up
-    gi = _calculate_gi(start_gradients, end_gradients, n_ramp_down, n_ramp_up, n_plateau, area_needed)
+    gi = _calculate_gi(
+        start_gradients, end_gradients, n_ramp_down, n_ramp_up, n_plateau, area_needed
+    )
     nb_shots, nb_dimension = kspace_end_loc.shape
     G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
     for i in range(nb_shots):
