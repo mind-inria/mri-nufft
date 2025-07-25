@@ -77,7 +77,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     if np.all(trajectory[:, 0] == 0):
         # If the trajectory starts at the origin, we can check that the first gradient is zero
         assert np.all(GS.shape[1] < 10)
-    assert GS.shape[1] < 200 # Checks to ensure we don't have too many samples
+    assert GS.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
         np.sum(GS, axis=1) * gamma * raster_time,
@@ -100,7 +100,7 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     assert np.all(np.abs(GE) <= gmax)
     assert np.all(np.abs(np.diff(GE, axis=1) / raster_time) <= smax)
     assert np.all(np.abs(GE[:, -1]) / raster_time < smax)
-    assert GE.shape[1] < 200 # Checks to ensure we don't have too many samples
+    assert GE.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
         0,

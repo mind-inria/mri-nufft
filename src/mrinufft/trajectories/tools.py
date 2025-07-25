@@ -458,10 +458,10 @@ def get_gradient_times_to_travel(
 
     Returns
     -------
-    The timing values for the ramp down phase.
-    The timing values for the ramp up phase.
-    The timing values for the plateau phase.
-    The intermediate gradient values for trapezoidal or triangular waveforms.
+    n_ramp_down: The timing values for the ramp down phase.
+    n_ramp_up: The timing values for the ramp up phase.
+    n_plateau: The timing values for the plateau phase.
+    gi: The intermediate gradient values for trapezoidal or triangular waveforms.
     """
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
 
