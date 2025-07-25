@@ -1303,7 +1303,57 @@ def add_slew_ramp(
     smax: float = DEFAULT_SMAX,
     slew_ramp_disable: bool = False,
 ) -> Callable:
-    """Add slew-compatible ramps to a trajectory function."""
+    """Add slew-compatible ramps to a trajectory function.
+
+    This decorator modifies a trajectory function to include
+    slew rate ramps, ensuring that the trajectory adheres to
+    the maximum slew rate and gradient amplitude constraints.
+    The ramps are applied to the gradients of the trajectory
+    at the specified `ramp_to_index`, which is typically the
+    index of the first readout sample.
+
+    Parameters
+    ----------
+    func : Optional[Callable], optional
+        The trajectory function to decorate. If not provided,
+        the decorator can be used without arguments.
+    ramp_to_index : int, optional
+        The index in the trajectory where the slew ramp should be applied,
+        by default 5. This is typically the index of the first readout sample.
+    resolution : float or NDArray, optional
+        The resolution of the trajectory, by default DEFAULT_RESOLUTION.
+        This can be a single float or an array-like of shape (3,).
+    raster_time : float, optional
+        The time interval between samples in the trajectory, by default 
+        DEFAULT_RASTER_TIME.
+    gamma : float, optional
+        The gyromagnetic ratio in Hz/T, by default Gammas.Hydrogen.
+    smax : float, optional
+        The maximum slew rate in T/m/s, by default DEFAULT_SMAX.
+    slew_ramp_disable : bool, optional
+        If True, disables the slew ramp and returns the trajectory as is,
+        by default False. This is useful for in-out trajectories where
+        the slew ramp is not needed.
+    
+    Returns
+    -------
+    Callable
+        A decorator that modifies the trajectory function to include
+        slew rate ramps.
+    
+    Notes
+    -----
+    - The decorator modifies the trajectory function to ensure that the
+        gradients at the specified `ramp_to_index` are adjusted to comply with
+        the maximum slew rate and gradient amplitude constraints.
+    - If `slew_ramp_disable` is set to True, the trajectory function will
+        return the trajectory as is, without applying any slew ramps.
+    - The decorator can be used with or without providing a function.
+    - If used without a function, it returns a decorator that can be applied later.
+    - The decorated function should accept parameters like `smax`, `resolution`,    
+        `raster_time`, `gamma`, and `ramp_to_index` to control the behavior of the
+        slew ramping.
+    """
 
     def decorator(trajectory_func):
         sig = inspect.signature(trajectory_func)
@@ -1338,6 +1388,7 @@ def add_slew_ramp(
                 gamma=_gamma,
                 raster_time=_raster_time,
                 smax=_smax,
+                n_jobs=-1,  # Use all available cores
             )
             # Update the Ns of the trajectory to ensure we still give 
             # same Ns as users expect. We use extra 2 points as buffer.
@@ -1358,6 +1409,7 @@ def add_slew_ramp(
                 gamma=_gamma,
                 raster_time=_raster_time,
                 smax=_smax,
+                n_jobs=-1,  # Use all available core
             )[:, :-1]
             ramp_up_traj = convert_gradients_to_trajectory(
                 gradients=ramp_up_gradients,
