@@ -430,10 +430,10 @@ def get_gradient_times_to_travel(
     Compute gradient timing values to take k-space trajectories
     from position ``ks`` with gradient ``gs`` to position ``ke`` with gradient
     ``ge``, while being hardware compliant.
-    This function calculates the minimal number of time steps required for 
-    the ramp down, ramp up, and plateau phases of the gradient waveform, 
-    ensuring that the area traversed in k-space matches the desired 
-    trajectory while adhering to the maximum gradient amplitude and 
+    This function calculates the minimal number of time steps required for
+    the ramp down, ramp up, and plateau phases of the gradient waveform,
+    ensuring that the area traversed in k-space matches the desired
+    trajectory while adhering to the maximum gradient amplitude and
     slew rate constraints.
 
     Parameters
