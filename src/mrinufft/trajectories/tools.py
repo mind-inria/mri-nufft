@@ -380,12 +380,12 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     return trajectory
 
 
-def _calculate_area(gs, ge, gi, n_down, n_up, n_pl):
+def _trapezoidal_area(gs, ge, gi, n_down, n_up, n_pl):
     """Calculate the area traversed by the trapezoidal gradient waveform."""
     return 0.5 * (gs + gi) * (n_down + 1) + 0.5 * (ge + gi) * (n_up - 1) + n_pl * gi
 
 
-def _calculate_plateau(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0):
+def _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0):
     """Calculate the plateau length of the trapezoidal gradient waveform."""
     n_pl = (
         0.5
@@ -397,7 +397,7 @@ def _calculate_plateau(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer
     return n_pl + buffer
 
 
-def _calculate_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
+def _trapezoidal_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
     """Calculate the number of time steps for the ramp down and up."""
     n_ramp_down = np.abs(gi - gs) / (smax * raster_time)
     n_ramp_up = np.abs(ge - gi) / (smax * raster_time)
@@ -407,7 +407,7 @@ def _calculate_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
     return n_ramp_down + buffer, n_ramp_up + buffer
 
 
-def _calculate_gi(gs, ge, n_down, n_up, n_pl, area_needed):
+def _plateau_value(gs, ge, n_down, n_up, n_pl, area_needed):
     """Calculate the gi value for the trapezoidal gradient waveform."""
     return (2 * area_needed - (n_down + 1) * gs - (n_up - 1) * ge) / (
         n_down + n_up + 2 * n_pl
@@ -472,8 +472,8 @@ def get_gradient_times_to_travel(
 
     def solve_gi_min_plateau(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time)
-            n_pl = _calculate_plateau(gs, ge, gi, n_down, n_up, area)
+            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, smax, raster_time)
+            n_pl = _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area)
             if n_pl < 0:
                 return np.abs(n_pl) * 10000  # Penalize negative plateau
             return n_pl * 100
@@ -491,7 +491,7 @@ def get_gradient_times_to_travel(
         delayed(solve_gi_min_plateau)(gs,ge,area) 
         for gs,ge,area in zip(start_gradients[:],end_gradients[:], area_needed[:]))
     gi = np.reshape(gi, start_gradients.shape)
-    n_ramp_down, n_ramp_up = _calculate_ramps(
+    n_ramp_down, n_ramp_up = _trapezoidal_ramps(
         start_gradients,
         end_gradients,
         gi,
@@ -500,7 +500,7 @@ def get_gradient_times_to_travel(
         ceil=True,
         buffer=1,
     )
-    n_plateau = _calculate_plateau(
+    n_plateau = _trapezoidal_plateau_length(
         start_gradients,
         end_gradients,
         gi,
@@ -608,11 +608,11 @@ def get_gradient_amplitudes_to_travel_for_set_time(
 
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _calculate_ramps(gs, ge, gi, smax, raster_time, buffer=1)
+            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, smax, raster_time, buffer=1)
             n_pl = nb_raster_points - n_down - n_up
             if n_pl < 0:
                 return np.abs(n_pl)  # Penalize this
-            area_expr = _calculate_area(gs, ge, gi, n_down, n_up, n_pl)
+            area_expr = _trapezoidal_area(gs, ge, gi, n_down, n_up, n_pl)
             return np.abs(area - area_expr)
 
         res = minimize_scalar(
@@ -632,7 +632,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         for j in range(start_gradients.shape[1])
     )
     gi = np.reshape(gi, start_gradients.shape)
-    n_ramp_down, n_ramp_up = _calculate_ramps(
+    n_ramp_down, n_ramp_up = _trapezoidal_ramps(
         start_gradients,
         end_gradients,
         gi,
@@ -641,7 +641,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         ceil=True,
     )
     n_plateau = nb_raster_points - n_ramp_down - n_ramp_up
-    gi = _calculate_gi(
+    gi = _plateau_value(
         start_gradients, end_gradients, n_ramp_down, n_ramp_up, n_plateau, area_needed
     )
     nb_shots, nb_dimension = kspace_end_loc.shape
