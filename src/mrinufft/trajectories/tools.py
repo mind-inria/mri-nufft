@@ -385,7 +385,9 @@ def _trapezoidal_area(gs, ge, gi, n_down, n_up, n_pl):
     return 0.5 * (gs + gi) * (n_down + 1) + 0.5 * (ge + gi) * (n_up - 1) + n_pl * gi
 
 
-def _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0):
+def _trapezoidal_plateau_length(
+    gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0
+):
     """Calculate the plateau length of the trapezoidal gradient waveform."""
     n_pl = (
         0.5
@@ -408,7 +410,7 @@ def _trapezoidal_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
 
 
 def _plateau_value(gs, ge, n_down, n_up, n_pl, area_needed):
-    """Calculate the gi value for the trapezoidal gradient waveform."""
+    """Calculate the  value of the plateau of a trapezoidal gradient waveform."""
     return (2 * area_needed - (n_down + 1) * gs - (n_up - 1) * ge) / (
         n_down + n_up + 2 * n_pl
     )
@@ -488,8 +490,9 @@ def get_gradient_times_to_travel(
         return res.x
 
     gi = Parallel(n_jobs=n_jobs)(
-        delayed(solve_gi_min_plateau)(gs,ge,area) 
-        for gs,ge,area in zip(start_gradients[:],end_gradients[:], area_needed[:]))
+        delayed(solve_gi_min_plateau)(gs, ge, area)
+        for gs, ge, area in zip(start_gradients[:], end_gradients[:], area_needed[:])
+    )
     gi = np.reshape(gi, start_gradients.shape)
     n_ramp_down, n_ramp_up = _trapezoidal_ramps(
         start_gradients,
@@ -647,8 +650,8 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     nb_shots, nb_dimension = kspace_end_loc.shape
     G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
     for i in range(nb_shots):
-        start = n_ramp_down[i,0]
-        G[i, : start] = np.linspace(
+        start = n_ramp_down[i, 0]
+        G[i, :start] = np.linspace(
             start_gradients[i], gi[i], n_ramp_down[i], endpoint=False, axis=-1
         )
         if n_plateau[i, d] > 0:
