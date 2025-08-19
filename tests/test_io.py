@@ -55,7 +55,9 @@ class CasesIO:
 )
 @parametrize("gmax", [0.1, DEFAULT_GMAX])
 @parametrize("smax", [0.7, DEFAULT_SMAX])
-def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, smax):
+def test_trajectory_state_changer_start(
+    kspace_loc, shape, gamma, raster_time, gmax, smax
+):
     """Test the trajectory state changer."""
     dimension = len(shape)
     resolution = dimension * (0.23 / 256,)
@@ -86,6 +88,25 @@ def test_trajectory_state_changer(kspace_loc, shape, gamma, raster_time, gmax, s
     # Check that gradients match.
     np.testing.assert_allclose(GS[:, 0], 0, atol=1e-5)
 
+
+@parametrize("gamma,raster_time", [(Gammas.Hydrogen, DEFAULT_RASTER_TIME)])
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[
+        CasesTrajectories.case_radial2D,
+        CasesTrajectories.case_radial3D,
+        CasesTrajectories.case_in_out_radial2D,
+    ],
+)
+@parametrize("gmax", [0.1, DEFAULT_GMAX])
+@parametrize("smax", [0.7, DEFAULT_SMAX])
+def test_trajectory_state_changer_end(
+    kspace_loc, shape, gamma, raster_time, gmax, smax
+):
+    dimension = len(shape)
+    resolution = dimension * (0.23 / 256,)
+    trajectory = kspace_loc / resolution
+    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
     GE = get_gradient_amplitudes_to_travel_for_set_time(
         kspace_start_loc=trajectory[:, -1],
         kspace_end_loc=np.zeros_like(trajectory[:, -1]),
