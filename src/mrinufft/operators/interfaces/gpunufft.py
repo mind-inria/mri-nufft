@@ -617,6 +617,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
         """Return the Lipschitz constant of the operator.
 
+        Parameters
         ----------
         max_iter: int
             Number of iteration to perform to estimate the Lipschitz constant.

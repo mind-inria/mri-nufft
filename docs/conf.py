@@ -81,6 +81,7 @@ sphinx_gallery_conf = {
     "within_subsection_order": "ExampleTitleSortKey",
     "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
+    "prefer_full_module": {r".*"},
     "nested_sections": True,
     "binder": {
         "org": "mind-inria",
@@ -100,7 +101,7 @@ sphinx_gallery_conf = {
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "cupy": ("https://docs.cupy.dev/en/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
 }

@@ -9,6 +9,7 @@ from datetime import datetime
 
 from mrinufft.io.utils import prepare_trajectory_for_seq
 import numpy as np
+from typing import Optional
 
 from mrinufft.trajectories.utils import (
     DEFAULT_GMAX,
@@ -18,7 +19,6 @@ from mrinufft.trajectories.utils import (
     Gammas,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
-    unnormalize_trajectory,
     convert_trajectory_to_gradients,
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
@@ -218,9 +218,9 @@ def write_trajectory(
     TE_pos: float = 0.5,
     gmax: float = DEFAULT_GMAX,
     smax: float = DEFAULT_SMAX,
-    pregrad: str | None = "speedup",
-    postgrad: str | None = "slowdown_to_edge",
-    version: float = 5.1,
+    pregrad: str | None = None,
+    postgrad: str | None = None,
+    version: float = 5,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -435,6 +435,7 @@ def read_trajectory(
             data,
             dimension * num_samples_per_shot * num_shots,
         )
+        # Convert gradients to T/m
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
@@ -444,11 +445,14 @@ def read_trajectory(
                 np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
             )
             initial_positions += start_location_updates
-        gradients = gradients[:, start_skip_samples:-end_skip_samples, :]
-        num_samples_per_shot -= start_skip_samples + end_skip_samples
-
+            gradients = gradients[:, start_skip_samples:, :]
+            num_samples_per_shot -= start_skip_samples
+        if end_skip_samples > 0:
+            gradients = gradients[:, :-end_skip_samples, :]
+            num_samples_per_shot -= end_skip_samples
         if num_adc_samples is None:
             if read_shots:
+                # Acquire one extra sample at the end of each shot in read_shots mode
                 num_adc_samples = num_samples_per_shot + 1
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
@@ -462,7 +466,7 @@ def read_trajectory(
                 Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
             )
         ):
-            warnings.warn("Binary file doesn't seem right! " "Proceeding anyway")
+            warnings.warn("Binary file doesn't seem right! Proceeding anyway")
         grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:

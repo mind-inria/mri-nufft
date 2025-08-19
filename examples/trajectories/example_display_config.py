@@ -54,7 +54,7 @@ def show_traj(traj, name, values, **kwargs):
 #
 # The following trajectory will be used to showcase the display parameters.
 # The trajectory parameters are explained in the
-# :ref:`sphx_glr_generated_autoexamples_example_3D_trajectories.py` example.
+# :ref:`sphx_glr_generated_autoexamples_trajectories_example_3D_trajectories.py` example.
 
 traj = conify(initialize_2D_spiral(Nc // 6, Ns), nb_cones=6)[::-1]
 

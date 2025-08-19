@@ -60,6 +60,7 @@ from mrinufft.trajectories import initialize_2D_cones
 
 # %%
 # Setup a simple class for the U-Net model
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 
 class Model(torch.nn.Module):
@@ -67,7 +68,7 @@ class Model(torch.nn.Module):
 
     def __init__(self, initial_trajectory):
         super().__init__()
-        self.operator = get_operator("gpunufft", wrt_data=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True)(
             initial_trajectory,
             shape=(256, 256),
             density=True,
