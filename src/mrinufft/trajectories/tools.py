@@ -480,7 +480,7 @@ def get_gradient_times_to_travel(
             n_pl = _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area)
             if n_pl < 0:
                 return np.abs(n_pl) * 10000  # Penalize negative plateau
-            return n_pl * 100
+            return n_pl * 100  # Penalize large plateau
 
         res = minimize_scalar(
             _residual,
@@ -492,8 +492,13 @@ def get_gradient_times_to_travel(
         return res.x
 
     gi = Parallel(n_jobs=n_jobs)(
-        delayed(solve_gi_min_plateau)(gs, ge, area)
-        for gs, ge, area in zip(start_gradients[:], end_gradients[:], area_needed[:])
+        delayed(solve_gi_min_plateau)(
+            start_gradients[i, j],
+            end_gradients[i, j],
+            area_needed[i, j],
+        )
+        for i in range(start_gradients.shape[0])
+        for j in range(start_gradients.shape[1])
     )
     gi = np.reshape(gi, start_gradients.shape)
     n_ramp_down, n_ramp_up = _trapezoidal_ramps(
