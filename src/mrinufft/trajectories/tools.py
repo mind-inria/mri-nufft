@@ -463,6 +463,10 @@ def get_gradient_times_to_travel(
     n_ramp_up: The timing values for the ramp up phase.
     n_plateau: The timing values for the plateau phase.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
+    See Also
+    --------
+    get_gradient_amplitudes_to_travel_for_set_time :
+        To directly get the waveforms required. This is most-likely what you want to use.
     """
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
 
@@ -484,14 +488,8 @@ def get_gradient_times_to_travel(
         return res.x
 
     gi = Parallel(n_jobs=n_jobs)(
-        delayed(solve_gi_min_plateau)(
-            start_gradients[i, j],
-            end_gradients[i, j],
-            area_needed[i, j],
-        )
-        for i in range(start_gradients.shape[0])
-        for j in range(start_gradients.shape[1])
-    )
+        delayed(solve_gi_min_plateau)(gs,ge,area) 
+        for gs,ge,area in zip(start_gradients[:],end_gradients[:], area_needed[:]))
     gi = np.reshape(gi, start_gradients.shape)
     n_ramp_down, n_ramp_up = _calculate_ramps(
         start_gradients,
@@ -563,9 +561,9 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     Returns
     -------
     NDArray
-        Gradient waveforms, shape (nb_shots, nb_samples_per_shot, nb_dimension)
-        , where each entry contains the gradient value at each time step
-         for each shot and dimension.
+        Gradient waveforms, shape (nb_shots, nb_samples_per_shot, nb_dimension),
+        where each entry contains the gradient value at each time step for each shot
+        and dimension.
 
     Notes
     -----
@@ -649,18 +647,16 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     nb_shots, nb_dimension = kspace_end_loc.shape
     G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
     for i in range(nb_shots):
-        for d in range(nb_dimension):
-            start = 0
-            G[i, : n_ramp_down[i, d], d] = np.linspace(
-                start_gradients[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False
-            )
-            start += n_ramp_down[i, d]
-            if n_plateau[i, d] > 0:
-                G[i, start : start + n_plateau[i, d], d] = gi[i, d]
-                start += n_plateau[i, d]
-            G[i, start : start + n_ramp_up[i, d], d] = np.linspace(
-                gi[i, d], end_gradients[i, d], n_ramp_up[i, d], endpoint=False
-            )
+        start = n_ramp_down[i,0]
+        G[i, : start] = np.linspace(
+            start_gradients[i], gi[i], n_ramp_down[i], endpoint=False, axis=-1
+        )
+        if n_plateau[i, d] > 0:
+            G[i, start : start + n_plateau[i, 0]] = gi[i]
+            start += n_plateau[i, 0]
+        G[i, start : start + n_ramp_up[i, 0]] = np.linspace(
+            gi[i], end_gradients[i], n_ramp_up[i, 0], axis=-1, endpoint=False
+        )
     return G
 
 

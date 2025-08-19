@@ -44,8 +44,7 @@ class CasesIO:
         )
 
 
-@parametrize("gamma", [Gammas.Hydrogen])
-@parametrize("raster_time", [DEFAULT_RASTER_TIME])
+@parametrize("gamma,raster_time", [(Gammas.Hydrogen, DEFAULT_RASTER_TIME)])
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
