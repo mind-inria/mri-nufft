@@ -1,8 +1,13 @@
 """Utility functions in general."""
 
+from __future__ import annotations
+
+import re
+from typing import ClassVar, Any
+from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from numbers import Real
-from typing import Any, Literal
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -52,15 +57,15 @@ class StrEnum(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 class Gammas(FloatEnum):
     """Enumerate gyromagnetic ratios for common nuclei in MR."""
 
-    # Values in kHz/T
-    HYDROGEN = 42576
-    HELIUM = 32434
-    CARBON = 10708
-    OXYGEN = 5772
-    FLUORINE = 40078
-    SODIUM = 11262
-    PHOSPHOROUS = 17235
-    XENON = 11777
+    # Values in Hz/T
+    HYDROGEN = 42_576_000
+    HELIUM = 32_434_000
+    CARBON = 10_708_000
+    OXYGEN = 5_772_000
+    FLUORINE = 40_078_000
+    SODIUM = 11_262_000
+    PHOSPHOROUS = 17_235_000
+    XENON = 11_777_000
 
     # Aliases
     H = H1 = PROTON = HYDROGEN
@@ -173,6 +178,83 @@ class VDSpdf(StrEnum):
     EQUISPACED = "equispaced"
 
 
+#############################
+# Hardware and Acquisition  #
+#############################
+
+
+class SI:
+    giga = 1e9
+    mega = 1e6
+    kilo = 1e3
+    hecto = 100
+    deca = 10
+    deci = 0.1
+    centi = 0.01
+    milli = 0.001
+    micro = 1e-6
+    nano = 1e-9
+
+    gauss = 1e-4  # T to Gauss conversion factor
+
+
+@dataclass(frozen=True)
+class Hardware:
+    gmax: float = 40 * SI.milli  # Maximum gradient amplitude in T/m
+    smax: float = 200  # T/m/s
+    n_coils: int = 8
+    dwell_time = 1 * SI.nano  # s
+    grad_raster_time = 5 * SI.micro  # s
+    field_strength: float = 3.0  # Tesla
+
+    @property
+    def raster_time(self) -> float:
+        return self.grad_raster_time
+
+
+class SIEMENS_HARDWARE(object):
+    TERRAX = Hardware()
+    PRISMA = ...
+    CIMA = ...
+    CIMAX = ...
+    ISEULT = ...
+
+
+@dataclass(frozen=True)
+class Acquisition:
+    default: ClassVar[Acquisition]
+
+    fov: tuple[float, float, float]  # Field of View in m
+    img_size: tuple[int, int, int]  # Image size in pixels
+    hardware: Hardware
+    gamma: Gammas = Gammas.HYDROGEN  # Hz/T
+    oversampling: int = 1  # Oversampling factor for the ADC
+    norm_factor: float = 0.5
+
+    def set_default(self) -> Acquisition:
+        """Make the current acquisition configuration the default."""
+        Acquisition.default = self
+        return self
+
+    def __getattr__(self, name):
+        # pass through attributes to the hardware object
+        return getattr(self.hardware, name)
+
+    @classmethod
+    def __getattr__(cls, name):
+        return getattr(cls.default, name)
+
+    @property
+    def res(self) -> tuple[float, ...]:
+        """Resolution in meters."""
+        return tuple(fov / size for fov, size in zip(self.fov, self.img_size))
+
+
+# Create a default acquisition.
+Acquisition.default = Acquisition(
+    fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()
+)
+
 ###############
 # CONSTRAINTS #
 ###############
@@ -180,8 +262,7 @@ class VDSpdf(StrEnum):
 
 def normalize_trajectory(
     trajectory: NDArray,
-    norm_factor: float = KMAX,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Normalize an un-normalized/natural trajectory for NUFFT use.
 
@@ -189,25 +270,22 @@ def normalize_trajectory(
     ----------
     trajectory : NDArray
         Un-normalized trajectory consisting of k-space coordinates in 2D or 3D.
-    norm_factor : float, optional
-        Trajectory normalization factor, by default KMAX.
-    resolution : float, np.array, optional
-        Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `np.array`.
-        The default is DEFAULT_RESOLUTION.
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
 
     Returns
     -------
     trajectory : NDArray
         Normalized trajectory corresponding to `trajectory` input.
     """
-    return trajectory * norm_factor * (2 * resolution)
+    acq = acq or Acquisition.default
+    return trajectory * acq.norm_factor * (2 * acq.res)
 
 
 def unnormalize_trajectory(
     trajectory: NDArray,
-    norm_factor: float = KMAX,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Un-normalize a NUFFT-normalized trajectory.
 
@@ -215,27 +293,21 @@ def unnormalize_trajectory(
     ----------
     trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
-    norm_factor : float, optional
-        Trajectory normalization factor, by default KMAX.
-    resolution : float, np.array, optional
-        Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `np.array`.
-        The default is DEFAULT_RESOLUTION.
-
+    acq : Acquisition, optional
+        Acquisition configuration to use for un-normalization.
+        If `None`, the default acquisition is used.
     Returns
     -------
     trajectory : NDArray
         Un-normalized trajectory corresponding to `trajectory` input.
     """
-    return trajectory / norm_factor / (2 * resolution)
+    acq = acq or Acquisition.default
+    return trajectory / acq.norm_factor / (2 * acq.resolution)
 
 
 def convert_trajectory_to_gradients(
     trajectory: NDArray,
-    norm_factor: float = KMAX,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gamma: float = Gammas.HYDROGEN,
+    acq: Acquisition | None = None,
     get_final_positions: bool = False,
 ) -> tuple[NDArray, ...]:
     """Derive a normalized trajectory over time to provide gradients.
@@ -244,19 +316,9 @@ def convert_trajectory_to_gradients(
     ----------
     trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
-    norm_factor : float, optional
-        Trajectory normalization factor, by default KMAX.
-    resolution : float, np.array, optional
-        Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `np.array`.
-        The default is DEFAULT_RESOLUTION.
-    raster_time : float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-    gamma : float, optional
-        Gyromagnetic ratio of the selected nucleus in kHz/T
-        The default is Gammas.HYDROGEN.
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
     get_final_positions : bool, optional
         If `True`, return the final positions in k-space.
         The default is `False`.
@@ -266,11 +328,12 @@ def convert_trajectory_to_gradients(
     gradients : NDArray
         Gradients corresponding to `trajectory`.
     """
+    acq = acq or Acquisition.default
     # Un-normalize the trajectory from NUFFT usage
-    trajectory = unnormalize_trajectory(trajectory, norm_factor, resolution)
+    trajectory = unnormalize_trajectory(trajectory, acq)
 
     # Compute gradients and starting positions
-    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
+    gradients = np.diff(trajectory, axis=1) / acq.gamma / acq.raster_time
     initial_positions = trajectory[:, 0, :]
     if get_final_positions:
         return gradients, initial_positions, trajectory[:, -1, :]
@@ -280,10 +343,7 @@ def convert_trajectory_to_gradients(
 def convert_gradients_to_trajectory(
     gradients: NDArray,
     initial_positions: NDArray | None = None,
-    norm_factor: float = KMAX,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gamma: float = Gammas.HYDROGEN,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Integrate gradients over time to provide a normalized trajectory.
 
@@ -294,19 +354,9 @@ def convert_gradients_to_trajectory(
     initial_positions: NDArray, optional
         Positions in k-space at the beginning of the readout window.
         The default is `None`.
-    norm_factor : float, optional
-        Trajectory normalization factor, by default KMAX.
-    resolution : float, np.array, optional
-        Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `np.array`.
-        The default is DEFAULT_RESOLUTION.
-    raster_time : float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-    gamma : float, optional
-        Gyromagnetic ratio of the selected nucleus in kHz/T
-        The default is Gammas.HYDROGEN.
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
 
     Returns
     -------
@@ -314,22 +364,23 @@ def convert_gradients_to_trajectory(
         Normalized trajectory corresponding to `gradients`.
     """
     # Handle no initial positions
+    acq = acq or Acquisition.default
     if initial_positions is None:
         initial_positions = np.zeros((gradients.shape[0], 1, gradients.shape[-1]))
 
     # Prepare and integrate gradients
-    trajectory = gradients * gamma * raster_time
+    trajectory = gradients * acq.gamma * acq.raster_time
     trajectory = np.concatenate([initial_positions[:, None, :], trajectory], axis=1)
     trajectory = np.cumsum(trajectory, axis=1)
 
     # Normalize the trajectory for NUFFT usage
-    trajectory = normalize_trajectory(trajectory, norm_factor, resolution)
+    trajectory = normalize_trajectory(trajectory, acq)
     return trajectory
 
 
 def convert_gradients_to_slew_rates(
     gradients: NDArray,
-    raster_time: float = DEFAULT_RASTER_TIME,
+    acq: Acquisition | None = None,
 ) -> tuple[NDArray, NDArray]:
     """Derive the gradients over time to provide slew rates.
 
@@ -337,11 +388,9 @@ def convert_gradients_to_slew_rates(
     ----------
     gradients : NDArray
         Gradients over 2 or 3 directions.
-    raster_time : float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-
+    acq : Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     Returns
     -------
     slewrates : NDArray
@@ -350,7 +399,8 @@ def convert_gradients_to_slew_rates(
         Gradients at the beginning of the readout window.
     """
     # Compute slew rates and starting gradients
-    slewrates = np.diff(gradients, axis=1) / raster_time
+    acq = acq or Acquisition.default
+    slewrates = np.diff(gradients, axis=1) / acq.raster_time
     initial_gradients = gradients[:, 0, :]
     return slewrates, initial_gradients
 
@@ -358,7 +408,7 @@ def convert_gradients_to_slew_rates(
 def convert_slew_rates_to_gradients(
     slewrates: NDArray,
     initial_gradients: NDArray | None = None,
-    raster_time: float = DEFAULT_RASTER_TIME,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Integrate slew rates over time to provide gradients.
 
@@ -369,22 +419,21 @@ def convert_slew_rates_to_gradients(
     initial_gradients: NDArray, optional
         Gradients at the beginning of the readout window.
         The default is `None`.
-    raster_time : float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
     Returns
     -------
     gradients : NDArray
         Gradients corresponding to `slewrates`.
     """
     # Handle no initial gradients
+    acq = acq or Acquisition.default
     if initial_gradients is None:
         initial_gradients = np.zeros((slewrates.shape[0], 1, slewrates.shape[-1]))
 
     # Prepare and integrate slew rates
-    gradients = slewrates * raster_time
+    gradients = slewrates * acq.raster_time
     gradients = np.concatenate([initial_gradients[:, None, :], gradients], axis=1)
     gradients = np.cumsum(gradients, axis=1)
     return gradients
@@ -392,10 +441,7 @@ def convert_slew_rates_to_gradients(
 
 def compute_gradients_and_slew_rates(
     trajectory: NDArray,
-    norm_factor: float = KMAX,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gamma: float = Gammas.HYDROGEN,
+    acq: Acquisition | None = None,
 ) -> tuple[NDArray, NDArray]:
     """Compute the gradients and slew rates from a normalized trajectory.
 
@@ -403,19 +449,9 @@ def compute_gradients_and_slew_rates(
     ----------
     trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
-    norm_factor : float, optional
-        Trajectory normalization factor, by default KMAX.
-    resolution : float, np.array, optional
-        Resolution of MR image in meters, isotropic as `int`
-        or anisotropic as `np.array`.
-        The default is DEFAULT_RESOLUTION.
-    raster_time : float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-    gamma : float, optional
-        Gyromagnetic ratio of the selected nucleus in kHz/T
-        The default is Gammas.HYDROGEN.
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
 
     Returns
     -------
@@ -427,14 +463,11 @@ def compute_gradients_and_slew_rates(
     # Convert normalized trajectory to gradients
     gradients, _ = convert_trajectory_to_gradients(
         trajectory,
-        norm_factor=norm_factor,
-        resolution=resolution,
-        raster_time=raster_time,
-        gamma=gamma,
+        acq,
     )
 
     # Convert gradients to slew rates
-    slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
+    slewrates, _ = convert_gradients_to_slew_rates(gradients, acq)
 
     return gradients, slewrates
 
@@ -442,9 +475,8 @@ def compute_gradients_and_slew_rates(
 def check_hardware_constraints(
     gradients: NDArray,
     slewrates: NDArray,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
-    order: int | str | None = None,
+    acq: Acquisition | None = None,
+    order: float | Literal["fro", "nuc"] | None = None,
 ) -> tuple[bool, float, float]:
     """Check if a trajectory satisfies the gradient hardware constraints.
 
@@ -454,10 +486,10 @@ def check_hardware_constraints(
         Gradients to check
     slewrates: NDArray
         Slewrates to check
-    gmax : float, optional
-        Maximum gradient amplitude in T/m. The default is DEFAULT_GMAX.
-    smax : float, optional
-        Maximum slew rate in T/m/ms. The default is DEFAULT_SMAX.
+    acq : Acquisition, optional
+        Acquisition configuration to use for checking.
+        If `None`, the default acquisition is used.
+
     order : int or str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
@@ -473,9 +505,11 @@ def check_hardware_constraints(
     float
         Maximum slew rate in T/m/ms.
     """
+    acq = acq or Acquisition.default
+
     max_grad = np.max(np.linalg.norm(gradients, axis=-1, ord=order))
     max_slew = np.max(np.linalg.norm(slewrates, axis=-1, ord=order))
-    return (max_grad < gmax) and (max_slew < smax), max_grad, max_slew
+    return (max_grad < acq.gmax) and (max_slew < acq.smax), max_grad, max_slew
 
 
 ###########

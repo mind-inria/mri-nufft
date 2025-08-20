@@ -12,13 +12,10 @@ from joblib import Parallel, delayed
 from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
+    Acquisition,
     VDSorder,
     VDSpdf,
     initialize_tilt,
-    DEFAULT_GMAX,
-    DEFAULT_RASTER_TIME,
-    DEFAULT_SMAX,
-    Gammas,
 )
 
 ################
@@ -362,7 +359,7 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     NDArray
         Trajectory with more but shorter single shots.
     """
-    Nc, Ns, Nd = trajectory.shape
+    _, Ns, Nd = trajectory.shape
     if Ns % (Ns_readouts + Ns_transitions) != Ns_readouts:
         raise ValueError(
             "`trajectory` shape does not match `Ns_readouts` or `Ns_transitions`."
@@ -421,10 +418,7 @@ def get_gradient_times_to_travel(
     kspace_start_loc: Optional[NDArray] = None,
     end_gradients: Optional[NDArray] = None,
     start_gradients: Optional[NDArray] = None,
-    gamma: float = Gammas.Hydrogen,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     n_jobs: int = 1,
 ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
     """Get gradient timing values for trapezoidal or triangular waveforms.
@@ -448,14 +442,9 @@ def get_gradient_times_to_travel(
         Ending gradient values, shape (nb_shots, nb_dimension).
     start_gradients : NDArray, default None when it is 0
         Starting gradient values, shape (nb_shots, nb_dimension).
-    gamma : float, optional
-        Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
-    raster_time : float, optional
-        Time interval between gradient samples (s). Default is DEFAULT_RASTER_TIME.
-    gmax : float, optional
-        Maximum gradient amplitude (T/m). Default is DEFAULT_GMAX.
-    smax : float, optional
-        Maximum slew rate ``T/m/s``. Default is DEFAULT_SMAX.
+    acq : Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     n_jobs : int, optional
         Number of parallel jobs to run for optimization, by default 1.
 
@@ -472,11 +461,11 @@ def get_gradient_times_to_travel(
         To directly get the waveforms required. This is most-likely what
         you want to use.
     """
-    area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+    area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time
 
     def solve_gi_min_plateau(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, smax, raster_time)
+            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, acq.smax, acq.raster_time)
             n_pl = _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area)
             if n_pl < 0:
                 return np.abs(n_pl) * 10000  # Penalize negative plateau
@@ -484,7 +473,7 @@ def get_gradient_times_to_travel(
 
         res = minimize_scalar(
             _residual,
-            bounds=(-gmax, gmax),
+            bounds=(-acq.gmax, acq.gmax),
             method="bounded",
         )
         if not res.success:
@@ -500,13 +489,13 @@ def get_gradient_times_to_travel(
         for i in range(start_gradients.shape[0])
         for j in range(start_gradients.shape[1])
     )
-    gi = np.reshape(gi, start_gradients.shape)
+    gi = np.array(gi).reshape(start_gradients.shape)
     n_ramp_down, n_ramp_up = _trapezoidal_ramps(
         start_gradients,
         end_gradients,
         gi,
-        smax,
-        raster_time,
+        acq.smax,
+        acq.raster_time,
         ceil=True,
         buffer=1,
     )
@@ -528,10 +517,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     end_gradients: Optional[NDArray] = None,
     start_gradients: Optional[NDArray] = None,
     nb_raster_points: Optional[int] = None,
-    gamma: float = Gammas.Hydrogen,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     n_jobs: int = 1,
 ) -> NDArray:
     """Calculate timings for trapezoidal or triangular gradient waveforms.
@@ -557,14 +543,9 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     nb_raster_points : int, default None
         Number of time steps (samples) for the gradient waveform.
         If None, timing is calculated based on the area needed and hardware limits.
-    gamma : float, optional
-        Gyromagnetic ratio in Hz/T. Default is Gammas.Hydrogen.
-    raster_time : float, optional
-        Time interval between gradient samples (s). Default is DEFAULT_RASTER_TIME.
-    gmax : float, optional
-        Maximum gradient amplitude (T/m). Default is DEFAULT_GMAX.
-    smax : float, optional
-        Maximum slew rate (T/m/s). Default is DEFAULT_SMAX.
+    acq : Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     n_jobs : int, optional
         Number of parallel jobs to run for optimization, by default 1.
 
@@ -606,19 +587,16 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             kspace_start_loc=kspace_start_loc,
             end_gradients=end_gradients,
             start_gradients=start_gradients,
-            gamma=gamma,
-            raster_time=raster_time,
-            gmax=gmax,
-            smax=smax,
+            acq=acq,
         )
         # Extra 2 buffer samples
-        nb_raster_points = np.max(n_ramp_down + n_ramp_up + n_plateau) + 2
+        nb_raster_points = int(np.max(n_ramp_down + n_ramp_up + n_plateau) + 2)
 
-    area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
+    area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time
 
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, smax, raster_time, buffer=1)
+            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, acq.smax, acq.raster_time, buffer=1)
             n_pl = nb_raster_points - n_down - n_up
             if n_pl < 0:
                 return np.abs(n_pl)  # Penalize this
@@ -626,7 +604,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             return np.abs(area - area_expr)
 
         res = minimize_scalar(
-            _residual, bounds=(-gmax, gmax), method="bounded", options={"xatol": 1e-10}
+            _residual, bounds=(-acq.gmax, acq.gmax), method="bounded", options={"xatol": 1e-10}
         )
         if not res.success:
             raise RuntimeError(f"Minimization failed: {res.message}")
@@ -641,13 +619,13 @@ def get_gradient_amplitudes_to_travel_for_set_time(
         for i in range(start_gradients.shape[0])
         for j in range(start_gradients.shape[1])
     )
-    gi = np.reshape(gi, start_gradients.shape)
+    gi = np.array(gi).reshape(start_gradients.shape)
     n_ramp_down, n_ramp_up = _trapezoidal_ramps(
         start_gradients,
         end_gradients,
         gi,
-        smax,
-        raster_time,
+        acq.smax,
+        acq.raster_time,
         ceil=True,
     )
     n_plateau = nb_raster_points - n_ramp_down - n_ramp_up
