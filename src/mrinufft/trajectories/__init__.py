@@ -1,6 +1,12 @@
 """Collection of trajectories and tools used for non-Cartesian MRI."""
 
-from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
+from .display import (
+    display_2D_trajectory,
+    display_3D_trajectory,
+    displayConfig,
+    display_gradients,
+    display_gradients_simply,
+)
 from .gradients import patch_center_anomaly
 from .inits import (
     initialize_2D_random_walk,
@@ -8,7 +14,7 @@ from .inits import (
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
-from .projection import fit_arc_length
+from .projection import parameterize_by_arc_length
 from .sampling import (
     create_chauffert_density,
     create_cutoff_decay_density,
@@ -117,6 +123,8 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "display_gradients",
+    "display_gradients_simply",
     # projection
-    "fit_arc_length",
+    "parameterize_by_arc_length",
 ]

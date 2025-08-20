@@ -64,6 +64,8 @@ from .trajectories import (
     displayConfig,
     display_2D_trajectory,
     display_3D_trajectory,
+    display_gradients,
+    display_gradients_simply,
 )
 
 from .density import voronoi, cell_count, pipe, get_density
@@ -130,6 +132,8 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "display_gradients",
+    "display_gradients_simply",
 ]
 
 from importlib.metadata import version, PackageNotFoundError

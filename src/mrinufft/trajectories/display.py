@@ -427,7 +427,6 @@ def display_gradients_simply(
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
-    show_signal: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
     subfigure: plt.Figure | None = None,
@@ -446,10 +445,6 @@ def display_gradients_simply(
     fill_area : bool, optional
         Fills the area under the curve for improved visibility and
         representation of the integral, aka trajectory.
-        The default is `True`.
-    show_signal : bool, optional
-        Show an additional illustration of the signal as
-        the modulated distance to the center.
         The default is `True`.
     uni_signal : str or None, optional
         Define whether the signal should be represented by a
@@ -471,13 +466,13 @@ def display_gradients_simply(
         Axes of the figure.
     """
     # Setup figure and labels
-    Nd = trajectory.shape[-1]
+    nb_axes = trajectory.shape[-1] + 1
     if subfigure is None:
-        fig = plt.figure(figsize=(figsize, figsize * (Nd + show_signal) / Nd))
+        fig = plt.figure(figsize=(figsize, figsize * nb_axes / (nb_axes - 1)))
     else:
         fig = subfigure
-    axes = fig.subplots(Nd + show_signal, 1)
-    for i, ax in enumerate(axes[:Nd]):
+    axes = fig.subplots(nb_axes, 1)
+    for i, ax in enumerate(axes[:nb_axes - 1]):
         ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
     axes[-1].set_xlabel("Time", fontsize=displayConfig.fontsize)
 
@@ -489,50 +484,42 @@ def display_gradients_simply(
 
     # Plot the curves for each axis
     gradients = np.diff(trajectory, axis=1)
-    vmax = 1.1 * np.max(np.abs(gradients[shot_ids, ...]))
-    x_axis = np.arange(gradients.shape[1])
+    vmax = 1.1 * np.max(np.linalg.norm(gradients[shot_ids, ...], axis=-1, ord=1))
+    for ax in axes[:-1]:
+        ax.set_ylim((-vmax, vmax))
+    axes[-1].set_ylim(-0.1 * vmax, vmax)
+
+    time_axis = np.arange(gradients.shape[1])
     colors = displayConfig.get_colorlist()
     for j, s_id in enumerate(shot_ids):
-        for i, ax in enumerate(axes[:Nd]):
-            ax.set_ylim((-vmax, vmax))
-            color = (
-                uni_gradient
-                if uni_gradient is not None
-                else colors[j % displayConfig.nb_colors]
-            )
-            ax.plot(x_axis, gradients[s_id, ..., i], color=color)
+        color = (
+            uni_gradient
+            if uni_gradient is not None
+            else colors[j % displayConfig.nb_colors]
+        )
+
+        # Set each axis individually
+        for i, ax in enumerate(axes[:-1]):
+            ax.plot(time_axis, gradients[s_id, ..., i], color=color)
             if fill_area:
                 ax.fill_between(
-                    x_axis,
+                    time_axis,
                     gradients[s_id, ..., i],
                     alpha=displayConfig.alpha,
                     color=color,
                 )
 
-    # Return axes alone
-    if not show_signal:
-        return axes
-
-    # Show signal as modulated distance to center
-    distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
-    distances = np.tile(distances.reshape((len(shot_ids), -1, 1)), (1, 1, 10))
-    signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
-    signal = (
-        signal * np.exp(2j * np.pi * figsize / 100 * np.arange(signal.shape[1]))
-    ).real
-    signal = signal * np.abs(signal) ** 3
-
-    colors = displayConfig.get_colorlist()
-    # Show signal for each requested shot
-    axes[-1].set_ylim((-1, 1))
-    axes[-1].set_ylabel("Signal", fontsize=displayConfig.fontsize)
-    for j in range(len(shot_ids)):
-        color = (
-            uni_signal
-            if (uni_signal is not None)
-            else colors[j % displayConfig.nb_colors]
-        )
-        axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
+        # Set the norm axis if requested
+        gradient_norm = np.linalg.norm(gradients[s_id], axis=-1)
+        axes[-1].set_ylabel("|G|", fontsize=displayConfig.fontsize)
+        axes[-1].plot(gradient_norm, color=color)
+        if fill_area:
+            axes[-1].fill_between(
+                time_axis,
+                gradient_norm,
+                alpha=displayConfig.alpha,
+                color=color,
+                )
     return axes
 
 
@@ -541,7 +528,7 @@ def display_gradients(
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
-    show_signal: bool = True,
+    show_norm: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
     subfigure: plt.Figure | plt.Axes | None = None,
@@ -567,7 +554,7 @@ def display_gradients(
         Fills the area under the curve for improved visibility and
         representation of the integral, aka trajectory.
         The default is `True`.
-    show_signal : bool, optional
+    show_norm : bool, optional
         Show an additional illustration of the signal as
         the modulated distance to the center.
         The default is `True`.
@@ -619,7 +606,7 @@ def display_gradients(
         shot_ids,
         figsize,
         fill_area,
-        show_signal,
+        show_norm,
         uni_signal,
         uni_gradient,
         subfigure,
@@ -633,7 +620,7 @@ def display_gradients(
             fontsize=displayConfig.small_fontsize,
         )
     axes[-1].set_xlabel("Time (ms)", fontsize=displayConfig.small_fontsize)
-    if show_signal:
+    if show_norm:
         axes[-1].set_ylabel("Signal (a.u.)", fontsize=displayConfig.small_fontsize)
 
     # Update axis ticks with rescaled values
@@ -642,7 +629,7 @@ def display_gradients(
         if ax == axes[-1]:
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
-            scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * raster_time
+            scale = (0.1 if (show_norm and ax == axes[-1]) else 1) * raster_time
             locator = mticker.FixedLocator(ticks)
             formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
             ax.xaxis.set_major_locator(locator)
@@ -663,7 +650,7 @@ def display_gradients(
         scale = 1e3 * scale  # Convert from T/m to mT/m
         locator = mticker.FixedLocator(ticks)
         formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
-        if not show_signal or ax != axes[-1]:
+        if not show_norm or ax != axes[-1]:
             ax.yaxis.set_major_locator(locator)
             ax.yaxis.set_major_formatter(formatter)
 

@@ -6,16 +6,20 @@ from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
 
-def fit_arc_length(
+def parameterize_by_arc_length(
     trajectory: NDArray, order: int | None = None, eps: float = 1e-8
 ) -> NDArray:
-    """Adjust the trajectory to have a uniform arc-length distribution.
+    """Adjust the trajectory to have a uniform distribution over the arc-length.
 
     The trajectory is parametrized according to its arc length along a
     cubic-interpolated path and samples are repositioned to minimize
     the gradients amplitude. This solution is optimal with respect to
     gradients but can lead to excessive slew rates, and it will change
     the overall density.
+
+    .. warning::
+        - Slew rates are not minimized, and instead likely to increase
+        - The sampling density will not be preserved
 
     Parameters
     ----------
