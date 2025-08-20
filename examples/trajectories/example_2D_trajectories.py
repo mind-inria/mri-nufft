@@ -32,7 +32,7 @@ from mrinufft import display_2D_trajectory
 # Trajectory parameters
 Nc = 24  # Number of shots
 Ns = 256  # Number of samples per shot
-in_out = True  # Choose between in-out or center-out trajectories
+in_out = False  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Choose the angular distance between shots
 nb_repetitions = 6  # Number of strips when relevant
 seed = 0  # Seed for random trajectories
