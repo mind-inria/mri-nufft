@@ -4,15 +4,10 @@ import numpy as np
 from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.io.utils import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories.trajectory2D import initialize_2D_radial
-from mrinufft.trajectories.utils import (
-    Gammas,
-    DEFAULT_GMAX,
-    DEFAULT_SMAX,
-    DEFAULT_RASTER_TIME,
-)
+from mrinufft.trajectories.utils import Gammas, Acquisition, Hardware
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 from mrinufft.trajectories.trajectory3D import initialize_3D_cones
-from pytest_cases import parametrize, parametrize_with_cases
+from pytest_cases import parametrize, parametrize_with_cases, fixture
 from case_trajectories import CasesTrajectories
 import pytest
 
@@ -44,7 +39,23 @@ class CasesIO:
         )
 
 
-@parametrize("gamma,raster_time", [(Gammas.Hydrogen, DEFAULT_RASTER_TIME)])
+@fixture(scope="module")
+@parametrize("gmax", [0.1, Acquisition.default.gmax])
+@parametrize("smax", [0.7, Acquisition.default.smax])
+def acquisition(gmax, smax):
+    """Create a default acquisition object."""
+    return Acquisition(
+        hardware=Hardware(
+            gmax=gmax,
+            smax=smax,
+            grad_raster_time=Acquisition.default.raster_time,
+        ),
+        fov=(0.23, 0.23, 0.1248),
+        img_size=(256, 256, 32),
+        gamma=Gammas.Hydrogen,
+    )
+
+
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
@@ -53,35 +64,29 @@ class CasesIO:
         CasesTrajectories.case_in_out_radial2D,
     ],
 )
-@parametrize("gmax", [0.1, DEFAULT_GMAX])
-@parametrize("smax", [0.7, DEFAULT_SMAX])
-def test_trajectory_state_changer_start(
-    kspace_loc, shape, gamma, raster_time, gmax, smax
-):
+def test_trajectory_state_changer_start(kspace_loc, shape, acquisition):
     """Test the trajectory state changer."""
+    acq = acquisition
     dimension = len(shape)
     resolution = dimension * (0.23 / 256,)
     trajectory = kspace_loc / resolution
-    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
+    gradients = np.diff(trajectory, axis=1) / acq.gamma / acq.raster_time
     GS = get_gradient_amplitudes_to_travel_for_set_time(
         kspace_end_loc=trajectory[:, 0],
         end_gradients=gradients[:, 0],
-        gamma=gamma,
-        raster_time=raster_time,
-        gmax=gmax,
-        smax=smax,
+        acq=acq,
     )
     # Hardware constraints check
-    assert np.all(np.abs(GS) <= gmax)
-    assert np.all(np.abs(np.diff(GS, axis=1) / raster_time) <= smax)
-    assert np.all(np.abs(GS[:, -1] - gradients[:, 0]) / raster_time < smax)
+    assert np.all(np.abs(GS) <= acq.gmax)
+    assert np.all(np.abs(np.diff(GS, axis=1) / acq.raster_time) <= acq.smax)
+    assert np.all(np.abs(GS[:, -1] - gradients[:, 0]) / acq.raster_time < acq.smax)
     if np.all(trajectory[:, 0] == 0):
         # If the trajectory starts at the origin, we can check that the first gradient is zero
         assert np.all(GS.shape[1] < 10)
     assert GS.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
-        np.sum(GS, axis=1) * gamma * raster_time,
+        np.sum(GS, axis=1) * acq.gamma * acq.raster_time,
         trajectory[:, 0],
         atol=1e-2 / min(resolution) / 2,
     )
@@ -89,7 +94,6 @@ def test_trajectory_state_changer_start(
     np.testing.assert_allclose(GS[:, 0], 0, atol=1e-5)
 
 
-@parametrize("gamma,raster_time", [(Gammas.Hydrogen, DEFAULT_RASTER_TIME)])
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[
@@ -98,33 +102,31 @@ def test_trajectory_state_changer_start(
         CasesTrajectories.case_in_out_radial2D,
     ],
 )
-@parametrize("gmax", [0.1, DEFAULT_GMAX])
-@parametrize("smax", [0.7, DEFAULT_SMAX])
 def test_trajectory_state_changer_end(
-    kspace_loc, shape, gamma, raster_time, gmax, smax
+    kspace_loc,
+    shape,
+    acquisition,
 ):
+    acq = acquisition
     dimension = len(shape)
     resolution = dimension * (0.23 / 256,)
     trajectory = kspace_loc / resolution
-    gradients = np.diff(trajectory, axis=1) / gamma / raster_time
+    gradients = np.diff(trajectory, axis=1) / acq.gamma / acq.raster_time
     GE = get_gradient_amplitudes_to_travel_for_set_time(
         kspace_start_loc=trajectory[:, -1],
         kspace_end_loc=np.zeros_like(trajectory[:, -1]),
         start_gradients=gradients[:, -1],
-        gamma=gamma,
-        raster_time=raster_time,
-        gmax=gmax,
-        smax=smax,
+        acq=acq,
     )
     # Hardware constraints check
-    assert np.all(np.abs(GE) <= gmax)
-    assert np.all(np.abs(np.diff(GE, axis=1) / raster_time) <= smax)
-    assert np.all(np.abs(GE[:, -1]) / raster_time < smax)
+    assert np.all(np.abs(GE) <= acq.gmax)
+    assert np.all(np.abs(np.diff(GE, axis=1) / acq.raster_time) <= acq.smax)
+    assert np.all(np.abs(GE[:, -1]) / acq.raster_time < acq.smax)
     assert GE.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
     np.testing.assert_allclose(
         0,
-        trajectory[:, -1] + np.sum(GE, axis=1) * gamma * raster_time,
+        trajectory[:, -1] + np.sum(GE, axis=1) * acq.gamma * acq.raster_time,
         atol=1e-2 / min(resolution) / 2,
     )
     # Check that gradients match.

@@ -203,8 +203,8 @@ class Hardware:
     gmax: float = 40 * SI.milli  # Maximum gradient amplitude in T/m
     smax: float = 200  # T/m/s
     n_coils: int = 8
-    dwell_time = 1 * SI.nano  # s
-    grad_raster_time = 5 * SI.micro  # s
+    dwell_time: float = 1 * SI.nano  # s
+    grad_raster_time: float = 5 * SI.micro  # s
     field_strength: float = 3.0  # Tesla
 
     @property
