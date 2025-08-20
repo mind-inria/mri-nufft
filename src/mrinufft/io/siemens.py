@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from .utils import siemens_quat_to_rot_mat
+from .utils import siemens_quat_to_rot_mat, nifti_affine
 
 
 def read_siemens_rawdat(
@@ -52,8 +52,9 @@ def read_siemens_rawdat(
     Notes
     -----
     This function requires the mapVBVD module to be installed.
-    You can install it using the following command:
-        `pip install pymapVBVD`
+    You can install it using the following command::
+
+        pip install pymapVBVD
     """
     try:
         from mapvbvd import mapVBVD
@@ -76,6 +77,7 @@ def read_siemens_rawdat(
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
         "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
+        "affine": nifti_affine(twixObj),
         "acs": None,
     }
     if "refscan" in twixObj.keys():

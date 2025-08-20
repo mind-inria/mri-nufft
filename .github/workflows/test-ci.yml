@@ -51,36 +51,9 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
-          python -m pip install -e .[test]
-
-      - name: Install pynfft
-        if: ${{ matrix.backend == 'pynfft' || env.ref_backend == 'pynfft' }}
-        shell: bash
-        run: |
-          ${{ env.activate_venv }}
-          python -m pip install "pynfft2>=1.4.3"
-
-      - name: Install pynufft
-        if: ${{ matrix.backend == 'pynufft-cpu' || env.ref_backend == 'pynufft-cpu' }}
-        run: |
-          ${{ env.activate_venv }}
-          python -m pip install pynufft
-
-      - name: Install finufft
-        if: ${{ matrix.backend == 'finufft'  || env.ref_backend == 'finufft'}}
-        shell: bash
-        run: |
-          ${{ env.activate_venv }}
-          python -m pip install finufft
-
-      - name: Install Sigpy
-        if: ${{ matrix.backend == 'sigpy'  || env.ref_backend == 'sigpy'}}
-        shell: bash
-        run: |
-          ${{ env.activate_venv }}
-          python -m pip install sigpy
-
-      - name: Install BART
+          python -m pip install -e .[test,${{ env.ref_backend }},${{ matrix.backend }}]
+          
+      - name: Install BART if needed
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
         shell: bash
         run: |
@@ -91,13 +64,6 @@ jobs:
           cd bart-${{ env.BART_VERSION }}
           make
           echo $PWD >> $GITHUB_PATH
-
-      - name: Install torchkbnufft-cpu
-        if: ${{ matrix.backend == 'torchkbnufft-cpu'  || env.ref_backend == 'torchkbnufft-cpu'}}
-        run: |
-          ${{ env.activate_venv }}
-          python -m pip install torchkbnufft
-
 
       - name: Run Tests
         shell: bash
@@ -127,33 +93,22 @@ jobs:
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip wheel
-          python -m pip install -e .[test]
-          python -m pip install cupy-cuda12x finufft "numpy<2.0"
+          cd $RUNNER_WORKSPACE
+          python --version
+          python -m venv venv
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          pip install --upgrade pip wheel
+          pip install -e mri-nufft[test,finufft]
 
-      - name: Install torch with CUDA 12.1
-        shell: bash
-        if: ${{ matrix.backend != 'tensorflow'}}
-        run: |
-          ${{ env.activate_venv }}
-          ${{ env.setup_cuda }}
-          python -m pip install torch
 
       - name: Install backend
         shell: bash
         run: |
-          ${{ env.activate_venv }}
-          if [[ ${{ matrix.backend }} == "torchkbnufft-gpu" ]]; then
-            python -m pip install torchkbnufft
-          elif [[ ${{ matrix.backend }} == "tensorflow" ]]; then
-            python -m pip install tensorflow-mri==0.21.0 tensorflow-probability==0.17.0 tensorflow-io==0.27.0 matplotlib==3.7
-          elif [[ ${{ matrix.backend }} == "cufinufft" ]]; then
-            python -m pip install "cufinufft<2.3"
-          else
-            python -m pip install ${{ matrix.backend }}
-          fi
+          source $RUNNER_WORKSPACE/venv/bin/activate
+          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
+          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
+          pip install -e .[${{ matrix.backend }},autodiff]
 
       - name: Run Tests
         shell: bash
@@ -268,20 +223,22 @@ jobs:
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
           python -m pip install -e .[extra,test,dev]
-          python -m pip install finufft pooch brainweb-dl torch fastmri
+          python -m pip install pooch brainweb-dl torch fastmri
 
-      - name: Install GPU related interfaces
+      - name: Install Python deps
+        shell: bash
         run: |
           ${{ env.activate_venv }}
           ${{ env.setup_cuda }}
-          pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image fastmri
-
+          python -m pip install --upgrade pip
+          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,smaps,autodiff,doc]
+        
       - name: Run examples
         shell: bash
         run: |
           ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
+          export MRINUFFT_BACKEND=cufinufft
           python -m pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
@@ -377,26 +334,26 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
+        
+      - name: Point to CUDA 12.4
+        run: |
+          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
+          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
+          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
+      
       - name: Install dependencies
         shell: bash -l {0}
         run: |
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
-          python -m pip install .[doc,extra]
-          python -m pip install finufft
-
-      - name: Install GPU related interfaces
-        run: |
-          ${{ env.activate_venv }}
-          ${{ env.setup_cuda }}
-          pip install cupy-cuda12x torch
-          python -m pip install gpuNUFFT "cufinufft<2.3" sigpy scikit-image fastmri
-
+          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft,sigpy,extra] fastmri
+      
+          
       - name: Build API documentation
         run: |
           ${{ env.activate_venv }}
+          export MRINUFFT_BACKEND=cufinufft
           python -m sphinx docs docs_build
 
       - name: Display data
