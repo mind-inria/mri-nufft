@@ -385,6 +385,8 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_amplitudes_to_travel_for_set_time.html">get_gradient_amplitudes_to_travel_for_set_time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_times_to_travel.html">get_gradient_times_to_travel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
@@ -844,9 +846,21 @@ This file mainly specifies an arbitrary gradient profile which is played on scan
 <td><p>n.a.</p></td>
 <td><p>Time stamp when the binary is created</p></td>
 </tr>
+<tr class="row-odd"><td><p>ADC pre-skip</p></td>
+<td><p>FLOAT</p></td>
+<td><p>1</p></td>
+<td><p>n.a.</p></td>
+<td><p>Gradient samples to skip before starting ADC, for pre-phasors</p></td>
+</tr>
+<tr class="row-even"><td><p>ADC post-skip</p></td>
+<td><p>FLOAT</p></td>
+<td><p>1</p></td>
+<td><p>n.a.</p></td>
+<td><p>Gradient samples to skip at the end of trajectory by turning off ADC</p></td>
+</tr>
 <tr class="row-odd"><td><p>Empty places</p></td>
 <td><p>FLOAT</p></td>
-<td><p>9</p></td>
+<td><p>7</p></td>
 <td><p>n.a.</p></td>
 <td><p>Yet unused : Default initialized with 0</p></td>
 </tr>
