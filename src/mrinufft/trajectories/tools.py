@@ -495,7 +495,6 @@ def get_gradient_times_to_travel(
     n_ramp_down: The timing values for the ramp down phase.
     n_ramp_up: The timing values for the ramp up phase.
     n_plateau: The timing values for the plateau phase.
-    n_direct: The timing values in case we can do direct gradients.
     gi: The intermediate gradient values for trapezoidal or triangular waveforms.
 
     See Also
@@ -522,7 +521,6 @@ def get_gradient_times_to_travel(
                 return np.abs(n_pl) * 10000  # Penalize negative plateau
             return n_pl * 100  # Penalize large plateau
 
-        # Minimize the residual to find gi
         res = minimize_scalar(
             _residual,
             bounds=(-gmax, gmax),
