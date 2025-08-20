@@ -110,7 +110,6 @@ def test_zmap_coeff(zmap, mask, array_interface):
 
 def test_b0_map_upsampling_warns_and_matches_shape():
     """Test that MRIFourierCorrected upscales the b0_map and warns if shape mismatch exists."""
-
     shape_target = (16, 16, 16)
     b0_shape = (8, 8, 8)
 
