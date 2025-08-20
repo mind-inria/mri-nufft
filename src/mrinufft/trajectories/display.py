@@ -390,8 +390,12 @@ def display_3D_trajectory(
         )
 
         # Check constraints
-        gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > acq.gmax)]
-        slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > acq.smax)]
+        gradients = trajectory.reshape((-1, 3))[
+            np.where(gradients.flatten() > acq.gmax)
+        ]
+        slewrates = trajectory.reshape((-1, 3))[
+            np.where(slewrates.flatten() > acq.smax)
+        ]
 
         # Scatter points with vivid colors
         ax.scatter(
