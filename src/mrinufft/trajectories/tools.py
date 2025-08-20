@@ -1439,7 +1439,7 @@ def add_slew_ramp(
                 return traj
             return _add_slew_ramp_to_traj_func(
                 trajectory_func,
-                func_args,
+                bound.arguments,
                 ramp_to_index=_ramp_to_index,
                 resolution=_resolution,
                 raster_time=_raster_time,
