@@ -1,9 +1,10 @@
+# type: ignore
 """Display functions for trajectories."""
 
 from __future__ import annotations
 
 import itertools
-from typing import Any
+from typing import Any, Literal
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -12,10 +13,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .utils import (
-    DEFAULT_GMAX,
-    DEFAULT_RASTER_TIME,
-    DEFAULT_SMAX,
-    KMAX,
+    Acquisition,
     compute_gradients_and_slew_rates,
     convert_trajectory_to_gradients,
 )
@@ -145,7 +143,7 @@ def _setup_2D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
     return ax
 
 
-def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
+def _setup_3D_ticks(figsize: float, fig: plt.FigureBase | None = None) -> plt.Axes:
     """Add ticks to 3D plot."""
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
@@ -174,9 +172,8 @@ def display_2D_trajectory(
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
-    constraints_order: int | str | None = None,
+    acq: Acquisition | None = None,
+    constraints_order: float | Literal["fro"] | None = None,
     **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
     """Display 2D trajectories.
@@ -199,12 +196,9 @@ def display_2D_trajectory(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
@@ -221,7 +215,7 @@ def display_2D_trajectory(
         Axes of the figure.
     """
     # Setup figure and ticks
-    Nc, Ns = trajectory.shape[:2]
+    Nc, _ = trajectory.shape[:2]
     ax = _setup_2D_ticks(figsize, subfigure)
     colors = displayConfig.get_colorlist()
     # Display every shot
@@ -264,8 +258,8 @@ def display_2D_trajectory(
 
         # Check constraints
         trajectory = trajectory.reshape((-1, 2))
-        gradients = trajectory[np.where(gradients.flatten() > gmax)]
-        slews = trajectory[np.where(slews.flatten() > smax)]
+        gradients = trajectory[np.where(gradients.flatten() > acq.gmax)]
+        slews = trajectory[np.where(slews.flatten() > acq.smax)]
 
         # Scatter points with vivid colors
         ax.scatter(
@@ -291,8 +285,7 @@ def display_3D_trajectory(
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
     **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
@@ -322,12 +315,9 @@ def display_3D_trajectory(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
@@ -400,8 +390,8 @@ def display_3D_trajectory(
         )
 
         # Check constraints
-        gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > gmax)]
-        slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
+        gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > acq.gmax)]
+        slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > acq.smax)]
 
         # Scatter points with vivid colors
         ax.scatter(
@@ -546,10 +536,8 @@ def display_gradients(
     uni_gradient: str | None = None,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
-    raster_time: float = DEFAULT_RASTER_TIME,
     **constraints_kwargs: Any,  # noqa ANN401
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
@@ -588,12 +576,9 @@ def display_gradients(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
@@ -681,14 +666,14 @@ def display_gradients(
 
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
-        pts = np.where(gradients > gmax)
+        pts = np.where(gradients > acq.gmax)
         ax.scatter(
             pts,
             np.zeros_like(pts),
             color=displayConfig.gradient_point_color,
             s=displayConfig.pointsize,
         )
-        pts = np.where(slewrates > smax)
+        pts = np.where(slewrates > acq.smax)
         ax.scatter(
             pts,
             np.zeros_like(pts),
