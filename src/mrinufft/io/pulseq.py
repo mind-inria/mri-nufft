@@ -15,18 +15,21 @@ from .utils import prepare_trajectory_for_seq
 from mrinufft.trajectories.utils import KMAX
 
 
-def read_pulseq_traj(seq, traj_delay=0.0, grad_offset=0.0):
+def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
     """Extract k-space trajectory from a Pulseq sequence file.
 
     The sequence should be a valid Pulseq `.seq` file, with arbitrary gradient
     waveforms, which all have the same length.
 
-    Note
 
     Parameters
     ----------
     sequence : pulseq Sequence, or Path to the Pulseq `.seq` file.
-
+        The Pulseq sequence object or the path to the `.seq` file.
+    trajectory_delay : float, optional
+        Compensation factor in seconds (s) to align ADC and gradients in the reconstruction.
+    gradient_offset : float, optional
+        Simulates background gradients (specified in Hz/m)
     Returns
     -------
     description : dict
@@ -34,14 +37,15 @@ def read_pulseq_traj(seq, traj_delay=0.0, grad_offset=0.0):
     np.ndarray
         The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
         where the last dimension corresponds to the x, y, and z coordinates in k-space.
-
     """
     if not isinstance(seq, pp.Sequence):
         filename = seq
         seq = pp.Sequence()
         seq.read(filename)
 
-    kspace_adc, _, t_exc, t_refocus, t_adc = seq.calculate_kspace()
+    kspace_adc, _, t_exc, t_refocus, t_adc = seq.calculate_kspace(
+        trajectory_delay=trajectory_delay, gradient_offset=gradient_offset
+    )
 
     if not t_adc:
         raise ValueError(
@@ -77,7 +81,7 @@ def _check_timings(seq):
         warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
 
 
-def pulseq_gre_3D(
+def pulseq_gre(
     trajectory: NDArray,
     fov: tuple[float, float, float],
     img_size: tuple[int, int, int],
@@ -85,10 +89,12 @@ def pulseq_gre_3D(
     TE: float,
     TE_pos: float = 0.5,
     FA: float | None = None,
+    gre_2D: bool = False,
+    slice_overlap: float = 0.0,
     rf_pulse: SimpleNamespace | None = None,
     rf_spoiling_inc: float = 0.0,
     grad_spoil_factor: float = 2.0,
-    system: pp.Opts = pp.Opts.default,
+    system: pp.Opts | None = None,
     osf: int = 1,
 ) -> pp.Sequence:
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.
@@ -114,7 +120,12 @@ def pulseq_gre_3D(
     rf_spoiling_inc: float, optional
         The increment in the RF phase (in degree) for spoiling. Default is 0.0,
         which means no spoiling.
-
+    gre_2D: bool, optional
+        If True, the sequence will be a 2D GRE sequence. Default is False,
+        which means a 3D GRE sequence.
+    slice_overlap: float, optional
+        The slice overlap proportion for 2D GRE sequences. Default is 0.0
+        Positive values indicates an overlap, negative values indicates a gap.
     grad_spoil_factor: float, optional
         The factor by which the spoiler gradient moves to the edge of k-space. Default is 2.0.
     osf: int, optional
@@ -137,6 +148,11 @@ def pulseq_gre_3D(
     4. Gradient spoilers
     5. Delay to sync the next TR
 
+
+    If `gre_2D` is True, the sequence will be a 2D GRE sequence, and the slice
+    thickness will be determined as :math:`(FOV[2] / img_size[2]) *
+    (1+slice_overlap)`
+
     Returns
     -------
     pp.Sequence
@@ -144,9 +160,15 @@ def pulseq_gre_3D(
     """
     TR = TR / 1000.0  # convert to seconds
     TE = TE / 1000.0  # convert to seconds
+    if system is None:
+        system = pp.Opts.default
     seq = pp.Sequence(system=system)
 
-
+    if gre_2D and rf_pulse is not None:
+        raise ValueError(
+            "2D GRE sequences do not support custom RF pulses. "
+            "Please set `rf_pulse` to None or use a block pulse."
+        )
     if rf_pulse is None and FA is not None:
         rf_pulse = pp.make_block_pulse(flip_angle=FA, system=system, use="excitation")
     elif rf_pulse is not None and FA is not None:
@@ -164,7 +186,9 @@ def pulseq_gre_3D(
     if FA is None:
         # Compute the flip angle from the RF pulse
         # following https://github.com/imr-framework/pypulseq/tree/src/pypulseq/Sequence/ext_test_report.py#L24
-        FA = float(abs(np.sum(rf_pulse.signal[:-1]*(rf_pulse.t[1:] - rf_pulse.t[:-1]))) * 360)
+        FA = float(
+            abs(np.sum(rf_pulse.signal[:-1] * (rf_pulse.t[1:] - rf_pulse.t[:-1]))) * 360
+        )
 
     seq.set_definition("FOV", fov)
     seq.set_definition("ImgSize", img_size)
@@ -211,6 +235,18 @@ def pulseq_gre_3D(
         - delay_before_grad.delay
         - full_grads.shape[1] * system.grad_raster_time
     )
+    if gre_2D:
+        return _pulseq_gre_2D(
+            seq,
+            full_grads[:, :2],
+            rf_spoiling_inc,
+            adc,
+            spoiler,
+            delay_before_grad,
+            delay_end_TR,
+            thickness=fov[2] / img_size[2] * (1 + slice_overlap),
+            slice_locs=trajectory[:,2]
+        )
 
     rf_phase = 0.0
     for grad_xyz in full_grads:
@@ -237,28 +273,55 @@ def pulseq_gre_3D(
     return seq
 
 
-def gre_2D(trajectory, TR, TE, FA, pulse, system=pp.Opts.default):
-    """Create a Pulseq 2D-GRE sequence for arbitrary 2D trajectories.
+def _pulseq_gre_2D(
+    seq: pp.Sequence,
+    full_grads: NDArray,
+    rf_spoiling_inc: float,
+    adc: SimpleNamespace,
+    spoiler: SimpleNamespace,
+    delay_before_grad: SimpleNamespace,
+    delay_end_TR: SimpleNamespace,
+    thickness: float,
+    slice_locs: NDArray
+) -> pp.Sequence:
+    """Create a Pulseq 2D-GRE sequence for arbitrary trajectories."""
 
-    Parameters
-    ----------
-    trajectory : np.ndarray
-        The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
-        where the last dimension corresponds to the x, y, and z coordinates in k-space.
-    TR: float
-        The repetition time in milliseconds (ms).
-    TE: float
-        The echo time in milliseconds (ms).
-    FA: float
-        The flip angle in degrees (°).
-    pulse: SimpleNamespace
-        A custom radio-frequency pulse object.
-    system : pypulseq.Opts, optional
-        The system options for the Pulseq sequence. Default is `pp.Opts.default`.
+    rf, gz, gzr = pp.make_sinc_pulse(
+        flip_angle=float(seq.get_definition("FA")),
+        slice_thickness=thickness,
+        return_gz=True,
+        system=seq.system,
+    )  # type: ignore[assignment]
 
-    Returns
-    -------
-    pp.Sequence
-        A Pulseq sequence object with the specified arbitrary gradient waveform.
-    """
-    ...
+    rf_phase = 0.0
+    nz = seq.get_definition("ImgSize")[2]
+    for grad_xyz, kz in zip(full_grads, slice_locs):
+        rf_phase = divmod(rf_phase + rf_spoiling_inc, 360.0)[1]
+
+        # Update the Gz component
+        # Update the RF pulse phase offset
+        rf.frequency_offset = gz.amplitude * thickness * kz * nz
+        rf.phase_offset = rf_phase / 180 * np.pi
+        adc.phase_offset = rf_phase / 180 * np.pi
+        seq.add_block(rf, gz)  # RF pulse and slice selection gradient for a 2D
+        seq.add_block(adc)  # ADC
+        seq.add_block(delay_before_grad)  # delay to sync TE
+        # Add the gradient waveform, the first/last points are set to 0
+        # to avoid accumulating offsets between shots
+        seq.add_block(
+            *[
+                pp.make_arbitrary_grad(
+                    channel=c,
+                    waveform=grad_xyz[:, i],
+                    first=0,
+                    last=0,
+                    system=seq.system,
+                )
+                for i, c in enumerate("xyz")
+            ], # Gx and Gy are arbitrary gradients
+            gzr, # Refocusing gradient for Gzr
+        )
+        seq.add_block(spoiler, delay_end_TR)
+
+    _check_timings(seq)
+    return seq
