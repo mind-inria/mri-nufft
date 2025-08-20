@@ -1299,6 +1299,7 @@ def stack_random(
 
     return new_trajectory.reshape(-1, Ns, 3)
 
+
 def _add_slew_ramp_to_traj_func(
     func: Callable,
     func_kwargs: dict,
@@ -1323,7 +1324,7 @@ def _add_slew_ramp_to_traj_func(
         smax=smax,
         n_jobs=-1,  # Use all available cores
     )
-    # Update the Ns of the trajectory to ensure we still give 
+    # Update the Ns of the trajectory to ensure we still give
     # same Ns as users expect. We use extra 2 points as buffer.
     n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
     func_kwargs["Ns"] -= n_slew_ramp - ramp_to_index
@@ -1370,7 +1371,7 @@ def add_slew_ramp(
     The ramps are applied to the gradients of the trajectory
     at the specified `ramp_to_index`, which is by-default the
     index of the 5th readout sample.
-    Note that this decorator does not change the length of the original 
+    Note that this decorator does not change the length of the original
     trajectory.
 
     Parameters
@@ -1385,7 +1386,7 @@ def add_slew_ramp(
         The resolution of the trajectory, by default DEFAULT_RESOLUTION.
         This can be a single float or an array-like of shape (3,).
     raster_time : float, optional
-        The time interval between samples in the trajectory, by default 
+        The time interval between samples in the trajectory, by default
         DEFAULT_RASTER_TIME.
     gamma : float, optional
         The gyromagnetic ratio in Hz/T, by default Gammas.Hydrogen.
@@ -1395,13 +1396,13 @@ def add_slew_ramp(
         If True, disables the slew ramp and returns the trajectory as is,
         by default False. This is useful for in-out trajectories where
         the slew ramp is not needed.
-    
+
     Returns
     -------
     Callable
         A decorator that modifies the trajectory function to include
         slew rate ramps.
-    
+
     Notes
     -----
     - The decorator modifies the trajectory function to ensure that the
@@ -1411,7 +1412,7 @@ def add_slew_ramp(
         return the trajectory as is, without applying any slew ramps.
     - The decorator can be used with or without providing a function.
     - If used without a function, it returns a decorator that can be applied later.
-    - The decorated function should accept parameters like `smax`, `resolution`,    
+    - The decorated function should accept parameters like `smax`, `resolution`,
         `raster_time`, `gamma`, and `ramp_to_index` to control the behavior of the
         slew ramping.
     """
@@ -1446,7 +1447,6 @@ def add_slew_ramp(
                 gamma=_gamma,
                 smax=_smax,
             )
-
 
         return wrapped
 
