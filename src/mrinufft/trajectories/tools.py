@@ -596,7 +596,9 @@ def get_gradient_amplitudes_to_travel_for_set_time(
 
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
-            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, acq.smax, acq.raster_time, buffer=1)
+            n_down, n_up = _trapezoidal_ramps(
+                gs, ge, gi, acq.smax, acq.raster_time, buffer=1
+            )
             n_pl = nb_raster_points - n_down - n_up
             if n_pl < 0:
                 return np.abs(n_pl)  # Penalize this
@@ -604,7 +606,10 @@ def get_gradient_amplitudes_to_travel_for_set_time(
             return np.abs(area - area_expr)
 
         res = minimize_scalar(
-            _residual, bounds=(-acq.gmax, acq.gmax), method="bounded", options={"xatol": 1e-10}
+            _residual,
+            bounds=(-acq.gmax, acq.gmax),
+            method="bounded",
+            options={"xatol": 1e-10},
         )
         if not res.success:
             raise RuntimeError(f"Minimization failed: {res.message}")
