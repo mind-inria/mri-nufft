@@ -271,7 +271,6 @@ def write_trajectory(
         These are arguments passed to write_gradients function above.
     """
     # Convert normalized trajectory to gradients
-
     if version < 5.1 and pregrad is None and postgrad is None:
         gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
             trajectory,

@@ -616,7 +616,7 @@ def get_gradient_amplitudes_to_travel_for_set_time(
 
     area_needed = (kspace_end_loc - kspace_start_loc) / gamma / raster_time
 
-
+    
     def solve_gi_fixed_N(gs, ge, area):
         def _residual(gi):
             n_down, n_up = _trapezoidal_ramps(gs, ge, gi, smax, raster_time, buffer=1)
