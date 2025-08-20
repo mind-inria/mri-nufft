@@ -1299,6 +1299,59 @@ def stack_random(
 
     return new_trajectory.reshape(-1, Ns, 3)
 
+def _add_slew_ramp_to_traj_func(
+    func: Callable,
+    func_kwargs: dict,
+    ramp_to_index: int,
+    resolution: float,
+    raster_time: float,
+    gamma: float,
+    smax: float,
+):
+    traj = func(**func_kwargs)
+    unnormalized_traj = unnormalize_trajectory(traj, resolution=resolution)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        traj, resolution=resolution, raster_time=raster_time, gamma=gamma
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    # Calculate the number of time steps for ramps
+    n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
+        kspace_end_loc=unnormalized_traj[:, ramp_to_index],
+        end_gradients=gradients_to_reach,
+        gamma=gamma,
+        raster_time=raster_time,
+        smax=smax,
+        n_jobs=-1,  # Use all available cores
+    )
+    # Update the Ns of the trajectory to ensure we still give 
+    # same Ns as users expect. We use extra 2 points as buffer.
+    n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
+    func_kwargs["Ns"] -= n_slew_ramp - ramp_to_index
+    new_traj = func(**func_kwargs)
+    # Re-calculate the gradients
+    unnormalized_traj = unnormalize_trajectory(new_traj, resolution=resolution)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        new_traj, resolution=resolution, raster_time=raster_time, gamma=gamma
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+        kspace_end_loc=unnormalized_traj[:, ramp_to_index],
+        end_gradients=gradients_to_reach,
+        nb_raster_points=n_slew_ramp,
+        gamma=gamma,
+        raster_time=raster_time,
+        smax=smax,
+        n_jobs=-1,  # Use all available core
+    )[:, :-1]
+    ramp_up_traj = convert_gradients_to_trajectory(
+        gradients=ramp_up_gradients,
+        initial_positions=initial_positions,
+        resolution=resolution,
+        raster_time=raster_time,
+        gamma=gamma,
+    )
+    return np.hstack([ramp_up_traj, new_traj[:, ramp_to_index:]])
+
 
 def add_slew_ramp(
     func: Optional[Callable] = None,
@@ -1315,8 +1368,10 @@ def add_slew_ramp(
     slew rate ramps, ensuring that the trajectory adheres to
     the maximum slew rate and gradient amplitude constraints.
     The ramps are applied to the gradients of the trajectory
-    at the specified `ramp_to_index`, which is typically the
-    index of the first readout sample.
+    at the specified `ramp_to_index`, which is by-default the
+    index of the 5th readout sample.
+    Note that this decorator does not change the length of the original 
+    trajectory.
 
     Parameters
     ----------
@@ -1378,53 +1433,20 @@ def add_slew_ramp(
             bound = sig.bind(*args, **kwargs)
             bound.apply_defaults()
             in_out = bound.arguments.get("in_out", False)
-            traj = trajectory_func(*args, **kwargs)
             if in_out or _slew_ramp_disable:
+                traj = trajectory_func(*args, **kwargs)
                 # Send the trajectory as is for in-out trajectories
                 return traj
-            unnormalized_traj = unnormalize_trajectory(traj, resolution=_resolution)
-            gradients, initial_positions = convert_trajectory_to_gradients(
-                traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma
-            )
-            gradients_to_reach = gradients[:, _ramp_to_index]
-            # Calculate the number of time steps for ramps
-            n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
-                kspace_end_loc=unnormalized_traj[:, _ramp_to_index],
-                end_gradients=gradients_to_reach,
-                gamma=_gamma,
-                raster_time=_raster_time,
-                smax=_smax,
-                n_jobs=-1,  # Use all available cores
-            )
-            # Update the Ns of the trajectory to ensure we still give 
-            # same Ns as users expect. We use extra 2 points as buffer.
-            n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
-            bound.arguments["Ns"] -= n_slew_ramp - _ramp_to_index
-            new_traj = trajectory_func(**bound.arguments)
-
-            # Re-calculate the gradients
-            unnormalized_traj = unnormalize_trajectory(new_traj, resolution=_resolution)
-            gradients, initial_positions = convert_trajectory_to_gradients(
-                new_traj, resolution=_resolution, raster_time=_raster_time, gamma=_gamma
-            )
-            gradients_to_reach = gradients[:, _ramp_to_index]
-            ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-                kspace_end_loc=unnormalized_traj[:, _ramp_to_index],
-                end_gradients=gradients_to_reach,
-                nb_raster_points=n_slew_ramp,
-                gamma=_gamma,
-                raster_time=_raster_time,
-                smax=_smax,
-                n_jobs=-1,  # Use all available core
-            )[:, :-1]
-            ramp_up_traj = convert_gradients_to_trajectory(
-                gradients=ramp_up_gradients,
-                initial_positions=initial_positions,
+            return _add_slew_ramp_to_traj_func(
+                trajectory_func,
+                func_args,
+                ramp_to_index=_ramp_to_index,
                 resolution=_resolution,
                 raster_time=_raster_time,
                 gamma=_gamma,
+                smax=_smax,
             )
-            return np.hstack([ramp_up_traj, new_traj[:, _ramp_to_index:]])
+
 
         return wrapped
 
