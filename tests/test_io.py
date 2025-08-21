@@ -81,7 +81,7 @@ def test_trajectory_state_changer_start(kspace_loc, shape, acquisition):
     assert np.all(np.abs(np.diff(GS, axis=1) / acq.raster_time) <= acq.smax)
     assert np.all(np.abs(GS[:, -1] - gradients[:, 0]) / acq.raster_time < acq.smax)
     if np.all(trajectory[:, 0] == 0):
-        # If the trajectory starts at the origin, we can check that the first gradient is zero
+        # trajectory starts at the origin, check that the first gradient is zero
         assert np.all(GS.shape[1] < 10)
     assert GS.shape[1] < 200  # Checks to ensure we don't have too many samples
     # Check that ending location matches.
@@ -107,6 +107,7 @@ def test_trajectory_state_changer_end(
     shape,
     acquisition,
 ):
+    """Test the trajectory state changer for the end of the trajectory."""
     acq = acquisition
     dimension = len(shape)
     resolution = dimension * (0.23 / 256,)
@@ -154,6 +155,7 @@ def test_write_n_read(
     postgrad,
     pregrad,
 ):
+    """Write the trajectory to a file and read it back."""
     if version < 5.1 and (postgrad is not None or pregrad is not None):
         pytest.skip("postgrad 'slowdown_to_edge' is not supported in version < 5.0")
     """Test function which writes the trajectory and reads it back."""
