@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import ClassVar, Any
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
@@ -184,6 +183,8 @@ class VDSpdf(StrEnum):
 
 
 class SI:
+    """SI prefixes."""
+
     giga = 1e9
     mega = 1e6
     kilo = 1e3
@@ -200,33 +201,116 @@ class SI:
 
 @dataclass(frozen=True)
 class Hardware:
+    """
+    Hardware configuration for MRI sequences.
+
+    Parameters
+    ----------
+    gmax : float
+        Maximum gradient amplitude in T/m. Defaults to 40 mT/m.
+    smax : float
+        Maximum slew rate in T/m/s. Defaults to 200 T/m/s.
+    n_coils : int
+        Number of coils used in the MRI system. Defaults to 8.
+    dwell_time : float
+        Dwell time in seconds. Defaults to 1 ns.
+    grad_raster_time : float
+        Gradient raster time in seconds. Defaults to 5 us.
+    field_strength : float
+        Magnetic field strength in Tesla. Defaults to 3.0 T.
+
+    Attributes
+    ----------
+    raster_time : float
+        The gradient raster time in seconds, which is the same as `grad_raster_time`.
+
+    Notes
+    -----
+    The `Hardware` class encapsulates the hardware constraints for MRI sequences,
+    including the maximum gradient amplitude, slew rate, number of coils, dwell time,
+    gradient raster time, and magnetic field strength.
+    It is designed to be used in conjunction with the `Acquisition` class, which defines
+    acquisition parameters such as field of view, image size, and gyromagnetic ratio.
+
+    The default values for the parameters are set to typical values used in MRI systems.
+    These values can be adjusted based on the specific hardware being used for MRI
+    acquisition.
+
+    For convenience, we define several common hardware configurations,
+
+    """
+
     gmax: float = 40 * SI.milli  # Maximum gradient amplitude in T/m
     smax: float = 200  # T/m/s
-    n_coils: int = 8
+    n_coils: int = 32
     dwell_time: float = 1 * SI.nano  # s
     grad_raster_time: float = 5 * SI.micro  # s
     field_strength: float = 3.0  # Tesla
 
     @property
     def raster_time(self) -> float:
+        """Alias of grad_raster_time."""
         return self.grad_raster_time
 
+# fmt: off
+class SIEMENS:
+    """Common hardware configurations for Siemens MRI systems."""
 
-class SIEMENS_HARDWARE(object):
-    TERRAX = Hardware()
-    PRISMA = ...
-    CIMA = ...
-    CIMAX = ...
-    ISEULT = ...
+    TERRA          = Hardware(gmax=80*SI.milli, smax=200, field_strength=7)
+    TERRAX         = Hardware(gmax=200*SI.milli, smax=200, field_strength=7)
+    TERRAX_IMPULSE = Hardware(gmax=200*SI.milli, smax=900, field_strength=7)
+    PRISMA         = Hardware(gmax=40*SI.milli, smax=200, field_strength=3)
+    CIMA           = Hardware(gmax=200*SI.milli, smax=200, field_strength=3)
+    CIMAX          = Hardware(gmax=200*SI.milli, smax=200, field_strength=3)
 
+# fmt: on
 
 @dataclass(frozen=True)
 class Acquisition:
+    """
+    Acquisition configuration for MRI sequences.
+
+    Parameters
+    ----------
+    fov : tuple[float, float, float]
+        Field of View in meters (x, y, z).
+    img_size : tuple[int, int, int]
+        Image size in pixels (x, y, z).
+    hardware : Hardware
+        Hardware configuration for the acquisition.
+    gamma : Gammas, optional
+        Gyromagnetic ratio in Hz/T for the nucleus being imaged.
+        Defaults to `Gammas.HYDROGEN`.
+    oversampling : int, optional
+        Oversampling factor for the ADC. Defaults to 1.
+    norm_factor : float, optional
+        Normalization factor for the trajectory. Defaults to 0.5.
+
+    Attributes
+    ----------
+    default : ClassVar[Acquisition]
+        The default acquisition configuration used if none is specified.
+
+    Notes
+    -----
+    The `Acquisition` class encapsulates the parameters needed for MRI acquisition,
+    including the field of view, image size, hardware specifications, and gyromagnetic
+    ratio.
+
+    It is designed to be used in conjunction with the `Hardware` class, which defines
+    the hardware constraints such as maximum gradient amplitude and slew rate.
+    The `default` class variable holds the default acquisition configuration, which can
+    be set using the `set_default` method. This allows for easy access to a standard
+    acquisition configuration without needing to instantiate a new `Acquisition` object
+    each time.
+
+    """
+
     default: ClassVar[Acquisition]
 
     fov: tuple[float, float, float]  # Field of View in m
     img_size: tuple[int, int, int]  # Image size in pixels
-    hardware: Hardware
+    hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
     oversampling: int = 1  # Oversampling factor for the ADC
     norm_factor: float = 0.5
@@ -237,12 +321,8 @@ class Acquisition:
         return self
 
     def __getattr__(self, name):
-        # pass through attributes to the hardware object
+        """Allow access to hardware attributes directly from Acquisition."""
         return getattr(self.hardware, name)
-
-    @classmethod
-    def __getattr__(cls, name):
-        return getattr(cls.default, name)
 
     @property
     def res(self) -> tuple[float, ...]:
@@ -271,7 +351,7 @@ def normalize_trajectory(
     trajectory : NDArray
         Un-normalized trajectory consisting of k-space coordinates in 2D or 3D.
     acq : Acquisition, optional
-        Acquisition configuration to use for normalization.
+        Acquisition configuration to use.
         If `None`, the default acquisition is used.
 
     Returns
@@ -294,8 +374,9 @@ def unnormalize_trajectory(
     trajectory : NDArray
         Normalized trajectory consisting of k-space coordinates in 2D or 3D.
     acq : Acquisition, optional
-        Acquisition configuration to use for un-normalization.
+        Acquisition configuration to use.
         If `None`, the default acquisition is used.
+
     Returns
     -------
     trajectory : NDArray
@@ -391,6 +472,7 @@ def convert_gradients_to_slew_rates(
     acq : Acquisition, optional
         Acquisition configuration to use.
         If `None`, the default acquisition is used.
+
     Returns
     -------
     slewrates : NDArray
@@ -422,6 +504,7 @@ def convert_slew_rates_to_gradients(
     acq : Acquisition, optional
         Acquisition configuration to use for normalization.
         If `None`, the default acquisition is used.
+
     Returns
     -------
     gradients : NDArray
