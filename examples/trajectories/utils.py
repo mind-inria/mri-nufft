@@ -40,12 +40,13 @@ def show_trajectory(trajectory, one_shot, figure_size):
 
 def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10):
     # General configuration
+    nb_dim = trajectory.shape[-1]
     fig = plt.figure(figsize=(3 * figure_size, figure_size))
     subfigs = fig.subfigures(1, 3, wspace=0)
 
     # Trajectory display
     subfigs[0].suptitle("Trajectory", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
-    if trajectory.shape[-1] == 2:
+    if nb_dim == 2:
         ax = display_2D_trajectory(
             trajectory,
             size=figure_size,
@@ -60,9 +61,9 @@ def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10):
             per_plane=False,
             subfigure=subfigs[0],
         )
-    ax.set_aspect("equal")
     for i in range(trajectory.shape[0]):
-        ax.scatter(trajectory[i, ::sample_freq, 0], trajectory[i, ::sample_freq, 1], s=15)
+        ax.scatter(*(trajectory[i, ::sample_freq].T), s=15)
+    ax.set_aspect("equal")
 
     # Gradient display
     subfigs[1].suptitle("Gradients", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
@@ -85,9 +86,14 @@ def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10):
         uni_gradient="k",
         uni_signal="gray",
     )
+
     subfigs[2].axes[0].set_ylabel("Sx")
     subfigs[2].axes[1].set_ylabel("Sy")
-    subfigs[2].axes[2].set_ylabel("|S|")
+    if nb_dim == 2:
+        subfigs[2].axes[2].set_ylabel("|S|")
+    else:
+        subfigs[2].axes[2].set_ylabel("Sz")
+        subfigs[2].axes[3].set_ylabel("|S|")
     plt.show()
 
 

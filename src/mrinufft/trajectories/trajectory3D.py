@@ -730,8 +730,9 @@ def initialize_3D_annular_shells(
 
     An exclusive trajectory inspired from the work proposed in [HM11]_.
     It is similar to other trajectories based on concentric rings but
-    rings are split into halves and rotated to be recombined by pairs
-    and better balance the shot lengths.
+    rings are split into halves and rotated to be recombined with
+    halves from other rings, in order to better balance the shot lengths
+    between longer and shorter rings from a same shell.
 
     Parameters
     ----------
