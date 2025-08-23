@@ -27,9 +27,10 @@ def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
     sequence : pulseq Sequence, or Path to the Pulseq `.seq` file.
         The Pulseq sequence object or the path to the `.seq` file.
     trajectory_delay : float, optional
-        Compensation factor in seconds (s) to align ADC and gradients in the reconstruction.
+        Compensation factor in seconds (s) to align ADC and gradients.
     gradient_offset : float, optional
         Simulates background gradients (specified in Hz/m)
+
     Returns
     -------
     description : dict
@@ -127,7 +128,7 @@ def pulseq_gre(
         The slice overlap proportion for 2D GRE sequences. Default is 0.0
         Positive values indicates an overlap, negative values indicates a gap.
     grad_spoil_factor: float, optional
-        The factor by which the spoiler gradient moves to the edge of k-space. Default is 2.0.
+        How much the spoiler gradient moves to the edge of k-space. Default is 2.0.
     osf: int, optional
         The oversampling factor for the ADC. Default is 1, which means no oversampling.
 
@@ -245,7 +246,7 @@ def pulseq_gre(
             delay_before_grad,
             delay_end_TR,
             thickness=fov[2] / img_size[2] * (1 + slice_overlap),
-            slice_locs=trajectory[:,2]
+            slice_locs=trajectory[:, 2],
         )
 
     rf_phase = 0.0
@@ -282,10 +283,9 @@ def _pulseq_gre_2D(
     delay_before_grad: SimpleNamespace,
     delay_end_TR: SimpleNamespace,
     thickness: float,
-    slice_locs: NDArray
+    slice_locs: NDArray,
 ) -> pp.Sequence:
     """Create a Pulseq 2D-GRE sequence for arbitrary trajectories."""
-
     rf, gz, gzr = pp.make_sinc_pulse(
         flip_angle=float(seq.get_definition("FA")),
         slice_thickness=thickness,
@@ -318,8 +318,8 @@ def _pulseq_gre_2D(
                     system=seq.system,
                 )
                 for i, c in enumerate("xyz")
-            ], # Gx and Gy are arbitrary gradients
-            gzr, # Refocusing gradient for Gzr
+            ],  # Gx and Gy are arbitrary gradients
+            gzr,  # Refocusing gradient for Gzr
         )
         seq.add_block(spoiler, delay_end_TR)
 
