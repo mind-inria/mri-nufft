@@ -212,7 +212,7 @@ def _pop_elements(array, num_elements=1, type=np.float32):
 
 def write_trajectory(
     trajectory: np.ndarray,
-    FOV: tuple[float,float, float],
+    FOV: tuple[float, float, float],
     img_size: tuple[int, int, int],
     grad_filename: str,
     norm_factor: float = KMAX,
