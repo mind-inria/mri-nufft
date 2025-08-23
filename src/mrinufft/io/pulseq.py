@@ -8,11 +8,19 @@ sequences. Requires the `pypulseq` package to be installed.
 
 import warnings
 from types import SimpleNamespace
+
 import numpy as np
-import pypulseq as pp
 from numpy.typing import NDArray
-from .utils import prepare_trajectory_for_seq
+
 from mrinufft.trajectories.utils import KMAX
+
+from .utils import prepare_trajectory_for_seq
+
+PULSEQ_AVAILABLE = True
+try:
+    import pypulseq as pp
+except ImportError:
+    PULSEQ_AVAILABLE = False
 
 
 def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
@@ -39,6 +47,12 @@ def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
         The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
         where the last dimension corresponds to the x, y, and z coordinates in k-space.
     """
+    if not PULSEQ_AVAILABLE:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` or "
+            "`pip install mri-nufft[io]`."
+        )
     if not isinstance(seq, pp.Sequence):
         filename = seq
         seq = pp.Sequence()
@@ -95,9 +109,9 @@ def pulseq_gre(
     rf_pulse: SimpleNamespace | None = None,
     rf_spoiling_inc: float = 0.0,
     grad_spoil_factor: float = 2.0,
-    system: pp.Opts | None = None,
+    system = None,
     osf: int = 1,
-) -> pp.Sequence:
+):
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.
 
     Parameters
@@ -159,6 +173,12 @@ def pulseq_gre(
     pp.Sequence
         A Pulseq sequence object with the specified arbitrary gradient waveform.
     """
+    if not PULSEQ_AVAILABLE:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` "
+            "or `pip install mri-nufft[io]`."
+        )
     TR = TR / 1000.0  # convert to seconds
     TE = TE / 1000.0  # convert to seconds
     if system is None:
@@ -275,7 +295,7 @@ def pulseq_gre(
 
 
 def _pulseq_gre_2D(
-    seq: pp.Sequence,
+    seq,
     full_grads: NDArray,
     rf_spoiling_inc: float,
     adc: SimpleNamespace,
@@ -284,7 +304,7 @@ def _pulseq_gre_2D(
     delay_end_TR: SimpleNamespace,
     thickness: float,
     slice_locs: NDArray,
-) -> pp.Sequence:
+):
     """Create a Pulseq 2D-GRE sequence for arbitrary trajectories."""
     rf, gz, gzr = pp.make_sinc_pulse(
         flip_angle=float(seq.get_definition("FA")),

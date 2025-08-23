@@ -10,7 +10,6 @@ from datetime import datetime
 
 from mrinufft.io.utils import prepare_trajectory_for_seq
 import numpy as np
-from typing import Optional
 
 from mrinufft.trajectories.utils import (
     Acquisition,
