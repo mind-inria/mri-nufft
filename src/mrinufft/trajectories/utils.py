@@ -252,6 +252,7 @@ class Hardware:
         """Alias of grad_raster_time."""
         return self.grad_raster_time
 
+
 # fmt: off
 class SIEMENS:
     """Common hardware configurations for Siemens MRI systems."""
@@ -264,6 +265,7 @@ class SIEMENS:
     CIMAX          = Hardware(gmax=200*SI.milli, smax=200, field_strength=3)
 
 # fmt: on
+
 
 @dataclass(frozen=True)
 class Acquisition:
