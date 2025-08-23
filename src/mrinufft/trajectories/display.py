@@ -128,33 +128,49 @@ class displayConfig:
 ##############
 
 
-def _setup_2D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
+def _setup_2D_ticks(
+    figsize: float,
+    fig: plt.Figure | None = None,
+    acq: Acquisition | None = None,
+    scale_fov: bool = False,
+) -> plt.Axes:
     """Add ticks to 2D plot."""
+    acq = acq or Acquisition.default
+    KMAX = acq.norm_factor * (2 * np.array(acq.res) if scale_fov else np.array([1, 1]))
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig if (isinstance(fig, plt.Axes)) else fig.subplots()
     ax.grid(True)
-    ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_xlim((-KMAX, KMAX))
-    ax.set_ylim((-KMAX, KMAX))
+    ax.set_xticks([-KMAX[0], -KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
+    ax.set_yticks([-KMAX[1], -KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
+    ax.set_xlim((-KMAX[0], KMAX[0]))
+    ax.set_ylim((-KMAX[1], KMAX[1]))
     ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
     ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
     return ax
 
 
-def _setup_3D_ticks(figsize: float, fig: plt.FigureBase | None = None) -> plt.Axes:
+def _setup_3D_ticks(
+    figsize: float,
+    fig: plt.FigureBase | None = None,
+    acq: Acquisition = None,
+    scale_fov: bool = False,
+) -> plt.Axes:
     """Add ticks to 3D plot."""
+    acq = acq or Acquisition.default
+    KMAX = acq.norm_factor * (
+        2 * np.array(acq.res) if scale_fov else np.array([1, 1, 1])
+    )
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig if (isinstance(fig, plt.Axes)) else fig.add_subplot(projection="3d")
-    ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.axes.set_xlim3d(left=-KMAX, right=KMAX)
-    ax.axes.set_ylim3d(bottom=-KMAX, top=KMAX)
-    ax.axes.set_zlim3d(bottom=-KMAX, top=KMAX)
-    ax.set_box_aspect((2 * KMAX, 2 * KMAX, 2 * KMAX))
+    ax.set_xticks([-KMAX[0] - KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
+    ax.set_yticks([-KMAX[1] - KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
+    ax.set_zticks([-KMAX[2] - KMAX[2] / 2, 0, KMAX[2] / 2, KMAX[2]])
+    ax.axes.set_xlim3d(left=-KMAX[0], right=KMAX[0])
+    ax.axes.set_ylim3d(bottom=-KMAX[1], top=KMAX[1])
+    ax.axes.set_zlim3d(bottom=-KMAX[2], top=KMAX[2])
+    ax.set_box_aspect((2 * KMAX[0], 2 * KMAX[1], 2 * KMAX[2]))
     ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
     ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
     ax.set_zlabel("kz", fontsize=displayConfig.fontsize)
@@ -174,7 +190,7 @@ def display_2D_trajectory(
     show_constraints: bool = False,
     acq: Acquisition | None = None,
     constraints_order: float | Literal["fro"] | None = None,
-    **constraints_kwargs: Any,  # noqa ANN401
+    scale_fov: bool = False,
 ) -> plt.Axes:
     """Display 2D trajectories.
 
@@ -204,19 +220,19 @@ def display_2D_trajectory(
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    **constraints_kwargs
-        Acquisition parameters used to check on hardware constraints,
-        following the parameter convention from
-        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
+    scale_fov: bool, optional
+        If True the ticks are scaled to represent the k-space in m^-1
+        If False (default) the ticks are left in the normalized k-space [-0.5, 0.5]
 
     Returns
     -------
     ax : plt.Axes
         Axes of the figure.
     """
+    acq = acq or Acquisition.default
     # Setup figure and ticks
     Nc, _ = trajectory.shape[:2]
-    ax = _setup_2D_ticks(figsize, subfigure)
+    ax = _setup_2D_ticks(figsize, subfigure, acq, scale_fov=scale_fov)
     colors = displayConfig.get_colorlist()
     # Display every shot
     for i in range(Nc):
@@ -244,9 +260,7 @@ def display_2D_trajectory(
 
     # Point out violated constraints if requested
     if show_constraints:
-        gradients, slews = compute_gradients_and_slew_rates(
-            trajectory, **constraints_kwargs
-        )
+        gradients, slews = compute_gradients_and_slew_rates(trajectory, acq=acq)
 
         # Pad and compute norms
         gradients = np.linalg.norm(
@@ -287,7 +301,6 @@ def display_3D_trajectory(
     show_constraints: bool = False,
     acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
     """Display 3D trajectories.
 
@@ -378,7 +391,8 @@ def display_3D_trajectory(
     # Point out violated constraints if requested
     if show_constraints:
         gradients, slewrates = compute_gradients_and_slew_rates(
-            trajectory.reshape((-1, Ns, 3)), **constraints_kwargs
+            trajectory.reshape((-1, Ns, 3)),
+            acq=acq,
         )
 
         # Pad and compute norms
@@ -542,7 +556,6 @@ def display_gradients(
     show_constraints: bool = False,
     acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: Any,  # noqa ANN401
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
@@ -588,14 +601,6 @@ def display_gradients(
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    raster_time: float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-    **constraints_kwargs
-        Acquisition parameters used to check on hardware constraints,
-        following the parameter convention from
-        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
     -------
@@ -631,7 +636,7 @@ def display_gradients(
         if ax == axes[-1]:
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
-            scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * raster_time
+            scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * acq.raster_time
             locator = mticker.FixedLocator(ticks)
             formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
             ax.xaxis.set_major_locator(locator)
@@ -645,7 +650,8 @@ def display_gradients(
         norms = np.where(norms != 0, norms, 1)
         scale = (
             convert_trajectory_to_gradients(
-                trajectory[:1, :2], raster_time=raster_time, **constraints_kwargs
+                trajectory[:1, :2],
+                raster_time=acq.raster_time,
             )[0][0, 0, idx]
             / norms
         )
@@ -662,7 +668,7 @@ def display_gradients(
 
     # Compute true gradients and slew rates
     gradients, slewrates = compute_gradients_and_slew_rates(
-        trajectory[shot_ids, :], **constraints_kwargs
+        trajectory[shot_ids, :], acq=acq
     )
     gradients = np.linalg.norm(gradients, axis=-1, ord=constraints_order)
     slewrates = np.linalg.norm(slewrates, axis=-1, ord=constraints_order)
