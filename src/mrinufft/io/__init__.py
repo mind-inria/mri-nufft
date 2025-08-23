@@ -3,7 +3,7 @@
 from .cfl import traj2cfl, cfl2traj
 from .nsp import read_trajectory, write_trajectory, read_arbgrad_rawdat
 from .siemens import read_siemens_rawdat
-from .pulseq import read_pulseq_traj, pulseq_gre_3D
+from .pulseq import read_pulseq_traj, pulseq_gre
 from .utils import prepare_trajectory_for_seq
 
 __all__ = [

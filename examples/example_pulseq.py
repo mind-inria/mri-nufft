@@ -7,7 +7,7 @@ Create a GRE Sequence using Pulseq
 Example how to create sequences using PyPulseq.
 """
 import numpy as np
-from mrinufft.io import pulseq_gre_3D, prepare_trajectory_for_seq
+from mrinufft.io import pulseq_gre, prepare_trajectory_for_seq
 from mrinufft.trajectories.display import display_3D_trajectory
 from mrinufft.trajectories import initialize_2D_spiral, stack
 
@@ -47,7 +47,7 @@ plt.plot(grads[0,2,:], label="Gz")
 
 # Create a 3D GRE sequence with the trajectory:
 
-seq = pulseq_gre_3D(traj[:3], fov=FOV, img_size=img_size, TR=TR, TE=TE, FA=FA)
+seq = pulseq_gre(traj[:3], fov=FOV, img_size=img_size, TR=TR, TE=TE, FA=FA)
 
 
 # %%
