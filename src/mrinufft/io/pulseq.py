@@ -8,11 +8,19 @@ sequences. Requires the `pypulseq` package to be installed.
 
 import warnings
 from types import SimpleNamespace
+
 import numpy as np
-import pypulseq as pp
 from numpy.typing import NDArray
-from .utils import prepare_trajectory_for_seq
+
 from mrinufft.trajectories.utils import KMAX
+
+from .utils import prepare_trajectory_for_seq
+
+PULSEQ_AVAILABLE = True
+try:
+    import pypulseq as pp
+except ImportError:
+    PULSEQ_AVAILABLE = False
 
 
 def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
@@ -39,6 +47,12 @@ def read_pulseq_traj(seq, trajectory_delay=0.0, gradient_offset=0.0):
         The k-space trajectory as a numpy array of shape (n_shots, n_samples, 3),
         where the last dimension corresponds to the x, y, and z coordinates in k-space.
     """
+    if not PULSEQ_AVAILABLE:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` or "
+            "`pip install mri-nufft[io]`."
+        )
     if not isinstance(seq, pp.Sequence):
         filename = seq
         seq = pp.Sequence()
@@ -159,6 +173,12 @@ def pulseq_gre(
     pp.Sequence
         A Pulseq sequence object with the specified arbitrary gradient waveform.
     """
+    if not PULSEQ_AVAILABLE:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` "
+            "or `pip install mri-nufft[io]`."
+        )
     TR = TR / 1000.0  # convert to seconds
     TE = TE / 1000.0  # convert to seconds
     if system is None:
