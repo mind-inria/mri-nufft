@@ -68,6 +68,7 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
         velocity = grad_new + beta * velocity
 
         image = image - velocity / lipschitz_cst
+        grad = grad_new
         if compute_loss:
             loss.append(calculate_loss(image))
     return image if loss is None else (image, xp.array(loss))
