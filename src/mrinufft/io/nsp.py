@@ -331,7 +331,7 @@ def read_trajectory(
     gamma: Gammas | float = Acquisition.default.gamma,
     raster_time: float = Acquisition.default.raster_time,
     read_shots: bool = False,
-    normalize_factor: float = Acquisition.default.normalize_factor,
+    normalize_factor: float = Acquisition.default.norm_factor,
     pre_skip: int = 0,
 ):
     """Get k-space locations from gradient file.
