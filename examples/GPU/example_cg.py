@@ -105,7 +105,7 @@ plt.legend(loc="lower left", fontsize=8)
 plt.subplot(2, 3, 6)
 plt.title("K-space from DC adjoint NUFFT")
 plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
-plt.plot(np.log(abs(nufft.op(dc_adjoint))), label="DC adjoint k-space")
+plt.plot(np.log(abs(nufft.op(dc_adjoint).get())), label="DC adjoint k-space")
 plt.legend(loc="lower left", fontsize=8)
 # %%
 # References
