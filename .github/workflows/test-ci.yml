@@ -18,7 +18,7 @@ env:
   ref_backend: "finufft"
   create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
   activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
-  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda-12.1/;export PATH=/usr/local/cuda-12.1/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}"
+  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
   test-cpu:
@@ -104,10 +104,7 @@ jobs:
       - name: Install backend
         shell: bash
         run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
-          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
+          ${{ env.setup_cuda }}
           pip install -e .[${{ matrix.backend }},autodiff]
 
       - name: Run Tests
@@ -150,7 +147,7 @@ jobs:
           python -m pip install -e .[test]
           python -m pip install cupy-cuda12x finufft "numpy<2.0"
 
-      - name: Install torch with CUDA 12.1
+      - name: Install torch with CUDA 12.x
         shell: bash
         run: |
           ${{ env.activate_venv }}
@@ -335,15 +332,10 @@ jobs:
         with:
           python-version: "3.10"
         
-      - name: Point to CUDA 12.4
-        run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
-          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
-      
       - name: Install dependencies
         shell: bash -l {0}
         run: |
+          ${{ env.setup_cuda }}
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip
