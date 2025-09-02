@@ -52,9 +52,9 @@ Imports
 .. code-block:: Python
 
     import numpy as np
+    import cupy as cp
     import mrinufft
     from brainweb_dl import get_mri
-    from mrinufft.density import voronoi
     from matplotlib import pyplot as plt
     import os
 
@@ -71,13 +71,14 @@ Imports
 
 Setup Inputs
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-45
+.. GENERATED FROM PYTHON SOURCE LINES 41-46
 
 .. code-block:: Python
 
     samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=512, nb_revolutions=8)
     image = get_mri(sub_id=4)
     image = np.flipud(image[90])
+    image_gpu = cp.array(image)  # convert to cupy array for GPU processing
 
 
 
@@ -86,11 +87,11 @@ Setup Inputs
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-47
+.. GENERATED FROM PYTHON SOURCE LINES 47-48
 
 Setup the NUFFT operator
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-56
+.. GENERATED FROM PYTHON SOURCE LINES 48-57
 
 .. code-block:: Python
 
@@ -111,31 +112,36 @@ Setup the NUFFT operator
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-58
+.. GENERATED FROM PYTHON SOURCE LINES 58-59
 
 Reconstruct the image using the CG method
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-104
+.. GENERATED FROM PYTHON SOURCE LINES 59-110
 
 .. code-block:: Python
 
-    kspace_data = nufft.op(image)  # get the k-space data
-    dc_adjoint = nufft.adj_op(kspace_data)
+    kspace_data_gpu = nufft.op(image_gpu)  # get the k-space data
+    kspace_data = kspace_data_gpu.get()  # convert back to numpy array for display
+    dc_adjoint = nufft.adj_op(kspace_data_gpu)  # density compensated adjoint NUFFT
     reconstructed_image, loss = nufft.cg(
-        kspace_data=kspace_data, x_init=dc_adjoint.copy(), num_iter=50, compute_loss=True
+        kspace_data=kspace_data_gpu,
+        x_init=dc_adjoint.copy(),
+        num_iter=50,
+        compute_loss=True,
     )
 
+    # convert back to numpy array for display
+    reconstructed_image = reconstructed_image.get().squeeze()
 
     # Display the results
-
     plt.figure(figsize=(15, 10))
     plt.subplot(2, 3, 1)
     plt.title("Original image")
@@ -159,7 +165,7 @@ Reconstruct the image using the CG method
 
     plt.subplot(2, 3, 4)
     plt.title("Loss")
-    plt.plot(loss)
+    plt.plot(loss.get())
     plt.grid()
 
     plt.subplot(2, 3, 5)
@@ -171,7 +177,7 @@ Reconstruct the image using the CG method
     plt.subplot(2, 3, 6)
     plt.title("K-space from DC adjoint NUFFT")
     plt.plot(np.log(abs(kspace_data)), label="Acquired k-space")
-    plt.plot(np.log(abs(nufft.op(dc_adjoint))), label="DC adjoint k-space")
+    plt.plot(np.log(abs(nufft.op(dc_adjoint).get())), label="DC adjoint k-space")
     plt.legend(loc="lower left", fontsize=8)
 
 
@@ -186,14 +192,14 @@ Reconstruct the image using the CG method
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
+    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
       warnings.warn("Lipschitz constant did not converge")
 
-    <matplotlib.legend.Legend object at 0x7aa0adeb2260>
+    <matplotlib.legend.Legend object at 0x7538b86cb9d0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-114
+.. GENERATED FROM PYTHON SOURCE LINES 111-120
 
 References
 ==========
@@ -208,7 +214,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.482 seconds)
+   **Total running time of the script:** (0 minutes 1.490 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:
