@@ -4,6 +4,7 @@ import numpy as np
 from pathlib import Path
 from hashlib import md5
 from functools import wraps
+import warnings
 
 CUPY_AVAILABLE = True
 try:
@@ -42,7 +43,13 @@ def is_cuda_tensor(var):
 def is_host_array(var):
     """Check if var is a host contiguous np array."""
     try:
-        return isinstance(var, np.ndarray) and var.flags.c_contiguous
+        if isinstance(var, np.ndarray):
+            if var.flags.c_contiguous:
+                warnings.warn(
+                    "The input is CPU array but not C-contiguous. "
+                )
+                return False
+            return True
     except Exception:
         return False
 

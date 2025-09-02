@@ -694,6 +694,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
+        else:
+            raise ValueError("image_data and obs_data should be both on CPU or GPU")
+
         ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 
