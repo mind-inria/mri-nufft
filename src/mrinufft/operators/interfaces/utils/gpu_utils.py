@@ -44,7 +44,7 @@ def is_host_array(var):
     """Check if var is a host contiguous np array."""
     try:
         if isinstance(var, np.ndarray):
-            if var.flags.c_contiguous:
+            if not var.flags.c_contiguous:
                 warnings.warn("The input is CPU array but not C-contiguous. ")
                 return False
             return True
