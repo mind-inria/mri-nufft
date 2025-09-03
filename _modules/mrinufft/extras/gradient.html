@@ -704,12 +704,21 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_numpy_cupy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_array_module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 
 <div class="viewcode-block" id="cg">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html#mrinufft.extras.gradient.cg">[docs]</a>
 <span class="nd">@with_numpy_cupy</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">cg</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">,</span> <span class="n">x_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cg</span><span class="p">(</span>
+    <span class="n">operator</span><span class="p">,</span>
+    <span class="n">kspace_data</span><span class="p">,</span>
+    <span class="n">x_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">compute_loss</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform conjugate gradient (CG) optimization for image reconstruction.</span>
 
@@ -741,11 +750,11 @@ document.write(`
     <span class="n">lipschitz_cst</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">get_lipschitz_cst</span><span class="p">()</span>
     <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">kspace_data</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">uses_sense</span><span class="p">:</span>
-        <span class="n">init_shape</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">init_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">operator</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">init_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="o">*</span><span class="n">operator</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">init_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="n">operator</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="o">*</span><span class="n">operator</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">image</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">init_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">kspace_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">init_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">kspace_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">x_init</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="k">else</span> <span class="n">x_init</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">init_shape</span><span class="p">)</span>
     <span class="p">)</span>
@@ -760,7 +769,10 @@ document.write(`
         <span class="k">return</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
     <span class="n">loss</span> <span class="o">=</span> <span class="p">[</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">image</span><span class="p">)]</span> <span class="k">if</span> <span class="n">compute_loss</span> <span class="k">else</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">):</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">progressbar</span><span class="p">:</span>
+        <span class="n">iterator</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
         <span class="n">grad_new</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">data_consistency</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">kspace_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">grad_new</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">:</span>
             <span class="k">break</span>
@@ -775,6 +787,8 @@ document.write(`
         <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_new</span>
         <span class="k">if</span> <span class="n">compute_loss</span><span class="p">:</span>
             <span class="n">loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">squeeze_dims</span><span class="p">:</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">image</span> <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span></div>
 
 </pre></div>

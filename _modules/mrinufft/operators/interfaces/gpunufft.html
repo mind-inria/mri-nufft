@@ -912,7 +912,9 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uses_sense</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># Support for one additional dimension</span>
-                <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">xp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+                    <span class="n">image</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">T</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">image</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
@@ -1445,6 +1447,9 @@ document.write(`
                     <span class="s2">&quot;Using direct GPU array without passing &quot;</span>
                     <span class="s2">&quot;`use_gpu_direct=True`, this is memory inefficient.&quot;</span>
                 <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;image_data and obs_data should be both on CPU or GPU&quot;</span><span class="p">)</span>
+
         <span class="n">ret</span> <span class="o">=</span> <span class="n">grad_func</span><span class="p">(</span><span class="n">image_data</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
