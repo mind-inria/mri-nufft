@@ -200,7 +200,9 @@ class RawGpuNUFFT:
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return xp.ascontiguousarray(image.squeeze().astype(xp.complex64, copy=False).T[None])
+                return xp.ascontiguousarray(
+                    image.squeeze().astype(xp.complex64, copy=False).T[None]
+                )
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def set_smaps(self, smaps):

@@ -215,7 +215,7 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
 
 
 def test_gradient_lipschitz(operator, image_data, kspace_data):
-    """Test the gradient lipschitz constant."""
+    """Test the gradient lipschitz constant converges."""
     C = 1 if operator.uses_sense else operator.n_coils
     img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape).squeeze()
     for _ in range(10):
@@ -228,3 +228,15 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     # TODO: check that the value is "not too far" from 1
     # TODO: to do the same with density compensation
     assert (norm - norm_prev) / norm_prev < 1e-3
+
+@parametrize("use_init", [True, False])
+@parametrize("compute_loss", [True, False])
+def test_cg_runs(operator, image_data, kspace_data, compute_loss, use_init):
+    if operator.n_batchs > 1:
+        pytest.skip("Skip batch tests")
+    """Compare the interface to the raw NUDFT implementation."""
+    x_init = None
+    if use_init:
+        x_init = image_data
+    image_cg = operator.cg(kspace_data, compute_loss=compute_loss, x_init=x_init, num_iter=2, progressbar=False)
+    
