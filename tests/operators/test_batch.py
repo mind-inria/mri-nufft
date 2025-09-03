@@ -229,6 +229,7 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     # TODO: to do the same with density compensation
     assert (norm - norm_prev) / norm_prev < 1e-3
 
+
 @parametrize("use_init", [True, False])
 @parametrize("compute_loss", [True, False])
 def test_cg_runs(operator, image_data, kspace_data, compute_loss, use_init):
@@ -238,5 +239,10 @@ def test_cg_runs(operator, image_data, kspace_data, compute_loss, use_init):
     x_init = None
     if use_init:
         x_init = image_data
-    image_cg = operator.cg(kspace_data, compute_loss=compute_loss, x_init=x_init, num_iter=2, progressbar=False)
-    
+    image_cg = operator.cg(
+        kspace_data,
+        compute_loss=compute_loss,
+        x_init=x_init,
+        num_iter=2,
+        progressbar=False,
+    )
