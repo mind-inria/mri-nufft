@@ -7,13 +7,17 @@ from numpy.typing import NDArray
 def solve_tsp_with_2opt(
     locations: NDArray, improvement_threshold: float = 1e-8
 ) -> NDArray:
-    """Solve the TSP problem using a 2-opt approach.
+    """Solve approximately the TSP using a 2-opt approach.
 
     A sub-optimal solution to the Travelling Salesman Problem (TSP)
-    is provided using the 2-opt approach in O(n²) where chunks of
-    an initially random route are reversed, and selected if the
-    total distance is reduced. As a result, the route solution
-    does not cross its own path in 2D.
+    is provided using the 2-opt approach in O(n²) time and memory,
+    where chunks of  an arbitrary initial route are reversed,
+    and selected if the total distance is reduced. A notable
+    result in 2D is that the path is guaranteed to never cross
+    itself.
+
+    This implementation solves the TSP for a one-way path, not a
+    looping cycle.
 
     Parameters
     ----------
@@ -30,7 +34,7 @@ def solve_tsp_with_2opt(
     """
     route = np.arange(locations.shape[0])
     distances = np.linalg.norm(locations[None] - locations[:, None], axis=-1)
-    route_length = np.sum(distances[0])
+    route_length = np.sum(distances[route[:-1], route[1:]])
 
     improvement_factor = 1
     while improvement_factor >= improvement_threshold:
@@ -53,5 +57,5 @@ def solve_tsp_with_2opt(
                     )
                     route_length += delta_length
 
-        improvement_factor = abs(1 - route_length / old_route_length)
+        improvement_factor = 1 - route_length / old_route_length
     return route
