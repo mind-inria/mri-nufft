@@ -11,7 +11,7 @@ def solve_tsp_with_2opt(
 
     A sub-optimal solution to the Travelling Salesman Problem (TSP)
     is provided using the 2-opt approach in O(n²) time and memory,
-    where chunks of  an arbitrary initial route are reversed,
+    where chunks of an arbitrary initial route are reversed,
     and selected if the total distance is reduced. A notable
     result in 2D is that the path is guaranteed to never cross
     itself.
