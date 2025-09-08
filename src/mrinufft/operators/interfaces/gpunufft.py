@@ -119,7 +119,7 @@ class RawGpuNUFFT:
             In this case pinned memory is not used and this saved memory.
             It will not be an error if this is False and you pass GPU array,
             just that it is inefficient.
-        **kwargs (optional): additional arguments. These include 
+        **kwargs (optional): additional arguments. These include
             ``gpu_device_id``(GPU ID)
 
         Notes
