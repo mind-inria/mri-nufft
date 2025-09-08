@@ -14,13 +14,20 @@ Another key feature is to display the sampling density in k-space, for example t
 import os
 from mrinufft.trajectories.display3D import get_gridded_trajectory
 import mrinufft.trajectories.trajectory3D as mtt
-from mrinufft.trajectories.utils import Gammas
+from mrinufft.trajectories.utils import Gammas, Acquisition
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
+
+# %%
+# Acquisition parameters
+# ======================
+# Here we use acquisition defaults for the  trajectory gridding.
+
+acq = Acquisition.default
 
 # %%
 # Helper function to Displaying 3D Gridded Trajectories
@@ -57,9 +64,8 @@ def create_grid(grid_type, trajectories, traj_params, **kwargs):
     for i, (name, traj) in enumerate(trajectories.items()):
         grid = get_gridded_trajectory(
             traj,
-            traj_params["img_size"],
+            acq,
             grid_type=grid_type,
-            traj_params=traj_params,
             backend=BACKEND,
             osf=2,
             **kwargs,
