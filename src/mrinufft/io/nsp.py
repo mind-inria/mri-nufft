@@ -326,7 +326,7 @@ def write_trajectory(
 
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float | str = Acquisition.default.dwell_time,
+    dwell_time: float | str = Acquisition.default.adc_dwell_time,
     num_adc_samples: int | None = None,
     gamma: Gammas | float = Acquisition.default.gamma,
     raster_time: float = Acquisition.default.raster_time,

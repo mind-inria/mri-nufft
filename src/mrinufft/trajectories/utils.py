@@ -212,8 +212,8 @@ class Hardware:
         Maximum slew rate in T/m/s. Defaults to 200 T/m/s.
     n_coils : int
         Number of coils used in the MRI system. Defaults to 8.
-    dwell_time : float
-        Dwell time in seconds. Defaults to 1 ns.
+    min_dwell_time : float
+        Minimum ADC dwell time in seconds. Defaults to 1 ns.
     grad_raster_time : float
         Gradient raster time in seconds. Defaults to 5 us.
     field_strength : float
@@ -243,7 +243,7 @@ class Hardware:
     gmax: float = 40 * SI.milli  # Maximum gradient amplitude in T/m
     smax: float = 200  # T/m/s
     n_coils: int = 32
-    dwell_time: float = 1 * SI.nano  # s
+    min_dwell_time: float = 1 * SI.nano  # s
     grad_raster_time: float = 5 * SI.micro  # s
     field_strength: float = 3.0  # Tesla
 
@@ -314,8 +314,29 @@ class Acquisition:
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
-    oversampling: int = 1  # Oversampling factor for the ADC
+    adc_dwell_time: float = 1 * SI.micro # us
     norm_factor: float = 0.5
+
+    def __post_init__(self):
+        """Validate parameters after initialization."""
+        if isinstance(self.fov, Real):
+            self.fov = (self.fov, self.fov, self.fov)
+        if isinstance(self.img_size, int):
+            self.img_size = (self.img_size, self.img_size, self.img_size)
+
+        if not(2 <= len(self.fov) <= 3):
+            raise ValueError("fov must be a tuple of 3 elements (x, y, z).")
+        if not(2 <= len(self.img_size) <= 3):
+            raise ValueError("img_size must be a tuple of 3 elements (x, y, z).")
+        if any(s <= 0 for s in self.img_size):
+            raise ValueError("img_size must contain positive integers.")
+        if any(f <= 0 for f in self.fov):
+            raise ValueError("fov must contain positive values.")
+        if self.adc_dwell_time < self.hardware.min_dwell_time:
+            raise ValueError(
+                f"adc_dwell_time ({self.adc_dwell_time}s) "
+                f"must be >= hardware.min_dwell_time ({self.hardware.min_dwell_time}s)."
+            )
 
     def set_default(self) -> Acquisition:
         """Make the current acquisition configuration the default."""
@@ -329,9 +350,15 @@ class Acquisition:
     @property
     def res(self) -> tuple[float, ...]:
         """Resolution in meters."""
-        return tuple(fov / size for fov, size in zip(self.fov, self.img_size))
+        return tuple(fov / size for fov, size in zip(self.fov, self.img_size, strict=True))
 
 
+    @property
+    def kmax(self) -> tuple[float, ...]:
+        """Maximum k-space value in 1/m."""
+        return tuple(0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True))
+
+    
 # Create a default acquisition.
 Acquisition.default = Acquisition(
     fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()
