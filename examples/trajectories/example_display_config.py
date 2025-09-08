@@ -15,7 +15,7 @@ import numpy as np
 
 from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
 from mrinufft.trajectories import conify, initialize_2D_spiral
-
+from mrinuff.trajectories.utils import Acquisition, Hardware
 # %%
 # Script options
 # ==============
@@ -116,5 +116,19 @@ show_traj(
     traj,
     "slewrate_point_color",
     ["tab:blue", "tab:orange", "tab:red"],
+    show_constraints=True,
+)
+
+# You can also change the values of gmax and smax in order to see how the constraint
+# violations change.
+#
+acqs = [Acquisition(Hardware(gmax=0.04, smax=50)), # limiting slew rate to 50 T/m/s
+        Acquisition(Hardware(gmax=0.04, smax=100)), # limiting slew rate to 100 T/m/s
+        Acquisition(Hardware(gmax=0.04, smax=200)),] # limiting slew rate to 200 T/m/s
+
+show_traj(
+    traj,
+    "acq",
+    acqs,
     show_constraints=True,
 )

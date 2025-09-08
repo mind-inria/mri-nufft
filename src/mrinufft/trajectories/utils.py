@@ -292,7 +292,7 @@ class Acquisition:
     ----------
     default : ClassVar[Acquisition]
         The default acquisition configuration used if none is specified.
-
+        You can set it using the `set_default` class method.
     Notes
     -----
     The `Acquisition` class encapsulates the parameters needed for MRI acquisition,
