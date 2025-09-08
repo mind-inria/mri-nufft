@@ -83,7 +83,7 @@ class RawGpuNUFFT:
         pinned_image=None,
         pinned_kspace=None,
         use_gpu_direct=False,
-        **kwargs
+        **kwargs,
     ):
         """Initialize the 'NUFFT' class.
 
@@ -119,7 +119,8 @@ class RawGpuNUFFT:
             In this case pinned memory is not used and this saved memory.
             It will not be an error if this is False and you pass GPU array,
             just that it is inefficient.
-        **kwargs (optional): additional arguments. These include ``gpu_device_id``(GPU ID)
+        **kwargs (optional): additional arguments. These include 
+            ``gpu_device_id``(GPU ID)
 
         Notes
         -----
@@ -184,7 +185,7 @@ class RawGpuNUFFT:
             sector_width,
             osf,
             balance_workload,
-            **kwargs
+            **kwargs,
         )
 
     def toggle_grad_traj(self):

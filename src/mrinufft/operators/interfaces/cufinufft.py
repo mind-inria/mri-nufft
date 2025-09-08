@@ -194,12 +194,14 @@ class MRICufiNUFFT(FourierOperatorBase):
             raise RuntimeError("cupy is not installed")
         if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
-        # set CUDA device 
+        # set CUDA device
         gpu_device_id = kwargs.get("gpu_device_id", 0)
         try:
             cp.cuda.Device(gpu_device_id).use()
         except Exception as e:
-            warnings.warn(f"Failed to set CUDA device {gpu_device_id}: {e}", RuntimeWarning)
+            warnings.warn(
+                f"Failed to set CUDA device {gpu_device_id}: {e}", RuntimeWarning
+            )
         super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
