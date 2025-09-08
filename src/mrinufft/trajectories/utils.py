@@ -293,6 +293,7 @@ class Acquisition:
     default : ClassVar[Acquisition]
         The default acquisition configuration used if none is specified.
         You can set it using the `set_default` class method.
+
     Notes
     -----
     The `Acquisition` class encapsulates the parameters needed for MRI acquisition,
@@ -314,7 +315,7 @@ class Acquisition:
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
-    adc_dwell_time: float = 1 * SI.micro # us
+    adc_dwell_time: float = 1 * SI.micro  # us
     norm_factor: float = 0.5
 
     def __post_init__(self):
@@ -324,9 +325,9 @@ class Acquisition:
         if isinstance(self.img_size, int):
             self.img_size = (self.img_size, self.img_size, self.img_size)
 
-        if not(2 <= len(self.fov) <= 3):
+        if not (2 <= len(self.fov) <= 3):
             raise ValueError("fov must be a tuple of 3 elements (x, y, z).")
-        if not(2 <= len(self.img_size) <= 3):
+        if not (2 <= len(self.img_size) <= 3):
             raise ValueError("img_size must be a tuple of 3 elements (x, y, z).")
         if any(s <= 0 for s in self.img_size):
             raise ValueError("img_size must contain positive integers.")
@@ -350,15 +351,18 @@ class Acquisition:
     @property
     def res(self) -> tuple[float, ...]:
         """Resolution in meters."""
-        return tuple(fov / size for fov, size in zip(self.fov, self.img_size, strict=True))
-
+        return tuple(
+            fov / size for fov, size in zip(self.fov, self.img_size, strict=True)
+        )
 
     @property
     def kmax(self) -> tuple[float, ...]:
         """Maximum k-space value in 1/m."""
-        return tuple(0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True))
+        return tuple(
+            0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True)
+        )
 
-    
+
 # Create a default acquisition.
 Acquisition.default = Acquisition(
     fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()

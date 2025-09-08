@@ -29,6 +29,7 @@ BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 
 acq = Acquisition.default
 
+
 # %%
 # Helper function to Displaying 3D Gridded Trajectories
 # =====================================================
