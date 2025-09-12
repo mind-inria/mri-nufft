@@ -62,7 +62,12 @@ def list_backends(available_only=False):
 
 
 def get_operator(
-    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
+    backend_name: str,
+    wrt_data: bool = False,
+    wrt_traj: bool = False,
+    paired_batch_size: int = None,
+    *args,
+    **kwargs,
 ):
     """Return an MRI Fourier operator interface using the correct backend.
 
@@ -74,6 +79,9 @@ def get_operator(
         if set gradients wrt to data and images will be available.
     wrt_traj: bool, default False
         if set gradients wrt to trajectory will be available.
+    paired_batch_size : int, optional
+        If provided, specifies batch size for varying data/smaps pairs.
+        Default is None, which means no batching
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -112,10 +120,12 @@ def get_operator(
     # if autograd:
     if wrt_data or wrt_traj:
         if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(wrt_data, wrt_traj)
+            operator = operator.make_autograd(wrt_data, wrt_traj, paired_batch_size)
         else:
             # instance will be created later
-            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+            operator = partial(
+                operator.with_autograd, wrt_data, wrt_traj, paired_batch_size
+            )
 
     return operator
 
@@ -272,7 +282,7 @@ class FourierOperatorBase(ABC):
             **kwargs,
         )
 
-    def make_autograd(self, wrt_data=True, wrt_traj=False):
+    def make_autograd(self, wrt_data=True, wrt_traj=False, paired_batch_size=None):
         """Make a new Operator with autodiff support.
 
         Parameters
@@ -285,6 +295,10 @@ class FourierOperatorBase(ABC):
 
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
+
+        paired_batch_size : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
 
         Returns
         -------
@@ -301,9 +315,17 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
+        if paired_batch_size is not None:
+            if not isinstance(paired_batch_size, int) or paired_batch_size < 1:
+                raise ValueError(
+                    "Batch size ={paired_batch_size} must be a positive integer"
+                )
+
         from mrinufft.operators.autodiff import MRINufftAutoGrad
 
-        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
+        return MRINufftAutoGrad(
+            self, wrt_data=wrt_data, wrt_traj=wrt_traj, batch_size=paired_batch_size
+        )
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
@@ -525,9 +547,16 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
+    def with_autograd(
+        cls,
+        wrt_data=True,
+        wrt_traj=False,
+        paired_batch_size=None,
+        *args,
+        **kwargs,
+    ):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
+        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj, paired_batch_size)
 
 
 class FourierOperatorCPU(FourierOperatorBase):
