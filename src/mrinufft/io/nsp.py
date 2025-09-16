@@ -13,6 +13,7 @@ import numpy as np
 from mrinufft.trajectories.utils import (
     Acquisition,
     Gammas,
+    SI,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
@@ -44,7 +45,7 @@ def write_gradients(
     Parameters
     ----------
     gradients : np.ndarray
-        Gradients. Shape (num_shots, num_samples_per_shot, dimension).
+        Gradients. Shape (num_shots, num_samples_per_shot, dimension). in T/m.
     initial_positions : np.ndarray
         Initial positions. Shape (num_shots, dimension).
     grad_filename : str
@@ -247,6 +248,7 @@ def write_trajectory(
         These are arguments passed to write_gradients function above.
     """
     # Convert normalized trajectory to gradients
+    acq = acq or Acquisition.default
     gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
         trajectory,
         acq,
@@ -276,8 +278,8 @@ def write_trajectory(
             )
         edge_locations = np.zeros_like(final_positions)
         if postgrad == "slowdown_to_edge":
-            # Always end at KMax, the spoilers can be handeled by the sequence.
-            edge_locations[..., 0] = acq.img_size[0] / acq.FOV[0] / 2
+            # Always end at KMax, the spoilers can be handled by the sequence.
+            edge_locations[..., 0] = acq.img_size[0] / acq.fov[0] / 2
         end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
             kspace_end_loc=edge_locations,
             start_gradients=gradients[:, -1],
@@ -341,7 +343,7 @@ def read_trajectory(
     grad_filename : str
         Gradient filename.
     dwell_time : float | str, optional
-        Dwell time of ADC in ms, by default 0.01
+        Dwell time of ADC in s, by default 1e-5
         It can also be string 'min_osf' to select dwell time
         based on minimum OSF needed to get Nyquist sampling
         (This is obtained from SPARKLING trajectory header).
@@ -350,7 +352,7 @@ def read_trajectory(
     gamma : float, optional
         Gyromagnetic ratio in kHz/T, by default 42.576e3
     gradient_raster_time : float, optional
-        Gradient raster time in ms, by default 0.01
+        Gradient raster time in s, by default 1e-5
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
@@ -367,6 +369,11 @@ def read_trajectory(
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
+
+    raster_time *= SI.micro # convert to ms
+    dwell_time *= SI.micro # convert to ms
+    gamma /= SI.kilo  # convert to kHz/T
+
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:

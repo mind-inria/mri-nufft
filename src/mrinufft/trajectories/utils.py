@@ -393,7 +393,7 @@ def normalize_trajectory(
         Normalized trajectory corresponding to `trajectory` input.
     """
     acq = acq or Acquisition.default
-    return trajectory * acq.norm_factor * (2 * acq.res)
+    return trajectory * acq.norm_factor * (2 * np.array(acq.res))
 
 
 def unnormalize_trajectory(
@@ -416,7 +416,7 @@ def unnormalize_trajectory(
         Un-normalized trajectory corresponding to `trajectory` input.
     """
     acq = acq or Acquisition.default
-    return trajectory / acq.norm_factor / (2 * acq.resolution)
+    return trajectory / acq.norm_factor / (2 * np.array(acq.res)[:trajectory.shape[-1]])
 
 
 def convert_trajectory_to_gradients(
@@ -440,7 +440,7 @@ def convert_trajectory_to_gradients(
     Returns
     -------
     gradients : NDArray
-        Gradients corresponding to `trajectory`.
+        Gradients corresponding to `trajectory` in T/m
     """
     acq = acq or Acquisition.default
     # Un-normalize the trajectory from NUFFT usage
@@ -464,7 +464,7 @@ def convert_gradients_to_trajectory(
     Parameters
     ----------
     gradients : NDArray
-        Gradients over 2 or 3 directions.
+        Gradients over 2 or 3 directions in T/m
     initial_positions: NDArray, optional
         Positions in k-space at the beginning of the readout window.
         The default is `None`.
