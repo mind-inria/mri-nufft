@@ -15,7 +15,7 @@ import numpy as np
 
 from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
 from mrinufft.trajectories import conify, initialize_2D_spiral
-from mrinuff.trajectories.utils import Acquisition, Hardware
+from mrinufft.trajectories.utils import Acquisition, Hardware
 
 # %%
 # Script options
@@ -124,9 +124,9 @@ show_traj(
 # violations change.
 #
 acqs = [
-    Acquisition(Hardware(gmax=0.04, smax=50)),  # limiting slew rate to 50 T/m/s
-    Acquisition(Hardware(gmax=0.04, smax=100)),  # limiting slew rate to 100 T/m/s
-    Acquisition(Hardware(gmax=0.04, smax=200)),
+    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=50)),  # limiting slew rate to 50 T/m/s
+    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=100)),  # limiting slew rate to 100 T/m/s
+    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=200)),
 ]  # limiting slew rate to 200 T/m/s
 
 show_traj(
