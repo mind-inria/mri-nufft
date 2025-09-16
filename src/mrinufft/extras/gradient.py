@@ -2,10 +2,19 @@
 
 from mrinufft._array_compat import with_numpy_cupy
 from mrinufft._utils import get_array_module
+from tqdm import tqdm
 
 
 @with_numpy_cupy
-def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=False):
+def cg(
+    operator,
+    kspace_data,
+    x_init=None,
+    num_iter=10,
+    tol=1e-4,
+    compute_loss=False,
+    progressbar=True,
+):
     """
     Perform conjugate gradient (CG) optimization for image reconstruction.
 
@@ -37,11 +46,11 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
     lipschitz_cst = operator.get_lipschitz_cst()
     xp = get_array_module(kspace_data)
     if operator.uses_sense:
-        init_shape = operator.shape
+        init_shape = (operator.n_batchs, 1, *operator.shape)
     else:
-        init_shape = (operator.n_coils, *operator.shape)
+        init_shape = (operator.n_batchs, operator.n_coils, *operator.shape)
     image = (
-        xp.zeros(init_shape, dtype=type(kspace_data[0]))
+        xp.zeros(init_shape, dtype=kspace_data.dtype)
         if x_init is None
         else x_init.reshape(init_shape)
     )
@@ -56,7 +65,10 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
         return xp.linalg.norm(residual) ** 2
 
     loss = [calculate_loss(image)] if compute_loss else None
-    for _ in range(num_iter):
+    iterator = range(num_iter)
+    if progressbar:
+        iterator = tqdm(iterator)
+    for _ in iterator:
         grad_new = operator.data_consistency(image, kspace_data)
         if xp.linalg.norm(grad_new) <= tol:
             break
@@ -71,4 +83,6 @@ def cg(operator, kspace_data, x_init=None, num_iter=10, tol=1e-4, compute_loss=F
         grad = grad_new
         if compute_loss:
             loss.append(calculate_loss(image))
+    if operator.squeeze_dims:
+        image = operator._safe_squeeze(image)
     return image if loss is None else (image, xp.array(loss))

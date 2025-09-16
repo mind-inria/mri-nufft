@@ -200,7 +200,9 @@ class RawGpuNUFFT:
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return image.squeeze().astype(xp.complex64, copy=False).T[None]
+                return xp.ascontiguousarray(
+                    image.squeeze().astype(xp.complex64, copy=False).T[None]
+                )
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def set_smaps(self, smaps):
@@ -694,6 +696,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
+        else:
+            raise ValueError("image_data and obs_data should be both on CPU or GPU")
+
         ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 
