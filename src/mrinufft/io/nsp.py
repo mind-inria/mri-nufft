@@ -18,7 +18,10 @@ from mrinufft.trajectories.utils import (
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
-    DEFAULT_GMAX,DEFAULT_SMAX, KMAX, DEFAULT_RASTER_TIME
+    DEFAULT_GMAX,
+    DEFAULT_SMAX,
+    KMAX,
+    DEFAULT_RASTER_TIME,
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
@@ -211,7 +214,7 @@ def write_trajectory(
     img_size: tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
-    gamma: float = Gammas.HYDROGEN/1e3,
+    gamma: float = Gammas.HYDROGEN / 1e3,
     raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     TE_pos: float = 0.5,
@@ -275,7 +278,7 @@ def write_trajectory(
         img_size=img_size,
         gamma=gamma,
         norm_factor=norm_factor,
-        hardware=Hardware(gmax=gmax, smax=smax, grad_raster_time=raster_time)
+        hardware=Hardware(gmax=gmax, smax=smax, grad_raster_time=raster_time),
     )
     gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
         trajectory,

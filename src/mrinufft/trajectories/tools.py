@@ -461,7 +461,6 @@ def get_gradient_times_to_travel(
         To directly get the waveforms required. This is most-likely what
         you want to use.
     """
-
     acq = acq or Acquisition.default
     area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time
 
@@ -565,8 +564,6 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     - The returned gradients are suitable for use in MRI pulse sequence design,
       ensuring compliance with specified hardware constraints.
     """
-
-
     acq = acq or Acquisition.default
 
     kspace_end_loc = np.atleast_2d(kspace_end_loc)

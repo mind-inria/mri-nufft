@@ -362,6 +362,7 @@ class Acquisition:
             0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True)
         )
 
+
 # Create a default acquisition.
 Acquisition.default = Acquisition(
     fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()
@@ -415,7 +416,9 @@ def unnormalize_trajectory(
         Un-normalized trajectory corresponding to `trajectory` input.
     """
     acq = acq or Acquisition.default
-    return trajectory / acq.norm_factor / (2 * np.array(acq.res)[:trajectory.shape[-1]])
+    return (
+        trajectory / acq.norm_factor / (2 * np.array(acq.res)[: trajectory.shape[-1]])
+    )
 
 
 def convert_trajectory_to_gradients(
@@ -492,9 +495,7 @@ def convert_gradients_to_trajectory(
 
 
 def convert_gradients_to_slew_rates(
-    gradients: NDArray,
-    acq: Acquisition | None = None,
-    raster_time: float |None=None
+    gradients: NDArray, acq: Acquisition | None = None, raster_time: float | None = None
 ) -> tuple[NDArray, NDArray]:
     """Derive the gradients over time to provide slew rates.
 
