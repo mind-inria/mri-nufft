@@ -506,6 +506,8 @@ def convert_gradients_to_slew_rates(
     acq : Acquisition, optional
         Acquisition configuration to use.
         If `None`, the default acquisition is used.
+    raster_time: float
+        Raster time in seconds
 
     Returns
     -------
@@ -523,7 +525,7 @@ def convert_gradients_to_slew_rates(
         raster_time = Acquisition.default.raster_time
     else:
         raise ValueError("incompatible acquisition and raster_time")
-    slewrates = np.diff(gradients, axis=1) / acq.raster_time
+    slewrates = np.diff(gradients, axis=1) / raster_time
     initial_gradients = gradients[:, 0, :]
     return slewrates, initial_gradients
 

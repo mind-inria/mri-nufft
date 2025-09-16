@@ -124,9 +124,21 @@ show_traj(
 # violations change.
 #
 acqs = [
-    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=50)),  # limiting slew rate to 50 T/m/s
-    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=100)),  # limiting slew rate to 100 T/m/s
-    Acquisition(fov=(0.256,0.256,0.256), img_size=(256,256,256), hardware=Hardware(gmax=0.04, smax=200)),
+    Acquisition(
+        fov=(0.256, 0.256, 0.256),
+        img_size=(256, 256, 256),
+        hardware=Hardware(gmax=0.04, smax=50),
+    ),  # limiting slew rate to 50 T/m/s
+    Acquisition(
+        fov=(0.256, 0.256, 0.256),
+        img_size=(256, 256, 256),
+        hardware=Hardware(gmax=0.04, smax=100),
+    ),  # limiting slew rate to 100 T/m/s
+    Acquisition(
+        fov=(0.256, 0.256, 0.256),
+        img_size=(256, 256, 256),
+        hardware=Hardware(gmax=0.04, smax=200),
+    ),
 ]  # limiting slew rate to 200 T/m/s
 
 show_traj(
