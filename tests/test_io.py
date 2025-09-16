@@ -20,7 +20,7 @@ class CasesIO:
         trajectory = initialize_2D_radial(
             Nc=32, Ns=256, tilt="uniform", in_out=False
         ).astype(np.float32)
-        return "2D", trajectory, (0.23, 0.23), (256, 256), 0.5, 2, 42.576e3, 1.1
+        return "2D", trajectory, (0.23, 0.23), (256, 256), 0.5, 2, Gammas.H, 1.1
 
     def case_trajectory_3D(self):
         """Test the 3D Trajectory."""
@@ -41,7 +41,7 @@ class CasesIO:
 
 @fixture(scope="module")
 @parametrize("gmax", [0.1, Acquisition.default.gmax])
-@parametrize("smax", [0.7, Acquisition.default.smax])
+@parametrize("smax", [700, Acquisition.default.smax])
 def acquisition(gmax, smax):
     """Create a default acquisition object."""
     return Acquisition(
