@@ -38,7 +38,7 @@ class CaseInsensitiveEnumMeta(EnumMeta):
 
     def __getattr__(self, name: str) -> Any:  # noqa ANN401
         """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
-        return super().__getattr__(name.upper())
+        return super().__getattribute__(name.upper())
 
 
 class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
