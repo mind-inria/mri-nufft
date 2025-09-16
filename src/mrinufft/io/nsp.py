@@ -12,11 +12,13 @@ import numpy as np
 
 from mrinufft.trajectories.utils import (
     Acquisition,
+    Hardware,
     Gammas,
     SI,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
+    DEFAULT_GMAX,DEFAULT_SMAX, KMAX, DEFAULT_RASTER_TIME
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
@@ -205,13 +207,19 @@ def _pop_elements(array, num_elements=1, type=np.float32):
 
 def write_trajectory(
     trajectory: np.ndarray,
+    FOV: tuple[float, ...],
+    img_size: tuple[int, ...],
     grad_filename: str,
+    norm_factor: float = KMAX,
+    gamma: float = Gammas.HYDROGEN/1e3,
+    raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     TE_pos: float = 0.5,
+    gmax: float = DEFAULT_GMAX,
+    smax: float = DEFAULT_SMAX,
     pregrad: str | None = None,
     postgrad: str | None = None,
     version: float = 5,
-    acq: Acquisition | None = None,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -221,14 +229,28 @@ def write_trajectory(
     trajectory : np.ndarray
         Trajectory in k-space points.
         Shape (num_shots, num_samples_per_shot, dimension).
+    FOV : tuple
+        Field of view
+    img_size : tuple
+        Image size
     grad_filename : str
         Gradient filename
+    norm_factor : float, optional
+        Trajectory normalization factor, by default 0.5
+    gamma : float, optional
+        Gyromagnetic ratio in kHz/T, by default 42.576e3
+    raster_time : float, optional
+        Gradient raster time in ms, by default 0.01
     check_constraints : bool, optional
         Check scanner constraints, by default True
     TE_pos : float, optional
         The ratio of trajectory when TE occurs, with 0 as start of
         trajectory and 1 as end. By default 0.5, which is the
         center of the trajectory (in-out trajectory).
+    gmax : float, optional
+        Maximum gradient magnitude in T/m, by default 0.04
+    smax : float, optional
+        Maximum slew rate in T/m/ms, by default 0.1
     pregrad : str, optional
         Pregrad method, by default `prephase`
         `prephase` will add a prephasing gradient to the start of the trajectory.
@@ -248,10 +270,16 @@ def write_trajectory(
         These are arguments passed to write_gradients function above.
     """
     # Convert normalized trajectory to gradients
-    acq = acq or Acquisition.default
+    acq = Acquisition(
+        fov=FOV,
+        img_size=img_size,
+        gamma=gamma,
+        norm_factor=norm_factor,
+        hardware=Hardware(gmax=gmax, smax=smax, grad_raster_time=raster_time)
+    )
     gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
         trajectory,
-        acq,
+        acq=acq,
         get_final_positions=True,
     )
     Ns_to_skip_at_start = 0
@@ -278,8 +306,8 @@ def write_trajectory(
             )
         edge_locations = np.zeros_like(final_positions)
         if postgrad == "slowdown_to_edge":
-            # Always end at KMax, the spoilers can be handled by the sequence.
-            edge_locations[..., 0] = acq.img_size[0] / acq.fov[0] / 2
+            # Always end at KMax, the spoilers can be handeled by the sequence.
+            edge_locations[..., 0] = img_size[0] / FOV[0] / 2
         end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
             kspace_end_loc=edge_locations,
             start_gradients=gradients[:, -1],
@@ -299,16 +327,16 @@ def write_trajectory(
         if not valid:
             warnings.warn(
                 "Hard constraints violated! "
-                f"Maximum gradient amplitude: {maxG:.3f} > {acq.gmax:.3f}"
-                f"Maximum slew rate: {maxS:.3f} > {acq.smax:.3f}"
+                f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
+                f"Maximum slew rate: {maxS:.3f} > {smax:.3f}"
             )
         if pregrad != "prephase":
-            border_slew_rate = gradients[:, 0] / acq.raster_time
-            if np.any(np.abs(border_slew_rate) > acq.smax):
+            border_slew_rate = gradients[:, 0] / raster_time
+            if np.any(np.abs(border_slew_rate) > smax):
                 warnings.warn(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
-                    f" > {acq.smax:.3f}. Please use prephase gradient to avoid this "
+                    f" > {smax:.3f}. Please use prephase gradient to avoid this "
                     " issue."
                 )
 
@@ -318,7 +346,10 @@ def write_trajectory(
         initial_positions=initial_positions,
         final_positions=final_positions,
         grad_filename=grad_filename,
+        img_size=img_size,
+        FOV=FOV,
         TE_pos=TE_pos,
+        gamma=gamma,
         version=version,
         start_skip_samples=Ns_to_skip_at_start,
         end_skip_samples=Ns_to_skip_at_end,
@@ -328,12 +359,12 @@ def write_trajectory(
 
 def read_trajectory(
     grad_filename: str,
-    dwell_time: float | str = Acquisition.default.adc_dwell_time,
+    dwell_time: float | str = DEFAULT_RASTER_TIME,
     num_adc_samples: int | None = None,
-    gamma: Gammas | float = Acquisition.default.gamma,
-    raster_time: float = Acquisition.default.raster_time,
+    gamma: Gammas | float = Gammas.HYDROGEN,
+    raster_time: float = DEFAULT_RASTER_TIME,
     read_shots: bool = False,
-    normalize_factor: float = Acquisition.default.norm_factor,
+    normalize_factor: float = KMAX,
     pre_skip: int = 0,
 ):
     """Get k-space locations from gradient file.
@@ -343,7 +374,7 @@ def read_trajectory(
     grad_filename : str
         Gradient filename.
     dwell_time : float | str, optional
-        Dwell time of ADC in s, by default 1e-5
+        Dwell time of ADC in ms, by default 0.01
         It can also be string 'min_osf' to select dwell time
         based on minimum OSF needed to get Nyquist sampling
         (This is obtained from SPARKLING trajectory header).
@@ -352,7 +383,7 @@ def read_trajectory(
     gamma : float, optional
         Gyromagnetic ratio in kHz/T, by default 42.576e3
     gradient_raster_time : float, optional
-        Gradient raster time in s, by default 1e-5
+        Gradient raster time in ms, by default 0.01
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
@@ -369,11 +400,6 @@ def read_trajectory(
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
     """
-
-    raster_time *= SI.micro # convert to ms
-    dwell_time *= SI.micro # convert to ms
-    gamma /= SI.kilo  # convert to kHz/T
-
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:

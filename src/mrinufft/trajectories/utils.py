@@ -362,7 +362,6 @@ class Acquisition:
             0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True)
         )
 
-
 # Create a default acquisition.
 Acquisition.default = Acquisition(
     fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()
@@ -495,6 +494,7 @@ def convert_gradients_to_trajectory(
 def convert_gradients_to_slew_rates(
     gradients: NDArray,
     acq: Acquisition | None = None,
+    raster_time: float |None=None
 ) -> tuple[NDArray, NDArray]:
     """Derive the gradients over time to provide slew rates.
 
@@ -514,7 +514,14 @@ def convert_gradients_to_slew_rates(
         Gradients at the beginning of the readout window.
     """
     # Compute slew rates and starting gradients
-    acq = acq or Acquisition.default
+    if isinstance(acq, float) and raster_time is None:
+        raster_time = acq
+    elif isinstance(acq, Acquisition) and raster_time is None:
+        raster_time = acq.raster_time
+    elif raster_time is None and acq is None:
+        raster_time = Acquisition.default.raster_time
+    else:
+        raise ValueError("incompatible acquisition and raster_time")
     slewrates = np.diff(gradients, axis=1) / acq.raster_time
     initial_gradients = gradients[:, 0, :]
     return slewrates, initial_gradients
