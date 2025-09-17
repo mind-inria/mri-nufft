@@ -1,13 +1,13 @@
 """Utility functions in general."""
 
 from __future__ import annotations
-
-from typing import ClassVar, Any
-from dataclasses import dataclass
+from copy import deepcopy
+from dataclasses import dataclass, field
 from enum import Enum, EnumMeta
 from numbers import Real
+from typing import Any, ClassVar
 from typing import Literal
-from copy import deepcopy
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -309,14 +309,15 @@ class Acquisition:
 
     """
 
-    default: ClassVar[Acquisition]
-    __old_default: ClassVar[Acquisition|None] = None
     fov: tuple[float, float, float]  # Field of View in m
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
     adc_dwell_time: float = 1 * SI.micro  # us
     norm_factor: float = 0.5
+
+    default: ClassVar[Acquisition]
+    _old_default: Acquisition | None = field(default=None, init=False)
 
     def __post_init__(self):
         """Validate parameters after initialization."""
@@ -365,14 +366,16 @@ class Acquisition:
     # Context Manager to use temporary new default.
     def __enter__(self) -> Acquisition:
         """Enter Context Manager with new default."""
-        self.__old_default = deepcopy(Acquisition.default)
+        object.__setattr__(
+            self, "_old_default", deepcopy(Acquisition.default)
+        )  # bypass frozen
         self.set_default()
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         """Exit Context Manager and reset default."""
-        self.__old_default.set_default()
-        self.__old_default = None
+        self._old_default.set_default()
+        object.__setattr__(self, "_old_default", None)  # bypass frozen
 
 
 # Create a default acquisition.
