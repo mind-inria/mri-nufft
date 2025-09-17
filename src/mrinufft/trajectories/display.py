@@ -347,6 +347,8 @@ def display_3D_trajectory(
         Axes of the figure.
     """
     # Setup figure and ticks, and handle 2D trajectories
+    acq = acq or Acquisition.default
+
     ax = _setup_3D_ticks(figsize, subfigure)
     if nb_repetitions is None:
         nb_repetitions = trajectory.shape[0]
