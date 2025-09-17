@@ -141,9 +141,11 @@ acqs = [
     ),
 ]  # limiting slew rate to 200 T/m/s
 
-show_traj(
-    traj,
-    "acq",
-    acqs,
-    show_constraints=True,
-)
+# you can use Acquisition as a Context Manager, like display config.
+# Or pass it to the display function as well.
+for acq in acqs:
+    with acq:
+        display_3D_trajectory(traj, show_constraints=True)
+
+    # equivalent to
+    # display_3D_trajectory(traj, show_constraints=True, acq=acq)

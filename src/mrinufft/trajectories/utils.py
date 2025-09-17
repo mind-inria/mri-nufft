@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from numbers import Real
 from typing import Literal
-
+from copy import deepcopy
 import numpy as np
 from numpy.typing import NDArray
 
@@ -310,7 +310,7 @@ class Acquisition:
     """
 
     default: ClassVar[Acquisition]
-
+    __old_default: ClassVar[Acquisition|None] = None
     fov: tuple[float, float, float]  # Field of View in m
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
@@ -361,6 +361,18 @@ class Acquisition:
         return tuple(
             0.5 * size / fov for fov, size in zip(self.fov, self.img_size, strict=True)
         )
+
+    # Context Manager to use temporary new default.
+    def __enter__(self) -> Acquisition:
+        """Enter Context Manager with new default."""
+        self.__old_default = deepcopy(Acquisition.default)
+        self.set_default()
+        return self
+
+    def __exit__(self):
+        """Exit Context Manager and reset default."""
+        self.__old_default.set_default()
+        self.__old_default = None
 
 
 # Create a default acquisition.
