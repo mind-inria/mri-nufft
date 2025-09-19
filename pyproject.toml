@@ -4,8 +4,8 @@ description = "MRI Non-Cartesian Fourier Operators with multiple computation bac
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
 readme = "README.md"
-dependencies = ["numpy", "scipy", "matplotlib", "tqdm", "joblib"]
-requires-python = ">=3.9"
+dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "joblib>=1.4"]
+requires-python = ">=3.10"
 
 dynamic = ["version"]
 
@@ -18,7 +18,7 @@ torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x"]
 torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x"]
 
 cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x"]
-tensorflow = ["tensorflow-mri==0.21.0", "tensorflow-probability==0.17.0", "tensorflow-io==0.27.0", "matplotlib==3.7"]
+tensorflow = ["tensorflow-mri>=0.22.0"]
 finufft = ["finufft>=2.4.0"]
 sigpy = ["sigpy"]
 pynfft = ["pynfft3"]
