@@ -1576,22 +1576,29 @@ document.write(`
 <span class="sd">        float</span>
 <span class="sd">            Lipschitz constant of the operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tmp_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-            <span class="n">density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
-            <span class="n">n_coils</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">smaps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">squeeze_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># Disable coil dimension for faster computation</span>
+        <span class="n">n_coils</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
+        <span class="n">smaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span>
+        <span class="n">squeeze_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpx_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpx_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">power_method</span><span class="p">(</span>
-            <span class="n">max_iter</span><span class="p">,</span> <span class="n">tmp_op</span><span class="p">,</span> <span class="n">norm_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span>
-        <span class="p">)</span></div>
+        <span class="n">lipschitz_cst</span> <span class="o">=</span> <span class="n">power_method</span><span class="p">(</span>
+            <span class="n">max_iter</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">norm_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span>
+        <span class="p">)</span>
+
+        <span class="c1"># restore coil setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="n">n_coils</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="n">smaps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span> <span class="o">=</span> <span class="n">squeeze_dims</span>
+
+        <span class="k">return</span> <span class="n">lipschitz_cst</span></div>
 
 
 <div class="viewcode-block" id="MRICufiNUFFT.toggle_grad_traj">
