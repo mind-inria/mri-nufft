@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import ClassVar, Callable
+from typing import ClassVar
+from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
 
