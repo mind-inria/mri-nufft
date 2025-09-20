@@ -30,7 +30,6 @@ from utils import show_trajectories, show_trajectory
 
 # Internal
 import mrinufft as mn
-from mrinufft import display_2D_trajectory, display_3D_trajectory
 
 # %%
 # Script options

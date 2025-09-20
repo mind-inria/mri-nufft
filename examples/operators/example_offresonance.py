@@ -85,10 +85,10 @@ plt.show()
 
 from mrinufft import initialize_2D_spiral
 from mrinufft.density import voronoi
-from mrinufft.trajectories.utils import DEFAULT_RASTER_TIME
+from mrinufft.trajectories.utils import Acquisition
 
 samples = initialize_2D_spiral(Nc=48, Ns=600, nb_revolutions=10)
-t_read = np.arange(samples.shape[1]) * DEFAULT_RASTER_TIME * 1e-3
+t_read = np.arange(samples.shape[1]) * Acquisition.default.raster_time
 t_read = np.repeat(t_read[None, ...], samples.shape[0], axis=0)
 density = voronoi(samples)
 
