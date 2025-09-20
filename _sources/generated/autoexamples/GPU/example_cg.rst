@@ -112,9 +112,9 @@ Setup the NUFFT operator
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
 
 
@@ -192,11 +192,11 @@ Reconstruct the image using the CG method
 
  .. code-block:: none
 
-    /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
+    /volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
       warnings.warn("Lipschitz constant did not converge")
-      0%|          | 0/50 [00:00<?, ?it/s]     68%|██████▊   | 34/50 [00:00<00:00, 320.99it/s]    100%|██████████| 50/50 [00:00<00:00, 310.65it/s]
+      0%|          | 0/50 [00:00<?, ?it/s]     44%|████▍     | 22/50 [00:00<00:00, 209.40it/s]     86%|████████▌ | 43/50 [00:00<00:00, 177.95it/s]    100%|██████████| 50/50 [00:00<00:00, 178.85it/s]
 
-    <matplotlib.legend.Legend object at 0x7aa41e7e34c0>
+    <matplotlib.legend.Legend object at 0x7884964f9540>
 
 
 
@@ -215,7 +215,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.377 seconds)
+   **Total running time of the script:** (0 minutes 1.488 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:

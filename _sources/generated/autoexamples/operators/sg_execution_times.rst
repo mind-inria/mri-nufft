@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:46.284** total execution time for 4 files **from generated/autoexamples/operators**:
+**00:42.330** total execution time for 4 files **from generated/autoexamples/operators**:
 
 .. container::
 
@@ -33,14 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_subspace.py` (``example_subspace.py``)
-     - 00:38.894
+     - 00:35.029
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_stacked.py` (``example_stacked.py``)
-     - 00:02.846
-     - 0.0
-   * - :ref:`sphx_glr_generated_autoexamples_operators_example_readme.py` (``example_readme.py``)
-     - 00:02.395
+     - 00:02.833
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_offresonance.py` (``example_offresonance.py``)
-     - 00:02.149
+     - 00:02.239
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_operators_example_readme.py` (``example_readme.py``)
+     - 00:02.230
      - 0.0

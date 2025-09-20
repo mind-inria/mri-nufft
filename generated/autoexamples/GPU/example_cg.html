@@ -828,9 +828,9 @@ and machine learning tasks.</p>
 <span class="p">)</span>  <span class="c1"># create the NUFFT operator</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:94: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
   warnings.warn(
-/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
+/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:99: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
   warnings.warn(
 </pre></div>
 </div>
@@ -888,14 +888,15 @@ and machine learning tasks.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html#matplotlib.pyplot.legend" title="matplotlib.pyplot.legend" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../../_images/sphx_glr_example_cg_001.png" srcset="../../../_images/sphx_glr_example_cg_001.png" alt="Original image, Conjugate gradient, Adjoint NUFFT, Loss, K-space from conjugate gradient (CG), K-space from DC adjoint NUFFT" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
+<img src="../../../_images/sphx_glr_example_cg_001.png" srcset="../../../_images/sphx_glr_example_cg_001.png" alt="Original image, Conjugate gradient, Adjoint NUFFT, Loss, K-space from conjugate gradient (CG), K-space from DC adjoint NUFFT" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/volatile/github-ci-mind-inria/gpu_runner2/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:149: UserWarning: Lipschitz constant did not converge
   warnings.warn(&quot;Lipschitz constant did not converge&quot;)
 
   0%|          | 0/50 [00:00&lt;?, ?it/s]
- 68%|██████▊   | 34/50 [00:00&lt;00:00, 320.99it/s]
-100%|██████████| 50/50 [00:00&lt;00:00, 310.65it/s]
+ 44%|████▍     | 22/50 [00:00&lt;00:00, 209.40it/s]
+ 86%|████████▌ | 43/50 [00:00&lt;00:00, 177.95it/s]
+100%|██████████| 50/50 [00:00&lt;00:00, 178.85it/s]
 
-&lt;matplotlib.legend.Legend object at 0x7aa41e7e34c0&gt;
+&lt;matplotlib.legend.Legend object at 0x7884964f9540&gt;
 </pre></div>
 </div>
 <section id="references">
@@ -917,7 +918,7 @@ and machine learning tasks.</p>
 <a class="reference external" href="https://en.wikipedia.org/wiki/Conjugate_gradient_method">https://en.wikipedia.org/wiki/Conjugate_gradient_method</a></p>
 </div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.377 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.488 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-generated-autoexamples-gpu-example-cg-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/mind-inria/mri-nufft/gh-pages?urlpath=lab/tree/examples/generated/autoexamples/GPU/example_cg.ipynb"><img alt="Launch binder" src="../../../_images/binder_badge_logo.svg" style="width: 150px;" />
