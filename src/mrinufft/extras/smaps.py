@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
 from mrinufft._utils import get_array_module
+from mrinufft._array_compat import with_numpy_cupy
 from .utils import register_smaps
 import numpy as np
 from numpy.typing import NDArray
@@ -194,11 +195,11 @@ def low_frequency(
     Smaps = Smaps / SOS
     return Smaps, SOS
 
-
+@with_numpy_cupy
 def coil_compression(
     kspace_data: NDArray,
-    traj: NDArray,
     K: int | float,
+    traj: NDArray|None = None,
     krad_thresh: float | None = None,
 ) -> NDArray:
     """
@@ -208,11 +209,11 @@ def coil_compression(
     ----------
     kspace_data : NDArray
         Multi-coil k-space data. Shape: (n_coils, n_samples).
-    traj : NDArray
-        Sampling trajectory. Shape: (n_samples, n_dims).
     K : int or float
         Number of virtual coils to retain (if int), or energy threshold (if
         float between 0 and 1).
+    traj : NDArray, optional
+        Sampling trajectory. Shape: (n_samples, n_dims).
     krad_thresh : float, optional
         Relative k-space radius (as a fraction of maximum) to use for selecting
         the calibration region for principal component analysis. If None, use
@@ -220,27 +221,32 @@ def coil_compression(
 
     Returns
     -------
-    compress_data : NDArray
+    NDArray
         Coil-compressed data. Shape: (K, n_samples) if K is int, number of
         retained components otherwise.
     """
-    if krad_thresh is not None:
-        traj_rad = np.sqrt(np.sum(traj**2, axis=-1))
-        center_data = kspace_data[:, traj_rad < krad_thresh * np.max(traj)]
-    else:
+    xp = get_array_module(kspace_data)
+
+    if krad_thresh is not None and traj is not None:
+        traj_rad = xp.sqrt(xp.sum(traj**2, axis=-1))
+        center_data = kspace_data[:, traj_rad < krad_thresh * xp.max(traj)]
+    elif krad_thresh is None:
         center_data = kspace_data
+    else:
+        raise ValueError("traj and krad_thresh must be specified.")
+
     # Compute the covar matrix of selected data
     cov = center_data @ center_data.T.conj()
-    w, v = np.linalg.eigh(cov)
+    w, v = xp.linalg.eigh(cov)
     # sort eigenvalues largest to smallest
-    si = np.argsort(w)[::-1]
+    si = xp.argsort(w)[::-1]
     w_sorted = w[si]
     v_sorted = v[si]
     if isinstance(K, float):
         # retain enough components to reach energy K
-        w_cumsum = np.cumsum(w_sorted)  # from largest to smallest
-        total_energy = np.sum(w_sorted)
-        K = int(np.searchsorted(w_cumsum / total_energy, K, side="left") + 1)
+        w_cumsum = xp.cumsum(w_sorted)  # from largest to smallest
+        total_energy = xp.sum(w_sorted)
+        K = int(xp.searchsorted(w_cumsum / total_energy, K, side="left") + 1)
         K = min(K, w_sorted.size)
     V = v_sorted[:K]  # use top K component
     compress_data = V @ kspace_data
