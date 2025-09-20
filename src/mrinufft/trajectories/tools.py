@@ -415,10 +415,10 @@ def _plateau_value(gs, ge, n_down, n_up, n_pl, area_needed):
 
 
 def get_gradient_times_to_travel(
-    kspace_end_loc: Optional[NDArray] = None,
-    kspace_start_loc: Optional[NDArray] = None,
-    end_gradients: Optional[NDArray] = None,
-    start_gradients: Optional[NDArray] = None,
+    kspace_end_loc: NDArray | None = None,
+    kspace_start_loc: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    start_gradients: NDArray | None = None,
     acq: Acquisition | None = None,
     n_jobs: int = 1,
 ) -> tuple[NDArray, NDArray, NDArray, NDArray]:
@@ -515,10 +515,10 @@ def get_gradient_times_to_travel(
 
 def get_gradient_amplitudes_to_travel_for_set_time(
     kspace_end_loc: NDArray,
-    kspace_start_loc: Optional[NDArray] = None,
-    end_gradients: Optional[NDArray] = None,
-    start_gradients: Optional[NDArray] = None,
-    nb_raster_points: Optional[int] = None,
+    kspace_start_loc: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+    nb_raster_points: int | None = None,
     acq: Acquisition | None = None,
     n_jobs: int = 1,
 ) -> NDArray:
