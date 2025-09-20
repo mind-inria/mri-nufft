@@ -9,7 +9,7 @@ from .utils import register_smaps
 import numpy as np
 from numpy.typing import NDArray
 
-from typing import Callable, Any, TypeVar
+from collections.abc import Callable
 
 
 def _extract_kspace_center(
@@ -85,7 +85,7 @@ def _extract_kspace_center(
         return data_thresholded, center_locations, dc
     else:
         if callable(window_fun):
-            window = window_fun(center_locations)
+            window = window_fun(kspace_loc)
         else:
             if window_fun in ["hann", "hanning", "hamming"]:
                 radius = xp.linalg.norm(kspace_loc, axis=1)
@@ -195,11 +195,12 @@ def low_frequency(
     Smaps = Smaps / SOS
     return Smaps, SOS
 
+
 @with_numpy_cupy
 def coil_compression(
     kspace_data: NDArray,
     K: int | float,
-    traj: NDArray|None = None,
+    traj: NDArray | None = None,
     krad_thresh: float | None = None,
 ) -> NDArray:
     """
