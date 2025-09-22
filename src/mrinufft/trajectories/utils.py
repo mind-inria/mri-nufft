@@ -215,7 +215,7 @@ class Hardware:
     min_dwell_time : float
         Minimum ADC dwell time in seconds. Defaults to 1 ns.
     grad_raster_time : float
-        Gradient raster time in seconds. Defaults to 5 us.
+        Gradient raster time in seconds. Defaults to 10 us.
     field_strength : float
         Magnetic field strength in Tesla. Defaults to 3.0 T.
 
@@ -283,8 +283,8 @@ class Acquisition:
     gamma : Gammas, optional
         Gyromagnetic ratio in Hz/T for the nucleus being imaged.
         Defaults to `Gammas.HYDROGEN`.
-    oversampling : int, optional
-        Oversampling factor for the ADC. Defaults to 1.
+    adc_dwell_time: float
+        Time resolution for the ADC, in seconds. default to 5us.
     norm_factor : float, optional
         Normalization factor for the trajectory. Defaults to 0.5.
 
@@ -313,7 +313,7 @@ class Acquisition:
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
-    adc_dwell_time: float = 1 * SI.micro  # us
+    adc_dwell_time: float = 5 * SI.micro  # us
     norm_factor: float = 0.5
 
     default: ClassVar[Acquisition]
