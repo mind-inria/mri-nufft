@@ -2,6 +2,7 @@
 
 import warnings
 from collections import defaultdict
+from collections.abc import Callable
 from functools import wraps
 import numpy as np
 from numpy.typing import DTypeLike
@@ -188,3 +189,20 @@ class MethodRegister:
             return decorator(func)
         else:
             return decorator
+
+    def make_getter(self) -> Callable:
+        def getter(method_name, *args, **kwargs):
+            try:
+                method = self.registry[self.register_name][method_name]
+            except KeyError as e:
+                raise ValueError(
+                    f"Unknown {self.register_name} method {method_name}. Available methods are \n"
+                    f"{list(self.registry[self.register_name].keys())}"
+                ) from e
+
+            if args or kwargs:
+                return method(*args, **kwargs)
+            return method
+        getter.__doc__ = f"""Get the {self.register_name} function from its name."""
+        getter.__name__ = f"get_{self.register_name}"
+        return getter
