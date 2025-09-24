@@ -123,6 +123,7 @@ Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coil. Such sensit
 ..
     TODO Add ref to SENSE and CG-Sense
 
+.. _nufft-orc:
 Off-resonance correction model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -130,15 +131,15 @@ The constant magnetic field applied in a MRI machine :math:`B0` (with a typical 
 
 .. math::
 
-   y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}
+   y(t_m) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_m} + \Delta\omega(\boldsymbol{u}) t_m} d\boldsymbol{u}
 
-where :math:`t_i` is the time at which the frequency :math:`\nu_i` is acquired. Similarly at the reconstruction we have
+where :math:`t_i` is the time at which the frequency :math:`\nu_m` is acquired. Similarly at the reconstruction we have
 
 .. math::
 
-   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}
+   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_m}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}
 
-With these mixed-domain field pertubations, the Fourier model does not hold anymore and the FFT algorithm cannot be used any longer.
+With these mixed-domain field pertubations, the Fourier model does not hold anymore and the (NU)FFT algorithm cannot be used any longer.
 The main approach (initially proposed by Noll et al. [2]_) is to approximate the mixed-domain exponential term by splitting it into single-domain weights :math:`b_{m, \ell}` and :math:`c_{\ell, n}`:
 
 .. math::
@@ -157,14 +158,14 @@ The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C
 
    \hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2
 
-Where :math:`E_mn = e^i\Delta\omega_0(u_n)t_m`.
+Where :math:`E_mn = e^{i\Delta\omega_0(u_n)t_m}`.
 
 
 .. TODO Add Reference to the Code doing this.
 .. TODO Reference for SVI, MTI, MFI and pointers to pysap-mri for their estimation.
 
 
-.. _nufft-algo:
+.. _nufft-subspace:
 
 Subspace Projection Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~
