@@ -103,6 +103,7 @@ def _extract_kspace_center(
 register_smaps = MethodRegister("smaps")
 get_smaps = register_smaps.make_getter()
 
+
 @register_smaps
 @flat_traj
 def low_frequency(

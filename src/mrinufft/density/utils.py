@@ -9,6 +9,7 @@ from mrinufft._utils import MethodRegister, proper_trajectory
 register_density = MethodRegister("density")
 get_density = register_density.make_getter()
 
+
 def flat_traj(normalize="unit"):
     """Decorate function to ensure that the trajectory is flatten before calling."""
 
