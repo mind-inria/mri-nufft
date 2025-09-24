@@ -14,6 +14,7 @@ from typing import ClassVar
 from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
+import warnings
 
 from mrinufft._array_compat import (
     with_numpy,
@@ -27,8 +28,6 @@ from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 
-if AUTOGRAD_AVAILABLE:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad
 if CUPY_AVAILABLE:
     import cupy as cp
 
@@ -125,8 +124,7 @@ class FourierOperatorBase(ABC):
     """Base Fourier Operator class.
 
     Every (Linear) Fourier operator inherits from this class,
-    to ensure that we have all the functions rightly implemented
-    as required by ModOpt.
+    to ensure that we have all the functions rightly implemented.
     """
 
     interfaces: dict[str, tuple] = {}
@@ -144,6 +142,8 @@ class FourierOperatorBase(ABC):
         self._smaps = None
         self._density = None
         self._n_coils = 1
+        self._n_batchs = 1
+        self.squeeze_dims = False
 
     def __init_subclass__(cls):
         """Register the class in the list of available operators."""
@@ -160,10 +160,10 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        image : np.ndarray, optional
+        image : NDArray, optional
             If passed, the shape of image data will be checked.
 
-        ksp : np.ndarray or object, optional
+        ksp : NDArray or object, optional
             If passed, the shape of the k-space data will be checked.
 
         Raises
@@ -197,12 +197,12 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        data: np.ndarray
+        data: NDArray
             input as array.
 
         Returns
         -------
-        result: np.ndarray
+        result: NDArray
             operator transform of the input.
         """
         pass
@@ -213,12 +213,12 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        x: np.ndarray
+        x: NDArray
             input data array.
 
         Returns
         -------
-        results: np.ndarray
+        results: NDArray
             adjoint operator transform.
         """
         pass
@@ -263,7 +263,7 @@ class FourierOperatorBase(ABC):
             method = kwargs.pop("name")
         if isinstance(method, str):
             method = get_smaps(method)
-        if not callable(method):
+        if not isinstance(method, Callable):
             raise ValueError(f"Unknown smaps method: {method}")
         self.smaps, self.SOS = method(
             self.samples,
@@ -328,9 +328,7 @@ class FourierOperatorBase(ABC):
         `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu`
         and `torchkbnufft-gpu`.
         """
-        if isinstance(method, np.ndarray) or (
-            CUPY_AVAILABLE and isinstance(method, cp.ndarray)
-        ):
+        if is_host_array(method) or (CUPY_AVAILABLE and is_cuda_array(method)):
             self.density = method
             return None
         if not method:
@@ -391,7 +389,7 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        kspace_data: np.ndarray
+        kspace_data: NDArray
             The k-space data to reconstruct.
         computer_loss: bool
             Whether to compute the loss at each iteration.
@@ -401,9 +399,9 @@ class FourierOperatorBase(ABC):
 
         Returns
         -------
-        np.ndarray
+        NDArray
             Reconstructed image
-        np.ndarray, optional
+        NDArray, optional
             array of loss at each iteration, if compute_loss is True.
         """
         from ..extras.gradient import cg
@@ -420,7 +418,7 @@ class FourierOperatorBase(ABC):
     @property
     def uses_density(self):
         """Return True if the operator uses density compensation."""
-        return getattr(self, "density", None) is not None
+        return self.density is not None
 
     @property
     def ndim(self):
@@ -446,6 +444,17 @@ class FourierOperatorBase(ABC):
         if n_coils < 1 or not int(n_coils) == n_coils:
             raise ValueError(f"n_coils should be a positive integer, {type(n_coils)}")
         self._n_coils = int(n_coils)
+
+    @property
+    def n_batchs(self):
+        """Number of coils for the operator."""
+        return self._n_batchs
+
+    @n_batchs.setter
+    def n_batchs(self, n_batchs):
+        if n_batchs < 1 or not int(n_batchs) == n_batchs:
+            raise ValueError(f"n_batchs should be a positive integer, {type(n_batchs)}")
+        self._n_batchs = int(n_batchs)
 
     @property
     def smaps(self):
@@ -538,17 +547,17 @@ class FourierOperatorCPU(FourierOperatorBase):
 
     Parameters
     ----------
-    samples: np.ndarray
+    samples: NDArray
         The samples used by the operator.
     shape: tuple
         The shape of the image space (in 2D or 3D)
-    density: bool or np.ndarray
+    density: bool or NDArray
         If True, the density compensation is estimated from the samples.
         If False, no density compensation is applied.
-        If np.ndarray, the density compensation is applied from the array.
+        If NDArray, the density compensation is applied from the array.
     n_coils: int
         The number of coils.
-    smaps: np.ndarray
+    smaps: NDArray
         The sensitivity maps.
     raw_op: object
         An object implementing the NUFFT API. Ut should be responsible to compute a
@@ -594,7 +603,7 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         Parameters
         ----------
-        data: np.ndarray
+        data: NDArray
         The uniform (2D or 3D) data in image space.
 
         Returns
@@ -789,7 +798,12 @@ class FourierOperatorCPU(FourierOperatorBase):
         return arr
 
 
-def power_method(max_iter:int , operator:FourierOperatorBase, norm_func:Callable|None=None, x:NDArray|None=None) -> float:
+def power_method(
+    max_iter: int,
+    operator: FourierOperatorBase,
+    norm_func: Callable | None = None,
+    x: NDArray | None = None,
+) -> float:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
