@@ -2,6 +2,7 @@
 
 import warnings
 import numpy as np
+from numpy.typing import NDArray
 from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy, power_method
 from mrinufft._utils import (
     proper_trajectory,
@@ -43,10 +44,10 @@ class RawCufinufftPlan:
 
     def __init__(
         self,
-        samples,
-        shape,
-        n_trans=1,
-        eps=1e-6,
+        samples: NDArray,
+        shape: tuple[int, ...],
+        n_trans: int = 1,
+        eps: float = 1e-6,
         **kwargs,
     ):
         self.shape = shape
@@ -56,7 +57,7 @@ class RawCufinufftPlan:
         self._dtype = samples.dtype
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
-        self.plans = [None, None, None]
+        self.plans: list[Plan | None] = [None, None, None]
         self.grad_plan = None
         self._kx = cp.array(samples[:, 0], copy=False)
         self._ky = cp.array(samples[:, 1], copy=False)

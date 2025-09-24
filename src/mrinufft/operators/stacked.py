@@ -3,7 +3,6 @@
 import warnings
 
 import numpy as np
-import scipy as sp
 
 from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 from mrinufft.operators.base import (
@@ -11,7 +10,7 @@ from mrinufft.operators.base import (
     check_backend,
     get_operator,
     with_numpy_cupy,
-    power_method
+    power_method,
 )
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,
@@ -19,6 +18,8 @@ from mrinufft.operators.interfaces.utils import (
     pin_memory,
     sizeof_fmt,
 )
+from typing import Literal
+from numpy.typing import NDArray
 
 CUPY_AVAILABLE = True
 try:
@@ -73,14 +74,14 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def __init__(
         self,
-        samples,
-        shape,
-        backend,
-        smaps,
-        z_index="auto",
-        n_coils=1,
-        n_batchs=1,
-        squeeze_dims=False,
+        samples: NDArray,
+        shape: tuple[int, int, int],
+        backend: str | FourierOperatorBase,
+        smaps: NDArray,
+        z_index: Literal["auto"] | NDArray | None = "auto",
+        n_coils: int = 1,
+        n_batchs: int = 1,
+        squeeze_dims: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -109,7 +110,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
             samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
             self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
-
             if backend.n_coils != self.n_coils * (len(z_index_)):
                 raise ValueError(
                     "The backend operator should have ``n_coils * len(z_index)``"
@@ -128,7 +128,11 @@ class MRIStackedNUFFT(FourierOperatorBase):
             )
 
     @staticmethod
-    def _init_samples(samples, z_index, shape):
+    def _init_samples(
+        samples: NDArray,
+        z_index: Literal["auto"] | NDArray | None,
+        shape: tuple[int, int, int],
+    ) -> tuple[NDArray, NDArray]:
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
         if samples_dim == len(shape) and auto_z:
@@ -377,7 +381,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         n_coils=1,
         n_batchs=1,
         n_trans=1,
-        z_index="auto",
+        z_index: NDArray | None | Literal["auto"] = "auto",
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
