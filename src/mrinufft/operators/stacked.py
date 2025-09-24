@@ -5,12 +5,13 @@ import warnings
 import numpy as np
 import scipy as sp
 
-from mrinufft._utils import proper_trajectory, power_method, get_array_module, auto_cast
+from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
 from mrinufft.operators.base import (
     FourierOperatorBase,
     check_backend,
     get_operator,
     with_numpy_cupy,
+    power_method
 )
 from mrinufft.operators.interfaces.utils import (
     is_cuda_array,

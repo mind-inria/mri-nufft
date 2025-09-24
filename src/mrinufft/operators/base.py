@@ -21,7 +21,7 @@ from mrinufft._array_compat import (
     AUTOGRAD_AVAILABLE,
     CUPY_AVAILABLE,
 )
-from mrinufft._utils import auto_cast, power_method
+from mrinufft._utils import auto_cast
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
@@ -787,3 +787,52 @@ class FourierOperatorCPU(FourierOperatorBase):
             except ValueError:
                 pass
         return arr
+
+
+def power_method(max_iter:int , operator:FourierOperatorBase, norm_func:Callable|None=None, x:NDArray|None=None) -> float:
+    """Power method to find the Lipschitz constant of an operator.
+
+    Parameters
+    ----------
+    max_iter: int
+        Maximum number of iterations
+    operator: FourierOperatorBase or child class
+        NUFFT Operator of which to estimate the lipchitz constant.
+    norm_func: callable, optional
+        Function to compute the norm , by default np.linalg.norm.
+        Change this if you want custom norm, or for computing on GPU.
+    x: array_like, optional
+        Initial value to use, by default a random numpy array is used.
+
+    Returns
+    -------
+    float
+        The lipschitz constant of the operator.
+    """
+
+    def AHA(x):
+        return operator.adj_op(operator.op(x))
+
+    if norm_func is None:
+        norm_func = np.linalg.norm
+    if x is None:
+        x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    x_norm = norm_func(x)
+    x /= x_norm
+    for i in range(max_iter):  # noqa: B007
+        x_new = AHA(x)
+        x_new_norm = norm_func(x_new)
+        x_new /= x_new_norm
+        if abs(x_norm - x_new_norm) < 1e-6:
+            break
+        x_norm = x_new_norm
+        x = x_new
+
+    if i == max_iter - 1:
+        warnings.warn("Lipschitz constant did not converge")
+
+    if hasattr(x_new_norm, "__cuda_array_interface__"):
+        import cupy as cp
+
+        x_new_norm = cp.asarray(x_new_norm).get().item()
+    return x_new_norm
