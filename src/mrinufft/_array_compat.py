@@ -3,7 +3,8 @@
 import warnings
 
 from functools import wraps
-
+from inspect import cleandoc
+from textwrap import indent, dedent
 import numpy as np
 
 from mrinufft._utils import get_array_module
@@ -43,6 +44,41 @@ def _tf_cuda_is_available():
 TF_CUDA_AVAILABLE = _tf_cuda_is_available()
 
 
+NUMPY_NOTE = """
+.. note::
+
+    This function uses ``numpy`` internally, and will convert all its array
+    argument to numpy arrays. The outputs will be converted back to the original
+    array module and device.
+"""
+NUMPY_CUPY_NOTE = """
+.. note::
+
+    This function uses ``numpy`` for all CPU arrays, and ``cupy`` for all on-gpu
+    array. It will convert all its array argument to the respective array
+    library. The outputs will be converted back to the original array module and
+    device.
+"""
+
+TORCH_NOTE = """
+.. note::
+
+    This function uses ``torch`` internally, and will convert all its array
+    argument to torch tensors, but will respect the device they are allocated
+    on. The outputs will be converted back to the original array module and
+    device.
+"""
+
+TF_NOTE = """
+.. note::
+
+    This function uses ``tensorflow`` internally, and will convert all its array
+    argument to tensorflow tensors. but will respect the device they are
+    allocated on. The outputs will be converted back to the original array
+    module and device.
+"""
+
+
 def with_numpy(fun):
     """Ensure the function works internally with numpy array."""
 
@@ -63,6 +99,8 @@ def with_numpy(fun):
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
 
+    if wrapper.__doc__:
+        wrapper.__doc__ = cleandoc(wrapper.__doc__) + NUMPY_NOTE
     return wrapper
 
 
@@ -86,6 +124,9 @@ def with_tensorflow(fun):
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
 
+    if wrapper.__doc__:
+        wrapper.__doc__ = cleandoc(wrapper.__doc__) + TF_NOTE
+
     return wrapper
 
 
@@ -108,6 +149,8 @@ def with_numpy_cupy(fun):
         # convert output to original array module and device
         return _to_interface(ret_, xp)
 
+    if wrapper.__doc__:
+        wrapper.__doc__ = cleandoc(wrapper.__doc__) + NUMPY_CUPY_NOTE
     return wrapper
 
 
@@ -131,6 +174,8 @@ def with_torch(fun):
         # convert output to original array module and device
         return _to_interface(ret_, xp, device)
 
+    if wrapper.__doc__:
+        wrapper.__doc__ = cleandoc(wrapper.__doc__) + TORCH_NOTE
     return wrapper
 
 
