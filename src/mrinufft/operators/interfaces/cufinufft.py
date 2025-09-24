@@ -2,12 +2,11 @@
 
 import warnings
 import numpy as np
-from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy
+from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy, power_method
 from mrinufft._utils import (
     proper_trajectory,
     get_array_module,
     auto_cast,
-    power_method,
 )
 
 from .utils import (
