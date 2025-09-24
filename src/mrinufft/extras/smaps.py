@@ -4,17 +4,21 @@ from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
 from mrinufft._utils import get_array_module
+from mrinufft._array_compat import with_numpy_cupy
 from .utils import register_smaps
 import numpy as np
+from numpy.typing import NDArray
+
+from collections.abc import Callable
 
 
 def _extract_kspace_center(
-    kspace_data,
-    kspace_loc,
-    threshold=None,
-    density=None,
-    window_fun="ellipse",
-):
+    kspace_data: NDArray,
+    kspace_loc: NDArray,
+    threshold: float | tuple[float, ...] = None,
+    density: NDArray | None = None,
+    window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
+) -> tuple[NDArray, NDArray, NDArray | None]:
     r"""Extract k-space center and corresponding sampling locations.
 
     The extracted center of the k-space, i.e. both the kspace locations and
@@ -81,7 +85,7 @@ def _extract_kspace_center(
         return data_thresholded, center_locations, dc
     else:
         if callable(window_fun):
-            window = window_fun(center_locations)
+            window = window_fun(kspace_loc)
         else:
             if window_fun in ["hann", "hanning", "hamming"]:
                 radius = xp.linalg.norm(kspace_loc, axis=1)
@@ -99,16 +103,16 @@ def _extract_kspace_center(
 @register_smaps
 @flat_traj
 def low_frequency(
-    traj,
-    shape,
-    kspace_data,
-    backend,
+    traj: NDArray,
+    shape: tuple[int, ...],
+    kspace_data: NDArray,
+    backend: str,
     threshold: float | tuple[float, ...] = 0.1,
-    density=None,
-    window_fun: str = "ellipse",
+    density: NDArray | None = None,
+    window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
     blurr_factor: int | float | tuple[float, ...] = 0.0,
     mask: bool = False,
-):
+) -> tuple[NDArray, NDArray]:
     """
     Calculate low-frequency sensitivity maps.
 
@@ -190,3 +194,61 @@ def low_frequency(
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
     return Smaps, SOS
+
+
+@with_numpy_cupy
+def coil_compression(
+    kspace_data: NDArray,
+    K: int | float,
+    traj: NDArray | None = None,
+    krad_thresh: float | None = None,
+) -> NDArray:
+    """
+    Coil compression using principal component analysis on k-space data.
+
+    Parameters
+    ----------
+    kspace_data : NDArray
+        Multi-coil k-space data. Shape: (n_coils, n_samples).
+    K : int or float
+        Number of virtual coils to retain (if int), or energy threshold (if
+        float between 0 and 1).
+    traj : NDArray, optional
+        Sampling trajectory. Shape: (n_samples, n_dims).
+    krad_thresh : float, optional
+        Relative k-space radius (as a fraction of maximum) to use for selecting
+        the calibration region for principal component analysis. If None, use
+        all k-space samples.
+
+    Returns
+    -------
+    NDArray
+        Coil-compressed data. Shape: (K, n_samples) if K is int, number of
+        retained components otherwise.
+    """
+    xp = get_array_module(kspace_data)
+
+    if krad_thresh is not None and traj is not None:
+        traj_rad = xp.sqrt(xp.sum(traj**2, axis=-1))
+        center_data = kspace_data[:, traj_rad < krad_thresh * xp.max(traj)]
+    elif krad_thresh is None:
+        center_data = kspace_data
+    else:
+        raise ValueError("traj and krad_thresh must be specified.")
+
+    # Compute the covar matrix of selected data
+    cov = center_data @ center_data.T.conj()
+    w, v = xp.linalg.eigh(cov)
+    # sort eigenvalues largest to smallest
+    si = xp.argsort(w)[::-1]
+    w_sorted = w[si]
+    v_sorted = v[si]
+    if isinstance(K, float):
+        # retain enough components to reach energy K
+        w_cumsum = xp.cumsum(w_sorted)  # from largest to smallest
+        total_energy = xp.sum(w_sorted)
+        K = int(xp.searchsorted(w_cumsum / total_energy, K, side="left") + 1)
+        K = min(K, w_sorted.size)
+    V = v_sorted[:K]  # use top K component
+    compress_data = V @ kspace_data
+    return compress_data
