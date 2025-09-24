@@ -229,7 +229,7 @@ jobs:
           ${{ env.activate_venv }}
           ${{ env.setup_cuda }}
           python -m pip install --upgrade pip
-          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,smaps,autodiff,doc]
+          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc]
         
       - name: Run examples
         shell: bash
