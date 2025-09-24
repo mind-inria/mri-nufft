@@ -1,0 +1,13 @@
+name: nufft
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip>=19.1.1
+  - jupyter>=1.0.0
+  - pip:
+      - mri-nufft[finufft]
+      - joblib
+      - brainweb-dl
+      - torch
+      - pywavelets

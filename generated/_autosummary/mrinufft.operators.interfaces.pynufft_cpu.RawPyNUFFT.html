@@ -1,0 +1,929 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RawPyNUFFT &#8212; MRI-nufft Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT';</script>
+    <link rel="icon" href="../../_static/mri-nufft-icon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="interfaces.sigpy" href="mrinufft.operators.interfaces.sigpy.html" />
+    <link rel="prev" title="MRIPynufft" href="mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/mri-nufft.png" class="logo__image only-light" alt="MRI-nufft Documentation - Home"/>
+    <script>document.write(`<img src="../../_static/mri-nufft.png" class="logo__image only-dark" alt="MRI-nufft Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    MRI-NUFFT
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+
+<li class="toctree-l1 has-children"><a class="reference internal" href="../autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_samples.html">Learn Sampling pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explanations</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../nufft.html">The NUFFT Operator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../trajectory_gradspec.html">The trajectory binary file specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mrinufft_convention.html">MRI-NUFFT Interfaces Convention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="mrinufft.operators.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.operators</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.autodiff.html"><code class="docutils literal notranslate"><span class="pre">operators.autodiff</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.autodiff.MRINufftAutoGrad.html">MRINufftAutoGrad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.base.html"><code class="docutils literal notranslate"><span class="pre">operators.base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.check_backend.html">check_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.get_operator.html">get_operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="mrinufft.operators.interfaces.html"><code class="docutils literal notranslate"><span class="pre">operators.interfaces</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.bart.html"><code class="docutils literal notranslate"><span class="pre">interfaces.bart</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.bart.MRIBartNUFFT.html">MRIBartNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.bart.RawBartNUFFT.html">RawBartNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.cufinufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.cufinufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html">MRICufiNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.cufinufft.RawCufinufftPlan.html">RawCufinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.finufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.finufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.finufft.MRIfinufft.html">MRIfinufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.finufft.RawFinufftPlan.html">RawFinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.gpunufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.gpunufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.gpunufft.make_pinned_smaps.html">make_pinned_smaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html">MRIGpuNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html">RawGpuNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html">get_fourier_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix.html">get_implicit_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.implicit_type1_ndft.html">implicit_type1_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.implicit_type2_ndft.html">implicit_type2_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.MRInumpy.html">MRInumpy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html">RawNDFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 current active has-children"><a class="reference internal" href="mrinufft.operators.interfaces.pynufft_cpu.html"><code class="docutils literal notranslate"><span class="pre">interfaces.pynufft_cpu</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft.html">MRIPynufft</a></li>
+<li class="toctree-l4 current active"><a class="current reference internal" href="#">RawPyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.sigpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.sigpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.sigpy.MRISigpyNUFFT.html">MRISigpyNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.sigpy.RawSigpyNUFFT.html">RawSigpyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.tfnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.tfnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.html">MRITensorflowNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.torchkbnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.torchkbnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft.html">MRITorchKbNufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTcpu.html">TorchKbNUFFTcpu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTgpu.html">TorchKbNUFFTgpu</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.stacked.html"><code class="docutils literal notranslate"><span class="pre">operators.stacked</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.stacked.stacked2traj3d.html">stacked2traj3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.stacked.traj3d2stacked.html">traj3d2stacked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.stacked.MRIStackedNUFFT.html">MRIStackedNUFFT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.stacked.MRIStackedNUFFTGPU.html">MRIStackedNUFFTGPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.operators.subspace.html"><code class="docutils literal notranslate"><span class="pre">operators.subspace</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.operators.subspace.MRISubspace.html">MRISubspace</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.trajectories.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.trajectories</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.display.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_2D_trajectory.html">display_2D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_3D_trajectory.html">display_3D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.gradients.patch_center_anomaly.html">patch_center_anomaly</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.inits.travelling_salesman.html"><code class="docutils literal notranslate"><span class="pre">inits.travelling_salesman</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.travelling_salesman.initialize_2D_travelling_salesman.html">initialize_2D_travelling_salesman</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.inits.travelling_salesman.initialize_3D_travelling_salesman.html">initialize_3D_travelling_salesman</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.maths.html"><code class="docutils literal notranslate"><span class="pre">trajectories.maths</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.html"><code class="docutils literal notranslate"><span class="pre">maths.fibonacci</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle.html">generate_fibonacci_circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.generate_fibonacci_lattice.html">generate_fibonacci_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere.html">generate_fibonacci_sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.get_closest_fibonacci_number.html">get_closest_fibonacci_number</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence.html">is_from_fibonacci_sequence</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.maths.primes.html"><code class="docutils literal notranslate"><span class="pre">maths.primes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.primes.compute_coprime_factors.html">compute_coprime_factors</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.html"><code class="docutils literal notranslate"><span class="pre">maths.rotations</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.R2D.html">R2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.Ra.html">Ra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.Rv.html">Rv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.Rx.html">Rx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.Ry.html">Ry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.rotations.Rz.html">Rz</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="mrinufft.trajectories.maths.tsp_solver.html"><code class="docutils literal notranslate"><span class="pre">maths.tsp_solver</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt.html">solve_tsp_with_2opt</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.sampling.html"><code class="docutils literal notranslate"><span class="pre">trajectories.sampling</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.create_chauffert_density.html">create_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.create_cutoff_decay_density.html">create_cutoff_decay_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.create_energy_density.html">create_energy_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.create_fast_chauffert_density.html">create_fast_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.create_polynomial_density.html">create_polynomial_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.sampling.sample_from_density.html">sample_from_density</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.tools.html"><code class="docutils literal notranslate"><span class="pre">trajectories.tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.conify.html">conify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.get_gradient_amplitudes_to_travel_for_set_time.html">get_gradient_amplitudes_to_travel_for_set_time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.get_gradient_times_to_travel.html">get_gradient_times_to_travel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.oversample.html">oversample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.precess.html">precess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.prewind.html">prewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.radialize_center.html">radialize_center</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.rewind.html">rewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.rotate.html">rotate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.shellify.html">shellify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.tools.unepify.html">unepify</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory2D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_cones.html">initialize_2D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral.html">initialize_2D_fibonacci_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_lissajous.html">initialize_2D_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous.html">initialize_2D_polar_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_propeller.html">initialize_2D_propeller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_radial.html">initialize_2D_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_rings.html">initialize_2D_rings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_rosette.html">initialize_2D_rosette</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide.html">initialize_2D_sinusoide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_spiral.html">initialize_2D_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory2D.initialize_2D_waves.html">initialize_2D_waves</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells.html">initialize_3D_annular_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_cones.html">initialize_3D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_floret.html">initialize_3D_floret</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_golden_means_radial.html">initialize_3D_golden_means_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_helical_shells.html">initialize_3D_helical_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_park_radial.html">initialize_3D_park_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial.html">initialize_3D_phyllotaxis_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_repi.html">initialize_3D_repi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_shells.html">initialize_3D_seiffert_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral.html">initialize_3D_seiffert_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_turbine.html">initialize_3D_turbine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi.html">initialize_3D_wave_caipi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.trajectory3D.initialize_3D_wong_radial.html">initialize_3D_wong_radial</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.trajectories.utils.html"><code class="docutils literal notranslate"><span class="pre">trajectories.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.check_hardware_constraints.html">check_hardware_constraints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html">compute_gradients_and_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.convert_gradients_to_slew_rates.html">convert_gradients_to_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.convert_gradients_to_trajectory.html">convert_gradients_to_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.convert_slew_rates_to_gradients.html">convert_slew_rates_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.convert_trajectory_to_gradients.html">convert_trajectory_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.initialize_algebraic_spiral.html">initialize_algebraic_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.initialize_shape_norm.html">initialize_shape_norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.initialize_tilt.html">initialize_tilt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.normalize_trajectory.html">normalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.unnormalize_trajectory.html">unnormalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Acquisition.html">Acquisition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.CaseInsensitiveEnumMeta.html">CaseInsensitiveEnumMeta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.FloatEnum.html">FloatEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Gammas.html">Gammas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Hardware.html">Hardware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Packings.html">Packings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.SI.html">SI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.SIEMENS.html">SIEMENS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.density.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.density</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.density.geometry_based.html"><code class="docutils literal notranslate"><span class="pre">density.geometry_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.geometry_based.cell_count.html">cell_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.geometry_based.voronoi.html">voronoi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.geometry_based.voronoi_unique.html">voronoi_unique</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.density.nufft_based.html"><code class="docutils literal notranslate"><span class="pre">density.nufft_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.nufft_based.pipe.html">pipe</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.utils.get_density.html">get_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.io.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.io</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.cfl.html"><code class="docutils literal notranslate"><span class="pre">io.cfl</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.cfl.cfl2traj.html">cfl2traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.cfl.traj2cfl.html">traj2cfl</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.nsp.html"><code class="docutils literal notranslate"><span class="pre">io.nsp</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.nsp.read_arbgrad_rawdat.html">read_arbgrad_rawdat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.nsp.read_trajectory.html">read_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.nsp.write_gradients.html">write_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.nsp.write_trajectory.html">write_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.siemens.html"><code class="docutils literal notranslate"><span class="pre">io.siemens</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.siemens.read_siemens_rawdat.html">read_siemens_rawdat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.gradient.cg.html">cg</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.smaps.coil_compression.html">coil_compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="mrinufft._utils.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mrinufft._utils.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellanneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../misc/contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/development.html">Developing MRI-nufft</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Related Projects</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/pysap">PySAP</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/ModOpt/">ModOpt</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/paquiteau/brainweb-dl">Brainweb-dl</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/edit/main/generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2Fgenerated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>RawPyNUFFT</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT.op()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT.adj_op()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="rawpynufft">
+<h1>RawPyNUFFT<a class="headerlink" href="#rawpynufft" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mrinufft.operators.interfaces.pynufft_cpu.</span></span><span class="sig-name descname"><span class="pre">RawPyNUFFT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/pynufft_cpu.html#RawPyNUFFT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Wrapper around PyNUFFT object.</p>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op" title="mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adj_op</span></code></a></p></td>
+<td><p>Adjoint Operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op" title="mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op"><code class="xref py py-obj docutils literal notranslate"><span class="pre">op</span></code></a></p></td>
+<td><p>Forward Operator.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method" id="sphx-glr-backref-mrinufft-operators-interfaces-pynufft-cpu-rawpynufft">
+<dt class="sig sig-object py" id="mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op">
+<span class="sig-name descname"><span class="pre">op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/pynufft_cpu.html#RawPyNUFFT.op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op" title="Link to this definition">#</a></dt>
+<dd><p>Forward Operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op">
+<span class="sig-name descname"><span class="pre">adj_op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mrinufft/operators/interfaces/pynufft_cpu.html#RawPyNUFFT.adj_op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op" title="Link to this definition">#</a></dt>
+<dd><p>Adjoint Operator.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">MRIPynufft</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mrinufft.operators.interfaces.sigpy.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">interfaces.sigpy</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.op"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT.op()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.adj_op"><code class="docutils literal notranslate"><span class="pre">RawPyNUFFT.adj_op()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By MRI-NUFFT Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022, MRI-NUFFT Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

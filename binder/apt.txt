@@ -1,0 +1,3 @@
+cmake
+libnfft3-dev
+libgl1-mesa-glx
