@@ -109,7 +109,7 @@ def pulseq_gre(
     rf_pulse: SimpleNamespace | None = None,
     rf_spoiling_inc: float = 0.0,
     grad_spoil_factor: float = 2.0,
-    system = None,
+    system=None,
     osf: int = 1,
 ):
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.

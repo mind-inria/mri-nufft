@@ -644,13 +644,13 @@ def get_gradient_amplitudes_to_travel_for_set_time(
     nb_shots, nb_dimension = kspace_end_loc.shape
     G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
     for i in range(nb_shots):
-        start = n_ramp_down[i,0]
-        G[i, : start] = np.linspace(
+        start = n_ramp_down[i, 0]
+        G[i, :start] = np.linspace(
             start_gradients[i], gi[i], n_ramp_down[i], endpoint=False, axis=-1
         )
-        if n_plateau[i, d] > 0:
+        if n_plateau[i] > 0:
             G[i, start : start + n_plateau[i, 0]] = gi[i]
-            start += n_plateau[i, 0]
+            start += n_plateau[i]
         G[i, start : start + n_ramp_up[i, 0]] = np.linspace(
             gi[i], end_gradients[i], n_ramp_up[i, 0], axis=-1, endpoint=False
         )

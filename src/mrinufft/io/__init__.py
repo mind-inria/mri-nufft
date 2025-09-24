@@ -9,7 +9,7 @@ from .utils import prepare_trajectory_for_seq
 __all__ = [
     "cfl2traj",
     "prepare_trajectory_for_seq",
-    "pulseq_gre_3D",
+    "pulseq_gre",
     "read_arbgrad_rawdat",
     "read_pulseq_traj",
     "read_siemens_rawdat",

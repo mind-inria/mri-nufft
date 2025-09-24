@@ -312,12 +312,15 @@ def write_trajectory(
         if postgrad == "slowdown_to_edge":
             # Always end at KMax, the spoilers can be handeled by the sequence.
             edge_locations[..., 0] = img_size[0] / FOV[0] / 2
-        end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
-            kspace_end_loc=edge_locations,
-            start_gradients=gradients[:, -1],
-            kspace_start_loc=final_positions,
-            acq=acq,
-        )
+            end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+                kspace_end_loc=edge_locations,
+                start_gradients=gradients[:, -1],
+                kspace_start_loc=final_positions,
+                acq=acq,
+            )
+
+            gradients = np.hstack([gradients, end_gradients])
+            Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, acq)
