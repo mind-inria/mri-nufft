@@ -1,6 +1,8 @@
 """General utility functions for MRI-NUFFT."""
 
 import warnings
+from inspect import cleandoc
+
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
@@ -114,25 +116,33 @@ class MethodRegister:
     Parameters
     ----------
     name: str
-        The  register
+        The  register name
+    docstring_sub: dict[str,str]
+        List of potential subsititutions to apply to the docstring.
     """
 
     registry = defaultdict(dict)
 
-    def __init__(self, register_name):
+    def __init__(
+        self, register_name: str, docstring_subs: dict[str, str] | None = None
+    ):
         self.register_name = register_name
+        self.docstring_subs = docstring_subs
 
     def __call__(self, method_name=None):
-        """Register the function in the registry."""
+        """Register the function in the registry.
+
+        It also substitute placeholder in docstrings.
+        """
 
         def decorator(func):
             self.registry[self.register_name][method_name] = func
-
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
-
-            return wrapper
+            if self.docstring_subs is not None and func.__doc__:
+                docstring = cleandoc(func.__doc__)
+                for key, sub in self.docstring_subs.items():
+                    docstring.replace(f"${{{key}}}", sub)
+                func.__doc__ = docstring
+            return func
 
         if callable(method_name):
             func = method_name
@@ -147,13 +157,15 @@ class MethodRegister:
                 method = self.registry[self.register_name][method_name]
             except KeyError as e:
                 raise ValueError(
-                    f"Unknown {self.register_name} method {method_name}. Available methods are \n"
+                    f"Unknown {self.register_name} method {method_name}."
+                    " Available methods are \n"
                     f"{list(self.registry[self.register_name].keys())}"
                 ) from e
 
             if args or kwargs:
                 return method(*args, **kwargs)
             return method
+
         getter.__doc__ = f"""Get the {self.register_name} function from its name."""
         getter.__name__ = f"get_{self.register_name}"
         return getter
