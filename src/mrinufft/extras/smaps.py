@@ -5,7 +5,7 @@ from __future__ import annotations
 from mrinufft.density.utils import flat_traj
 from mrinufft._utils import get_array_module
 from mrinufft._array_compat import with_numpy_cupy
-from .utils import register_smaps
+from mrinufft._utils import MethodRegister
 import numpy as np
 from numpy.typing import NDArray
 
@@ -98,6 +98,10 @@ def _extract_kspace_center(
         data_thresholded = window * kspace_data
         # Return k-space locations & density just for consistency
         return data_thresholded, kspace_loc, density
+
+
+register_smaps = MethodRegister("smaps")
+get_smaps = register_smaps.make_getter()
 
 
 @register_smaps
