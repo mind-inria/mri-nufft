@@ -85,7 +85,7 @@ def read_siemens_rawdat(
         # get a list of all sequences times in the sequence
         # the first element found is the length of the list, we dicard it.
         vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))[1:]
-        nice_key = key[:2]  # strip prefix "al"
+        nice_key = key[2:]  # strip prefix "al"
         if len(vals) == 1:
             hdr[nice_key] = vals[0]
         elif len(vals) > 0:

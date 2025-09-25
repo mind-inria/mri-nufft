@@ -183,7 +183,7 @@ def get_complex_fieldmap_rad(
     if xp.iscomplexobj(b0_map):
         return b0_map
 
-    field_map = 2 * np.pi * np.complex64(1j) * xp.float32(b0_map)
+    field_map = 2 * xp.pi * xp.complex64(1j) * b0_map.astype(xp.float32, copy=False)
 
     if r2star_map is not None:
         r2star_map = xp.asarray(r2star_map, dtype=xp.float32)
@@ -207,8 +207,7 @@ def _create_histogram(
 
     """
     xp = get_array_module(field_map)
-
-    z = field_map[mask].ravel().view(xp.float32)
+    z = field_map[mask].ravel().view(xp.float32).reshape(-1,2)
     # create histograms
     h_counts, h_edges = xp.histogramdd(z, bins=n_bins)
     # get center of bins for real and imaginary part
@@ -220,10 +219,6 @@ def _create_histogram(
         )
     else:
         h_centers_cpx = np.complex64(1j) * h_centers[0]
-
-    # flatten histogram values and centers
-    h_counts = h_counts.ravel()
-    h_centers_cpx = h_centers_cpx.ravel()
 
     # Change the weighting according to args
     if weights == "ones":
@@ -247,6 +242,43 @@ def _create_variable_density(centers: NDArray, counts: NDArray, L: int):
     return centers
 
 
+@with_numpy_cupy
+def _full_C(field_map:NDArray[np.complex64], C_small:NDArray[np.complex64], zk:NDArray[np.complex64]):
+    """
+    Generate a full spatial interpolator C from a quantized version.
+
+    Parameters
+    ----------
+    field_map: NDArray
+        Complex-valued field-map in rad/s.
+    C_small: NDArray
+        Small C matrix computed at histogram centers.
+    zk: NDArray
+        Histogram centers where C_small is computed.
+
+    Return
+    """
+    
+    xp = get_array_module(field_map)
+    zreal_min = xp.min(field_map.real) 
+    zimag_min= xp.min(field_map.imag) 
+    dzreal = (xp.max(field_map.real) - zreal_min)/zk.shape[0]
+    dzimag = (xp.max(field_map.imag) - zimag_min)/zk.shape[1]
+    if dzreal == 0:
+        ireal = xp.zeros_like(field_map, dtype=np.int16)
+    else:
+        ireal = xp.floor((field_map.real - zreal_min)/dzreal).astype(int)
+    if dzimag == 0:
+        iimag = xp.zeros_like(field_map, dtype=np.int16)
+    else:
+        iimag = xp.floor((field_map.imag - zimag_min)/dzimag).astype(int)
+    # boundary conditions for the maximums
+    iimag = np.minimum(iimag, zk.shape[1]-1)
+    ireal = np.minimum(ireal, zk.shape[0]-1)
+    full_C = C_small.real[:,ireal] + xp.complex64(1j) * C_small.imag[:,iimag]
+    return full_C
+
+    
 @register_orc("mfi")
 @with_numpy_cupy
 def compute_mfi_coefficients(
@@ -337,6 +369,7 @@ def compute_mti_coefficients2(
 
     # Compute B with a Least Square interpolation
     B, _, _, _ = xp.linalg.lstsq(Ch, Eh, rcond=None)
+    C = _full_C(field_map, C.T, w_k)
     return B.T, C.T, E.T
 
 
@@ -379,6 +412,7 @@ def compute_svd_coefficients(
     # (Redundant with C=DV from E=UDV using L singular values
     # but it avoids 0 division issues when weighted)
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
+    C = _full_C(field_map, C, w_k)
     return B, C, E
 
 
@@ -423,6 +457,7 @@ def compute_tsvd_coefficients(
     # (Redundant with C=DV from E=UDV using L singular values
     # but it avoids 0 division issues when weighted)
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
+    C = _full_C(field_map, C, w_k)
     return B, C, E
 
 
@@ -504,13 +539,14 @@ def compute_mti_coefficients(
     and MIRT (mri_exp_approx.m): https://web.eecs.umich.edu/~fessler/code/
     """
     xp = get_array_module(field_map)
+    field_map = get_complex_fieldmap_rad(field_map)
 
     if isinstance(n_bins, int) and xp.iscomplexobj(field_map):
         n_bins = (10, n_bins)
     elif isinstance(n_bins, Sequence) and xp.isrealobj(field_map):
         n_bins = n_bins[-1]
     # enforce data types
-    readout_time = xp.asarray(readout_time, dtype=xp.float32).ravel()
+    readout_time = xp.asarray(readout_time)
 
     hk, zk = _create_histogram(field_map, mask, n_bins, weights)
 
@@ -522,7 +558,7 @@ def compute_mti_coefficients(
     # prepare for basis calculation
     E = xp.exp(xp.outer(-tl, zk))
     w = hk**0.5
-    p = w * xp.linalg.pinv(w * E.T)
+    p = w[None,:] * xp.linalg.pinv(w[:,None] * E.T)
 
     # actual temporal basis calculation
     B = p @ xp.exp(xp.outer(zk, -readout_time))
@@ -539,3 +575,5 @@ def compute_mti_coefficients(
     else:
         C = xp.exp(-tl[:, None] * field_map[None, ...])
     return B, C, E
+
+

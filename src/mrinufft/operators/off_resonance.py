@@ -1,13 +1,19 @@
 """Off Resonance correction Operator wrapper."""
 
 from collections.abc import Callable
+from scipy.ndimage import zoom
+import warnings
 
+from mrinufft._array_compat import with_numpy_cupy, CUPY_AVAILABLE
 import numpy as np
 from numpy.typing import NDArray
 
 from .._utils import get_array_module
 from ..extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
-from .base import FourierOperatorBase
+from .base import FourierOperatorBase, power_method
+
+if CUPY_AVAILABLE:
+    from cupyx.scipy.ndimage import zoom as cp_zoom
 
 
 class MRIFourierCorrected(FourierOperatorBase):
@@ -71,6 +77,9 @@ class MRIFourierCorrected(FourierOperatorBase):
         interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
     ):
         self._fourier_op = fourier_op
+        self.squeeze_dims = self._fourier_op.squeeze_dims
+        self._fourier_op.squeeze_dims = False  # we will manage shapes here.
+
         if (
             b0_map is None
             and readout_time is None
@@ -81,18 +90,22 @@ class MRIFourierCorrected(FourierOperatorBase):
             )
 
         if readout_time.size != self.n_samples:
-            raise ValueError(
-                "readout_time should match number of samples of the operator."
-            )
+            n_shot, r = divmod(self.n_samples, readout_time.size)
+            if r != 0:
+                raise ValueError(
+                    "readout_time should divide or equal the size of the samples."
+                )
+            self.n_shots = n_shot
+        complex_field_map = None
+        if b0_map is not None:
+            complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
 
-        complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
         self.B, self.C = self.compute_interpolator(
-            interpolator, complex_field_map, readout_time, mask
+            interpolator, complex_field_map, readout_time.ravel(), mask
         )
 
-    @staticmethod
     def compute_interpolator(
-        interpolators, field_map, time_vec, mask
+        self, interpolators, field_map, readout_time, mask
     ) -> tuple[NDArray, NDArray]:
         """Decompose the field-map in space and time-wise interpolators."""
         if isinstance(interpolators, tuple):
@@ -104,7 +117,30 @@ class MRIFourierCorrected(FourierOperatorBase):
                     "Provide a tuple of 2 array_like data"
                     " for space and time interpolators"
                 ) from e
+            Bl, Bs = B.shape
+            Cl, Cxyz = C.shape
+            if Bl != Cl or self.n_samples % Bs or Cxyz != self.shape:
+                raise ValueError("Interpolator shapes should be (k*Ns, L) and (L,*XYZ)")
             return B, C
+        # Resize to match fourier shape
+        if field_map.shape != self._fourier_op.shape:
+            warnings.warn(
+                "field_map and mask will be interpolated to match image shape."
+            )
+            xp = get_array_module(field_map)
+            zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
+            field_map = zoom_func(
+                field_map,
+                zoom=tuple(
+                    np.array(self._fourier_op.shape) / np.array(field_map.shape)
+                ),
+            )
+            if mask is not None:
+                mask = zoom_func(
+                    mask,
+                    zoom=tuple(np.array(self._fourier_op.shape) / np.array(mask.shape)),
+                )
+
         kwargs = {}
         if isinstance(interpolators, dict):
             kwargs = interpolators.copy()
@@ -113,8 +149,8 @@ class MRIFourierCorrected(FourierOperatorBase):
             interpolators = get_orc_factorization(interpolators)
         if not isinstance(interpolators, Callable):
             raise ValueError(f"Unknown off-resonance interpolator ``{interpolators}``")
-        B, C = interpolators(
-            field_map=field_map, timve_vec=time_vec, mask=mask, **kwargs
+        B, C, _ = interpolators(
+            field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
         return B, C
 
@@ -122,6 +158,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         """Delegate attribute to internal operator."""
         return getattr(self._fourier_op, name)
 
+    @with_numpy_cupy
     def op(self, data, *args):
         """Compute Forward Operation with off-resonance effect.
 
@@ -137,13 +174,22 @@ class MRIFourierCorrected(FourierOperatorBase):
             Array module is the same as input data.
 
         """
-        y = 0.0
-        data_d = self.xp.asarray(data)
-        for idx in range(self.n_interpolators):
-            y += self.B[idx] * self._fourier_op.op(self.C[idx] * data_d, *args)
+        xp = get_array_module(data)
+        y = xp.zeros((self.n_batchs, self.n_coils, self.n_samples), dtype=xp.complex64)
 
+        ns = self.n_samples_per_shot
+        data_d = xp.asarray(data)
+        for ll in range(self.n_interpolators):
+            ytmp = self._fourier_op.op(self.C[ll] * data_d, *args)
+            # repeat B over shots
+            for s in range(self.n_shots):
+                # TODO use reshape and multiply with broadcasting
+                y[:, :, s * ns : (s + 1) * ns] += (
+                    self.B[:, ll] * ytmp[:, :, s * ns : (s + 1) * ns]
+                )
         return y
 
+    @with_numpy_cupy
     def adj_op(self, coeffs, *args):
         """
         Compute Adjoint Operation with off-resonance effect.
@@ -160,11 +206,67 @@ class MRIFourierCorrected(FourierOperatorBase):
             Array module is the same as input coeffs.
 
         """
-        y = 0.0
-        coeffs_d = self.xp.asarray(coeffs)
-        for idx in range(self.n_interpolators):
-            y += self.xp.conj(self.C[idx]) * self._fourier_op.adj_op(
-                self.xp.conj(self.B[idx]) * coeffs_d, *args
-            )
+        xp = get_array_module(coeffs)
+        B, C = self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        NS,NK = self.n_shots, self.n_samples_per_shot
+        ytmp = xp.zeros((B, C, K), dtype=xp.complex64)
+        img = xp.zeros((B, C, *XYZ), dtype=xp.complex64)
 
-        return y
+        coeffs = coeffs.reshape(B, C, NS, NK)
+        ns = self.n_samples_per_shot
+        for ll in range(self.n_interpolators):
+            Bconj = self.B[:, ll].conj()
+            Cconj = self.C[ll].conj()
+            ytmp = (Bconj * coeffs).reshape(B, C, K)
+            img += Cconj * self._fourier_op.adj_op(ytmp)
+        return self._safe_squeeze(img)
+
+        
+    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+        """Return the Lipschitz constant of the operator.
+
+        Parameters
+        ----------
+        max_iter: int
+            Number of iteration to perform to estimate the Lipschitz constant.
+        kwargs:
+            Extra kwargs for the cufinufft operator.
+
+        Returns
+        -------
+        float
+            Lipschitz constant of the operator.
+        """
+        # Disable coil dimension for faster computation
+        n_coils = self._fourier_op.n_coils
+        smaps = self._fourier_op.smaps
+        squeeze_dims = self.squeeze_dims
+
+        self._fourier_op.smaps = None
+        self._fourier_op.n_coils = 1
+
+        x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+        x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
+
+        x = np.asarray(x)
+        lipschitz_cst = power_method(
+            max_iter, self, norm_func=lambda x: np.linalg.norm(x.flatten()), x=x
+        )
+
+        # restore coil setup
+        self._fourier_op.n_coils = n_coils
+        self._fourier_op.smaps = smaps
+
+        return lipschitz_cst
+
+        
+    
+    @property
+    def n_interpolators(self):
+        return self.B.shape[1]
+
+    @property
+    def n_samples_per_shot(self):
+        return self.B.shape[0]
+

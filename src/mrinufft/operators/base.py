@@ -485,6 +485,19 @@ class FourierOperatorBase(ABC):
                 f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
 
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
+
     @property
     def density(self):
         """Density compensation of the operator."""
