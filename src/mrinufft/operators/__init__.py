@@ -10,7 +10,7 @@ from .base import (
     list_backends,
     check_backend,
 )
-from .off_resonance import MRIFourierCorrected, get_interpolators_from_fieldmap
+from .off_resonance import MRIFourierCorrected
 from .stacked import MRIStackedNUFFT
 from .subspace import MRISubspace
 
@@ -30,5 +30,4 @@ __all__ = [
     "check_backend",
     "get_operator",
     "list_backends",
-    "get_interpolators_from_fieldmap",
 ]

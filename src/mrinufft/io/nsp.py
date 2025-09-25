@@ -421,7 +421,7 @@ def read_trajectory(
                 dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if version > 4:
-            TE, data = _pop_elements(data)
+            TE_pos, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
             recon_tag, data = _pop_elements(data)
             recon_tag = np.around(recon_tag, 2)
@@ -525,7 +525,7 @@ def read_trajectory(
             params["min_osf"] = min_osf
             params["gamma"] = gamma
             params["recon_tag"] = recon_tag
-            params["TE"] = TE
+            params["TE_pos"] = TE_pos
             if version >= 4.2:
                 params["timestamp"] = timestamp
         if normalize_factor is not None:
