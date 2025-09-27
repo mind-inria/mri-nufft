@@ -73,15 +73,10 @@ jobs:
 
       - name: Fetch artifact URL
         id: fetch-artifact-url
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Use GitHub API to fetch the artifact details
-          ARTIFACT_ID=${{ steps.get-artifact-id.outputs.artifact-id }}
-          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}"
-          ARTIFACT_DATA=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" ${API_URL})
-          ARTIFACT_URL=$(echo ${ARTIFACT_DATA} | jq -r '.archive_download_url')
-          echo "artifact-url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
+          # Find the most recent artifact link in the logs
+          ARTIFACT_LINK=$(grep -oE 'https://github.com/.*/artifacts/[0-9]+' $GITHUB_WORKSPACE/../_actions/*/upload-artifact/*/dist/index.js | tail -1)
+          echo "artifact-link=$ARTIFACT_LINK" >> $GITHUB_OUTPUT
 
       - name: Edit comment with artifact link (PR only)
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request
@@ -90,7 +85,7 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           body: |
             Documentation built successfully!
-            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-url }})
+            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-link }})
           edit-mode: replace
 
       - name: Print artifact URL (Push only)
