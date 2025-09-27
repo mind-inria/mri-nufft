@@ -1,0 +1,99 @@
+name: docs
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  issue_comment:
+    types: [created]
+  
+env:
+  PYTHON_VERSION: "3.10"
+  BART_VERSION: "0.8.00"
+  ref_backend: "finufft"
+  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
+  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
+  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
+
+jobs:    
+  build-doc:
+    if: github.ref == 'refs/heads/master' || (contains(github.event.comment.body, '/build-docs') && github.event.issue_pull_request)
+    name: Build API Documentation
+    runs-on: gpu
+    needs: get-commit-message
+    permissions:
+      actions: read
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get history and tags for SCM versioning to work
+        run: |
+          git fetch --prune --unshallow
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+        
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          ${{ env.setup_cuda }}
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
+          python -m pip install --upgrade pip
+          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft,sigpy,extra] fastmri
+      
+          
+      - name: Build API documentation
+        run: |
+          ${{ env.activate_venv }}
+          export MRINUFFT_BACKEND=cufinufft
+          python -m sphinx docs docs_build
+
+      - name: Upload artifact
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v4
+        with:
+          # Upload the docs
+          name: docs
+          path: 'docs_build'
+          retention-days: 5
+
+      - name: Get artifact ID
+        id: get-artifact-id
+        run: |
+          echo "artifact-id=${{ steps.upload-artifact.outputs.artifact-id }}" >> $GITHUB_OUTPUT
+
+      - name: Fetch artifact URL
+        id: fetch-artifact-url
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use GitHub API to fetch the artifact details
+          ARTIFACT_ID=${{ steps.get-artifact-id.outputs.artifact-id }}
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}"
+          ARTIFACT_DATA=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" ${API_URL})
+          ARTIFACT_URL=$(echo ${ARTIFACT_DATA} | jq -r '.archive_download_url')
+          echo "artifact-url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
+
+      - name: Edit comment with artifact link (PR only)
+        if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            Documentation built successfully!
+            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-url }})
+          edit-mode: replace
+
+      - name: Print artifact URL (Push only)
+        if: github.event_name == 'push'
+        run: |
+          echo "Documentation built and uploaded as artifact."
+          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-url }}"
