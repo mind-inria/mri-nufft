@@ -66,31 +66,24 @@ jobs:
           path: 'docs_build'
           retention-days: 5
 
-      - name: Get artifact download URL (temporary)
-        id: get-artifact-url
+      - name: Get artifact ID
+        id: get-artifact-id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # List all artifacts for this workflow run
+          # Get the artifact ID for "docs"
           ARTIFACTS_JSON=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
-          # Find the artifact named "docs"
-          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[] | select(.name == "docs") | .archive_download_url' | head -n1)
-          echo $ARTIFACT_URL
-          echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+          ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[] | select(.name == "docs") | .id' | head -n1)
+          echo "artifact-id=$ARTIFACT_ID"  
+          echo "artifact-id=$ARTIFACT_ID" >> $GITHUB_OUTPUT
 
-      - name: Edit comment with artifact link (PR only)
+      - name: Comment with artifact web link
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
-            Documentation built successfully!
-            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-url }})
+            ✅ Documentation built!
+            [download the artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.get-artifact-id.outputs.artifact-id }})
           edit-mode: replace
-
-      - name: Print artifact URL (Push only)
-        if: github.event_name == 'push'
-        run: |
-          echo "Documentation built and uploaded as artifact."
-          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-url}}"
