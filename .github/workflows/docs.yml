@@ -3,8 +3,8 @@ name: docs
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
   issue_comment:
     types: [created]
   
@@ -18,10 +18,9 @@ env:
 
 jobs:    
   build-doc:
-    if: github.ref == 'refs/heads/master' || (contains(github.event.comment.body, '/build-docs') && github.event.issue_pull_request)
+    if: ${{ (contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request) }}
     name: Build API Documentation
     runs-on: gpu
-    needs: get-commit-message
     permissions:
       actions: read
       pull-requests: write
