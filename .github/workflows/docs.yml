@@ -66,22 +66,18 @@ jobs:
           path: 'docs_build'
           retention-days: 5
 
-      - name: Get artifact ID
-        id: get-artifact-id
-        run: |
-          echo "artifact-id=${{ steps.upload-artifact.outputs.artifact-id }}" >> $GITHUB_OUTPUT
-
-      - name: Get artifact download URL
-        id: get_artifact_url
+      - name: Get artifact download URL (temporary)
+        id: get-artifact-url
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # List artifacts for this workflow run
+          # List all artifacts for this workflow run
           ARTIFACTS_JSON=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
-          # Extract the first artifact's download URL
-          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
-          echo "artifact-link=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+          # Find the artifact named "docs"
+          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[] | select(.name == "docs") | .archive_download_url' | head -n1)
+          echo $ARTIFACT_URL
+          echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
 
       - name: Edit comment with artifact link (PR only)
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request
@@ -90,11 +86,11 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           body: |
             Documentation built successfully!
-            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-link }})
+            Download the artifact: [here](${{ steps.fetch-artifact-url.outputs.artifact-url }})
           edit-mode: replace
 
       - name: Print artifact URL (Push only)
         if: github.event_name == 'push'
         run: |
           echo "Documentation built and uploaded as artifact."
-          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-link}}"
+          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-url}}"
