@@ -20,9 +20,7 @@ env:
 
 jobs:    
   build-doc:
-    if: |
-      (contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request) ||
-      github.event_name == 'push'
+    if: ${{ ( contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request ) || github.event_name == 'push' || github.event_name == 'workflow_dispatch'}}
     name: Build API Documentation
     runs-on: gpu
     permissions:
