@@ -20,9 +20,7 @@ env:
 
 jobs:    
   build-doc:
-    if: |
-      (contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request) ||
-      github.event_name == 'push'
+    if: ${{ ( contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request ) || github.event_name == 'push' || github.event_name == 'workflow_dispatch'}}
     name: Build API Documentation
     runs-on: gpu
     permissions:
@@ -72,13 +70,17 @@ jobs:
         id: get-artifact-id
         run: |
           echo "artifact-id=${{ steps.upload-artifact.outputs.artifact-id }}" >> $GITHUB_OUTPUT
-
-      - name: Fetch artifact URL
-        id: fetch-artifact-url
+      - name: Get artifact download URL
+        id: get_artifact_url
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Find the most recent artifact link in the logs
-          ARTIFACT_LINK=$(grep -oE 'https://github.com/.*/artifacts/[0-9]+' $GITHUB_WORKSPACE/../_actions/*/upload-artifact/*/dist/index.js | tail -1)
-          echo "artifact-link=$ARTIFACT_LINK" >> $GITHUB_OUTPUT
+          # List artifacts for this workflow run
+          ARTIFACTS_JSON=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
+          # Extract the first artifact's download URL
+          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
+          echo "artifact-link=$ARTIFACT_URL" >> $GITHUB_OUTPUT
 
       - name: Edit comment with artifact link (PR only)
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request
@@ -94,6 +96,5 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo "Documentation built and uploaded as artifact."
-          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-url }}"
 
-# Test for pull request
+          echo "Download URL: ${{ steps.fetch-artifact-url.outputs.artifact-link}}"
