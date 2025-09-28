@@ -2182,7 +2182,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 9.640 seconds)
+   **Total running time of the script:** (1 minutes 5.995 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_trajectories_example_3D_trajectories.py:

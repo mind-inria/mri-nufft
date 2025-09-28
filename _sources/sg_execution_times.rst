@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**18:05.625** total execution time for 19 files **from all galleries**:
+**17:33.022** total execution time for 19 files **from all galleries**:
 
 .. container::
 
@@ -32,60 +32,60 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``../examples/GPU/example_learn_straight_line_readouts.py``)
-     - 02:14.923
-     - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_sampling_densities.py` (``../examples/trajectories/example_sampling_densities.py``)
-     - 02:08.639
+     - 02:12.280
+     - 0.0
+   * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_straight_line_readouts.py` (``../examples/GPU/example_learn_straight_line_readouts.py``)
+     - 02:10.295
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_gif_3D.py` (``../examples/trajectories/example_gif_3D.py``)
-     - 01:59.556
+     - 01:50.635
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_3d_trajectory_display.py` (``../examples/GPU/example_3d_trajectory_display.py``)
-     - 01:39.154
+     - 01:35.612
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_fastMRI_UNet.py` (``../examples/GPU/example_fastMRI_UNet.py``)
-     - 01:34.121
+     - 01:33.497
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples_multicoil.py` (``../examples/GPU/example_learn_samples_multicoil.py``)
-     - 01:31.193
+     - 01:29.247
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_gif_2D.py` (``../examples/trajectories/example_gif_2D.py``)
-     - 01:19.547
+     - 01:15.978
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_learn_samples.py` (``../examples/GPU/example_learn_samples.py``)
-     - 01:10.624
+     - 01:09.562
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_3D_trajectories.py` (``../examples/trajectories/example_3D_trajectories.py``)
-     - 01:09.640
+     - 01:05.995
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_learn_samples_multires.py` (``../examples/trajectories/example_learn_samples_multires.py``)
-     - 01:08.181
+     - 01:03.476
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_trajectory_tools.py` (``../examples/trajectories/example_trajectory_tools.py``)
-     - 00:49.271
+     - 00:49.164
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_subspace.py` (``../examples/operators/example_subspace.py``)
-     - 00:36.147
+     - 00:34.587
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_2D_trajectories.py` (``../examples/trajectories/example_2D_trajectories.py``)
-     - 00:21.489
+     - 00:20.279
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_density.py` (``../examples/GPU/example_density.py``)
-     - 00:07.749
+     - 00:07.766
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_display_config.py` (``../examples/trajectories/example_display_config.py``)
-     - 00:06.386
+     - 00:06.281
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_stacked.py` (``../examples/operators/example_stacked.py``)
-     - 00:03.239
+     - 00:02.761
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_readme.py` (``../examples/operators/example_readme.py``)
-     - 00:02.374
+     - 00:02.249
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_operators_example_offresonance.py` (``../examples/operators/example_offresonance.py``)
-     - 00:02.139
+     - 00:01.979
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_GPU_example_cg.py` (``../examples/GPU/example_cg.py``)
-     - 00:01.253
+     - 00:01.378
      - 0.0
