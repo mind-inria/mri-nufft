@@ -19,7 +19,7 @@ env:
   setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:    
-  build-doc:
+  build-docs:
     if: ${{ ( contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request ) || github.event_name == 'push' || github.event_name == 'workflow_dispatch'}}
     name: Build API Documentation
     runs-on: gpu
@@ -87,3 +87,30 @@ jobs:
             ✅ Documentation built!
             [download the artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.get-artifact-id.outputs.artifact-id }})
           edit-mode: replace
+
+    deploy-docs:
+      name: Deploy API Documentation
+      runs-on: ubuntu-latest
+      needs: build-docs
+      if: ${{ github.event_name == 'push' }}
+
+      steps:
+        - name: Get the docs_build artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: docs
+            path: docs_build
+            run-id: ${{ github.event.workflow_run.id }}
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Display structure of docs
+          run: ls -R docs_build/
+
+        - name: Deploy to GitHub Pages
+          uses: peaceiris/actions-gh-pages@v4
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./docs_build
+            destination_dir: .  # Ensure you deploy to the root of the gh-pages branch
+            publish_branch: gh-pages
+            keep_files: false
