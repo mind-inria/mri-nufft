@@ -404,7 +404,7 @@ It could be useful to understand potential regions in k-space with eddy current 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 35.612 seconds)
+   **Total running time of the script:** (1 minutes 35.080 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_3d_trajectory_display.py:
