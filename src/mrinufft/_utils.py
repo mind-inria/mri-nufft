@@ -169,3 +169,29 @@ class MethodRegister:
         getter.__doc__ = f"""Get the {self.register_name} function from its name."""
         getter.__name__ = f"get_{self.register_name}"
         return getter
+
+
+class LazyArray:
+    """
+    Mimic the behaviour of a NDArray, but use a dynamic computation method.
+
+    Parameters
+    ----------
+    idx_method: Callable
+    shape: tuple of int
+    dtype: DType of the returned array
+
+    """
+
+    def __init__(
+        self, idx_method: Callable[..., NDArray], shape: tuple[int], dtype: DTypeLike
+    ):
+        self.idx_method = idx_method
+        self.shape = shape
+        self.dtype = np.dtype(dtype)
+
+    def __len__(self):
+        return self.shape[0]
+
+    def __getitem__(self, idx):
+        return self.idx_method(idx).reshape(self.shape[1:])

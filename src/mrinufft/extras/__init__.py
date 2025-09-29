@@ -1,7 +1,7 @@
 """Additional supports routines."""
 
 from .data import get_brainweb_map, fse_simulation
-from .field_map import make_b0map, make_t2smap
+from .field_map import make_b0map, make_t2smap, get_orc_factorization
 from .smaps import low_frequency, get_smaps
 
 __all__ = [

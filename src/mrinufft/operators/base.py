@@ -231,11 +231,20 @@ class FourierOperatorBase(ABC):
         """
         return self.adj_op(self.op(image_data) - obs_data)
 
-    def with_off_resonance_correction(self, B, C, indices):
+    def with_off_resonance_correction(
+        self,
+        b0_map: NDArray | None = None,
+        readout_time: NDArray | None = None,
+        r2star_map: NDArray | None = None,
+        mask: NDArray | None = None,
+        interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
+    ):
         """Return a new operator with Off Resonnance Correction."""
         from .off_resonance import MRIFourierCorrected
 
-        return MRIFourierCorrected(self, B, C, indices)
+        return MRIFourierCorrected(
+            self, b0_map, readout_time, r2star_map, mask, interpolator
+        )
 
     def compute_smaps(self, method: NDArray | Callable | str | dict | None = None):
         """Compute the sensitivity maps and set it.
@@ -475,6 +484,19 @@ class FourierOperatorBase(ABC):
                 f"smaps shape is {smaps.shape}, it should be"
                 f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
             )
+
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
 
     @property
     def density(self):
