@@ -10,7 +10,6 @@ from .operators import (
     get_operator,
     check_backend,
     list_backends,
-    get_interpolators_from_fieldmap,
 )
 
 from .trajectories import (
@@ -75,7 +74,6 @@ __all__ = [
     "get_operator",
     "check_backend",
     "list_backends",
-    "get_interpolators_from_fieldmap",
     "voronoi",
     "cell_count",
     "pipe",
