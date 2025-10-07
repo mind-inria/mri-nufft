@@ -182,7 +182,7 @@ def test_write_n_read(
     np.testing.assert_allclose(params["version"], version)
     assert params["num_shots"] == trajectory.shape[0]
     assert params["num_samples_per_shot"] == trajectory.shape[1] - 1
-    np.testing.assert_almost_equal(params["TE"], TE_pos)
+    np.testing.assert_almost_equal(params["TE_pos"], TE_pos)
     np.testing.assert_allclose(params["gamma"], gamma)
     np.testing.assert_allclose(params["recon_tag"], recon_tag)
     assert params["min_osf"] == min_osf
