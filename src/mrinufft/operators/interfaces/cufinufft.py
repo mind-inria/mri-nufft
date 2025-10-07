@@ -749,19 +749,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad /= self.norm_factor
         return grad
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     @property
     def eps(self):
         """Return the underlying precision parameter."""

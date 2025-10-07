@@ -192,6 +192,19 @@ class FourierOperatorBase(ABC):
         if image is None and ksp is None:
             raise ValueError("Nothing to check, provides image or ksp arguments")
 
+    def _safe_squeeze(self, arr):
+        """Squeeze the first two dimensions of shape of the operator."""
+        if self.squeeze_dims:
+            try:
+                arr = arr.squeeze(axis=1)
+            except ValueError:
+                pass
+            try:
+                arr = arr.squeeze(axis=0)
+            except ValueError:
+                pass
+        return arr
+
     @abstractmethod
     def op(self, data):
         """Compute operator transform.
@@ -794,19 +807,6 @@ class FourierOperatorCPU(FourierOperatorBase):
             self._adj_op(ksp, grad[i * T : (i + 1) * T])
         grad /= self.norm_factor
         return grad.reshape(B, C, *XYZ)
-
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
 
 
 def power_method(
