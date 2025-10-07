@@ -11,6 +11,7 @@ from numpy.typing import NDArray
 from collections.abc import Callable
 
 
+@with_numpy_cupy
 def _extract_kspace_center(
     kspace_data: NDArray,
     kspace_loc: NDArray,
@@ -89,7 +90,7 @@ def _extract_kspace_center(
             if window_fun in ["hann", "hanning", "hamming"]:
                 radius = xp.linalg.norm(kspace_loc, axis=1)
                 a_0 = 0.5 if window_fun in ["hann", "hanning"] else 0.53836
-                window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold)
+                window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold[0])
             elif window_fun == "ellipse":
                 window = xp.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
             else:
@@ -105,6 +106,7 @@ get_smaps = register_smaps.make_getter()
 
 @register_smaps
 @flat_traj
+@with_numpy_cupy
 def low_frequency(
     traj: NDArray,
     shape: tuple[int, ...],
@@ -114,7 +116,7 @@ def low_frequency(
     density: NDArray | None = None,
     window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
     blurr_factor: int | float | tuple[float, ...] = 0.0,
-    mask: bool = False,
+    mask: bool | NDArray = False,
 ) -> tuple[NDArray, NDArray]:
     """
     Calculate low-frequency sensitivity maps.
@@ -175,11 +177,17 @@ def low_frequency(
         window_fun=window_fun,
     )
     smaps_adj_op = get_operator(backend)(
-        samples, shape, density=dc, n_coils=k_space.shape[-2]
+        samples,
+        shape,
+        density=dc,
+        n_coils=k_space.shape[-2],
+        squeeze_dims=True,
     )
     Smaps = smaps_adj_op.adj_op(k_space)
     SOS = np.linalg.norm(Smaps, axis=0)
-    if mask:
+    if isinstance(mask, np.ndarray):
+        Smaps = Smaps * mask
+    elif isinstance(mask, bool):
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
         convex_hull = convex_hull_image(SOS > thresh)
@@ -192,7 +200,7 @@ def low_frequency(
             1j * np.angle(Smaps)
         )
     # Re-normalize the sensitivity maps
-    if mask or np.sum(blurr_factor) > 0:
+    if np.any(mask) or np.sum(blurr_factor) > 0:
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
