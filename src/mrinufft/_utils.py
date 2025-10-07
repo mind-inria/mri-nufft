@@ -2,62 +2,41 @@
 
 import warnings
 from inspect import cleandoc
-
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
+
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
-
-ARRAY_LIBS = {
-    "numpy": (np, np.ndarray),
-    "cupy": (None, None),
-    "torch": (None, None),
-    "tensorflow": (None, None),
-}
-try:
-    import cupy
-
-    ARRAY_LIBS["cupy"] = (cupy, cupy.ndarray)
-except ImportError:
-    pass
-try:
-    import torch
-
-    ARRAY_LIBS["torch"] = (torch, torch.Tensor)
-except ImportError:
-    pass
-    NP2TORCH = {}
-else:
-    NP2TORCH = {
-        np.dtype("float64"): torch.float64,
-        np.dtype("float32"): torch.float32,
-        np.dtype("complex64"): torch.complex64,
-        np.dtype("complex128"): torch.complex128,
-    }
-try:
-    from tensorflow.experimental import numpy as tnp
-
-    ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
-except ImportError:
-    pass
+from mrinufft._array_compat import get_array_module
 
 
-def get_array_module(array):
-    """Get the module of the array."""
-    for lib, array_type in ARRAY_LIBS.values():
-        if lib is not None and isinstance(array, array_type):
-            return lib
-    raise ValueError(f"Unknown array library (={type(array)}.")
+def check_error(ier, message):  # noqa: D103
+    if ier != 0:
+        raise RuntimeError(message)
 
 
-def auto_cast(array, dtype: DTypeLike):
-    module = get_array_module(array)
-    if module.__name__ == "torch":
-        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
-    else:
-        return array.astype(dtype, copy=False)
+def sizeof_fmt(num, suffix="B"):
+    """
+    Return a number as a XiB format.
+
+    Parameters
+    ----------
+    num: int
+        The number to format
+    suffix: str, default "B"
+        The unit suffix
+
+    References
+    ----------
+    https://stackoverflow.com/a/1094933
+    """
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
 
 
 def proper_trajectory(trajectory, normalize="pi"):

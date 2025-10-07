@@ -2,7 +2,7 @@
 
 import torch
 import numpy as np
-from .._utils import NP2TORCH
+from .._array_compat import NP2TORCH
 
 
 class _NUFFT_OP(torch.autograd.Function):

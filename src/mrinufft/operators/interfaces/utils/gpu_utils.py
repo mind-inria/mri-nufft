@@ -4,19 +4,10 @@ import numpy as np
 from pathlib import Path
 from hashlib import md5
 from functools import wraps
-import warnings
+from mrinufft._array_compat import CUPY_AVAILABLE
 
-CUPY_AVAILABLE = True
-try:
+if CUPY_AVAILABLE:
     import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-TORCH_AVAILABLE = True
-try:
-    import torch
-except ImportError:
-    TORCH_AVAILABLE = False
 
 
 def get_maxThreadBlock():
@@ -25,39 +16,6 @@ def get_maxThreadBlock():
         device = cp.cuda.runtime.getDevice()
         return cp.cuda.runtime.getDeviceProperties(device)["maxThreadsPerBlock"]
     raise RuntimeError("Cupy is not available")
-
-
-def is_cuda_array(var):
-    """Check if var implement the CUDA Array interface."""
-    try:
-        return hasattr(var, "__cuda_array_interface__")
-    except Exception:
-        return False
-
-
-def is_cuda_tensor(var):
-    """Check if var is a CUDA tensor."""
-    return TORCH_AVAILABLE and isinstance(var, torch.Tensor) and var.is_cuda
-
-
-def is_host_array(var):
-    """Check if var is a host contiguous np array."""
-    try:
-        if isinstance(var, np.ndarray):
-            if not var.flags.c_contiguous:
-                warnings.warn("The input is CPU array but not C-contiguous. ")
-                return False
-            return True
-    except Exception:
-        return False
-
-
-def pin_memory(array):
-    """Create a copy of the array in pinned memory."""
-    mem = cp.cuda.alloc_pinned_memory(array.nbytes)
-    ret = np.frombuffer(mem, array.dtype, array.size).reshape(array.shape)
-    ret[...] = array
-    return ret
 
 
 # Load CSS4 colors

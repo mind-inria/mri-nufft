@@ -4,7 +4,14 @@ import warnings
 
 import numpy as np
 
-from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
+from mrinufft._utils import proper_trajectory, sizeof_fmt
+from mrinufft._array_compat import (
+    get_array_module,
+    auto_cast,
+    is_cuda_array,
+    is_host_array,
+    pin_memory,
+)
 from mrinufft.operators.base import (
     FourierOperatorBase,
     check_backend,
@@ -12,12 +19,7 @@ from mrinufft.operators.base import (
     with_numpy_cupy,
     power_method,
 )
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_array,
-    is_host_array,
-    pin_memory,
-    sizeof_fmt,
-)
+
 from typing import Literal
 from numpy.typing import NDArray
 

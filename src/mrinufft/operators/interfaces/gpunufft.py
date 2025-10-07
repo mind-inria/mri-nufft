@@ -3,9 +3,15 @@
 import numpy as np
 import warnings
 
-from ..base import FourierOperatorBase, with_numpy_cupy
-from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from ..base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
+from mrinufft._array_compat import (
+    get_array_module,
+    auto_cast,
+    is_cuda_array,
+    is_host_array,
+    with_numpy_cupy,
+)
 
 GPUNUFFT_AVAILABLE = True
 try:

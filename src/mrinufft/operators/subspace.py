@@ -1,7 +1,11 @@
 """Subspace NUFFT Operator wrapper."""
 
-from mrinufft._array_compat import _get_device, _to_interface
-from mrinufft._utils import ARRAY_LIBS, get_array_module
+from mrinufft._array_compat import (
+    _get_device,
+    _to_interface,
+    ARRAY_LIBS,
+    get_array_module,
+)
 
 
 from .base import FourierOperatorBase
