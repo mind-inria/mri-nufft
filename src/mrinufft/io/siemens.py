@@ -80,6 +80,18 @@ def read_siemens_rawdat(
         "affine": nifti_affine(twixObj),
         "acs": None,
     }
+    # Add sequence information
+    for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
+        # get a list of all sequences times in the sequence
+        # the first element found is the length of the list, we dicard it.
+        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))[1:]
+        nice_key = key[2:]  # strip prefix "al"
+        if len(vals) == 1:
+            hdr[nice_key] = vals[0]
+        elif len(vals) > 0:
+            hdr[nice_key] = vals
+        # don't populate if not found.
+
     if "refscan" in twixObj.keys():
         twixObj.refscan.squeeze = True
         acs = twixObj.refscan[""].astype(np.complex64)
