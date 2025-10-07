@@ -656,19 +656,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
             max_iter=max_iter, tolerance=tolerance
         )
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the data consistency estimation directly on gpu.

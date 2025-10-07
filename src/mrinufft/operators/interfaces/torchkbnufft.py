@@ -166,19 +166,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         img /= self.norm_factor
         return self._safe_squeeze(img)
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     @with_torch
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
