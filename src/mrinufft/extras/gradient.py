@@ -2,20 +2,22 @@
 
 from mrinufft._array_compat import with_numpy_cupy
 from mrinufft._utils import get_array_module
+from mrinufft.operators.base import FourierOperatorBase
+from numpy.typing import NDArray
 from tqdm import tqdm
 
 
 @with_numpy_cupy
 def cg(
-    operator,
-    kspace_data,
+    operator: FourierOperatorBase,
+    kspace_data: NDArray,
     x_init=None,
     num_iter=10,
-    tol=1e-4,
-    compute_loss=False,
-    progressbar=True,
+    tol: float = 1e-4,
+    compute_loss: bool = False,
+    progressbar: bool = True,
 ):
-    """
+    r"""
     Perform conjugate gradient (CG) optimization for image reconstruction.
 
     The image is updated using the gradient of a data consistency term,
@@ -23,20 +25,25 @@ def cg(
 
     Parameters
     ----------
-    kspace_data : numpy.ndarray
-              The k-space data to be used for image reconstruction.
+    kspace_data: numpy.ndarray
+        The k-space data to be used for image reconstruction.
 
-    x_init : numpy.ndarray, optional
-              An initial guess for the image. If None, an image of zeros with the same
-              shape as the expected output is used. Default is None.
+    x_init: numpy.ndarray, optional
+        An initial guess for the image. If None, an image of zeros with the same
+        shape as the expected output is used. Default is None.
 
     num_iter : int, optional
-              The maximum number of iterations to perform. Default is 10.
-
+        The maximum number of iterations to perform. Default is 10.
     tol : float, optional
-              The tolerance for convergence. If the norm of the gradient falls below
-              this value or the dot product between the image and k-space data is
-              non-positive, the iterations stop. Default is 1e-4.
+        The tolerance for convergence. If the norm of the gradient falls below
+        this value or the dot product between the image and k-space data is
+        non-positive, the iterations stop. Default is 1e-4.
+    compute_loss: bool, optional
+        If True, also compute the associated loss :math:`\|Ax_k-b\|_2^2`, and return it.
+        Default: False
+    progressbar: bool, optional
+        If True (default) display a progress bar to track iterations.
+
 
     Returns
     -------
@@ -65,10 +72,8 @@ def cg(
         return xp.linalg.norm(residual) ** 2
 
     loss = [calculate_loss(image)] if compute_loss else None
-    iterator = range(num_iter)
-    if progressbar:
-        iterator = tqdm(iterator)
-    for _ in iterator:
+
+    for _ in tqdm(range(num_iter), disable=progressbar):
         grad_new = operator.data_consistency(image, kspace_data)
         if xp.linalg.norm(grad_new) <= tol:
             break
