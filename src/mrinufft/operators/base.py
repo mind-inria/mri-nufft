@@ -266,13 +266,14 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not isinstance(method, Callable):
             raise ValueError(f"Unknown smaps method: {method}")
-        self.smaps, self.SOS = method(
+        smaps, SOS = method(
             self.samples,
             self.shape,
             density=self.density,
             backend=self.backend,
             **kwargs,
         )
+        self.smaps = smaps.reshape(self.n_coils, *self.shape)
 
     def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
