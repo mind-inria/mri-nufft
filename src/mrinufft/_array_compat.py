@@ -1,34 +1,78 @@
 """Array libraries compatibility utils."""
 
 import warnings
-
 from functools import wraps
 from inspect import cleandoc
-from textwrap import indent, dedent
+from numpy.typing import NDArray, DTypeLike
 import numpy as np
 
-from mrinufft._utils import get_array_module
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_cuda_tensor
+ARRAY_LIBS = {
+    "numpy": (np, np.ndarray),
+    "cupy": (None, None),
+    "torch": (None, None),
+    "tensorflow": (None, None),
+}
 
-
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
-AUTOGRAD_AVAILABLE = True
-try:
-    import torch
-except ImportError:
-    AUTOGRAD_AVAILABLE = False
-
-
+# TEST import of array libraries.
 TENSORFLOW_AVAILABLE = True
 try:
     import tensorflow as tf
 except ImportError:
     TENSORFLOW_AVAILABLE = False
+
+
+CUPY_AVAILABLE = True
+try:
+    import cupy as cp
+
+    ARRAY_LIBS["cupy"] = (cp, cp.ndarray)
+except ImportError:
+    CUPY_AVAILABLE = False
+
+AUTOGRAD_AVAILABLE = True
+TORCH_AVAILABLE = True
+try:
+    import torch
+
+    ARRAY_LIBS["torch"] = (torch, torch.Tensor)
+except ImportError:
+    AUTOGRAD_AVAILABLE = False
+    TORCH_AVAILABLE = False
+    pass
+    NP2TORCH = {}
+else:
+    NP2TORCH = {
+        np.dtype("float64"): torch.float64,
+        np.dtype("float32"): torch.float32,
+        np.dtype("complex64"): torch.complex64,
+        np.dtype("complex128"): torch.complex128,
+    }
+try:
+    from tensorflow.experimental import numpy as tnp
+
+    ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
+except ImportError:
+    pass
+
+
+def get_array_module(array: NDArray) -> np:  # type: ignore
+    """Get the module of the array."""
+    for lib, array_type in ARRAY_LIBS.values():
+        if lib is not None and isinstance(array, array_type):
+            return lib
+    raise ValueError(f"Unknown array library (={type(array)}.")
+
+
+def auto_cast(array, dtype: DTypeLike):
+    """Cast an array or a tensor to the desired dtype.
+
+    This automatically convert numpy/torch dtype to suitable format.
+    """
+    module = get_array_module(array)
+    if module.__name__ == "torch":
+        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
+    else:
+        return array.astype(dtype, copy=False)
 
 
 def _tf_cuda_is_available():
@@ -42,6 +86,40 @@ def _tf_cuda_is_available():
 
 
 TF_CUDA_AVAILABLE = _tf_cuda_is_available()
+
+
+def is_cuda_array(var) -> bool:
+    """Check if var implement the CUDA Array interface."""
+    try:
+        return hasattr(var, "__cuda_array_interface__")
+    except Exception:
+        return False
+
+
+def is_cuda_tensor(var) -> bool:
+    """Check if var is a CUDA tensor."""
+    return TORCH_AVAILABLE and isinstance(var, torch.Tensor) and var.is_cuda
+
+
+def is_host_array(var) -> bool:
+    """Check if var is a host contiguous np array."""
+    try:
+        if isinstance(var, np.ndarray):
+            if not var.flags.c_contiguous:
+                warnings.warn("The input is CPU array but not C-contiguous. ")
+                return False
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def pin_memory(array: NDArray) -> NDArray:
+    """Create a copy of the array in pinned memory."""
+    mem = cp.cuda.alloc_pinned_memory(array.nbytes)
+    ret = np.frombuffer(mem, array.dtype, array.size).reshape(array.shape)
+    ret[...] = array
+    return ret
 
 
 NUMPY_NOTE = """

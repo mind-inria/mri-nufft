@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
-from mrinufft._utils import get_array_module
-from mrinufft._array_compat import with_numpy_cupy
+from mrinufft._array_compat import with_numpy_cupy, get_array_module
 from mrinufft._utils import MethodRegister
 import numpy as np
 from numpy.typing import NDArray

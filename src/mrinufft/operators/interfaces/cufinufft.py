@@ -6,18 +6,18 @@ from numpy.typing import NDArray
 from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy, power_method
 from mrinufft._utils import (
     proper_trajectory,
-    get_array_module,
-    auto_cast,
+    sizeof_fmt,
 )
 
-from .utils import (
+from mrinufft._array_compat import (
     CUPY_AVAILABLE,
     is_cuda_array,
     is_host_array,
-    nvtx_mark,
     pin_memory,
-    sizeof_fmt,
+    get_array_module,
+    auto_cast,
 )
+from mrinufft.operators.interfaces.utils import nvtx_mark
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:

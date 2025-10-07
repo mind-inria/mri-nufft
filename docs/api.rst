@@ -8,3 +8,4 @@
     mrinufft.io
     mrinufft.extras
     mrinufft._utils
+    mrinufft._array_compat

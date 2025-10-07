@@ -98,7 +98,6 @@ __all__ = [
     "initialize_3D_golden_means_radial",
     "initialize_3D_wong_radial",
     "initialize_3D_park_radial",
-    "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
     "initialize_3D_floret",
     "initialize_3D_wave_caipi",
@@ -121,7 +120,6 @@ __all__ = [
     "shellify",
     "duplicate_along_axes",
     "radialize_center",
-    "patch_center_anomaly",
     "oversample",
     # densities
     "sample_from_density",

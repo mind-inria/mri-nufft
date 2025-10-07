@@ -1,13 +1,9 @@
 """Pytorch MRI Nufft Operators."""
 
-from mrinufft.operators.base import FourierOperatorBase
-from mrinufft._array_compat import with_torch
-from mrinufft._utils import proper_trajectory
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_tensor,
-)
 import numpy as np
-
+from mrinufft.operators.base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
+from mrinufft._array_compat import is_cuda_tensor, with_torch
 
 TORCH_AVAILABLE = True
 try:

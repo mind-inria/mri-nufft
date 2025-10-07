@@ -21,11 +21,12 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
     AUTOGRAD_AVAILABLE,
     CUPY_AVAILABLE,
+    is_cuda_array,
+    is_host_array,
+    auto_cast,
 )
-from mrinufft._utils import auto_cast
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
 
 
 if CUPY_AVAILABLE:
