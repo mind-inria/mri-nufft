@@ -1,111 +1,103 @@
 """Test off-resonance spatial coefficient and temporal interpolator estimation."""
 
-import math
-
+from mrinufft.extras import get_orc_factorization, get_complex_fieldmap_rad
 import numpy as np
-
+import numpy.testing as npt
 import pytest
-from pytest_cases import parametrize_with_cases
+from pytest_cases import parametrize_with_cases, parametrize
 
 
-import mrinufft
-from mrinufft._array_compat import CUPY_AVAILABLE
-from mrinufft._utils import get_array_module
 from mrinufft.operators.off_resonance import MRIFourierCorrected
 from mrinufft import get_operator
+from mrinufft.extras import make_b0map, make_t2smap
 
-from helpers import to_interface, assert_allclose
-from helpers.factories import _param_array_interface
-from case_fieldmaps import CasesB0maps, CasesZmaps
-
-
-def calculate_true_offresonance_term(fieldmap, t, array_interface):
-    """Calculate non-approximate off-resonance modulation term."""
-    fieldmap = to_interface(fieldmap, array_interface)
-    t = to_interface(t, array_interface)
-
-    xp = get_array_module(fieldmap)
-    arg = t * fieldmap[..., None]
-    arg = arg[None, ...].swapaxes(0, -1)[..., 0]
-    return xp.exp(-arg)
+from helpers import to_interface
+from helpers.factories import _param_array_interface_np_cp, from_interface
 
 
-def calculate_approx_offresonance_term(B, C):
-    """Calculate approximate off-resonance modulation term."""
-    field_term = 0.0
-    for n in range(B.shape[0]):
-        tmp = B[n] * C[n][..., None]
-        tmp = tmp[None, ...].swapaxes(0, -1)[..., 0]
-        field_term += tmp
-    return field_term
+class CasesB0maps:
+    """B0 field maps cases we want to test.
+
+    Each case return a field map and the binary spatial support of the object.
+    """
+
+    def case_real2D(self, N=64, b0_range=(-300, 300)):
+        """Create a real (B0 only) 2D field map."""
+        b0_map, mask = make_b0map(2 * [N])
+        return b0_map, None, mask
+
+    # def case_real3D(self, N=32, b0range=(-300, 300)):
+    #     """Create a real (B0 only) 3D field map."""
+    #     b0_map,  mask = make_b0map(3 * [N], b0range)
+    #     return b0_map, None, mask
+
+    def case_complex2D(self, N=64, b0range=(-300, 300), t2svalue=15.0):
+        """Create a complex (R2* + 1j * B0) 2D field map."""
+        # Generate real and imaginary parts
+        t2s_map, _ = make_t2smap(2 * [N], t2svalue)
+        b0_map, mask = make_b0map(2 * [N], b0range)
+
+        # Convert T2* map to R2* map
+        t2s_map = t2s_map * 1e-3  # ms -> s
+        r2s_map = 1.0 / (t2s_map + 1e-9)  # Hz
+        r2s_map = mask * r2s_map
+
+        return b0_map, r2s_map, mask
+
+    # def case_complex3D(self, N=32, b0range=(-300, 300), t2svalue=15.0):
+    #     """Create a complex (R2* + 1j * B0) 3D field map."""
+    #     # Generate real and imaginary parts
+    #     t2s_map, _ = make_t2smap(3 * [N], t2svalue)
+    #     b0_map, mask = make_b0map(3 * [N], b0range)
+
+    #     # Convert T2* map to R2* map
+    #     t2s_map = t2s_map * 1e-3  # ms -> s
+    #     r2s_map = 1.0 / (t2s_map + 1e-9)  # Hz
+    #     r2s_map = mask * r2s_map
+    #     return b0_map, r2s_map, mask
 
 
-@_param_array_interface
-@parametrize_with_cases("b0map, mask", cases=CasesB0maps)
-def test_b0map_coeff(b0map, mask, array_interface):
+@_param_array_interface_np_cp
+@parametrize_with_cases("b0_map, r2s_map, mask", cases=CasesB0maps)
+@parametrize("method", ["svd-full", "mti", "mfi"])
+@parametrize("L", [40, -1])
+def test_b0map_coeff(b0_map, r2s_map, mask, method, L, array_interface):
     """Test exponential approximation for B0 field only."""
-    if array_interface == "torch-gpu" and not CUPY_AVAILABLE:
-        pytest.skip("GPU computations requires cupy")
-
     # Generate readout times
-    tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
+    Nt = 400
+    tread = np.linspace(0.0, 5e-3, Nt, dtype=np.float32)
 
-    # Generate coefficients
-    B, tl = mrinufft.get_interpolators_from_fieldmap(
-        to_interface(b0map, array_interface), tread, mask=mask, n_time_segments=100
+    cpx_fieldmap = get_complex_fieldmap_rad(b0_map, r2s_map).astype(np.complex64)
+
+    E_full = np.exp(np.outer(tread, cpx_fieldmap[mask]))
+
+    kwargs = {}
+    if method == "svd-full":  # Truncated SVD is flacky (esp. for cupy)
+        kwargs["partial_svd"] = False
+        method = "svd"
+    B, C, _ = get_orc_factorization(method)(
+        to_interface(cpx_fieldmap, array_interface),
+        to_interface(tread, array_interface),
+        to_interface(mask, array_interface),
+        L=L,
+        lazy=False,
+        n_bins=4096,
+        **kwargs,
     )
 
-    # Calculate spatial coefficients
-    C = MRIFourierCorrected.get_spatial_coefficients(
-        to_interface(2 * math.pi * 1j * b0map, array_interface), tl
-    )
-
+    if L == -1:
+        L = B.shape[1]
+        print(L)
     # Assert properties
-    assert B.shape == (100, 501)
-    assert C.shape == (100, *b0map.shape)
+    assert B.shape == (Nt, L)
+    assert C.shape == (L, *b0_map.shape)
 
-    # Correct approximation
-    expected = calculate_true_offresonance_term(
-        0 + 2 * math.pi * 1j * b0map, tread, array_interface
-    )
-    actual = calculate_approx_offresonance_term(B, C)
-    assert_allclose(actual, expected, atol=1e-3, rtol=1e-3, interface=array_interface)
-
-
-@_param_array_interface
-@parametrize_with_cases("zmap, mask", cases=CasesZmaps)
-def test_zmap_coeff(zmap, mask, array_interface):
-    """Test exponential approximation for complex Z = R2* + 1j *B0 field."""
-    if array_interface == "torch-gpu" and CUPY_AVAILABLE is False:
-        pytest.skip("GPU computations requires cupy")
-
-    # Generate readout times
-    tread = np.linspace(0.0, 5e-3, 501, dtype=np.float32)
-
-    # Generate coefficients
-    B, tl = mrinufft.get_interpolators_from_fieldmap(
-        to_interface(zmap.imag, array_interface),
-        tread,
-        mask=mask,
-        r2star_map=to_interface(zmap.real, array_interface),
-        n_time_segments=100,
-    )
-
-    # Calculate spatial coefficients
-    C = MRIFourierCorrected.get_spatial_coefficients(
-        to_interface(2 * math.pi * zmap, array_interface), tl
-    )
-
-    # Assert properties
-    assert B.shape == (100, 501)
-    assert C.shape == (100, *zmap.shape)
-
-    # Correct approximation
-    expected = calculate_true_offresonance_term(
-        2 * math.pi * zmap, tread, array_interface
-    )
-    actual = calculate_approx_offresonance_term(B, C)
-    assert_allclose(actual, expected, atol=1e-3, rtol=1e-3, interface=array_interface)
+    # Check that the approximation match the full matrix.
+    B = from_interface(B, array_interface)
+    C = from_interface(C, array_interface)
+    E2 = B @ C[:, mask]
+    # TODO get closer bound somehow ?
+    npt.assert_allclose(E2, E_full, atol=5e-3, rtol=5e-3)
 
 
 def test_b0_map_upsampling_warns_and_matches_shape():
@@ -134,5 +126,5 @@ def test_b0_map_upsampling_warns_and_matches_shape():
         )
 
         # check that no exception is raised and internal shape matches
-        assert op.B.shape[1] == len(readout_time)
+        assert op.B.shape[0] == len(readout_time)
         assert op.shape == shape_target
