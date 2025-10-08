@@ -11,19 +11,6 @@ except ImportError:
     PYNFFT_AVAILABLE = False
 
 
-def get_fourier_matrix(ktraj, shape, ndim, do_ifft=False):
-    """Get the NDFT Fourier Matrix."""
-    n = np.prod(shape)
-    matrix = np.zeros((n, n), dtype=complex)
-    r = [np.arange(shape[i]) for i in range(ndim)]
-    grid_r = np.reshape(np.meshgrid(*r, indexing="ij"), (ndim, np.prod(shape)))
-    traj_grid = ktraj @ grid_r
-    matrix = np.exp(-2j * np.pi * traj_grid)
-    if do_ifft:
-        matrix = matrix.conj().T
-    return matrix / np.sqrt(n)
-
-
 class RawPyNFFT3:
     """Binding for the pyNFFT3 package."""
 
