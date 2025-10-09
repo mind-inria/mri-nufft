@@ -497,9 +497,15 @@ def initialize_3D_wave_caipi(
         # Get the trajectory for the gradient wave.
         # Normalize back to -1, 1 as thats how we start defining trajectory
         width = (
-            np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
-            / acq.norm_factor
-        ) * Ns / 2 / np.pi / nb_revolutions # Extra factor from angles
+            (
+                np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
+                / acq.norm_factor
+            )
+            * Ns
+            / 2
+            / np.pi
+            / nb_revolutions
+        )  # Extra factor from angles
         width = (
             width[:2]
             if readout_axis == "z"
