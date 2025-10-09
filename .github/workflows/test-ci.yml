@@ -145,7 +145,7 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip wheel
-          python -m pip install -e .[test]
+          python -m pip install -e .[test,extra]
           python -m pip install cupy-cuda12x finufft "numpy<2.0"
 
       - name: Install torch with CUDA 12.x
