@@ -499,7 +499,7 @@ def initialize_3D_wave_caipi(
         width = (
             np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
             / acq.norm_factor
-        )
+        ) * Ns / 2 / np.pi / nb_revolutions # Extra factor from angles
         width = (
             width[:2]
             if readout_axis == "z"
