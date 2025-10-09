@@ -1260,10 +1260,19 @@ def stack_random(
 def get_grappa_caipi_positions(img_size, grappa_factors, caipi_delta=0):
     """Get a Cartesian mask with GRAPPA and CAIPI."""
     Nc_per_axis = img_size // np.array(grappa_factors)
-    positions = np.asarray(np.meshgrid(
-        *[np.linspace(-KMAX, KMAX, num, endpoint=num%2) for num in Nc_per_axis],
-        indexing="ij",
-    )).T.astype(np.float32).reshape(-1, 2)
+    positions = (
+        np.asarray(
+            np.meshgrid(
+                *[
+                    np.linspace(-KMAX, KMAX, num, endpoint=num % 2)
+                    for num in Nc_per_axis
+                ],
+                indexing="ij",
+            )
+        )
+        .T.astype(np.float32)
+        .reshape(-1, 2)
+    )
     if caipi_delta > 0:
         positions[::2, 1] += caipi_delta / img_size[1]
     return positions

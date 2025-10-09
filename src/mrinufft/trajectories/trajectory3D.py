@@ -482,26 +482,40 @@ def initialize_3D_wave_caipi(
     """
     acq = acq.default if acq is None else acq
     if grappa_factors is not None:
-        sample_axis = acq.img_size[:2] if readout_axis == "z" else acq.img_size[1:] if readout_axis == "x" else acq.img_size[::2]
-        positions = get_grappa_caipi_positions(sample_axis, grappa_factors, caipi_delta) / KMAX 
+        sample_axis = (
+            acq.img_size[:2]
+            if readout_axis == "z"
+            else acq.img_size[1:] if readout_axis == "x" else acq.img_size[::2]
+        )
+        positions = (
+            get_grappa_caipi_positions(sample_axis, grappa_factors, caipi_delta) / KMAX
+        )
         Nc = positions.shape[0]
-        wavegrad = np.array([[[wavegrad]]] if np.isscalar(wavegrad) else [[list(wavegrad)]], np.float32)
+        wavegrad = np.array(
+            [[[wavegrad]]] if np.isscalar(wavegrad) else [[list(wavegrad)]], np.float32
+        )
         # Get the trajectory for the gradient wave.
         # Normalize back to -1, 1 as thats how we start defining trajectory
-        width = np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1] / acq.norm_factor
-        width = width[:2] if readout_axis == "z" else width[1:] if readout_axis == "x" else width[::2]
+        width = (
+            np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
+            / acq.norm_factor
+        )
+        width = (
+            width[:2]
+            if readout_axis == "z"
+            else width[1:] if readout_axis == "x" else width[::2]
+        )
     else:
         width = (width, width) if np.isscalar(width) else width
     # Initialize first shot
     angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
-    initial_shot = np.stack([
-        width[0] * np.cos(angles),
-        width[1] * np.sin(angles),
-        np.linspace(-1, 1, Ns)
-    ], axis=-1)
-    
+    initial_shot = np.stack(
+        [width[0] * np.cos(angles), width[1] * np.sin(angles), np.linspace(-1, 1, Ns)],
+        axis=-1,
+    )
+
     # reorder based on readout axis
-    perm = {'x': [2, 0, 1], 'y': [1, 2, 0], 'z': [0, 1, 2]}[readout_axis]
+    perm = {"x": [2, 0, 1], "y": [1, 2, 0], "z": [0, 1, 2]}[readout_axis]
     initial_shot = initial_shot[..., perm]
 
     if grappa_factors is None:
@@ -554,10 +568,10 @@ def initialize_3D_wave_caipi(
         positions = positions[:Nc]
 
     # Shifting copies of the initial shot to all positions
-    positions = np.insert(positions, {'x':0, 'y':1, 'z':2}[readout_axis], 0, axis=-1)
+    positions = np.insert(positions, {"x": 0, "y": 1, "z": 2}[readout_axis], 0, axis=-1)
     trajectory = initial_shot[None] + positions[:, None]
-    
-    axes = {'x': [1, 2], 'y': [0, 2], 'z': [0, 1]}[readout_axis]
+
+    axes = {"x": [1, 2], "y": [0, 2], "z": [0, 1]}[readout_axis]
     if grappa_factors is None:
         trajectory[..., axes] /= np.max(np.abs(trajectory))
     return KMAX * trajectory
