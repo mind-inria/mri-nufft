@@ -122,11 +122,11 @@ def _make_sphere(shape, frac_radius=0.3):
 
 
 _field_map_docs = dict(
-    base_params=r"""\
+    base_params=r"""
 field_map : NDArray
     The field map (off-resonance map) in rad/s, If complex-valued, the real part
     is interpreted as R2* mapping. If real-valued this is the field
-    inhomogeneities in Hz. and will be multiplied by :math:`2*j*\pi`
+    inhomogeneities in Hz. and will be multiplied by :math:`2j\pi`
 readout_time : NDArray
     The vector of time points (in seconds) at which to compute phase evolution.
 mask : NDArray

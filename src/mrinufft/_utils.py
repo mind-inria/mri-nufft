@@ -119,7 +119,7 @@ class MethodRegister:
             if self.docstring_subs is not None and func.__doc__:
                 docstring = cleandoc(func.__doc__)
                 for key, sub in self.docstring_subs.items():
-                    docstring.replace(f"${{{key}}}", sub)
+                    docstring = docstring.replace(f"${{{key}}}", sub)
                 func.__doc__ = docstring
             return func
 
