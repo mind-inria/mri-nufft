@@ -60,8 +60,8 @@ class CasesB0maps:
 @_param_array_interface_np_cp
 @parametrize_with_cases("b0_map, r2s_map, mask", cases=CasesB0maps)
 @parametrize("method", ["svd-full", "mti", "mfi"])
-@parametrize("L", [40, -1])
-def test_b0map_coeff(b0_map, r2s_map, mask, method, L, array_interface):
+@parametrize("L, lazy", [(40, True), (-1, True), (40, False)])
+def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
     """Test exponential approximation for B0 field only."""
     # Generate readout times
     Nt = 400
@@ -80,7 +80,7 @@ def test_b0map_coeff(b0_map, r2s_map, mask, method, L, array_interface):
         to_interface(tread, array_interface),
         to_interface(mask, array_interface),
         L=L,
-        lazy=False,
+        lazy=lazy,
         n_bins=4096,
         **kwargs,
     )
@@ -92,6 +92,8 @@ def test_b0map_coeff(b0_map, r2s_map, mask, method, L, array_interface):
     assert B.shape == (Nt, L)
     assert C.shape == (L, *b0_map.shape)
 
+    if lazy:
+        C = np.stack([C[l] for l in range(len(C))])
     # Check that the approximation match the full matrix.
     B = from_interface(B, array_interface)
     C = from_interface(C, array_interface)

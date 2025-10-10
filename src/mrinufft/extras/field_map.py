@@ -270,10 +270,6 @@ class C_lazy:
         """Get number of interpolators."""
         return len(self.C_small)
 
-    def __getattr__(self, name):
-        """Get other attribute from array."""
-        return getattr(self.C_small, name)
-
     @property
     def shape(self):
         """Overall shape of the lazy array."""

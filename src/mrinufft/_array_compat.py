@@ -321,6 +321,13 @@ def _convert(_array_to_xp, args, kwargs=None):
         elif isinstance(_arg, (tuple, list)):
             args[n], _ = _convert(_array_to_xp, _arg)
         # objects with attributes that are arrays are also converted
+        elif hasattr(_arg, "__dict__") and not isinstance:
+            process_dict_vals, _ = _convert(*_arg.__dict__.values())
+            for k, v in zip(_arg.__dict__.keys(), process_dict_vals):
+                try:
+                    setattr(_arg, k, v)
+                except Exception:
+                    pass
     # convert keyworded
     if kwargs:
         process_kwargs_vals, _ = _convert(_array_to_xp, kwargs.values())
