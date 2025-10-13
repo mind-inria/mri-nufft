@@ -21,7 +21,7 @@ from mrinufft.trajectories.utils import KMAX
 def show_trajectory(trajectory, one_shot, figure_size):
     if trajectory.shape[-1] == 2:
         ax = display_2D_trajectory(
-            trajectory, size=figure_size, one_shot=one_shot % trajectory.shape[0]
+            trajectory, figsize=figure_size, one_shot=one_shot % trajectory.shape[0]
         )
         ax.set_aspect("equal")
         plt.tight_layout()
@@ -29,7 +29,7 @@ def show_trajectory(trajectory, one_shot, figure_size):
     else:
         ax = display_3D_trajectory(
             trajectory,
-            size=figure_size,
+            figsize=figure_size,
             one_shot=one_shot % trajectory.shape[0],
             per_plane=False,
         )
@@ -113,7 +113,7 @@ def show_trajectories(
         if dim == "3D" and traj.shape[-1] == 3:
             ax = display_3D_trajectory(
                 traj,
-                size=subfig_size,
+                figsize=subfig_size,
                 one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
                 per_plane=False,
@@ -121,7 +121,7 @@ def show_trajectories(
         else:
             ax = display_2D_trajectory(
                 traj[..., axes],
-                size=subfig_size,
+                figsize=subfig_size,
                 one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
             )

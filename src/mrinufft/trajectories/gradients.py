@@ -1,6 +1,6 @@
 """Functions to improve/modify gradients."""
 
-from typing import Callable
+from collections.abc import Callable
 
 import numpy as np
 import numpy.linalg as nl

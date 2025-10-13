@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import ClassVar, Callable
+from typing import ClassVar
+from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
 
@@ -377,7 +378,7 @@ class FourierOperatorBase(ABC):
         minified version of the nufft operator. No coil or B0 compensation is used,
         but includes any computed density.
         """
-        if self.n_coils > 1:
+        if self.n_coils > 1 or self.n_batchs > 1:
             tmp_op = self.__class__(
                 self.samples, self.shape, density=self.density, n_coils=1, **kwargs
             )

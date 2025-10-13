@@ -83,6 +83,7 @@ class RawGpuNUFFT:
         pinned_image=None,
         pinned_kspace=None,
         use_gpu_direct=False,
+        **kwargs,
     ):
         """Initialize the 'NUFFT' class.
 
@@ -118,6 +119,8 @@ class RawGpuNUFFT:
             In this case pinned memory is not used and this saved memory.
             It will not be an error if this is False and you pass GPU array,
             just that it is inefficient.
+        **kwargs (optional): additional arguments. These include
+            ``gpu_device_id``(GPU ID)
 
         Notes
         -----
@@ -182,6 +185,7 @@ class RawGpuNUFFT:
             sector_width,
             osf,
             balance_workload,
+            **kwargs,
         )
 
     def toggle_grad_traj(self):
@@ -200,7 +204,9 @@ class RawGpuNUFFT:
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return image.squeeze().astype(xp.complex64, copy=False).T[None]
+                return xp.ascontiguousarray(
+                    image.squeeze().astype(xp.complex64, copy=False).T[None]
+                )
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def set_smaps(self, smaps):
@@ -694,6 +700,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
+        else:
+            raise ValueError("image_data and obs_data should be both on CPU or GPU")
+
         ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 

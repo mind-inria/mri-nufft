@@ -14,7 +14,8 @@ from .factories import (
 __all__ = [
     "assert_almost_allclose",
     "assert_correlate",
-    "assert_allclose" "kspace_from_op",
+    "assert_allclose",
+    "kspace_from_op",
     "image_from_op",
     "to_interface",
     "from_interface",

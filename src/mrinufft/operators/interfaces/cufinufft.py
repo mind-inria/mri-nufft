@@ -194,7 +194,14 @@ class MRICufiNUFFT(FourierOperatorBase):
             raise RuntimeError("cupy is not installed")
         if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
-
+        # set CUDA device
+        gpu_device_id = kwargs.get("gpu_device_id", 0)
+        try:
+            cp.cuda.Device(gpu_device_id).use()
+        except Exception as e:
+            warnings.warn(
+                f"Failed to set CUDA device {gpu_device_id}: {e}", RuntimeWarning
+            )
         super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
@@ -828,22 +835,29 @@ class MRICufiNUFFT(FourierOperatorBase):
         float
             Lipschitz constant of the operator.
         """
-        tmp_op = self.__class__(
-            self.samples,
-            self.shape,
-            density=self.density,
-            n_coils=1,
-            smaps=None,
-            squeeze_dims=True,
-            **kwargs,
-        )
+        # Disable coil dimension for faster computation
+        n_coils = self.n_coils
+        smaps = self.smaps
+        squeeze_dims = self.squeeze_dims
+
+        self.smaps = None
+        self.n_coils = 1
+        self.squeeze_dims = True
+
         x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
         x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = cp.asarray(x)
-        return power_method(
-            max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
+        lipschitz_cst = power_method(
+            max_iter, self, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )
+
+        # restore coil setup
+        self.n_coils = n_coils
+        self.smaps = smaps
+        self.squeeze_dims = squeeze_dims
+
+        return lipschitz_cst
 
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
