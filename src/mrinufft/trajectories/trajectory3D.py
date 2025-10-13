@@ -837,8 +837,6 @@ def initialize_3D_annular_shells(
         trajectory[count : count + Ms] = shell
         count += Ms
 
-    # Balance the samples over the recombined shots
-    # trajectory = parameterize_by_arc_length(trajectory) # FIXME
     return KMAX * trajectory
 
 
