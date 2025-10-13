@@ -482,7 +482,7 @@ def display_gradients_simply(
     else:
         fig = subfigure
     axes = fig.subplots(nb_axes, 1)
-    for i, ax in enumerate(axes[:nb_axes - 1]):
+    for i, ax in enumerate(axes[: nb_axes - 1]):
         ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
     axes[-1].set_xlabel("Time", fontsize=displayConfig.fontsize)
 
@@ -529,7 +529,7 @@ def display_gradients_simply(
                 gradient_norm,
                 alpha=displayConfig.alpha,
                 color=color,
-                )
+            )
     return axes
 
 
