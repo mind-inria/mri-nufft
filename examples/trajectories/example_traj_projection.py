@@ -18,7 +18,7 @@ A collection of methods to make trajectories fit hardware constraints.
 # .. list-table:: Constraint fitting methods
 #    :header-rows: 1
 #
-#    * - 
+#    * -
 #      - Gradient strength
 #      - Slew rate
 #      - Path preserved
@@ -68,7 +68,9 @@ sample_freq = 60  # Frequency of samples to display in the trajectory plots
 # We will be using a cone trajectory to showcase the different methods as
 # it switches several times between high gradients and slew rates.
 
-original_trajectory = mn.initialize_2D_cones(Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags)
+original_trajectory = mn.initialize_2D_cones(
+    Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags
+)
 
 # %%
 # Arc-length parameterization
@@ -76,12 +78,14 @@ original_trajectory = mn.initialize_2D_cones(Nc, Ns, in_out=in_out, nb_zigzags=n
 # Arc-length parameterization is the simplest method to reduce the gradient
 # strength as it resamples the trajectory to have a constant distance between
 # samples. This is technically the lowest gradient strength achievable while
-# preserving the path of the trajectory, but it does not preserve the k-space 
+# preserving the path of the trajectory, but it does not preserve the k-space
 # density and can lead to high slew rates as shown below.
 
 show_trajectory_full(original_trajectory, one_shot, subfigure_size, sample_freq)
 
-grads, slews = compute_gradients_and_slew_rates(original_trajectory, resolution, raster_time)
+grads, slews = compute_gradients_and_slew_rates(
+    original_trajectory, resolution, raster_time
+)
 grad_max, slew_max = np.max(grads), np.max(slews)
 print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 
@@ -96,6 +100,8 @@ projected_trajectory = parameterize_by_arc_length(original_trajectory)
 
 show_trajectory_full(projected_trajectory, one_shot, subfigure_size, sample_freq)
 
-grads, slews = compute_gradients_and_slew_rates(projected_trajectory, resolution, raster_time)
+grads, slews = compute_gradients_and_slew_rates(
+    projected_trajectory, resolution, raster_time
+)
 grad_max, slew_max = np.max(grads), np.max(slews)
 print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
