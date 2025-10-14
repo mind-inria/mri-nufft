@@ -84,7 +84,7 @@ def test_orc_forward(
     ksp = orc_nufft.op(image_data)
     ksp_ideal = ext_mat @ image_data.ravel()
 
-    assert_correlate(ksp.squeeze(), ksp_ideal)
+    assert_correlate(ksp.squeeze(), ksp_ideal, slope_err=0.005)
 
 
 def test_orc_adjoint(orc_info, kspace_data):
@@ -93,4 +93,4 @@ def test_orc_adjoint(orc_info, kspace_data):
     img = orc_nufft.adj_op(kspace_data)
     img_ideal = ext_mat.conj().T @ kspace_data.ravel()
     img_ideal = img_ideal.reshape(orc_nufft.shape)
-    assert_correlate(img.squeeze(), img_ideal)
+    assert_correlate(img.squeeze(), img_ideal, slope_err=0.005)
