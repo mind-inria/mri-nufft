@@ -26,10 +26,10 @@ class CasesB0maps:
         b0_map, mask = make_b0map(2 * [N])
         return b0_map, None, mask
 
-    # def case_real3D(self, N=32, b0range=(-300, 300)):
-    #     """Create a real (B0 only) 3D field map."""
-    #     b0_map,  mask = make_b0map(3 * [N], b0range)
-    #     return b0_map, None, mask
+    def case_real3D(self, N=32, b0range=(-300, 300)):
+        """Create a real (B0 only) 3D field map."""
+        b0_map, mask = make_b0map(3 * [N], b0range)
+        return b0_map, None, mask
 
     def case_complex2D(self, N=64, b0range=(-300, 300), t2svalue=15.0):
         """Create a complex (R2* + 1j * B0) 2D field map."""
@@ -44,21 +44,23 @@ class CasesB0maps:
 
         return b0_map, r2s_map, mask
 
-    # def case_complex3D(self, N=32, b0range=(-300, 300), t2svalue=15.0):
-    #     """Create a complex (R2* + 1j * B0) 3D field map."""
-    #     # Generate real and imaginary parts
-    #     t2s_map, _ = make_t2smap(3 * [N], t2svalue)
-    #     b0_map, mask = make_b0map(3 * [N], b0range)
+    def case_complex3D(self, N=32, b0range=(-300, 300), t2svalue=15.0):
+        """Create a complex (R2* + 1j * B0) 3D field map."""
+        # Generate real and imaginary parts
+        t2s_map, _ = make_t2smap(3 * [N], t2svalue)
+        b0_map, mask = make_b0map(3 * [N], b0range)
 
-    #     # Convert T2* map to R2* map
-    #     t2s_map = t2s_map * 1e-3  # ms -> s
-    #     r2s_map = 1.0 / (t2s_map + 1e-9)  # Hz
-    #     r2s_map = mask * r2s_map
-    #     return b0_map, r2s_map, mask
+        # Convert T2* map to R2* map
+        t2s_map = t2s_map * 1e-3  # ms -> s
+        r2s_map = 1.0 / (t2s_map + 1e-9)  # Hz
+        r2s_map = mask * r2s_map
+        return b0_map, r2s_map, mask
 
 
 @_param_array_interface_np_cp
-@parametrize_with_cases("b0_map, r2s_map, mask", cases=CasesB0maps)
+@parametrize_with_cases(
+    "b0_map, r2s_map, mask", cases=[CasesB0maps.case_real2D, CasesB0maps.case_complex2D]
+)
 @parametrize("method", ["svd-full", "mti", "mfi"])
 @parametrize("L, lazy", [(40, True), (-1, True), (40, False)])
 def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
