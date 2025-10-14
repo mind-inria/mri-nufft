@@ -1257,9 +1257,46 @@ def stack_random(
     return new_trajectory.reshape(-1, Ns, 3)
 
 
-def get_grappa_caipi_positions(img_size, grappa_factors, caipi_delta=0):
-    """Get a Cartesian mask with GRAPPA and CAIPI."""
-    Nc_per_axis = img_size // np.array(grappa_factors)
+def get_grappa_caipi_positions(
+    img_size: tuple(int, int), grappa_factors: tuple(int, int), caipi_delta: int = 0
+):
+    """
+    Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
+
+    This function computes the k-space sampling positions for a GRAPPA (GeneRalized
+    Autocalibrating Partial Parallel Acquisition) pattern, optionally incorporating
+    CAIPI (Controlled Aliasing in Parallel Imaging) shifts. The sampling points are
+    distributed over a Cartesian grid based on the specified GRAPPA acceleration
+    factors and image size.
+
+    Parameters
+    ----------
+    img_size : array_like of int, shape (2,)
+        The size of the k-space grid (number of samples) along each dimension,
+        typically corresponding to the phase-encoding and frequency-encoding
+        directions.
+
+    grappa_factors : array_like of int, shape (2,)
+        The GRAPPA acceleration factors along each axis. For example, a factor
+        of ``[2, 1]`` means every second line is sampled along the first axis,
+        while every line is sampled along the second axis.
+
+    caipi_delta : float, optional
+        The CAIPI phase shift (in units of k-space fraction) to apply along the
+        second dimension. A nonzero value introduces controlled aliasing between
+        slices or coil elements. Default is ``0`` (no shift).
+
+    Returns
+    -------
+    positions : ndarray of shape (N, 2)
+        The Cartesian coordinates of the sampled k-space points in 2D plane.
+
+    Notes
+    -----
+    - This function does not produce ACS regions currently
+    - This function merely gives the mask positions, not the entire trajectory.
+    """
+    Nc_per_axis = np.array(img_size) // np.array(grappa_factors)
     positions = (
         np.asarray(
             np.meshgrid(

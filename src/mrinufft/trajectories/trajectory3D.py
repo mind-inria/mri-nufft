@@ -419,7 +419,7 @@ def initialize_3D_wave_caipi(
     shape: str | float = "square",
     spacing: tuple[int, int] = (1, 1),
     readout_axis: str = "x",
-    wavegrad: float | None = None,
+    wavegrad: float | tuple[float, float] | None = None,
     grappa_factors: tuple[int, int] = None,
     caipi_delta: int = 0,
     acq: Acquisition = None,
