@@ -54,7 +54,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         - If ``{"name":name, **kwargs}`` use an existing
           method in `extra_field_map.py` parameterize by kwargs.
         - If``tuple[NDArray, NDArray]`` use this directly as the decomposition
-         (B and C)
+          (B and C)
 
     Notes
     -----
@@ -62,9 +62,14 @@ class MRIFourierCorrected(FourierOperatorBase):
     ``field_map = R2*_map + 1j * B0_map``. If R2* is not provided,
     the field is purely imaginary: ``field_map = 1j * B0_map``.
 
+    You can also  use the method :py:func:`.with_off_resonance_correction
+    <mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction>`
+    to augment an existing operator with off-resonance correction capability.
+
+
     See Also
     --------
-    :ref:`_nufft-orc`
+    :ref:`nufft-orc`
 
     """
 

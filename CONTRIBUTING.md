@@ -149,6 +149,8 @@ To build the documentation locally, you can run the following commands :
     # you can specify a specfic backend to run the example with an environment variable:
     export MRINUFFT_BACKEND=finufft
     python -m sphinx-build docs docs_build 
+    # If you don't care about examples you can use
+    python -m sphinx-build docs docs_build -D plot_gallery=0
     # view the documentation in your browser
     python -m http.server --directory docs_build 8080
     # open localhost:8080 in your browser

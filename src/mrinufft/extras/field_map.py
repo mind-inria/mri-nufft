@@ -1,6 +1,12 @@
-"""Field map generator module."""
+"""Field map Module.
+
+This module provides methods to generate dummy B0map as well as estimation of the
+bilinearization of the off-resonance model (See :ref:`nufft-orc` for a detailed
+explanation).
+"""
 
 import numpy as np
+from collections.abc import Callable
 
 from numpy.typing import ArrayLike, NDArray
 
@@ -149,6 +155,10 @@ C: NDArray
     time points; nt = len(readout_time).
 E: NDArray
     [nbins, nt] exponential off-resonance phase matrix at input histogram bins.
+
+See Also
+--------
+    :ref:`nufft-orc`
 """,
 )
 
@@ -180,7 +190,7 @@ def get_complex_fieldmap_rad(
 
     See Also
     --------
-    :ref:`_nufft-orc`
+    :ref:`nufft-orc`
 
     """
     xp = get_array_module(b0_map)
@@ -242,6 +252,14 @@ def _create_histogram(
 class C_lazy:
     """A lazy version of the C interpolator.
 
+    Instead of storing C as a ``(L, Nx, Ny, Nz)`` array, we store the quantize
+    version of shape L, N_bins, and the indexes mapping each voxel of the
+    complex-valued field-map to the bins values.
+
+    When accessing the L-th interpolator, the full ``(Nx, Ny, Nz)`` associated array is
+    generated.
+
+
     Parameters
     ----------
     C_sr: NDArray of shape (L, Nbinsreal, Nbinsimag)
@@ -282,13 +300,16 @@ class C_lazy:
 
 @with_numpy_cupy
 def _full_C(
-    field_map: NDArray,
+    field_map: NDArray[np.complex64],
     C_small: NDArray,
     n_bins: tuple[int, int],
     lazy: bool = False,
 ):
     """
     Generate a full spatial interpolator C from a quantized version.
+
+    If `lazy=True` uses the an array like structure to generate the
+    interpolators on the fly.
 
     Parameters
     ----------
@@ -300,7 +321,12 @@ def _full_C(
         Number of bins for the real and imaginary part
     lazy: bool, default False
         If True, returns a lazy version of the C matrix.
-    Return
+
+    Returns
+    -------
+    NDArray if lazy = False
+
+    C_Lazy if lazy = True
     """
     xp = get_array_module(field_map)
     fr = field_map.real.ravel()
@@ -329,7 +355,9 @@ def _full_C(
         return xp.ascontiguousarray(C_big.reshape(-1, *field_map.shape))
 
 
-def _get_svds(xp, partial_svd):
+def _get_svds(
+    xp, partial_svd
+) -> Callable[[NDArray, int], tuple[NDArray, NDArray, NDArray]]:
     if partial_svd:
         if xp.__name__ == "cupy":
             from cupyx.scipy.sparse.linalg import svds
@@ -355,22 +383,29 @@ def compute_svd_coefficients(
     lazy: bool = False,
     partial_svd: bool = True,
 ):
-    """
-    Compute off-resonance correction coefficients using tSVD.
+    r"""
+    Compute off-resonance correction coefficients using an SVD.
 
-    Utilizes truncated SVD to extract L leading singular vectors from the weighted
-    exponentiated phase matrix sampled at field map histogram centers. Outputs tSVD
-    basis (B), interpolation matrix (C), and exponential phase matrix (E).
+    Solves :math:`\arg\min_{B,C} = \|E - BC \|_{F}^2`
+
+    In practise it utilizes truncated SVD to extract L leading singular vectors from
+    the weighted exponentiated phase matrix sampled at field map histogram centers.
+
 
     Parameters
     ----------
     ${base_params}
-
     partial_svd: bool, default True
         If True, only compute the L components required for the estimation, not
         the full SVD.
 
     ${returns}
+
+    References
+    ----------
+    Sutton BP, Noll DC, Fessler JA. Fast, iterative image reconstruction for MRI
+    in the presence of field inhomogeneities. IEEE Trans Med Imaging. 2003
+    Feb;22(2):178-88. doi: 10.1109/tmi.2002.808360. PMID: 12715994.
     """
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
@@ -416,6 +451,13 @@ def compute_mti_coefficients(
     ${base_params}
 
     ${returns}
+
+    References
+    ----------
+    D. C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, "A
+    homogeneity correction method for magnetic resonance imaging with
+    time-varying gradients," in IEEE Transactions on Medical Imaging, vol. 10,
+    no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599
     """
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
@@ -483,6 +525,13 @@ def compute_mfi_coefficients(
     ${base_params}
 
     ${returns}
+
+    References
+    ----------
+    Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency
+    interpolation for fast off-resonance correction. Magn. Reson. Med., 37:
+    785-792. https://doi.org/10.1002/mrm.1910370523
+
     """
     # Format the input and apply the weight option
 

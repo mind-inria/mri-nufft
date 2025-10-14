@@ -206,7 +206,7 @@ class FourierOperatorBase(ABC):
         return arr
 
     @abstractmethod
-    def op(self, data):
+    def op(self, data: NDArray) -> NDArray:
         """Compute operator transform.
 
         Parameters
@@ -222,7 +222,7 @@ class FourierOperatorBase(ABC):
         pass
 
     @abstractmethod
-    def adj_op(self, coeffs):
+    def adj_op(self, coeffs: NDArray) -> NDArray:
         """Compute adjoint operator transform.
 
         Parameters
@@ -237,7 +237,7 @@ class FourierOperatorBase(ABC):
         """
         pass
 
-    def data_consistency(self, image_data, obs_data):
+    def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
         """Compute the gradient data consistency.
 
         This is the naive implementation using adj_op(op(x)-y).
