@@ -69,7 +69,7 @@ jobs:
         run: |
           ${{ env.activate_venv }}
           export MRINUFFT_BACKEND=cufinufft
-          python -m sphinx docs docs_build ${{ contains(github.event.comment.body, 'fast') && '-D plot_gallery=0' }}
+          python -m sphinx docs docs_build ${{ contains(github.event.comment.body, 'fast') && '-D plot_gallery=0' }} -j 5
 
       - name: Upload artifact
         id: artifact-upload-step
