@@ -222,6 +222,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
@@ -249,7 +250,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
@@ -285,13 +285,11 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
 </ul>
 </details></li>
@@ -473,7 +471,6 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
 </ul>
 </details></li>
@@ -507,20 +504,22 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -528,18 +527,26 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
 </ul>
 </details></li>
 </ul>
@@ -705,9 +712,28 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for mrinufft.extras.field_map</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Field map generator module.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Field map Module.</span>
+
+<span class="sd">This module provides methods to generate dummy B0map as well as estimation of the</span>
+<span class="sd">bilinearization of the off-resonance model (See :ref:`nufft-orc` for a detailed</span>
+<span class="sd">explanation).</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_array_module</span><span class="p">,</span>
+    <span class="n">with_numpy</span><span class="p">,</span>
+    <span class="n">with_numpy_cupy</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MethodRegister</span>
+
+<span class="c1">#######################</span>
+<span class="c1"># Generate Dummy Data #</span>
+<span class="c1">#######################</span>
 
 
 <div class="viewcode-block" id="make_b0map">
@@ -814,6 +840,462 @@ document.write(`
     <span class="n">zz</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">xx</span> <span class="o">=</span> <span class="n">zz</span> <span class="o">/</span> <span class="n">nz</span><span class="p">,</span> <span class="n">yy</span> <span class="o">/</span> <span class="n">ny</span><span class="p">,</span> <span class="n">xx</span> <span class="o">/</span> <span class="n">nx</span>
     <span class="n">rr</span> <span class="o">=</span> <span class="p">(</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">zz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
     <span class="k">return</span> <span class="n">rr</span> <span class="o">&lt;</span> <span class="n">frac_radius</span><span class="p">,</span> <span class="n">rr</span>
+
+
+<span class="c1">########################################################</span>
+<span class="c1"># Estimation of Off-Resonance-Correction Interpolators #</span>
+<span class="c1">########################################################</span>
+
+
+<span class="n">_field_map_docs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">base_params</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">field_map : NDArray</span>
+<span class="s2">    The field map (off-resonance map) in rad/s, If complex-valued, the real part</span>
+<span class="s2">    is interpreted as R2* mapping. If real-valued this is the field</span>
+<span class="s2">    inhomogeneities in Hz. and will be multiplied by :math:`2j\pi`</span>
+<span class="s2">readout_time : NDArray</span>
+<span class="s2">    The vector of time points (in seconds) at which to compute phase evolution.</span>
+<span class="s2">mask : NDArray</span>
+<span class="s2">    Binary mask indicating object region for field map/statistics.</span>
+<span class="s2">L : int, optional</span>
+<span class="s2">    Number of virtual centers or basis functions retained (default is -1,</span>
+<span class="s2">    automatically estimated).</span>
+<span class="s2">n_bins : int, optional</span>
+<span class="s2">    Number of histogram bins for off-resonance value clustering (default is 1000).</span>
+<span class="s2">lazy: bool, default False</span>
+<span class="s2">    If True, use a lazy evaluation scheme for the space interpolator C, saving memory.</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">returns</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Returns</span>
+<span class="s2">-------</span>
+<span class="s2">B: NDArray</span>
+<span class="s2">    [L, nbins] phase basis matrix in the time domain.</span>
+<span class="s2">C: NDArray</span>
+<span class="s2">    [L, nt] interpolation matrix to transform weighted basis to phase at the</span>
+<span class="s2">    time points; nt = len(readout_time).</span>
+<span class="s2">E: NDArray</span>
+<span class="s2">    [nbins, nt] exponential off-resonance phase matrix at input histogram bins.</span>
+
+<span class="s2">See Also</span>
+<span class="s2">--------</span>
+<span class="s2">    :ref:`nufft-orc`</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">register_orc</span> <span class="o">=</span> <span class="n">MethodRegister</span><span class="p">(</span><span class="s2">&quot;orc_factorization&quot;</span><span class="p">,</span> <span class="n">_field_map_docs</span><span class="p">)</span>
+<span class="n">get_orc_factorization</span> <span class="o">=</span> <span class="n">register_orc</span><span class="o">.</span><span class="n">make_getter</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="get_complex_fieldmap_rad">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html#mrinufft.extras.field_map.get_complex_fieldmap_rad">[docs]</a>
+<span class="nd">@with_numpy_cupy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_complex_fieldmap_rad</span><span class="p">(</span>
+    <span class="n">b0_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">r2star_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a complex-valued field-map in rad/s.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    b0_map: NDArray</span>
+<span class="sd">        If complex-valued, returned as is.</span>
+<span class="sd">        If real valued, it is the off-resonance field map in Hz.</span>
+<span class="sd">    r2star_map: NDArray, optional</span>
+<span class="sd">        :math:`R_2^*` mapping, in Hz</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray</span>
+<span class="sd">        The complex valued field-map in radian, :math:`-\Delta=R_2^* + 2j\pi\Delta f`,</span>
+<span class="sd">        in [rad/s]. This is used in the inhomogeneity term</span>
+<span class="sd">        :math:`\exp(\Delta(\boldsymbol{r})t)\exp(2j\pi\boldsymbol{r}\boldsymbol{k}(t))`</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    :ref:`nufft-orc`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">b0_map</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xp</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">b0_map</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">b0_map</span>
+
+    <span class="n">field_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">b0_map</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">r2star_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r2star_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r2star_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">field_map</span> <span class="o">+=</span> <span class="n">r2star_map</span>
+
+    <span class="k">return</span> <span class="n">field_map</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_histogram</span><span class="p">(</span>
+    <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">],</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quantize the field map in n_bins values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_map : NDArray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="n">masked_field_map</span> <span class="o">=</span> <span class="n">field_map</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">deltaR</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">masked_field_map</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">-</span> <span class="n">xp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">masked_field_map</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">deltaI</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">masked_field_map</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span> <span class="o">-</span> <span class="n">xp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">masked_field_map</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">deltaI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">deltaR</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_bins_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">n_bins</span> <span class="o">*</span> <span class="n">deltaR</span> <span class="o">/</span> <span class="n">deltaI</span><span class="p">)))</span>
+            <span class="n">n_bins_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">n_bins</span> <span class="o">/</span> <span class="n">n_bins_r</span><span class="p">)</span>
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_bins_r</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_bins_i</span><span class="p">))</span>
+
+    <span class="n">z</span> <span class="o">=</span> <span class="n">field_map</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># create histograms</span>
+    <span class="n">h_counts</span><span class="p">,</span> <span class="n">h_edges</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">)</span>
+    <span class="c1"># get center of bins for real and imaginary part</span>
+    <span class="n">h_centers</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">h_edges</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h_centers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">h_centers_cpx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span>
+            <span class="n">h_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">h_centers</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">h_centers_cpx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">h_centers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">h_counts</span><span class="p">,</span> <span class="n">h_centers_cpx</span>
+
+
+<div class="viewcode-block" id="C_lazy">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html#mrinufft.extras.field_map.C_lazy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">C_lazy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A lazy version of the C interpolator.</span>
+
+<span class="sd">    Instead of storing C as a ``(L, Nx, Ny, Nz)`` array, we store the quantize</span>
+<span class="sd">    version of shape L, N_bins, and the indexes mapping each voxel of the</span>
+<span class="sd">    complex-valued field-map to the bins values.</span>
+
+<span class="sd">    When accessing the L-th interpolator, the full ``(Nx, Ny, Nz)`` associated array is</span>
+<span class="sd">    generated.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    C_sr: NDArray of shape (L, Nbinsreal, Nbinsimag)</span>
+<span class="sd">    idxr: NDArray mapping field-map real value to real bins</span>
+<span class="sd">    idxi: NDArray mapping field-map imag value to imag bins</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    __getitem__</span>
+<span class="sd">        Return the l-th interpolator, with the same shape as field-map.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">C_sr</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">],</span>
+        <span class="n">idxr</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">idxi</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">img_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C_small</span> <span class="o">=</span> <span class="n">C_sr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idxr</span> <span class="o">=</span> <span class="n">idxr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idxi</span> <span class="o">=</span> <span class="n">idxi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_shape</span> <span class="o">=</span> <span class="n">img_shape</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get number of interpolators.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C_small</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overall shape of the lazy array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">img_shape</span><span class="p">)</span>
+
+<div class="viewcode-block" id="C_lazy.__getitem__">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html#mrinufft.extras.field_map.C_lazy.__getitem__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the original array, with proper space indexing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">C_small</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">idxr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idxi</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_shape</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="nd">@with_numpy_cupy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_full_C</span><span class="p">(</span>
+    <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">],</span>
+    <span class="n">C_small</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a full spatial interpolator C from a quantized version.</span>
+
+<span class="sd">    If `lazy=True` uses the an array like structure to generate the</span>
+<span class="sd">    interpolators on the fly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_map: NDArray</span>
+<span class="sd">        Complex-valued field-map in rad/s.</span>
+<span class="sd">    C_small: NDArray</span>
+<span class="sd">        Small C matrix computed at histogram centers.</span>
+<span class="sd">    n_bins: tuple[int, int]</span>
+<span class="sd">        Number of bins for the real and imaginary part</span>
+<span class="sd">    lazy: bool, default False</span>
+<span class="sd">        If True, returns a lazy version of the C matrix.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NDArray if lazy = False</span>
+
+<span class="sd">    C_Lazy if lazy = True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="n">fr</span> <span class="o">=</span> <span class="n">field_map</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">fi</span> <span class="o">=</span> <span class="n">field_map</span><span class="o">.</span><span class="n">imag</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">minr</span><span class="p">,</span> <span class="n">maxr</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">fr</span><span class="p">),</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span>
+    <span class="n">mini</span><span class="p">,</span> <span class="n">maxi</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">fi</span><span class="p">),</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span>
+
+    <span class="n">dr</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxr</span> <span class="o">-</span> <span class="n">minr</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxi</span> <span class="o">-</span> <span class="n">mini</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">idxr</span><span class="p">,</span> <span class="n">idxi</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">dr</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">idxr</span> <span class="o">=</span> <span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">around</span><span class="p">((</span><span class="n">fr</span> <span class="o">-</span> <span class="n">minr</span><span class="p">)</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">idxr</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">idxr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">di</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">idxi</span> <span class="o">=</span> <span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">around</span><span class="p">((</span><span class="n">fi</span> <span class="o">-</span> <span class="n">mini</span><span class="p">)</span> <span class="o">/</span> <span class="n">di</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">idxi</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">idxi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">C_sr</span> <span class="o">=</span> <span class="n">C_small</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">n_bins</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lazy</span><span class="p">:</span>
+        <span class="n">C_big</span> <span class="o">=</span> <span class="n">C_lazy</span><span class="p">(</span><span class="n">C_sr</span><span class="p">,</span> <span class="n">idxr</span><span class="p">,</span> <span class="n">idxi</span><span class="p">,</span> <span class="n">field_map</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">C_big</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">C_big</span> <span class="o">=</span> <span class="n">C_sr</span><span class="p">[:,</span> <span class="n">idxr</span><span class="p">,</span> <span class="n">idxi</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">xp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">C_big</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">field_map</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_svds</span><span class="p">(</span>
+    <span class="n">xp</span><span class="p">,</span> <span class="n">partial_svd</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]]:</span>
+    <span class="k">if</span> <span class="n">partial_svd</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">xp</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;cupy&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">cupyx.scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">svds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">svds</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">svds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">u</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n</span><span class="p">],</span> <span class="n">s</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">v</span><span class="p">[:</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">svds</span>
+
+
+<div class="viewcode-block" id="compute_svd_coefficients">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html#mrinufft.extras.field_map.compute_svd_coefficients">[docs]</a>
+<span class="nd">@register_orc</span><span class="p">(</span><span class="s2">&quot;svd&quot;</span><span class="p">)</span>
+<span class="nd">@with_numpy_cupy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_svd_coefficients</span><span class="p">(</span>
+    <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">readout_time</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">L</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">partial_svd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute off-resonance correction coefficients using an SVD.</span>
+
+<span class="sd">    Solves :math:`\arg\min_{B,C} = \|E - BC \|_{F}^2`</span>
+
+<span class="sd">    In practise it utilizes truncated SVD to extract L leading singular vectors from</span>
+<span class="sd">    the weighted exponentiated phase matrix sampled at field map histogram centers.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ${base_params}</span>
+<span class="sd">    partial_svd: bool, default True</span>
+<span class="sd">        If True, only compute the L components required for the estimation, not</span>
+<span class="sd">        the full SVD.</span>
+
+<span class="sd">    ${returns}</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Sutton BP, Noll DC, Fessler JA. Fast, iterative image reconstruction for MRI</span>
+<span class="sd">    in the presence of field inhomogeneities. IEEE Trans Med Imaging. 2003</span>
+<span class="sd">    Feb;22(2):178-88. doi: 10.1109/tmi.2002.808360. PMID: 12715994.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_map</span> <span class="o">=</span> <span class="n">get_complex_fieldmap_rad</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="c1"># Format the input and apply the weight option</span>
+    <span class="n">h_k</span><span class="p">,</span> <span class="n">w_k</span> <span class="o">=</span> <span class="n">_create_histogram</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+    <span class="n">hist_shape</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">w_k</span> <span class="o">=</span> <span class="n">w_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">h_k</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="c1"># Compute B with a Singular Value Decomposition</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">w_k</span><span class="p">))</span>
+    <span class="n">Ew</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">E</span>
+    <span class="n">svds</span> <span class="o">=</span> <span class="n">_get_svds</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">partial_svd</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">L</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Empirically: maximum frequency in the E matrix.</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">w_k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">readout_time</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span>
+        <span class="p">)</span>
+    <span class="n">B</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">svds</span><span class="p">(</span><span class="n">Ew</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span>
+    <span class="c1"># Compute C with a Least Square interpolation</span>
+    <span class="c1"># (Redundant with C=DV from E=BSD using L singular values</span>
+    <span class="c1"># but more robust to histogram with 0 weights.</span>
+    <span class="n">C</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">_full_C</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">hist_shape</span><span class="p">,</span> <span class="n">lazy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">E</span></div>
+
+
+
+<div class="viewcode-block" id="compute_mti_coefficients">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html#mrinufft.extras.field_map.compute_mti_coefficients">[docs]</a>
+<span class="nd">@register_orc</span><span class="p">(</span><span class="s2">&quot;mti&quot;</span><span class="p">)</span>
+<span class="nd">@with_numpy_cupy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_mti_coefficients</span><span class="p">(</span>
+    <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">readout_time</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">L</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute off-resonance correction coefficients using Mixed Time interpolator (MTI).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ${base_params}</span>
+
+<span class="sd">    ${returns}</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    D. C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, &quot;A</span>
+<span class="sd">    homogeneity correction method for magnetic resonance imaging with</span>
+<span class="sd">    time-varying gradients,&quot; in IEEE Transactions on Medical Imaging, vol. 10,</span>
+<span class="sd">    no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_map</span> <span class="o">=</span> <span class="n">get_complex_fieldmap_rad</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="c1"># Format the input and apply the weight option</span>
+    <span class="n">h_k</span><span class="p">,</span> <span class="n">w_k</span> <span class="o">=</span> <span class="n">_create_histogram</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+    <span class="n">hist_shape</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">h_k</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">w_k</span> <span class="o">=</span> <span class="n">w_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">L</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># from Douglas Noll PhD Thesis</span>
+        <span class="c1"># and XXX</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">w_k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">readout_time</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span>
+        <span class="p">)</span>
+
+    <span class="n">t_l</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">readout_time</span><span class="p">),</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">readout_time</span><span class="p">),</span> <span class="n">L</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># Compute C as a phase shift</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">t_l</span><span class="p">,</span> <span class="n">w_k</span><span class="p">))</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">w_k</span><span class="p">))</span>
+    <span class="n">Ch</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span>
+    <span class="n">Eh</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_k</span><span class="p">)</span> <span class="o">*</span> <span class="n">E</span>
+
+    <span class="c1"># Compute B with a Least Square interpolation</span>
+    <span class="n">B</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">Ch</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Eh</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">_full_C</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">hist_shape</span><span class="p">,</span> <span class="n">lazy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">E</span></div>
+
+
+
+<span class="nd">@with_numpy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_cluster_centers</span><span class="p">(</span><span class="n">hist_locs</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">counts</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">L</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quantized the fine histogram to L interpolators.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;The scikit-learn module is not available. Please install &quot;</span>
+            <span class="s2">&quot;it along with the [extra] dependencies &quot;</span>
+            <span class="s2">&quot;or using `pip install scikit-learn`.&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">L</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">hist_locs</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">counts</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">cluster_centers_</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="compute_mfi_coefficients">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html#mrinufft.extras.field_map.compute_mfi_coefficients">[docs]</a>
+<span class="nd">@register_orc</span><span class="p">(</span><span class="s2">&quot;mfi&quot;</span><span class="p">)</span>
+<span class="nd">@with_numpy_cupy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_mfi_coefficients</span><span class="p">(</span>
+    <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">readout_time</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">L</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
+    <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute off-resonance correction coefficients using Mixed-Frequency-Interpolator.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ${base_params}</span>
+
+<span class="sd">    ${returns}</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency</span>
+<span class="sd">    interpolation for fast off-resonance correction. Magn. Reson. Med., 37:</span>
+<span class="sd">    785-792. https://doi.org/10.1002/mrm.1910370523</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Format the input and apply the weight option</span>
+
+    <span class="n">field_map</span> <span class="o">=</span> <span class="n">get_complex_fieldmap_rad</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+    <span class="c1"># Format the input and apply the weight option</span>
+    <span class="n">h_k</span><span class="p">,</span> <span class="n">w_k</span> <span class="o">=</span> <span class="n">_create_histogram</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+    <span class="n">hist_shape</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">h_k</span> <span class="o">=</span> <span class="n">h_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">w_k</span> <span class="o">=</span> <span class="n">w_k</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">L</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># From Doug Noll PhD Thesis</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">w_k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w_k</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">readout_time</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="n">w_l</span> <span class="o">=</span> <span class="n">_get_cluster_centers</span><span class="p">(</span><span class="n">w_k</span><span class="p">,</span> <span class="n">h_k</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span>
+    <span class="c1"># Compute B as a phase shift</span>
+
+    <span class="n">B</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">w_l</span><span class="p">))</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">w_k</span><span class="p">))</span>
+
+    <span class="c1"># Compute C with a Least Square interpolation</span>
+    <span class="n">C</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">_full_C</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">hist_shape</span><span class="p">,</span> <span class="n">lazy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">E</span></div>
+
 </pre></div>
 
                 </article>

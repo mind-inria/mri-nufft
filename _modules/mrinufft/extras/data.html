@@ -222,6 +222,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
@@ -249,7 +250,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
@@ -285,13 +285,11 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
 </ul>
 </details></li>
@@ -473,7 +471,6 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
 </ul>
 </details></li>
@@ -507,20 +504,22 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -528,18 +527,26 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
 </ul>
 </details></li>
 </ul>
@@ -709,6 +716,8 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
 
 <div class="viewcode-block" id="get_brainweb_map">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html#mrinufft.extras.data.get_brainweb_map">[docs]</a>
@@ -783,6 +792,63 @@ document.write(`
     <span class="n">T2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">T2</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span></div>
+
+
+
+<div class="viewcode-block" id="fse_simulation">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html#mrinufft.extras.data.fse_simulation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fse_simulation</span><span class="p">(</span>
+    <span class="n">M0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">T1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">T2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">TE</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">TR</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform simple analytical Fast Spin Echo simulation.</span>
+
+<span class="sd">    Assume that refocusing angles are 180° and</span>
+<span class="sd">    k-space center is sampled for each echo in the Echo Train</span>
+<span class="sd">    (e.g., as in spiral or radial imaging).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    M0 : np.ndarray</span>
+<span class="sd">        Input equilibrium magnetization.</span>
+<span class="sd">    T1 : np.ndarray</span>
+<span class="sd">        Input T1 in [ms].</span>
+<span class="sd">    T2 : np.ndarray</span>
+<span class="sd">        Input T2 in [ms].</span>
+<span class="sd">    TE : float | Sequence[float]</span>
+<span class="sd">        Sequence Echo Time in [ms].</span>
+<span class="sd">    TR : float | Sequence[float]</span>
+<span class="sd">        Sequence Repetition Time in [ms].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    signal : np.ndarray</span>
+<span class="sd">        Simulated signal of shape (nTE*nTR, *M0).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># preprocess sequence parameters</span>
+    <span class="n">TE</span><span class="p">,</span> <span class="n">TR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">TE</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">TR</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+    <span class="n">TE</span><span class="p">,</span> <span class="n">TR</span> <span class="o">=</span> <span class="n">TE</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">TR</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># preprocess tissue parameters</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">M0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">T1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">T2</span><span class="p">)</span>
+    <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span> <span class="o">=</span> <span class="n">M0</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">T1</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">T2</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">T1</span> <span class="o">+=</span> <span class="mf">1e-9</span>
+    <span class="n">T2</span> <span class="o">+=</span> <span class="mf">1e-9</span>
+
+    <span class="c1"># compute signal</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">M0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">TR</span> <span class="o">-</span> <span class="n">TE</span><span class="p">)</span> <span class="o">/</span> <span class="n">T1</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">TE</span> <span class="o">/</span> <span class="n">T2</span><span class="p">)</span>
+
+    <span class="c1"># post process</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">signal</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">signal</span></div>
 
 </pre></div>
 

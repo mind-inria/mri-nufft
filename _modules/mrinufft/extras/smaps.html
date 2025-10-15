@@ -222,6 +222,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
@@ -249,7 +250,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
@@ -285,13 +285,11 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
 </ul>
 </details></li>
@@ -473,7 +471,6 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
 </ul>
 </details></li>
@@ -507,20 +504,22 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -528,18 +527,26 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
 </ul>
 </details></li>
 </ul>
@@ -710,15 +717,15 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft.density.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">flat_traj</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_array_module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_numpy_cupy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_smaps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_numpy_cupy</span><span class="p">,</span> <span class="n">get_array_module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MethodRegister</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 
 
+<span class="nd">@with_numpy_cupy</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_extract_kspace_center</span><span class="p">(</span>
     <span class="n">kspace_data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">kspace_loc</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
@@ -797,7 +804,7 @@ document.write(`
             <span class="k">if</span> <span class="n">window_fun</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hann&quot;</span><span class="p">,</span> <span class="s2">&quot;hanning&quot;</span><span class="p">,</span> <span class="s2">&quot;hamming&quot;</span><span class="p">]:</span>
                 <span class="n">radius</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kspace_loc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">a_0</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">window_fun</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;hann&quot;</span><span class="p">,</span> <span class="s2">&quot;hanning&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="mf">0.53836</span>
-                <span class="n">window</span> <span class="o">=</span> <span class="n">a_0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">threshold</span><span class="p">)</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="n">a_0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">xp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">threshold</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">elif</span> <span class="n">window_fun</span> <span class="o">==</span> <span class="s2">&quot;ellipse&quot;</span><span class="p">:</span>
                 <span class="n">window</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kspace_loc</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
@@ -807,10 +814,15 @@ document.write(`
         <span class="k">return</span> <span class="n">data_thresholded</span><span class="p">,</span> <span class="n">kspace_loc</span><span class="p">,</span> <span class="n">density</span>
 
 
+<span class="n">register_smaps</span> <span class="o">=</span> <span class="n">MethodRegister</span><span class="p">(</span><span class="s2">&quot;smaps&quot;</span><span class="p">)</span>
+<span class="n">get_smaps</span> <span class="o">=</span> <span class="n">register_smaps</span><span class="o">.</span><span class="n">make_getter</span><span class="p">()</span>
+
+
 <div class="viewcode-block" id="low_frequency">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.smaps.low_frequency.html#mrinufft.extras.smaps.low_frequency">[docs]</a>
 <span class="nd">@register_smaps</span>
 <span class="nd">@flat_traj</span>
+<span class="nd">@with_numpy_cupy</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">low_frequency</span><span class="p">(</span>
     <span class="n">traj</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
@@ -820,7 +832,7 @@ document.write(`
     <span class="n">density</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">window_fun</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">NDArray</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ellipse&quot;</span><span class="p">,</span>
     <span class="n">blurr_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate low-frequency sensitivity maps.</span>
@@ -881,11 +893,17 @@ document.write(`
         <span class="n">window_fun</span><span class="o">=</span><span class="n">window_fun</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">smaps_adj_op</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="n">backend</span><span class="p">)(</span>
-        <span class="n">samples</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span> <span class="n">n_coils</span><span class="o">=</span><span class="n">k_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">samples</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">,</span>
+        <span class="n">density</span><span class="o">=</span><span class="n">dc</span><span class="p">,</span>
+        <span class="n">n_coils</span><span class="o">=</span><span class="n">k_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">squeeze_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">Smaps</span> <span class="o">=</span> <span class="n">smaps_adj_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="n">k_space</span><span class="p">)</span>
     <span class="n">SOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Smaps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">mask</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">Smaps</span> <span class="o">=</span> <span class="n">Smaps</span> <span class="o">*</span> <span class="n">mask</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="n">thresh</span> <span class="o">=</span> <span class="n">threshold_otsu</span><span class="p">(</span><span class="n">SOS</span><span class="p">)</span>
         <span class="c1"># Create convex hull from mask</span>
         <span class="n">convex_hull</span> <span class="o">=</span> <span class="n">convex_hull_image</span><span class="p">(</span><span class="n">SOS</span> <span class="o">&gt;</span> <span class="n">thresh</span><span class="p">)</span>
@@ -898,7 +916,7 @@ document.write(`
             <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Smaps</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="c1"># Re-normalize the sensitivity maps</span>
-    <span class="k">if</span> <span class="n">mask</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">blurr_factor</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">blurr_factor</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># ReCalculate SOS with a minor eps to ensure divide by 0 is ok</span>
         <span class="n">SOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Smaps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>
     <span class="n">Smaps</span> <span class="o">=</span> <span class="n">Smaps</span> <span class="o">/</span> <span class="n">SOS</span>

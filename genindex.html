@@ -222,6 +222,7 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
@@ -249,7 +250,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
@@ -285,13 +285,11 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
 </ul>
 </details></li>
@@ -473,7 +471,6 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
 </ul>
 </details></li>
@@ -507,20 +504,22 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -528,18 +527,26 @@
 <li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
 </ul>
 </details></li>
 </ul>
@@ -737,6 +744,8 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft._utils.MethodRegister.html#mrinufft._utils.MethodRegister.__call__">__call__() (mrinufft._utils.MethodRegister method)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.C_lazy.html#mrinufft.extras.field_map.C_lazy.__getitem__">__getitem__() (mrinufft.extras.field_map.C_lazy method)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT._adj_op_sense_device">_adj_op_sense_device() (mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT._adj_op_sense_host">_adj_op_sense_host() (mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
@@ -749,6 +758,8 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT._dc_sense_device">_dc_sense_device() (mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT._dc_sense_host">_dc_sense_host() (mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._fftz">_fftz() (mrinufft.operators.stacked.MRIStackedNUFFT static method)</a>
@@ -757,8 +768,6 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU._fftz">(mrinufft.operators.stacked.MRIStackedNUFFTGPU static method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._ifftz">_ifftz() (mrinufft.operators.stacked.MRIStackedNUFFT static method)</a>
 
       <ul>
@@ -769,18 +778,8 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT._reshape_image">_reshape_image() (mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT method)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU._safe_squeeze">_safe_squeeze() (mrinufft.operators.base.FourierOperatorCPU method)</a>
-
-      <ul>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT._safe_squeeze">(mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
+      <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase._safe_squeeze">_safe_squeeze() (mrinufft.operators.base.FourierOperatorBase method)</a>
 </li>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT._safe_squeeze">(mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT method)</a>
-</li>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft.html#mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft._safe_squeeze">(mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft method)</a>
-</li>
-        <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT._safe_squeeze">(mrinufft.operators.stacked.MRIStackedNUFFT method)</a>
-</li>
-      </ul></li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html#mrinufft.operators.interfaces.bart.RawBartNUFFT._tmp_file">_tmp_file() (mrinufft.operators.interfaces.bart.RawBartNUFFT method)</a>
 </li>
   </ul></td>
@@ -837,7 +836,7 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.alpha">alpha (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft._utils.auto_cast.html#mrinufft._utils.auto_cast">auto_cast() (in module mrinufft._utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.auto_cast.html#mrinufft._array_compat.auto_cast">auto_cast() (in module mrinufft._array_compat)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -857,6 +856,8 @@ document.write(`
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.C_lazy.html#mrinufft.extras.field_map.C_lazy">C_lazy (class in mrinufft.extras.field_map)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.CaseInsensitiveEnumMeta.html#mrinufft.trajectories.utils.CaseInsensitiveEnumMeta">CaseInsensitiveEnumMeta (class in mrinufft.trajectories.utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.density.geometry_based.cell_count.html#mrinufft.density.geometry_based.cell_count">cell_count() (in module mrinufft.density.geometry_based)</a>
@@ -871,7 +872,7 @@ document.write(`
       </ul></li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.check_backend.html#mrinufft.operators.base.check_backend">check_backend() (in module mrinufft.operators.base)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.check_error.html#mrinufft.operators.interfaces.utils.utils.check_error">check_error() (in module mrinufft.operators.interfaces.utils.utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._utils.check_error.html#mrinufft._utils.check_error">check_error() (in module mrinufft._utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.check_hardware_constraints.html#mrinufft.trajectories.utils.check_hardware_constraints">check_hardware_constraints() (in module mrinufft.trajectories.utils)</a>
 </li>
@@ -883,11 +884,19 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.compute_density">compute_density() (mrinufft.operators.base.FourierOperatorBase method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html#mrinufft.trajectories.utils.compute_gradients_and_slew_rates">compute_gradients_and_slew_rates() (in module mrinufft.trajectories.utils)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.compute_interpolator">compute_interpolator() (mrinufft.operators.off_resonance.MRIFourierCorrected method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html#mrinufft.extras.field_map.compute_mfi_coefficients">compute_mfi_coefficients() (in module mrinufft.extras.field_map)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html#mrinufft.extras.field_map.compute_mti_coefficients">compute_mti_coefficients() (in module mrinufft.extras.field_map)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.compute_smaps">compute_smaps() (mrinufft.operators.base.FourierOperatorBase method)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html#mrinufft.extras.field_map.compute_svd_coefficients">compute_svd_coefficients() (in module mrinufft.extras.field_map)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.conify.html#mrinufft.trajectories.tools.conify">conify() (in module mrinufft.trajectories.tools)</a>
 </li>
@@ -993,7 +1002,7 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html#mrinufft.operators.base.FourierOperatorCPU">FourierOperatorCPU (class in mrinufft.operators.base)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.extras.sim.fse_simulation.html#mrinufft.extras.sim.fse_simulation">fse_simulation() (in module mrinufft.extras.sim)</a>
+      <li><a href="generated/_autosummary/mrinufft.extras.data.fse_simulation.html#mrinufft.extras.data.fse_simulation">fse_simulation() (in module mrinufft.extras.data)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1009,7 +1018,7 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere.html#mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere">generate_fibonacci_sphere() (in module mrinufft.trajectories.maths.fibonacci)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft._utils.get_array_module.html#mrinufft._utils.get_array_module">get_array_module() (in module mrinufft._utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.get_array_module.html#mrinufft._array_compat.get_array_module">get_array_module() (in module mrinufft._array_compat)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html#mrinufft.extras.data.get_brainweb_map">get_brainweb_map() (in module mrinufft.extras.data)</a>
 </li>
@@ -1017,14 +1026,10 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.get_colorlist">get_colorlist() (mrinufft.trajectories.display.displayConfig class method)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.density.utils.get_density.html#mrinufft.density.utils.get_density">get_density() (in module mrinufft.density.utils)</a>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html#mrinufft.extras.field_map.get_complex_fieldmap_rad">get_complex_fieldmap_rad() (in module mrinufft.extras.field_map)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html#mrinufft.operators.interfaces.nfft.get_fourier_matrix">get_fourier_matrix() (in module mrinufft.operators.interfaces.nfft)</a>
-
-      <ul>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html#mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix">(in module mrinufft.operators.interfaces.nudft_numpy)</a>
+      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html#mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix">get_fourier_matrix() (in module mrinufft.operators.interfaces.nudft_numpy)</a>
 </li>
-      </ul></li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_amplitudes_to_travel_for_set_time.html#mrinufft.trajectories.tools.get_gradient_amplitudes_to_travel_for_set_time">get_gradient_amplitudes_to_travel_for_set_time() (in module mrinufft.trajectories.tools)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_times_to_travel.html#mrinufft.trajectories.tools.get_gradient_times_to_travel">get_gradient_times_to_travel() (in module mrinufft.trajectories.tools)</a>
@@ -1035,14 +1040,14 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix.html#mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix">get_implicit_matrix() (in module mrinufft.operators.interfaces.nudft_numpy)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html#mrinufft.operators.off_resonance.get_interpolators_from_fieldmap">get_interpolators_from_fieldmap() (in module mrinufft.operators.off_resonance)</a>
-</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.get_lipschitz_cst">get_lipschitz_cst() (mrinufft.operators.base.FourierOperatorBase method)</a>
 
       <ul>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html#mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.get_lipschitz_cst">(mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT method)</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.get_lipschitz_cst">(mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT method)</a>
+</li>
+        <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.get_lipschitz_cst">(mrinufft.operators.off_resonance.MRIFourierCorrected method)</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html#mrinufft.operators.stacked.MRIStackedNUFFT.get_lipschitz_cst">(mrinufft.operators.stacked.MRIStackedNUFFT method)</a>
 </li>
@@ -1054,10 +1059,6 @@ document.write(`
       <li><a href="generated/_autosummary/mrinufft.operators.base.get_operator.html#mrinufft.operators.base.get_operator">get_operator() (in module mrinufft.operators.base)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html#mrinufft.trajectories.tools.get_random_loc_1d">get_random_loc_1d() (in module mrinufft.trajectories.tools)</a>
-</li>
-      <li><a href="generated/_autosummary/mrinufft.extras.utils.get_smaps.html#mrinufft.extras.utils.get_smaps">get_smaps() (in module mrinufft.extras.utils)</a>
-</li>
-      <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.get_spatial_coefficients">get_spatial_coefficients() (mrinufft.operators.off_resonance.MRIFourierCorrected static method)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.gradient_point_color">gradient_point_color (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
@@ -1149,13 +1150,13 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.initialize_tilt.html#mrinufft.trajectories.utils.initialize_tilt">initialize_tilt() (in module mrinufft.trajectories.utils)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_array.html#mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_array">is_cuda_array() (in module mrinufft.operators.interfaces.utils.gpu_utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.is_cuda_array.html#mrinufft._array_compat.is_cuda_array">is_cuda_array() (in module mrinufft._array_compat)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor.html#mrinufft.operators.interfaces.utils.gpu_utils.is_cuda_tensor">is_cuda_tensor() (in module mrinufft.operators.interfaces.utils.gpu_utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html#mrinufft._array_compat.is_cuda_tensor">is_cuda_tensor() (in module mrinufft._array_compat)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence.html#mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence">is_from_fibonacci_sequence() (in module mrinufft.trajectories.maths.fibonacci)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.is_host_array.html#mrinufft.operators.interfaces.utils.gpu_utils.is_host_array">is_host_array() (in module mrinufft.operators.interfaces.utils.gpu_utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.is_host_array.html#mrinufft._array_compat.is_host_array">is_host_array() (in module mrinufft._array_compat)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1203,6 +1204,8 @@ document.write(`
     module
 
       <ul>
+        <li><a href="generated/_autosummary/mrinufft._array_compat.html#module-mrinufft._array_compat">mrinufft._array_compat</a>
+</li>
         <li><a href="generated/_autosummary/mrinufft._utils.html#module-mrinufft._utils">mrinufft._utils</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.density.html#module-mrinufft.density">mrinufft.density</a>
@@ -1221,11 +1224,7 @@ document.write(`
 </li>
         <li><a href="generated/_autosummary/mrinufft.extras.gradient.html#module-mrinufft.extras.gradient">mrinufft.extras.gradient</a>
 </li>
-        <li><a href="generated/_autosummary/mrinufft.extras.sim.html#module-mrinufft.extras.sim">mrinufft.extras.sim</a>
-</li>
         <li><a href="generated/_autosummary/mrinufft.extras.smaps.html#module-mrinufft.extras.smaps">mrinufft.extras.smaps</a>
-</li>
-        <li><a href="generated/_autosummary/mrinufft.extras.utils.html#module-mrinufft.extras.utils">mrinufft.extras.utils</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.io.html#module-mrinufft.io">mrinufft.io</a>
 </li>
@@ -1268,8 +1267,6 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.html#module-mrinufft.operators.interfaces.utils">mrinufft.operators.interfaces.utils</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html#module-mrinufft.operators.interfaces.utils.gpu_utils">mrinufft.operators.interfaces.utils.gpu_utils</a>
-</li>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html#module-mrinufft.operators.interfaces.utils.utils">mrinufft.operators.interfaces.utils.utils</a>
 </li>
         <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.html#module-mrinufft.operators.off_resonance">mrinufft.operators.off_resonance</a>
 </li>
@@ -1326,6 +1323,13 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html#mrinufft.operators.interfaces.nfft.MRInfft">MRInfft (class in mrinufft.operators.interfaces.nfft)</a>
 </li>
+      <li>
+    mrinufft._array_compat
+
+      <ul>
+        <li><a href="generated/_autosummary/mrinufft._array_compat.html#module-mrinufft._array_compat">module</a>
+</li>
+      </ul></li>
       <li>
     mrinufft._utils
 
@@ -1390,24 +1394,10 @@ document.write(`
 </li>
       </ul></li>
       <li>
-    mrinufft.extras.sim
-
-      <ul>
-        <li><a href="generated/_autosummary/mrinufft.extras.sim.html#module-mrinufft.extras.sim">module</a>
-</li>
-      </ul></li>
-      <li>
     mrinufft.extras.smaps
 
       <ul>
         <li><a href="generated/_autosummary/mrinufft.extras.smaps.html#module-mrinufft.extras.smaps">module</a>
-</li>
-      </ul></li>
-      <li>
-    mrinufft.extras.utils
-
-      <ul>
-        <li><a href="generated/_autosummary/mrinufft.extras.utils.html#module-mrinufft.extras.utils">module</a>
 </li>
       </ul></li>
       <li>
@@ -1417,8 +1407,6 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.io.html#module-mrinufft.io">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mrinufft.io.cfl
 
@@ -1426,6 +1414,8 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.io.cfl.html#module-mrinufft.io.cfl">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mrinufft.io.nsp
 
@@ -1557,13 +1547,6 @@ document.write(`
 
       <ul>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html#module-mrinufft.operators.interfaces.utils.gpu_utils">module</a>
-</li>
-      </ul></li>
-      <li>
-    mrinufft.operators.interfaces.utils.utils
-
-      <ul>
-        <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html#module-mrinufft.operators.interfaces.utils.utils">module</a>
 </li>
       </ul></li>
       <li>
@@ -1737,12 +1720,16 @@ document.write(`
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.n_batchs">n_batchs (mrinufft.operators.base.FourierOperatorBase property)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.n_coils">n_coils (mrinufft.operators.base.FourierOperatorBase property)</a>
 
       <ul>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.n_coils">(mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT attribute)</a>
 </li>
       </ul></li>
+      <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.n_interpolators">n_interpolators (mrinufft.operators.off_resonance.MRIFourierCorrected property)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.n_samples">n_samples (mrinufft.operators.base.FourierOperatorBase property)</a>
 
       <ul>
@@ -1751,10 +1738,14 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.operators.subspace.MRISubspace.html#mrinufft.operators.subspace.MRISubspace.n_samples">(mrinufft.operators.subspace.MRISubspace property)</a>
 </li>
       </ul></li>
+      <li><a href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.n_samples_per_shot">n_samples_per_shot (mrinufft.operators.off_resonance.MRIFourierCorrected property)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.nb_colors">nb_colors (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.ndim">ndim (mrinufft.operators.base.FourierOperatorBase property)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.io.utils.nifti_affine.html#mrinufft.io.utils.nifti_affine">nifti_affine() (in module mrinufft.io.utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.norm_factor">norm_factor (mrinufft.operators.base.FourierOperatorBase property)</a>
@@ -1771,8 +1762,6 @@ document.write(`
         <li><a href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html#mrinufft.operators.stacked.MRIStackedNUFFTGPU.norm_factor">(mrinufft.operators.stacked.MRIStackedNUFFTGPU property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.normalize_trajectory.html#mrinufft.trajectories.utils.normalize_trajectory">normalize_trajectory() (in module mrinufft.trajectories.utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.density.utils.normalize_weights.html#mrinufft.density.utils.normalize_weights">normalize_weights() (in module mrinufft.density.utils)</a>
@@ -1849,7 +1838,7 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.gradients.patch_center_anomaly.html#mrinufft.trajectories.gradients.patch_center_anomaly">patch_center_anomaly() (in module mrinufft.trajectories.gradients)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.pin_memory.html#mrinufft.operators.interfaces.utils.gpu_utils.pin_memory">pin_memory() (in module mrinufft.operators.interfaces.utils.gpu_utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.pin_memory.html#mrinufft._array_compat.pin_memory">pin_memory() (in module mrinufft._array_compat)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.density.nufft_based.pipe.html#mrinufft.density.nufft_based.pipe">pipe() (in module mrinufft.density.nufft_based)</a>
 
@@ -1869,7 +1858,7 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.pointsize">pointsize (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft._utils.power_method.html#mrinufft._utils.power_method">power_method() (in module mrinufft._utils)</a>
+      <li><a href="generated/_autosummary/mrinufft.operators.base.power_method.html#mrinufft.operators.base.power_method">power_method() (in module mrinufft.operators.base)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.precess.html#mrinufft.trajectories.tools.precess">precess() (in module mrinufft.trajectories.tools)</a>
 </li>
@@ -1967,23 +1956,25 @@ document.write(`
 </li>
       <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.set_smaps">set_smaps() (mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT method)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.shape">shape (mrinufft.operators.base.FourierOperatorBase property)</a>
+      <li><a href="generated/_autosummary/mrinufft.extras.field_map.C_lazy.html#mrinufft.extras.field_map.C_lazy.shape">shape (mrinufft.extras.field_map.C_lazy property)</a>
 
       <ul>
+        <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.shape">(mrinufft.operators.base.FourierOperatorBase property)</a>
+</li>
         <li><a href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html#mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.shape">(mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT attribute)</a>
 </li>
       </ul></li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.tools.shellify.html#mrinufft.trajectories.tools.shellify">shellify() (in module mrinufft.trajectories.tools)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.trajectories.utils.SI.html#mrinufft.trajectories.utils.SI">SI (class in mrinufft.trajectories.utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft.trajectories.utils.SI.html#mrinufft.trajectories.utils.SI">SI (class in mrinufft.trajectories.utils)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.utils.SIEMENS.html#mrinufft.trajectories.utils.SIEMENS">SIEMENS (class in mrinufft.trajectories.utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html#mrinufft.io.utils.siemens_quat_to_rot_mat">siemens_quat_to_rot_mat() (in module mrinufft.io.utils)</a>
 </li>
-      <li><a href="generated/_autosummary/mrinufft.operators.interfaces.utils.utils.sizeof_fmt.html#mrinufft.operators.interfaces.utils.utils.sizeof_fmt">sizeof_fmt() (in module mrinufft.operators.interfaces.utils.utils)</a>
+      <li><a href="generated/_autosummary/mrinufft._utils.sizeof_fmt.html#mrinufft._utils.sizeof_fmt">sizeof_fmt() (in module mrinufft._utils)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html#mrinufft.trajectories.display.displayConfig.slewrate_point_color">slewrate_point_color (mrinufft.trajectories.display.displayConfig attribute)</a>
 </li>
@@ -2093,10 +2084,18 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.with_autograd">with_autograd() (mrinufft.operators.base.FourierOperatorBase class method)</a>
 </li>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.with_numpy.html#mrinufft._array_compat.with_numpy">with_numpy() (in module mrinufft._array_compat)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html#mrinufft._array_compat.with_numpy_cupy">with_numpy_cupy() (in module mrinufft._array_compat)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction">with_off_resonance_correction() (mrinufft.operators.base.FourierOperatorBase method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.with_tensorflow.html#mrinufft._array_compat.with_tensorflow">with_tensorflow() (in module mrinufft._array_compat)</a>
+</li>
+      <li><a href="generated/_autosummary/mrinufft._array_compat.with_torch.html#mrinufft._array_compat.with_torch">with_torch() (in module mrinufft._array_compat)</a>
+</li>
       <li><a href="generated/_autosummary/mrinufft.io.nsp.write_gradients.html#mrinufft.io.nsp.write_gradients">write_gradients() (in module mrinufft.io.nsp)</a>
 </li>
       <li><a href="generated/_autosummary/mrinufft.io.nsp.write_trajectory.html#mrinufft.io.nsp.write_trajectory">write_trajectory() (in module mrinufft.io.nsp)</a>

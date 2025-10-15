@@ -222,6 +222,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
 </ul>
@@ -249,7 +250,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.get_fourier_matrix.html">get_fourier_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
 </ul>
@@ -285,13 +285,11 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.interfaces.utils.utils.html"><code class="docutils literal notranslate"><span class="pre">utils.utils</span></code></a></li>
 </ul>
 </details></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html">get_interpolators_from_fieldmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
 </ul>
 </details></li>
@@ -473,7 +471,6 @@
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.get_density.html">get_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
 </ul>
 </details></li>
@@ -507,20 +504,22 @@
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.html"><code class="docutils literal notranslate"><span class="pre">extras.sim</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.sim.fse_simulation.html">fse_simulation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -528,18 +527,26 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
 </ul>
 </details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.html"><code class="docutils literal notranslate"><span class="pre">extras.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.extras.utils.get_smaps.html">get_smaps</a></li>
-</ul>
-</details></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.auto_cast.html">auto_cast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.get_array_module.html">get_array_module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.power_method.html">power_method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
 </ul>
 </details></li>
 </ul>
@@ -705,168 +712,23 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for mrinufft.operators.off_resonance</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Off Resonance correction Operator wrapper.</span>
+<span></span><span class="sd">&quot;&quot;&quot;Off Resonance correction Operator wrapper.&quot;&quot;&quot;</span>
 
-<span class="sd">Based on the implementation of Guillaume Daval-Frérot in pysap-mri:</span>
-<span class="sd">https://github.com/CEA-COSMIC/pysap-mri/blob/master/mri/operators/fourier/orc_wrapper.py</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">CUPY_AVAILABLE</span><span class="p">,</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">,</span> <span class="n">with_numpy_cupy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_array_module</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierOperatorBase</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_cuda_array</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mrinufft._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">with_numpy_cupy</span><span class="p">,</span> <span class="n">CUPY_AVAILABLE</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._array_compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_array_module</span><span class="p">,</span> <span class="n">is_host_array</span><span class="p">,</span> <span class="n">is_cuda_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..extras.field_map</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_orc_factorization</span><span class="p">,</span> <span class="n">get_complex_fieldmap_rad</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierOperatorBase</span><span class="p">,</span> <span class="n">power_method</span><span class="p">,</span> <span class="n">get_operator</span>
 
 <span class="k">if</span> <span class="n">CUPY_AVAILABLE</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
-
-<span class="k">if</span> <span class="n">AUTOGRAD_AVAILABLE</span><span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-
-
-<div class="viewcode-block" id="get_interpolators_from_fieldmap">
-<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.get_interpolators_from_fieldmap.html#mrinufft.operators.off_resonance.get_interpolators_from_fieldmap">[docs]</a>
-<span class="nd">@with_numpy_cupy</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_interpolators_from_fieldmap</span><span class="p">(</span>
-    <span class="n">b0_map</span><span class="p">,</span> <span class="n">readout_time</span><span class="p">,</span> <span class="n">n_time_segments</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Approximate ``exp(-2j*pi*fieldmap*readout_time) ≈ Σ B_n(t)C_n(r)``.</span>
-
-<span class="sd">    Here, B_n(t) are n_time_segments temporal coefficients and C_n(r)</span>
-<span class="sd">    are n_time_segments temporal spatial coefficients.</span>
-
-<span class="sd">    The matrix B has shape ``(n_time_segments, len(readout_time))``</span>
-<span class="sd">    and C has shape ``(n_time_segments, *b0_map.shape)``.</span>
-
-<span class="sd">    From Sigpy: https://github.com/mikgroup/sigpy</span>
-<span class="sd">    and MIRT (mri_exp_approx.m): https://web.eecs.umich.edu/~fessler/code/</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    b0_map : np.ndarray</span>
-<span class="sd">        Static field inhomogeneities map.</span>
-<span class="sd">        ``b0_map`` and ``readout_time`` should have reciprocal units.</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    readout_time : np.ndarray</span>
-<span class="sd">        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots * n_pts,)``.</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    n_time_segments : int, optional</span>
-<span class="sd">        Number of time segments. The default is ``6``.</span>
-<span class="sd">    n_bins : int | Sequence[int] optional</span>
-<span class="sd">        Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``</span>
-<span class="sd">        If it is a scalar, assume ``n_bins = (n_bins, 10)``.</span>
-<span class="sd">        For real fieldmap (B0 only), ``n_bins[1]`` is ignored.</span>
-<span class="sd">    mask : np.ndarray, optional</span>
-<span class="sd">        Boolean mask of the region of interest</span>
-<span class="sd">        (e.g., corresponding to the imaged object).</span>
-<span class="sd">        This is used to exclude the background fieldmap values</span>
-<span class="sd">        from histogram computation. Must have same shape as ``b0_map``.</span>
-<span class="sd">        The default is ``None`` (use the whole map).</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    r2star_map : np.ndarray, optional</span>
-<span class="sd">        Effective transverse relaxation map (R2*).</span>
-<span class="sd">        ``r2star_map`` and ``readout_time`` should have reciprocal units.</span>
-<span class="sd">        Must have same shape as ``b0_map``.</span>
-<span class="sd">        The default is ``None`` (purely imaginary field).</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    The total field map used to calculate the field coefficients is</span>
-<span class="sd">    ``field_map = R2*_map + 1j * B0_map``. If R2* is not provided,</span>
-<span class="sd">    the field is purely immaginary: ``field_map = 1j * B0_map``.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    B : np.ndarray</span>
-<span class="sd">        Temporal interpolator of shape ``(n_time_segments, len(t))``.</span>
-<span class="sd">        Array module is the same as input field_map.</span>
-<span class="sd">    tl : np.ndarray</span>
-<span class="sd">        Time segment centers of shape ``(n_time_segments,)``.</span>
-<span class="sd">        Array module is the same as input field_map.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># default</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-        <span class="n">n_bins</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-    <span class="n">n_bins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
-
-    <span class="c1"># get backend and device</span>
-    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">b0_map</span><span class="p">)</span>
-
-    <span class="c1"># enforce data types</span>
-    <span class="n">b0_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">readout_time</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">r2star_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">r2star_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r2star_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="c1"># Hz to radians / s</span>
-    <span class="n">field_map</span> <span class="o">=</span> <span class="n">_get_complex_fieldmap</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="p">)</span>
-
-    <span class="c1"># enforce precision</span>
-    <span class="n">field_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-
-    <span class="c1"># create histograms</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">field_map</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">r2star_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">z</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">real</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">hk</span><span class="p">,</span> <span class="n">ze</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">histogramdd</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">)</span>
-        <span class="n">ze</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ze</span><span class="p">)</span>
-
-        <span class="c1"># get bin centers</span>
-        <span class="n">zc</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">ze</span><span class="p">]</span>
-
-        <span class="c1"># complexify</span>
-        <span class="n">zk</span> <span class="o">=</span> <span class="n">_outer_sum</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">zc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># [K1 K2]</span>
-        <span class="n">zk</span> <span class="o">=</span> <span class="n">zk</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">hk</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">T</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">hk</span><span class="p">,</span> <span class="n">ze</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-        <span class="c1"># get bin centers</span>
-        <span class="n">zc</span> <span class="o">=</span> <span class="n">ze</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="p">(</span><span class="n">ze</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ze</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-
-        <span class="c1"># complexify</span>
-        <span class="n">zk</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">zc</span>  <span class="c1"># [K 1]</span>
-
-    <span class="c1"># flatten histogram values and centers</span>
-    <span class="n">hk</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-    <span class="n">zk</span> <span class="o">=</span> <span class="n">zk</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-
-    <span class="c1"># generate time for each segment</span>
-    <span class="n">tl</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
-        <span class="n">readout_time</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">readout_time</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">n_time_segments</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span>
-    <span class="p">)</span>  <span class="c1"># time seg centers in [s]</span>
-
-    <span class="c1"># prepare for basis calculation</span>
-    <span class="n">ch</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">tl</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">@</span> <span class="n">zk</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
-    <span class="n">w</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">hk</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">w</span> <span class="o">@</span> <span class="n">ch</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="n">w</span>
-
-    <span class="c1"># actual temporal basis calculation</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">p</span> <span class="o">@</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">zk</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">*</span> <span class="n">readout_time</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">B</span><span class="p">,</span> <span class="n">tl</span></div>
-
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_outer_sum</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">):</span>
-    <span class="n">xx</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># add a singleton dimension at axis 1</span>
-    <span class="n">yy</span> <span class="o">=</span> <span class="n">yy</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># add a singleton dimension at axis 0</span>
-    <span class="n">ss</span> <span class="o">=</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">yy</span>  <span class="c1"># compute the outer sum</span>
-    <span class="k">return</span> <span class="n">ss</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">cupyx.scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom</span> <span class="k">as</span> <span class="n">cp_zoom</span>
 
 
 <div class="viewcode-block" id="MRIFourierCorrected">
@@ -879,245 +741,316 @@ document.write(`
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    b0_map : np.ndarray</span>
+<span class="sd">    fourier_op: FourierOperatorBase</span>
+<span class="sd">        Existing NUFFT operator.</span>
+<span class="sd">    b0_map : NDArray</span>
 <span class="sd">        Static field inhomogeneities map.</span>
-<span class="sd">        ``b0_map`` and ``readout_time`` should have reciprocal units.</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    readout_time : np.ndarray</span>
-<span class="sd">        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots * n_pts,)``.</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    n_time_segments : int, optional</span>
-<span class="sd">        Number of time segments. The default is ``6``.</span>
-<span class="sd">    n_bins : int | Sequence[int] optional</span>
-<span class="sd">        Number of histogram bins to use for ``(B0, T2*)``. The default is ``(40, 10)``</span>
-<span class="sd">        If it is a scalar, assume ``n_bins = (n_bins, 10)``.</span>
-<span class="sd">        For real fieldmap (B0 only), ``n_bins[1]`` is ignored.</span>
-<span class="sd">    mask : np.ndarray, optional</span>
+<span class="sd">        ``b0_map`` and ``readout_time`` should have reciprocal units. (e.g. [Hz]</span>
+<span class="sd">        and [s]) Also supports Cupy arrays and Torch tensors.</span>
+<span class="sd">    readout_time : NDArray</span>
+<span class="sd">        Readout time in ``[s]`` of shape ``(n_shots, n_pts)`` or ``(n_shots *</span>
+<span class="sd">        n_pts,)``. Also supports Cupy arrays and Torch tensors.</span>
+<span class="sd">    mask : NDArray, optional</span>
 <span class="sd">        Boolean mask of the region of interest</span>
 <span class="sd">        (e.g., corresponding to the imaged object).</span>
-<span class="sd">        This is used to exclude the background fieldmap values</span>
+<span class="sd">        This is used to exclude the background field-map values</span>
 <span class="sd">        from histogram computation.</span>
 <span class="sd">        The default is ``None`` (use the whole map).</span>
 <span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    B : np.ndarray, optional</span>
-<span class="sd">        Temporal interpolator of shape ``(n_time_segments, len(readout_time))``.</span>
-<span class="sd">    tl : np.ndarray, optional</span>
-<span class="sd">        Time segment centers of shape ``(n_time_segments,)``.</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    r2star_map : np.ndarray, optional</span>
-<span class="sd">        Effective transverse relaxation map (R2*).</span>
-<span class="sd">        ``r2star_map`` and ``readout_time`` should have reciprocal units.</span>
-<span class="sd">        Must have same shape as ``b0_map``.</span>
-<span class="sd">        The default is ``None`` (purely imaginary field).</span>
-<span class="sd">        Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">    negate: bool, optional, default=False</span>
-<span class="sd">        If True, negate the field map. Useful for matching the convention of</span>
-<span class="sd">        your field map generation.</span>
-<span class="sd">    backend: str, optional</span>
-<span class="sd">        The backend to use for computations. Either &#39;cpu&#39;, &#39;gpu&#39; or &#39;torch&#39;.</span>
-<span class="sd">        The default is `cpu`.</span>
+<span class="sd">    r2star_map : NDArray, optional</span>
+<span class="sd">        Effective transverse relaxation map (R2*). ``r2star_map`` and</span>
+<span class="sd">        ``readout_time`` should have reciprocal units (e.g. [Hz] and [s]). Must</span>
+<span class="sd">        have same shape as ``b0_map``. The default is ``None`` (purely imaginary</span>
+<span class="sd">        field). Also supports Cupy arrays and Torch tensors.</span>
+<span class="sd">    interpolators: str, dict, tuple[NDArray, NDArray]</span>
+<span class="sd">        Determine how to decompose the field-map.</span>
+
+<span class="sd">        - If ``str``, use an existing method in `extra/field_map.py` with</span>
+<span class="sd">          default parameters</span>
+<span class="sd">        - If ``{&quot;name&quot;:name, **kwargs}`` use an existing</span>
+<span class="sd">          method in `extra_field_map.py` parameterize by kwargs.</span>
+<span class="sd">        - If``tuple[NDArray, NDArray]`` use this directly as the decomposition</span>
+<span class="sd">          (B and C)</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    The total field map used to calculate the field coefficients is</span>
 <span class="sd">    ``field_map = R2*_map + 1j * B0_map``. If R2* is not provided,</span>
-<span class="sd">    the field is purely immaginary: ``field_map = 1j * B0_map``.</span>
+<span class="sd">    the field is purely imaginary: ``field_map = 1j * B0_map``.</span>
+
+<span class="sd">    You can also  use the method :py:func:`.with_off_resonance_correction</span>
+<span class="sd">    &lt;mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction&gt;`</span>
+<span class="sd">    to augment an existing operator with off-resonance correction capability.</span>
+
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    :ref:`nufft-orc`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">fourier_op</span><span class="p">,</span>
-        <span class="n">b0_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">readout_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_time_segments</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-        <span class="n">n_bins</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">B</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">negate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">fourier_op</span><span class="p">:</span> <span class="n">FourierOperatorBase</span><span class="p">,</span>
+        <span class="n">b0_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">readout_time</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">r2star_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">interpolator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;svd&quot;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">CUPY_AVAILABLE</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cupy is required for gpu computations.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;torch&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xp</span> <span class="o">=</span> <span class="n">torch</span>
-        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xp</span> <span class="o">=</span> <span class="n">cp</span>
-        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xp</span> <span class="o">=</span> <span class="n">np</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported backend.&quot;</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span> <span class="o">=</span> <span class="n">fourier_op</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">negate</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;negate must be a boolean value.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">isign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">negate</span> <span class="k">else</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">n_coils</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">shape</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">smaps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">autograd_available</span> <span class="o">=</span> <span class="n">fourier_op</span><span class="o">.</span><span class="n">autograd_available</span>
-        <span class="k">if</span> <span class="n">b0_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">b0_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">b0_map</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;B0 map shape </span><span class="si">{</span><span class="n">b0_map</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> does not match operator </span><span class="se">\</span>
-<span class="s2">                    shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">. &quot;</span>
-                    <span class="s2">&quot;Upsampling will be performed automatically.</span><span class="se">\</span>
-<span class="s2">                        Please ensure orientation is correct.&quot;</span><span class="p">,</span>
-                    <span class="ne">UserWarning</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">zoom_factors</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">c</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">b0_map</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-                <span class="n">b0_map</span> <span class="o">=</span> <span class="n">zoom</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">zoom_factors</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">B</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tl</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">b0_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b0_map</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span> <span class="o">=</span> <span class="n">get_interpolators_from_fieldmap</span><span class="p">(</span>
-                <span class="n">b0_map</span><span class="p">,</span>
-                <span class="n">readout_time</span><span class="p">,</span>
-                <span class="n">n_time_segments</span><span class="p">,</span>
-                <span class="n">n_bins</span><span class="p">,</span>
-                <span class="n">mask</span><span class="p">,</span>
-                <span class="n">r2star_map</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please either provide fieldmap and t or B and tl&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">squeeze_dims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">squeeze_dims</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># we will manage shapes here.</span>
 
-        <span class="c1"># create spatial interpolator</span>
-        <span class="n">field_map</span> <span class="o">=</span> <span class="n">_get_complex_fieldmap</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="n">b0_map</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">=</span> <span class="n">field_map</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span><span class="p">,</span> <span class="n">isign</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">isign</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">b0_map</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">readout_time</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolator</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;b0_map  and readout_time required for off-resonance correction.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">complex_field_map</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">b0_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">complex_field_map</span> <span class="o">=</span> <span class="n">get_complex_fieldmap_rad</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_interpolator</span><span class="p">(</span><span class="n">interpolator</span><span class="p">,</span> <span class="n">complex_field_map</span><span class="p">,</span> <span class="n">readout_time</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MRIFourierCorrected.compute_interpolator">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.compute_interpolator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_interpolator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interpolators</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">],</span>
+        <span class="n">field_map</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">readout_time</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decompose the field-map in space and time-wise interpolators.</span>
+
+<span class="sd">        Sets the B and C attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolators</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">interpolators</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Provide a tuple of 2 array_like data&quot;</span>
+                    <span class="s2">&quot; for space and time interpolators&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+            <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">:</span>
+                <span class="n">n_shot</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Time interpolator should divide or equal size of the samples.&quot;</span>
+                    <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_shots</span> <span class="o">=</span> <span class="n">n_shot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span>
+            <span class="k">return</span>
+
+        <span class="n">readout_time</span> <span class="o">=</span> <span class="n">readout_time</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_shots</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">readout_time</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">:</span>
+            <span class="n">n_shot</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">readout_time</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;readout_time should divide or equal the size of the samples.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_shots</span> <span class="o">=</span> <span class="n">n_shot</span>
+        <span class="c1"># Resize to match fourier shape</span>
+        <span class="k">if</span> <span class="n">field_map</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;field_map and mask will be interpolated to match image shape.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
+            <span class="n">zoom_func</span> <span class="o">=</span> <span class="n">cp_zoom</span> <span class="k">if</span> <span class="n">xp</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;cupy&quot;</span> <span class="k">else</span> <span class="n">zoom</span>
+            <span class="n">field_map</span> <span class="o">=</span> <span class="n">zoom_func</span><span class="p">(</span>
+                <span class="n">field_map</span><span class="p">,</span>
+                <span class="n">zoom</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field_map</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">zoom_func</span><span class="p">(</span>
+                    <span class="n">mask</span><span class="p">,</span>
+                    <span class="n">zoom</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
+                    <span class="n">order</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolators</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">interpolators</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">interpolators</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolators</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">interpolators</span> <span class="o">=</span> <span class="n">get_orc_factorization</span><span class="p">(</span><span class="n">interpolators</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolators</span><span class="p">,</span> <span class="n">Callable</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown off-resonance interpolator ``</span><span class="si">{</span><span class="n">interpolators</span><span class="si">}</span><span class="s2">``&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">interpolators</span><span class="p">(</span>
+            <span class="n">field_map</span><span class="o">=</span><span class="n">field_map</span><span class="p">,</span> <span class="n">readout_time</span><span class="o">=</span><span class="n">readout_time</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delegate attribute to internal operator.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MRIFourierCorrected.op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.op">[docs]</a>
+    <span class="nd">@with_numpy_cupy</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute Forward Operation with off-resonance effect.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        x: numpy.ndarray</span>
+<span class="sd">        data: NDArray</span>
 <span class="sd">            N-D input image.</span>
-<span class="sd">            Also supports Cupy arrays and Torch tensors.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
+<span class="sd">        NDArray</span>
 <span class="sd">            Masked distorted N-D k-space.</span>
 <span class="sd">            Array module is the same as input data.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">data_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
-                <span class="n">y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">data_d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
-                <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-                <span class="n">y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="n">data_d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+        <span class="n">NS</span><span class="p">,</span> <span class="n">NK</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_shots</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples_per_shot</span>
 
-        <span class="k">return</span> <span class="n">y</span></div>
+        <span class="n">on_gpu</span> <span class="o">=</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_host_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="ow">and</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Interpolators are on CPU, moving GPU image data to CPU.&quot;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Interpolators are on GPU, moving CPU image data to GPU&quot;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+
+        <span class="n">data_d</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
+            <span class="n">ytmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">[</span><span class="n">ll</span><span class="p">]</span> <span class="o">*</span> <span class="n">data_d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NS</span><span class="p">,</span> <span class="n">NK</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[:,</span> <span class="n">ll</span><span class="p">]</span> <span class="o">*</span> <span class="n">ytmp</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MRIFourierCorrected.adj_op">
 <a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.adj_op">[docs]</a>
+    <span class="nd">@with_numpy_cupy</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">adj_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute Adjoint Operation with off-resonance effect.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        x: numpy.ndarray</span>
-<span class="sd">            Masked distorted N-D k-space.</span>
-<span class="sd">            Also supports Cupy arrays and Torch tensors.</span>
-
+<span class="sd">        coeffs: NDArray</span>
+<span class="sd">            k-space data</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        numpy.ndarray</span>
+<span class="sd">        NDArray</span>
 <span class="sd">            Inverse Fourier transform of the distorted input k-space.</span>
 <span class="sd">            Array module is the same as input coeffs.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">coeffs_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
-                <span class="n">y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs_d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-                <span class="p">)</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_batchs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_coils</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">XYZ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">NS</span><span class="p">,</span> <span class="n">NK</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_shots</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples_per_shot</span>
+        <span class="n">ytmp</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">on_gpu</span> <span class="o">=</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_host_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="ow">and</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">uses_sense</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
-                <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">field_map</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-                <span class="n">y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">xp</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">*</span> <span class="n">coeffs_d</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-                <span class="p">)</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">XYZ</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NS</span><span class="p">,</span> <span class="n">NK</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_interpolators</span><span class="p">):</span>
+            <span class="n">Bconj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[:,</span> <span class="n">ll</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">Cconj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">[</span><span class="n">ll</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">ytmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">Bconj</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+            <span class="n">img</span> <span class="o">+=</span> <span class="n">Cconj</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">adj_op</span><span class="p">(</span><span class="n">ytmp</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">y</span></div>
+        <span class="k">if</span> <span class="n">on_gpu</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_cuda_array</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_squeeze</span><span class="p">(</span><span class="n">img</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MRIFourierCorrected.get_spatial_coefficients">
-<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.get_spatial_coefficients">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute spatial coefficients for field approximation.</span>
+<div class="viewcode-block" id="MRIFourierCorrected.get_lipschitz_cst">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html#mrinufft.operators.off_resonance.MRIFourierCorrected.get_lipschitz_cst">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lipschitz_cst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the Lipschitz constant of the operator.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        field_map : np.ndarray</span>
-<span class="sd">            Total field map used to calculate the field coefficients is</span>
-<span class="sd">            ``field_map = R2*_map + 1j * B0_map``.</span>
-<span class="sd">            Also supports Cupy arrays and Torch tensors.</span>
-<span class="sd">        tl : np.ndarray</span>
-<span class="sd">            Time segment centers of shape ``(n_time_segments,)``.</span>
-<span class="sd">            Also supports Cupy arrays and Torch tensors.</span>
+<span class="sd">        max_iter: int</span>
+<span class="sd">            Number of iteration to perform to estimate the Lipschitz constant.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Extra kwargs for the cufinufft operator.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        C : np.ndarray</span>
-<span class="sd">            Off-resonance phase map at each time segment center of shape</span>
-<span class="sd">            ``(n_time_segments, *field_map.shape)``.</span>
-<span class="sd">            Array module is the same as input field_map.</span>
-
+<span class="sd">        float</span>
+<span class="sd">            Lipschitz constant of the operator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">)</span></div>
-</div>
+        <span class="c1"># Disable coil dimension for faster computation</span>
+        <span class="c1"># For gpuNUFFT we have to create a new operator,</span>
+        <span class="c1"># because coils are managed at C++ levels.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gpunufft&quot;</span><span class="p">:</span>
+            <span class="n">old_fourier_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span> <span class="o">=</span> <span class="n">get_operator</span><span class="p">(</span><span class="s2">&quot;gpunufft&quot;</span><span class="p">)(</span>
+                <span class="n">samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="n">density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
+                <span class="n">n_coils</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_coils</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">n_coils</span>
+            <span class="n">smaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">smaps</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpx_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpx_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">lipschitz_cst</span> <span class="o">=</span> <span class="n">power_method</span><span class="p">(</span>
+            <span class="n">max_iter</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">norm_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()),</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gpunufft&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span> <span class="o">=</span> <span class="n">old_fourier_op</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># restore coil setup</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">n_coils</span> <span class="o">=</span> <span class="n">n_coils</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fourier_op</span><span class="o">.</span><span class="n">smaps</span> <span class="o">=</span> <span class="n">smaps</span>
+
+        <span class="k">return</span> <span class="n">lipschitz_cst</span></div>
 
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_interpolators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of interpolators used to approximate the off-resonance effects.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_complex_fieldmap</span><span class="p">(</span><span class="n">b0_map</span><span class="p">,</span> <span class="n">r2star_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">b0_map</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_samples_per_shot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of time points in a shot.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-    <span class="k">if</span> <span class="n">r2star_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">r2star_map</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r2star_map</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="n">field_map</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">r2star_map</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">b0_map</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">field_map</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">b0_map</span>
-
-    <span class="k">return</span> <span class="n">field_map</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_spatial_coefficients</span><span class="p">(</span><span class="n">field_map</span><span class="p">,</span> <span class="n">tl</span><span class="p">,</span> <span class="n">isign</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="n">xp</span> <span class="o">=</span> <span class="n">get_array_module</span><span class="p">(</span><span class="n">field_map</span><span class="p">)</span>
-    <span class="c1"># get spatial coeffs</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">isign</span> <span class="o">*</span> <span class="n">tl</span> <span class="o">*</span> <span class="n">field_map</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span>
-        <span class="o">...</span><span class="p">,</span> <span class="mi">0</span>
-    <span class="p">]</span>  <span class="c1"># (..., n_time_segments) -&gt; (n_time_segments, ...)</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-
-    <span class="c1"># clean-up of spatial coeffs</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">posinf</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">neginf</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">C</span>
 </pre></div>
 
                 </article>
