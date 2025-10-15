@@ -488,7 +488,7 @@ def initialize_3D_wave_caipi(
             else acq.img_size[1:] if readout_axis == "x" else acq.img_size[::2]
         )
         positions = (
-            get_grappa_caipi_positions(sample_axis, grappa_factors, caipi_delta) / KMAX
+            get_grappa_caipi_positions(sample_axis, grappa_factors, caipi_delta) / acq.norm_factor
         )
         Nc = positions.shape[0]
         wavegrad = np.array(
