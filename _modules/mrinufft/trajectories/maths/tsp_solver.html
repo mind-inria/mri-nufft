@@ -716,13 +716,17 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">solve_tsp_with_2opt</span><span class="p">(</span>
     <span class="n">locations</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">improvement_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve the TSP problem using a 2-opt approach.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve approximately the TSP using a 2-opt approach.</span>
 
 <span class="sd">    A sub-optimal solution to the Travelling Salesman Problem (TSP)</span>
-<span class="sd">    is provided using the 2-opt approach in O(n²) where chunks of</span>
-<span class="sd">    an initially random route are reversed, and selected if the</span>
-<span class="sd">    total distance is reduced. As a result, the route solution</span>
-<span class="sd">    does not cross its own path in 2D.</span>
+<span class="sd">    is provided using the 2-opt approach in O(n²) time and memory,</span>
+<span class="sd">    where chunks of an arbitrary initial route are reversed,</span>
+<span class="sd">    and selected if the total distance is reduced. A notable</span>
+<span class="sd">    result in 2D is that the path is guaranteed to never cross</span>
+<span class="sd">    itself.</span>
+
+<span class="sd">    This implementation solves the TSP for a one-way path, not a</span>
+<span class="sd">    looping cycle.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -739,7 +743,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">route</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">locations</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">locations</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">route_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">route_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="n">route</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">route</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
 
     <span class="n">improvement_factor</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">while</span> <span class="n">improvement_factor</span> <span class="o">&gt;=</span> <span class="n">improvement_threshold</span><span class="p">:</span>
@@ -762,7 +766,7 @@ document.write(`
                     <span class="p">)</span>
                     <span class="n">route_length</span> <span class="o">+=</span> <span class="n">delta_length</span>
 
-        <span class="n">improvement_factor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">route_length</span> <span class="o">/</span> <span class="n">old_route_length</span><span class="p">)</span>
+        <span class="n">improvement_factor</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">route_length</span> <span class="o">/</span> <span class="n">old_route_length</span>
     <span class="k">return</span> <span class="n">route</span></div>
 
 </pre></div>
