@@ -32,7 +32,7 @@ A collection of methods to make trajectories fit hardware constraints.
 
 # Internal
 import mrinufft as mn
-from mrinufft.trajectories.utils import compute_gradients_and_slew_rates
+from mrinufft.trajectories.utils import Acquisition, compute_gradients_and_slew_rates
 from utils import show_trajectory_full
 
 # External
@@ -45,8 +45,7 @@ import numpy as np
 # These options are used in the examples below as default values for all trajectories.
 
 # Acquisition parameters
-resolution = 1e-3  # Resolution in meters
-raster_time = 40e-3  # Raster time in milliseconds
+acq = Acquisition.default
 
 # %%
 
@@ -83,9 +82,7 @@ original_trajectory = mn.initialize_2D_cones(
 
 show_trajectory_full(original_trajectory, one_shot, subfigure_size, sample_freq)
 
-grads, slews = compute_gradients_and_slew_rates(
-    original_trajectory, resolution, raster_time
-)
+grads, slews = compute_gradients_and_slew_rates(original_trajectory, acq)
 grad_max, slew_max = np.max(grads), np.max(slews)
 print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 
@@ -100,8 +97,6 @@ projected_trajectory = parameterize_by_arc_length(original_trajectory)
 
 show_trajectory_full(projected_trajectory, one_shot, subfigure_size, sample_freq)
 
-grads, slews = compute_gradients_and_slew_rates(
-    projected_trajectory, resolution, raster_time
-)
+grads, slews = compute_gradients_and_slew_rates(projected_trajectory, acq)
 grad_max, slew_max = np.max(grads), np.max(slews)
 print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
