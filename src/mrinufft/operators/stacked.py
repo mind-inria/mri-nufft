@@ -79,7 +79,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
         samples: NDArray,
         shape: tuple[int, int, int],
         backend: str | FourierOperatorBase,
-        smaps: NDArray,
+        smaps: NDArray | None,
         z_index: Literal["auto"] | NDArray | None = "auto",
         n_coils: int = 1,
         n_batchs: int = 1,
@@ -326,6 +326,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 ],
                 axis=1,
             )
+        return samples
 
     @samples.setter
     def samples(self, samples):
@@ -366,7 +367,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self,
         samples,
         shape,
-        smaps,
+        smaps=None,
         n_coils=1,
         n_batchs=1,
         n_trans=1,
