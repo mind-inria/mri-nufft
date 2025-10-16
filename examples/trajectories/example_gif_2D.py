@@ -7,13 +7,10 @@ An animation to show 2D trajectory customization.
 
 """
 
-import time
-
-import joblib
+import matplotlib.animation as animation
+from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import numpy as np
-import tempfile as tmp
-from PIL import Image, ImageSequence
 
 import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory2D as mtt
@@ -137,92 +134,36 @@ arguments = [
 # ===================
 
 frame_setup = [
-    (f, i, name, arg)
+    (f, name, arg)
     for (name, f), args in list(zip(functions, arguments))
-    for i, arg in enumerate(args)
+    for arg in args
 ]
 
 
-def draw_frame(func, index, name, arg):
-    """Draw a single frame of the gif and save it to a tmp file."""
+fig = plt.figure(figsize=(2 * figsize, figsize))
+gs = GridSpec(3, 2)
+ksp_ax = fig.add_subplot(gs[:, 0])
+axs_grad = [fig.add_subplot(gs[i, 1]) for i in range(3)]
+
+
+def plot_frame(frame_data):
+    func, name, arg = frame_data
+    ksp_ax.clear()
+    [ax.clear() for ax in axs_grad]
     trajectory = func(arg)
-    # General configuration
-    fig = plt.figure(figsize=(2 * figsize, figsize))
-    subfigs = fig.subfigures(1, 2, wspace=0)
-
-    # Trajectory display
-    subfigs[0].suptitle(name, fontsize=displayConfig.fontsize, x=0.5, y=0.98)
-    ax = mtd.display_2D_trajectory(
-        trajectory, one_shot=one_shot, figsize=figsize, subfigure=subfigs[0]
-    )
-    ax.set_aspect("equal")
-
-    # Gradient display
-    subfigs[1].suptitle("Gradients", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
+    ksp_ax.set_title(name, fontsize=displayConfig.fontsize)
+    mtd.display_2D_trajectory(trajectory, one_shot=one_shot, subfigure=ksp_ax)
+    ksp_ax.set_aspect("equal")
     mtd.display_gradients_simply(
         trajectory,
         shot_ids=[one_shot],
-        figsize=figsize,
-        subfigure=subfigs[1],
+        subfigure=axs_grad,
         uni_gradient="k",
         uni_signal="gray",
     )
 
-    # Save figure
-    filename = f"{tmp.NamedTemporaryFile().name}.png"
-    plt.savefig(filename, bbox_inches="tight")
-    plt.close()
-    return filename
 
+ani = animation.FuncAnimation(fig, plot_frame, frame_setup, interval=50, repeat=False)
 
-image_files = joblib.Parallel(n_jobs=1)(
-    joblib.delayed(draw_frame)(*data) for data in frame_setup
-)
-
-
-# Make a GIF of all images.
-imgs = [Image.open(img) for img in image_files]
-imgs[0].save(
-    "mrinufft_2D_traj.gif",
-    save_all=True,
-    append_images=imgs[1:],
-    optimize=False,
-    duration=duration,
-    loop=0,
-)
-
-
-# sphinx_gallery_start_ignore
-# cleanup
-import os
-import shutil
-from pathlib import Path
-
-for f in image_files:
-    try:
-        os.remove(f)
-    except OSError:
-        continue
-# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
-try:
-    final_dir = (
-        Path(os.getcwd()).parent.parent
-        / "docs"
-        / "generated"
-        / "autoexamples"
-        / "trajectories"
-        / "images"
-    )
-    shutil.copyfile("mrinufft_2D_traj.gif", final_dir / "mrinufft_2D_traj.gif")
-except FileNotFoundError:
-    pass
-# sphinx_gallery_end_ignore
-
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/trajectories/images/mrinufft_2D_traj.gif'
-
-
-# %%
-# .. image-sg:: /generated/autoexamples/trajectories/images/mrinufft_2D_traj.gif
-#    :alt: example density
-#    :srcset: /generated/autoexamples/trajectories/images/mrinufft_2D_traj.gif
-#    :class: sphx-glr-single-img
+plt.show()
+# sphinx_gallery_thumbnail_number = -1

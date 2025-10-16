@@ -39,16 +39,12 @@ Note that the NUFFT operator always holds linearly interpolated version of the c
 #
 #    !pip install mri-nufft[finufft]
 
-import time
-
+import os
 import brainweb_dl as bwdl
-import joblib
+from matplotlib import animation
 import matplotlib.pyplot as plt
 import numpy as np
-import tempfile as tmp
 import torch
-from PIL import Image, ImageSequence
-from tqdm import tqdm
 
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
@@ -64,6 +60,12 @@ from mrinufft.trajectories import initialize_2D_radial
 #     See [GRC23]_ for more details.
 
 
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "finufft")
+
+
+plt.rcParams["animation.embed_limit"] = 2**30  # 1GiB is very large.
+
+
 class Model(torch.nn.Module):
     def __init__(
         self,
@@ -72,7 +74,7 @@ class Model(torch.nn.Module):
         start_decim=8,
         interpolation_mode="linear",
     ):
-        super(Model, self).__init__()
+        super().__init__()
         self.control = torch.nn.Parameter(
             data=torch.Tensor(inital_trajectory[:, ::start_decim]),
             requires_grad=True,
@@ -80,7 +82,7 @@ class Model(torch.nn.Module):
         self.current_decim = start_decim
         self.interpolation_mode = interpolation_mode
         sample_points = inital_trajectory.reshape(-1, inital_trajectory.shape[-1])
-        self.operator = get_operator("finufft", wrt_data=True, wrt_traj=True)(
+        self.operator = get_operator(BACKEND, wrt_data=True, wrt_traj=True)(
             sample_points,
             shape=img_size,
             density=True,
@@ -127,54 +129,11 @@ class Model(torch.nn.Module):
 
 
 # %%
-# State plotting
-# --------------
-
-
-def plot_state(axs, image, traj, recon, control_points=None, loss=None, save_name=None):
-    axs = axs.flatten()
-    # Upper left reference image
-    axs[0].imshow(np.abs(image[0]), cmap="gray")
-    axs[0].axis("off")
-    axs[0].set_title("MR Image")
-
-    # Upper right trajectory
-    axs[1].scatter(*traj.T, s=0.5)
-    if control_points is not None:
-        axs[1].scatter(*control_points.T, s=1, color="r")
-        axs[1].legend(
-            ["Trajectory", "Control points"], loc="right", bbox_to_anchor=(2, 0.6)
-        )
-    axs[1].grid(True)
-    axs[1].set_title("Trajectory")
-    axs[1].set_xlim(-0.5, 0.5)
-    axs[1].set_ylim(-0.5, 0.5)
-    axs[1].set_aspect("equal")
-
-    # Down left reconstructed image
-    axs[2].imshow(np.abs(recon[0][0].detach().cpu().numpy()), cmap="gray")
-    axs[2].axis("off")
-    axs[2].set_title("Reconstruction")
-
-    # Down right loss evolution
-    if loss is not None:
-        axs[3].plot(loss)
-        axs[3].set_ylim(0, None)
-        axs[3].grid("on")
-        axs[3].set_title("Loss")
-        plt.subplots_adjust(hspace=0.3)
-
-    # Save & close
-    if save_name is not None:
-        plt.savefig(save_name, bbox_inches="tight")
-        plt.close()
-    else:
-        plt.show()
-
-
-# %%
 # Optimizer upscaling
 # -------------------
+#
+# The multi-resolution training requires us to update the optimizer as well. The optimization weights will also be
+# linearly interpolated.
 
 
 def upsample_optimizer(optimizer, new_optimizer, factor=2):
@@ -230,7 +189,9 @@ initial_traj = initialize_2D_radial(image.shape[1] // AF, image.shape[2]).astype
 # Initialisation
 # --------------
 
-model = Model(initial_traj, img_size=image.shape[1:])
+N_upscale = 4
+
+model = Model(initial_traj, img_size=image.shape[1:], start_decim=2 ** (N_upscale - 1))
 model = model.eval()
 
 # %%
@@ -240,28 +201,60 @@ model = model.eval()
 
 initial_recons = model(image)
 
-fig, axs = plt.subplots(1, 3, figsize=(9, 3))
-plot_state(axs, image, initial_traj, initial_recons)
-
 
 # %%
 # Training loop
 # -------------
 
+
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 model.train()
+num_epochs = 30
 
-losses = []
-image_files = []
-while model.current_decim >= 1:
-    with tqdm(range(30), unit="steps") as tqdms:
-        for i in tqdms:
+
+# setup plotting
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+fig.suptitle("Training Starting")
+axs = axs.flatten()
+
+axs[0].imshow(np.abs(image.detach().cpu().numpy().squeeze()), cmap="gray")
+axs[0].axis("off")
+axs[0].set_title("MR Image")
+
+traj_scat = axs[1].scatter(
+    *model.get_trajectory().detach().cpu().numpy().T, s=0.5, c="tab:blue"
+)
+traj_scat2 = axs[1].scatter(*model.control.detach().cpu().numpy().T, s=2, c="tab:red")
+
+axs[1].legend(["Trajectory", "Control Points"], loc="upper right")
+axs[1].set_title("Trajectory")
+
+recon_im = axs[2].imshow(
+    np.abs(initial_recons.squeeze().detach().cpu().numpy()), cmap="gray"
+)
+axs[2].axis("off")
+axs[2].set_title("Reconstruction")
+(loss_curve,) = axs[3].plot([], [])
+axs[3].grid()
+axs[3].set_xlim(0, 1)
+axs[3].set_xlabel("epochs")
+axs[3].set_ylabel("loss")
+# add line marking the decimation steps
+[
+    axs[3].axvline(num_epochs * i, c="tab:red", linestyle="dashed")
+    for i in range(N_upscale)
+]
+fig.tight_layout()
+
+
+def train():
+    global optimizer
+    losses = []
+    while model.current_decim >= 1:
+        for _ in range(num_epochs):
             out = model(image)
             loss = torch.nn.functional.mse_loss(out, image[None, None])
-            numpy_loss = (loss.detach().cpu().numpy(),)
-
-            tqdms.set_postfix({"loss": numpy_loss})
-            losses.append(numpy_loss)
+            losses.append(loss.item())
             optimizer.zero_grad()
             loss.backward()
 
@@ -270,20 +263,15 @@ while model.current_decim >= 1:
                 # Clamp the value of trajectory between [-0.5, 0.5]
                 for param in model.parameters():
                     param.clamp_(-0.5, 0.5)
-            # Generate images for gif
-            filename = f"{tmp.NamedTemporaryFile().name}.png"
-            plt.clf()
-            fig, axs = plt.subplots(2, 2, figsize=(10, 10), num=1)
-            plot_state(
-                axs,
-                image,
+
+            yield (
+                out.detach().cpu().numpy(),
                 model.get_trajectory().detach().cpu().numpy(),
-                out,
                 model.control.detach().cpu().numpy(),
                 losses,
-                save_name=filename,
+                model.current_decim,
             )
-            image_files.append(filename)
+
         if model.current_decim == 1:
             break
         else:
@@ -292,67 +280,34 @@ while model.current_decim >= 1:
                 optimizer, torch.optim.Adam(model.parameters(), lr=1e-3)
             )
 
-# %%
 
-# Make a GIF of all images.
-imgs = [Image.open(img) for img in image_files]
-imgs[0].save(
-    "mrinufft_learn_traj_multires.gif",
-    save_all=True,
-    append_images=imgs[1:],
-    optimize=False,
-    duration=2,
-    loop=0,
+def plot_epoch(data):
+    recon, traj, control, losses, decim = data
+    cur_epoch = len(losses)
+    recon_im.set_data(abs(recon).squeeze())
+    loss_curve.set_xdata(np.arange(cur_epoch))
+    loss_curve.set_ydata(losses)
+    traj_scat.set_offsets(traj)
+
+    axs[3].set_xlim(0, cur_epoch)
+    axs[3].set_ylim(0, 1.1 * max(losses))
+    axs[2].set_title(f"Reconstruction, frame {cur_epoch}/{num_epochs*N_upscale}")
+    axs[1].set_title(
+        f"Trajectory, step {cur_epoch}/{num_epochs * N_upscale}, decim = {decim}"
+    )
+
+    traj_scat.set_offsets(traj.reshape(-1, 2))
+    traj_scat2.set_offsets(control.reshape(-1, 2))
+
+    if cur_epoch < num_epochs * N_upscale:
+        fig.suptitle("Training in progress " + "." * (1 + cur_epoch % 3))
+    else:
+        fig.suptitle("Training complete !")
+
+
+ani = animation.FuncAnimation(
+    fig, plot_epoch, train, repeat=False, save_count=num_epochs, interval=50
 )
-
-# sphinx_gallery_start_ignore
-# cleanup
-import os
-import shutil
-from pathlib import Path
-
-for f in image_files:
-    try:
-        os.remove(f)
-    except OSError:
-        continue
-# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
-try:
-    final_dir = (
-        Path(os.getcwd()).parent.parent
-        / "docs"
-        / "generated"
-        / "autoexamples"
-        / "trajectories"
-        / "images"
-    )
-    shutil.copyfile(
-        "mrinufft_learn_traj_multires.gif",
-        final_dir / "mrinufft_learn_traj_multires.gif",
-    )
-except FileNotFoundError:
-    pass
-
-# sphinx_gallery_end_ignore
-
-# %%
-# .. image-sg:: /generated/autoexamples/trajectories/images/mrinufft_learn_traj_multires.gif
-#    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/trajectories/images/mrinufft_learn_traj_multires.gif
-#    :class: sphx-glr-single-img
-
-# %%
-# Results
-# -------
-
-model.eval()
-final_recons = model(image)
-final_traj = model.get_trajectory().detach().cpu().numpy()
-
-# %%
-
-fig, axs = plt.subplots(1, 3, figsize=(9, 3))
-plot_state(axs, image, final_traj, final_recons)
 plt.show()
 
 # %%

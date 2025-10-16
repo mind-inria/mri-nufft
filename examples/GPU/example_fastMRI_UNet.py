@@ -56,7 +56,8 @@ from mrinufft.trajectories import initialize_2D_cones
 # Setup a simple class for the U-Net model
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
-plt.rcParams["animation.embed_limit"] = 2 ** 30 # 1GiB is very large.
+plt.rcParams["animation.embed_limit"] = 2**30  # 1GiB is very large.
+
 
 class Model(torch.nn.Module):
     """Model for MRI reconstruction using a U-Net."""
@@ -116,7 +117,6 @@ def plot_state(axs, mri_2D, traj, recon, loss=None, save_name=None):
         plt.show()
 
 
-
 # %%
 # Setup Inputs (models, trajectory and image)
 init_traj = initialize_2D_cones(32, 256).reshape(-1, 2).astype(np.float32)
@@ -136,7 +136,6 @@ kspace_mri_2D = model.operator.op(mri_2D)
 dc_adjoint = model.operator.adj_op(kspace_mri_2D)
 
 
-
 # %%
 num_epochs = 100
 optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
@@ -153,16 +152,19 @@ axs[0].set_title("MR Image")
 axs[1].scatter(*init_traj.T, s=0.5)
 axs[1].set_title("Trajectory")
 
-recon_im =  axs[2].imshow(np.abs(dc_adjoint[0][0].detach().cpu().numpy()), cmap="gray",
-                        )
+recon_im = axs[2].imshow(
+    np.abs(dc_adjoint[0][0].detach().cpu().numpy()),
+    cmap="gray",
+)
 axs[2].axis("off")
 axs[2].set_title("Reconstruction")
-loss_curve, = axs[3].plot([],[])
+(loss_curve,) = axs[3].plot([], [])
 axs[3].grid()
 axs[3].set_xlabel("epochs")
 axs[3].set_ylabel("loss")
 
 fig.tight_layout()
+
 
 def train():
     """Train loop."""
@@ -178,23 +180,27 @@ def train():
         losses.append(loss.item())
         yield out.detach().cpu().numpy().squeeze(), losses
 
+
 def plot_epoch(data):
     img, losses = data
     cur_epoch = len(losses)
     recon_im.set_data(abs(img))
     loss_curve.set_xdata(np.arange(cur_epoch))
     loss_curve.set_ydata(losses)
-    axs[3].set_xlim(0,cur_epoch)
-    axs[3].set_ylim(0, 1.1*max(losses))
+    axs[3].set_xlim(0, cur_epoch)
+    axs[3].set_ylim(0, 1.1 * max(losses))
     axs[2].set_title(f"Reconstruction, frame {cur_epoch}/{num_epochs}")
 
     if cur_epoch < num_epochs:
-        fig.suptitle("Training in progress " + "."*(1+cur_epoch % 3))
+        fig.suptitle("Training in progress " + "." * (1 + cur_epoch % 3))
     else:
         fig.suptitle("Training complete !")
 
-ani = animation.FuncAnimation(fig, plot_epoch, train, save_count=num_epochs, repeat=False)
-plt.show()    
+
+ani = animation.FuncAnimation(
+    fig, plot_epoch, train, save_count=num_epochs, repeat=False
+)
+plt.show()
 
 # %%
 # References
