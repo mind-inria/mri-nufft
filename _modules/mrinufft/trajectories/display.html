@@ -198,6 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_traj_projection.html">Trajectory constraints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../generated/autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
 </ul>
@@ -367,6 +368,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt.html">solve_tsp_with_2opt</a></li>
 </ul>
 </details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.projection.html"><code class="docutils literal notranslate"><span class="pre">trajectories.projection</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.projection.parameterize_by_arc_length.html">parameterize_by_arc_length</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../generated/_autosummary/mrinufft.trajectories.sampling.html"><code class="docutils literal notranslate"><span class="pre">trajectories.sampling</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -1171,7 +1176,6 @@ document.write(`
     <span class="n">shot_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
     <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">fill_area</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">show_signal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">uni_signal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span><span class="p">,</span>
     <span class="n">uni_gradient</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1190,10 +1194,6 @@ document.write(`
 <span class="sd">    fill_area : bool, optional</span>
 <span class="sd">        Fills the area under the curve for improved visibility and</span>
 <span class="sd">        representation of the integral, aka trajectory.</span>
-<span class="sd">        The default is `True`.</span>
-<span class="sd">    show_signal : bool, optional</span>
-<span class="sd">        Show an additional illustration of the signal as</span>
-<span class="sd">        the modulated distance to the center.</span>
 <span class="sd">        The default is `True`.</span>
 <span class="sd">    uni_signal : str or None, optional</span>
 <span class="sd">        Define whether the signal should be represented by a</span>
@@ -1215,13 +1215,13 @@ document.write(`
 <span class="sd">        Axes of the figure.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Setup figure and labels</span>
-    <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">nb_axes</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">subfigure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">*</span> <span class="p">(</span><span class="n">Nd</span> <span class="o">+</span> <span class="n">show_signal</span><span class="p">)</span> <span class="o">/</span> <span class="n">Nd</span><span class="p">))</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">*</span> <span class="n">nb_axes</span> <span class="o">/</span> <span class="p">(</span><span class="n">nb_axes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">subfigure</span>
-    <span class="n">axes</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">Nd</span> <span class="o">+</span> <span class="n">show_signal</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">[:</span><span class="n">Nd</span><span class="p">]):</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nb_axes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">[:</span> <span class="n">nb_axes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]):</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;G</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">fontsize</span><span class="p">)</span>
     <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">fontsize</span><span class="p">)</span>
 
@@ -1233,50 +1233,42 @@ document.write(`
 
     <span class="c1"># Plot the curves for each axis</span>
     <span class="n">gradients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">vmax</span> <span class="o">=</span> <span class="mf">1.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gradients</span><span class="p">[</span><span class="n">shot_ids</span><span class="p">,</span> <span class="o">...</span><span class="p">]))</span>
-    <span class="n">x_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">gradients</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">vmax</span> <span class="o">=</span> <span class="mf">1.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">gradients</span><span class="p">[</span><span class="n">shot_ids</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="o">-</span><span class="n">vmax</span><span class="p">,</span> <span class="n">vmax</span><span class="p">))</span>
+    <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+
+    <span class="n">time_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">gradients</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">colors</span> <span class="o">=</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">get_colorlist</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">s_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shot_ids</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">[:</span><span class="n">Nd</span><span class="p">]):</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="o">-</span><span class="n">vmax</span><span class="p">,</span> <span class="n">vmax</span><span class="p">))</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">uni_gradient</span>
-                <span class="k">if</span> <span class="n">uni_gradient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">colors</span><span class="p">[</span><span class="n">j</span> <span class="o">%</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">nb_colors</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">gradients</span><span class="p">[</span><span class="n">s_id</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">uni_gradient</span>
+            <span class="k">if</span> <span class="n">uni_gradient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">colors</span><span class="p">[</span><span class="n">j</span> <span class="o">%</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">nb_colors</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set each axis individually</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_axis</span><span class="p">,</span> <span class="n">gradients</span><span class="p">[</span><span class="n">s_id</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">fill_area</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
-                    <span class="n">x_axis</span><span class="p">,</span>
+                    <span class="n">time_axis</span><span class="p">,</span>
                     <span class="n">gradients</span><span class="p">[</span><span class="n">s_id</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span>
                     <span class="n">alpha</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="c1"># Return axes alone</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">show_signal</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">axes</span>
-
-    <span class="c1"># Show signal as modulated distance to center</span>
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">trajectory</span><span class="p">[</span><span class="n">shot_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
-    <span class="n">signal</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">distances</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">shot_ids</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
-    <span class="n">signal</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">signal</span><span class="o">**</span><span class="mi">2</span>
-        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">figsize</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
-    <span class="p">)</span>
-
-    <span class="n">colors</span> <span class="o">=</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">get_colorlist</span><span class="p">()</span>
-    <span class="c1"># Show signal for each requested shot</span>
-    <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Signal&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">fontsize</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shot_ids</span><span class="p">)):</span>
-        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">uni_signal</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">uni_signal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">else</span> <span class="n">colors</span><span class="p">[</span><span class="n">j</span> <span class="o">%</span> <span class="n">displayConfig</span><span class="o">.</span><span class="n">nb_colors</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">signal</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="c1"># Set the norm axis if requested</span>
+        <span class="n">gradient_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">gradients</span><span class="p">[</span><span class="n">s_id</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;|G|&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">fontsize</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gradient_norm</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fill_area</span><span class="p">:</span>
+            <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">time_axis</span><span class="p">,</span>
+                <span class="n">gradient_norm</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="p">)</span>
     <span class="k">return</span> <span class="n">axes</span></div>
 
 
@@ -1288,7 +1280,7 @@ document.write(`
     <span class="n">shot_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
     <span class="n">figsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">fill_area</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">show_signal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">uni_signal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span><span class="p">,</span>
     <span class="n">uni_gradient</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">subfigure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">|</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1311,7 +1303,7 @@ document.write(`
 <span class="sd">        Fills the area under the curve for improved visibility and</span>
 <span class="sd">        representation of the integral, aka trajectory.</span>
 <span class="sd">        The default is `True`.</span>
-<span class="sd">    show_signal : bool, optional</span>
+<span class="sd">    show_norm : bool, optional</span>
 <span class="sd">        Show an additional illustration of the signal as</span>
 <span class="sd">        the modulated distance to the center.</span>
 <span class="sd">        The default is `True`.</span>
@@ -1352,7 +1344,7 @@ document.write(`
         <span class="n">shot_ids</span><span class="p">,</span>
         <span class="n">figsize</span><span class="p">,</span>
         <span class="n">fill_area</span><span class="p">,</span>
-        <span class="n">show_signal</span><span class="p">,</span>
+        <span class="n">show_norm</span><span class="p">,</span>
         <span class="n">uni_signal</span><span class="p">,</span>
         <span class="n">uni_gradient</span><span class="p">,</span>
         <span class="n">subfigure</span><span class="p">,</span>
@@ -1366,7 +1358,7 @@ document.write(`
             <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">small_fontsize</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (ms)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">small_fontsize</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">show_signal</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">show_norm</span><span class="p">:</span>
         <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Signal (a.u.)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">displayConfig</span><span class="o">.</span><span class="n">small_fontsize</span><span class="p">)</span>
 
     <span class="c1"># Update axis ticks with rescaled values</span>
@@ -1375,7 +1367,7 @@ document.write(`
         <span class="k">if</span> <span class="n">ax</span> <span class="o">==</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">ticks</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xticks</span><span class="p">()</span>
-            <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span> <span class="k">if</span> <span class="p">(</span><span class="n">show_signal</span> <span class="ow">and</span> <span class="n">ax</span> <span class="o">==</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">acq</span><span class="o">.</span><span class="n">raster_time</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span> <span class="k">if</span> <span class="p">(</span><span class="n">show_norm</span> <span class="ow">and</span> <span class="n">ax</span> <span class="o">==</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">acq</span><span class="o">.</span><span class="n">raster_time</span>
             <span class="n">locator</span> <span class="o">=</span> <span class="n">mticker</span><span class="o">.</span><span class="n">FixedLocator</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
             <span class="n">formatter</span> <span class="o">=</span> <span class="n">mticker</span><span class="o">.</span><span class="n">FixedFormatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">ticks</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
@@ -1397,7 +1389,7 @@ document.write(`
         <span class="n">scale</span> <span class="o">=</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">scale</span>  <span class="c1"># Convert from T/m to mT/m</span>
         <span class="n">locator</span> <span class="o">=</span> <span class="n">mticker</span><span class="o">.</span><span class="n">FixedLocator</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
         <span class="n">formatter</span> <span class="o">=</span> <span class="n">mticker</span><span class="o">.</span><span class="n">FixedFormatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">ticks</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">show_signal</span> <span class="ow">or</span> <span class="n">ax</span> <span class="o">!=</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">show_norm</span> <span class="ow">or</span> <span class="n">ax</span> <span class="o">!=</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 

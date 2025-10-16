@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mrinufft.extras.data &#8212; MRI-nufft Documentation</title>
+    <title>mrinufft.trajectories.projection &#8212; MRI-nufft Documentation</title>
   
   
   
@@ -46,7 +46,7 @@
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mrinufft/extras/data';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/mrinufft/trajectories/projection';</script>
     <link rel="icon" href="../../../_static/mri-nufft-icon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -638,7 +638,7 @@
       
       
       
-      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2F_modules/mrinufft/extras/data.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2F_modules/mrinufft/trajectories/projection.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -716,144 +716,80 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for mrinufft.extras.data</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Data generator module.&quot;&quot;&quot;</span>
+  <h1>Source code for mrinufft.trajectories.projection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions to fit gradient constraints.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-
-
-<div class="viewcode-block" id="get_brainweb_map">
-<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html#mrinufft.extras.data.get_brainweb_map">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_brainweb_map</span><span class="p">(</span><span class="n">sub_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get M0, T1 and T2 parametric maps from a brainweb crisp segmentation.</span>
-
-<span class="sd">    Output maps have the same shape as the tissue segmentation.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    sub_id : int</span>
-<span class="sd">        Subject ID.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ImportError</span>
-<span class="sd">        If brainweb-dl is not installed.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    M0 : np.ndarray</span>
-<span class="sd">        Proton Density map. For sub_id &gt; 0,</span>
-<span class="sd">        it is a binary mask.</span>
-<span class="sd">    T1 : np.ndarray</span>
-<span class="sd">        T1 map map in [ms].</span>
-<span class="sd">    T2 : np.ndarray</span>
-<span class="sd">        T2 map map in [ms].</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">brainweb_dl</span>
-    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-            <span class="s2">&quot;The brainweb-dl module is not available. Please install it using &quot;</span>
-            <span class="s2">&quot;the following command: pip install brainweb-dl&quot;</span>
-        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
-
-    <span class="c1"># get segmentation</span>
-    <span class="n">segmentation</span> <span class="o">=</span> <span class="n">brainweb_dl</span><span class="o">.</span><span class="n">get_mri</span><span class="p">(</span><span class="n">sub_id</span><span class="p">,</span> <span class="s2">&quot;crisp&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">455</span>
-    <span class="n">segmentation</span> <span class="o">=</span> <span class="n">segmentation</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="c1"># get properties</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">brainweb_dl</span><span class="o">.</span><span class="n">_brainweb</span><span class="o">.</span><span class="n">BrainWebTissueMap</span>
-    <span class="k">if</span> <span class="n">sub_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">properties</span> <span class="o">=</span> <span class="n">brainweb_dl</span><span class="o">.</span><span class="n">_brainweb</span><span class="o">.</span><span class="n">_load_tissue_map</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">v1</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">properties</span> <span class="o">=</span> <span class="n">brainweb_dl</span><span class="o">.</span><span class="n">_brainweb</span><span class="o">.</span><span class="n">_load_tissue_map</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">v2</span><span class="p">)</span>
-
-    <span class="c1"># initialize maps</span>
-    <span class="k">if</span> <span class="n">sub_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">M0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">segmentation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">T1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">segmentation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">T2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">segmentation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="c1"># fill maps</span>
-    <span class="k">for</span> <span class="n">tissue</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">segmentation</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">tissue</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">sub_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">M0</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tissue</span><span class="p">[</span><span class="s2">&quot;PD (ms)&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">idx</span>
-        <span class="n">T1</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tissue</span><span class="p">[</span><span class="s2">&quot;T1 (ms)&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">idx</span>
-        <span class="n">T2</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tissue</span><span class="p">[</span><span class="s2">&quot;T2 (ms)&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">idx</span>
-
-    <span class="k">if</span> <span class="n">sub_id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">M0</span> <span class="o">=</span> <span class="p">(</span><span class="n">segmentation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-    <span class="c1"># pad to square</span>
-    <span class="n">pad_width</span> <span class="o">=</span> <span class="n">segmentation</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">segmentation</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-    <span class="n">pad</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pad_width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad_width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)))</span>
-    <span class="n">M0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">M0</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
-    <span class="n">T1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
-    <span class="n">T2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">T2</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span></div>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">CubicSpline</span>
 
 
+<div class="viewcode-block" id="parameterize_by_arc_length">
+<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.trajectories.projection.parameterize_by_arc_length.html#mrinufft.trajectories.projection.parameterize_by_arc_length">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parameterize_by_arc_length</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adjust the trajectory to have a uniform distribution over the arc-length.</span>
 
-<div class="viewcode-block" id="fse_simulation">
-<a class="viewcode-back" href="../../../generated/_autosummary/mrinufft.extras.data.fse_simulation.html#mrinufft.extras.data.fse_simulation">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fse_simulation</span><span class="p">(</span>
-    <span class="n">M0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">T1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">T2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">TE</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-    <span class="n">TR</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform simple analytical Fast Spin Echo simulation.</span>
+<span class="sd">    The trajectory is parametrized according to its arc length along a</span>
+<span class="sd">    cubic-interpolated path and samples are repositioned to minimize</span>
+<span class="sd">    the gradients amplitude. This solution is optimal with respect to</span>
+<span class="sd">    gradients but can lead to excessive slew rates, and it will change</span>
+<span class="sd">    the overall density.</span>
 
-<span class="sd">    Assume that refocusing angles are 180° and</span>
-<span class="sd">    k-space center is sampled for each echo in the Echo Train</span>
-<span class="sd">    (e.g., as in spiral or radial imaging).</span>
+<span class="sd">    .. warning::</span>
+<span class="sd">        - Slew rates are not minimized, and instead likely to increase</span>
+<span class="sd">        - The sampling density will not be preserved</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    M0 : np.ndarray</span>
-<span class="sd">        Input equilibrium magnetization.</span>
-<span class="sd">    T1 : np.ndarray</span>
-<span class="sd">        Input T1 in [ms].</span>
-<span class="sd">    T2 : np.ndarray</span>
-<span class="sd">        Input T2 in [ms].</span>
-<span class="sd">    TE : float | Sequence[float]</span>
-<span class="sd">        Sequence Echo Time in [ms].</span>
-<span class="sd">    TR : float | Sequence[float]</span>
-<span class="sd">        Sequence Repetition Time in [ms].</span>
+<span class="sd">    trajectory: NDArray</span>
+<span class="sd">        A 2D or 3D trajectory of shape (Nc, Ns, Nd), with Nc the number of shots,</span>
+<span class="sd">        Ns the number of samples per shot, and Nd the number of dimensions.</span>
+<span class="sd">    order: int | None</span>
+<span class="sd">        The order of the norm used to compute arc length, based on the convention from</span>
+<span class="sd">        `numpy.linalg.norm`. Defaults to None (Euclidean norm).</span>
+<span class="sd">    eps: float</span>
+<span class="sd">        Convergence threshold for stopping the iterative refinement. Defaults to 1e-8.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    signal : np.ndarray</span>
-<span class="sd">        Simulated signal of shape (nTE*nTR, *M0).</span>
-
+<span class="sd">    NDArray: The reparameterized trajectory with the same shape as the input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># preprocess sequence parameters</span>
-    <span class="n">TE</span><span class="p">,</span> <span class="n">TR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">TE</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">TR</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
-    <span class="n">TE</span><span class="p">,</span> <span class="n">TR</span> <span class="o">=</span> <span class="n">TE</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">TR</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">Nc</span><span class="p">,</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">Nd</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">new_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
 
-    <span class="c1"># preprocess tissue parameters</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">M0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">T1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">T2</span><span class="p">)</span>
-    <span class="n">M0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span> <span class="o">=</span> <span class="n">M0</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">T1</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">T2</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-    <span class="n">T1</span> <span class="o">+=</span> <span class="mf">1e-9</span>
-    <span class="n">T2</span> <span class="o">+=</span> <span class="mf">1e-9</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nc</span><span class="p">):</span>
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-    <span class="c1"># compute signal</span>
-    <span class="n">signal</span> <span class="o">=</span> <span class="n">M0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">TR</span> <span class="o">-</span> <span class="n">TE</span><span class="p">)</span> <span class="o">/</span> <span class="n">T1</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">TE</span> <span class="o">/</span> <span class="n">T2</span><span class="p">)</span>
+        <span class="c1"># Ignore null gradients</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">projection</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="nb">ord</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">non_zero_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">gradients</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">non_zero_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_zero_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">arc_func</span> <span class="o">=</span> <span class="n">CubicSpline</span><span class="p">(</span><span class="n">non_zero_time</span><span class="p">,</span> <span class="n">projection</span><span class="p">[</span><span class="n">non_zero_ids</span><span class="p">])</span>
 
-    <span class="c1"># post process</span>
-    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">signal</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">signal</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="c1"># Setup initial conditions</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Ns</span><span class="p">)</span>
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">arc_func</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">old_projection</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">return</span> <span class="n">signal</span></div>
+        <span class="c1"># Iterate to reduce arc length cubic approximation error</span>
+        <span class="k">while</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">projection</span> <span class="o">-</span> <span class="n">old_projection</span><span class="p">)</span> <span class="o">/</span> <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
+            <span class="c1"># Find mapping from arc length back to time</span>
+            <span class="n">arc_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span>
+                <span class="n">nl</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">projection</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="nb">ord</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">arc_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">arc_length</span><span class="p">])</span>
+            <span class="n">arc_length</span> <span class="o">=</span> <span class="n">arc_length</span> <span class="o">/</span> <span class="n">arc_length</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">inv_arc_func</span> <span class="o">=</span> <span class="n">CubicSpline</span><span class="p">(</span><span class="n">arc_length</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+            <span class="c1"># Find times such that arc length is uniform</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">inv_arc_func</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Ns</span><span class="p">))</span>
+            <span class="n">old_projection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="n">arc_func</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">new_trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">projection</span>
+    <span class="k">return</span> <span class="n">new_trajectory</span></div>
 
 </pre></div>
 
