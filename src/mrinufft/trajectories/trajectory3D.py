@@ -17,6 +17,7 @@ from .maths import (
     Rz,
     generate_fibonacci_circle,
 )
+from .projection import parameterize_by_arc_length
 from .tools import conify, duplicate_along_axes, epify, precess, stack
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_tilt
@@ -728,6 +729,10 @@ def initialize_3D_annular_shells(
     """Initialize 3D trajectories with annular shells.
 
     An exclusive trajectory inspired from the work proposed in [HM11]_.
+    It is similar to other trajectories based on concentric rings but
+    rings are split into halves and rotated to be recombined with
+    halves from other rings, in order to better balance the shot lengths
+    between longer and shorter rings from a same shell.
 
     Parameters
     ----------
