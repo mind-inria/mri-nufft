@@ -27,7 +27,8 @@ BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 # ======================
 # Here we use acquisition defaults for the  trajectory gridding.
 
-acq = Acquisition(fov=(0.23,0.23,0.23), img_size=(64,64,64))
+acq = Acquisition(fov=(0.23, 0.23, 0.23), img_size=(64, 64, 64))
+
 
 # %%
 # Helper function to Displaying 3D Gridded Trajectories

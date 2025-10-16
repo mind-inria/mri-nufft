@@ -2,7 +2,7 @@
 """Display functions for trajectories."""
 
 from __future__ import annotations
-
+from collections.abc import Sequence
 import itertools
 from typing import Any, Literal
 
@@ -434,12 +434,12 @@ def display_3D_trajectory(
 
 def display_gradients_simply(
     trajectory: NDArray,
-    shot_ids: tuple[int, ...] = (0,),
+    shot_ids: Sequence[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
-    subfigure: plt.Figure | None = None,
+    subfigure: plt.Figure | Sequence[plt.Axes, ...] = None,
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
@@ -479,11 +479,15 @@ def display_gradients_simply(
     nb_axes = trajectory.shape[-1] + 1
     if subfigure is None:
         fig = plt.figure(figsize=(figsize, figsize * nb_axes / (nb_axes - 1)))
+        axes = fig.subplots(nb_axes, 1)
+    elif isinstance(subfigure, Sequence) and len(subfigure) == nb_axes:
+        axes = subfigure
     else:
         fig = subfigure
-    axes = fig.subplots(nb_axes, 1)
+        axes = fig.subplots(nb_axes, 1)
     for i, ax in enumerate(axes[: nb_axes - 1]):
         ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
+
     axes[-1].set_xlabel("Time", fontsize=displayConfig.fontsize)
 
     # Setup axes ticks
