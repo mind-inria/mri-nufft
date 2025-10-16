@@ -8,3 +8,4 @@ Related Projects
     PySAP <https://cea-cosmic.github.io/pysap>
     ModOpt <https://cea-cosmic.github.io/ModOpt/>
     Brainweb-dl <http://github.com/paquiteau/brainweb-dl>
+    SNAKE <https://github.com/mind-inria/snake-fmri>
