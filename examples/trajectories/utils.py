@@ -49,14 +49,14 @@ def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10):
     if nb_dim == 2:
         ax = display_2D_trajectory(
             trajectory,
-            size=figure_size,
+            figsize=figure_size,
             one_shot=one_shot,
             subfigure=subfigs[0],
         )
     else:
         ax = display_3D_trajectory(
             trajectory,
-            size=figure_size,
+            figsize=figure_size,
             one_shot=one_shot,
             per_plane=False,
             subfigure=subfigs[0],
