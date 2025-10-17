@@ -800,7 +800,7 @@ document.write(`
         <span class="n">samples</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
         <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">FourierOperatorBase</span><span class="p">,</span>
-        <span class="n">smaps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">smaps</span><span class="p">:</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">z_index</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
         <span class="n">n_coils</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">n_batchs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1065,6 +1065,7 @@ document.write(`
                 <span class="p">],</span>
                 <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="k">return</span> <span class="n">samples</span>
 
     <span class="nd">@samples</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
@@ -1108,7 +1109,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="n">shape</span><span class="p">,</span>
-        <span class="n">smaps</span><span class="p">,</span>
+        <span class="n">smaps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">n_coils</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">n_batchs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">n_trans</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>

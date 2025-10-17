@@ -1,0 +1,1192 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The NUFFT Operator &#8212; MRI-nufft Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nufft';</script>
+    <link rel="icon" href="_static/mri-nufft-icon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The trajectory binary file specification" href="trajectory_gradspec.html" />
+    <link rel="prev" title="Trajectory tools" href="generated/autoexamples/trajectories/example_trajectory_tools.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/mri-nufft.png" class="logo__image only-light" alt="MRI-nufft Documentation - Home"/>
+    <script>document.write(`<img src="_static/mri-nufft.png" class="logo__image only-dark" alt="MRI-nufft Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    MRI-NUFFT
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/autoexamples/index.html">Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/autoexamples/GPU/index.html">GPU Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_density.html">Density Compensation Routines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_3d_trajectory_display.html">Gridded trajectory display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples.html">Learn Sampling pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_samples_multicoil.html">Learn Sampling pattern for multi-coil MRI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_learn_straight_line_readouts.html">Learn Straight line readout pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_cg.html">Reconstruction with conjugate gradient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/GPU/example_fastMRI_UNet.html">Simple UNet model.</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/autoexamples/operators/index.html">Operators Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/operators/example_readme.html">Minimal example script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/operators/example_offresonance.html">Off-resonance corrected NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/operators/example_stacked.html">Stacked NUFFT operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/operators/example_subspace.html">Subspace NUFFT Operator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/autoexamples/trajectories/index.html">Trajectories Examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_2D_trajectories.html">2D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_3D_trajectories.html">3D Trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_gif_2D.html">Animated 2D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_gif_3D.html">Animated 3D trajectories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_learn_samples_multires.html">Learning sampling pattern with decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_sampling_densities.html">Sampling densities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_traj_projection.html">Trajectory constraints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_display_config.html">Trajectory display configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/autoexamples/trajectories/example_trajectory_tools.html">Trajectory tools</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explanations</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">The NUFFT Operator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory_gradspec.html">The trajectory binary file specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mrinufft_convention.html">MRI-NUFFT Interfaces Convention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.operators</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.autodiff.html"><code class="docutils literal notranslate"><span class="pre">operators.autodiff</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.autodiff.MRINufftAutoGrad.html">MRINufftAutoGrad</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.html"><code class="docutils literal notranslate"><span class="pre">operators.base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.check_backend.html">check_backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.get_operator.html">get_operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.list_backends.html">list_backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.power_method.html">power_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html">FourierOperatorBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorCPU.html">FourierOperatorCPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.html"><code class="docutils literal notranslate"><span class="pre">operators.interfaces</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.bart.html"><code class="docutils literal notranslate"><span class="pre">interfaces.bart</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.bart.MRIBartNUFFT.html">MRIBartNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.bart.RawBartNUFFT.html">RawBartNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.cufinufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT.html">MRICufiNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.cufinufft.RawCufinufftPlan.html">RawCufinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.finufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.finufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.finufft.MRIfinufft.html">MRIfinufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.finufft.RawFinufftPlan.html">RawFinufftPlan</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.gpunufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.make_pinned_smaps.html">make_pinned_smaps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.MRIGpuNUFFT.html">MRIGpuNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.gpunufft.RawGpuNUFFT.html">RawGpuNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nfft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.MRInfft.html">MRInfft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nfft.RawPyNFFT3.html">RawPyNFFT3</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.nudft_numpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_fourier_matrix.html">get_fourier_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.get_implicit_matrix.html">get_implicit_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.implicit_type1_ndft.html">implicit_type1_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.implicit_type2_ndft.html">implicit_type2_ndft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.MRInumpy.html">MRInumpy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.nudft_numpy.RawNDFT.html">RawNDFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.html"><code class="docutils literal notranslate"><span class="pre">interfaces.pynufft_cpu</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.MRIPynufft.html">MRIPynufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.pynufft_cpu.RawPyNUFFT.html">RawPyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.sigpy.html"><code class="docutils literal notranslate"><span class="pre">interfaces.sigpy</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.sigpy.MRISigpyNUFFT.html">MRISigpyNUFFT</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.sigpy.RawSigpyNUFFT.html">RawSigpyNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.tfnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.tfnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.tfnufft.MRITensorflowNUFFT.html">MRITensorflowNUFFT</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.torchkbnufft.html"><code class="docutils literal notranslate"><span class="pre">interfaces.torchkbnufft</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.torchkbnufft.MRITorchKbNufft.html">MRITorchKbNufft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTcpu.html">TorchKbNUFFTcpu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.torchkbnufft.TorchKbNUFFTgpu.html">TorchKbNUFFTgpu</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.utils.html"><code class="docutils literal notranslate"><span class="pre">interfaces.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.utils.gpu_utils.html"><code class="docutils literal notranslate"><span class="pre">utils.gpu_utils</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.off_resonance.html"><code class="docutils literal notranslate"><span class="pre">operators.off_resonance</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.off_resonance.MRIFourierCorrected.html">MRIFourierCorrected</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.stacked.html"><code class="docutils literal notranslate"><span class="pre">operators.stacked</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.stacked.stacked2traj3d.html">stacked2traj3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.stacked.traj3d2stacked.html">traj3d2stacked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFT.html">MRIStackedNUFFT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.stacked.MRIStackedNUFFTGPU.html">MRIStackedNUFFTGPU</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.subspace.html"><code class="docutils literal notranslate"><span class="pre">operators.subspace</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.operators.subspace.MRISubspace.html">MRISubspace</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.trajectories</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_2D_trajectory.html">display_2D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_3D_trajectory.html">display_3D_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_gradients.html">display_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.display_gradients_simply.html">display_gradients_simply</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display.displayConfig.html">displayConfig</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.display3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.display3D.get_gridded_trajectory.html">get_gridded_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.gradients.html"><code class="docutils literal notranslate"><span class="pre">trajectories.gradients</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.gradients.patch_center_anomaly.html">patch_center_anomaly</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.html"><code class="docutils literal notranslate"><span class="pre">trajectories.inits</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.eccentric.html"><code class="docutils literal notranslate"><span class="pre">inits.eccentric</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_2D_eccentric.html">initialize_2D_eccentric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.eccentric.initialize_3D_eccentric.html">initialize_3D_eccentric</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.random_walk.html"><code class="docutils literal notranslate"><span class="pre">inits.random_walk</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_2D_random_walk.html">initialize_2D_random_walk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.random_walk.initialize_3D_random_walk.html">initialize_3D_random_walk</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.travelling_salesman.html"><code class="docutils literal notranslate"><span class="pre">inits.travelling_salesman</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_2D_travelling_salesman.html">initialize_2D_travelling_salesman</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.inits.travelling_salesman.initialize_3D_travelling_salesman.html">initialize_3D_travelling_salesman</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.html"><code class="docutils literal notranslate"><span class="pre">trajectories.maths</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.html"><code class="docutils literal notranslate"><span class="pre">maths.fibonacci</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_circle.html">generate_fibonacci_circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_lattice.html">generate_fibonacci_lattice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.generate_fibonacci_sphere.html">generate_fibonacci_sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.get_closest_fibonacci_number.html">get_closest_fibonacci_number</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.fibonacci.is_from_fibonacci_sequence.html">is_from_fibonacci_sequence</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.primes.html"><code class="docutils literal notranslate"><span class="pre">maths.primes</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.primes.compute_coprime_factors.html">compute_coprime_factors</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.html"><code class="docutils literal notranslate"><span class="pre">maths.rotations</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.R2D.html">R2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.Ra.html">Ra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.Rv.html">Rv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.Rx.html">Rx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.Ry.html">Ry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.rotations.Rz.html">Rz</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.tsp_solver.html"><code class="docutils literal notranslate"><span class="pre">maths.tsp_solver</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.maths.tsp_solver.solve_tsp_with_2opt.html">solve_tsp_with_2opt</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.projection.html"><code class="docutils literal notranslate"><span class="pre">trajectories.projection</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.projection.parameterize_by_arc_length.html">parameterize_by_arc_length</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.html"><code class="docutils literal notranslate"><span class="pre">trajectories.sampling</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.create_chauffert_density.html">create_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.create_cutoff_decay_density.html">create_cutoff_decay_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.create_energy_density.html">create_energy_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.create_fast_chauffert_density.html">create_fast_chauffert_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.create_polynomial_density.html">create_polynomial_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.sampling.sample_from_density.html">sample_from_density</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.html"><code class="docutils literal notranslate"><span class="pre">trajectories.tools</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.conify.html">conify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.duplicate_along_axes.html">duplicate_along_axes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.epify.html">epify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_amplitudes_to_travel_for_set_time.html">get_gradient_amplitudes_to_travel_for_set_time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_gradient_times_to_travel.html">get_gradient_times_to_travel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.get_random_loc_1d.html">get_random_loc_1d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.oversample.html">oversample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.precess.html">precess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.prewind.html">prewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.radialize_center.html">radialize_center</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.rewind.html">rewind</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.rotate.html">rotate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.shellify.html">shellify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack.html">stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack_random.html">stack_random</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.stack_spherically.html">stack_spherically</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.tools.unepify.html">unepify</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory2D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_cones.html">initialize_2D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_fibonacci_spiral.html">initialize_2D_fibonacci_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_lissajous.html">initialize_2D_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_polar_lissajous.html">initialize_2D_polar_lissajous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_propeller.html">initialize_2D_propeller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_radial.html">initialize_2D_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rings.html">initialize_2D_rings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_rosette.html">initialize_2D_rosette</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_sinusoide.html">initialize_2D_sinusoide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_spiral.html">initialize_2D_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory2D.initialize_2D_waves.html">initialize_2D_waves</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.html"><code class="docutils literal notranslate"><span class="pre">trajectories.trajectory3D</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_annular_shells.html">initialize_3D_annular_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_cones.html">initialize_3D_cones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_floret.html">initialize_3D_floret</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_golden_means_radial.html">initialize_3D_golden_means_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_helical_shells.html">initialize_3D_helical_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_park_radial.html">initialize_3D_park_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_phyllotaxis_radial.html">initialize_3D_phyllotaxis_radial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_repi.html">initialize_3D_repi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_shells.html">initialize_3D_seiffert_shells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_seiffert_spiral.html">initialize_3D_seiffert_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_turbine.html">initialize_3D_turbine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wave_caipi.html">initialize_3D_wave_caipi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.trajectory3D.initialize_3D_wong_radial.html">initialize_3D_wong_radial</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.html"><code class="docutils literal notranslate"><span class="pre">trajectories.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.check_hardware_constraints.html">check_hardware_constraints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.compute_gradients_and_slew_rates.html">compute_gradients_and_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_slew_rates.html">convert_gradients_to_slew_rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.convert_gradients_to_trajectory.html">convert_gradients_to_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.convert_slew_rates_to_gradients.html">convert_slew_rates_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.convert_trajectory_to_gradients.html">convert_trajectory_to_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.initialize_algebraic_spiral.html">initialize_algebraic_spiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.initialize_shape_norm.html">initialize_shape_norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.initialize_tilt.html">initialize_tilt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.normalize_trajectory.html">normalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.unnormalize_trajectory.html">unnormalize_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Acquisition.html">Acquisition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.CaseInsensitiveEnumMeta.html">CaseInsensitiveEnumMeta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.FloatEnum.html">FloatEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Gammas.html">Gammas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Hardware.html">Hardware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.NormShapes.html">NormShapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Packings.html">Packings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.SI.html">SI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.SIEMENS.html">SIEMENS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Spirals.html">Spirals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.StrEnum.html">StrEnum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.Tilts.html">Tilts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.VDSorder.html">VDSorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.trajectories.utils.VDSpdf.html">VDSpdf</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.density.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.density</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.density.geometry_based.html"><code class="docutils literal notranslate"><span class="pre">density.geometry_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.geometry_based.cell_count.html">cell_count</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.geometry_based.voronoi.html">voronoi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.geometry_based.voronoi_unique.html">voronoi_unique</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.density.nufft_based.html"><code class="docutils literal notranslate"><span class="pre">density.nufft_based</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.nufft_based.pipe.html">pipe</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.html"><code class="docutils literal notranslate"><span class="pre">density.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.flat_traj.html">flat_traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.density.utils.normalize_weights.html">normalize_weights</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.io</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.cfl.html"><code class="docutils literal notranslate"><span class="pre">io.cfl</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.cfl.cfl2traj.html">cfl2traj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.cfl.traj2cfl.html">traj2cfl</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.nsp.html"><code class="docutils literal notranslate"><span class="pre">io.nsp</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.nsp.read_arbgrad_rawdat.html">read_arbgrad_rawdat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.nsp.read_trajectory.html">read_trajectory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.nsp.write_gradients.html">write_gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.nsp.write_trajectory.html">write_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.siemens.html"><code class="docutils literal notranslate"><span class="pre">io.siemens</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.siemens.read_siemens_rawdat.html">read_siemens_rawdat</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.html"><code class="docutils literal notranslate"><span class="pre">io.utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.add_phase_to_kspace_with_shifts.html">add_phase_to_kspace_with_shifts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.nifti_affine.html">nifti_affine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.remove_extra_kspace_samples.html">remove_extra_kspace_samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.io.utils.siemens_quat_to_rot_mat.html">siemens_quat_to_rot_mat</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.html"><code class="docutils literal notranslate"><span class="pre">mrinufft.extras</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.html"><code class="docutils literal notranslate"><span class="pre">extras.data</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.fse_simulation.html">fse_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.data.get_brainweb_map.html">get_brainweb_map</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.html"><code class="docutils literal notranslate"><span class="pre">extras.field_map</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_mfi_coefficients.html">compute_mfi_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_mti_coefficients.html">compute_mti_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.compute_svd_coefficients.html">compute_svd_coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.get_complex_fieldmap_rad.html">get_complex_fieldmap_rad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.make_b0map.html">make_b0map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.make_t2smap.html">make_t2smap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.C_lazy.html">C_lazy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.gradient.html"><code class="docutils literal notranslate"><span class="pre">extras.gradient</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.gradient.cg.html">cg</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.smaps.html"><code class="docutils literal notranslate"><span class="pre">extras.smaps</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.smaps.coil_compression.html">coil_compression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/_autosummary/mrinufft.extras.smaps.low_frequency.html">low_frequency</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._utils</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.check_error.html">check_error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.proper_trajectory.html">proper_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.sizeof_fmt.html">sizeof_fmt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._utils.MethodRegister.html">MethodRegister</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.html"><code class="docutils literal notranslate"><span class="pre">mrinufft._array_compat</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.auto_cast.html">auto_cast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.get_array_module.html">get_array_module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_cuda_array.html">is_cuda_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_cuda_tensor.html">is_cuda_tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.is_host_array.html">is_host_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.pin_memory.html">pin_memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_numpy.html">with_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_numpy_cupy.html">with_numpy_cupy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_tensorflow.html">with_tensorflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/_autosummary/mrinufft._array_compat.with_torch.html">with_torch</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellanneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="misc/contributors.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc/code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc/development.html">Developing MRI-nufft</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Related Projects</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/pysap">PySAP</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://cea-cosmic.github.io/ModOpt/">ModOpt</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/paquiteau/brainweb-dl">Brainweb-dl</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/edit/main/nufft.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/mind-inria/mri-nufft/issues/new?title=Issue%20on%20page%20%2Fnufft.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/nufft.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>The NUFFT Operator</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-non-uniform-discrete-fourier-transform">The Non-Uniform Discrete Fourier Transform</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#application-in-mri">Application in MRI</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extension-of-the-acquisition-model">Extension of the Acquisition model</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-imaging-model">Parallel Imaging Model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#off-resonance-correction-model">Off-resonance correction model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#subspace-projection-model">Subspace Projection Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-non-uniform-fast-fourier-transform-in-practice">The Non Uniform Fast Fourier Transform in practice</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#density-compensation">Density Compensation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-application">Other Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="the-nufft-operator">
+<span id="nufft"></span><h1>The NUFFT Operator<a class="headerlink" href="#the-nufft-operator" title="Link to this heading">#</a></h1>
+<p>This document gives a general overview of the Non-Uniform Fast fourier transform (NUFFT), and its application to MRI.</p>
+<section id="the-non-uniform-discrete-fourier-transform">
+<h2>The Non-Uniform Discrete Fourier Transform<a class="headerlink" href="#the-non-uniform-discrete-fourier-transform" title="Link to this heading">#</a></h2>
+<p>The Non-Uniform Discrete Fourier Transform (NUDFT) is a generalization of the Discrete Fourier Transform (DFT) to non-uniform sampling.</p>
+<p>For a signal <span class="math notranslate nohighlight">\(x\)</span> sampled at location <span class="math notranslate nohighlight">\(p_0, p_1, \ldots, p_{N-1}\)</span> we want to get the frequency points (non uniformly spaced) at <span class="math notranslate nohighlight">\(\nu_0, \nu_1, \ldots, \nu_{M-1}\)</span></p>
+<p>The 1D-NUDFT <a class="footnote-reference brackets" href="#id7" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[X_k = \sum_{n=0}^{N-1} x(p_n) e^{ -2\imath \pi p_n \nu_k}\]</div>
+<p>where <span class="math notranslate nohighlight">\(X_k\)</span> is the frequency point at <span class="math notranslate nohighlight">\(\nu_k\)</span>.</p>
+<p>The multidimensional cases are derived by using vectorized location e.g <span class="math notranslate nohighlight">\(\boldsymbol{p}_n\)</span> and  <span class="math notranslate nohighlight">\(\boldsymbol{\nu_k}\)</span> as for the classical DFT.</p>
+<p>There exist 3 types of NUDFT:</p>
+<ul class="simple">
+<li><p>Type 1: <span class="math notranslate nohighlight">\(p_n = n/N\)</span> and <span class="math notranslate nohighlight">\(\nu_k\)</span> are non-uniformly spaced</p></li>
+<li><p>Type 2: <span class="math notranslate nohighlight">\(p_n\)</span> are non uniformly spaced and <span class="math notranslate nohighlight">\(\nu_k = k/M\)</span></p></li>
+<li><p>Type 3: <span class="math notranslate nohighlight">\(p_n\)</span> and <span class="math notranslate nohighlight">\(\nu_k\)</span> are non uniformly spaced</p></li>
+<li><p>If  <span class="math notranslate nohighlight">\(p_n=n/N\)</span> and <span class="math notranslate nohighlight">\(\nu_k=k/M\)</span> then the NUDFT is simply the Discrete Fourier Transform.</p></li>
+</ul>
+<p>The naive implementation of the NUDFT is <span class="math notranslate nohighlight">\(O(NM)\)</span>. This becomes problematic for large N and M. The NUFFT is a fast algorithm to compute the NUDFT. The NUFFT is a generalization of the Fast Fourier Transform (FFT) to non-uniform sampling. The underlying principles of the NUFFT algorithm are described briefly <a class="reference internal" href="#nufft-algo"><span class="std std-ref">down in the document</span></a></p>
+</section>
+<section id="application-in-mri">
+<h2>Application in MRI<a class="headerlink" href="#application-in-mri" title="Link to this heading">#</a></h2>
+<p>In Magnetic Resonance Imaging (MRI) the raw data is acquired in the k-space, ideally corresponding to the Fourier domain.
+Traditional sampling schemes of the k-space usually consist of acquired lines in a specific direction, in a Cartesian fashion.</p>
+<p>In order to accelerate the acquisition of k-space data, one may use a non-Cartesian (i.e. non-uniformly distributed in <em>every</em> direction) sampling scheme as the latter offers increased sampling efficiency, i.e. broader k-space coverage in a given time period.</p>
+<p>The acquisition model is usually described as:</p>
+<div class="math notranslate nohighlight">
+\[y(\boldsymbol{\nu}_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} d\boldsymbol{u} + n_i, \quad i=1,\dots,M\]</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x(\boldsymbol{u})\)</span> is the spatially varying image contrast acquired.</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_1, \dots, y_M\)</span> are the sampled points at frequency locations <span class="math notranslate nohighlight">\(\Omega=\lbrace \boldsymbol{\nu}_1, \dots, \boldsymbol{\nu}_M \in [-1/2, 1/2]^d\rbrace\)</span>.
+Typically images (<span class="math notranslate nohighlight">\(d=2\)</span>) or volumes (<span class="math notranslate nohighlight">\(d=3\)</span>) are acquired.</p></li>
+<li><p><span class="math notranslate nohighlight">\(n_i\)</span> is a zero-mean complex-valued Gaussian Noise, modeling the “thermal noise” of the scanner.</p></li>
+</ul>
+<p>In practice the equation above is discretized, and the integral is replaced by a sum, using a finite number of samples <span class="math notranslate nohighlight">\(N\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[y(\boldsymbol{\nu}_i) = \sum_{j=1}^N x(\boldsymbol{u}_j) e^{-2\imath\pi\boldsymbol{u}_j\cdot\boldsymbol{\nu_i}} + n_i, \quad i=1,\dots,M\]</div>
+<p>Where <span class="math notranslate nohighlight">\(\boldsymbol{u}_j\)</span> are the <span class="math notranslate nohighlight">\(N\)</span> spatial locations of image voxels.
+This is stated using the operator notation:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{y} = \mathcal{F}_\Omega (\boldsymbol{x}) + \boldsymbol{n}\]</div>
+<p>As the sampling locations <span class="math notranslate nohighlight">\(\Omega\)</span> are non-uniform and the image locations <span class="math notranslate nohighlight">\(\boldsymbol{u}_j\)</span> are uniform, <span class="math notranslate nohighlight">\(\mathcal{F}_\Omega\)</span> is a NUDFT operator, and the equation above describe a Type 2 NUDFT. Similarly the adjoint operator is:</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id13">
+<caption><span class="caption-text">Correspondance Table between NUFFT and MRI acquisition model.</span><a class="headerlink" href="#id13" title="Link to this table">#</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>NUFFT Type</p></th>
+<th class="head"><p>Operation</p></th>
+<th class="head"><p>MRI Transform</p></th>
+<th class="head"><p>Operator</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Type 1</p></td>
+<td><p>Adjoint</p></td>
+<td><p>Kspace → Image</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{F}_\Omega^*\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Type 2</p></td>
+<td><p>Forward</p></td>
+<td><p>Image → Kspace</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathcal{F}_\Omega\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>In order to reconstruct <span class="math notranslate nohighlight">\(x\)</span> from <span class="math notranslate nohighlight">\(y\)</span>, one has to solve the <em>inverse problem</em>, stated usually as</p>
+<div class="math notranslate nohighlight">
+\[\hat{x} = \arg\min_x \frac{1}{2} \|\mathcal{F}_\Omega(\boldsymbol{x}) - \boldsymbol{y}\|_2^2 + g(\boldsymbol{x}).\]</div>
+<p>This package focuses solely on computing <span class="math notranslate nohighlight">\(\mathcal{F}_\Omega\boldsymbol{x}\)</span> or <span class="math notranslate nohighlight">\(\mathcal{F}_\Omega^**\boldsymbol{y}\)</span>.
+solving this problem is <strong>not</strong> addressed here, but you can check <a class="reference external" href="https://github.com/CEA-COSMIC/pysap-mri">pysap-mri</a> for this purpose.</p>
+</div>
+<section id="extension-of-the-acquisition-model">
+<h3>Extension of the Acquisition model<a class="headerlink" href="#extension-of-the-acquisition-model" title="Link to this heading">#</a></h3>
+<p>The MRI acquisition model can be extended in two main ways. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensitivity profile.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>MRI-NUFFT provides the <cite>FourierOperator</cite> interface to implement all the physical model described below. See <span class="xref std std-ref">nufft-interface</span> for the standard, and <a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase" title="mrinufft.operators.base.FourierOperatorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FourierOperatorBase</span></code></a></p>
+</div>
+<section id="parallel-imaging-model">
+<h4>Parallel Imaging Model<a class="headerlink" href="#parallel-imaging-model" title="Link to this heading">#</a></h4>
+<p>In MRI the acquired signal can be received by multiple antennas (“coils”). Each coil possesses a specific sensitivity profile (i.e. each sees the object differently due to its physical layout).</p>
+<p>The acquisition model for parallel imaging with <span class="math notranslate nohighlight">\(L\)</span> coils  is:</p>
+<div class="math notranslate nohighlight">
+\[y_{i,\ell} = \int_{\mathbb{R}^d} S_\ell(\boldsymbol{u})x(\boldsymbol{u}) e^{-2i\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} d\boldsymbol{u} + n_{i,\ell}\]</div>
+<p>Or using the operator notation:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tilde{\boldsymbol{y}} = \begin{bmatrix}
+ \mathcal{F}_\Omega S_1 \\
+ \vdots  \\
+ \mathcal{F}_\Omega S_L \\
+ \end{bmatrix}
+ \boldsymbol{x} + \boldsymbol{n}_\ell  = \mathcal{F}_\Omega S \otimes \boldsymbol{x} + \tilde{\boldsymbol{n}}\end{split}\]</div>
+<p>Where <span class="math notranslate nohighlight">\(S_1, \dots, S_L\)</span> are the sensitivity maps of each coil. Such sensitivity maps can be acquired separetely by acquiring low frequency of the kspace, or estimated from the data.</p>
+</section>
+<section id="off-resonance-correction-model">
+<span id="nufft-orc"></span><h4>Off-resonance correction model<a class="headerlink" href="#off-resonance-correction-model" title="Link to this heading">#</a></h4>
+<p>The constant magnetic field applied in a MRI machine <span class="math notranslate nohighlight">\(B0\)</span> (with a typical intensity 1.5, 3 or 7 Tesla) is inherently disturbed at tissue interfaces with owing to different magnetic susceptibilities (such as air-tissue interfaces in the nose and ear canals). Those field perturbations introduce a spatially varying phase shift in the frequencies acquired (noted <span class="math notranslate nohighlight">\(\Delta\omega_0\)</span>), making the acquisition model deviating from the convenient Fourier model. Fortunately, this inhomogeneity map can be acquired separatly or estimated (but this goes beyond the scope of this package) and integrated in the model as:</p>
+<div class="math notranslate nohighlight">
+\[y(t_m) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_m} + \Delta\omega(\boldsymbol{u}) t_m} d\boldsymbol{u}\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_i\)</span> is the time at which the frequency <span class="math notranslate nohighlight">\(\nu_m\)</span> is acquired. Similarly at the reconstruction we have</p>
+<div class="math notranslate nohighlight">
+\[x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_m}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}\]</div>
+<p>With these mixed-domain field pertubations, the Fourier model does not hold anymore and the (NU)FFT algorithm cannot be used any longer.
+The main approach (initially proposed by Noll et al. <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>) is to approximate the mixed-domain exponential term by splitting it into single-domain weights <span class="math notranslate nohighlight">\(b_{m, \ell}\)</span> and <span class="math notranslate nohighlight">\(c_{\ell, n}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[e^{i\Delta\omega(\boldsymbol{u_n}) t_m} = \sum_{\ell=1}^L b_{m, \ell}\, c_{\ell, n}\]</div>
+<p>Yielding the following model, where <span class="math notranslate nohighlight">\(L \ll M, N\)</span> regular Fourier transforms are performed to approximate the non-Fourier transform.</p>
+<div class="math notranslate nohighlight">
+\[x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}\]</div>
+<p>The coefficients <span class="math notranslate nohighlight">\(B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}\)</span> and <span class="math notranslate nohighlight">\(C=(c_\ell, n) \in \mathbb{C}^{L\times N}\)</span> can be (optimally) estimated for any given <span class="math notranslate nohighlight">\(L\)</span> by solving the following matrix factorisation problem <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[\hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2\]</div>
+<p>Where <span class="math notranslate nohighlight">\(E_{mn} = e^{i\Delta\omega_0(u_n)t_m}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The estimation of the B and C methods are provided in the <a class="reference internal" href="generated/_autosummary/mrinufft.extras.field_map.html#module-mrinufft.extras.field_map" title="mrinufft.extras.field_map"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mrinufft.extras.field_map</span></code></a> module.
+Other methods like MTI <a class="footnote-reference brackets" href="#id11" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> and MFI <a class="footnote-reference brackets" href="#id12" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a> are also available.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can use the method <a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction" title="mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction"><code class="xref py py-func docutils literal notranslate"><span class="pre">.with_off_resonance_correction</span></code></a> to augment an existing operator with off-resonance correction capability.</p>
+</div>
+</section>
+<section id="subspace-projection-model">
+<span id="nufft-subspace"></span><h4>Subspace Projection Model<a class="headerlink" href="#subspace-projection-model" title="Link to this heading">#</a></h4>
+<p>In several MRI applications, such as dynamic or quantitative MRI, a single acquisition provides a stack of two- or three-dimensional images, each representing a single time frame (for dynamic MRI) or a single contrast (for quantitative MRI).
+To achieve a clinically feasible scan time, each frame or contrast is acquired with a different aggressively undersampled k-space trajectory. In this context, the single-coil acquisition model becomes:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tilde{\boldsymbol{y}} = \begin{bmatrix}
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
+   \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
+\end{bmatrix}
+\boldsymbol{x} + \boldsymbol{n}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{F}_{\Omega_1}, \dots, \mathcal{F}_{\Omega_T}\)</span> are the Fourier operators corresponding to each individual frame. Some applications (e.g., MR Fingerprinting <a class="footnote-reference brackets" href="#id9" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>) may consists of
+thousands of total frames <span class="math notranslate nohighlight">\(T\)</span>, leading to repeated Fourier Transform operations and high computational burden. However, the 1D signal series arising from similar voxels, e.g., with similar
+relaxation properties, are typically highly correlated. For this reason, the image series can be represented as:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{x} = \Phi\Phi^H \boldsymbol{x}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi\)</span> is an orthonormal basis spanning a low dimensional subspace whose rank <span class="math notranslate nohighlight">\(K \ll T\)</span> which can be obtained performing a Singular Value Decomposition of a low resolution fully sampled
+training dataset or an ensemble of simulated Bloch responses. The signal model can be then written as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tilde{\boldsymbol{y}} = \begin{bmatrix}
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
+   \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
+\end{bmatrix}
+\Phi \Phi^H \boldsymbol{x} + \boldsymbol{n} =
+ \begin{bmatrix}
+   \mathcal{F}_{\Omega_1} &amp; 0 &amp; \cdots &amp; 0 \\
+   0 &amp; \mathcal{F}_{\Omega_2} &amp; \cdots &amp; 0 \\
+   \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+   0 &amp; 0 &amp; \cdots &amp; \mathcal{F}_{\Omega_T}
+\end{bmatrix}
+\Phi \boldsymbol{\alpha} + \boldsymbol{n}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{\alpha} = \Phi^H \boldsymbol{x}\)</span> are the spatial coefficients representing the image series. Since the elements of <span class="math notranslate nohighlight">\(\Phi^H\)</span> do not depend on the specific k-space frequency points,
+the projection operator <span class="math notranslate nohighlight">\(\boldsymbol{\Phi}\)</span> commutes with the Fourier transform, and the signal equation finally becomes:</p>
+<div class="math notranslate nohighlight">
+\[\tilde{\boldsymbol{y}} = \Phi \mathcal{F}_\Omega(\boldsymbol{\alpha}) + \boldsymbol{n}\]</div>
+<p>that is, computation now involves <span class="math notranslate nohighlight">\(K \ll T\)</span> Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.</p>
+</section>
+</section>
+</section>
+<section id="the-non-uniform-fast-fourier-transform-in-practice">
+<span id="nufft-algo"></span><h2>The Non Uniform Fast Fourier Transform in practice<a class="headerlink" href="#the-non-uniform-fast-fourier-transform-in-practice" title="Link to this heading">#</a></h2>
+<p>In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical <span class="math notranslate nohighlight">\(O(MN)\)</span> complexity to <span class="math notranslate nohighlight">\(O(M\log(N))\)</span>). Thus, the main steps of the <em>Non-Uniform Fast Fourier Transform</em> are for the type 1:</p>
+<ol class="arabic simple">
+<li><p>Spreading/Interpolation of the non-uniform points to an oversampled Cartesian grid (typically with twice the resolution of the final image)</p></li>
+<li><p>Perform the (I)FFT on this image</p></li>
+<li><p>Downsampling to the final grid, and apply some bias correction.</p></li>
+</ol>
+<p>This package exposes interfaces to the main NUFFT libraries available (See <a class="reference internal" href="generated/_autosummary/mrinufft.operators.interfaces.html#module-mrinufft.operators.interfaces" title="mrinufft.operators.interfaces"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mrinufft.operators.interfaces</span></code></a>). The choice of the spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods.</p>
+<p>Type 2 transforms perform those steps in reversed order.</p>
+</section>
+<section id="density-compensation">
+<h2>Density Compensation<a class="headerlink" href="#density-compensation" title="Link to this heading">#</a></h2>
+<p>In non-uniform sampling, such as radial or spiral MRI, the acquired k-space samples <span class="math notranslate nohighlight">\(k_m\)</span> are not equally spaced. As a result, each sample does not contribute equally to the final image. To account for the non-uniform sampling density, a set of weights <span class="math notranslate nohighlight">\(w_m\)</span>—called the density compensation function (DCF)—is applied to the measured data <span class="math notranslate nohighlight">\(y_m\)</span>.</p>
+<p>In the adjoint NUFFT (type 2), which maps from non-uniform k-space onto the image grid, the operation can be mathematically written as:</p>
+<div class="math notranslate nohighlight">
+\[x_n = \sum_{m=1}^M y_m \, w_m \, e^{-i 2\pi k_m \cdot x_n}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x_n\)</span> is the reconstructed pixel value at position <span class="math notranslate nohighlight">\(x_n\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_m\)</span> are the measured non-uniform k-space data,</p></li>
+<li><p><span class="math notranslate nohighlight">\(w_m\)</span> is the density compensation weight for sample <span class="math notranslate nohighlight">\(m\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(k_m\)</span> is the k-space sampling location.</p></li>
+</ul>
+<p>The choice of <span class="math notranslate nohighlight">\(w_m\)</span> depends on the trajectory:</p>
+<ul class="simple">
+<li><p><strong>Analytical weights</strong>: For simple trajectories (e.g., radial), <span class="math notranslate nohighlight">\(w_m\)</span> may have closed forms.</p></li>
+<li><p><strong>Voronoi weights</strong>: <span class="math notranslate nohighlight">\(w_m\)</span> corresponds to the area/volume of Voronoi cells around each sample <span class="math notranslate nohighlight">\(k_m\)</span>.</p></li>
+<li><p><strong>Iterative methods</strong>: For arbitrary trajectories, <span class="math notranslate nohighlight">\(w_m\)</span> can be estimated via iterative algorithms that minimize reconstruction artifacts.</p></li>
+</ul>
+<p>The DCF is typically applied before the NNUFFT ensuring each k-space measurement contributes proportionally to its neighborhood. Proper density compensation is crucial for artifact-free, quantitatively accurate image reconstruction.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">mri-nufft</span></code>, density compensation can be specified when initializing the NUFFT operator (via the <code class="docutils literal notranslate"><span class="pre">density</span></code> argument) as either a precomputed array, a method name (e.g., <code class="docutils literal notranslate"><span class="pre">'voronoi'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pipe'</span></code>), or by providing your own function.
+See <a class="reference internal" href="generated/_autosummary/mrinufft.operators.base.FourierOperatorBase.html#mrinufft.operators.base.FourierOperatorBase" title="mrinufft.operators.base.FourierOperatorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FourierOperatorBase</span></code></a> and the <code class="docutils literal notranslate"><span class="pre">compute_density</span></code> API for more details. Several geometry-based and NUFFT-based DCF methods are available in the <a class="reference internal" href="generated/_autosummary/mrinufft.density.html#module-mrinufft.density" title="mrinufft.density"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mrinufft.density</span></code></a> module.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For consistent scaling, density compensation weights should be normalized, so that the total signal energy is preserved across different trajectories and density choices. If you supply your own weights (See the for instance the normalization done for the <code class="xref py py-func docutils literal notranslate"><span class="pre">pipe</span></code> method)</p>
+</div>
+</section>
+<section id="other-application">
+<h2>Other Application<a class="headerlink" href="#other-application" title="Link to this heading">#</a></h2>
+<p>Apart from MRI, The NUFFT operator is also used for:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Electron tomography</p></li>
+<li><p>Probability Density Function estimation</p></li>
+<li><p>Astronomical Imaging</p></li>
+<li><p>…</p></li>
+</ul>
+</div></blockquote>
+<p>These applications are not covered by this package, do it yourself!</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id7" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform">https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform</a></p>
+</aside>
+<aside class="footnote brackets" id="id8" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., “A homogeneity correction method for magnetic resonance imaging with time-varying gradients”, IEEE Transaction on Medical Imaging (1991), pp. 629-637.</p>
+</aside>
+<aside class="footnote brackets" id="id9" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">3</a><span class="fn-bracket">]</span></span>
+<p>Fessler, J. A., Lee, S., Olafsson, V. T., Shi, H. R., Noll, D. C., “Toeplitz-based iterative image reconstruction for MRI with correction for magnetic field inhomogeneity”,  IEEE Transactions on Signal Processing 53.9 (2005), pp. 3393–3402.</p>
+</aside>
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">4</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="6">
+<li><p>McGivney et al., “SVD Compression for Magnetic Resonance Fingerprinting in the Time Domain,” IEEE Transactions on Medical Imaging (2014), pp. 2311-2322.</p></li>
+</ol>
+</li>
+</ol>
+</aside>
+<aside class="footnote brackets" id="id11" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">5</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="3">
+<li><p>Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, “A homogeneity correction method for magnetic resonance imaging with time-varying gradients,” in IEEE Transactions on Medical Imaging, vol. 10, no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599</p></li>
+</ol>
+</li>
+</ol>
+</aside>
+<aside class="footnote brackets" id="id12" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">6</a><span class="fn-bracket">]</span></span>
+<p>Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency interpolation for fast off-resonance correction. Magn. Reson. Med., 37: 785-792. <a class="reference external" href="https://doi.org/10.1002/mrm.1910370523">https://doi.org/10.1002/mrm.1910370523</a></p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="generated/autoexamples/trajectories/example_trajectory_tools.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Trajectory tools</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="trajectory_gradspec.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">The trajectory binary file specification</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-non-uniform-discrete-fourier-transform">The Non-Uniform Discrete Fourier Transform</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#application-in-mri">Application in MRI</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extension-of-the-acquisition-model">Extension of the Acquisition model</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-imaging-model">Parallel Imaging Model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#off-resonance-correction-model">Off-resonance correction model</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#subspace-projection-model">Subspace Projection Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-non-uniform-fast-fourier-transform-in-practice">The Non Uniform Fast Fourier Transform in practice</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#density-compensation">Density Compensation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-application">Other Application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By MRI-NUFFT Contributors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022, MRI-NUFFT Contributors.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
