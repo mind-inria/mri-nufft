@@ -1258,7 +1258,7 @@ def stack_random(
 
 
 def get_grappa_caipi_positions(
-    img_size: tuple(int, int), grappa_factors: tuple(int, int), caipi_delta: int = 0
+    img_size: tuple[int, int], grappa_factors: tuple[int, int], caipi_delta: int = 0
 ):
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.

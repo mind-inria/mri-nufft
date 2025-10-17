@@ -127,7 +127,7 @@ def get_gridded_trajectory(
     elif grid_type == "time":
         data = _gridder_adj_op(
             np.tile(np.linspace(1, 10, trajectory.shape[1]), (trajectory.shape[0],))
-        )
+        ) / (gridded_ones + np.finfo(np.float32).eps)
     elif grid_type == "inversion":
         data = _gridder_adj_op(
             np.repeat(
