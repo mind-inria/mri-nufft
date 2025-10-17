@@ -3,6 +3,7 @@
 import torch
 import numpy as np
 from .._array_compat import NP2TORCH
+from torch.types import Tensor
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -108,10 +109,41 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     Parameters
     ----------
-    nufft_op: Classic Non differentiable MRI-NUFFT operator.
+    nufft_op: FourierOperatorBase
+        Classic Non differentiable MRI-NUFFT operator.
+    wrt_data: bool, default True
+        If True allow auto-differentiation/backpropagation with respect to
+        kspace/image data.
+    wrt_traj: bool, default False
+        If True allow auto-differentiation/backpropagation with respect to the
+        k-space trajectory (samples locations).
+    paired_batch: bool, default False
+        If True, an extra dimension for batchs is considered for the data.
+        Data dimensions for inputs and output will be `(batch_size,
+        nufft_op.n_batchs, nufft_op.n_coils, nufft_op.n_samples)` for k-space
+        and `(batch_Size, nufft_op.n_batchs, 1, *nufft_op.shape)` for image
+        (with smaps support).
+        The NUFFT operator will support different processing different k-space /
+        image data and corresponding sensitivity map pairs. This is particularly
+        useful for multi-contrast reconstructions in a batched mode
+
+    Notes
+    -----
+        - Even with batch_size, the data is processed sequentially.
+        - Unlike the `n_batchs` argument of the base nufft_operator,
+          `batch_size` allows for batching on other data than images and
+          k-space. By using :meth:`op_batched` and :mod:`adj_op_batched`. In
+          this context `n_batchs` of the NUFFT operator can be seen
+          as a number of MR echos.
     """
 
-    def __init__(self, nufft_op, wrt_data=True, wrt_traj=False):
+    def __init__(
+        self,
+        nufft_op,
+        wrt_data: bool = True,
+        wrt_traj: bool = False,
+        paired_batch: bool = False,
+    ):
         super().__init__()
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not supported for autodiff.")
@@ -127,14 +159,117 @@ class MRINufftAutoGrad(torch.nn.Module):
             # used for update also.
             self._samples_torch = torch.Tensor(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
+        self.paired_batch = paired_batch
 
-    def op(self, x):
-        r"""Compute the forward image -> k-space."""
+    def op(self, x, smaps=None, samples=None):
+        r"""Compute the forward image -> k-space.
+
+        Parameters
+        ----------
+        x: Tensor
+            Image data of shape ``(batch_size, nufft_op.n_batchs, (1 if smaps
+            else nufft_op.n_coils), *nufft_op.shape)``
+        smaps: Tensor, optional
+            Sensitivity maps of shape ``(batch_size, nufft_op.n_coils, *nufft_op.shape)
+        samples: Tensor, optional
+            Samples for the batches of shape ``(batch_size, nufft_op.n_samples,
+            nufft_op.ndim)``
+
+        Returns
+        -------
+        Tensor:
+             with shape `(batch_size, nufft_op.n_batchs, nufft_op.n_coils,
+             nufft_op.n_samples)`
+
+        Notes
+        -----
+        The batch_size dimension can be omitted if paired_batch_mode is false.
+        """
+        if self.paired_batch:
+            return self._op_batched(x, smaps, samples)
         return _NUFFT_OP.apply(x, self.samples, self.nufft_op)
 
-    def adj_op(self, kspace):
-        r"""Compute the adjoint k-space -> image."""
+    def adj_op(self, kspace, smaps=None, samples=None):
+        """
+        Compute the adjoint k-space -> image.
+
+        Parameters
+        ----------
+        kspace: Tensor
+             with shape
+             ``(batch_size, nufft_op.n_batchs, nufft_op.n_coils, nufft_op.n_samples)``
+        smaps: Tensor, optional
+            Sensitivity maps of shape ``(batch_size, nufft_op.n_coils, *nufft_op.shape)
+        samples: Tensor, optional
+            Samples for the batches of shape
+            ``(batch_size, nufft_op.n_samples, nufft_op.ndim)``
+
+        Returns
+        -------
+        Tensor:
+            Image data of shape ``(batch_size, nufft_op.n_batchs,
+            (1 if smaps else nufft_op.n_coils), *nufft_op.shape)``
+
+        Notes
+        -----
+        The batch_size dimension can be omitted if paired_batch_mode is false.
+
+        """
+        if self.paired_batch:
+            return self._adj_op_batched(kspace, smaps, samples)
         return _NUFFT_ADJOP.apply(kspace, self.samples, self.nufft_op)
+
+    def _op_batched(
+        self,
+        batched_imgs: Tensor,
+        batched_smaps: Tensor | None = None,
+        batched_samples: Tensor | None = None,
+    ) -> Tensor:
+        """Compute the forward batched_imgs -> batched_kspace."""
+        # Each batch element independently calls NUFFT_OP.apply(...).
+        # The NUFFT operator is stored via ctx.nufft_op, which already saves both
+        # kspace_loc and smaps as attributes. Since ctx is isolated per element,
+        # the correct smaps are used during backpropagation.
+        self._check_input_shape(
+            smaps=batched_smaps, imgs=batched_imgs, samples=batched_samples
+        )
+        batched_kspace = []
+        for i in range(len(batched_imgs)):
+            try:
+                if batched_smaps:
+                    # update smaps for proper backward computation
+                    self.nufft_op.smaps = batched_smaps[i]
+                if batched_samples:
+                    self.samples = batched_samples[i]
+                batched_kspace.append(
+                    _NUFFT_OP.apply(batched_imgs[i], self.samples, self.nufft_op)
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed at batch index {i+1}"
+                ) from e  # For an easier debugging
+        return torch.stack(batched_kspace, dim=0)
+
+    def _adj_op_batched(self, batched_kspace, batched_smaps=None, batched_samples=None):
+        """Compute the adjoint batched_kspace -> batched_imgs."""
+        # NUFFT op is saved per batch element in ctx to ensure correct backpropagation.
+        self._check_input_shape(
+            smaps=batched_smaps, kspace=batched_kspace, samples=batched_samples
+        )
+        batched_imgs = []
+        for i in range(self.batch_size):
+            try:
+                if batched_smaps:
+                    self.nufft_op.smaps = batched_smaps[i]
+                if batched_samples:
+                    # updates the nufft_op samples internally
+                    self.samples = batched_samples[i]
+                batched_imgs.append(
+                    _NUFFT_ADJOP.apply(batched_kspace[i], self.samples, self.nufft_op)
+                )
+            except Exception as e:
+                raise RuntimeError(f"Failed at batch index {i+1}") from e
+        return torch.stack(batched_imgs, dim=0)
 
     @property
     def samples(self):
@@ -152,3 +287,44 @@ class MRINufftAutoGrad(torch.nn.Module):
     def __getattr__(self, name):
         """Forward all other attributes to the nufft_op."""
         return getattr(self.nufft_op, name)
+
+    def _check_input_shape(
+        self, *, imgs=None, kspace=None, smaps=None, samples=None
+    ) -> bool:
+        """Validate the batch size of either ops or adj_op inputs.
+
+        Raises ValueError if any mismatch is detected, return True otherwise
+        """
+        # 4 arguments, so there is 6 pairwise comparison (handshakes) to make:
+
+        if imgs is not None and smaps is not None:
+            D, B, C, *XYZ = imgs.shape
+            D2, B2, C2, *XYZ2 = smaps.shape
+            if D != D2 or B != B2 or XYZ != XYZ2 or C != 1:
+                raise ValueError("Shape mismatch between smaps and image")
+        if kspace is not None and smaps is not None:
+            D, B, C, NS = kspace.shape
+            D2, B2, C2, *XYZ2 = smaps.shape
+            if D != D2 or B != B2:
+                raise ValueError("Shape mismatch between smaps and k-space")
+        if kspace is not None and samples is not None:
+            D, B, C, NS = kspace.shape
+            D2, NS2, N = samples.shape
+            if D != D2 or NS != NS2:
+                raise ValueError("Shape mismatch between k-space and samples loc")
+        if imgs is not None and samples is not None:
+            D, B, C, *XYZ = imgs.shape
+            D2, NS2, N = samples.shape
+            if D != D2 or N != len(XYZ):
+                raise ValueError("Shape mismatch between samples loc and image")
+        if samples is not None and smaps is not None:
+            D, NS, N = samples.shape
+            D2, B2, C2, *XYZ2 = smaps.shape
+            if D != D2 or N != len(XYZ2):
+                raise ValueError("Shape mismatch between samples loc and smaps")
+        if imgs is not None and kspace is not None:
+            raise ValueError(
+                "Input shape should not compare batched_img and batched_kspace"
+            )
+
+        return True
