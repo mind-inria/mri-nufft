@@ -482,7 +482,9 @@ def initialize_3D_wave_caipi(
     """
     acq = acq.default if acq is None else acq
     if R is not None:
-        sample_axis= tuple(im for i, im in enumerate(acq.img_size) if i != readout_axis)
+        sample_axis = tuple(
+            im for i, im in enumerate(acq.img_size) if i != readout_axis
+        )
         positions = (
             get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
         )

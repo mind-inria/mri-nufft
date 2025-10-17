@@ -1314,6 +1314,7 @@ def get_grappa_caipi_positions(
         positions[::2, 1] += caipi_delta / img_size[1]
     return positions
 
+
 def get_packing_spacing_positions(
     Nc: int,
     packing: str = "triangular",
