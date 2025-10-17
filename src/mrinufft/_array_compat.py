@@ -318,7 +318,7 @@ def _convert(_array_to_xp, args, kwargs=None):
         _arg = args[n]
         if hasattr(_arg, "__array__"):
             args[n] = _array_to_xp(_arg)
-        elif isinstance(_arg, (tuple, list)):
+        elif isinstance(_arg, tuple | list):
             args[n], _ = _convert(_array_to_xp, _arg)
         # objects with attributes that are arrays are also converted
         elif hasattr(_arg, "__dict__") and not isinstance:
@@ -423,7 +423,7 @@ def _to_interface(args, array_interface, device=None):
 
     """
     # enforce iterable
-    if isinstance(args, (list, tuple)) is False:
+    if isinstance(args, list | tuple) is False:
         args = [args]
 
     # convert to target interface
