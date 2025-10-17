@@ -418,9 +418,9 @@ def initialize_3D_wave_caipi(
     packing: str = "triangular",
     shape: str | float = "square",
     spacing: tuple[int, int] = (1, 1),
-    readout_axis: str = "x",
+    readout_axis: int = 0,
     wavegrad: float | tuple[float, float] | None = None,
-    grappa_factors: tuple[int, int] = None,
+    R: tuple[int, int] = None,
     caipi_delta: int = 0,
     acq: Acquisition = None,
 ) -> NDArray:
@@ -454,15 +454,15 @@ def initialize_3D_wave_caipi(
         Spacing between helices over the 2D :math:`k_x-k_y` plane
         normalized similarly to `width` to correspond to
         helix diameters, by default (1, 1).
-    readout_axis : str, optional
+    readout_axis : int, optional
         Axis along which the readout is performed,
-        either "x", "y" or "z", by default "x".
+        either 0, 1 or 2.
     wavegrad : float, optional
         Wave gradient amplitude in T/m, by default None
         If None, the value of `width` is used to estimate
         the wave gradient amplitude. `acq` must be provided
         if used.
-    grappa_factors : tuple[int, int], optional
+    R : tuple[int, int], optional
         GRAPPA factors along the two phase-encoding
         directions, by default (1, 1).
     acq : Acquisition, optional
@@ -481,14 +481,10 @@ def initialize_3D_wave_caipi(
        Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
     acq = acq.default if acq is None else acq
-    if grappa_factors is not None:
-        sample_axis = (
-            acq.img_size[:2]
-            if readout_axis == "z"
-            else acq.img_size[1:] if readout_axis == "x" else acq.img_size[::2]
-        )
+    if R is not None:
+        sample_axis= tuple(im for i, im in enumerate(acq.img_size) if i != readout_axis)
         positions = (
-            get_grappa_caipi_positions(sample_axis, grappa_factors, caipi_delta) / acq.norm_factor
+            get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
         )
         Nc = positions.shape[0]
         wavegrad = np.array(
@@ -506,11 +502,7 @@ def initialize_3D_wave_caipi(
             / np.pi
             / nb_revolutions
         )  # Extra factor from angles
-        width = (
-            width[:2]
-            if readout_axis == "z"
-            else width[1:] if readout_axis == "x" else width[::2]
-        )
+        width = tuple(w for i, w in enumerate(width) if i != readout_axis)
     else:
         width = (width, width) if np.isscalar(width) else width
     # Initialize first shot
@@ -519,66 +511,19 @@ def initialize_3D_wave_caipi(
         [width[0] * np.cos(angles), width[1] * np.sin(angles), np.linspace(-1, 1, Ns)],
         axis=-1,
     )
-
     # reorder based on readout axis
-    perm = {"x": [2, 0, 1], "y": [1, 2, 0], "z": [0, 1, 2]}[readout_axis]
+    perm = [[2, 0, 1], [1, 2, 0], [0, 1, 2]][readout_axis]
     initial_shot = initial_shot[..., perm]
 
-    if grappa_factors is None:
-        # Choose the helix positions according to packing
-        packing_enum = Packings[packing]
-        side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
-        if packing_enum == Packings.RANDOM:
-            positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
-        elif packing_enum == Packings.CIRCLE:
-            positions = [[0, 0]]
-            counter = 0
-            while len(positions) < side**2:
-                counter += 1
-                perimeter = 2 * np.pi * counter
-                nb_shots = int(np.trunc(perimeter))
-                # Add the full circle
-                radius = 2 * counter
-                angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
-                circle = radius * np.exp(1j * angles)
-                positions = np.concatenate(
-                    [positions, np.array([circle.real, circle.imag]).T], axis=0
-                )
-        elif packing_enum in [Packings.SQUARE, Packings.TRIANGLE, Packings.HEXAGONAL]:
-            # Square packing or initialize hexagonal/triangular packing
-            px, py = np.meshgrid(
-                np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
-            )
-            positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
-
-        if packing_enum in [Packings.HEXAGON, Packings.TRIANGLE]:
-            # Hexagonal/triangular packing based on square packing
-            positions[::2, 1] += 1 / 2
-            positions[1::2, 1] -= 1 / 2
-            ratio = nl.norm(np.diff(positions[:2], axis=-1))
-            positions[:, 0] /= ratio / 2
-
-        if packing_enum == Packings.FIBONACCI:
-            # Estimate helix width based on the k-space 2D surface
-            # and an optimal circle packing
-            positions = np.sqrt(
-                Nc * 2 / CIRCLE_PACKING_DENSITY
-            ) * generate_fibonacci_circle(Nc * 2)
-
-        # Remove points by distance to fit both shape and Nc
-        main_order = initialize_shape_norm(shape)
-        tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
-        positions = np.array(positions) * np.array(spacing)
-        positions = sorted(positions, key=partial(nl.norm, ord=tie_order))
-        positions = sorted(positions, key=partial(nl.norm, ord=main_order))
-        positions = positions[:Nc]
+    if R is None:
+        positions = _generate_positions_packing_spacing(Nc, packing, shape, spacing)
 
     # Shifting copies of the initial shot to all positions
-    positions = np.insert(positions, {"x": 0, "y": 1, "z": 2}[readout_axis], 0, axis=-1)
+    positions = np.insert(positions, readout_axis, 0, axis=-1)
     trajectory = initial_shot[None] + positions[:, None]
 
-    axes = {"x": [1, 2], "y": [0, 2], "z": [0, 1]}[readout_axis]
-    if grappa_factors is None:
+    axes = [[1, 2], [0, 2], [0, 1]][readout_axis]
+    if R is None:
         trajectory[..., axes] /= np.max(np.abs(trajectory))
     return KMAX * trajectory
 

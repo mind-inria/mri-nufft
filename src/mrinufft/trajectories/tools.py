@@ -1313,3 +1313,75 @@ def get_grappa_caipi_positions(
     if caipi_delta > 0:
         positions[::2, 1] += caipi_delta / img_size[1]
     return positions
+
+def get_packing_spacing_positions(
+    Nc: int,
+    packing: str = "triangular",
+    shape: str | float = "square",
+    spacing: tuple[int, int] = (1, 1),
+):
+    """
+    Nc : int
+        Number of positions
+    packing : str, optional
+        Packing method used to position the helices:
+        "triangular"/"hexagonal", "square", "circular"
+        or "random"/"uniform", by default "triangular".
+    shape : str | float, optional
+        Shape over the 2D :math:`k_x-k_y` plane to pack with shots,
+        either defined as `str` ("circle", "square", "diamond")
+        or as `float` through p-norms following the conventions
+        of the `ord` parameter from `numpy.linalg.norm`,
+        by default "circle".
+    spacing : tuple[int, int]
+        Spacing between helices over the 2D :math:`k_x-k_y` plane
+        normalized similarly to `width` to correspond to
+        helix diameters, by default (1, 1).
+    """
+    # Choose the helix positions according to packing
+    packing_enum = Packings[packing]
+    side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
+    if packing_enum == Packings.RANDOM:
+        positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
+    elif packing_enum == Packings.CIRCLE:
+        positions = [[0, 0]]
+        counter = 0
+        while len(positions) < side**2:
+            counter += 1
+            perimeter = 2 * np.pi * counter
+            nb_shots = int(np.trunc(perimeter))
+            # Add the full circle
+            radius = 2 * counter
+            angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
+            circle = radius * np.exp(1j * angles)
+            positions = np.concatenate(
+                [positions, np.array([circle.real, circle.imag]).T], axis=0
+            )
+    elif packing_enum in [Packings.SQUARE, Packings.TRIANGLE, Packings.HEXAGONAL]:
+        # Square packing or initialize hexagonal/triangular packing
+        px, py = np.meshgrid(
+            np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
+        )
+        positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
+    else:
+        raise ValueError(f"Unsupported packing: {packing}")
+    if packing_enum in [Packings.HEXAGON, Packings.TRIANGLE]:
+        # Hexagonal/triangular packing based on square packing
+        positions[::2, 1] += 1 / 2
+        positions[1::2, 1] -= 1 / 2
+        ratio = nl.norm(np.diff(positions[:2], axis=-1))
+        positions[:, 0] /= ratio / 2
+    if packing_enum == Packings.FIBONACCI:
+        # Estimate helix width based on the k-space 2D surface
+        # and an optimal circle packing
+        positions = np.sqrt(
+            Nc * 2 / CIRCLE_PACKING_DENSITY
+        ) * generate_fibonacci_circle(Nc * 2)
+    # Remove points by distance to fit both shape and Nc
+    main_order = initialize_shape_norm(shape)
+    tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
+    positions = np.array(positions) * np.array(spacing)
+    positions = sorted(positions, key=partial(nl.norm, ord=tie_order))
+    positions = sorted(positions, key=partial(nl.norm, ord=main_order))
+    positions = positions[:Nc]
+    return positions
