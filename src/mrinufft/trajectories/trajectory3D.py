@@ -1,6 +1,5 @@
 """Functions to initialize 3D trajectories."""
 
-from functools import partial
 from typing import Literal
 
 import numpy as np
@@ -8,7 +7,10 @@ import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.special import ellipj, ellipk
 from mrinufft.trajectories.utils import Acquisition, convert_gradients_to_trajectory
-from mrinufft.trajectories.tools import get_grappa_caipi_positions
+from mrinufft.trajectories.tools import (
+    get_grappa_caipi_positions,
+    get_packing_spacing_positions,
+)
 
 from .maths import (
     CIRCLE_PACKING_DENSITY,
@@ -17,12 +19,11 @@ from .maths import (
     Ra,
     Ry,
     Rz,
-    generate_fibonacci_circle,
 )
 from .projection import parameterize_by_arc_length
 from .tools import conify, duplicate_along_axes, epify, precess, stack
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
-from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_tilt
+from .utils import KMAX, Spirals, initialize_tilt
 
 ##############
 # 3D RADIALS #
@@ -411,7 +412,7 @@ def initialize_3D_floret(
 
 
 def initialize_3D_wave_caipi(
-    Nc: int,
+    Nc_or_R: int | tuple[int, int],
     Ns: int,
     nb_revolutions: float = 5,
     width: float = 1,
@@ -420,7 +421,6 @@ def initialize_3D_wave_caipi(
     spacing: tuple[int, int] = (1, 1),
     readout_axis: int = 0,
     wavegrad: float | tuple[float, float] | None = None,
-    R: tuple[int, int] = None,
     caipi_delta: int = 0,
     acq: Acquisition = None,
 ) -> NDArray:
@@ -430,8 +430,12 @@ def initialize_3D_wave_caipi(
 
     Parameters
     ----------
-    Nc : int
-        Number of shots
+    Nc_or_R : int or tuple[int, int]
+        Number of shots `Nc` or GRAPPA `R` factors along the two
+        phase-encoding directions.
+        - If an **int** is provided, it is interpreted as `Nc` (number of shots).
+        - If a **tuple[int, int]** is provided, it is interpreted as
+          `R` (GRAPPA factors).
     Ns : int
         Number of samples per shot
     nb_revolutions : float, optional
@@ -481,14 +485,14 @@ def initialize_3D_wave_caipi(
        Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
     acq = acq.default if acq is None else acq
-    if R is not None:
+    if not np.isscalar(Nc_or_R):
+        R = Nc_or_R
         sample_axis = tuple(
             im for i, im in enumerate(acq.img_size) if i != readout_axis
         )
         positions = (
             get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
         )
-        Nc = positions.shape[0]
         wavegrad = np.array(
             [[[wavegrad]]] if np.isscalar(wavegrad) else [[list(wavegrad)]], np.float32
         )
@@ -517,15 +521,15 @@ def initialize_3D_wave_caipi(
     perm = [[2, 0, 1], [1, 2, 0], [0, 1, 2]][readout_axis]
     initial_shot = initial_shot[..., perm]
 
-    if R is None:
-        positions = _generate_positions_packing_spacing(Nc, packing, shape, spacing)
+    if np.isscalar(Nc_or_R):
+        positions = get_packing_spacing_positions(Nc_or_R, packing, shape, spacing)
 
     # Shifting copies of the initial shot to all positions
     positions = np.insert(positions, readout_axis, 0, axis=-1)
     trajectory = initial_shot[None] + positions[:, None]
 
     axes = [[1, 2], [0, 2], [0, 1]][readout_axis]
-    if R is None:
+    if np.isscalar(Nc_or_R):
         trajectory[..., axes] /= np.max(np.abs(trajectory))
     return KMAX * trajectory
 

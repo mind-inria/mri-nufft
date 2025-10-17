@@ -2,9 +2,11 @@
 
 from typing import Any, Literal, Optional
 from collections.abc import Callable
+from functools import partial
 
 import numpy as np
 from numpy.typing import NDArray
+import numpy.linalg as nl
 from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
 from scipy.optimize import minimize_scalar
@@ -14,10 +16,13 @@ from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
     Acquisition,
+    Packings,
+    initialize_shape_norm,
     VDSorder,
     VDSpdf,
     initialize_tilt,
 )
+from .maths import CIRCLE_PACKING_DENSITY, generate_fibonacci_circle
 
 ################
 # DIRECT TOOLS #
@@ -1322,6 +1327,10 @@ def get_packing_spacing_positions(
     spacing: tuple[int, int] = (1, 1),
 ):
     """
+    Generate a k-space positions for a fixed spacing and packing.
+
+    Parameters
+    ----------
     Nc : int
         Number of positions
     packing : str, optional
@@ -1338,6 +1347,11 @@ def get_packing_spacing_positions(
         Spacing between helices over the 2D :math:`k_x-k_y` plane
         normalized similarly to `width` to correspond to
         helix diameters, by default (1, 1).
+
+    Returns
+    -------
+    positions : ndarray of shape (N, 2)
+        The Non-Cartesian coordinates of the sampled k-space points in 2D plane.
     """
     # Choose the helix positions according to packing
     packing_enum = Packings[packing]
