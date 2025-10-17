@@ -13,7 +13,7 @@ def test_wave_caipi_gradients(wavegrad=8.8e-3, caipi_delta=2, nb_revolutions=11)
     acq = Acquisition.default
     wavegrad = 8.8e-3
     traj = initialize_3D_wave_caipi(
-        (3, 3)
+        (3, 3),
         417,
         packing="square",
         shape="square",
