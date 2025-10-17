@@ -584,18 +584,22 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, new_smaps):
-        self._check_smaps_shape(new_smaps)
-        self._smaps = new_smaps
-
-    def _check_smaps_shape(self, smaps):
-        """Check the shape of the sensitivity maps."""
-        if smaps is None:
+        if new_smaps is None:
             self._smaps = None
-        elif smaps.shape != (self.n_coils, *self.shape):
-            raise ValueError(
-                f"smaps shape is {smaps.shape}, it should be"
-                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
-            )
+            return
+
+        if not isinstance(new_smaps, np.ndarray):
+            raise ValueError("Smaps should be an array")
+        C = new_smaps.shape[0]
+        XYZ = new_smaps.shape[1:]
+
+        # working with internal value for efficiency
+        if XYZ != self._shape:
+            raise ValueError("Smaps should match image shape.")
+        if C != self._n_coils:
+            self._n_coils = C
+            warnings.warn("updating number of coils via Smaps.")
+        self._smaps = new_smaps
 
     @property
     def density(self) -> NDArray[np.floating] | None:
