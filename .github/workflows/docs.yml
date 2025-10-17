@@ -98,7 +98,7 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
-            ✅ Documentation built! ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' }}
+            ✅ Documentation built! ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' || ''}}
             [download the artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.get-artifact-id.outputs.artifact-id }})
           edit-mode: replace
 
@@ -108,7 +108,7 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
-           ❌ Failed to build documentation ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' }}
+           ❌ Failed to build documentation ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' || '' }}
            [Check Log output](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           edit-mode: replace
 
