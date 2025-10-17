@@ -195,7 +195,7 @@ Reconstruct the image using the CG method
     /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/operators/base.py:857: UserWarning: Lipschitz constant did not converge
       warnings.warn("Lipschitz constant did not converge")
 
-    <matplotlib.legend.Legend object at 0x7c52230c7730>
+    <matplotlib.legend.Legend object at 0x72b2dfdb3fa0>
 
 
 
@@ -214,7 +214,7 @@ References
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.789 seconds)
+   **Total running time of the script:** (0 minutes 1.276 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_cg.py:
