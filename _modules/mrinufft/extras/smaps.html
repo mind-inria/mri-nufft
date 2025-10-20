@@ -908,7 +908,7 @@ document.write(`
     <span class="n">SOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Smaps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">Smaps</span> <span class="o">=</span> <span class="n">Smaps</span> <span class="o">*</span> <span class="n">mask</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">mask</span><span class="p">:</span>
         <span class="n">thresh</span> <span class="o">=</span> <span class="n">threshold_otsu</span><span class="p">(</span><span class="n">SOS</span><span class="p">)</span>
         <span class="c1"># Create convex hull from mask</span>
         <span class="n">convex_hull</span> <span class="o">=</span> <span class="n">convex_hull_image</span><span class="p">(</span><span class="n">SOS</span> <span class="o">&gt;</span> <span class="n">thresh</span><span class="p">)</span>
