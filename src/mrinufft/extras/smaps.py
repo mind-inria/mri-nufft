@@ -187,7 +187,7 @@ def low_frequency(
     SOS = np.linalg.norm(Smaps, axis=0)
     if isinstance(mask, np.ndarray):
         Smaps = Smaps * mask
-    elif isinstance(mask, bool):
+    elif isinstance(mask, bool) and mask:
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
         convex_hull = convex_hull_image(SOS > thresh)
