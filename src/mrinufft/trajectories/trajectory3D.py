@@ -511,6 +511,7 @@ def initialize_3D_wave_caipi(
         width = tuple(w for i, w in enumerate(width) if i != readout_axis)
     else:
         width = (width, width) if np.isscalar(width) else width
+        positions = get_packing_spacing_positions(Nc_or_R, packing, shape, spacing)
     # Initialize first shot
     angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
     initial_shot = np.stack(
@@ -520,9 +521,6 @@ def initialize_3D_wave_caipi(
     # reorder based on readout axis
     perm = [[2, 0, 1], [1, 2, 0], [0, 1, 2]][readout_axis]
     initial_shot = initial_shot[..., perm]
-
-    if np.isscalar(Nc_or_R):
-        positions = get_packing_spacing_positions(Nc_or_R, packing, shape, spacing)
 
     # Shifting copies of the initial shot to all positions
     positions = np.insert(positions, readout_axis, 0, axis=-1)
