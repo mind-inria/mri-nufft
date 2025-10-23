@@ -297,6 +297,47 @@ class FourierOperatorBase(ABC):
         )
         self.smaps = smaps.reshape(self.n_coils, *self.shape)
 
+    def make_linops(self, *, cupy: bool = False):
+        """Create a Scipy Linear Operator from the NUFFT operator.
+
+        We add a _nufft private attribute with the current operator.
+
+        Parameters
+        ----------
+        cupy: bool, default False
+            If True, create a Cupy Linear Operator
+
+        See Also
+        --------
+        - https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.LinearOperator.html
+        - https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html
+        """
+        if cupy and not CUPY_AVAILABLE:
+            raise ValueError("cupy is not available")
+        elif cupy:
+            from cupyx.scipy.sparse.linalg import LinearOperator
+        else:
+            from scipy.sparse.linalg import LinearOperator
+
+        linop = LinearOperator(
+            shape=(
+                self.n_batchs * self.n_coils * self.n_samples,
+                self.n_batchs
+                * (1 if self.uses_sense else self.n_coils)
+                * np.prod(self.shape),
+            ),
+            matvec=lambda x: self.op(  # type: ignore
+                x.reshape(
+                    self.n_batchs, (1 if self.uses_sense else self.n_coils), *self.shape
+                )
+            ).ravel(),
+            rmatvec=lambda x: self.adj_op(  # type: ignore
+                x.reshape(self.n_batchs, self.n_coils, self.n_samples)
+            ).ravel(),
+            dtype=self.cpx_dtype,
+        )
+        linop._nufft = self  # type: ignore
+
     def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
 
