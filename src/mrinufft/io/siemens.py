@@ -83,12 +83,14 @@ def read_siemens_rawdat(
     # Add sequence information
     for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
         # get a list of all sequences times in the sequence
-        # the first element found is the length of the list, we dicard it.
-        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))[1:]
-        nice_key = key[2:]  # strip prefix "al"
+        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))
+        nice_key = key[2:]  # strip prefix "al /ad"
         if len(vals) == 1:
             hdr[nice_key] = vals[0]
         elif len(vals) > 0:
+            # the first element found is the length of the list, we dicard it.
+            if vals[0] == len(vals[1:]):
+                vals = vals[1:]
             hdr[nice_key] = vals
         # don't populate if not found.
 
