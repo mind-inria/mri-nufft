@@ -234,7 +234,7 @@ density and can lead to high slew rates as shown below.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.942 seconds)
+   **Total running time of the script:** (0 minutes 0.943 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_trajectories_example_traj_projection.py:

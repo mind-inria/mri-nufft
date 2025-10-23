@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**08:55.936** total execution time for 9 files **from generated/autoexamples/trajectories**:
+**08:57.122** total execution time for 9 files **from generated/autoexamples/trajectories**:
 
 .. container::
 
@@ -33,29 +33,29 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_gif_3D.py` (``example_gif_3D.py``)
-     - 02:18.294
+     - 02:23.365
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_sampling_densities.py` (``example_sampling_densities.py``)
-     - 02:09.561
+     - 02:06.843
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_gif_2D.py` (``example_gif_2D.py``)
-     - 01:36.647
+     - 01:36.186
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_3D_trajectories.py` (``example_3D_trajectories.py``)
-     - 01:05.324
+     - 01:03.476
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_trajectory_tools.py` (``example_trajectory_tools.py``)
-     - 00:50.822
+     - 00:52.228
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_learn_samples_multires.py` (``example_learn_samples_multires.py``)
-     - 00:28.050
+     - 00:28.135
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_2D_trajectories.py` (``example_2D_trajectories.py``)
-     - 00:20.124
+     - 00:19.723
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_display_config.py` (``example_display_config.py``)
-     - 00:06.172
+     - 00:06.223
      - 0.0
    * - :ref:`sphx_glr_generated_autoexamples_trajectories_example_traj_projection.py` (``example_traj_projection.py``)
-     - 00:00.942
+     - 00:00.943
      - 0.0

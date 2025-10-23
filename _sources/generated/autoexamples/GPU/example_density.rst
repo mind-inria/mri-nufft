@@ -104,7 +104,7 @@ Create sample data
     /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:76: UserWarning: Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)
       warnings.warn(
 
-    <matplotlib.image.AxesImage object at 0x7255e41f17b0>
+    <matplotlib.image.AxesImage object at 0x709278e34580>
 
 
 
@@ -335,8 +335,8 @@ Pipe's method is an iterative scheme, that use the interpolation and spreading k
 
     /volatile/github-ci-mind-inria/gpu_mind_runner/_work/mri-nufft/venv/lib/python3.10/site-packages/mrinufft/_utils.py:81: UserWarning: Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)
       warnings.warn(
-    [0.01538814+0.j 0.020558  +0.j 0.0399904 +0.j ... 3.424798  +0.j
-     2.9435487 +0.j 2.6805582 +0.j]
+    [0.01538814+0.j 0.02055799+0.j 0.03999039+0.j ... 3.424798  +0.j
+     2.9435487 +0.j 2.6805584 +0.j]
 
 
 
@@ -375,8 +375,8 @@ We can also do density compensation using cufinufft backend
 
  .. code-block:: none
 
-    [0.01538814+0.j 0.020558  +0.j 0.0399904 +0.j ... 3.424797  +0.j
-     2.9435487 +0.j 2.6805584 +0.j]
+    [0.01538814+0.j 0.02055801+0.j 0.03999041+0.j ... 3.4247987 +0.j
+     2.943549  +0.j 2.6805584 +0.j]
 
 
 
@@ -384,7 +384,7 @@ We can also do density compensation using cufinufft backend
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.268 seconds)
+   **Total running time of the script:** (0 minutes 8.238 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_GPU_example_density.py:

@@ -334,7 +334,7 @@ is significantly reduced using the off-resonance corrected NUFFT operator (right
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 6.032 seconds)
+   **Total running time of the script:** (0 minutes 5.995 seconds)
 
 
 .. _sphx_glr_download_generated_autoexamples_operators_example_offresonance.py:
