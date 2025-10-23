@@ -345,7 +345,6 @@ class FourierOperatorBase(ABC):
             - If an array, it should be of shape (Nsamples,) and will be used as is.
             - If `True`, the method `pipe` is chosen as default estimation method.
 
-
         Notes
         -----
         The "pipe" method is only available for the following backends:
@@ -408,31 +407,30 @@ class FourierOperatorBase(ABC):
             tmp_op = self
         return power_method(max_iter, tmp_op)
 
-    def cg(self, kspace_data, compute_loss=False, **kwargs):
-        """Conjugate Gradient method to solve the inverse problem.
+    def pinv_solver(self, kspace_data, optim="lsqr", **kwargs):
+        """
+        Solves the linear system Ax = y.
+
+        It uses a least-square optimization solver,
 
         Parameters
         ----------
         kspace_data: NDArray
             The k-space data to reconstruct.
-        computer_loss: bool
-            Whether to compute the loss at each iteration.
-            If True, loss is calculated and returned, otherwise, it's skipped.
+        optim: str, default "lsqr"
+            name of the least-square optimizer to use.
+
         **kwargs:
-            Extra arguments to pass to the conjugate gradient method.
+            Extra arguments to pass to the least-square optimizer.
 
         Returns
         -------
         NDArray
             Reconstructed image
-        NDArray, optional
-            array of loss at each iteration, if compute_loss is True.
         """
-        from ..extras.gradient import cg
+        from ..extras.optim import get_optimizer
 
-        return cg(
-            operator=self, kspace_data=kspace_data, compute_loss=compute_loss, **kwargs
-        )
+        return get_optimizer(optim)(operator=self, kspace_data=kspace_data, **kwargs)
 
     @property
     def uses_sense(self):
