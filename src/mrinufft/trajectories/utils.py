@@ -497,7 +497,7 @@ def convert_gradients_to_trajectory(
     # Handle no initial positions
     acq = acq or Acquisition.default
     if initial_positions is None:
-        initial_positions = np.zeros((gradients.shape[0], 1, gradients.shape[-1]))
+        initial_positions = np.zeros((gradients.shape[0], gradients.shape[-1]))
 
     # Prepare and integrate gradients
     trajectory = gradients * acq.gamma * acq.raster_time
