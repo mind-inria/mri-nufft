@@ -422,7 +422,7 @@ def initialize_3D_wave_caipi(
     readout_axis: int = 0,
     wavegrad: float | tuple[float, float] | None = None,
     caipi_delta: int = 0,
-    acq: Acquisition = None,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Initialize 3D trajectories with Wave-CAIPI.
 
