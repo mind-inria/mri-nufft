@@ -63,7 +63,12 @@ def list_backends(available_only=False):
 
 
 def get_operator(
-    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
+    backend_name: str,
+    wrt_data: bool = False,
+    wrt_traj: bool = False,
+    paired_batch: bool = False,
+    *args,
+    **kwargs,
 ):
     """Return an MRI Fourier operator interface using the correct backend.
 
@@ -75,6 +80,9 @@ def get_operator(
         if set gradients wrt to data and images will be available.
     wrt_traj: bool, default False
         if set gradients wrt to trajectory will be available.
+    paired_batch_size : int, optional
+        If provided, specifies batch size for varying data/smaps pairs.
+        Default is None, which means no batching
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -113,10 +121,10 @@ def get_operator(
     # if autograd:
     if wrt_data or wrt_traj:
         if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(wrt_data, wrt_traj)
+            operator = operator.make_autograd(wrt_data, wrt_traj, paired_batch)
         else:
             # instance will be created later
-            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj, paired_batch)
 
     return operator
 
@@ -297,7 +305,13 @@ class FourierOperatorBase(ABC):
         )
         self.smaps = smaps.reshape(self.n_coils, *self.shape)
 
-    def make_autograd(self, wrt_data=True, wrt_traj=False):
+    def make_autograd(
+        self,
+        *,
+        wrt_data: bool = True,
+        wrt_traj: bool = False,
+        paired_batch: bool = False,
+    ):
         """Make a new Operator with autodiff support.
 
         Parameters
@@ -310,6 +324,10 @@ class FourierOperatorBase(ABC):
 
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
+
+        paired_batch_size : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
 
         Returns
         -------
@@ -328,7 +346,9 @@ class FourierOperatorBase(ABC):
 
         from mrinufft.operators.autodiff import MRINufftAutoGrad
 
-        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
+        return MRINufftAutoGrad(
+            self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
+        )
 
     def compute_density(self, method=None):
         """Compute the density compensation weights and set it.
@@ -487,18 +507,22 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, new_smaps):
-        self._check_smaps_shape(new_smaps)
-        self._smaps = new_smaps
-
-    def _check_smaps_shape(self, smaps):
-        """Check the shape of the sensitivity maps."""
-        if smaps is None:
+        if new_smaps is None:
             self._smaps = None
-        elif smaps.shape != (self.n_coils, *self.shape):
-            raise ValueError(
-                f"smaps shape is {smaps.shape}, it should be"
-                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
-            )
+            return
+
+        if not isinstance(new_smaps, np.ndarray):
+            raise ValueError("Smaps should be an array")
+        C = new_smaps.shape[0]
+        XYZ = new_smaps.shape[1:]
+
+        # working with internal value for efficiency
+        if XYZ != self._shape:
+            raise ValueError("Smaps should match image shape.")
+        if C != self._n_coils:
+            self._n_coils = C
+            warnings.warn("updating number of coils via Smaps.")
+        self._smaps = new_smaps
 
     @property
     def density(self):
@@ -559,9 +583,16 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
+    def with_autograd(
+        cls,
+        wrt_data=True,
+        wrt_traj=False,
+        paired_batch_size=None,
+        *args,
+        **kwargs,
+    ):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
+        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj, paired_batch_size)
 
 
 class FourierOperatorCPU(FourierOperatorBase):
