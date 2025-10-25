@@ -489,13 +489,13 @@ class FourierOperatorBase(ABC):
         return len(self._shape)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Shape of the image space of the operator."""
         return self._shape
 
     @shape.setter
     def shape(self, shape):
-        self._shape = tuple(shape)
+        self._shape = tuple(int(i) for i in shape)
 
     @property
     def n_coils(self):
@@ -540,12 +540,12 @@ class FourierOperatorBase(ABC):
             )
 
     @property
-    def density(self):
+    def density(self) -> NDArray[np.floating] | None:
         """Density compensation of the operator."""
         return self._density
 
     @density.setter
-    def density(self, new_density):
+    def density(self, new_density: NDArray):
         if new_density is None:
             self._density = None
         elif len(new_density) != self.n_samples:
@@ -568,21 +568,21 @@ class FourierOperatorBase(ABC):
         return np.dtype(DTYPE_R2C[str(self.dtype)])
 
     @property
-    def samples(self):
+    def samples(self) -> NDArray:
         """Return the samples used by the operator."""
         return self._samples
 
     @samples.setter
-    def samples(self, new_samples):
+    def samples(self, new_samples: NDArray[np.floating]):
         self._samples = new_samples
 
     @property
-    def n_samples(self):
+    def n_samples(self) -> int:
         """Return the number of samples used by the operator."""
         return self._samples.shape[0]
 
     @property
-    def norm_factor(self):
+    def norm_factor(self) -> np.floating:
         """Normalization factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
 
