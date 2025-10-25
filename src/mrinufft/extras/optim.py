@@ -1,7 +1,7 @@
 """Implements the LSQR algorithm."""
 
 from collections.abc import Callable
-
+import numpy as np
 from tqdm.auto import tqdm
 from numpy.typing import NDArray
 
@@ -60,8 +60,13 @@ def bc_left(x, y):
     return x.reshape(x.shape + (1,) * (y.ndim - x.ndim))
 
 
+@with_numpy_cupy
 def loss_l2_reg(
-    image, operator, kspace_data, damp: float = 0.0, x0: NDArray | None = None
+    image: NDArray,
+    operator: FourierOperatorBase,
+    kspace_data: NDArray,
+    damp: float = 0.0,
+    x0: NDArray | None = None,
 ):
     """
     Compute the regularized least squares loss for MRI reconstruction.
@@ -98,15 +103,16 @@ def loss_l2_reg(
       of the convergence.
 
     """
-    residual = operator.op(image) - kspace_data
+    residual = operator.op(image).reshape(operator.ksp_full_shape)
+    residual -= kspace_data.reshape(operator.ksp_full_shape)
     residual.reshape(operator.n_batchs, -1)
     norm_res = norm_batched(residual).squeeze()
 
     if damp:
+        image_ = image.reshape(operator.img_full_shape)
         if x0 is not None:
-            norm_damp = damp**2 * norm_batched(image - x0)
-        else:
-            norm_damp = damp**2 * norm_batched(image)
+            image_ = image_ - x0.reshape(operator.img_full_shape)
+        norm_damp = damp**2 * norm_batched(image_.reshape(operator.n_batchs, -1))
         norm_res += norm_damp
     return norm_res
 
@@ -225,8 +231,8 @@ def lsqr(
     if kspace_data.ndim > 1:
         kspace_data.squeeze()
 
-    u = kspace_data
-    bnorm = norm_batched(kspace_data)
+    u = kspace_data.copy()
+    bnorm = norm_batched(u)
 
     if x_init is None:
         if x0 is None:
@@ -268,10 +274,10 @@ def lsqr(
 
     cs2 = -1
     sn2 = 0.0
-    itn = istop = 0
+    istop = 0
     callback_returns = []
-    for itn in tqdm(range(n_iter)):
-        u *= -alpha.reshape(alpha.shape + (1,) * (u.ndim - 1))
+    for _ in tqdm(range(n_iter), disable=not progressbar):
+        u *= -bc_left(alpha, u)
         u += A(v)
         beta = norm_batched(u)
 
@@ -369,9 +375,7 @@ def lsqr(
                 callback(x, operator, kspace_data, damp=damp, x0=x0)
             )
 
-        if itn >= n_iter:
-            istop = 7
-        elif xp.all(1 + test3 <= 1):
+        if xp.all(1 + test3 <= 1):
             istop = 6
         elif xp.all(1 + test2 <= 1):
             istop = 5
@@ -387,6 +391,285 @@ def lsqr(
 
         if istop:
             break
+    if operator.squeeze_dims:
+        x = operator._safe_squeeze(x)
+    if callback_returns:
+        return x, callback_returns
+    return x
+
+
+@register_optim
+@with_numpy_cupy
+def lsmr(
+    operator: FourierOperatorBase,
+    kspace_data: NDArray,
+    damp: float = 0.0,
+    atol: float = 1e-6,
+    btol: float = 1e-6,
+    conlim: float = 1e8,
+    n_iter: int = 100,
+    x0: NDArray | None = None,
+    x_init: NDArray | None = None,
+    callback: Callable | None = None,
+    progressbar: bool = True,
+):
+    r"""
+    Solve a general regularized linear least-squares problem using the LSQR algorithm.
+
+    Solves problems of the form::
+
+        minimize ||A x - b||_2^2 + damp^2 ||x - x0||_2^2
+
+    Stop iterating if:
+    - numerical convergence is reached: ``norm(Ax-b) <= atol * norm(A) * norm(x)
+      + btol * norm(b)``
+    - estimation of the conditioning of the problem diverge: ``cond(A)>=conlim``
+    - Maximum number of iteration reached.
+
+    Parameters
+    ----------
+    $base_params
+
+    atol : float, optional
+        Stopping tolerance on the absolute error. Default is 1e-6.
+    btol : float, optional
+        Stopping tolerance on the relative error. Default is 1e-6.
+    conlim : float, optional
+        Limit on condition number. Iteration stops if condition exceeds this
+        value. Default is 1e8.
+
+    $returns
+
+    References
+    ----------
+    .. [1] D. C.-L. Fong and M. A. Saunders,
+           "LSMR: An iterative algorithm for sparse least-squares problems",
+           SIAM J. Sci. Comput., vol. 33, pp. 2950-2971, 2011.
+           :arxiv:`1006.0758`
+    .. [2] LSMR Software, https://web.stanford.edu/group/SOL/software/lsmr/
+
+    """
+    xp = get_array_module(kspace_data)
+
+    ctol = 0
+    if conlim > 0:
+        ctol = 1 / conlim
+
+    #   eps = xp.finfo(kspace_data.dtype).eps
+
+    IMG_COIL_DIM = operator.n_coils if not operator.uses_sense else 1
+
+    def AT(y):
+        return operator.adj_op(y).reshape(
+            operator.n_batchs, IMG_COIL_DIM, *operator.shape
+        )
+
+    def A(x):
+        return operator.op(x).reshape(
+            operator.n_batchs, operator.n_coils, operator.n_samples
+        )
+
+    kspace_data = kspace_data.reshape(
+        (operator.n_batchs, operator.n_coils, operator.n_samples)
+    )
+    if kspace_data.ndim > 1:
+        kspace_data.squeeze()
+
+    u = kspace_data.copy()
+
+    normb = norm_batched(u)
+
+    if x_init is None:
+        if x0 is None:
+            x_init = xp.zeros(
+                (operator.n_batchs, IMG_COIL_DIM, *operator.shape),
+                dtype=operator.cpx_dtype,
+            )
+        else:
+            x_init = xp.copy(x0)
+    x = x_init
+
+    beta = normb.copy()
+
+    if x0 is not None:
+        u -= A(x)
+        beta = norm_batched(u)
+
+    if xp.all(beta) > 0:
+        u /= bc_left(beta, u)
+        v = AT(u)
+        alpha = norm_batched(v)
+    else:
+        v = xp.copy(x)
+        alpha = xp.zeros(v.shape[0])
+
+    if xp.any((alpha * beta) == 0):
+        return x
+
+    if xp.all(alpha) > 0:
+        v /= bc_left(alpha, v)
+
+    damp = xp.full(operator.n_batchs, damp, xp.float32)
+
+    # initialize variable for 1st iteration
+    itn = 0
+    zetabar = alpha * beta
+    alphabar = alpha
+    rho = 1
+    rhobar = 1
+    cbar = 1
+    sbar = 0
+
+    h = v.copy()
+    hbar = xp.zeros(v.shape, operator.cpx_dtype)
+
+    # Initialize variables for estimation of ||r||.
+
+    betadd = beta
+    betad = 0
+    rhodold = 1
+    tautildeold = 0
+    thetatilde = 0
+    zeta = 0
+    d = 0
+
+    # Initialize variables for estimation of ||A|| and cond(A)
+
+    normA2 = alpha * alpha
+    maxrbar = 0
+    minrbar = 1e100
+    normA = xp.sqrt(normA2)
+    condA = 1
+    normx = 0
+
+    # Items for use in stopping rules, normb set earlier
+    istop = 0
+    normr = beta
+
+    callback_returns = []
+    for _ in tqdm(range(n_iter)):
+
+        u *= -bc_left(alpha, u)
+        u += A(v)
+        beta = norm_batched(u)
+
+        if xp.all(beta) > 0:
+            u /= bc_left(beta, u)
+            v *= -bc_left(beta, v)
+            v += AT(u)
+            alpha = norm_batched(v)
+            if xp.all(alpha) > 0:
+                v /= bc_left(alpha, v)
+
+        chat, shat, alphahat = _sym_ortho(alphabar, damp)
+
+        rhoold = rho
+        c, s, rho = _sym_ortho(alphahat, beta)
+        thetanew = s * alpha
+        alphabar = c * alpha
+
+        # Use a plane rotation (Qbar_i) to turn R_i^T to R_i^bar
+
+        rhobarold = rhobar
+        zetaold = zeta
+        thetabar = sbar * rho
+        rhotemp = cbar * rho
+        cbar, sbar, rhobar = _sym_ortho(cbar * rho, thetanew)
+        zeta = cbar * zetabar
+        zetabar = -sbar * zetabar
+
+        # Update h, h_hat, x.
+
+        hbar *= -(thetabar * rho / (rhoold * rhobarold))
+        hbar += h
+        x += (zeta / (rho * rhobar)) * hbar
+        h *= -(thetanew / rho)
+        h += v
+
+        # Estimate of ||r||.
+
+        # Apply rotation Qhat_{k,2k+1}.
+        betaacute = chat * betadd
+        betacheck = -shat * betadd
+
+        # Apply rotation Q_{k,k+1}.
+        betahat = c * betaacute
+        betadd = -s * betaacute
+
+        # Apply rotation Qtilde_{k-1}.
+        # betad = betad_{k-1} here.
+
+        thetatildeold = thetatilde
+        ctildeold, stildeold, rhotildeold = _sym_ortho(rhodold, thetabar)
+        thetatilde = stildeold * rhobar
+        rhodold = ctildeold * rhobar
+        betad = -stildeold * betad + ctildeold * betahat
+
+        # betad   = betad_k here.
+        # rhodold = rhod_k  here.
+
+        tautildeold = (zetaold - thetatildeold * tautildeold) / rhotildeold
+        taud = (zeta - thetatilde * tautildeold) / rhodold
+        d = d + betacheck * betacheck
+        normr = xp.sqrt(d + (betad - taud) ** 2 + betadd * betadd)
+
+        # Estimate ||A||.
+        normA2 = normA2 + beta * beta
+        normA = xp.sqrt(normA2)
+        normA2 = normA2 + alpha * alpha
+
+        # Estimate cond(A).
+        maxrbar = max(maxrbar, rhobarold)
+        if itn > 1:
+            minrbar = min(minrbar, rhobarold)
+        condA = max(maxrbar, rhotemp) / min(minrbar, rhotemp)
+
+        # Test for convergence.
+
+        # Compute norms for convergence testing.
+        normar = abs(zetabar)
+        normx = norm_batched(x)
+
+        # Now use these norms to estimate certain other quantities,
+        # some of which will be small near a solution.
+
+        test1 = normr / normb
+        if (normA * normr) != 0:
+            test2 = normar / (normA * normr)
+        else:
+            test2 = xp.inf
+        test3 = 1 / condA
+        t1 = test1 / (1 + normA * normx / normb)
+        rtol = btol + atol * normA * normx / normb
+
+        # The following tests guard against extremely small values of
+        # atol, btol or ctol.  (The user may have set any or all of
+        # the parameters atol, btol, conlim  to 0.)
+        # The effect is equivalent to the normAl tests using
+        # atol = eps,  btol = eps,  conlim = 1/eps.
+
+        if callback:
+            callback_returns.append(
+                callback(x, operator, kspace_data, damp=damp, x0=x0)
+            )
+
+        if 1 + test3 <= 1:
+            istop = 6
+        elif 1 + test2 <= 1:
+            istop = 5
+        elif 1 + t1 <= 1:
+            istop = 4
+        # Allow for tolerances set by the user.
+        elif test3 <= ctol:
+            istop = 3
+        elif test2 <= atol:
+            istop = 2
+        elif test1 <= rtol:
+            istop = 1
+
+        if istop:
+            break
+
     if operator.squeeze_dims:
         x = operator._safe_squeeze(x)
     if callback_returns:
@@ -449,7 +732,7 @@ def cg(
     image = image - velocity
 
     callbacks_results = []
-    for _ in tqdm(range(n_iter), disable=progressbar):
+    for _ in tqdm(range(n_iter), disable=not progressbar):
         grad_new = operator.data_consistency(image, kspace_data)
         if xp.linalg.norm(grad_new) <= tol:
             break
