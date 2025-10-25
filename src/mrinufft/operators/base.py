@@ -520,6 +520,16 @@ class FourierOperatorBase(ABC):
         self._n_batchs = int(n_batchs)
 
     @property
+    def img_full_shape(self) -> tuple[int, int, ...]:
+        """Full image shape with batch and coil dimensions."""
+        return (self.n_batchs, (1 if self.uses_sense else self.n_coils)) + self.shape
+
+    @property
+    def ksp_full_shape(self) -> tuple[int, int, int]:
+        """Full kspace shape with batch and coil dimensions."""
+        return (self.n_batchs, self.n_coils, self.n_samples)
+
+    @property
     def smaps(self):
         """Sensitivity maps of the operator."""
         return self._smaps
