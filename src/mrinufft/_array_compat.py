@@ -14,28 +14,27 @@ ARRAY_LIBS = {
     "tensorflow": (None, None),
 }
 
+ArrayTypes = np.ndarray
 # TEST import of array libraries.
+
 TENSORFLOW_AVAILABLE = True
-try:
-    import tensorflow as tf
-except ImportError:
-    TENSORFLOW_AVAILABLE = False
-
-
 CUPY_AVAILABLE = True
+AUTOGRAD_AVAILABLE = True
+TORCH_AVAILABLE = True
+
 try:
     import cupy as cp
 
     ARRAY_LIBS["cupy"] = (cp, cp.ndarray)
+    ArrayTypes = ArrayTypes | cp.ndarray
 except ImportError:
     CUPY_AVAILABLE = False
 
-AUTOGRAD_AVAILABLE = True
-TORCH_AVAILABLE = True
 try:
     import torch
 
     ARRAY_LIBS["torch"] = (torch, torch.Tensor)
+    ArrayTypes = ArrayTypes | torch.Tensor
 except ImportError:
     AUTOGRAD_AVAILABLE = False
     TORCH_AVAILABLE = False
@@ -49,10 +48,13 @@ else:
         np.dtype("complex128"): torch.complex128,
     }
 try:
+    import tensorflow as tf
     from tensorflow.experimental import numpy as tnp
 
     ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
+    ArrayTypes = ArrayTypes | tnp.ndarray
 except ImportError:
+    TENSORFLOW_AVAILABLE = False
     pass
 
 
@@ -316,9 +318,11 @@ def _convert(_array_to_xp, args, kwargs=None):
     args = list(args)
     for n in range(len(args)):
         _arg = args[n]
-        if hasattr(_arg, "__array__"):
+        # All array are converted to the detected module
+        # but numpy scalars are left as is.
+        if isinstance(_arg, ArrayTypes):
             args[n] = _array_to_xp(_arg)
-        elif isinstance(_arg, (tuple, list)):
+        elif isinstance(_arg, tuple | list) and isinstance(_arg[0], ArrayTypes):
             args[n], _ = _convert(_array_to_xp, _arg)
         # objects with attributes that are arrays are also converted
         elif hasattr(_arg, "__dict__") and not isinstance:
