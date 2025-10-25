@@ -1,7 +1,7 @@
 """Array libraries compatibility utils."""
 
-from typing import overload
 import warnings
+from numbers import Number  # abstract base type for python numeric type
 from functools import wraps, partial
 from inspect import cleandoc
 from numpy.typing import NDArray, DTypeLike
@@ -58,8 +58,10 @@ except ImportError:
     pass
 
 
-def get_array_module(array: NDArray) -> np:  # type: ignore
+def get_array_module(array: NDArray | Number) -> np:  # type: ignore
     """Get the module of the array."""
+    if isinstance(array, Number | np.generic):
+        return np
     for lib, array_type in ARRAY_LIBS.values():
         if lib is not None and isinstance(array, array_type):
             return lib
