@@ -824,11 +824,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         # Disable coil dimension for faster computation
         n_coils = self.n_coils
+        n_batchs = self.n_batchs
         smaps = self.smaps
         squeeze_dims = self.squeeze_dims
 
         self.smaps = None
         self.n_coils = 1
+        self.n_batchs = 1
         self.squeeze_dims = True
 
         x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
@@ -841,6 +843,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # restore coil setup
         self.n_coils = n_coils
+        self.n_batchs = n_batchs
         self.smaps = smaps
         self.squeeze_dims = squeeze_dims
 
