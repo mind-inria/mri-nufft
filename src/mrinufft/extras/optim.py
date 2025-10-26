@@ -103,12 +103,15 @@ def loss_l2_reg(
       of the convergence.
 
     """
+    xp = get_array_module(image)
     residual = operator.op(image).reshape(operator.ksp_full_shape)
     residual -= kspace_data.reshape(operator.ksp_full_shape)
     residual.reshape(operator.n_batchs, -1)
     norm_res = norm_batched(residual).squeeze()
 
-    if damp:
+    if (isinstance(damp, float | np.generic | xp.generic) and damp != 0.0) or (
+        isinstance(damp, xp.ndarray) and xp.any(damp)
+    ):
         image_ = image.reshape(operator.img_full_shape)
         if x0 is not None:
             image_ = image_ - x0.reshape(operator.img_full_shape)
@@ -580,10 +583,10 @@ def lsmr(
 
         # Update h, h_hat, x.
 
-        hbar *= -(thetabar * rho / (rhoold * rhobarold))
+        hbar *= bc_left(-(thetabar * rho / (rhoold * rhobarold)), hbar)
         hbar += h
-        x += (zeta / (rho * rhobar)) * hbar
-        h *= -(thetanew / rho)
+        x += bc_left((zeta / (rho * rhobar)), hbar) * hbar
+        h *= bc_left(-(thetanew / rho), h)
         h += v
 
         # Estimate of ||r||.
@@ -619,10 +622,11 @@ def lsmr(
         normA2 = normA2 + alpha * alpha
 
         # Estimate cond(A).
-        maxrbar = max(maxrbar, rhobarold)
+        # We use the batch dimension for getting better estimates
+        maxrbar = xp.max(xp.maximum(maxrbar, rhobarold))
         if itn > 1:
-            minrbar = min(minrbar, rhobarold)
-        condA = max(maxrbar, rhotemp) / min(minrbar, rhotemp)
+            minrbar = xp.min(xp.minimum(minrbar, rhobarold))
+        condA = xp.mean(xp.maximum(maxrbar, rhotemp) / xp.minimum(minrbar, rhotemp))
 
         # Test for convergence.
 
@@ -634,7 +638,7 @@ def lsmr(
         # some of which will be small near a solution.
 
         test1 = normr / normb
-        if (normA * normr) != 0:
+        if xp.all((normA * normr) != 0):
             test2 = normar / (normA * normr)
         else:
             test2 = xp.inf
@@ -653,18 +657,18 @@ def lsmr(
                 callback(x, operator, kspace_data, damp=damp, x0=x0)
             )
 
-        if 1 + test3 <= 1:
+        if xp.all(1 + test3) <= 1:
             istop = 6
-        elif 1 + test2 <= 1:
+        elif xp.all(1 + test2) <= 1:
             istop = 5
-        elif 1 + t1 <= 1:
+        elif xp.all(1 + t1) <= 1:
             istop = 4
         # Allow for tolerances set by the user.
-        elif test3 <= ctol:
+        elif xp.all(test3) <= ctol:
             istop = 3
-        elif test2 <= atol:
+        elif xp.all(test2) <= atol:
             istop = 2
-        elif test1 <= rtol:
+        elif xp.all(test1) <= rtol:
             istop = 1
 
         if istop:
@@ -711,14 +715,10 @@ def cg(
     """
     lipschitz_cst = operator.get_lipschitz_cst()
     xp = get_array_module(kspace_data)
-    if operator.uses_sense:
-        init_shape = (operator.n_batchs, 1, *operator.shape)
-    else:
-        init_shape = (operator.n_batchs, operator.n_coils, *operator.shape)
     image = (
-        xp.zeros(init_shape, dtype=kspace_data.dtype)
+        xp.zeros(operator.img_full_shape, dtype=kspace_data.dtype)
         if x_init is None
-        else x_init.reshape(init_shape)
+        else x_init.reshape(operator.img_full_shape)
     )
     velocity = xp.zeros_like(image)
 
