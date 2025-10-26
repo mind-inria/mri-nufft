@@ -440,13 +440,25 @@ class FourierOperatorBase(ABC):
         minified version of the nufft operator. No coil or B0 compensation is used,
         but includes any computed density.
         """
-        if self.n_coils > 1 or self.n_batchs > 1:
-            tmp_op = self.__class__(
-                self.samples, self.shape, density=self.density, n_coils=1, **kwargs
-            )
-        else:
-            tmp_op = self
-        return power_method(max_iter, tmp_op)
+        n_coils = self.n_coils
+        n_batchs = self.n_batchs
+        smaps = self.smaps
+        squeeze_dims = self.squeeze_dims
+
+        self.smaps = None
+        self.n_coils = 1
+        self.n_batchs = 1
+        self.squeeze_dims = True
+
+        lipschitz_cst = power_method(max_iter, self)
+
+        # restore coil setup
+        self.n_coils = n_coils
+        self.n_batchs = n_batchs
+        self.smaps = smaps
+        self.squeeze_dims = squeeze_dims
+
+        return lipschitz_cst
 
     def pinv_solver(self, kspace_data, optim="lsqr", **kwargs):
         """
