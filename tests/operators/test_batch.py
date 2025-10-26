@@ -89,21 +89,16 @@ def flat_operator(operator):
 @fixture(scope="module")
 def image_data(operator):
     """Generate a random image."""
-    if operator.uses_sense:
-        shape = (operator.n_batchs, *operator.shape)
-    else:
-        shape = (operator.n_batchs, operator.n_coils, *operator.shape)
-    img = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    img += np.random.rand(*shape).astype(operator.cpx_dtype)
+    img = (1j * np.random.rand(*operator.img_full_shape)).astype(operator.cpx_dtype)
+    img += np.random.rand(*operator.img_full_shape).astype(operator.cpx_dtype)
     return img
 
 
 @fixture(scope="module")
 def kspace_data(operator):
     """Generate a random image."""
-    shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
-    kspace = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    kspace += np.random.rand(*shape).astype(operator.cpx_dtype)
+    kspace = (1j * np.random.rand(*operator.ksp_full_shape)).astype(operator.cpx_dtype)
+    kspace += np.random.rand(*operator.ksp_full_shape).astype(operator.cpx_dtype)
     return kspace
 
 
@@ -230,19 +225,18 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     assert (norm - norm_prev) / norm_prev < 1e-3
 
 
-@parametrize("use_init", [True, False])
-@parametrize("compute_loss", [True, False])
-def test_cg_runs(operator, image_data, kspace_data, compute_loss, use_init):
-    if operator.n_batchs > 1:
-        pytest.skip("Skip batch tests")
-    """Compare the interface to the raw NUDFT implementation."""
-    x_init = None
-    if use_init:
-        x_init = image_data
-    image_cg = operator.cg(
-        kspace_data,
-        compute_loss=compute_loss,
-        x_init=x_init,
-        num_iter=2,
-        progressbar=False,
+@parametrize("optim", ["cg", "lsqr", "lsmr"])
+@param_array_interface
+def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
+    """Test pseudo inverse batch solver."""
+    image_data = to_interface(image_data, array_interface)
+    kspace_data = to_interface(kspace_data, array_interface)
+
+    from mrinufft.extras.optim import loss_l2_reg
+
+    img, res = operator.pinv_solver(
+        kspace_data, optim=optim, callback=loss_l2_reg, n_iter=10
     )
+
+    assert img.shape == operator.img_full_shape
+    assert res[0].size == operator.n_batchs
