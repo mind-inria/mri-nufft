@@ -849,7 +849,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             for t, b in enumerate(idx_batch):
                 grad[b] += coil_img[t]
         grad /= self.norm_factor
-        return grad
+        return grad.reshape(B, 1, *XYZ)
 
     def _grad_calibless(self, image_data, obs_data):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
