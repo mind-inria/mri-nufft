@@ -76,6 +76,7 @@ def read_siemens_rawdat(
         "n_adc_samples": int(twixObj.image.NCol),
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
+        "n_reps": int(twixObj.image.NRep),
         "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
         "affine": nifti_affine(twixObj),
         "acs": None,
@@ -122,6 +123,7 @@ def read_siemens_rawdat(
         hdr["n_shots"],
         hdr["n_adc_samples"],
         hdr["n_slices"] if slice_num is None else 1,
+        hdr["n_reps"],
         hdr["n_contrasts"] if contrast_num is None else 1,
         hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
     )
