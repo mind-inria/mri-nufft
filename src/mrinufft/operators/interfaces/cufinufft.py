@@ -860,7 +860,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         **kwargs,
@@ -873,7 +873,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             the kspace locations
         volume_shape: np.ndarray
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -894,7 +894,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
-        for _ in range(num_iterations):
+        for _ in range(max_iter):
             density_comp /= cp.abs(
                 grid_op.op(
                     grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
