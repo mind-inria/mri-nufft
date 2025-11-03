@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import ClassVar
+from typing import ClassVar, overload, Any
 from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
@@ -62,9 +62,25 @@ def list_backends(available_only=False):
     ]
 
 
+@overload
+def get_operator(
+    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False
+) -> Callable[..., FourierOperatorBase]: ...
+
+
+@overload
+def get_operator(
+    backend_name: str,
+    wrt_data: bool = False,
+    wrt_traj: bool = False,
+    *args: Any,
+    **kwargs: Any,
+) -> FourierOperatorBase: ...
+
+
 def get_operator(
     backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
-):
+) -> FourierOperatorBase | Callable[..., FourierOperatorBase]:
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
