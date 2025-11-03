@@ -669,7 +669,11 @@ class FourierOperatorBase(ABC):
         **kwargs,
     ):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj, paired_batch_size)
+        return cls(*args, **kwargs).make_autograd(
+            wrt_data=wrt_data,
+            wrt_traj=wrt_traj,
+            paired_batch_size=paired_batch_size,
+        )
 
 
 class FourierOperatorCPU(FourierOperatorBase):
