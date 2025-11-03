@@ -27,7 +27,7 @@ callback: Callable, optional
     If provided, a callback function will be called at the end of each
     iteration with the current estimate. It should have the following signature
     ``callback(operator, kspace_data, damp, x0)``
-n_iter: int, optional
+max_iter: int, optional
     Maximum number of iterations. Default is 100.
 progressbar: bool, optional
     If True (default) display a progress bar to track iterations.
@@ -230,7 +230,7 @@ def lsqr(
     atol: float = 1e-6,
     btol: float = 1e-6,
     conlim: float = 1e8,
-    n_iter: int = 100,
+    max_iter: int = 100,
     x0: NDArray | None = None,
     x_init: NDArray | None = None,
     callback: Callable | None = None,
@@ -332,7 +332,7 @@ def lsqr(
     sn2 = 0.0
     istop = 0
     callback_returns = []
-    for _ in tqdm(range(n_iter), disable=not progressbar):
+    for _ in tqdm(range(max_iter), disable=not progressbar):
         u *= -_bc_left(alpha, u)
         u += operator.op(v).reshape(operator.ksp_full_shape)
         beta = norm_batched(u)
@@ -463,7 +463,7 @@ def lsmr(
     atol: float = 1e-6,
     btol: float = 1e-6,
     conlim: float = 1e8,
-    n_iter: int = 100,
+    max_iter: int = 100,
     x0: NDArray | None = None,
     x_init: NDArray | None = None,
     callback: Callable | None = None,
@@ -612,7 +612,7 @@ def lsmr(
     normr = beta
 
     callback_returns = []
-    for _ in tqdm(range(n_iter), disable=not progressbar):
+    for _ in tqdm(range(max_iter), disable=not progressbar):
 
         u *= -_bc_left(alpha, u)
         u += A(v)
@@ -751,7 +751,7 @@ def cg(
     damp: float = 0.0,
     x0: NDArray | None = None,
     x_init: NDArray | None = None,
-    n_iter: int = 10,
+    max_iter: int = 10,
     tol: float = 1e-4,
     progressbar: bool = True,
     callback: Callable | None = None,
@@ -796,7 +796,7 @@ def cg(
     image = image - velocity
 
     callbacks_results = []
-    for _ in tqdm(range(n_iter), disable=not progressbar):
+    for _ in tqdm(range(max_iter), disable=not progressbar):
         grad_new = operator.data_consistency(image, kspace_data).reshape(
             operator.img_full_shape
         )

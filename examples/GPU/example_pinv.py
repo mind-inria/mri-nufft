@@ -98,7 +98,7 @@ iterations_cb = dict()
 for optim in OPTIM:
     image, iter_cb = nufft.pinv_solver(
         kspace_data=kspace_data_gpu,
-        n_iter=1000,
+        max_iter=1000,
         callback=mixed_cb,
         optim=optim,
     )
@@ -180,7 +180,7 @@ iterations_cb = dict()
 for optim in OPTIM:
     image, iter_cb = nufft.pinv_solver(
         kspace_data=kspace_data_gpu,
-        n_iter=1000,
+        max_iter=1000,
         callback=mixed_cb,
         damp=0.1,
         optim=optim,
