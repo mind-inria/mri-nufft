@@ -235,7 +235,7 @@ def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
     from mrinufft.extras.optim import loss_l2_reg
 
     img, res = operator.pinv_solver(
-        kspace_data, optim=optim, callback=loss_l2_reg, n_iter=5
+        kspace_data, optim=optim, callback=loss_l2_reg, max_iter=5
     )
 
     assert img.shape == operator.img_full_shape

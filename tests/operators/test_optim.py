@@ -62,6 +62,6 @@ def test_pinv(operator, image_data, optim):
     kspace_nufft = operator.op(image_data).squeeze()
 
     _, residuals = operator.pinv_solver(
-        kspace_nufft, optim=optim, n_iter=10, callback=loss_l2_reg
+        kspace_nufft, optim=optim, max_iter=10, callback=loss_l2_reg
     )
     assert residuals[-1] <= residuals[0]
