@@ -5,24 +5,24 @@ import numpy as np
 from tqdm.auto import tqdm
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import get_array_module, with_numpy_cupy
+from mrinufft._array_compat import get_array_module, with_numpy_cupy, CUPY_AVAILABLE
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import MethodRegister
-
 
 _optim_docs = dict(
     base_params=r"""
 nufft: FourierOperatorBase
     The NUFFT operator representing the forward model.
 kspace_data: NDArray
-    The right-hand side vector (`kspace` data). Shape typically (n_batchs,
+    The right-hand side vector (`kspace` data). Shape is typically (n_batchs,
     n_coils, n_samples).
 damp: float, optional
     Damping (regularization) parameter. Default is 0.0 (no regularization).
 x0: NDArray or None, optional
-    Damping vector. If None, uses zero. Shape must be
+    Damping vector. If None, uses zero. Shape is typically (n_batchs, n_coils or 1,
+    *nufft.shape).
 x_init: NDArray or None, optional
-    Initial guess vector. If ommitted, default to x0.
+    Initial guess vector. If ommitted, default to x0. Must have same shape as x0.
 callback: Callable, optional
     If provided, a callback function will be called at the end of each
     iteration with the current estimate. It should have the following signature
@@ -46,16 +46,34 @@ register_optim = MethodRegister("optim", _optim_docs)
 get_optimizer = register_optim.make_getter()
 
 
-def norm_batched(x) -> NDArray:
-    """Compute the norm of x, preserving the first (batch) dimension."""
-    xp = get_array_module(x)
-    return xp.sqrt(xp.sum(abs(x) ** 2, axis=tuple(range(1, x.ndim)))).squeeze()
+def _norm_batched_np(x: NDArray) -> NDArray:
+    return np.sqrt(np.sum(abs(x) ** 2, axis=tuple(range(1, x.ndim))))
 
 
-def bc_left(x, y):
+if CUPY_AVAILABLE:
+    import cupy as cp
+
+    def _norm_batched_cp(x: NDArray) -> NDArray:
+        return cp.linalg.norm(x.reshape(x.shape[0], -1), axis=-1)
+
+
+def _bc_left(x, y):
     """Broadcast x to y shape, starting from first axis.
 
-    Regular numpy broadcasting start from the last axis.
+    Usefull for applying batch-wise scaling factors. as regular numpy
+    broadcasting start from the last axis.
+
+    Parameters
+    ----------
+    x : NDArray
+        Array to broadcast.
+    y : NDArray
+        Target array.
+
+    Returns
+    -------
+    NDArray
+        Broadcasted array.
     """
     return x.reshape(x.shape + (1,) * (y.ndim - x.ndim))
 
@@ -68,14 +86,14 @@ def loss_l2_reg(
     damp: float = 0.0,
     x0: NDArray | None = None,
 ):
-    """
+    r"""
     Compute the regularized least squares loss for MRI reconstruction.
 
-    Computes the loss:
-        ||A x - y||_2^2 + damp^2 ||x - x0||_2^2
+    Computes the loss :math:`\|A x - y\|_2^2 + \gamma^2 \|x - x_0\|_2^2`
+
     where A is the measurement operator, x is the current image estimate, y is
-    the acquired k-space data, damp is a regularization parameter, and x0 is an
-    initial guess.
+    the acquired k-space data, damp (:math:`\gamma`) is a regularization
+    parameter, and :math:`x_0` is an initial guess.
 
     Parameters
     ----------
@@ -101,9 +119,9 @@ def loss_l2_reg(
     - Batch dimension is preserved if present.
     - This function can be used as a callback in cg or lsqr method to keep track
       of the convergence.
-
     """
     xp = get_array_module(image)
+    norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
     residual = operator.op(image).reshape(operator.ksp_full_shape)
     residual -= kspace_data.reshape(operator.ksp_full_shape)
     residual.reshape(operator.n_batchs, -1)
@@ -120,7 +138,52 @@ def loss_l2_reg(
     return norm_res
 
 
-def _sym_ortho(a, b):
+@with_numpy_cupy
+def loss_l2_AHreg(
+    image: NDArray,
+    operator: FourierOperatorBase,
+    kspace_data: NDArray,
+    *args,
+    **kwargs,
+):
+    """
+    Compute the norm of the residual in the image domain.
+
+    Parameters
+    ----------
+    image : NDArray
+        Current image estimate. Shape and dtype must be compatible with the operator.
+    operator : FourierOperatorBase
+        The NUFFT (non-uniform FFT) operator used for forward modeling.
+    kspace_data : NDArray
+        Measured k-space data. Shape must match the output of the operator.op(image).
+
+    Returns
+    -------
+    norm_res : float or NDArray
+        The computed L2 regularized least squares loss value(s).
+        If batched, shape = (n_batchs,).
+
+    Notes
+    -----
+    - Batch dimension is preserved if present.
+    - This function can be used as a callback in cg or lsqr method to keep track
+      of the convergence.
+
+    """
+    xp = get_array_module(image)
+    norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
+
+    residual = operator.op(image).reshape(operator.ksp_full_shape)
+    residual -= kspace_data.reshape(operator.ksp_full_shape)
+    img_residual = operator.adj_op(residual).reshape(operator.img_full_shape)
+    img_residual.reshape(operator.n_batchs, -1)
+    norm_res = norm_batched(img_residual).squeeze()
+
+    return norm_res
+
+
+def _sym_ortho(a: NDArray, b: NDArray) -> tuple[NDArray, NDArray, NDArray]:
     """
     Stable implementation of Givens rotation.
 
@@ -174,13 +237,15 @@ def lsqr(
     r"""
     Solve a general regularized linear least-squares problem using the LSQR algorithm.
 
-    Solves problems of the form::
+    Solves problems of the form
+    .. math::
 
-        minimize ||A x - b||_2^2 + damp^2 ||x - x0||_2^2
+        \arg\min \|A x - b\|_2^2 + \gamma^2 \|x - x0\|_2^2
 
     Stop iterating if:
-    - numerical convergence is reached: ``norm(Ax-b) <= atol * norm(A) * norm(x)
-      + btol * norm(b)``
+
+    - numerical convergence is reached: :math:`\|Ax-b\| <= atol \|A\| * \|x\|
+      + btol * \|b\|`
     - estimation of the conditioning of the problem diverge: ``cond(A)>=conlim``
     - Maximum number of iteration reached.
 
@@ -209,28 +274,14 @@ def lsqr(
     .. [3] https://github.com/scipy/scipy/blob/v1.16.2/scipy/sparse/linalg/_isolve/lsqr.py
     """
     xp = get_array_module(kspace_data)
-
+    norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
     ctol = 0
     if conlim > 0:
         ctol = 1 / conlim
 
     eps = xp.finfo(kspace_data.dtype).eps
 
-    IMG_COIL_DIM = operator.n_coils if not operator.uses_sense else 1
-
-    def AT(y):
-        return operator.adj_op(y).reshape(
-            operator.n_batchs, IMG_COIL_DIM, *operator.shape
-        )
-
-    def A(x):
-        return operator.op(x).reshape(
-            operator.n_batchs, operator.n_coils, operator.n_samples
-        )
-
-    kspace_data = kspace_data.reshape(
-        (operator.n_batchs, operator.n_coils, operator.n_samples)
-    )
+    kspace_data = kspace_data.reshape(operator.ksp_full_shape)
     if kspace_data.ndim > 1:
         kspace_data.squeeze()
 
@@ -239,23 +290,23 @@ def lsqr(
 
     if x_init is None:
         if x0 is None:
-            x_init = xp.zeros(
-                (operator.n_batchs, IMG_COIL_DIM, *operator.shape),
-                dtype=operator.cpx_dtype,
-            )
+            x_init = xp.zeros(operator.img_full_shape, dtype=operator.cpx_dtype)
         else:
-            x_init = xp.copy(x0)
+            x0 = x0.reshape(operator.img_full_shape)
+            x_init = xp.copy(x0).reshape(operator.img_full_shape)
+    else:
+        x_init = x_init.reshape(operator.img_full_shape)
     x = x_init
 
     beta = bnorm.copy()
 
     if x0 is not None:
-        u -= A(x)
+        u -= operator.op(x0).reshape(operator.ksp_full_shape)
         beta = norm_batched(u)
 
     if xp.all(beta) > 0:
-        u /= bc_left(beta, u)
-        v = AT(u)
+        u /= _bc_left(beta, u)
+        v = operator.adj_op(u).reshape(operator.img_full_shape)
         alpha = norm_batched(v)
     else:
         v = xp.copy(x)
@@ -265,7 +316,7 @@ def lsqr(
         return x
 
     if xp.all(alpha) > 0:
-        v /= bc_left(alpha, v)
+        v /= _bc_left(alpha, v)
     w = xp.copy(v)
 
     rhobar = alpha
@@ -280,18 +331,18 @@ def lsqr(
     istop = 0
     callback_returns = []
     for _ in tqdm(range(n_iter), disable=not progressbar):
-        u *= -bc_left(alpha, u)
-        u += A(v)
+        u *= -_bc_left(alpha, u)
+        u += operator.op(v).reshape(operator.ksp_full_shape)
         beta = norm_batched(u)
 
         if xp.all(beta) > 0:
-            u /= bc_left(beta, u)
+            u /= _bc_left(beta, u)
             anorm = xp.sqrt(anorm**2 + alpha**2 + beta**2 + dampsq)
-            v *= -bc_left(beta, v)
-            v += AT(u)
+            v *= -_bc_left(beta, v)
+            v += operator.adj_op(u).reshape(operator.img_full_shape)
             alpha = norm_batched(v)
             if xp.all(alpha) > 0:
-                v /= bc_left(alpha, v)
+                v /= _bc_left(alpha, v)
         if damp:
             rhobar1 = xp.sqrt(rhobar**2 + dampsq)
             cs1 = rhobar / rhobar1
@@ -301,7 +352,7 @@ def lsqr(
         else:
             rhobar1 = rhobar
             psi = 0.0
-        # use a plane rotation to elimiate the subdiagonal element (beta)
+        # use a plane rotation to eliminate the subdiagonal element (beta)
         # of the lower-bidiagonal matrix, giving an upper-bidiagonal matrix.
         cs, sn, rho = _sym_ortho(rhobar1, beta)
 
@@ -312,11 +363,11 @@ def lsqr(
         tau = sn * phi
         t1 = phi / rho
         t2 = -theta / rho
-        dk = w / bc_left(rho, w)
+        dk = w / _bc_left(rho, w)
 
         # update x and w
-        x += bc_left(t1, w) * w
-        w *= bc_left(t2, w)
+        x += _bc_left(t1, w) * w
+        w *= _bc_left(t2, w)
         w += v
 
         ddnorm += norm_batched(dk) ** 2
@@ -417,15 +468,17 @@ def lsmr(
     progressbar: bool = True,
 ):
     r"""
-    Solve a general regularized linear least-squares problem using the LSQR algorithm.
+    Solve a general regularized linear least-squares problem using the LSMR algorithm.
 
-    Solves problems of the form::
+    Solves problems of the form
+    .. math::
 
-        minimize ||A x - b||_2^2 + damp^2 ||x - x0||_2^2
+        \arg\min \|A x - b\|_2^2 + \gamma^2 \|x - x0\|_2^2
 
     Stop iterating if:
-    - numerical convergence is reached: ``norm(Ax-b) <= atol * norm(A) * norm(x)
-      + btol * norm(b)``
+
+    - numerical convergence is reached: :math:`\|Ax-b\| <= atol \|A\| * \|x\|
+      + btol * \|b\|`
     - estimation of the conditioning of the problem diverge: ``cond(A)>=conlim``
     - Maximum number of iteration reached.
 
@@ -451,8 +504,16 @@ def lsmr(
            :arxiv:`1006.0758`
     .. [2] LSMR Software, https://web.stanford.edu/group/SOL/software/lsmr/
 
+    Notes
+    -----
+    - LSMR is generally more stable than LSQR, notably in term of image residual
+      norm :math:`\|A^H(Ax-b)\|`, and is similar to the MINRES algorithm for
+      least squares problems.
+    - It usually converges faster than LSQR and can stop in fewer iterations.
     """
+
     xp = get_array_module(kspace_data)
+    norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
 
     ctol = 0
     if conlim > 0:
@@ -484,12 +545,12 @@ def lsmr(
 
     if x_init is None:
         if x0 is None:
-            x_init = xp.zeros(
-                (operator.n_batchs, IMG_COIL_DIM, *operator.shape),
-                dtype=operator.cpx_dtype,
-            )
+            x_init = xp.zeros(operator.img_full_shape, dtype=operator.cpx_dtype)
         else:
-            x_init = xp.copy(x0)
+            x0 = x0.reshape(operator.img_full_shape)
+            x_init = xp.copy(x0).reshape(operator.img_full_shape)
+    else:
+        x_init = x_init.reshape(operator.img_full_shape)
     x = x_init
 
     beta = normb.copy()
@@ -499,7 +560,7 @@ def lsmr(
         beta = norm_batched(u)
 
     if xp.all(beta) > 0:
-        u /= bc_left(beta, u)
+        u /= _bc_left(beta, u)
         v = AT(u)
         alpha = norm_batched(v)
     else:
@@ -510,7 +571,7 @@ def lsmr(
         return x
 
     if xp.all(alpha) > 0:
-        v /= bc_left(alpha, v)
+        v /= _bc_left(alpha, v)
 
     damp = xp.full(operator.n_batchs, damp, xp.float32)
 
@@ -550,19 +611,19 @@ def lsmr(
     normr = beta
 
     callback_returns = []
-    for _ in tqdm(range(n_iter)):
+    for _ in tqdm(range(n_iter), disable=not progressbar):
 
-        u *= -bc_left(alpha, u)
+        u *= -_bc_left(alpha, u)
         u += A(v)
         beta = norm_batched(u)
 
         if xp.all(beta) > 0:
-            u /= bc_left(beta, u)
-            v *= -bc_left(beta, v)
+            u /= _bc_left(beta, u)
+            v *= -_bc_left(beta, v)
             v += AT(u)
             alpha = norm_batched(v)
             if xp.all(alpha) > 0:
-                v /= bc_left(alpha, v)
+                v /= _bc_left(alpha, v)
 
         chat, shat, alphahat = _sym_ortho(alphabar, damp)
 
@@ -583,10 +644,10 @@ def lsmr(
 
         # Update h, h_hat, x.
 
-        hbar *= bc_left(-(thetabar * rho / (rhoold * rhobarold)), hbar)
+        hbar *= _bc_left(-(thetabar * rho / (rhoold * rhobarold)), hbar)
         hbar += h
-        x += bc_left((zeta / (rho * rhobar)), hbar) * hbar
-        h *= bc_left(-(thetanew / rho), h)
+        x += _bc_left((zeta / (rho * rhobar)), hbar) * hbar
+        h *= _bc_left(-(thetanew / rho), h)
         h += v
 
         # Estimate of ||r||.
@@ -657,18 +718,18 @@ def lsmr(
                 callback(x, operator, kspace_data, damp=damp, x0=x0)
             )
 
-        if xp.all(1 + test3) <= 1:
+        if xp.all(1 + test3 <= 1):
             istop = 6
-        elif xp.all(1 + test2) <= 1:
+        elif xp.all(1 + test2 <= 1):
             istop = 5
-        elif xp.all(1 + t1) <= 1:
+        elif xp.all(1 + t1 <= 1):
             istop = 4
         # Allow for tolerances set by the user.
-        elif xp.all(test3) <= ctol:
+        elif xp.all(test3 <= ctol):
             istop = 3
-        elif xp.all(test2) <= atol:
+        elif xp.all(test2 <= atol):
             istop = 2
-        elif xp.all(test1) <= rtol:
+        elif xp.all(test1 <= rtol):
             istop = 1
 
         if istop:
