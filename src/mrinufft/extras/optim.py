@@ -133,7 +133,9 @@ def loss_l2_reg(
         image_ = image.reshape(operator.img_full_shape)
         if x0 is not None:
             image_ = image_ - x0.reshape(operator.img_full_shape)
-        norm_damp = damp**2 * norm_batched(image_.reshape(operator.n_batchs, -1))
+        norm_damp = (
+            damp**2 * norm_batched(image_.reshape(operator.n_batchs, -1))
+        ).squeeze()
         norm_res += norm_damp
     return norm_res
 
@@ -511,7 +513,6 @@ def lsmr(
       least squares problems.
     - It usually converges faster than LSQR and can stop in fewer iterations.
     """
-
     xp = get_array_module(kspace_data)
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
 
@@ -783,7 +784,9 @@ def cg(
     )
     velocity = xp.zeros_like(image)
 
-    grad = operator.data_consistency(image, kspace_data)
+    grad = operator.data_consistency(image, kspace_data).reshape(
+        operator.img_full_shape
+    )
     if damp:
         if x0:
             grad += damp * (image - x0)
@@ -794,7 +797,14 @@ def cg(
 
     callbacks_results = []
     for _ in tqdm(range(n_iter), disable=not progressbar):
-        grad_new = operator.data_consistency(image, kspace_data)
+        grad_new = operator.data_consistency(image, kspace_data).reshape(
+            operator.img_full_shape
+        )
+        if damp:
+            if x0 is not None:
+                grad_new += damp * (image - x0.reshape(operator.img_full_shape))
+            else:
+                grad_new += damp * image
         if xp.linalg.norm(grad_new) <= tol:
             break
 
