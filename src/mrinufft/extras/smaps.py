@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
-from mrinufft._array_compat import with_numpy_cupy, get_array_module
+from mrinufft._array_compat import with_numpy_cupy, get_array_module, with_torch
 from mrinufft._utils import MethodRegister
 import numpy as np
+from mrinufft.extras.cartesian import fft, ifft
 from numpy.typing import NDArray
 
 from collections.abc import Callable
@@ -81,8 +82,11 @@ def _extract_kspace_center(
         index = xp.extract(condition, index)
         center_locations = kspace_loc[index, :]
         data_thresholded = data_ordered[:, index]
-        dc = density[index]
-        return data_thresholded, center_locations, dc
+        if density is not None:
+            dc = density[index]
+        else:
+            dc = None
+        return xp.ascontiguousarray(data_thresholded), center_locations, dc
     else:
         if callable(window_fun):
             window = window_fun(kspace_loc)
@@ -207,6 +211,149 @@ def low_frequency(
     return Smaps, SOS
 
 
+@with_torch
+def _unfold_blocks(calib, calib_width):
+    for i, width in enumerate(calib_width):
+        calib = calib.unfold(dimension=i+1, size=width, step=1)
+    return calib
+
+
+
+@register_smaps
+@flat_traj
+@with_numpy_cupy
+def espirit(
+    traj: NDArray,
+    shape: tuple[int, ...],
+    kspace_data: NDArray,
+    backend: str,
+    calib_width: int | tuple[int, ...] = 24,
+    kernel_width: int | tuple[int, ...] = 6,
+    thresh: float = 0.02,
+    density: NDArray | None = None,
+) -> tuple[NDArray, NDArray]:
+    """
+    Calculate low-frequency sensitivity maps.
+
+    Parameters
+    ----------
+    traj : numpy.ndarray
+        The trajectory of the samples.
+    shape : tuple
+        The shape of the image.
+    kspace_data : numpy.ndarray
+        The k-space data.
+    threshold : float, or tuple of float, optional
+        The threshold used for extracting the k-space center.
+        By default it is 0.1
+    backend : str
+        The backend used for the operator.
+    density : numpy.ndarray, optional
+        The density compensation weights.
+    
+    Returns
+    -------
+    Smaps : numpy.ndarray
+        The low-frequency sensitivity maps.
+    SOS : numpy.ndarray
+        The sum of squares of the sensitivity maps.
+    """
+    # defer import to later to prevent circular import
+    from mrinufft import get_operator
+    from mrinufft.operators.base import power_method
+
+    try:
+        from sigpy.mri.app import EspiritCalib
+        from pykeops.torch import ComplexLazyTensor
+        import torch
+        import sigpy as sgp
+        import cupy as cp
+        from cupyx.scipy.ndimage import zoom
+    except ImportError as err:
+        raise ImportError(
+            "The sigpy module is not available. Please install "
+            "it along with the [extra] dependencies "
+            "or using `pip install sigpy`."
+        ) from err
+    if isinstance(calib_width, int):
+        calib_width = (calib_width,) * traj.shape[-1]
+    if isinstance(kernel_width, int):
+        kernel_width = (kernel_width,) * traj.shape[-1]
+    xp = get_array_module(kspace_data)
+    k_space, samples, dc = _extract_kspace_center(
+        kspace_data=kspace_data,
+        kspace_loc=traj,
+        threshold=tuple(float(sh) for sh in calib_width / np.asarray(shape)),
+        density=density,
+        window_fun='rect',
+    )
+    smaps_adj_op = get_operator(backend)(
+        samples,
+        shape,
+        density=dc,
+        n_coils=k_space.shape[-2],
+        squeeze_dims=True,
+    )
+    central_kspace_img = smaps_adj_op.cg(cp.asarray(k_space, dtype=cp.complex64))
+    central_kspace = fft(central_kspace_img)
+    import cupy as cp
+    maps = EspiritCalib(central_kspace, device=cp.cuda.Device(0), thresh=0.5).run()
+    # Get calibration region
+    calib_shape = (k_space.shape[0], *calib_width)
+    calib = sgp.resize(central_kspace, calib_shape)
+    calib = _unfold_blocks(calib, kernel_width)
+    calib = calib.reshape(
+        calib.shape[0],
+        -1,
+        np.prod(kernel_width),
+    )
+    
+    calib = calib.transpose(1, 0, 2).reshape(-1, calib.shape[0] * np.prod(kernel_width))
+    _, S, VH = xp.linalg.svd(calib, full_matrices=False)
+    VH = VH[S > thresh * S.max(), :]
+    # Get kernels
+    n_kernels = len(VH)
+    kernels = VH.reshape((n_kernels, k_space.shape[0], np.prod(kernel_width)))
+    smaps_kernel_kspace = torch.ones((k_space.shape[0], *kernel_width), dtype=torch.complex64)
+    smaps_kernel_kspace = smaps_kernel_kspace.reshape(k_space.shape[0], -1)  
+    kernels = torch.tensor(kernels, dtype=torch.complex64)
+    # Move frequency dimension to front -> (Nfreq, K, C)
+    kernels_flat = kernels.permute(2, 0, 1).contiguous()
+    x_flat = smaps_kernel_kspace.permute(1, 0).contiguous()
+    x_flat =x_flat.to(kernels_flat.device)
+
+    def forward(x):
+        """
+        x: torch.complex64 tensor, shape (kernel_size, n_coils, 1)
+        returns: (A^H A) @ x, same shape
+        """
+        # Step 1: s_k(f) = Σ_c K_k(f,c)*x(f,c)
+        K_lazy = ComplexLazyTensor(kernels_flat[:, None, :, :])  # (Nfreq, 1, K, C)
+        x_lazy = ComplexLazyTensor(x_flat[:, None, None, :])           # (Nfreq, C, 1)
+        s = K_lazy * x_lazy         # (Nfreq, K)
+
+        # Step 2: y_c(f) = Σ_k conj(K_k(f,c)) * s_k(f)
+        y = (K_lazy.conj() * s).sum(dim=2).squeeze()  # (Nfreq, C, 1)
+
+        return y
+    
+    def normalize(x):
+        return torch.linalg.norm(torch.abs(x), axis=-1)[:, None]
+    
+
+    out = power_method(
+        max_iter=10,
+        operator=forward,
+        norm_func=normalize,
+        x=x_flat,
+        check_convergence=False,
+    )
+    
+    
+
+    return Smaps, SOS
+
+
 @with_numpy_cupy
 def coil_compression(
     kspace_data: NDArray,
@@ -236,6 +383,8 @@ def coil_compression(
     NDArray
         Coil-compressed data. Shape: (K, n_samples) if K is int, number of
         retained components otherwise.
+    NDArray
+        The compression matrix. Shape: (K, n_coils).
     """
     xp = get_array_module(kspace_data)
 
@@ -262,4 +411,4 @@ def coil_compression(
         K = min(K, w_sorted.size)
     V = v_sorted[:K]  # use top K component
     compress_data = V @ kspace_data
-    return compress_data
+    return compress_data, V
