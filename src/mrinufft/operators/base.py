@@ -422,7 +422,7 @@ class FourierOperatorBase(ABC):
             self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
         )
 
-    def compute_density(self, method=None):
+    def compute_density(self, method: Callable[..., NDArray] = None):
         """Compute the density compensation weights and set it.
 
         Parameters
@@ -470,7 +470,7 @@ class FourierOperatorBase(ABC):
             )
         self.density = method(self.samples, self.shape, **kwargs)
 
-    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+    def get_lipschitz_cst(self, max_iter=10) -> np.floating | NDArray[np.floating]:
         """Return the Lipschitz constant of the operator.
 
         Parameters
@@ -561,7 +561,7 @@ class FourierOperatorBase(ABC):
         self._shape = tuple(int(i) for i in shape)
 
     @property
-    def n_coils(self):
+    def n_coils(self) -> int:
         """Number of coils for the operator."""
         return self._n_coils
 
@@ -583,7 +583,7 @@ class FourierOperatorBase(ABC):
         self._n_batchs = int(n_batchs)
 
     @property
-    def img_full_shape(self) -> tuple[int, int, ...]:
+    def img_full_shape(self) -> tuple[int, ...]:
         """Full image shape with batch and coil dimensions."""
         return (self.n_batchs, (1 if self.uses_sense else self.n_coils)) + self.shape
 
@@ -622,7 +622,7 @@ class FourierOperatorBase(ABC):
         return self._density
 
     @density.setter
-    def density(self, new_density: NDArray):
+    def density(self, new_density: NDArray | None):
         if new_density is None:
             self._density = None
         elif len(new_density) != self.n_samples:
@@ -941,7 +941,7 @@ def power_method(
     operator: FourierOperatorBase,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-) -> float:
+) -> np.floating | NDArray[np.floating]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
