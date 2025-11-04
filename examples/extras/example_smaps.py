@@ -40,7 +40,6 @@ def show_maps(imgs):
         axes[i, 0].set_title(f"Coil {i+1} - YZ plane")
         axes[i, 1].set_title(f"Coil {i+1} - XZ plane")
         axes[i, 2].set_title(f"Coil {i+1} - XY plane")
-    plt.axis("off")
     plt.show()
     return fig
 
@@ -78,6 +77,7 @@ smaps_methods = ["espirit", "low_frequency"]
 if BACKEND == "gpunufft":
     # GPU exists, run on GPU
     import cupy as cp
+
     kspace_data = cp.asarray(kspace_data, dtype=cp.complex64)
 for method in smaps_methods:
     extra_kwargs = {}

@@ -816,7 +816,7 @@ def power_method(
     x: NDArray | None = None,
     return_eigvec: bool = False,
     check_convergence: bool = True,
-) -> float | NDAr | tuple[float | NDArray, NDArray]:
+) -> float | NDArray | tuple[float | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters

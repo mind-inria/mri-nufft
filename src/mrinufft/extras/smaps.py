@@ -130,7 +130,7 @@ def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
     pad_width = []
     slices = []
 
-    for i, (s, t) in enumerate(zip(in_shape, target_shape)):
+    for _, (s, t) in enumerate(zip(in_shape, target_shape)):
         diff = t - s
         if diff > 0:
             # need to pad
@@ -238,7 +238,7 @@ def low_frequency(
         Smaps = Smaps * convex_hull
     # Smooth out the sensitivity maps
     if np.sum(blurr_factor) > 0:
-        if isinstance(blurr_factor, (float, int)):
+        if isinstance(blurr_factor, float | int):
             blurr_factor = (blurr_factor,) * SOS.ndim
         Smaps = gaussian(np.abs(Smaps), sigma=(0,) + blurr_factor) * np.exp(
             1j * np.angle(Smaps)
@@ -297,11 +297,14 @@ def espirit(
     thresh : float, optional
         The threshold for the singular values. By default it is 0.02.
     crop : float, optional
-        The cropping threshold for the sensitivity maps. By default it is 0.95.
+        The cropping threshold for the sensitivity maps.
+        By default it is 0.95.
     decim : int, optional
-        The decimation factor for the caluclation of sensitivity maps. By default it is 1.
-        This can be used to speed up the computation and significantly reduce memory usage.
-        The final result is upsampled back to the original size through linear interpolation.
+        The decimation factor for the caluclation of sensitivity maps.
+        By default it is 1. This can be used to speed up the computation
+        and significantly reduce memory usage. The final result is
+        upsampled back to the original size through linear
+        interpolation.
 
     Returns
     -------
