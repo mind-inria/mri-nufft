@@ -73,6 +73,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     backend = "stacked"
     available = True  # the true availabily will be check at runtime.
+    autograd_available = False
 
     def __init__(
         self,
