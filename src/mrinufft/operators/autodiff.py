@@ -35,18 +35,16 @@ class _NUFFT_OP(torch.autograd.Function):
         if ctx.nufft_op._grad_wrt_data:
             grad_data = ctx.nufft_op.adj_op(dy)
         if ctx.nufft_op._grad_wrt_traj:
-            im_size = x.size()[1:]
             factor = 1
             if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
-                torch.linspace(-size / 2, size / 2 - 1, size) * factor
-                for size in im_size
+                torch.linspace(-s / 2, s / 2 - 1, s) * factor
+                for s in ctx.nufft_op.shape
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
             grid_r = torch.stack(grid_r, dim=0).type_as(x)[:, None]
             grid_x = x * grid_r  # Element-wise multiplication: x * r
-
             nufft_dx_dom = torch.cat(
                 [ctx.nufft_op.op(grid_x[i, ...]) for i in range(grid_x.size(0))],
                 dim=0,
@@ -80,13 +78,12 @@ class _NUFFT_ADJOP(torch.autograd.Function):
             grad_data = ctx.nufft_op.op(dx)
         if ctx.nufft_op._grad_wrt_traj:
             ctx.nufft_op.toggle_grad_traj()
-            im_size = dx.size()[2:]
             factor = 1
             if ctx.nufft_op.backend in ["gpunufft"]:
                 factor *= np.pi * 2
             r = [
-                torch.linspace(-size / 2, size / 2 - 1, size) * factor
-                for size in im_size
+                torch.linspace(-s / 2, s / 2 - 1, s) * factor
+                for s in ctx.nufft_op.shape
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
             grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None]
@@ -236,17 +233,17 @@ class MRINufftAutoGrad(torch.nn.Module):
         batched_kspace = []
         for i in range(len(batched_imgs)):
             try:
-                if batched_smaps:
+                if batched_smaps is not None:
                     # update smaps for proper backward computation
                     self.nufft_op.smaps = batched_smaps[i]
-                if batched_samples:
+                if batched_samples is not None:
                     self.samples = batched_samples[i]
                 batched_kspace.append(
                     _NUFFT_OP.apply(batched_imgs[i], self.samples, self.nufft_op)
                 )
             except Exception as e:
                 raise RuntimeError(
-                    f"Failed at batch index {i+1}"
+                    f"Failed at batch index {i}"
                 ) from e  # For an easier debugging
         return torch.stack(batched_kspace, dim=0)
 
@@ -257,11 +254,11 @@ class MRINufftAutoGrad(torch.nn.Module):
             smaps=batched_smaps, kspace=batched_kspace, samples=batched_samples
         )
         batched_imgs = []
-        for i in range(self.batch_size):
+        for i in range(len(batched_kspace)):
             try:
-                if batched_smaps:
+                if batched_smaps is not None:
                     self.nufft_op.smaps = batched_smaps[i]
-                if batched_samples:
+                if batched_samples is not None:
                     # updates the nufft_op samples internally
                     self.samples = batched_samples[i]
                 batched_imgs.append(
@@ -299,13 +296,13 @@ class MRINufftAutoGrad(torch.nn.Module):
 
         if imgs is not None and smaps is not None:
             D, B, C, *XYZ = imgs.shape
-            D2, B2, C2, *XYZ2 = smaps.shape
-            if D != D2 or B != B2 or XYZ != XYZ2 or C != 1:
+            D2, C2, *XYZ2 = smaps.shape
+            if D != D2 or XYZ != XYZ2 or C != 1:
                 raise ValueError("Shape mismatch between smaps and image")
         if kspace is not None and smaps is not None:
             D, B, C, NS = kspace.shape
-            D2, B2, C2, *XYZ2 = smaps.shape
-            if D != D2 or B != B2:
+            D2, C2, *XYZ2 = smaps.shape
+            if D != D2:
                 raise ValueError("Shape mismatch between smaps and k-space")
         if kspace is not None and samples is not None:
             D, B, C, NS = kspace.shape
@@ -319,7 +316,7 @@ class MRINufftAutoGrad(torch.nn.Module):
                 raise ValueError("Shape mismatch between samples loc and image")
         if samples is not None and smaps is not None:
             D, NS, N = samples.shape
-            D2, B2, C2, *XYZ2 = smaps.shape
+            D2, C2, *XYZ2 = smaps.shape
             if D != D2 or N != len(XYZ2):
                 raise ValueError("Shape mismatch between samples loc and smaps")
         if imgs is not None and kspace is not None:
