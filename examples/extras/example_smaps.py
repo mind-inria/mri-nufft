@@ -30,14 +30,16 @@ def show_maps(imgs):
     """Display 4D sensitivity maps in a 4x3 figure layout."""
     n_coils, nx, ny, nz = imgs.shape
     fig, axes = plt.subplots(4, 3, figsize=(15, 20))
+    imgs = np.abs(imgs)
     for i in range(n_coils):
-        axes[i, 0].imshow(np.abs(imgs[i, nx//2, :, :]))
-        axes[i, 1].imshow(np.abs(imgs[i, :, ny//2, :]))
-        axes[i, 2].imshow(np.abs(imgs[i, :, :, nz//2]))
+        axes[i, 0].imshow(imgs[i, nx//2, :, :], vmax=imgs.max(), vmin=imgs.min())
+        axes[i, 1].imshow(imgs[i, :, ny//2, :], vmax=imgs.max(), vmin=imgs.min())
+        axes[i, 2].imshow(imgs[i, :, :, nz//2], vmax=imgs.max(), vmin=imgs.min())
         axes[i, 0].set_title(f'Coil {i+1} - YZ plane')
         axes[i, 1].set_title(f'Coil {i+1} - XZ plane')
         axes[i, 2].set_title(f'Coil {i+1} - XY plane')
-    plt.tight_layout()
+    plt.axis('off')
+    plt.show()
     return fig
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
@@ -45,9 +47,9 @@ BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 # %% 
 # Get MRI data, 3D FLORET trajectory, and simulate k-space data
 samples_loc = initialize_3D_floret(Nc=16*16, Ns=256)
-mri = get_mri(0)[::2, ::2, ::2]  # Load and downsample MRI data for speed
+mri = get_mri(0)[::2, ::2, ::2][::-1, ::-1]  # Load and downsample MRI data for speed
 n_coils = 4
-actual_smaps = birdcage_maps((n_coils, *mri.shape)).astype(np.complex64)  # Generate birdcage sensitivity maps
+actual_smaps = birdcage_maps((n_coils, *mri.shape), dtype=np.complex64)  # Generate birdcage sensitivity maps
 
 # %%
 # Show the sensitivity maps
@@ -62,7 +64,7 @@ show_maps(per_ch_mri)
 # %%
 # Simulate k-space data
 forward_op = get_operator(BACKEND)(samples_loc, shape=mri.shape, n_coils=n_coils, density=True)
-kspace_data = forward_op.op(mri)  # Simulate k-space data
+kspace_data = forward_op.op(per_ch_mri)  # Simulate k-space data
 
 # Estimate sensitivity maps from k-space data using different method
 smaps_methods = ["espirit", "low_frequency"]
