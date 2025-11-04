@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import ClassVar
+from typing import ClassVar, overload, Any
 from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
@@ -62,9 +62,25 @@ def list_backends(available_only=False):
     ]
 
 
+@overload
+def get_operator(
+    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False
+) -> Callable[..., FourierOperatorBase]: ...
+
+
+@overload
+def get_operator(
+    backend_name: str,
+    wrt_data: bool = False,
+    wrt_traj: bool = False,
+    *args: Any,
+    **kwargs: Any,
+) -> FourierOperatorBase: ...
+
+
 def get_operator(
     backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
-):
+) -> FourierOperatorBase | Callable[..., FourierOperatorBase]:
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
@@ -297,6 +313,47 @@ class FourierOperatorBase(ABC):
         )
         self.smaps = smaps.reshape(self.n_coils, *self.shape)
 
+    def make_linops(self, *, cupy: bool = False):
+        """Create a Scipy Linear Operator from the NUFFT operator.
+
+        We add a _nufft private attribute with the current operator.
+
+        Parameters
+        ----------
+        cupy: bool, default False
+            If True, create a Cupy Linear Operator
+
+        See Also
+        --------
+        - https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.LinearOperator.html
+        - https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html
+        """
+        if cupy and not CUPY_AVAILABLE:
+            raise ValueError("cupy is not available")
+        elif cupy:
+            from cupyx.scipy.sparse.linalg import LinearOperator
+        else:
+            from scipy.sparse.linalg import LinearOperator
+
+        linop = LinearOperator(
+            shape=(
+                self.n_batchs * self.n_coils * self.n_samples,
+                self.n_batchs
+                * (1 if self.uses_sense else self.n_coils)
+                * np.prod(self.shape),
+            ),
+            matvec=lambda x: self.op(  # type: ignore
+                x.reshape(
+                    self.n_batchs, (1 if self.uses_sense else self.n_coils), *self.shape
+                )
+            ).ravel(),
+            rmatvec=lambda x: self.adj_op(  # type: ignore
+                x.reshape(self.n_batchs, self.n_coils, self.n_samples)
+            ).ravel(),
+            dtype=self.cpx_dtype,
+        )
+        linop._nufft = self  # type: ignore
+
     def make_autograd(self, wrt_data=True, wrt_traj=False):
         """Make a new Operator with autodiff support.
 
@@ -344,7 +401,6 @@ class FourierOperatorBase(ABC):
             other items will be used as kwargs.
             - If an array, it should be of shape (Nsamples,) and will be used as is.
             - If `True`, the method `pipe` is chosen as default estimation method.
-
 
         Notes
         -----
@@ -400,39 +456,50 @@ class FourierOperatorBase(ABC):
         minified version of the nufft operator. No coil or B0 compensation is used,
         but includes any computed density.
         """
-        if self.n_coils > 1 or self.n_batchs > 1:
-            tmp_op = self.__class__(
-                self.samples, self.shape, density=self.density, n_coils=1, **kwargs
-            )
-        else:
-            tmp_op = self
-        return power_method(max_iter, tmp_op)
+        n_coils = self.n_coils
+        n_batchs = self.n_batchs
+        smaps = self.smaps
+        squeeze_dims = self.squeeze_dims
 
-    def cg(self, kspace_data, compute_loss=False, **kwargs):
-        """Conjugate Gradient method to solve the inverse problem.
+        self.smaps = None
+        self.n_coils = 1
+        self.n_batchs = 1
+        self.squeeze_dims = True
+
+        lipschitz_cst = power_method(max_iter, self)
+
+        # restore coil setup
+        self.n_coils = n_coils
+        self.n_batchs = n_batchs
+        self.smaps = smaps
+        self.squeeze_dims = squeeze_dims
+
+        return lipschitz_cst
+
+    def pinv_solver(self, kspace_data, optim="lsqr", **kwargs):
+        """
+        Solves the linear system Ax = y.
+
+        It uses a least-square optimization solver,
 
         Parameters
         ----------
         kspace_data: NDArray
             The k-space data to reconstruct.
-        computer_loss: bool
-            Whether to compute the loss at each iteration.
-            If True, loss is calculated and returned, otherwise, it's skipped.
+        optim: str, default "lsqr"
+            name of the least-square optimizer to use.
+
         **kwargs:
-            Extra arguments to pass to the conjugate gradient method.
+            Extra arguments to pass to the least-square optimizer.
 
         Returns
         -------
         NDArray
             Reconstructed image
-        NDArray, optional
-            array of loss at each iteration, if compute_loss is True.
         """
-        from ..extras.gradient import cg
+        from ..extras.optim import get_optimizer
 
-        return cg(
-            operator=self, kspace_data=kspace_data, compute_loss=compute_loss, **kwargs
-        )
+        return get_optimizer(optim)(operator=self, kspace_data=kspace_data, **kwargs)
 
     @property
     def uses_sense(self):
@@ -450,13 +517,13 @@ class FourierOperatorBase(ABC):
         return len(self._shape)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Shape of the image space of the operator."""
         return self._shape
 
     @shape.setter
     def shape(self, shape):
-        self._shape = tuple(int(sh) for sh in shape)
+        self._shape = tuple(int(i) for i in shape)
 
     @property
     def n_coils(self):
@@ -481,6 +548,16 @@ class FourierOperatorBase(ABC):
         self._n_batchs = int(n_batchs)
 
     @property
+    def img_full_shape(self) -> tuple[int, int, ...]:
+        """Full image shape with batch and coil dimensions."""
+        return (self.n_batchs, (1 if self.uses_sense else self.n_coils)) + self.shape
+
+    @property
+    def ksp_full_shape(self) -> tuple[int, int, int]:
+        """Full kspace shape with batch and coil dimensions."""
+        return (self.n_batchs, self.n_coils, self.n_samples)
+
+    @property
     def smaps(self):
         """Sensitivity maps of the operator."""
         return self._smaps
@@ -501,12 +578,12 @@ class FourierOperatorBase(ABC):
             )
 
     @property
-    def density(self):
+    def density(self) -> NDArray[np.floating] | None:
         """Density compensation of the operator."""
         return self._density
 
     @density.setter
-    def density(self, new_density):
+    def density(self, new_density: NDArray):
         if new_density is None:
             self._density = None
         elif len(new_density) != self.n_samples:
@@ -529,21 +606,21 @@ class FourierOperatorBase(ABC):
         return np.dtype(DTYPE_R2C[str(self.dtype)])
 
     @property
-    def samples(self):
+    def samples(self) -> NDArray:
         """Return the samples used by the operator."""
         return self._samples
 
     @samples.setter
-    def samples(self, new_samples):
+    def samples(self, new_samples: NDArray[np.floating]):
         self._samples = new_samples
 
     @property
-    def n_samples(self):
+    def n_samples(self) -> int:
         """Return the number of samples used by the operator."""
         return self._samples.shape[0]
 
     @property
-    def norm_factor(self):
+    def norm_factor(self) -> np.floating:
         """Normalization factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
 
@@ -788,7 +865,7 @@ class FourierOperatorCPU(FourierOperatorBase):
             for t, b in enumerate(idx_batch):
                 grad[b] += coil_img[t]
         grad /= self.norm_factor
-        return grad
+        return grad.reshape(B, 1, *XYZ)
 
     def _grad_calibless(self, image_data, obs_data):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils

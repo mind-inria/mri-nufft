@@ -192,7 +192,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         use_gpu=False,
@@ -206,7 +206,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             the kspace locations
         volume_shape: tuple
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -225,7 +225,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             **kwargs,
         )
         density_comp = tkbn.calc_density_compensation_function(
-            ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
+            ktraj=kspace_loc, im_size=volume_shape, max_iter=max_iter
         )
         if normalize:
             spike = torch.zeros(volume_shape, dtype=torch.float32).to(grid_op.device)
