@@ -59,11 +59,13 @@ def proper_trajectory(trajectory, normalize="pi"):
     # flatten to a list of point
     xp = get_array_module(trajectory)  # check if the trajectory is a tensor
     try:
-        new_traj = (
-            trajectory.clone()
-            if xp.__name__ == "torch"
-            else np.asarray(trajectory).copy()
-        )
+        if xp.__name__ == "torch":
+            new_traj = trajectory.clone()
+        elif xp.__name__ == "cupy":
+            new_traj = trajectory.get()
+            xp = np
+        else:
+            new_traj = np.asarray(trajectory).copy()
     except Exception as e:
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"

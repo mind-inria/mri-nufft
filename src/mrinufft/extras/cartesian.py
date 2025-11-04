@@ -20,7 +20,7 @@ def ifft(kspace, dim=3, shape=None):
     xp = get_array_module(kspace)
     return xp.fft.fftshift(
         xp.fft.ifftn(
-            xp.fft.ifftshift(kspace, axes=axes), 
+            xp.fft.ifftshift(kspace, axes=axes),
             norm="ortho",
             axes=axes,
             s=shape,

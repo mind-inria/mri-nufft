@@ -12,7 +12,6 @@ from numpy.typing import NDArray
 from collections.abc import Callable
 
 
-@with_numpy_cupy
 def _extract_kspace_center(
     kspace_data: NDArray,
     kspace_loc: NDArray,
@@ -70,20 +69,15 @@ def _extract_kspace_center(
         threshold = (threshold,) * kspace_loc.shape[1]
 
     if window_fun == "rect":
-        data_ordered = xp.copy(kspace_data)
-        index = xp.linspace(
-            0, kspace_loc.shape[0] - 1, kspace_loc.shape[0], dtype=xp.int64
-        )
-        condition = xp.logical_and.reduce(
+        condition = np.logical_and.reduce(
             tuple(
-                xp.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
+                np.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
             )
         )
-        index = xp.extract(condition, index)
-        center_locations = kspace_loc[index, :]
-        data_thresholded = data_ordered[:, index]
+        center_locations = kspace_loc[condition, :]
+        data_thresholded = kspace_data[:, condition]
         if density is not None:
-            dc = density[index]
+            dc = density[condition]
         else:
             dc = None
         return xp.ascontiguousarray(data_thresholded), center_locations, dc
@@ -92,13 +86,15 @@ def _extract_kspace_center(
             window = window_fun(kspace_loc)
         else:
             if window_fun in ["hann", "hanning", "hamming"]:
-                radius = xp.linalg.norm(kspace_loc, axis=1)
+                radius = np.linalg.norm(kspace_loc, axis=1)
                 a_0 = 0.5 if window_fun in ["hann", "hanning"] else 0.53836
-                window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold[0])
+                window = a_0 + (1 - a_0) * np.cos(np.pi * radius / threshold[0])
             elif window_fun == "ellipse":
-                window = xp.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
+                window = np.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
             else:
                 raise ValueError("Unsupported window function.")
+            if xp != np:
+                window = xp.asarray(window)
         data_thresholded = window * kspace_data
         # Return k-space locations & density just for consistency
         return data_thresholded, kspace_loc, density
@@ -108,9 +104,55 @@ register_smaps = MethodRegister("smaps")
 get_smaps = register_smaps.make_getter()
 
 
+@with_numpy_cupy
+def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
+    """
+    Crop or pad a NumPy/CuPy array to the target shape (centered).
+
+    Parameters
+    ----------
+    arr : np.ndarray or cupy.ndarray
+        Input array.
+    target_shape : tuple of int
+        Desired output shape.
+    mode : str, optional
+        Padding mode (same as np.pad / cupy.pad). Default is 'constant'.
+    constant_values : scalar, optional
+        Used if mode='constant'.
+
+    Returns
+    -------
+    out : np.ndarray or cupy.ndarray
+        Cropped/padded array.
+    """
+    xp = np if isinstance(arr, np.ndarray) else __import__("cupy")
+    in_shape = arr.shape
+    pad_width = []
+    slices = []
+
+    for i, (s, t) in enumerate(zip(in_shape, target_shape)):
+        diff = t - s
+        if diff > 0:
+            # need to pad
+            pad_before = diff // 2
+            pad_after = diff - pad_before
+            pad_width.append((pad_before, pad_after))
+            slices.append(slice(None))
+        else:
+            # need to crop
+            crop_before = (-diff) // 2
+            crop_after = crop_before + t
+            pad_width.append((0, 0))
+            slices.append(slice(crop_before, crop_after))
+
+    arr = arr[tuple(slices)]
+    if any(pw != (0, 0) for pw in pad_width):
+        arr = xp.pad(arr, pad_width, mode=mode, constant_values=constant_values)
+    return arr
+
+
 @register_smaps
 @flat_traj
-@with_numpy_cupy
 def low_frequency(
     traj: NDArray,
     shape: tuple[int, ...],
@@ -121,7 +163,7 @@ def low_frequency(
     window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
     blurr_factor: int | float | tuple[float, ...] = 0.0,
     mask: bool | NDArray = False,
-) -> tuple[NDArray, NDArray]:
+) -> NDArray:
     """
     Calculate low-frequency sensitivity maps.
 
@@ -157,8 +199,6 @@ def low_frequency(
     -------
     Smaps : numpy.ndarray
         The low-frequency sensitivity maps.
-    SOS : numpy.ndarray
-        The sum of squares of the sensitivity maps.
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
@@ -208,30 +248,30 @@ def low_frequency(
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
-    return Smaps, SOS
+    return Smaps
 
 
 @with_torch
 def _unfold_blocks(calib, calib_width):
     for i, width in enumerate(calib_width):
-        calib = calib.unfold(dimension=i+1, size=width, step=1)
+        calib = calib.unfold(dimension=i + 1, size=width, step=1)
     return calib
-
 
 
 @register_smaps
 @flat_traj
-@with_numpy_cupy
 def espirit(
     traj: NDArray,
     shape: tuple[int, ...],
     kspace_data: NDArray,
     backend: str,
+    density: NDArray | None = None,
     calib_width: int | tuple[int, ...] = 24,
     kernel_width: int | tuple[int, ...] = 6,
     thresh: float = 0.02,
-    density: NDArray | None = None,
-) -> tuple[NDArray, NDArray]:
+    crop: float = 0.95,
+    decim: int = 1,
+) -> NDArray:
     """
     Calculate low-frequency sensitivity maps.
 
@@ -247,33 +287,38 @@ def espirit(
         The threshold used for extracting the k-space center.
         By default it is 0.1
     backend : str
-        The backend used for the operator.
+        The backend used for the operator for `pinv` computation
     density : numpy.ndarray, optional
         The density compensation weights.
-    
+    calib_width : int or tuple of int, optional
+        The calibration region width. By default it is 24.
+    kernel_width : int or tuple of int, optional
+        The kernel width. By default it is 6.
+    thresh : float, optional
+        The threshold for the singular values. By default it is 0.02.
+    crop : float, optional
+        The cropping threshold for the sensitivity maps. By default it is 0.95.
+    decim : int, optional
+        The decimation factor for the caluclation of sensitivity maps. By default it is 1.
+        This can be used to speed up the computation and significantly reduce memory usage.
+        The final result is upsampled back to the original size through linear interpolation.
+
     Returns
     -------
     Smaps : numpy.ndarray
-        The low-frequency sensitivity maps.
-    SOS : numpy.ndarray
-        The sum of squares of the sensitivity maps.
+        The sensitivity maps.
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
     from mrinufft.operators.base import power_method
 
     try:
-        from sigpy.mri.app import EspiritCalib
-        from pykeops.torch import ComplexLazyTensor
-        import torch
-        import sigpy as sgp
-        import cupy as cp
-        from cupyx.scipy.ndimage import zoom
+        from skimage.restoration import unwrap_phase
     except ImportError as err:
         raise ImportError(
-            "The sigpy module is not available. Please install "
+            "The scikit-image module is not available. Please install "
             "it along with the [extra] dependencies "
-            "or using `pip install sigpy`."
+            "or using `pip install scikit-image`."
         ) from err
     if isinstance(calib_width, int):
         calib_width = (calib_width,) * traj.shape[-1]
@@ -285,73 +330,85 @@ def espirit(
         kspace_loc=traj,
         threshold=tuple(float(sh) for sh in calib_width / np.asarray(shape)),
         density=density,
-        window_fun='rect',
+        window_fun="rect",
     )
-    smaps_adj_op = get_operator(backend)(
+    n_coils = k_space.shape[0]
+    central_kspace_img = get_operator(backend)(
         samples,
         shape,
         density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
-    )
-    central_kspace_img = smaps_adj_op.cg(cp.asarray(k_space, dtype=cp.complex64))
+    ).cg(k_space)
     central_kspace = fft(central_kspace_img)
-    import cupy as cp
-    maps = EspiritCalib(central_kspace, device=cp.cuda.Device(0), thresh=0.5).run()
-    # Get calibration region
-    calib_shape = (k_space.shape[0], *calib_width)
-    calib = sgp.resize(central_kspace, calib_shape)
+    if decim > 1:
+        central_kspace = _crop_or_pad(
+            central_kspace,
+            tuple(
+                sh // decim if i != 0 else sh
+                for i, sh in enumerate(central_kspace.shape)
+            ),
+        )
+    calib_shape = (n_coils, *calib_width)
+    calib = _crop_or_pad(central_kspace, calib_shape)
     calib = _unfold_blocks(calib, kernel_width)
     calib = calib.reshape(
         calib.shape[0],
         -1,
         np.prod(kernel_width),
     )
-    
     calib = calib.transpose(1, 0, 2).reshape(-1, calib.shape[0] * np.prod(kernel_width))
     _, S, VH = xp.linalg.svd(calib, full_matrices=False)
     VH = VH[S > thresh * S.max(), :]
     # Get kernels
-    n_kernels = len(VH)
-    kernels = VH.reshape((n_kernels, k_space.shape[0], np.prod(kernel_width)))
-    smaps_kernel_kspace = torch.ones((k_space.shape[0], *kernel_width), dtype=torch.complex64)
-    smaps_kernel_kspace = smaps_kernel_kspace.reshape(k_space.shape[0], -1)  
-    kernels = torch.tensor(kernels, dtype=torch.complex64)
-    # Move frequency dimension to front -> (Nfreq, K, C)
-    kernels_flat = kernels.permute(2, 0, 1).contiguous()
-    x_flat = smaps_kernel_kspace.permute(1, 0).contiguous()
-    x_flat =x_flat.to(kernels_flat.device)
+    kernels = VH.reshape((len(VH), n_coils, *kernel_width))
+    # Get covariance matrix in image domain
+    AHA = xp.zeros(
+        central_kspace.shape[1:][::-1] + (n_coils, n_coils), dtype=kspace_data.dtype
+    )
+    for kernel in kernels:
+        img_kernel = ifft(_crop_or_pad(kernel, central_kspace.shape))
+        aH = xp.expand_dims(img_kernel.T, axis=-1)
+        a = xp.conj(aH.swapaxes(-1, -2))
+        AHA += aH @ a
+
+    AHA *= np.prod(central_kspace.shape[1:]) / np.prod(kernel_width)
+    Smaps = xp.ones(central_kspace.shape[::-1] + (1,), dtype=kspace_data.dtype)
 
     def forward(x):
-        """
-        x: torch.complex64 tensor, shape (kernel_size, n_coils, 1)
-        returns: (A^H A) @ x, same shape
-        """
-        # Step 1: s_k(f) = Σ_c K_k(f,c)*x(f,c)
-        K_lazy = ComplexLazyTensor(kernels_flat[:, None, :, :])  # (Nfreq, 1, K, C)
-        x_lazy = ComplexLazyTensor(x_flat[:, None, None, :])           # (Nfreq, C, 1)
-        s = K_lazy * x_lazy         # (Nfreq, K)
+        return AHA @ x
 
-        # Step 2: y_c(f) = Σ_k conj(K_k(f,c)) * s_k(f)
-        y = (K_lazy.conj() * s).sum(dim=2).squeeze()  # (Nfreq, C, 1)
-
-        return y
-    
     def normalize(x):
-        return torch.linalg.norm(torch.abs(x), axis=-1)[:, None]
-    
+        return xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5
 
-    out = power_method(
-        max_iter=10,
+    max_eig, Smaps = power_method(
+        max_iter=100,
         operator=forward,
         norm_func=normalize,
-        x=x_flat,
+        x=Smaps,
         check_convergence=False,
+        return_eigvec=True,
     )
-    
-    
+    Smaps = Smaps.T[0]
+    Smaps *= xp.conj(Smaps[0] / xp.abs(Smaps[0]))
+    Smaps *= max_eig.T[0] > crop
+    if decim > 1:
+        if xp.__name__ == "numpy":
+            from scipy.ndimage import zoom
 
-    return Smaps, SOS
+            unwrapped_phase = xp.array(
+                [unwrap_phase(smap) for smap in xp.angle(Smaps)], dtype=xp.float32
+            )
+        else:
+            from cupyx.scipy.ndimage import zoom
+
+            unwrapped_phase = xp.array(
+                [unwrap_phase(smap.get()) for smap in xp.angle(Smaps)], dtype=xp.float32
+            )
+        abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        Smaps = abs_maps * np.exp(1j * angle_maps)
+    return Smaps
 
 
 @with_numpy_cupy
@@ -360,7 +417,8 @@ def coil_compression(
     K: int | float,
     traj: NDArray | None = None,
     krad_thresh: float | None = None,
-) -> NDArray:
+    return_V: bool = False,
+) -> NDArray | tuple[NDArray, NDArray]:
     """
     Coil compression using principal component analysis on k-space data.
 
@@ -377,6 +435,8 @@ def coil_compression(
         Relative k-space radius (as a fraction of maximum) to use for selecting
         the calibration region for principal component analysis. If None, use
         all k-space samples.
+    return_V : bool, optional
+        Whether to return the compression matrix V.
 
     Returns
     -------
@@ -411,4 +471,6 @@ def coil_compression(
         K = min(K, w_sorted.size)
     V = v_sorted[:K]  # use top K component
     compress_data = V @ kspace_data
-    return compress_data, V
+    if return_V:
+        return compress_data, V
+    return compress_data

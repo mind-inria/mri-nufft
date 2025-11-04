@@ -814,8 +814,9 @@ def power_method(
     operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
+    return_eigvec: bool = False,
     check_convergence: bool = True,
-) -> float:
+) -> float | NDAr | tuple[float | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
@@ -830,12 +831,14 @@ def power_method(
         Change this if you want custom norm, or for computing on GPU.
     x: array_like, optional
         Initial value to use, by default a random numpy array is used.
+    return_eigvec: bool, optional
+        Whether to return the eigen vector
     check_convergence: bool, optional
         Whether to check for convergence, by default True.
 
     Returns
     -------
-    float
+    float | NDArray
         The lipschitz constant of the operator.
     """
 
@@ -865,10 +868,14 @@ def power_method(
         warnings.warn("Lipschitz constant did not converge")
 
     if return_as_is:
+        if return_eigvec:
+            return x_new_norm, x_new
         return x_new_norm
-    
+
     if hasattr(x_new_norm, "__cuda_array_interface__"):
         import cupy as cp
 
         x_new_norm = cp.asarray(x_new_norm).get().item()
+    if return_eigvec:
+        return x_new_norm, x_new
     return x_new_norm
