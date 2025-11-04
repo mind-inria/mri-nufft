@@ -600,6 +600,8 @@ def display_gradients(
     axes : plt.Axes
         Axes of the figure.
     """
+    acq = acq or Acquisition.default
+
     # Initialize figure with a simpler version
     axes = display_gradients_simply(
         trajectory,

@@ -584,7 +584,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         **kwargs,
@@ -597,7 +597,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the kspace locations
         volume_shape: np.ndarray
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -616,9 +616,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             osf=1,
             **kwargs,
         )
-        density_comp = grid_op.raw_op.operator.estimate_density_comp(
-            max_iter=num_iterations
-        )
+        density_comp = grid_op.raw_op.operator.estimate_density_comp(max_iter=max_iter)
         if normalize:
             test_op = cls(samples=kspace_loc, shape=original_shape, **kwargs)
             test_im = np.ones(original_shape, dtype=np.complex64)

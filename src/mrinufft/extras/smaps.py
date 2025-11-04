@@ -227,7 +227,7 @@ def low_frequency(
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     )
-    Smaps = smaps_adj_op.cg(k_space)
+    Smaps = smaps_adj_op.pinv_solver(k_space)
     SOS = np.linalg.norm(Smaps, axis=0)
     if isinstance(mask, np.ndarray):
         Smaps = Smaps * mask
@@ -339,7 +339,7 @@ def espirit(
         density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
-    ).cg(k_space)
+    ).pinv_solver(k_space)
     central_kspace = fft(central_kspace_img)
     if decim > 1:
         central_kspace = _crop_or_pad(

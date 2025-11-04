@@ -1,7 +1,7 @@
 """Array libraries compatibility utils."""
 
-from typing import overload
 import warnings
+from numbers import Number  # abstract base type for python numeric type
 from functools import wraps, partial
 from inspect import cleandoc
 from numpy.typing import NDArray, DTypeLike
@@ -14,28 +14,27 @@ ARRAY_LIBS = {
     "tensorflow": (None, None),
 }
 
+ArrayTypes = np.ndarray
 # TEST import of array libraries.
+
 TENSORFLOW_AVAILABLE = True
-try:
-    import tensorflow as tf
-except ImportError:
-    TENSORFLOW_AVAILABLE = False
-
-
 CUPY_AVAILABLE = True
+AUTOGRAD_AVAILABLE = True
+TORCH_AVAILABLE = True
+
 try:
     import cupy as cp
 
     ARRAY_LIBS["cupy"] = (cp, cp.ndarray)
+    ArrayTypes = ArrayTypes | cp.ndarray
 except ImportError:
     CUPY_AVAILABLE = False
 
-AUTOGRAD_AVAILABLE = True
-TORCH_AVAILABLE = True
 try:
     import torch
 
     ARRAY_LIBS["torch"] = (torch, torch.Tensor)
+    ArrayTypes = ArrayTypes | torch.Tensor
 except ImportError:
     AUTOGRAD_AVAILABLE = False
     TORCH_AVAILABLE = False
@@ -49,15 +48,20 @@ else:
         np.dtype("complex128"): torch.complex128,
     }
 try:
+    import tensorflow as tf
     from tensorflow.experimental import numpy as tnp
 
     ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
+    ArrayTypes = ArrayTypes | tnp.ndarray
 except ImportError:
+    TENSORFLOW_AVAILABLE = False
     pass
 
 
-def get_array_module(array: NDArray) -> np:  # type: ignore
+def get_array_module(array: NDArray | Number) -> np:  # type: ignore
     """Get the module of the array."""
+    if isinstance(array, Number | np.generic):
+        return np
     for lib, array_type in ARRAY_LIBS.values():
         if lib is not None and isinstance(array, array_type):
             return lib
@@ -316,18 +320,14 @@ def _convert(_array_to_xp, args, kwargs=None):
     args = list(args)
     for n in range(len(args)):
         _arg = args[n]
-        if hasattr(_arg, "__array__"):
+        # All array are converted to the detected module
+        # but numpy scalars are left as is.
+        if isinstance(_arg, ArrayTypes):
             args[n] = _array_to_xp(_arg)
-        elif isinstance(_arg, (tuple, list)):
+        elif isinstance(_arg, tuple | list) and isinstance(_arg[0], ArrayTypes):
             args[n], _ = _convert(_array_to_xp, _arg)
-        # objects with attributes that are arrays are also converted
-        elif hasattr(_arg, "__dict__") and not isinstance:
-            process_dict_vals, _ = _convert(*_arg.__dict__.values())
-            for k, v in zip(_arg.__dict__.keys(), process_dict_vals):
-                try:
-                    setattr(_arg, k, v)
-                except Exception:
-                    pass
+        elif isinstance(_arg, dict):
+            args[n], _ = _convert(_array_to_xp, [], _arg)
     # convert keyworded
     if kwargs:
         process_kwargs_vals, _ = _convert(_array_to_xp, kwargs.values())

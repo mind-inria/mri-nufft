@@ -33,7 +33,7 @@ def test_pipe(backend, traj, shape, osf):
         pytest.skip("OSF < 2 not supported for tensorflow.")
     if osf == 1 and "finufft" in backend:
         pytest.skip("cufinufft and finufft dont support OSF=1")
-    result = pipe(traj, shape, backend=backend, osf=osf, num_iterations=10)
+    result = pipe(traj, shape, backend=backend, osf=osf, max_iter=10)
     if backend == "cufinufft":
         result = result.get()
     result = result / np.mean(result)

@@ -824,11 +824,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         # Disable coil dimension for faster computation
         n_coils = self.n_coils
+        n_batchs = self.n_batchs
         smaps = self.smaps
         squeeze_dims = self.squeeze_dims
 
         self.smaps = None
         self.n_coils = 1
+        self.n_batchs = 1
         self.squeeze_dims = True
 
         x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
@@ -841,6 +843,7 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         # restore coil setup
         self.n_coils = n_coils
+        self.n_batchs = n_batchs
         self.smaps = smaps
         self.squeeze_dims = squeeze_dims
 
@@ -857,7 +860,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         **kwargs,
@@ -870,7 +873,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             the kspace locations
         volume_shape: np.ndarray
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -891,7 +894,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
-        for _ in range(num_iterations):
+        for _ in range(max_iter):
             density_comp /= cp.abs(
                 grid_op.op(
                     grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))
