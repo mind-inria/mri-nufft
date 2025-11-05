@@ -3,9 +3,23 @@
 from mrinufft._array_compat import get_array_module
 
 
-def fft(image, dim=3, shape=None):
-    """n-dimensional FFT along the last dim axes."""
-    axes = range(-dim, 0)
+def fft(image, dims=3, shape=None):
+    """Compute n-dimensional FFT along the last ``dims`` axes.
+    
+    Parameters
+    ----------
+    image: NDArray
+    dims: int, default 3
+        Number of dimensions on which the fft is performed, starting from last.
+    shape: tuple[int, ...], optional
+        Output shape, by default same as output.
+        
+    Returns
+    -------
+    NDArray: 
+       Fourier Transform of image.
+    """
+    axes = range(-dims, 0)
     xp = get_array_module(image)
     return xp.fft.fftshift(
         xp.fft.fftn(
