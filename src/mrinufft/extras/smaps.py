@@ -394,7 +394,6 @@ def espirit(
     )
     Smaps = Smaps.T[0]
     Smaps *= xp.conj(Smaps[0] / xp.abs(Smaps[0]))
-    Smaps *= max_eig.T[0] > crop
     if decim > 1:
         if xp.__name__ == "numpy":
             from scipy.ndimage import zoom
@@ -410,7 +409,9 @@ def espirit(
             )
         abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        max_eig = zoom(max_eig.T[0], (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         Smaps = abs_maps * np.exp(1j * angle_maps)
+    Smaps *= max_eig > crop
     return Smaps
 
 

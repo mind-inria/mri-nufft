@@ -77,12 +77,11 @@ smaps_methods = ["espirit", "low_frequency"]
 if BACKEND == "gpunufft":
     # GPU exists, run on GPU
     import cupy as cp
-
     kspace_data = cp.asarray(kspace_data, dtype=cp.complex64)
 for method in smaps_methods:
     extra_kwargs = {}
     if method == "espirit":
-        extra_kwargs["decim"] = 2
+        extra_kwargs["decim"] = 4
     Smaps = get_smaps(method)(
         samples_loc,
         mri.shape,
