@@ -72,22 +72,32 @@ forward_op = get_operator(BACKEND)(
 )
 kspace_data = forward_op.op(per_ch_mri)  # Simulate k-space data
 
-# Estimate sensitivity maps from k-space data using different method
-smaps_methods = ["espirit", "low_frequency"]
 if BACKEND == "gpunufft":
     # GPU exists, run on GPU
     import cupy as cp
+
     kspace_data = cp.asarray(kspace_data, dtype=cp.complex64)
-for method in smaps_methods:
-    extra_kwargs = {}
-    if method == "espirit":
-        extra_kwargs["decim"] = 4
-    Smaps = get_smaps(method)(
-        samples_loc,
-        mri.shape,
-        kspace_data=kspace_data,
-        density=forward_op.density,
-        backend=BACKEND,
-        **extra_kwargs,
-    )
-    show_maps(Smaps.get())
+
+
+# %%
+# Estimate sensitivity maps using ESPIRiT
+Smaps = get_smaps("espirit")(
+    samples_loc,
+    mri.shape,
+    kspace_data=kspace_data,
+    density=forward_op.density,
+    backend=BACKEND,
+    decim=4,
+)
+show_maps(Smaps.get())
+
+# %%
+# Estimate the sensitivity map using low-frequency calibration
+Smaps = get_smaps("low_frequency")(
+    samples_loc,
+    mri.shape,
+    kspace_data=kspace_data,
+    density=forward_op.density,
+    backend=BACKEND,
+)
+show_maps(Smaps.get())

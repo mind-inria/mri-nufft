@@ -915,7 +915,7 @@ def power_method(
 
     Returns
     -------
-    float | NDArray
+    float | NDArray | tuple[float | NDArray, NDArray]
         The lipschitz constant of the operator.
     """
 
