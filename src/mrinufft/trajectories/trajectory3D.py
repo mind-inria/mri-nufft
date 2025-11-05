@@ -484,7 +484,7 @@ def initialize_3D_wave_caipi(
        "Wave‐CAIPI for highly accelerated 3D imaging."
        Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
-    acq = acq | Acquisition.default
+    acq = acq if acq is not None else Acquisition.default
     if not np.isscalar(Nc_or_R):
         R = Nc_or_R
         sample_axis = tuple(
