@@ -32,8 +32,8 @@ def fft(image, dims=3, shape=None):
     )
 
 
-def ifft(kspace, dim=3, shape=None):
-    """n-dimensional inverse FFT along the last dim axes."""
+def ifft(kspace, dims=3, shape=None):
+    """n-dimensional inverse FFT along the last ``dims`` axes."""
     axes = range(-dim, 0)
     xp = get_array_module(kspace)
     return xp.fft.fftshift(
