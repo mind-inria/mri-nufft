@@ -49,13 +49,6 @@ class MRISubspace(FourierOperatorBase):
 
     def __init__(self, fourier_op, subspace_basis, use_gpu=False):
         self._fourier_op = fourier_op
-        self.backend = fourier_op.backend
-
-        self.n_batchs = fourier_op.n_batchs
-        self.n_coils = fourier_op.n_coils
-        self.shape = fourier_op.shape
-        self.smaps = fourier_op.smaps
-        self.autograd_available = fourier_op.autograd_available
 
         self.subspace_basis = subspace_basis
         self.n_coeffs, self.n_frames = self.subspace_basis.shape
@@ -167,10 +160,9 @@ class MRISubspace(FourierOperatorBase):
 
         return y
 
-    @property
-    def n_samples(self):
-        """Return the number of samples used by the operator."""
-        return self._fourier_op.n_samples
+    def __getattr__(self, name):
+        """Delegate attribute access to the underlying fourier operator."""
+        return getattr(self._fourier_op, name)
 
 
 def _get_arraylib_from_operator(
