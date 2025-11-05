@@ -18,12 +18,6 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
 
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
-
 
 class MRITorchKbNufft(FourierOperatorBase):
     """
@@ -118,6 +112,15 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     @FourierOperatorBase.smaps.setter
     def smaps(self, new_smaps):
+        """Update smaps.
+
+        If the number of coils is different, it is updated.
+
+        Parameters
+        ----------
+        new_smaps: Array or Tensor
+            The new sensitivity maps.
+        """
         if new_smaps is None:
             self._smaps = None
             return
