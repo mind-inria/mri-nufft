@@ -43,15 +43,19 @@ class _NUFFT_OP(torch.autograd.Function):
                 for s in ctx.nufft_op.shape
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(x)[:, None]
+            grid_r = torch.stack(grid_r, dim=0).type_as(x)[:, None, None]
             grid_x = x * grid_r  # Element-wise multiplication: x * r
+            # compute each kspace axis dimension separately
             nufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_x[i, ...]) for i in range(grid_x.size(0))],
+                [
+                    ctx.nufft_op.op(grid_x[i, ...])[None, :]
+                    for i in range(grid_x.size(0))
+                ],
                 dim=0,
             )
             grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
             grad_traj = torch.transpose(
-                torch.sum(grad_traj, dim=1),
+                torch.sum(grad_traj, dim=(1, 2)),
                 0,
                 1,
             ).to(NP2TORCH[ctx.nufft_op.dtype])
@@ -86,14 +90,19 @@ class _NUFFT_ADJOP(torch.autograd.Function):
                 for s in ctx.nufft_op.shape
             ]
             grid_r = torch.meshgrid(*r, indexing="ij")
-            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None]
+            grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None, None]
             grid_dx = torch.conj(dx) * grid_r
+            # compute each kspace axis dimension separately
             inufft_dx_dom = torch.cat(
-                [ctx.nufft_op.op(grid_dx[i, ...]) for i in range(grid_dx.size(0))],
+                [
+                    ctx.nufft_op.op(grid_dx[i, ...])[None, :]
+                    for i in range(grid_dx.size(0))
+                ],
                 dim=0,
             )
             grad_traj = 1j * y * inufft_dx_dom
-            grad_traj = torch.transpose(torch.sum(grad_traj, dim=1), 0, 1).to(
+            # sum over n_coil and n_batchs dimensions
+            grad_traj = torch.transpose(torch.sum(grad_traj, dim=(1, 2)), 0, 1).to(
                 NP2TORCH[ctx.nufft_op.dtype]
             )
             ctx.nufft_op.toggle_grad_traj()
