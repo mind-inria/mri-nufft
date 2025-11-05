@@ -1,6 +1,7 @@
 """Test the autodiff functionnality."""
 
 import numpy as np
+from numpy.typing import NDArray
 from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 import pytest
@@ -13,7 +14,7 @@ from helpers import (
     image_from_op,
     to_interface,
     assert_almost_allclose,
-    batchedSmaps_from_op,
+    batched_smaps_from_op,
 )
 
 
@@ -26,9 +27,9 @@ except ImportError:
 
 @fixture(scope="module")
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
-@parametrize(paired_batch_size=[None, 1, 3])
+@parametrize(paired_batch_size=[0, 1, 3])
 @parametrize(
-    "n_coils, n_trans, sense",
+    "n_coils, n_batchs, sense",
     [
         (1, 1, False),
         (4, 1, True),
@@ -46,12 +47,17 @@ except ImportError:
     ],
 )
 def operator(
-    request, kspace_loc, shape, n_coils, sense, n_trans, backend, paired_batch_size
+    request,
+    kspace_loc: NDArray,
+    shape: tuple[int, ...],
+    n_coils: int,
+    sense: bool,
+    n_batchs: int,
+    backend: str,
+    paired_batch_size: bool,
 ):
     """Create NUFFT operator with autodiff capabilities."""
-    if n_trans != 1 and backend == "gpunufft":
-        pytest.skip("Duplicate case.")
-    if not sense and paired_batch_size is not None:
+    if not sense and paired_batch_size:
         pytest.skip("Not relevant to test.")
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
@@ -65,14 +71,14 @@ def operator(
         backend_name=backend,
         wrt_data=True,
         wrt_traj=True,
-        paired_batch_size=paired_batch_size,
+        paired_batch=paired_batch_size,  # a slight abuse of attribute.
     )(
         samples=kspace_loc,
         shape=shape,
+        n_batchs=n_batchs,
         n_coils=n_coils,
-        n_trans=1,
         smaps=smaps,
-        squeeze_dims=False,  # Squeezing breaks dimensions !
+        squeeze_dims=False,
     )
     return nufft
 
@@ -84,55 +90,57 @@ def ndft_matrix(operator):
 
 def get_data(operator, interface):
     """Generate k-space and image data based on the interface."""
-    ksp_data = to_interface(kspace_from_op(operator), interface=interface)
-    img_data = to_interface(image_from_op(operator), interface=interface)
+    if operator.paired_batch:
+        ksp_data = to_interface(
+            np.stack([kspace_from_op(operator) for _ in range(operator.paired_batch)]),
+            interface=interface,
+        )
+        img_data = to_interface(
+            np.stack([image_from_op(operator) for _ in range(operator.paired_batch)]),
+            interface=interface,
+        )
+    else:
+        ksp_data = to_interface(kspace_from_op(operator), interface=interface)
+        img_data = to_interface(image_from_op(operator), interface=interface)
     return ksp_data, img_data
 
 
 def compute_adjoint(operator, ksp_data, img_data_ref):
     """Compute adjoint imgs for non-batched mode."""
     adj_data = operator.adj_op(ksp_data).reshape(img_data_ref.shape)
+
+    adj_matrix = ndft_matrix(operator).conj().T
+
     if operator.smaps is not None:
         smaps = torch.from_numpy(operator.smaps).to(img_data_ref.device)
-        adj_data_ndft_smaps = torch.cat(
-            [
-                (ndft_matrix(operator).conj().T @ ksp_data[i].flatten()).reshape(
-                    img_data_ref.shape
-                )[None, ...]
-                for i in range(ksp_data.shape[0])
-            ],
-            dim=0,
-        )
-        adj_data_ndft = torch.sum(smaps.conj() * adj_data_ndft_smaps, dim=0)
+        adj_data_ndft_smaps = torch.einsum(
+            "nm,...m -> ...n", adj_matrix, ksp_data
+        ).reshape((operator.n_batchs, operator.n_coils, *operator.shape))
+        adj_data_ndft = torch.einsum(
+            "c...,bc...->b...", smaps.conj(), adj_data_ndft_smaps
+        )[:, None]
     else:
-        adj_data_ndft = torch.matmul(
-            ndft_matrix(operator).conj().T, ksp_data.T
-        ).T.reshape(img_data_ref.shape)
+        adj_data_ndft = torch.einsum("nm,...m->...n", adj_matrix, ksp_data).reshape(
+            operator.img_full_shape
+        )
     return adj_data, adj_data_ndft
 
 
 def compute_adjoint_batched(operator, ksp_data, img_data_ref):
     """Compute adjoint imgs for batched mode."""
     # paired batched mode will be tested only if sense is True
-    smaps = batchedSmaps_from_op(operator)
+    smaps = batched_smaps_from_op(operator)
+
+    adj_matrix = ndft_matrix(operator).conj().T
     adj_data = operator.adj_op(ksp_data, smaps=smaps).reshape(img_data_ref.shape)
     smaps = torch.from_numpy(smaps).to(img_data_ref.device)
-    adj_data_ndft_smaps = torch.stack(
-        [
-            torch.stack(
-                [
-                    (ndft_matrix(operator).conj().T @ ksp_data[b, c].flatten()).reshape(
-                        img_data_ref.shape[1:]
-                    )
-                    for c in range(ksp_data.shape[1])
-                ],
-                dim=0,
-            )
-            for b in range(ksp_data.shape[0])
-        ],
-        dim=0,
+
+    adj_data_ndft_smaps = torch.einsum("nm,...m -> ...n", adj_matrix, ksp_data).reshape(
+        (operator.paired_batch, operator.n_batchs, operator.n_coils, *operator.shape)
     )
-    adj_data_ndft = torch.sum(smaps.conj() * adj_data_ndft_smaps, dim=1)
+    adj_data_ndft = torch.einsum(
+        "vc...,vbc...->vb...", smaps.conj(), adj_data_ndft_smaps
+    )[:, :, None]
     return adj_data, adj_data_ndft
 
 
@@ -151,7 +159,7 @@ def test_adjoint_and_grad(operator, interface):
     ksp_data, img_data_ref = get_data(operator, interface)
     ksp_data.requires_grad = True
 
-    is_batched = hasattr(operator, "batch_size") and operator.batch_size is not None
+    is_batched = getattr(operator, "paired_batch", 0)
 
     with torch.autograd.set_detect_anomaly(True):
         if is_batched:
@@ -186,13 +194,11 @@ def test_adjoint_and_grad(operator, interface):
         mismatch=20,
     )
     # Check if nufft and ndft are close in the backprop
-    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[
-        0
-    ]
+    grad_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
+    grad_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[0]
     assert_allclose(
-        gradient_ndft_kdata.cpu().numpy(),
-        gradient_nufft_kdata.cpu().numpy(),
+        grad_ndft_kdata.cpu().numpy(),
+        grad_nufft_kdata.cpu().numpy(),
         atol=6e-3,
         rtol=6e-3,
     )
@@ -200,47 +206,36 @@ def test_adjoint_and_grad(operator, interface):
 
 def compute_forward(operator, ksp_data_ref, img_data):
     """Compute ksps for non-batched mode."""
-    if operator.smaps is not None and operator.n_coils > 1:
-        img_data = img_data[None, ...]
     ksp_data = operator.op(img_data).reshape(ksp_data_ref.shape)
-    if operator.smaps is not None:
+    if operator.uses_sense:
         smaps = torch.from_numpy(operator.smaps).to(ksp_data_ref.device)
         img_data_smaps = smaps * img_data
-        ksp_data_ndft = torch.cat(
-            [
-                (ndft_matrix(operator) @ img_data_smaps[i].flatten())[None, ...]
-                for i in range(img_data_smaps.shape[0])
-            ],
-            dim=0,
-        )  # fft for each coil
-    else:
-        ksp_data_ndft = torch.matmul(
+        ksp_data_ndft = torch.einsum(
+            "mn,...n->...m",
             ndft_matrix(operator),
-            img_data.reshape(operator.n_coils, -1).squeeze().T,
-        ).T.reshape(ksp_data.shape)
+            img_data_smaps.reshape(operator.n_batchs, operator.n_coils, -1),
+        )
+    else:
+        ksp_data_ndft = torch.einsum(
+            "mn,...n->...m",
+            ndft_matrix(operator),
+            img_data.reshape(operator.n_batchs, operator.n_coils, -1),
+        )
     return ksp_data, ksp_data_ndft
 
 
 def compute_forward_batched(operator, ksp_data_ref, img_data):
     """Compute ksps for batched mode."""
-    if operator.smaps is not None and operator.n_coils > 1:
-        img_data = img_data[:, None, ...]
-    smaps = batchedSmaps_from_op(operator)
+    smaps = batched_smaps_from_op(operator)
     ksp_data = operator.op(img_data, smaps=smaps).reshape(ksp_data_ref.shape)
     smaps = torch.from_numpy(smaps).to(ksp_data_ref.device)
-    img_data_smaps = smaps * img_data
-    ksp_data_ndft = torch.stack(
-        [
-            torch.stack(
-                [
-                    (ndft_matrix(operator) @ img_data_smaps[b, c].flatten())
-                    for c in range(img_data_smaps.shape[1])
-                ],
-                dim=0,
-            )
-            for b in range(img_data_smaps.shape[0])
-        ],
-        dim=0,  # fft for each coil for each batch
+    img_data_smaps = smaps[:, None] * img_data
+    ksp_data_ndft = torch.einsum(
+        "mn,...n->...m",
+        ndft_matrix(operator),
+        img_data_smaps.reshape(
+            operator.paired_batch, operator.n_batchs, operator.n_coils, -1
+        ),
     )
     return ksp_data, ksp_data_ndft
 
@@ -260,8 +255,7 @@ def test_forward_and_grad(operator, interface):
     ksp_data_ref, img_data = get_data(operator, interface)
     img_data.requires_grad = True
 
-    is_batched = hasattr(operator, "batch_size") and operator.batch_size is not None
-
+    is_batched = getattr(operator, "paired_batch", 0)
     with torch.autograd.set_detect_anomaly(True):
         if is_batched:
             ksp_data, ksp_data_ndft = compute_forward_batched(
@@ -281,24 +275,25 @@ def test_forward_and_grad(operator, interface):
         mismatch=20,
     )
 
-    # Check if nufft and ndft w.r.t trajectory are close in the backprop
-    gradient_ndft_ktraj = torch.autograd.grad(
-        loss_ndft, operator.samples, retain_graph=True
-    )[0]
-    gradient_nufft_ktraj = torch.autograd.grad(
-        loss_nufft, operator.samples, retain_graph=True
-    )[0]
+    # Check if nufft and ndft w.r.t image  are close in the backprop
+    grad_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
+    grad_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[0]
     assert_allclose(
-        gradient_ndft_ktraj.cpu().numpy(),
-        gradient_nufft_ktraj.cpu().numpy(),
-        atol=5e-1,
+        grad_ndft_kdata.cpu().numpy(),
+        grad_nufft_kdata.cpu().numpy(),
+        atol=6e-3,
     )
 
-    # Check if nufft and ndft are close in the backprop
-    gradient_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
-    gradient_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[
-        0
-    ]
+    # Check if nufft and ndft w.r.t trajectory are close in the backprop
+    grad_ndft_ktraj = torch.autograd.grad(
+        loss_ndft, operator.samples, retain_graph=True
+    )[0]
+    grad_nufft_ktraj = torch.autograd.grad(
+        loss_nufft, operator.samples, retain_graph=True
+    )[0]
+
     assert_allclose(
-        gradient_ndft_kdata.cpu().numpy(), gradient_nufft_kdata.cpu().numpy(), atol=6e-3
+        grad_ndft_ktraj.cpu().numpy(),
+        grad_nufft_ktraj.cpu().numpy(),
+        atol=5e-1,
     )
