@@ -1,34 +1,18 @@
-.. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.svg
-   :width: 700
+|centerdiv|
+
+.. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/logos/mri-nufft.png
+   :width: 300
    :align: center
 
-.. raw:: html
+|
 
-    <div align="center"> <em>Doing non-Cartesian MR Imaging has never been so easy</em></div>
-
-.. raw:: html
-
-   <div align="center">
-
-|Coverage| |CI| |CD| |Style| |Docs| |PyPI| |JOSS|
+|Docs| |PyPI| |JOSS|
+|Coverage| |CI| |CD| |Style| 
 
 
+*Doing non-Cartesian MR Imaging has never been so easy*
 
-.. |Coverage| image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
-.. |CI| image:: https://github.com/mind-inria/mri-nufft/actions/workflows/test-ci.yml/badge.svg
-.. |CD| image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
-.. |Style| image:: https://img.shields.io/badge/style-black-black
-.. |Docs| image:: https://img.shields.io/badge/docs-Sphinx-blue
-    :target: https://mind-inria.github.io/mri-nufft
-.. |PyPI| image:: https://img.shields.io/pypi/v/mri-nufft
-    :target: https://pypi.org/project/mri-nufft/
-.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.07743
-    :target: https://doi.org/10.21105/joss.07743
-
-             
-.. raw:: html
-
-   </div>
+|enddiv|
 
 
 Introduction
@@ -37,25 +21,28 @@ Introduction
 
 MRI-NUFFT is an open-source Python library that provides state-of-the-art non-Cartesian MRI tools: trajectories, data loading and fast and memory-efficient operators to be used on laptops, clusters, and MRI consoles.
 
-In particular, it provides a unified interface for computing Non-Uniform Fast Fourier Transform (NUFFT), using the backend of your choice (``finufft``, ``cufinufft``, ``gpunufft``, ``torchkbnufft``, ... ), and with integrated MRI-specific features such as:
+In particular, it provides a unified interface for computing Non-Uniform Fast Fourier Transform (`NUFFT <https://mind-inria.github.io/mri-nufft/nufft.html>`_), using the specialized backend of your choice (|finufft|_, |gpunufft|_, |torchkbnufft|_, ... ), and with integrated MRI-specific features such as:
 
 - `multi-coil support <https://mind-inria.github.io/mri-nufft/generated/_autosummary/mrinufft.extras.smaps.html>`__ ,
 - `density compensation <https://mind-inria.github.io/mri-nufft/generated/_autosummary/mrinufft.density.html>`__,
 - `off-resonance correction <https://mind-inria.github.io/mri-nufft/generated/autoexamples/operators/example_offresonance.html>`__.
-- `autodiff support <https://mind-inria.github.io/mri-nufft/generated/autoexamples/GPU/index.html>`__ for deep learning applications.
+- `autodiff support <https://mind-inria.github.io/mri-nufft/generated/autoexamples/GPU/index.html>`__.
+
+   
+MRI-nufft is a nice and polite piece of software, that will return the same type of array (e.g ``numpy``, ``cupy``, ``torch``) provided at input, without extra copies for conversions.
+
 
 On top of that we ship a variety of `non-Cartesian trajectories <https://mind-inria.github.io/mri-nufft/generated/autoexamples/trajectories/index.html>`__ commonly used by the MRI community, and even `tools <https://mind-inria.github.io/mri-nufft/generated/autoexamples/trajectories/example_trajectory_tools.html>`__ to helps you develop new ones. 
 
+|centerdiv|
 
 .. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.svg
    :width: 700
    :align: center
 
-.. raw:: html 
-   
-   <div align="center"><em>
-   Modularity and Integration of MRI-nufft with the python computing libraries.
-   </em></div>
+*Modularity and Integration of MRI-nufft with the python computing libraries.*
+
+|enddiv|
 
 
 Usage
@@ -67,8 +54,6 @@ Usage
     from scipy.datasets import face # For demo
     import numpy as np
     import mrinufft
-    from mrinufft.trajectories import display
-    from mrinufft.density import voronoi
 
     # Create 2D Radial trajectories for demo
     samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)
@@ -149,5 +134,46 @@ We published MRI-NUFFT at `JOSS <https://doi.org/10.21105/joss.07743>`__ ::
     } 
 
 
-.. raw::
+Contributing
+------------
+
+We warmly welcome contributions ! Check out our `guidelines <https://github.com/mind-inria/mri-nufft/blob/master/CONTRIBUTING.md>`_ , 
+Don't hesitate to look for unsolved `issues <https://github.com/mind-inria/mri-nufft/issues/>`__
+
+
+
+.. raw:: html
+
    <div align="center"><em> ✨ If you made it this far, consider starring the repo ✨ <em></div>
+
+
+
+.. |Coverage| image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
+.. |CI| image:: https://github.com/mind-inria/mri-nufft/actions/workflows/test-ci.yml/badge.svg
+.. |CD| image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
+.. |Style| image:: https://img.shields.io/badge/style-black-black
+.. |Docs| image:: https://img.shields.io/badge/docs-Sphinx-blue
+    :target: https://mind-inria.github.io/mri-nufft
+.. |PyPI| image:: https://img.shields.io/pypi/v/mri-nufft
+    :target: https://pypi.org/project/mri-nufft/
+.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.07743/status.svg
+    :target: https://doi.org/10.21105/joss.07743
+
+.. |finufft| replace:: ``(cu)finufft``
+.. _finufft: https://github.com/flatironinstitute/finufft
+
+.. |gpunufft| replace:: ``gpunufft``
+.. _gpunufft: https://github.com/chaihtyagr/gpunufft
+
+.. |torchkbnufft| replace:: ``torchkbnufft``
+.. _torchkbnufft: https://github.com/mmuckley/torchkbnufft
+
+
+
+.. |centerdiv| raw:: html 
+
+   <div align="center">
+
+.. |enddiv| raw:: html
+
+   </div> 
