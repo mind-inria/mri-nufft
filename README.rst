@@ -123,7 +123,7 @@ We published MRI-NUFFT at `JOSS <https://doi.org/10.21105/joss.07743>`__ ::
 .. code:: bibtex
           
     @article{Comby2025, doi = {10.21105/joss.07743},
-        author = {Comby, Pierre-Antoine and Daval-Frérot, Guillaume and Pan, Caini and Tanabene, Asma and Oudjman, Léna and Cencini, Matteo and Ciuciu, Philippe and Gr, Chaithya},
+        author = {Comby, Pierre-Antoine and Daval-Frérot, Guillaume and Pan, Caini and Tanabene, Asma and Oudjman, Léna and Cencini, Matteo and Ciuciu, Philippe and GR, Chaithya},
         title = {MRI-NUFFT: Doing non-Cartesian MRI has never been easier}, journal = {Journal of Open Source Software},
         url = {https://doi.org/10.21105/joss.07743},
         year = {2025},
