@@ -5,7 +5,7 @@ from mrinufft._array_compat import get_array_module
 
 def fft(image, dims=3, shape=None):
     """Compute n-dimensional FFT along the last ``dims`` axes.
-    
+
     Parameters
     ----------
     image: NDArray
@@ -13,10 +13,10 @@ def fft(image, dims=3, shape=None):
         Number of dimensions on which the fft is performed, starting from last.
     shape: tuple[int, ...], optional
         Output shape, by default same as output.
-        
+
     Returns
     -------
-    NDArray: 
+    NDArray:
        Fourier Transform of image.
     """
     axes = range(-dims, 0)
@@ -33,8 +33,22 @@ def fft(image, dims=3, shape=None):
 
 
 def ifft(kspace, dims=3, shape=None):
-    """n-dimensional inverse FFT along the last ``dims`` axes."""
-    axes = range(-dim, 0)
+    """Compute n-dimensional IFFT along the last ``dims`` axes.
+
+    Parameters
+    ----------
+    image: NDArray
+    dims: int, default 3
+        Number of dimensions on which the ifft is performed, starting from last.
+    shape: tuple[int, ...], optional
+        Output shape, by default same as output.
+
+    Returns
+    -------
+    NDArray:
+       Fourier Transform of image.
+    """
+    axes = range(-dims, 0)
     xp = get_array_module(kspace)
     return xp.fft.fftshift(
         xp.fft.ifftn(

@@ -160,6 +160,7 @@ def low_frequency(
     backend: str,
     threshold: float | tuple[float, ...] = 0.1,
     density: NDArray | None = None,
+    max_iter: int = 10,
     window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
     blurr_factor: int | float | tuple[float, ...] = 0.0,
     mask: bool | NDArray = False,
@@ -182,6 +183,8 @@ def low_frequency(
         The backend used for the operator.
     density : numpy.ndarray, optional
         The density compensation weights.
+    max_iter : int, optional
+        The max iterations for internal `pinv` computations
     window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
         The window function to apply to the selected data. It is computed with
         the center locations selected. Only works with circular mask.
@@ -220,14 +223,13 @@ def low_frequency(
         density=density,
         window_fun=window_fun,
     )
-    smaps_adj_op = get_operator(backend)(
+    Smaps = get_operator(backend)(
         samples,
         shape,
         density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
-    )
-    Smaps = smaps_adj_op.pinv_solver(k_space)
+    ).pinv_solver(k_space, max_iter=max_iter)
     SOS = np.linalg.norm(Smaps, axis=0)
     if isinstance(mask, np.ndarray):
         Smaps = Smaps * mask
@@ -266,14 +268,15 @@ def espirit(
     kspace_data: NDArray,
     backend: str,
     density: NDArray | None = None,
+    max_iter: int = 10,
     calib_width: int | tuple[int, ...] = 24,
     kernel_width: int | tuple[int, ...] = 6,
     thresh: float = 0.02,
     crop: float = 0.95,
     decim: int = 1,
 ) -> NDArray:
-    """
-    Calculate low-frequency sensitivity maps.
+    """Calculate the Sensitivity maps using ESPIRIT algorithm
+    on non-Cartesian k-space data.
 
     Parameters
     ----------
@@ -290,6 +293,13 @@ def espirit(
         The backend used for the operator for `pinv` computation
     density : numpy.ndarray, optional
         The density compensation weights.
+    max_iter : int, optional
+        The max iterations for internal `pinv` computations
+
+    Parameters
+    ----------
+    kspace: NDArray
+        The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
     calib_width : int or tuple of int, optional
         The calibration region width. By default it is 24.
     kernel_width : int or tuple of int, optional
@@ -308,21 +318,12 @@ def espirit(
 
     Returns
     -------
-    Smaps : numpy.ndarray
-        The sensitivity maps.
+    Smaps : NDArray
+        The sensitivity maps
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
-    from mrinufft.operators.base import power_method
 
-    try:
-        from skimage.restoration import unwrap_phase
-    except ImportError as err:
-        raise ImportError(
-            "The scikit-image module is not available. Please install "
-            "it along with the [extra] dependencies "
-            "or using `pip install scikit-image`."
-        ) from err
     if isinstance(calib_width, int):
         calib_width = (calib_width,) * traj.shape[-1]
     if isinstance(kernel_width, int):
@@ -335,25 +336,74 @@ def espirit(
         density=density,
         window_fun="rect",
     )
-    n_coils = k_space.shape[0]
     central_kspace_img = get_operator(backend)(
         samples,
         shape,
         density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
-    ).pinv_solver(k_space)
+    ).pinv_solver(k_space, max_iter=max_iter)
     central_kspace = fft(central_kspace_img)
+    return cartesian_espirit(
+        central_kspace, calib_width, kernel_width, thresh, crop, decim
+    )
+
+
+def cartesian_espirit(
+    kspace: NDArray,
+    calib_width: int | tuple[int, ...] = 24,
+    kernel_width: int | tuple[int, ...] = 6,
+    thresh: float = 0.02,
+    crop: float = 0.95,
+    decim: int = 1,
+) -> NDArray:
+    """Calculate the Sensitivity maps using ESPIRIT algorithm
+    on non-Cartesian k-space data.
+
+    Parameters
+    ----------
+    kspace: NDArray
+        The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
+    calib_width : int or tuple of int, optional
+        The calibration region width. By default it is 24.
+    kernel_width : int or tuple of int, optional
+        The kernel width. By default it is 6.
+    thresh : float, optional
+        The threshold for the singular values. By default it is 0.02.
+    crop : float, optional
+        The cropping threshold for the sensitivity maps.
+        By default it is 0.95.
+    decim : int, optional
+        The decimation factor for the caluclation of sensitivity maps.
+        By default it is 1. This can be used to speed up the computation
+        and significantly reduce memory usage. The final result is
+        upsampled back to the original size through linear
+        interpolation.
+
+    Returns
+    -------
+    Smaps : NDArray
+        The sensitivity maps
+    """
+    from mrinufft.operators.base import power_method
+
+    xp = get_array_module(kspace)
+    n_coils = kspace.shape[0]
     if decim > 1:
-        central_kspace = _crop_or_pad(
-            central_kspace,
-            tuple(
-                sh // decim if i != 0 else sh
-                for i, sh in enumerate(central_kspace.shape)
-            ),
+        try:
+            from skimage.restoration import unwrap_phase
+        except ImportError as err:
+            raise ImportError(
+                "The scikit-image module is not available. Please install "
+                "it along with the [extra] dependencies "
+                "or using `pip install scikit-image`."
+            ) from err
+        kspace = _crop_or_pad(
+            kspace,
+            tuple(sh // decim if i != 0 else sh for i, sh in enumerate(kspace.shape)),
         )
     calib_shape = (n_coils, *calib_width)
-    calib = _crop_or_pad(central_kspace, calib_shape)
+    calib = _crop_or_pad(kspace, calib_shape)
     calib = _unfold_blocks(calib, kernel_width)
     calib = calib.reshape(
         calib.shape[0],
@@ -366,17 +416,15 @@ def espirit(
     # Get kernels
     kernels = VH.reshape((len(VH), n_coils, *kernel_width))
     # Get covariance matrix in image domain
-    AHA = xp.zeros(
-        central_kspace.shape[1:][::-1] + (n_coils, n_coils), dtype=kspace_data.dtype
-    )
+    AHA = xp.zeros(kspace.shape[1:][::-1] + (n_coils, n_coils), dtype=kspace.dtype)
     for kernel in kernels:
-        img_kernel = ifft(_crop_or_pad(kernel, central_kspace.shape))
+        img_kernel = ifft(_crop_or_pad(kernel, kspace.shape))
         aH = xp.expand_dims(img_kernel.T, axis=-1)
         a = xp.conj(aH.swapaxes(-1, -2))
         AHA += aH @ a
 
-    AHA *= np.prod(central_kspace.shape[1:]) / np.prod(kernel_width)
-    Smaps = xp.ones(central_kspace.shape[::-1] + (1,), dtype=kspace_data.dtype)
+    AHA *= np.prod(kspace.shape[1:]) / np.prod(kernel_width)
+    Smaps = xp.ones(kspace.shape[::-1] + (1,), dtype=kspace.dtype)
 
     def forward(x):
         return AHA @ x
