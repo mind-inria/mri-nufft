@@ -2,7 +2,14 @@
 Sensitivity maps estimation
 ===========================
 
-An example to show how to perform a simple NUFFT.
+This example demonstrates how to estimate coil sensitivity maps from
+non-Cartesian k-space data using different methods provided in the
+:mrinufft:`mrinufft.extras.smaps` module.
+We will simulate k-space data from a known MRI image and coil sensitivity
+maps, and then estimate the sensitivity maps using the ESPIRiT method [espirit]_ and
+a low-frequency calibration method [sense]_.
+We will visualize the estimated sensitivity maps and compare them to the
+actual sensitivity maps used in the simulation.
 """
 
 # %%
@@ -101,3 +108,16 @@ Smaps = get_smaps("low_frequency")(
     backend=BACKEND,
 )
 show_maps(Smaps.get())
+
+# %%
+# References
+# ==========
+#
+# .. [sense] Loubna El Gueddari, C. Lazarus, H Carrié, A. Vignaud, Philippe Ciuciu. 
+#           Self-calibrating nonlinear reconstruction algorithms for variable density 
+#           sampling and parallel reception MRI. 10th IEEE Sensor Array and Multichannel 
+#           Signal Processing workshop, Jul 2018, Sheffield, United Kingdom. ⟨hal-01782428v1⟩
+# .. [espirit] Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS, 
+#               Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel 
+#               MRI: where SENSE meets GRAPPA. Magn Reson Med. 2014 Mar;71(3):990-1001. 
+#               doi: 10.1002/mrm.24751. PMID: 23649942; PMCID: PMC4142121.
