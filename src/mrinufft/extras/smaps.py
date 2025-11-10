@@ -345,12 +345,13 @@ def espirit(
     ).pinv_solver(k_space, max_iter=max_iter)
     central_kspace = fft(central_kspace_img)
     return cartesian_espirit(
-        central_kspace, calib_width, kernel_width, thresh, crop, decim
+        central_kspace, shape, calib_width, kernel_width, thresh, crop, decim
     )
 
 
 def cartesian_espirit(
     kspace: NDArray,
+    shape: tuple[int, ...],
     calib_width: int | tuple[int, ...] = 24,
     kernel_width: int | tuple[int, ...] = 6,
     thresh: float = 0.02,
@@ -364,6 +365,8 @@ def cartesian_espirit(
     ----------
     kspace: NDArray
         The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
+    shape : tuple
+        The shape of the image.
     calib_width : int or tuple of int, optional
         The calibration region width. By default it is 24.
     kernel_width : int or tuple of int, optional
@@ -400,7 +403,7 @@ def cartesian_espirit(
             ) from err
         kspace = _crop_or_pad(
             kspace,
-            tuple(sh // decim if i != 0 else sh for i, sh in enumerate(kspace.shape)),
+            tuple(sh // decim if i != 0 else sh for i, sh in enumerate(shape)),
         )
     calib_shape = (n_coils, *calib_width)
     calib = _crop_or_pad(kspace, calib_shape)
