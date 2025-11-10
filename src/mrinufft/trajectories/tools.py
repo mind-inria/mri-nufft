@@ -1263,7 +1263,10 @@ def stack_random(
 
 
 def get_grappa_caipi_positions(
-    img_size: tuple[int, int], grappa_factors: tuple[int, int], caipi_delta: int = 0
+    img_size: tuple[int, int],
+    grappa_factors: tuple[int, int],
+    acs_region: tuple[int, int],
+    caipi_delta: int = 0,
 ):
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
@@ -1286,6 +1289,10 @@ def get_grappa_caipi_positions(
         of ``[2, 1]`` means every second line is sampled along the first axis,
         while every line is sampled along the second axis.
 
+    acs_region : array_like of int, shape (2,)
+        The size of the Auto-Calibration Signal (ACS) region along each dimension.
+        This region is fully sampled to allow for accurate GRAPPA kernel estimation.
+
     caipi_delta : float, optional
         The CAIPI phase shift (in units of k-space fraction) to apply along the
         second dimension. A nonzero value introduces controlled aliasing between
@@ -1295,10 +1302,11 @@ def get_grappa_caipi_positions(
     -------
     positions : ndarray of shape (N, 2)
         The Cartesian coordinates of the sampled k-space points in 2D plane.
+    acs_positions : ndarray of shape (M, 2)
+        The Cartesian coordinates of the ACS region k-space points in 2D plane.
 
     Notes
     -----
-    - This function does not produce ACS regions currently
     - This function merely gives the mask positions, not the entire trajectory.
     """
     Nc_per_axis = np.array(img_size) // np.array(grappa_factors)
@@ -1315,9 +1323,23 @@ def get_grappa_caipi_positions(
         .T.astype(np.float32)
         .reshape(-1, 2)
     )
+    acs_max_loc = np.array(acs_region) / np.array(img_size) * KMAX
+    acs_positions = (
+        np.asarray(
+            np.meshgrid(
+                *[
+                    np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
+                    for num, max_loc in zip(acs_region, acs_max_loc)
+                ],
+                indexing="ij",
+            )
+        )
+        .T.astype(np.float32)
+        .reshape(-1, 2)
+    )
     if caipi_delta > 0:
         positions[::2, 1] += caipi_delta / img_size[1]
-    return positions
+    return positions, acs_positions
 
 
 def get_packing_spacing_positions(

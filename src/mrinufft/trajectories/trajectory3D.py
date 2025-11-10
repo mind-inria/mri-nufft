@@ -490,7 +490,7 @@ def initialize_3D_wave_caipi(
         sample_axis = tuple(
             im for i, im in enumerate(acq.img_size) if i != readout_axis
         )
-        positions = (
+        positions, _ = (
             get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
         )
         wavegrad = np.array(
