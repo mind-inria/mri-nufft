@@ -113,11 +113,11 @@ show_maps(Smaps.get())
 # References
 # ==========
 #
-# .. [sense] Loubna El Gueddari, C. Lazarus, H Carrié, A. Vignaud, Philippe Ciuciu. 
-#           Self-calibrating nonlinear reconstruction algorithms for variable density 
-#           sampling and parallel reception MRI. 10th IEEE Sensor Array and Multichannel 
+# .. [sense] Loubna El Gueddari, C. Lazarus, H Carrié, A. Vignaud, Philippe Ciuciu.
+#           Self-calibrating nonlinear reconstruction algorithms for variable density
+#           sampling and parallel reception MRI. 10th IEEE Sensor Array and Multichannel
 #           Signal Processing workshop, Jul 2018, Sheffield, United Kingdom. ⟨hal-01782428v1⟩
-# .. [espirit] Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS, 
-#               Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel 
-#               MRI: where SENSE meets GRAPPA. Magn Reson Med. 2014 Mar;71(3):990-1001. 
+# .. [espirit] Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
+#               Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
+#               MRI: where SENSE meets GRAPPA. Magn Reson Med. 2014 Mar;71(3):990-1001.
 #               doi: 10.1002/mrm.24751. PMID: 23649942; PMCID: PMC4142121.
