@@ -104,7 +104,6 @@ register_smaps = MethodRegister("smaps")
 get_smaps = register_smaps.make_getter()
 
 
-@with_numpy_cupy
 def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
     """
     Crop or pad a NumPy/CuPy array to the target shape (centered).
@@ -125,7 +124,7 @@ def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
     out : np.ndarray or cupy.ndarray
         Cropped/padded array.
     """
-    xp = np if isinstance(arr, np.ndarray) else __import__("cupy")
+    xp = get_array_module(arr)
     in_shape = arr.shape
     pad_width = []
     slices = []
@@ -324,10 +323,6 @@ def espirit(
     # defer import to later to prevent circular import
     from mrinufft import get_operator
 
-    if isinstance(calib_width, int):
-        calib_width = (calib_width,) * traj.shape[-1]
-    if isinstance(kernel_width, int):
-        kernel_width = (kernel_width,) * traj.shape[-1]
     xp = get_array_module(kspace_data)
     k_space, samples, dc = _extract_kspace_center(
         kspace_data=kspace_data,
@@ -390,6 +385,11 @@ def cartesian_espirit(
     """
     from mrinufft.operators.base import power_method
 
+    if isinstance(calib_width, int):
+        calib_width = (calib_width,) * (kspace.ndim - 1)
+    if isinstance(kernel_width, int):
+        kernel_width = (kernel_width,) * (kspace.ndim - 1)
+
     xp = get_array_module(kspace)
     n_coils = kspace.shape[0]
     if decim > 1:
@@ -403,7 +403,7 @@ def cartesian_espirit(
             ) from err
         kspace = _crop_or_pad(
             kspace,
-            tuple(sh // decim if i != 0 else sh for i, sh in enumerate(shape)),
+            (kspace.shape[0],) + tuple(sh // decim for i, sh in enumerate(shape)),
         )
     calib_shape = (n_coils, *calib_width)
     calib = _crop_or_pad(kspace, calib_shape)
