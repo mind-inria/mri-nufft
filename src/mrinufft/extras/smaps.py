@@ -75,7 +75,7 @@ def _extract_kspace_center(
             )
         )
         center_locations = kspace_loc[condition, :]
-        data_thresholded = kspace_data[:, condition]
+        data_thresholded = kspace_data[..., condition]
         if density is not None:
             dc = density[condition]
         else:
@@ -259,11 +259,11 @@ def low_frequency(
     return Smaps
 
 
-@with_torch
 def _unfold_blocks(calib, calib_width):
-    for i, width in enumerate(calib_width):
-        calib = calib.unfold(dimension=i + 1, size=width, step=1)
-    return calib
+    xp = get_array_module(calib)
+    return xp.lib.stride_tricks.sliding_window_view(
+        calib, calib_width, axis=tuple(range(1, calib.ndim))
+    )
 
 
 @register_smaps

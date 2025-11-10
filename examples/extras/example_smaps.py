@@ -51,7 +51,7 @@ def show_maps(imgs):
     return fig
 
 
-BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 # %%
 # Get MRI data, 3D FLORET trajectory, and simulate k-space data
@@ -79,7 +79,7 @@ forward_op = get_operator(BACKEND)(
 )
 kspace_data = forward_op.op(per_ch_mri)  # Simulate k-space data
 
-if BACKEND == "gpunufft":
+if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
     # GPU exists, run on GPU
     import cupy as cp
 
