@@ -304,7 +304,7 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not isinstance(method, Callable):
             raise ValueError(f"Unknown smaps method: {method}")
-        smaps, SOS = method(
+        smaps = method(
             self.samples,
             self.shape,
             density=self.density,
@@ -888,36 +888,47 @@ class FourierOperatorCPU(FourierOperatorBase):
 
 def power_method(
     max_iter: int,
-    operator: FourierOperatorBase,
+    operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-) -> float:
+    return_eigvec: bool = False,
+    check_convergence: bool = True,
+) -> float | NDArray | tuple[float | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
     ----------
     max_iter: int
         Maximum number of iterations
-    operator: FourierOperatorBase or child class
+    operator: FourierOperatorBase or child class or Callable
         NUFFT Operator of which to estimate the lipchitz constant.
+        If it is Callable, it should implement the AHA operation.
     norm_func: callable, optional
         Function to compute the norm , by default np.linalg.norm.
         Change this if you want custom norm, or for computing on GPU.
     x: array_like, optional
         Initial value to use, by default a random numpy array is used.
+    return_eigvec: bool, optional
+        Whether to return the eigen vector
+    check_convergence: bool, optional
+        Whether to check for convergence, by default True.
 
     Returns
     -------
-    float
+    float | NDArray | tuple[float | NDArray, NDArray]
         The lipschitz constant of the operator.
     """
 
     def AHA(x):
+        if isinstance(operator, Callable):
+            return operator(x)
         return operator.adj_op(operator.op(x))
 
     if norm_func is None:
         norm_func = np.linalg.norm
+    return_as_is = True
     if x is None:
+        return_as_is = False
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
     x_norm = norm_func(x)
     x /= x_norm
@@ -925,7 +936,7 @@ def power_method(
         x_new = AHA(x)
         x_new_norm = norm_func(x_new)
         x_new /= x_new_norm
-        if abs(x_norm - x_new_norm) < 1e-6:
+        if check_convergence and abs(x_norm - x_new_norm) < 1e-6:
             break
         x_norm = x_new_norm
         x = x_new
@@ -933,8 +944,15 @@ def power_method(
     if i == max_iter - 1:
         warnings.warn("Lipschitz constant did not converge")
 
+    if return_as_is:
+        if return_eigvec:
+            return x_new_norm, x_new
+        return x_new_norm
+
     if hasattr(x_new_norm, "__cuda_array_interface__"):
         import cupy as cp
 
         x_new_norm = cp.asarray(x_new_norm).get().item()
+    if return_eigvec:
+        return x_new_norm, x_new
     return x_new_norm

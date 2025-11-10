@@ -423,7 +423,7 @@ def _to_interface(args, array_interface, device=None):
 
     """
     # enforce iterable
-    if isinstance(args, (list, tuple)) is False:
+    if isinstance(args, list | tuple) is False:
         args = [args]
 
     # convert to target interface

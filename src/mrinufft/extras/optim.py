@@ -776,6 +776,8 @@ def cg(
     https://en.m.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method
     """
     lipschitz_cst = operator.get_lipschitz_cst()
+    if operator.backend == "cufinufft":
+        lipschitz_cst = float(lipschitz_cst.get())
     xp = get_array_module(kspace_data)
     image = (
         xp.zeros(operator.img_full_shape, dtype=kspace_data.dtype)
