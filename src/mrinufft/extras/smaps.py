@@ -232,7 +232,6 @@ def low_frequency(
     Smaps = get_operator(backend)(
         samples,
         shape,
-        density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     ).pinv_solver(k_space, max_iter=max_iter)
@@ -348,7 +347,6 @@ def espirit(
     central_kspace_img = get_operator(backend)(
         samples,
         shape,
-        density=dc,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     ).pinv_solver(k_space, max_iter=max_iter)
@@ -480,7 +478,8 @@ def cartesian_espirit(
                 [unwrap_phase(smap.get()) for smap in xp.angle(Smaps)], dtype=xp.float32
             )
         abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
-        angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        # Phase zoom with 0 order to prevent residual unwrapping causing artifacts
+        angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=0)
         max_eig = zoom(max_eig.T[0], (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         Smaps = abs_maps * np.exp(1j * angle_maps)
     Smaps *= max_eig > crop
