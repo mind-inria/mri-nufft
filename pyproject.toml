@@ -3,7 +3,7 @@ name = "mri-nufft"
 description = "MRI Non-Cartesian Fourier Operators with multiple computation backends."
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
-readme = "README.md"
+readme = "README.rst"
 dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "joblib>=1.4"]
 requires-python = ">=3.10"
 
@@ -70,6 +70,9 @@ ignore = [
 "B028", # No explicit stacklevel keyword argument found
 "F401", # Using ``try: import ... except:`` is nice.
 ]
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = ["D"]
+
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
 

@@ -29,19 +29,18 @@ The image resolution is kept small to reduce computation time.
 # Imports
 # -------
 import os
-import time
-import joblib
 
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from tqdm import tqdm
-from PIL import Image, ImageSequence
+import matplotlib.animation as animation
 
 from mrinufft import get_operator
 
-BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
+BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
+
+plt.rcParams["animation.embed_limit"] = 2**30  # 1GiB is very large.
 
 # %%
 # Setup a simple class to learn trajectory
@@ -49,11 +48,15 @@ BACKEND = os.environ.get("MRINUFFT_BACKEND", "gpunufft")
 # .. note::
 #     While we are only learning the NUFFT operator, we still need the gradient `wrt_data=True` to have all the gradients computed correctly.
 #     See [Projector]_ for more details.
+#
+# .. note::
+#     Since we are training a 2D non-Cartesian pattern for a 3D volume, we could use the "stacked" version of
+#     the operator, which uses a FFT instead of a NUFFT. However, this is not supported yet, so we use the full 3D implementation !
 
 
 class Model(torch.nn.Module):
-    def __init__(self, num_shots, img_size, factor_cartesian=0.3):
-        super(Model, self).__init__()
+    def __init__(self, num_shots, img_size, factor_cartesian=0.1):
+        super().__init__()
         self.num_samples_per_shot = 128
         cart_del = 1 / img_size[0]
         num_cart_points = np.round(np.sqrt(factor_cartesian * num_shots)).astype(int)
@@ -127,60 +130,20 @@ class Model(torch.nn.Module):
 
 
 # %%
-# Util function to plot the state of the model
-# --------------------------------------------
-
-
-def plot_state(mri_2D, traj, recon, loss=None, save_name=None, i=None):
-    fig_grid = (2, 2)
-    if loss is None:
-        fig_grid = (1, 3)
-    fig, axs = plt.subplots(*fig_grid, figsize=tuple(i * 5 for i in fig_grid[::-1]))
-    axs = axs.flatten()
-    axs[0].imshow(np.abs(mri_2D[0][..., 11]), cmap="gray")
-    axs[0].axis("off")
-    axs[0].set_title("MR Image")
-    if traj.shape[-1] == 3:
-        if i is not None and i > 20:
-            axs[1].scatter(*traj.T[1:3, 0], s=10, color="blue")
-        else:
-            fig_kwargs = {}
-            plt_kwargs = {"s": 1, "alpha": 0.2}
-            if i is not None:
-                fig_kwargs["azim"], fig_kwargs["elev"] = (
-                    i / 25 * 60 - 60,
-                    30 - i / 25 * 30,
-                )
-                plt_kwargs["alpha"] = 0.2 + 0.8 * i / 20
-                plt_kwargs["s"] = 1 + 9 * i / 20
-            axs[1].remove()
-            axs[1] = fig.add_subplot(*fig_grid, 2, projection="3d", **fig_kwargs)
-            for shot in traj:
-                axs[1].scatter(*shot.T, color="blue", **plt_kwargs)
-    else:
-        axs[1].scatter(*traj.T, s=10)
-    axs[1].set_title("Trajectory")
-    axs[2].imshow(np.abs(recon[0][0][..., 11].detach().cpu().numpy()), cmap="gray")
-    axs[2].axis("off")
-    axs[2].set_title("Reconstruction")
-    if loss is not None:
-        axs[3].plot(loss)
-        axs[3].grid("on")
-        axs[3].set_title("Loss")
-    if save_name is not None:
-        plt.savefig(save_name, bbox_inches="tight")
-        plt.close()
-    else:
-        plt.show()
-
-
-# %%
 # Setup model and optimizer
 # -------------------------
 
+num_epochs = 100
+
 cart_data = np.flipud(bwdl.get_mri(4, "T1")).T[::8, ::8, ::8].astype(np.complex64)
 model = Model(253, cart_data.shape)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+schedulder = torch.optim.lr_scheduler.LinearLR(
+    optimizer,
+    start_factor=1,
+    end_factor=0.01,
+    total_iters=num_epochs,
+)
 # %%
 # Setup data
 # ----------
@@ -189,95 +152,111 @@ mri_3D = torch.Tensor(cart_data)[None]
 mri_3D = mri_3D / torch.mean(mri_3D)
 model.eval()
 recon = model(mri_3D)
-plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon)
 # %%
+#
+#
 # Start training loop
 # -------------------
-losses = []
-image_files = []
-model.train()
-with tqdm(range(40), unit="steps") as tqdms:
-    for i in tqdms:
+# Red points in the graph show the original locations, and the blue ones the new updated trajectory.
+# As training goes, they will deviate more and more.
+
+
+fig, axs = plt.subplots(2, 2, figsize=(15, 15))
+axs = axs.ravel()
+axs[0].imshow(np.abs(mri_3D.squeeze())[..., 11], cmap="gray")
+axs[0].axis("off")
+axs[0].set_title("Ground truth")
+axs[1].remove()
+axs[1] = fig.add_subplot(222, projection="3d", azim=0, elev=0)
+traj_scat = axs[1].scatter(
+    *model.get_trajectory(True).detach().cpu().numpy()[:, 0, :].T, s=1, c="tab:blue"
+)
+traj_scat2 = axs[1].scatter(
+    *model.get_trajectory(True).detach().cpu().numpy()[:, 0, :].T, s=1, c="tab:red"
+)
+axs[1].set_xlim(-0.5, 0.5)
+axs[1].set_ylim(-0.5, 0.5)
+axs[1].set_zlim(-0.5, 0.5)
+# traj_scat, = axs[1].plot(*model.get_trajectory(True).detach().cpu().numpy()[:,0,:].T, linestyle="", marker="o")
+axs[1].set_title("Trajectory")
+
+recon_im = axs[2].imshow(
+    np.abs(recon.squeeze()[..., 11].detach().cpu().numpy()), cmap="gray"
+)
+axs[2].set_title("Reconstruction")
+axs[2].axis("off")
+
+axs[3].grid()
+(loss_curve,) = axs[3].plot([], [])
+axs[3].set_ylabel("Loss")
+axs[3].set_xlabel("epoch")
+fig.suptitle("Starting Training")
+fig.tight_layout()
+
+
+def train():
+    """Train loop."""
+    losses = []
+    old_traj = None
+    for i in range(num_epochs):
         out = model(mri_3D)
-        loss = torch.nn.functional.mse_loss(out, mri_3D[None])
-        numpy_loss = loss.detach().cpu().numpy()
-        tqdms.set_postfix({"loss": numpy_loss})
-        losses.append(numpy_loss)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        loss = torch.norm(out - mri_3D[None])  # Compute loss
+
+        optimizer.zero_grad()  # Zero gradients
+        loss.backward()  # Backward pass
+        optimizer.step()  # Update weights
         with torch.no_grad():
-            # Clamp the value of trajectory between [-0.5, 0.5]
+            # clamp the value of trajectory between [-0.5, 0.5]
             for param in model.parameters():
                 param.clamp_(-0.5, 0.5)
-        # Generate images for gif
-        hashed = joblib.hash((i, "learn_line", time.time()))
-        filename = "/tmp/" + f"{hashed}.png"
-        plot_state(
-            mri_3D,
-            model.get_trajectory(True).detach().cpu().numpy(),
-            out,
+        schedulder.step()
+        losses.append(loss.item())
+        new_traj = model.get_trajectory(True).detach().cpu().numpy()
+        yield (
+            out.detach().cpu().numpy().squeeze()[..., 11],
+            new_traj,
+            old_traj,
             losses,
-            save_name=filename,
-            i=i,
         )
-        image_files.append(filename)
+        old_traj = new_traj
 
-# Make a GIF of all images.
-imgs = [Image.open(img) for img in image_files]
-imgs[0].save(
-    "mrinufft_learn_2d_sampling_pattern.gif",
-    save_all=True,
-    append_images=imgs[1:],
-    optimize=False,
-    duration=2,
-    loop=0,
+
+def plot_epoch(data):
+    img, new_traj, old_traj, losses = data
+
+    cur_epoch = len(losses)
+    recon_im.set_data(abs(img))
+    loss_curve.set_xdata(np.arange(cur_epoch))
+    loss_curve.set_ydata(losses)
+    mov3d = 70
+    if cur_epoch > mov3d:
+        #        traj_scat2.set_offsets([[np.nan, np.nan]])
+        trajf = new_traj.reshape(-1, 3)
+        traj_scat.set_offsets(trajf[:, :2])
+        traj_scat.set_3d_properties(trajf[:, 2], "z", True)
+        # traj_scat.set_xdata(traj[:, :, 0].ravel())
+        # traj_scat.set_ydata(traj[:, :, 1].ravel())
+        # traj_scat.set_3d_properties(traj[:, :, 2].ravel())
+        axs[1].view_init(azim=(cur_epoch - mov3d), elev=(cur_epoch - mov3d))
+    else:
+        traj_scat.set_offsets(new_traj[:, 0, :2])
+
+    axs[3].set_xlim(0, cur_epoch)
+    axs[3].set_ylim(0, 1.1 * max(losses))
+    axs[2].set_title(f"Reconstruction, frame {cur_epoch}/{num_epochs}")
+    axs[1].set_title(f"Trajectory, frame {cur_epoch}/{num_epochs}")
+
+    if cur_epoch < num_epochs:
+        fig.suptitle("Training in progress " + "." * (1 + cur_epoch % 3))
+    else:
+        fig.suptitle("Training complete !")
+
+
+ani = animation.FuncAnimation(
+    fig, plot_epoch, train, save_count=num_epochs, repeat=False
 )
-# sphinx_gallery_start_ignore
-# cleanup
-import os
-import shutil
-from pathlib import Path
-
-for f in image_files:
-    try:
-        os.remove(f)
-    except OSError:
-        continue
-# don't raise errors from pytest. This will only be executed for the sphinx gallery stuff
-try:
-    final_dir = (
-        Path(os.getcwd()).parent.parent
-        / "docs"
-        / "generated"
-        / "autoexamples"
-        / "GPU"
-        / "images"
-    )
-    shutil.copyfile(
-        "mrinufft_learn_2d_sampling_pattern.gif",
-        final_dir / "mrinufft_learn_2d_sampling_pattern.gif",
-    )
-except FileNotFoundError:
-    pass
-
-# sphinx_gallery_end_ignore
-
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif'
-
-# %%
-# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
-#    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_2d_sampling_pattern.gif
-#    :class: sphx-glr-single-img
-
-# %%
-# Trained trajectory
-# ------------------
-model.eval()
-recon = model(mri_3D)
-plot_state(mri_3D, model.get_trajectory(True).detach().cpu().numpy(), recon, losses)
 plt.show()
+
 
 # %%
 # References

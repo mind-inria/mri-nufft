@@ -156,7 +156,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         cls,
         samples,
         shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
     ):
@@ -169,7 +169,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             It should be C-contiguous.
         shape: tuple
             Shape of the image space.
-        n_iter: int
+        max_iter: int
             Number of iterations.
         osf: int, default 2
             Currently, we support only OSF=2 and this value cannot be changed.
@@ -192,7 +192,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
                 samples.astype(np.float32),
                 shape,
                 method="pipe",
-                max_iter=num_iterations,
+                max_iter=max_iter,
             )
         )
 

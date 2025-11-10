@@ -183,11 +183,11 @@ def low_frequency(
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     )
-    Smaps = smaps_adj_op.adj_op(k_space)
+    Smaps = smaps_adj_op.pinv_solver(k_space)
     SOS = np.linalg.norm(Smaps, axis=0)
     if isinstance(mask, np.ndarray):
         Smaps = Smaps * mask
-    elif isinstance(mask, bool):
+    elif isinstance(mask, bool) and mask:
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
         convex_hull = convex_hull_image(SOS > thresh)
@@ -201,9 +201,10 @@ def low_frequency(
         )
     # Re-normalize the sensitivity maps
     if np.any(mask) or np.sum(blurr_factor) > 0:
-        # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
-        SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
-    Smaps = Smaps / SOS
+        # ReCalculate SOS
+        SOS = np.linalg.norm(Smaps, axis=0)
+    # Divide by SOS + eps for numerical stability
+    Smaps = Smaps / (SOS + 1e-10)
     return Smaps, SOS
 
 
