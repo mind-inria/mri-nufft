@@ -1,4 +1,8 @@
-"""SMaps module for sensitivity maps estimation."""
+"""Smaps module for sensitivity maps estimation.
+
+.. autoregistry:: smaps
+
+"""
 
 from __future__ import annotations
 

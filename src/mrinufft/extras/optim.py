@@ -1,4 +1,7 @@
-"""Implements the LSQR algorithm."""
+"""Implements Optimization algorithms.
+
+.. autoregistry :: optimizer
+"""
 
 from collections.abc import Callable
 import numpy as np
@@ -42,7 +45,7 @@ NDArray:
 )
 
 
-register_optim = MethodRegister("optim", _optim_docs)
+register_optim = MethodRegister("optimizer", _optim_docs)
 get_optimizer = register_optim.make_getter()
 
 
