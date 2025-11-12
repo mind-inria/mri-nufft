@@ -132,13 +132,14 @@ html_theme_options = {
     "use_repository_button": True,
     "use_issues_button": True,
     "use_edit_page_button": True,
-    "use_download_button": True,
+    "use_download_button": False,
     "home_page_in_toc": True,
 }
 
 html_logo = "_static/logos/mri-nufft.png"
 html_favicon = "_static/logos/mri-nufft-icon.png"
 html_title = "MRI-nufft Documentation"
+html_copy_source = False
 html_show_sourcelink = False
 html_context = {
     "github_user": "mind-inria",
