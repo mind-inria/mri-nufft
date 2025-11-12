@@ -15,16 +15,23 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
-import coverage
+
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
+
+# import after updating the path.
+from link_info import linkcode_resolve_file_suffix  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = "mri-nufft"
 copyright = "2022, MRI-NUFFT Contributors"
 author = "MRI-NUFFT Contributors"
+
+
+GITHUB_REPO = "https://github.com/mind-inria/mri-nufft"
+GITHUB_VERSION = "master"
 
 # -- General configuration ---------------------------------------------------
 
@@ -39,7 +46,7 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
     "sphinxcontrib.video",
     "sphinx_gallery.gen_gallery",
@@ -121,7 +128,7 @@ html_theme = "sphinx_book_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_theme_options = {
-    "repository_url": "https://github.com/mind-inria/mri-nufft/",
+    "repository_url": GITHUB_REPO,
     "use_repository_button": True,
     "use_issues_button": True,
     "use_edit_page_button": True,
@@ -136,6 +143,13 @@ html_show_sourcelink = False
 html_context = {
     "github_user": "mind-inria",
     "github_repo": "mri-nufft",
-    "github_version": "master",
+    "github_version": GITHUB_VERSION,
     "doc_path": "docs/",
 }
+
+
+def linkcode_resolve(domain, info):
+    file_suffix = linkcode_resolve_file_suffix(domain, info)
+    if file_suffix is None:
+        return None
+    return f"{GITHUB_REPO}/blob/{GITHUB_VERSION}/" + file_suffix
