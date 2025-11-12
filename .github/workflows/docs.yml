@@ -44,6 +44,15 @@ jobs:
             });
             core.setOutput('head_ref', pr.head.ref);
 
+      - name: Comment That docs building is starting
+        if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && success()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+             🛠️  Documentation Build started !
+          edit-mode: append
+
       - uses: actions/checkout@v4
         with:
           # if this was triggered by a PR-comment we use the PR branch,
