@@ -45,7 +45,7 @@ class ColabLinkDirective(SphinxDirective):
         )
 
         # Generate the Colab URL based on GitHub repo information
-        self.colab_url = f"https://colab.research.google.com/github/mind-inria/mri-nufft/blob/gh-pages/examples/{notebook_repo_relative_path}"
+        self.colab_url = f"https://colab.research.google.com/github/mind-inria/mri-nufft/blob/colab-examples/examples/{notebook_repo_relative_path}"
 
         # Create the HTML button or link
         self.html = f"""<div class="colab-button">
