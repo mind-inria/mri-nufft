@@ -4,27 +4,64 @@ Getting Started
 Installing MRI-NUFFT
 --------------------
 
-mri-nufft is available on PyPi
+mri-nufft is available on `PyPi <https://pypi.org/project/mri-nufft/>`_
+
+
+.. tip::
+
+   TLDR: If you have a GPU and CUDA>=12.0, you probably want to install MRI-NUFFT like so:
+   ``pip install mri-nufft[cufinufft]`` or ``pip install mri-nufft[gpunufft]``
+   For CPU only setup we recommend ``pip install mri-nufft[finufft]``
+
+   Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
+
+   For more information , check the :ref:`general_examples`
+
 
 .. code-block:: sh
 
     pip install mri-nufft
 
+    
+However, if you want to use some specific backends or develop on mri-nufft, you can install it with extra dependencies. notably `extra`, `io`,  and `autodiff`
+
+.. code-block:: sh
+
+    pip install mri-nufft[extra,io,autodiff]
+
+
+Using ``uv``
+~~~~~~~~~~~~
+If you are using ``uv`` as your package installer you will need to do ::
+    .. code-block:: sh
+    
+         uv pip install mri-nufft[extra,io,autodiff] --no-build-isolation
+
+    
 Development Version
 ~~~~~~~~~~~~~~~~~~~
 
-If you want to modifiy the mri-nufft code base
+If you want to modify the mri-nufft code base
 
 .. code-block:: sh
 
     git clone https://github.com:mind-inria/mri-nufft
-    pip install -e ./mri-nufft[dev]
+    pip install -e ./mri-nufft[dev,doc,extra,io,autodiff,tests,cufinufft,gpunufft,finufft]
+
+or using ``uv``
+
+.. code-block:: sh
+
+    git clone https://github.com:mind-inria/mri-nufft
+    uv venv 
+    uv sync --all-extras --no-build-isolation --no-extra <backend-you-don't-need>
 
 
+    
 Choosing a NUFFT Backend
 ========================
 
-In order to perform Non-Uniform fast Fourier transform you need to install a specific :ref:`NUFFT` computation library backend.
+In order to perform Non-Uniform fast Fourier transform you need to install a specific :ref:``NUFFT` computation library backend.
 
 .. tip::
 
@@ -48,8 +85,8 @@ These libraries need to be installed separately from this package.
 Backend              Hardward     Batch computation   Precision        Array Interface
 ==================== ============ =================== ===============  =================
 cufinufft_           GPU (CUDA)   ✔                   single           cupy/torch/numpy
-finufft_             CPU          ✔                   single/double    numpy
-gpunufft_            GPU          ✔                   single/double    numpy
+finufft_             CPU          ✔                   single/double    numpy/torch
+gpunufft_            GPU          ✔                   single/double    numpy/torch/cupy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single           tensorflow
 pynufft-cpu_         CPU          ✘                   single/double    numpy
 pynfft_              CPU          ✘                   single/double    numpy
@@ -97,11 +134,8 @@ gpuNUFFT
 
 an active gpuNUFFT fork is maintained by `chaithyagr <https://github.com/chaithyagr/gpunufft/>`_.
 
-.. warning::
 
-    This is compatible only up to CUDA 11.8 !
-
-To install it use `pip install gpuNUFFT` or for local development.
+To install it use `pip install gpuNUFFT` or for local development, use the following: 
 
 .. code-block:: sh
 
@@ -109,6 +143,15 @@ To install it use `pip install gpuNUFFT` or for local development.
     cd gpuNUFFT
     python setup.py install
 
+.. warning::
+
+   If you are using ``uv`` as your package installer you will need to do ::
+
+    .. code-block:: sh
+    
+         uv pip install wheel pip pybind11
+         uv pip install mri-nufft[gpunufft] --no-build-isolation
+    
 BART
 ~~~~
 

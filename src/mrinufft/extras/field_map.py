@@ -3,6 +3,11 @@
 This module provides methods to generate dummy B0map as well as estimation of the
 bilinearization of the off-resonance model (See :ref:`nufft-orc` for a detailed
 explanation).
+
+
+
+.. autoregistry:: orc_factorization
+
 """
 
 import numpy as np

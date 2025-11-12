@@ -131,6 +131,8 @@ class MethodRegister:
             return decorator
 
     def make_getter(self) -> Callable:
+        """Create a `get_{register_name}` function to get methods from the registry."""
+
         def getter(method_name, *args, **kwargs):
             try:
                 method = self.registry[self.register_name][method_name]
