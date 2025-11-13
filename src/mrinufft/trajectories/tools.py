@@ -1402,8 +1402,6 @@ def get_packing_spacing_positions(
             np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
         )
         positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
-    else:
-        raise ValueError(f"Unsupported packing: {packing}")
     if packing_enum in [Packings.HEXAGON, Packings.TRIANGLE]:
         # Hexagonal/triangular packing based on square packing
         positions[::2, 1] += 1 / 2
