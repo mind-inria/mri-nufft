@@ -146,6 +146,18 @@ html_theme_options = {
         ],
     },
     "header_links_before_dropdown": 4,
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            # URL where the link will redirect
+            "url": "https://github.com/mind-inria/mri-nufft",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            "icon": "fa-brands fa-github",
+            # The type of image to be used (see below for details)
+            "type": "fontawesome",
+        },
+    ],
 }
 
 html_logo = "_static/logos/mri-nufft.png"
