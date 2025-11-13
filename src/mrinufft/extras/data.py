@@ -107,7 +107,7 @@ def fse_simulation(
     Returns
     -------
     signal : np.ndarray
-        Simulated signal of shape (nTE*nTR, *M0).
+        Simulated signal of shape ``(nTE*nTR, *M0)``.
 
     """
     # preprocess sequence parameters

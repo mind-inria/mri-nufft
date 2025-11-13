@@ -76,7 +76,7 @@ For improved image quality, embed these steps in a more complex reconstruction p
 
 Want to see more ?
 
-- Check the `Documentation <https://mind-inria.github.io/mri-nufft/>`_
+- Check the `Documentation <https://mind-inria.github.io/mri-nufft/>`__
 
 - Or go visit the `Examples <https://mind-inria.github.io/mri-nufft/generated/autoexamples/index.html>`_
 
@@ -88,7 +88,7 @@ MRI-nufft is available on `PyPi <https://pypi.org/project/mri-nufft>`__ and can 
 
   pip install mri-nufft
 
-Additionally, you will have to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`_ for more guidance.
+Additionally, you will have to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`__ for more guidance.
 Typically we recommend:: 
 
   pip install mri-nufft[finufft] 
