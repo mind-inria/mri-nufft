@@ -19,6 +19,7 @@ import warnings
 from mrinufft._array_compat import (
     with_numpy,
     with_numpy_cupy,
+    get_array_module,
     AUTOGRAD_AVAILABLE,
     CUPY_AVAILABLE,
     is_cuda_array,
@@ -501,7 +502,7 @@ class FourierOperatorBase(ABC):
         self.n_batchs = 1
         self.squeeze_dims = True
 
-        lipschitz_cst = power_method(max_iter, self)
+        lipschitz_cst, _ = power_method(max_iter, self)
 
         # restore coil setup
         self.n_coils = n_coils
@@ -938,18 +939,19 @@ class FourierOperatorCPU(FourierOperatorBase):
 
 def power_method(
     max_iter: int,
-    operator: FourierOperatorBase,
+    operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-) -> np.floating | NDArray[np.floating]:
+) -> tuple[np.floating | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
     ----------
     max_iter: int
         Maximum number of iterations
-    operator: FourierOperatorBase or child class
+    operator: FourierOperatorBase or child class or Callable
         NUFFT Operator of which to estimate the lipchitz constant.
+        If it is Callable, it should implement the AHA operation.
     norm_func: callable, optional
         Function to compute the norm , by default np.linalg.norm.
         Change this if you want custom norm, or for computing on GPU.
@@ -958,24 +960,31 @@ def power_method(
 
     Returns
     -------
-    float
-        The lipschitz constant of the operator.
+    x_new_norm: float or NDArray
+        The maximum eigen value
+    x_new: NDArray
+        The eigen vector associated with maximum eigen value
     """
 
     def AHA(x):
+        if isinstance(operator, Callable):
+            return operator(x)
         return operator.adj_op(operator.op(x))
 
     if norm_func is None:
         norm_func = np.linalg.norm
+    return_as_is = True
     if x is None:
+        return_as_is = False
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    xp = get_array_module(x)
     x_norm = norm_func(x)
     x /= x_norm
     for i in range(max_iter):  # noqa: B007
         x_new = AHA(x)
         x_new_norm = norm_func(x_new)
         x_new /= x_new_norm
-        if abs(x_norm - x_new_norm) < 1e-6:
+        if xp.linalg.norm(x_norm - x_new_norm) < 1e-6:
             break
         x_norm = x_new_norm
         x = x_new
@@ -983,8 +992,11 @@ def power_method(
     if i == max_iter - 1:
         warnings.warn("Lipschitz constant did not converge")
 
+    if return_as_is:
+        return x_new_norm, x_new
+
     if hasattr(x_new_norm, "__cuda_array_interface__"):
         import cupy as cp
 
         x_new_norm = cp.asarray(x_new_norm).get().item()
-    return x_new_norm
+    return x_new_norm, x_new

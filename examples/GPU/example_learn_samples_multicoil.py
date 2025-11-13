@@ -101,7 +101,7 @@ class Model(torch.nn.Module):
         kspace = self.operator.op(x)
 
         # Recompute the sensitivity maps for the updated trajectory.
-        self.sense_op.smaps, _ = get_smaps("low_frequency")(
+        self.sense_op.smaps = get_smaps("low_frequency")(
             self.trajectory.detach().numpy(),
             self.img_size,
             kspace.detach(),

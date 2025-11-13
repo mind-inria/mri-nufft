@@ -552,6 +552,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
+        xp = get_array_module(new_samples)
+        if xp.__name__ == "cupy":
+            new_samples = new_samples.get()
         self._samples = proper_trajectory(
             new_samples.astype(np.float32, copy=False), normalize="unit"
         )

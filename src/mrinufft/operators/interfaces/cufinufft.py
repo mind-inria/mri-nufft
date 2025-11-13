@@ -840,7 +840,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = cp.asarray(x)
-        lipschitz_cst = power_method(
+        lipschitz_cst, _ = power_method(
             max_iter, self, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )
 
