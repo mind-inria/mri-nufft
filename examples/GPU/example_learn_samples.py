@@ -20,11 +20,6 @@ where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_
     This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 
-# %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft] scikit-image
 
 import os
 

@@ -89,7 +89,7 @@ sphinx_gallery_conf = {
     "within_subsection_order": "ExampleTitleSortKey",
     "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
-    "prefer_full_module": {r".*"},
+    "prefer_full_module": {r"mrinufft"},
     "nested_sections": True,
     "binder": {
         "org": "mind-inria",
@@ -105,6 +105,9 @@ sphinx_gallery_conf = {
     },
     "parallel": True,
     "matplotlib_animations": (True, "mp4"),
+    "first_notebook_cell": (
+        "!pip install mri-nufft[cufinufft,finufft,gpunufft,extra,autodiff]"
+    ),  # for binder and colab
 }
 
 intersphinx_mapping = {
@@ -134,6 +137,14 @@ html_css_files = [
 
 html_theme_options = {
     "use_edit_page_button": True,
+    "secondary_sidebar_items": {
+        "generated/autoexamples/**": [
+            "page-toc",
+            "sg_download_links",
+            "sg_launcher_links",
+            "colab_link",
+        ],
+    },
     "header_links_before_dropdown": 4,
 }
 
