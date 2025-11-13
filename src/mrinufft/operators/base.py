@@ -328,7 +328,7 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not isinstance(method, Callable):
             raise ValueError(f"Unknown smaps method: {method}")
-        smaps, _ = method(
+        smaps = method(
             self.samples,
             self.shape,
             density=self.density,
