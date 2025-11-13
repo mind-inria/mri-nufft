@@ -81,7 +81,7 @@ highlight_language = "python"
 # -- Options for Sphinx Gallery ----------------------------------------------
 
 sphinx_gallery_conf = {
-    "doc_module": "mrinufft",
+    "doc_module": ("mrinufft",),
     "backreferences_dir": "generated/gallery_backreferences",
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
@@ -89,7 +89,7 @@ sphinx_gallery_conf = {
     "within_subsection_order": "ExampleTitleSortKey",
     "filename_pattern": "/example_",
     "ignore_pattern": r"(__init__|conftest|utils).py",
-    "prefer_full_module": {r"mrinufft"},
+    "prefer_full_module": {r".*"},
     "nested_sections": True,
     "binder": {
         "org": "mind-inria",
