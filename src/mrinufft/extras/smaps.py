@@ -459,18 +459,14 @@ def cartesian_espirit(
     Smaps = Smaps.T[0]
     Smaps *= xp.conj(Smaps[0] / xp.abs(Smaps[0]))
     if decim > 1:
-        if xp.__name__ == "numpy":
+        if xp is np:
             from scipy.ndimage import zoom
-
-            unwrapped_phase = xp.array(
-                [unwrap_phase(smap) for smap in xp.angle(Smaps)], dtype=xp.float32
-            )
         else:
             from cupyx.scipy.ndimage import zoom
-
-            unwrapped_phase = xp.array(
-                [unwrap_phase(smap.get()) for smap in xp.angle(Smaps)], dtype=xp.float32
-            )
+        unwrapped_phase = xp.array(
+            [with_numpy(unwrap_phase)(smap) for smap in xp.angle(Smaps)],
+            dtype=xp.float32
+        )
         abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         # Phase zoom with 0 order to prevent residual unwrapping causing artifacts
         angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=0)
