@@ -131,18 +131,13 @@ def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
 
     for _, (s, t) in enumerate(zip(in_shape, target_shape)):
         diff = t - s
-        if diff > 0:
-            # need to pad
-            pad_before = diff // 2
-            pad_after = diff - pad_before
-            pad_width.append((pad_before, pad_after))
-            slices.append(slice(None))
-        else:
-            # need to crop
-            crop_before = (-diff) // 2
-            crop_after = crop_before + t
-            pad_width.append((0, 0))
-            slices.append(slice(crop_before, crop_after))
+        pad_before = max(diff, 0) // 2
+        pad_after = max(diff, 0) - pad_before
+        crop_before = max(-diff, 0) // 2
+        crop_after = crop_before + min(s, t)
+
+        pad_width.append((pad_before, pad_after))
+        slices.append(slice(crop_before, crop_after))
 
     arr = arr[tuple(slices)]
     if any(pw != (0, 0) for pw in pad_width):
