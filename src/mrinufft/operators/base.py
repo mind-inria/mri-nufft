@@ -944,9 +944,7 @@ def power_method(
         warnings.warn("Lipschitz constant did not converge")
 
     if return_as_is:
-        if return_eigvec:
-            return x_new_norm, x_new
-        return x_new_norm
+        return x_new_norm, x_new
 
     if hasattr(x_new_norm, "__cuda_array_interface__"):
         import cupy as cp
