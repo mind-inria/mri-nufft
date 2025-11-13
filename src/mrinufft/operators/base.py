@@ -891,7 +891,6 @@ def power_method(
     operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-    check_convergence: bool = True,
 ) -> tuple[float | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
@@ -907,8 +906,6 @@ def power_method(
         Change this if you want custom norm, or for computing on GPU.
     x: array_like, optional
         Initial value to use, by default a random numpy array is used.
-    check_convergence: bool, optional
-        Whether to check for convergence, by default True.
 
     Returns
     -------
@@ -935,7 +932,7 @@ def power_method(
         x_new = AHA(x)
         x_new_norm = norm_func(x_new)
         x_new /= x_new_norm
-        if check_convergence and abs(x_norm - x_new_norm) < 1e-6:
+        if abs(x_norm - x_new_norm) < 1e-6:
             break
         x_norm = x_new_norm
         x = x_new

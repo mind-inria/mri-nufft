@@ -455,7 +455,6 @@ def cartesian_espirit(
         operator=forward,
         norm_func=normalize,
         x=Smaps,
-        check_convergence=False,
     )
     Smaps = Smaps.T[0]
     Smaps *= xp.conj(Smaps[0] / xp.abs(Smaps[0]))
