@@ -13,6 +13,69 @@ from numpy.typing import NDArray
 from collections.abc import Callable
 
 
+########################################################
+# Estimation of Off-Resonance-Correction Interpolators #
+########################################################
+
+_smap_docs = dict(
+    base_params="""
+Parameters
+----------
+traj : numpy.ndarray
+    The trajectory of the samples.
+shape : tuple
+    The shape of the image.
+kspace_data : numpy.ndarray
+    The k-space data.
+threshold : float, or tuple of float, optional
+    The threshold used for extracting the k-space center.
+    By default it is 0.1
+backend : str
+    The backend used for the operator.
+density : numpy.ndarray, optional
+    The density compensation weights.
+max_iter : int, optional
+    The max iterations for internal `pinv` computations
+""",
+    returns="""
+Returns
+-------
+Smaps : numpy.ndarray
+    The sensitivity maps.
+""",
+    espirit_params="""
+calib_width : int or tuple of int, optional
+    The calibration region width. By default it is 24.
+kernel_width : int or tuple of int, optional
+    The kernel width. By default it is 6.
+thresh : float, optional
+    The threshold for the singular values. By default it is 0.02.
+crop : float, optional
+    The cropping threshold for the sensitivity maps.
+    By default it is 0.95.
+decim : int, optional
+    The decimation factor for the caluclation of sensitivity maps.
+    By default it is 1. This can be used to speed up the computation
+    and significantly reduce memory usage. The final result is
+    upsampled back to the original size through linear
+    interpolation.
+Returns
+-------
+Smaps : NDArray
+    The sensitivity maps
+""",
+    espirit_ref="""
+References
+----------
+    Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
+    Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
+    MRI: where SENSE meets GRAPPA. Magn Reson Med.
+    2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
+    PMID: 23649942; PMCID: PMC4142121.
+""",
+)
+
+
 def _extract_kspace_center(
     kspace_data: NDArray,
     kspace_loc: NDArray,
@@ -101,7 +164,7 @@ def _extract_kspace_center(
         return data_thresholded, kspace_loc, density
 
 
-register_smaps = MethodRegister("smaps")
+register_smaps = MethodRegister("smaps", docstring_subs=_smap_docs)
 get_smaps = register_smaps.make_getter()
 
 
@@ -163,23 +226,7 @@ def low_frequency(
     """
     Calculate low-frequency sensitivity maps.
 
-    Parameters
-    ----------
-    traj : numpy.ndarray
-        The trajectory of the samples.
-    shape : tuple
-        The shape of the image.
-    kspace_data : numpy.ndarray
-        The k-space data.
-    threshold : float, or tuple of float, optional
-        The threshold used for extracting the k-space center.
-        By default it is 0.1
-    backend : str
-        The backend used for the operator.
-    density : numpy.ndarray, optional
-        The density compensation weights.
-    max_iter : int, optional
-        The max iterations for internal `pinv` computations
+    ${base_params}
     window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
         The window function to apply to the selected data. It is computed with
         the center locations selected. Only works with circular mask.
@@ -193,10 +240,7 @@ def low_frequency(
     mask: bool, optional default `False`
         Whether the Sensitivity maps must be masked
 
-    Returns
-    -------
-    Smaps : numpy.ndarray
-        The low-frequency sensitivity maps.
+    ${returns}
 
     References
     ----------
@@ -278,57 +322,12 @@ def espirit(
 ) -> NDArray:
     """ESPIRIT algorithm on non-Cartesian data.
 
-    Parameters
-    ----------
-    traj : numpy.ndarray
-        The trajectory of the samples.
-    shape : tuple
-        The shape of the image.
-    kspace_data : numpy.ndarray
-        The k-space data.
-    threshold : float, or tuple of float, optional
-        The threshold used for extracting the k-space center.
-        By default it is 0.1
-    backend : str
-        The backend used for the operator for `pinv` computation
-    density : numpy.ndarray, optional
-        The density compensation weights.
-    max_iter : int, optional
-        The max iterations for internal `pinv` computations
+    ${base_params}
+    ${espirit_params}
 
-    Parameters
-    ----------
-    kspace: NDArray
-        The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
-    calib_width : int or tuple of int, optional
-        The calibration region width. By default it is 24.
-    kernel_width : int or tuple of int, optional
-        The kernel width. By default it is 6.
-    thresh : float, optional
-        The threshold for the singular values. By default it is 0.02.
-    crop : float, optional
-        The cropping threshold for the sensitivity maps.
-        By default it is 0.95.
-    decim : int, optional
-        The decimation factor for the caluclation of sensitivity maps.
-        By default it is 1. This can be used to speed up the computation
-        and significantly reduce memory usage. The final result is
-        upsampled back to the original size through linear
-        interpolation.
+    ${returns}
 
-    Returns
-    -------
-    Smaps : NDArray
-        The sensitivity maps
-
-    References
-    ----------
-        Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
-        Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
-        MRI: where SENSE meets GRAPPA. Magn Reson Med.
-        2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
-        PMID: 23649942; PMCID: PMC4142121.
-
+    ${espirit_ref}
     """
     # defer import to later to prevent circular import
     from mrinufft import get_operator
@@ -352,6 +351,7 @@ def espirit(
     )
 
 
+@register_smaps
 def cartesian_espirit(
     kspace: NDArray,
     shape: tuple[int, ...],
@@ -369,34 +369,11 @@ def cartesian_espirit(
         The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
     shape : tuple
         The shape of the image.
-    calib_width : int or tuple of int, optional
-        The calibration region width. By default it is 24.
-    kernel_width : int or tuple of int, optional
-        The kernel width. By default it is 6.
-    thresh : float, optional
-        The threshold for the singular values. By default it is 0.02.
-    crop : float, optional
-        The cropping threshold for the sensitivity maps.
-        By default it is 0.95.
-    decim : int, optional
-        The decimation factor for the caluclation of sensitivity maps.
-        By default it is 1. This can be used to speed up the computation
-        and significantly reduce memory usage. The final result is
-        upsampled back to the original size through linear
-        interpolation.
+    ${espirit_params}
 
-    Returns
-    -------
-    Smaps : NDArray
-        The sensitivity maps
+    ${returns}
 
-    References
-    ----------
-        Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
-        Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
-        MRI: where SENSE meets GRAPPA. Magn Reson Med.
-        2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
-        PMID: 23649942; PMCID: PMC4142121.
+    ${espirit_ref}
     """
     from mrinufft.operators.base import power_method
 
