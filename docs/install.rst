@@ -41,17 +41,17 @@ If you are using ``uv`` as your package installer you will need to do
 Development Version
 ~~~~~~~~~~~~~~~~~~~
 
-If you want to modify the mri-nufft code base
+If you want to modify the mri-nufft code base:
 
 .. code-block:: sh
 
     git clone https://github.com:mind-inria/mri-nufft
     pip install -e ./mri-nufft[dev,doc,extra,io,autodiff,tests,cufinufft,gpunufft,finufft]
 
-or using ``uv``
+or using ``uv``: 
 
 .. code-block:: sh
 
     git clone https://github.com:mind-inria/mri-nufft
     uv venv 
-    uv sync --all-extras --no-build-isolation --no-extra <backend-you-don't-need>
+    uv sync --all-extras --no-build-isolation --no-extra <backend-you-dont-need>

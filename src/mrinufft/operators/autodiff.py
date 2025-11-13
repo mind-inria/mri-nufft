@@ -125,9 +125,9 @@ class MRINufftAutoGrad(torch.nn.Module):
         k-space trajectory (samples locations).
     paired_batch: bool, default False
         If True, an extra dimension for batchs is considered for the data.
-        Data dimensions for inputs and output will be `(batch_size,
-        nufft_op.n_batchs, nufft_op.n_coils, nufft_op.n_samples)` for k-space
-        and `(batch_Size, nufft_op.n_batchs, 1, *nufft_op.shape)` for image
+        Data dimensions for inputs and output will be ``(batch_size,
+        nufft_op.n_batchs, nufft_op.n_coils, nufft_op.n_samples)`` for k-space
+        and ``(batch_Size, nufft_op.n_batchs, 1, *nufft_op.shape)`` for image
         (with smaps support).
         The NUFFT operator will support different processing different k-space /
         image data and corresponding sensitivity map pairs. This is particularly
@@ -136,10 +136,10 @@ class MRINufftAutoGrad(torch.nn.Module):
     Notes
     -----
         - Even with batch_size, the data is processed sequentially.
-        - Unlike the `n_batchs` argument of the base nufft_operator,
-          `batch_size` allows for batching on other data than images and
+        - Unlike the ``n_batchs`` argument of the base nufft_operator,
+          ``batch_size`` allows for batching on other data than images and
           k-space. By using :meth:`op_batched` and :mod:`adj_op_batched`. In
-          this context `n_batchs` of the NUFFT operator can be seen
+          this context ``n_batchs`` of the NUFFT operator can be seen
           as a number of MR echos.
     """
 
@@ -176,7 +176,8 @@ class MRINufftAutoGrad(torch.nn.Module):
             Image data of shape ``(batch_size, nufft_op.n_batchs, (1 if smaps
             else nufft_op.n_coils), *nufft_op.shape)``
         smaps: Tensor, optional
-            Sensitivity maps of shape ``(batch_size, nufft_op.n_coils, *nufft_op.shape)
+            Sensitivity maps
+            with shape ``(batch_size, nufft_op.n_coils, *nufft_op.shape)``
         samples: Tensor, optional
             Samples for the batches of shape ``(batch_size, nufft_op.n_samples,
             nufft_op.ndim)``
@@ -184,8 +185,8 @@ class MRINufftAutoGrad(torch.nn.Module):
         Returns
         -------
         Tensor:
-             with shape `(batch_size, nufft_op.n_batchs, nufft_op.n_coils,
-             nufft_op.n_samples)`
+             with shape ``(batch_size, nufft_op.n_batchs, nufft_op.n_coils,
+             nufft_op.n_samples)``
 
         Notes
         -----
@@ -205,7 +206,8 @@ class MRINufftAutoGrad(torch.nn.Module):
              with shape
              ``(batch_size, nufft_op.n_batchs, nufft_op.n_coils, nufft_op.n_samples)``
         smaps: Tensor, optional
-            Sensitivity maps of shape ``(batch_size, nufft_op.n_coils, *nufft_op.shape)
+            Sensitivity maps with shape
+            ``(batch_size, nufft_op.n_coils, *nufft_op.shape)``
         samples: Tensor, optional
             Samples for the batches of shape
             ``(batch_size, nufft_op.n_samples, nufft_op.ndim)``
