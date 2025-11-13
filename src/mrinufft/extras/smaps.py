@@ -7,6 +7,7 @@ from mrinufft._array_compat import with_numpy_cupy, get_array_module
 from mrinufft._utils import MethodRegister
 import numpy as np
 from mrinufft.extras.cartesian import fft, ifft
+from mrinufft._array_compat import with_numpy
 from numpy.typing import NDArray
 
 from collections.abc import Callable
@@ -322,11 +323,11 @@ def espirit(
 
     References
     ----------
-    Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
-    Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
-    MRI: where SENSE meets GRAPPA. Magn Reson Med.
-    2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
-    PMID: 23649942; PMCID: PMC4142121.
+        Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
+        Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
+        MRI: where SENSE meets GRAPPA. Magn Reson Med.
+        2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
+        PMID: 23649942; PMCID: PMC4142121.
 
     """
     # defer import to later to prevent circular import
@@ -391,11 +392,11 @@ def cartesian_espirit(
 
     References
     ----------
-    Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
-    Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
-    MRI: where SENSE meets GRAPPA. Magn Reson Med.
-    2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
-    PMID: 23649942; PMCID: PMC4142121.
+        Uecker M, Lai P, Murphy MJ, Virtue P, Elad M, Pauly JM, Vasanawala SS,
+        Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
+        MRI: where SENSE meets GRAPPA. Magn Reson Med.
+        2014 Mar;71(3):990-1001. doi: 10.1002/mrm.24751.
+        PMID: 23649942; PMCID: PMC4142121.
     """
     from mrinufft.operators.base import power_method
 
@@ -465,7 +466,7 @@ def cartesian_espirit(
             from cupyx.scipy.ndimage import zoom
         unwrapped_phase = xp.array(
             [with_numpy(unwrap_phase)(smap) for smap in xp.angle(Smaps)],
-            dtype=xp.float32
+            dtype=xp.float32,
         )
         abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         # Phase zoom with 0 order to prevent residual unwrapping causing artifacts
