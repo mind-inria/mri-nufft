@@ -19,6 +19,7 @@ import warnings
 from mrinufft._array_compat import (
     with_numpy,
     with_numpy_cupy,
+    get_array_module,
     AUTOGRAD_AVAILABLE,
     CUPY_AVAILABLE,
     is_cuda_array,
@@ -926,13 +927,14 @@ def power_method(
     if x is None:
         return_as_is = False
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    xp = get_array_module(x)
     x_norm = norm_func(x)
     x /= x_norm
     for i in range(max_iter):  # noqa: B007
         x_new = AHA(x)
         x_new_norm = norm_func(x_new)
         x_new /= x_new_norm
-        if abs(x_norm - x_new_norm) < 1e-6:
+        if xp.linalg.norm(x_norm - x_new_norm) < 1e-6:
             break
         x_norm = x_new_norm
         x = x_new
