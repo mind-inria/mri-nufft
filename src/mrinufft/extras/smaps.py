@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from mrinufft.density.utils import flat_traj
 from mrinufft._array_compat import with_numpy_cupy, get_array_module
-from mrinufft._utils import MethodRegister
+from mrinufft._utils import MethodRegister, _fill_doc
 import numpy as np
 from mrinufft.extras.cartesian import fft, ifft
 from mrinufft._array_compat import with_numpy
@@ -351,7 +351,7 @@ def espirit(
     )
 
 
-@register_smaps
+@_fill_doc(_smap_docs)
 def cartesian_espirit(
     kspace: NDArray,
     shape: tuple[int, ...],
