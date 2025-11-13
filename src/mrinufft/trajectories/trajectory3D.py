@@ -1,12 +1,16 @@
 """Functions to initialize 3D trajectories."""
 
-from functools import partial
 from typing import Literal
 
 import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.special import ellipj, ellipk
+from mrinufft.trajectories.utils import Acquisition, convert_gradients_to_trajectory
+from mrinufft.trajectories.tools import (
+    get_grappa_caipi_positions,
+    get_packing_spacing_positions,
+)
 
 from .maths import (
     CIRCLE_PACKING_DENSITY,
@@ -15,12 +19,11 @@ from .maths import (
     Ra,
     Ry,
     Rz,
-    generate_fibonacci_circle,
 )
 from .projection import parameterize_by_arc_length
 from .tools import conify, duplicate_along_axes, epify, precess, stack
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
-from .utils import KMAX, Packings, Spirals, initialize_shape_norm, initialize_tilt
+from .utils import KMAX, Spirals, initialize_tilt
 
 ##############
 # 3D RADIALS #
@@ -409,13 +412,17 @@ def initialize_3D_floret(
 
 
 def initialize_3D_wave_caipi(
-    Nc: int,
+    Nc_or_R: int | tuple[int, int],
     Ns: int,
     nb_revolutions: float = 5,
     width: float = 1,
     packing: str = "triangular",
     shape: str | float = "square",
     spacing: tuple[int, int] = (1, 1),
+    readout_axis: int = 0,
+    wavegrad: float | tuple[float, float] | None = None,
+    caipi_delta: int = 0,
+    acq: Acquisition | None = None,
 ) -> NDArray:
     """Initialize 3D trajectories with Wave-CAIPI.
 
@@ -423,8 +430,12 @@ def initialize_3D_wave_caipi(
 
     Parameters
     ----------
-    Nc : int
-        Number of shots
+    Nc_or_R : int or tuple[int, int]
+        Number of shots `Nc` or GRAPPA `R` factors along the two
+        phase-encoding directions.
+        - If an **int** is provided, it is interpreted as `Nc` (number of shots).
+        - If a **tuple[int, int]** is provided, it is interpreted as
+          `R` (GRAPPA factors).
     Ns : int
         Number of samples per shot
     nb_revolutions : float, optional
@@ -447,6 +458,16 @@ def initialize_3D_wave_caipi(
         Spacing between helices over the 2D :math:`k_x-k_y` plane
         normalized similarly to `width` to correspond to
         helix diameters, by default (1, 1).
+    readout_axis : int, optional
+        Axis along which the readout is performed,
+        either 0, 1 or 2.
+    wavegrad : float, optional
+        Wave gradient amplitude in T/m, by default None
+        If None, the value of `width` is used to estimate
+        the wave gradient amplitude. `acq` must be provided
+        if used.
+    acq : Acquisition, optional
+        Acquisition parameters, by default None.
 
     Returns
     -------
@@ -460,69 +481,51 @@ def initialize_3D_wave_caipi(
        "Wave‐CAIPI for highly accelerated 3D imaging."
        Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
-    trajectory = np.zeros((Nc, Ns, 3))
-
+    acq = acq if acq is not None else Acquisition.default
+    if not np.isscalar(Nc_or_R):
+        R = Nc_or_R
+        sample_axis = tuple(
+            im for i, im in enumerate(acq.img_size) if i != readout_axis
+        )
+        positions = (
+            get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
+        )
+        wavegrad = np.array(
+            [[[wavegrad]]] if np.isscalar(wavegrad) else [[list(wavegrad)]], np.float32
+        )
+        # Get the trajectory for the gradient wave.
+        # Normalize back to -1, 1 as thats how we start defining trajectory
+        width = (
+            (
+                np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
+                / acq.norm_factor
+            )
+            * Ns
+            / 2
+            / np.pi
+            / nb_revolutions
+        )  # Extra factor from angles
+        width = tuple(w for i, w in enumerate(width) if i != readout_axis)
+    else:
+        width = (width, width) if np.isscalar(width) else width
+        positions = get_packing_spacing_positions(Nc_or_R, packing, shape, spacing)
     # Initialize first shot
     angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
-    trajectory[0, :, 0] = width * np.cos(angles)
-    trajectory[0, :, 1] = width * np.sin(angles)
-    trajectory[0, :, 2] = np.linspace(-1, 1, Ns)
-
-    # Choose the helix positions according to packing
-    packing_enum = Packings[packing]
-    side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
-    if packing_enum == Packings.RANDOM:
-        positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
-    elif packing_enum == Packings.CIRCLE:
-        positions = [[0, 0]]
-        counter = 0
-        while len(positions) < side**2:
-            counter += 1
-            perimeter = 2 * np.pi * counter
-            nb_shots = int(np.trunc(perimeter))
-            # Add the full circle
-            radius = 2 * counter
-            angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
-            circle = radius * np.exp(1j * angles)
-            positions = np.concatenate(
-                [positions, np.array([circle.real, circle.imag]).T], axis=0
-            )
-    elif packing_enum in [Packings.SQUARE, Packings.TRIANGLE, Packings.HEXAGONAL]:
-        # Square packing or initialize hexagonal/triangular packing
-        px, py = np.meshgrid(
-            np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
-        )
-        positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
-
-    if packing_enum in [Packings.HEXAGON, Packings.TRIANGLE]:
-        # Hexagonal/triangular packing based on square packing
-        positions[::2, 1] += 1 / 2
-        positions[1::2, 1] -= 1 / 2
-        ratio = nl.norm(np.diff(positions[:2], axis=-1))
-        positions[:, 0] /= ratio / 2
-
-    if packing_enum == Packings.FIBONACCI:
-        # Estimate helix width based on the k-space 2D surface
-        # and an optimal circle packing
-        positions = np.sqrt(
-            Nc * 2 / CIRCLE_PACKING_DENSITY
-        ) * generate_fibonacci_circle(Nc * 2)
-
-    # Remove points by distance to fit both shape and Nc
-    main_order = initialize_shape_norm(shape)
-    tie_order = 2 if (main_order != 2) else np.inf  # breaking ties
-    positions = np.array(positions) * np.array(spacing)
-    positions = sorted(positions, key=partial(nl.norm, ord=tie_order))
-    positions = sorted(positions, key=partial(nl.norm, ord=main_order))
-    positions = positions[:Nc]
+    initial_shot = np.stack(
+        [width[0] * np.cos(angles), width[1] * np.sin(angles), np.linspace(-1, 1, Ns)],
+        axis=-1,
+    )
+    # reorder based on readout axis
+    perm = [[2, 0, 1], [1, 2, 0], [0, 1, 2]][readout_axis]
+    initial_shot = initial_shot[..., perm]
 
     # Shifting copies of the initial shot to all positions
-    initial_shot = np.copy(trajectory[0])
-    positions = np.concatenate([positions, np.zeros((Nc, 1))], axis=-1)
-    for i in range(len(positions)):
-        trajectory[i] = initial_shot + positions[i]
+    positions = np.insert(positions, readout_axis, 0, axis=-1)
+    trajectory = initial_shot[None] + positions[:, None]
 
-    trajectory[..., :2] /= np.max(np.abs(trajectory))
+    axes = [[1, 2], [0, 2], [0, 1]][readout_axis]
+    if np.isscalar(Nc_or_R):
+        trajectory[..., axes] /= np.max(np.abs(trajectory))
     return KMAX * trajectory
 
 
