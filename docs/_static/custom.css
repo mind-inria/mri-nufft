@@ -1,0 +1,25 @@
+/* Change colour of sphinx-gallery download buttons */
+div.sphx-glr-download a {
+  background-color: #eef5fa !important;
+  background-image: none !important;
+  border: 1px solid #c9c9c9 !important;
+}
+
+/* Change size of sphinx-gallery thumbnails */
+.sphx-glr-thumbcontainer {
+    min-width: 250px !important;
+    margin: 20px !important;
+    padding-bottom: 50px !important;
+}
+.sphx-glr-thumbcontainer img {
+    max-height: 250px !important;
+    width: 250px !important;
+}
+.sphx-glr-thumbcontainer a.internal {
+    padding: 180px 10px 0 !important;
+}
+
+/* Hide sphinx-gallery signature */
+p.sphx-glr-signature a.reference.external {
+  font-size: 0% !important;
+}
