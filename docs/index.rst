@@ -6,41 +6,21 @@
 .. include:: ../README.rst
 
 
-.. toctree::
-   :hidden:
-   :caption: User Guides
-
-   getting_started
-   generated/autoexamples/index
 
 .. toctree::
+   :maxdepth: 3
    :hidden:
-   :maxdepth: 2
-   :caption: Explanations
 
-   nufft
-   trajectory_gradspec
-   mrinufft_convention
+   Getting Started <getting_started>
+   Examples <generated/autoexamples/index>
+   API <api>
+   Explanations <explanations/index>
+   
 
-.. toctree::
-   :hidden:
-   :caption: API References
-
-   api
-
-.. toctree::
-   :hidden:
-   :caption: Miscellanneous
-
+   misc/related
    misc/contributors
    misc/code_of_conduct
    misc/license
    misc/development
 
-.. toctree::
-   :hidden:
-   :caption: Related Projects
-
-   PySAP <https://cea-cosmic.github.io/pysap>
-   ModOpt <https://cea-cosmic.github.io/ModOpt/>
-   Brainweb-dl <http://github.com/paquiteau/brainweb-dl>
+             

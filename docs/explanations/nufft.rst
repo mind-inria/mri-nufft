@@ -98,7 +98,7 @@ Extension of the Acquisition model
 The MRI acquisition model can be extended in two main ways. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensitivity profile.
 
 .. tip::
-   MRI-NUFFT provides the `FourierOperator` interface to implement all the physical model described below. See :ref:`nufft-interface` for the standard, and :class:`FourierOperatorBase <mrinufft.operators.base.FourierOperatorBase>`
+   MRI-NUFFT provides the `FourierOperator` interface to implement all the physical model described below. See :ref:`mri-nufft-interface` for the standard, and :class:`FourierOperatorBase <mrinufft.operators.base.FourierOperatorBase>`
 
 
 Parallel Imaging Model
@@ -234,6 +234,17 @@ the projection operator :math:`\boldsymbol{\Phi}` commutes with the Fourier tran
    \tilde{\boldsymbol{y}} = \Phi \mathcal{F}_\Omega(\boldsymbol{\alpha}) + \boldsymbol{n}
 
 that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.
+
+
+
+Stacked NUFFT
+~~~~~~~~~~~~~
+
+If the k-space trajectory consists of a stacked of equally (or a subsampling of) spaced 2D planes of the 3D k-space, the NUFFT operator can be optimized by performing A 2D NUFFT on each plane, followed by a 1D FFT along the third dimension, resulting in a 2.5D NUFFT operator, lowering the computational cost and memory footprint.
+
+.. note::
+
+   You can use the stacked nufft operator by using a ``stacked-*`` backend, and provide a 3D stacked trajectory. See :py:mod:`mrinufft.operators.stacked` for more details.
 
 .. _nufft-algo:
 
