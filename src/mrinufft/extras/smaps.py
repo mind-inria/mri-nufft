@@ -483,8 +483,7 @@ def coil_compression(
     K: int | float,
     traj: NDArray | None = None,
     krad_thresh: float | None = None,
-    return_V: bool = False,
-) -> NDArray | tuple[NDArray, NDArray]:
+) -> tuple[NDArray, NDArray]:
     """
     Coil compression using principal component analysis on k-space data.
 
@@ -501,8 +500,6 @@ def coil_compression(
         Relative k-space radius (as a fraction of maximum) to use for selecting
         the calibration region for principal component analysis. If None, use
         all k-space samples.
-    return_V : bool, optional
-        Whether to return the compression matrix V.
 
     Returns
     -------
@@ -537,6 +534,4 @@ def coil_compression(
         K = min(K, w_sorted.size)
     V = v_sorted[:K]  # use top K component
     compress_data = V @ kspace_data
-    if return_V:
-        return compress_data, V
-    return compress_data
+    return compress_data, V
