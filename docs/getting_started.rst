@@ -1,178 +1,44 @@
+===============
 Getting Started
 ===============
 
-Installing MRI-NUFFT
---------------------
 
-mri-nufft is available on `PyPi <https://pypi.org/project/mri-nufft/>`_
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :titlesonly:
 
+   self
+   install
+   backend
 
-.. tip::
 
-   TLDR: If you have a GPU and CUDA>=12.0, you probably want to install MRI-NUFFT like so:
-   ``pip install mri-nufft[cufinufft]`` or ``pip install mri-nufft[gpunufft]``
-   For CPU only setup we recommend ``pip install mri-nufft[finufft]``
 
-   Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
+Welcome to MRI-NUFFT ! This library provides efficient implementations of Non-Uniform Fast Fourier Transform (NUFFT) algorithms specifically designed for Magnetic Resonance Imaging (MRI) applications.
 
-   For more information , check the :ref:`general_examples`
+Whether you are a researcher, developer, or student, this guide will help you get started with installing and using MRI-NUFFT for your MRI data processing needs.
 
+Installation
+------------
 
-.. code-block:: sh
+To install MRI-NUFFT, follow the instructions in the :doc:`install` section. This guide covers the prerequisites, installation steps, and verification of the installation.
 
-    pip install mri-nufft
+Using MRI-NUFFT
+-----------------
 
-    
-However, if you want to use some specific backends or develop on mri-nufft, you can install it with extra dependencies. notably `extra`, `io`,  and `autodiff`
+Once you have installed MRI-NUFFT, you can start using it in your projects. The :doc:`backend` section provides more details on how to perform NUFFT operation with a specific library backend, and :ref:`mri-nufft-interface` describes the main interface of the NUFFT operator you can use in your application.
 
-.. code-block:: sh
+.. note::
 
-    pip install mri-nufft[extra,io,autodiff]
+   We also provide a large collection of :ref:`trajectories <trajectories_examples>` and some :py:mod:`extras capabilities <mrinufft.extras>` for doing non-Cartesian MRI processing.
 
 
-Using ``uv``
-~~~~~~~~~~~~
-If you are using ``uv`` as your package installer you will need to do ::
-    .. code-block:: sh
-    
-         uv pip install mri-nufft[extra,io,autodiff] --no-build-isolation
 
-    
-Development Version
-~~~~~~~~~~~~~~~~~~~
+What's Next?
+------------
 
-If you want to modify the mri-nufft code base
+- You can explore the :ref:`general_examples` section to see practical applications of MRI-NUFFT, or refer to the :doc:`api` for detailed information on the available functions and classes.
 
-.. code-block:: sh
+- If you want to learn more about the underlying concepts of NUFFT and its applications in MRI, check out the :doc:`explanations/index` section.
 
-    git clone https://github.com:mind-inria/mri-nufft
-    pip install -e ./mri-nufft[dev,doc,extra,io,autodiff,tests,cufinufft,gpunufft,finufft]
-
-or using ``uv``
-
-.. code-block:: sh
-
-    git clone https://github.com:mind-inria/mri-nufft
-    uv venv 
-    uv sync --all-extras --no-build-isolation --no-extra <backend-you-don't-need>
-
-
-    
-Choosing a NUFFT Backend
-========================
-
-In order to perform Non-Uniform fast Fourier transform you need to install a specific :ref:``NUFFT` computation library backend.
-
-.. tip::
-
-   TLDR: If you have a GPU and CUDA>=12.0, you probably want to install MRI-NUFFT like so:
-   ``pip install mri-nufft[cufinufft]`` or ``pip install mri-nufft[gpunufft]``
-   For CPU only setup we recommend ``pip install mri-nufft[finufft]``
-
-   Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
-
-   For more information , check the :ref:`general_examples`
-
-
-Supported Libraries
--------------------
-
-These libraries need to be installed separately from this package.
-
-.. Don't touch the spacing ! ..
-
-==================== ============ =================== ===============  =================
-Backend              Hardward     Batch computation   Precision        Array Interface
-==================== ============ =================== ===============  =================
-cufinufft_           GPU (CUDA)   ✔                   single           cupy/torch/numpy
-finufft_             CPU          ✔                   single/double    numpy/torch
-gpunufft_            GPU          ✔                   single/double    numpy/torch/cupy
-tensorflow-nufft_    GPU (CUDA)   ✘                   single           tensorflow
-pynufft-cpu_         CPU          ✘                   single/double    numpy
-pynfft_              CPU          ✘                   single/double    numpy
-bart_                CPU/GPU      ✔                   single           numpy
-sigpy_               CPU          ✔                   single           numpy
-stacked (*)          CPU/GPU      ✔                   single/double    numpy
-==================== ============ =================== ===============  =================
-
-
-.. _cufinufft: https://github.com/flatironinstitute/finufft
-.. _finufft: https://github.com/flatironinstitute/finufft
-.. _tensorflow-nufft: https://github.com/flatironinstitute/pynufft
-.. _gpunufft: https://github.com/chaithyagr/gpuNUFFT
-.. _pynufft-cpu: https://github.com/jyhmiinlin/pynufft
-.. _pynfft: https://github.com/pynfft/pynfft
-.. _bart: https://github.com/mrirecon/bart
-.. _sigpy: https://github.com/sigpy/sigpy
-
-- (*) stacked-nufft allows one to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
-
-
-**The NUFFT operation is often not enough to provide decent image quality by itself (even with density compensation)**.
-For improved image quality, use a Compressed Sensing recon. For doing so, you can check the pysap-mri_ for MRI dedicated solutions and deepinv_ for Deep Learning based solutions.
-
-.. _pysap-mri: https://github.com/CEA-COSMIC/pysap-mri/
-.. _Modopt: https://github.com/CEA-COSMIC/ModOpt/
-.. _deepinv: https:/github.com/deepinv/deepinv/
-
-Backend Installations
----------------------
-
-To benefit the most from certain backends we recommend to use the following instructions
-
-finufft / cufinufft
-~~~~~~~~~~~~~~~~~~~
-
-Those are developed by the `flatiron-institute <https://github.com/flatironinstitute/finufft>`_ and are installable with `pip install finufft` and `pip install cufinufft`.
-
-.. warning::
-
-    for cufinufft, a working installation of CUDA and cupy is required.
-
-gpuNUFFT
-~~~~~~~~
-
-an active gpuNUFFT fork is maintained by `chaithyagr <https://github.com/chaithyagr/gpunufft/>`_.
-
-
-To install it use `pip install gpuNUFFT` or for local development, use the following: 
-
-.. code-block:: sh
-
-    git clone https://github.com/chaythiagr/gpuNUFFT
-    cd gpuNUFFT
-    python setup.py install
-
-.. warning::
-
-   If you are using ``uv`` as your package installer you will need to do ::
-
-    .. code-block:: sh
-    
-         uv pip install wheel pip pybind11
-         uv pip install mri-nufft[gpunufft] --no-build-isolation
-    
-BART
-~~~~
-
-BART has to be installed separately and `bart` command needs to be runnable from your `PATH`.
-See `installation instructions <https://mrirecon.github.io/bart/installation.html>`_
-
-
-PyNFFT
-~~~~~~
-
-PyNFFT requires Cython<3.0.0 to work.  and can be installed using
-
-.. code-block:: sh
-
-    pip install cython<3.0.0 pynfft2
-
-Which backend to use
---------------------
-
-We provided an extensive benchmark on computation and memory usage on https://github.com/mind-inria/mri-nufft-benchmark/
-
-.. tip::
-
-   Overall, we recommend to use ``finufft`` for CPU, and ``cufinufft`` or ``gpunufft`` when CUDA GPU are available.
+- Maybe you are also interested in the  :doc:`misc/related`.
