@@ -1266,8 +1266,8 @@ def get_grappa_caipi_positions(
     img_size: tuple[int, int],
     grappa_factors: tuple[int, int],
     caipi_delta: int = 0,
-    acs_region: tuple[int, int] = None,
-):
+    acs_region: tuple[int, int] | None = None,
+) -> NDArray | tuple[NDArray, NDArray]:
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
 

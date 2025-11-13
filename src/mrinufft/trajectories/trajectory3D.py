@@ -466,9 +466,6 @@ def initialize_3D_wave_caipi(
         If None, the value of `width` is used to estimate
         the wave gradient amplitude. `acq` must be provided
         if used.
-    R : tuple[int, int], optional
-        GRAPPA factors along the two phase-encoding
-        directions, by default (1, 1).
     acq : Acquisition, optional
         Acquisition parameters, by default None.
 
