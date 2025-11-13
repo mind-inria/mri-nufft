@@ -1265,8 +1265,8 @@ def stack_random(
 def get_grappa_caipi_positions(
     img_size: tuple[int, int],
     grappa_factors: tuple[int, int],
-    acs_region: tuple[int, int],
     caipi_delta: int = 0,
+    acs_region: tuple[int, int] = None,
 ):
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
@@ -1289,14 +1289,14 @@ def get_grappa_caipi_positions(
         of ``[2, 1]`` means every second line is sampled along the first axis,
         while every line is sampled along the second axis.
 
-    acs_region : array_like of int, shape (2,)
-        The size of the Auto-Calibration Signal (ACS) region along each dimension.
-        This region is fully sampled to allow for accurate GRAPPA kernel estimation.
-
     caipi_delta : float, optional
         The CAIPI phase shift (in units of k-space fraction) to apply along the
         second dimension. A nonzero value introduces controlled aliasing between
         slices or coil elements. Default is ``0`` (no shift).
+
+    acs_region : array_like of int, shape (2,)
+        The size of the Auto-Calibration Signal (ACS) region along each dimension.
+        This region is fully sampled to allow for accurate GRAPPA kernel estimation.
 
     Returns
     -------
@@ -1323,23 +1323,25 @@ def get_grappa_caipi_positions(
         .T.astype(np.float32)
         .reshape(-1, 2)
     )
-    acs_max_loc = np.array(acs_region) / np.array(img_size) * KMAX
-    acs_positions = (
-        np.asarray(
-            np.meshgrid(
-                *[
-                    np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
-                    for num, max_loc in zip(acs_region, acs_max_loc)
-                ],
-                indexing="ij",
-            )
-        )
-        .T.astype(np.float32)
-        .reshape(-1, 2)
-    )
     if caipi_delta > 0:
         positions[::2, 1] += caipi_delta / img_size[1]
-    return positions, acs_positions
+    if acs_region is not None:
+        acs_max_loc = np.array(acs_region) / np.array(img_size) * KMAX
+        acs_positions = (
+            np.asarray(
+                np.meshgrid(
+                    *[
+                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
+                        for num, max_loc in zip(acs_region, acs_max_loc)
+                    ],
+                    indexing="ij",
+                )
+            )
+            .T.astype(np.float32)
+            .reshape(-1, 2)
+        )
+        return positions, acs_positions
+    return positions
 
 
 def get_packing_spacing_positions(
