@@ -34,7 +34,7 @@ autodiff = ["torch"]
 
 test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
 dev = ["black", "isort", "ruff"]
-doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl", "coverage"]
+doc = ["sphinx-book-theme","sphinx-copybutton", "sphinxcontrib-video", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl", "coverage", "fastmri"]
 # pooch is for scipy.datasets
 
 [build-system]
