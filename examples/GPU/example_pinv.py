@@ -10,12 +10,6 @@ methods, to reconstruct images from non-uniform k-space data.
 
 """
 
-# %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft] scikit-image
-
 import os
 import time
 

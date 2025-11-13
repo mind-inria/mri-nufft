@@ -11,11 +11,6 @@ adjoint operation to act as preconditioner, and should make the lipschitz consta
 of the operator roughly equal to 1.
 
 """
-# %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft] finufft
 
 # %%
 # Imports

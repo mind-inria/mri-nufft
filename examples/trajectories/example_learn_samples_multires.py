@@ -34,10 +34,6 @@ Note that the NUFFT operator always holds linearly interpolated version of the c
     Users are encouraged to contact the authors if they want to use it.
 """
 # %%
-# .. colab-link::
-#    :needs_gpu: 0
-#
-#    !pip install mri-nufft[finufft]
 
 import os
 import brainweb_dl as bwdl

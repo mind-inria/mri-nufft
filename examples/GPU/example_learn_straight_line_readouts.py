@@ -20,12 +20,6 @@ The image resolution is kept small to reduce computation time.
 """
 
 # %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft]
-
-# %%
 # Imports
 # -------
 import os
