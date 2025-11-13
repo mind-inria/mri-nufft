@@ -56,6 +56,9 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Setup ffmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+
       - name: Install dependencies
         shell: bash -l {0}
         run: |
@@ -145,3 +148,4 @@ jobs:
           destination_dir: .  # Ensure you deploy to the root of the gh-pages branch
           publish_branch: gh-pages
           keep_files: false
+          force_orphan: true

@@ -34,7 +34,6 @@ author = "MRI-NUFFT Contributors"
 extensions = [
     "sphinx_copybutton",
     "sphinx.ext.duration",
-    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
@@ -42,6 +41,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.video",
     "sphinx_gallery.gen_gallery",
     "sphinx_add_colab_link",
 ]
@@ -96,7 +96,7 @@ sphinx_gallery_conf = {
         "use_jupyter_lab": True,
     },
     "parallel": True,
-    "matplotlib_animations": True,
+    "matplotlib_animations": (True, "mp4"),
 }
 
 intersphinx_mapping = {
@@ -131,3 +131,10 @@ html_theme_options = {
 html_logo = "_static/logos/mri-nufft.png"
 html_favicon = "_static/logos/mri-nufft-icon.png"
 html_title = "MRI-nufft Documentation"
+html_show_sourcelink = False
+html_context = {
+    "github_user": "mind-inria",
+    "github_repo": "mri-nufft",
+    "github_version": "master",
+    "doc_path": "docs/",
+}
