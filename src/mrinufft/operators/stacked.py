@@ -817,6 +817,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )[0]
 
+
 def traj3d2stacked(samples, dim_z, n_samples=0):
     """Convert a 3D trajectory into a trajectory and the z-stack index.
 
