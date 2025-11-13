@@ -466,7 +466,7 @@ class FourierOperatorBase(ABC):
         self.n_batchs = 1
         self.squeeze_dims = True
 
-        lipschitz_cst = power_method(max_iter, self)
+        lipschitz_cst, _ = power_method(max_iter, self)
 
         # restore coil setup
         self.n_coils = n_coils
@@ -891,9 +891,8 @@ def power_method(
     operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-    return_eigvec: bool = False,
     check_convergence: bool = True,
-) -> float | NDArray | tuple[float | NDArray, NDArray]:
+) -> tuple[float | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters
@@ -908,15 +907,15 @@ def power_method(
         Change this if you want custom norm, or for computing on GPU.
     x: array_like, optional
         Initial value to use, by default a random numpy array is used.
-    return_eigvec: bool, optional
-        Whether to return the eigen vector
     check_convergence: bool, optional
         Whether to check for convergence, by default True.
 
     Returns
     -------
-    float | NDArray | tuple[float | NDArray, NDArray]
-        The lipschitz constant of the operator.
+    x_new_norm: float or NDArray
+        The maximum eigen value
+    x_new: NDArray
+        The eigen vector associated with maximum eigen value
     """
 
     def AHA(x):
@@ -953,6 +952,4 @@ def power_method(
         import cupy as cp
 
         x_new_norm = cp.asarray(x_new_norm).get().item()
-    if return_eigvec:
-        return x_new_norm, x_new
-    return x_new_norm
+    return x_new_norm, x_new
