@@ -68,7 +68,8 @@ autosummary_generate = True
 # autosummary_imported_members = True
 autodoc_inherit_docstrings = True
 autodoc_member_order = "bysource"
-autodoc_typehints = "description"
+autodoc_typehints = "both"
+autodoc_typehints_description_target = "documented_params"
 
 napoleon_include_private_with_doc = True
 napolon_numpy_docstring = True
