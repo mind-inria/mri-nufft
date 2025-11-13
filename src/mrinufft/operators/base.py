@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import ClassVar, overload, Any
+from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
@@ -30,10 +30,14 @@ from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 
 
-if CUPY_AVAILABLE:
-    import cupy as cp
-
-
+if TYPE_CHECKING:
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+    from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
+else:
+    MRINufftAutoGrad = Any  # type: ignore
+    MRIStackedNUFFT = Any  # type: ignore
+    MRIStackedNUFFTGPU = Any  # type: ignore
+    #
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
@@ -63,25 +67,39 @@ def list_backends(available_only=False):
     ]
 
 
+# fmt: off
 @overload
-def get_operator(
-    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False
-) -> Callable[..., FourierOperatorBase]: ...
+def get_operator(backend_name: Literal["stacked"],  wrt_data: bool= False, wrt_traj: bool = False, paired_batch: bool=False) -> partial[MRIStackedNUFFT]: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[True] = True, wrt_traj: bool = False, paired_batch: bool=...) -> partial[MRINufftAutoGrad]: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: bool = ..., wrt_traj: Literal[True] = True, paired_batch: bool=...) -> partial[MRINufftAutoGrad]: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[True] = True, wrt_traj: bool = ..., paired_batch: bool=..., *args: Any, **kwargs: Any) -> MRINufftAutoGrad: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: bool = ..., wrt_traj: Literal[True] = ..., paired_batch: bool=..., *args: Any, **kwargs: Any) -> MRINufftAutoGrad: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=..., *args: Any, **kwargs: Any) -> FourierOperatorBase: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=...) -> type[FourierOperatorBase]: ... # noqa: E501
+# fmt: on
 
 
-@overload
 def get_operator(
     backend_name: str,
     wrt_data: bool = False,
     wrt_traj: bool = False,
-    *args: Any,
-    **kwargs: Any,
-) -> FourierOperatorBase: ...
-
-
-def get_operator(
-    backend_name: str, wrt_data: bool = False, wrt_traj: bool = False, *args, **kwargs
-) -> FourierOperatorBase | Callable[..., FourierOperatorBase]:
+    paired_batch: bool = False,
+    *args,
+    **kwargs,
+) -> (
+    FourierOperatorBase
+    | type[FourierOperatorBase]
+    | MRIStackedNUFFT
+    | partial[MRIStackedNUFFT]
+    | MRINufftAutoGrad
+    | partial[MRINufftAutoGrad]
+):
     """Return an MRI Fourier operator interface using the correct backend.
 
     Parameters
@@ -92,6 +110,9 @@ def get_operator(
         if set gradients wrt to data and images will be available.
     wrt_traj: bool, default False
         if set gradients wrt to trajectory will be available.
+    paired_batch: bool, default False
+        if set, the autograd will be done with paired batchs of data and smaps.
+
     *args, **kwargs:
         Arguments to pass to the operator constructor.
 
@@ -127,13 +148,15 @@ def get_operator(
     if args or kwargs:
         operator = operator(*args, **kwargs)
 
-    # if autograd:
     if wrt_data or wrt_traj:
+        if isinstance(operator, partial):
+            raise ValueError("Cannot create autograd of a partial operator.")
         if isinstance(operator, FourierOperatorBase):
-            operator = operator.make_autograd(wrt_data, wrt_traj)
-        else:
-            # instance will be created later
-            operator = partial(operator.with_autograd, wrt_data, wrt_traj)
+            operator = operator.make_autograd(
+                wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
+            )
+        else:  # instance will be created later
+            operator = partial(operator.with_autograd, wrt_data, wrt_traj, paired_batch)
 
     return operator
 
@@ -145,14 +168,14 @@ class FourierOperatorBase(ABC):
     to ensure that we have all the functions rightly implemented.
     """
 
-    interfaces: dict[str, tuple] = {}
+    interfaces: dict[str, tuple[bool, type[FourierOperatorBase]]] = {}
     autograd_available = False
     _density_method = None
     _grad_wrt_data = False
     _grad_wrt_traj = False
 
     backend: ClassVar[str]
-    available: ClassVar[bool]
+    available: ClassVar[bool] | Callable[..., bool]
 
     def __init__(self):
         if not self.available:
@@ -163,10 +186,10 @@ class FourierOperatorBase(ABC):
         self._n_batchs = 1
         self.squeeze_dims = False
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls: type[FourierOperatorBase]):
         """Register the class in the list of available operators."""
         super().__init_subclass__()
-        available = getattr(cls, "available", True)
+        available: Callable[..., bool] | bool = getattr(cls, "available", True)
         if callable(available):
             available = available()
         if backend := getattr(cls, "backend", None):
@@ -305,7 +328,7 @@ class FourierOperatorBase(ABC):
             method = get_smaps(method)
         if not isinstance(method, Callable):
             raise ValueError(f"Unknown smaps method: {method}")
-        smaps = method(
+        smaps, _ = method(
             self.samples,
             self.shape,
             density=self.density,
@@ -355,7 +378,13 @@ class FourierOperatorBase(ABC):
         )
         linop._nufft = self  # type: ignore
 
-    def make_autograd(self, wrt_data=True, wrt_traj=False):
+    def make_autograd(
+        self,
+        *,
+        wrt_data: bool = True,
+        wrt_traj: bool = False,
+        paired_batch: bool = False,
+    ) -> MRINufftAutoGrad:
         """Make a new Operator with autodiff support.
 
         Parameters
@@ -368,6 +397,10 @@ class FourierOperatorBase(ABC):
 
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
+
+        paired_batch_size : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
 
         Returns
         -------
@@ -386,9 +419,11 @@ class FourierOperatorBase(ABC):
 
         from mrinufft.operators.autodiff import MRINufftAutoGrad
 
-        return MRINufftAutoGrad(self, wrt_data=wrt_data, wrt_traj=wrt_traj)
+        return MRINufftAutoGrad(
+            self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
+        )
 
-    def compute_density(self, method=None):
+    def compute_density(self, method: Callable[..., NDArray] = None):
         """Compute the density compensation weights and set it.
 
         Parameters
@@ -436,7 +471,7 @@ class FourierOperatorBase(ABC):
             )
         self.density = method(self.samples, self.shape, **kwargs)
 
-    def get_lipschitz_cst(self, max_iter=10, **kwargs):
+    def get_lipschitz_cst(self, max_iter=10) -> np.floating | NDArray[np.floating]:
         """Return the Lipschitz constant of the operator.
 
         Parameters
@@ -527,7 +562,7 @@ class FourierOperatorBase(ABC):
         self._shape = tuple(int(i) for i in shape)
 
     @property
-    def n_coils(self):
+    def n_coils(self) -> int:
         """Number of coils for the operator."""
         return self._n_coils
 
@@ -549,7 +584,7 @@ class FourierOperatorBase(ABC):
         self._n_batchs = int(n_batchs)
 
     @property
-    def img_full_shape(self) -> tuple[int, int, ...]:
+    def img_full_shape(self) -> tuple[int, ...]:
         """Full image shape with batch and coil dimensions."""
         return (self.n_batchs, (1 if self.uses_sense else self.n_coils)) + self.shape
 
@@ -565,18 +600,22 @@ class FourierOperatorBase(ABC):
 
     @smaps.setter
     def smaps(self, new_smaps):
-        self._check_smaps_shape(new_smaps)
-        self._smaps = new_smaps
-
-    def _check_smaps_shape(self, smaps):
-        """Check the shape of the sensitivity maps."""
-        if smaps is None:
+        if new_smaps is None:
             self._smaps = None
-        elif smaps.shape != (self.n_coils, *self.shape):
-            raise ValueError(
-                f"smaps shape is {smaps.shape}, it should be"
-                f"(n_coils, *shape): {(self.n_coils, *self.shape)}"
-            )
+            return
+
+        if not isinstance(new_smaps, np.ndarray):
+            raise ValueError("Smaps should be an array")
+        C = new_smaps.shape[0]
+        XYZ = new_smaps.shape[1:]
+
+        # working with internal value for efficiency
+        if XYZ != self._shape:
+            raise ValueError("Smaps should match image shape.")
+        if C != self._n_coils:
+            self._n_coils = C
+            warnings.warn("updating number of coils via Smaps.")
+        self._smaps = new_smaps
 
     @property
     def density(self) -> NDArray[np.floating] | None:
@@ -584,7 +623,7 @@ class FourierOperatorBase(ABC):
         return self._density
 
     @density.setter
-    def density(self, new_density: NDArray):
+    def density(self, new_density: NDArray | None):
         if new_density is None:
             self._density = None
         elif len(new_density) != self.n_samples:
@@ -637,9 +676,20 @@ class FourierOperatorBase(ABC):
         )
 
     @classmethod
-    def with_autograd(cls, wrt_data=True, wrt_traj=False, *args, **kwargs):
+    def with_autograd(
+        cls,
+        wrt_data=True,
+        wrt_traj=False,
+        paired_batch=False,
+        *args,
+        **kwargs,
+    ):
         """Return a Fourier operator with autograd capabilities."""
-        return cls(*args, **kwargs).make_autograd(wrt_data, wrt_traj)
+        return cls(*args, **kwargs).make_autograd(
+            wrt_data=wrt_data,
+            wrt_traj=wrt_traj,
+            paired_batch=paired_batch,
+        )
 
 
 class FourierOperatorCPU(FourierOperatorBase):
@@ -892,7 +942,7 @@ def power_method(
     operator: FourierOperatorBase | Callable,
     norm_func: Callable | None = None,
     x: NDArray | None = None,
-) -> tuple[float | NDArray, NDArray]:
+) -> tuple[np.floating | NDArray, NDArray]:
     """Power method to find the Lipschitz constant of an operator.
 
     Parameters

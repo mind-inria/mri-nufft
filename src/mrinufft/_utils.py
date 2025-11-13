@@ -87,6 +87,25 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
+def _apply_docstring_subs(func: Callable, docstring_subs: dict[str, str]) -> Callable:
+    if func.__doc__:
+        docstring = cleandoc(func.__doc__)
+        for key, sub in docstring_subs.items():
+            docstring = docstring.replace(f"${{{key}}}", sub)
+        func.__doc__ = docstring
+    return func
+
+
+def _fill_doc(docstring_subs: dict[str, str]) -> Callable:
+    """Fill in docstrings with substitutions."""
+
+    @wraps(_fill_doc)
+    def wrapper(func: Callable) -> Callable:
+        return _apply_docstring_subs(func, docstring_subs)
+
+    return wrapper
+
+
 class MethodRegister:
     """
     A Decorator to register methods of the same type in dictionnaries.
@@ -115,11 +134,7 @@ class MethodRegister:
 
         def decorator(func):
             self.registry[self.register_name][method_name] = func
-            if self.docstring_subs is not None and func.__doc__:
-                docstring = cleandoc(func.__doc__)
-                for key, sub in self.docstring_subs.items():
-                    docstring = docstring.replace(f"${{{key}}}", sub)
-                func.__doc__ = docstring
+            func = _apply_docstring_subs(func, self.docstring_subs or {})
             return func
 
         if callable(method_name):
