@@ -18,7 +18,7 @@ def test_wave_caipi_gradients(wavegrad=8.8e-3, caipi_delta=2, nb_revolutions=11)
         packing="square",
         shape="square",
         nb_revolutions=nb_revolutions,
-        readout_axis="x",
+        readout_axis=0,
         wavegrad=wavegrad,
         acq=acq,
         caipi_delta=caipi_delta,
