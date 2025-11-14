@@ -163,7 +163,7 @@ Don't hesitate to look for unsolved `issues <https://github.com/mind-inria/mri-n
 .. _finufft: https://github.com/flatironinstitute/finufft
 
 .. |gpunufft| replace:: ``gpunufft``
-.. _gpunufft: https://github.com/chaihtyagr/gpunufft
+.. _gpunufft: https://github.com/chaithyagr/gpunufft
 
 .. |torchkbnufft| replace:: ``torchkbnufft``
 .. _torchkbnufft: https://github.com/mmuckley/torchkbnufft
