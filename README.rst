@@ -1,18 +1,15 @@
-|centerdiv|
 
 .. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/logos/mri-nufft.png
-   :width: 300
-   :align: center
+    :width: 200px
+    :align: center
 
 |
 
-|Docs| |PyPI| |JOSS|
-|Coverage| |CI| |CD| |Style| 
+|Docs| |PyPI| |JOSS| |Coverage| |CI| |CD| |Style| 
 
 
 *Doing non-Cartesian MR Imaging has never been so easy*
 
-|enddiv|
 
 
 Introduction
@@ -34,15 +31,12 @@ MRI-nufft is a nice and polite piece of software, that will return the same type
 
 On top of that we ship a variety of `non-Cartesian trajectories <https://mind-inria.github.io/mri-nufft/generated/autoexamples/trajectories/index.html>`__ commonly used by the MRI community, and even `tools <https://mind-inria.github.io/mri-nufft/generated/autoexamples/trajectories/example_trajectory_tools.html>`__ to helps you develop new ones. 
 
-|centerdiv|
-
-.. image:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.png
-   :width: 700
+.. figure:: https://github.com/mind-inria/mri-nufft/raw/master/docs/_static/mri-nufft-scheme.png
+   :width: 1000px
    :align: center
+   
+   *Modularity and Integration of MRI-nufft with the python computing libraries.*
 
-*Modularity and Integration of MRI-nufft with the python computing libraries.*
-
-|enddiv|
 
 
 Usage
@@ -142,14 +136,8 @@ Don't hesitate to look for unsolved `issues <https://github.com/mind-inria/mri-n
 
 
 
-|centerdiv|
 
-    ✨ If you made it this far, consider starring the repo ✨
-
-|enddiv| 
-
-
-.. |Coverage| image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg
+.. |Coverage| image:: https://raw.githubusercontent.com/mind-inria/mri-nufft/refs/heads/colab-examples/examples/_static/coverage_badge.svg
 .. |CI| image:: https://github.com/mind-inria/mri-nufft/actions/workflows/test-ci.yml/badge.svg
 .. |CD| image:: https://github.com/mind-inria/mri-nufft/workflows/CD/badge.svg
 .. |Style| image:: https://img.shields.io/badge/style-black-black
@@ -170,11 +158,3 @@ Don't hesitate to look for unsolved `issues <https://github.com/mind-inria/mri-n
 .. _torchkbnufft: https://github.com/mmuckley/torchkbnufft
 
 
-
-.. |centerdiv| raw:: html 
-
-   <div align="center">
-
-.. |enddiv| raw:: html
-
-   </div> 
