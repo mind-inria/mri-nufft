@@ -142,10 +142,11 @@ Don't hesitate to look for unsolved `issues <https://github.com/mind-inria/mri-n
 
 
 
-.. raw:: html
+|centerdiv|
 
-   <div align="center"><em> ✨ If you made it this far, consider starring the repo ✨ <em></div>
+    ✨ If you made it this far, consider starring the repo ✨
 
+|enddiv| 
 
 
 .. |Coverage| image:: https://mind-inria.github.io/mri-nufft/_static/coverage_badge.svg

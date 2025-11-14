@@ -138,9 +138,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-docs
     if: ${{ github.event_name == 'workflow_run' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
       pages: write
       id-token: write
+      contents: write
       
     steps:
       - name: Get the docs_build artifact
@@ -170,3 +174,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+

@@ -28,6 +28,13 @@ jobs:
         python -m pip install build
         python -m pip install .
 
+    # Overwrite the end of the README file, to remove the use of ``.. raw`` directives,
+    # that are disable by PyPi.
+    # There are zero-width space after the replace directive !
+    - name: Remove raw directive from rst
+      run: |
+        sed -i '/.. |centerdiv|/,$c .. |centerdiv| replace:: ​\n.. |enddiv| replace:: ​\n' README.rst
+
     - name: Build a binary wheel and a source tarball
       run: |
         python -m build --sdist --wheel --outdir dist/ .
