@@ -294,14 +294,14 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op.samples = value.detach().cpu().numpy()
 
     def __getattr__(self, name):
-        # only called if attribute not found normally
+        """Get attribute."""
         nufft = object.__getattribute__(self, "nufft_op")
         if hasattr(nufft, name):
             return getattr(nufft, name)
         raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
 
     def __setattr__(self, name, value):
-        # internal attributes (adapter/LinearPhysics) go to self
+        """Set attribute."""
         try:
             nufft = object.__getattribute__(self, "nufft_op")
             setattr(nufft, name, value)
@@ -351,10 +351,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 
 class DeepInvPhyNufft(LinearPhysics):
-    """
-    Thin adapter that exposes an MRINufftAutoGrad instance
-    as a DeepInv LinearPhysics operator.
-    """
+    """Thin adapter that exposes an MRINufftAutoGrad as DeepInv Physics Operator."""
 
     def __init__(self, nufft_op):
         object.__setattr__(self, "nufft_op", nufft_op)
@@ -362,23 +359,26 @@ class DeepInvPhyNufft(LinearPhysics):
 
     # ---- Core operators ----
     def A(self, x, **kwargs):
+        """Forward operation image -> k-space."""
         return self.nufft_op.op(x, **kwargs)
 
     def A_adjoint(self, y, **kwargs):
+        """Adjoint operation k-space -> image."""
         return self.nufft_op.adj_op(y, **kwargs)
 
     def A_dagger(self, y, **kwargs):
+        """Moore-Penrose pseudoinverse operation."""
         return self.pinv_solver(y, **kwargs)
 
     def __getattr__(self, name):
-        # only called if attribute not found normally
+        """Get attribute."""
         nufft = object.__getattribute__(self, "nufft_op")
         if hasattr(nufft, name):
             return getattr(nufft, name)
         raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
 
     def __setattr__(self, name, value):
-        # internal attributes (adapter/LinearPhysics) go to self
+        """Set attribute."""
         try:
             nufft = object.__getattribute__(self, "nufft_op")
             setattr(nufft, name, value)
