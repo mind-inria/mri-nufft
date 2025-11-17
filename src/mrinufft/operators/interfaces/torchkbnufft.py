@@ -1,13 +1,9 @@
 """Pytorch MRI Nufft Operators."""
 
-from mrinufft.operators.base import FourierOperatorBase
-from mrinufft._array_compat import with_torch
-from mrinufft._utils import proper_trajectory
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_tensor,
-)
 import numpy as np
-
+from mrinufft.operators.base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
+from mrinufft._array_compat import is_cuda_tensor, with_torch
 
 TORCH_AVAILABLE = True
 try:
@@ -170,19 +166,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         img /= self.norm_factor
         return self._safe_squeeze(img)
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     @with_torch
     def data_consistency(self, data, obs_data):
         """Compute the data consistency.
@@ -209,7 +192,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         use_gpu=False,
@@ -223,7 +206,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             the kspace locations
         volume_shape: tuple
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -242,7 +225,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             **kwargs,
         )
         density_comp = tkbn.calc_density_compensation_function(
-            ktraj=kspace_loc, im_size=volume_shape, num_iterations=num_iterations
+            ktraj=kspace_loc, im_size=volume_shape, max_iter=max_iter
         )
         if normalize:
             spike = torch.zeros(volume_shape, dtype=torch.float32).to(grid_op.device)

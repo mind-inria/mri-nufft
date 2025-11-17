@@ -3,22 +3,22 @@ name = "mri-nufft"
 description = "MRI Non-Cartesian Fourier Operators with multiple computation backends."
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
-readme = "README.md"
-dependencies = ["numpy", "scipy", "matplotlib", "tqdm", "joblib"]
-requires-python = ">=3.9"
+readme = "README.rst"
+dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "joblib>=1.4"]
+requires-python = ">=3.10"
 
 dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpuNUFFT>=0.9.0", "cupy-cuda12x"]
+gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda12x"]
 
 torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
 torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x"]
 torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x"]
 
 cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x"]
-tensorflow = ["tensorflow-mri==0.21.0", "tensorflow-probability==0.17.0", "tensorflow-io==0.27.0", "matplotlib==3.7"]
+tensorflow = ["tensorflow-mri>=0.22.0"]
 finufft = ["finufft>=2.4.0"]
 sigpy = ["sigpy"]
 pynfft = ["pynfft3"]
@@ -28,7 +28,6 @@ pynufft-cpu = ["pynufft"]
 pynufft-gpu = ["pynufft"]
 
 io = ["pymapvbvd"]
-smaps = ["scikit-image"]
 extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets"]
 autodiff = ["torch"]
 
@@ -71,6 +70,9 @@ ignore = [
 "B028", # No explicit stacklevel keyword argument found
 "F401", # Using ``try: import ... except:`` is nice.
 ]
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = ["D"]
+
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
 

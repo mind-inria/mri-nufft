@@ -1,0 +1,147 @@
+name: docs
+
+on:
+  workflow_dispatch:
+
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["master"]
+    types:
+      - completed 
+  issue_comment:
+    types: [created]
+  
+env:
+  PYTHON_VERSION: "3.10"
+  BART_VERSION: "0.8.00"
+  ref_backend: "finufft"
+  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
+  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
+  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
+
+jobs:    
+  build-docs:
+    if: ${{ ( contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request ) || github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch'}}
+    name: Build API Documentation
+    runs-on: gpu
+    permissions:
+      actions: read
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Get PR branch name
+        if: ${{ github.event.issue.pull_request }}
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            core.setOutput('head_ref', pr.head.ref);
+
+      - uses: actions/checkout@v4
+        with:
+          # if this was triggered by a PR-comment we use the PR branch,
+          # otherwise fall back to default (e.g. workflow_dispatch)
+          ref: ${{ github.event.issue.pull_request && steps.pr.outputs.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          ${{ env.setup_cuda }}
+          ${{ env.create_venv }}
+          ${{ env.activate_venv }}
+          python -m pip install --upgrade pip
+          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft,sigpy,extra] fastmri
+
+      - name: Build API documentation
+        run: |
+          ${{ env.activate_venv }}
+          export MRINUFFT_BACKEND=cufinufft
+          python -m sphinx docs docs_build ${{ contains(github.event.comment.body, 'fast') && '-D plot_gallery=0' || '' }} -j 5
+
+      - name: Upload artifact
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v4
+        with:
+          # Upload the docs
+          name: docs
+          path: 'docs_build'
+          retention-days: 5
+
+      - name: Get artifact ID
+        id: get-artifact-id
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the artifact ID for "docs"
+          ARTIFACTS_JSON=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts")
+          ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[] | select(.name == "docs") | .id' | head -n1)
+          echo "artifact-id=$ARTIFACT_ID"
+          echo "artifact-id=$ARTIFACT_ID" >> $GITHUB_OUTPUT
+
+      - name: Comment with artifact web link
+        if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && success()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            ✅ Documentation built! ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' || ''}}
+            [download the artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.get-artifact-id.outputs.artifact-id }})
+          edit-mode: replace
+
+      - name: Comment with failure
+        if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && failure()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+           ❌ Failed to build documentation ${{ contains(github.event.comment.body, 'fast') && '(examples were disabled)' || '' }}
+           [Check Log output](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          edit-mode: replace
+
+  deploy-docs:
+    name: Deploy API Documentation
+    runs-on: ubuntu-latest
+    needs: build-docs
+    if: ${{ github.event_name == 'workflow_run' }}
+
+    steps:
+      - name: Get the docs_build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs
+          path: docs_build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get the coverage badge from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage_badge
+          path: docs_build/_static
+          run-id: ${{ github.event.workflow_run.id}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Display structure of docs
+        run: ls -R docs_build/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_build
+          destination_dir: .  # Ensure you deploy to the root of the gh-pages branch
+          publish_branch: gh-pages
+          keep_files: false

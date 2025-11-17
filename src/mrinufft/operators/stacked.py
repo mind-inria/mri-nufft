@@ -3,21 +3,25 @@
 import warnings
 
 import numpy as np
-import scipy as sp
 
-from mrinufft._utils import proper_trajectory, power_method, get_array_module, auto_cast
+from mrinufft._utils import proper_trajectory, sizeof_fmt
+from mrinufft._array_compat import (
+    get_array_module,
+    auto_cast,
+    is_cuda_array,
+    is_host_array,
+    pin_memory,
+)
 from mrinufft.operators.base import (
     FourierOperatorBase,
     check_backend,
     get_operator,
     with_numpy_cupy,
+    power_method,
 )
-from mrinufft.operators.interfaces.utils import (
-    is_cuda_array,
-    is_host_array,
-    pin_memory,
-    sizeof_fmt,
-)
+
+from typing import Literal
+from numpy.typing import NDArray
 
 CUPY_AVAILABLE = True
 try:
@@ -72,14 +76,14 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def __init__(
         self,
-        samples,
-        shape,
-        backend,
-        smaps,
-        z_index="auto",
-        n_coils=1,
-        n_batchs=1,
-        squeeze_dims=False,
+        samples: NDArray,
+        shape: tuple[int, int, int],
+        backend: str | FourierOperatorBase,
+        smaps: NDArray | None,
+        z_index: Literal["auto"] | NDArray | None = "auto",
+        n_coils: int = 1,
+        n_batchs: int = 1,
+        squeeze_dims: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -108,7 +112,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
             samples2d, z_index_ = self._init_samples(backend.samples, z_index, shape)
             self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
-
             if backend.n_coils != self.n_coils * (len(z_index_)):
                 raise ValueError(
                     "The backend operator should have ``n_coils * len(z_index)``"
@@ -127,7 +130,11 @@ class MRIStackedNUFFT(FourierOperatorBase):
             )
 
     @staticmethod
-    def _init_samples(samples, z_index, shape):
+    def _init_samples(
+        samples: NDArray,
+        z_index: Literal["auto"] | NDArray | None,
+        shape: tuple[int, int, int],
+    ) -> tuple[NDArray, NDArray]:
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
         if samples_dim == len(shape) and auto_z:
@@ -276,19 +283,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
         img = self._ifftz(imgz)
         return img
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     def get_lipschitz_cst(self, max_iter=10):
         """Return the Lipschitz constant of the operator.
 
@@ -332,6 +326,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
                 ],
                 axis=1,
             )
+        return samples
 
     @samples.setter
     def samples(self, samples):
@@ -372,11 +367,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self,
         samples,
         shape,
-        smaps,
+        smaps=None,
         n_coils=1,
         n_batchs=1,
         n_trans=1,
-        z_index="auto",
+        z_index: NDArray | None | Literal["auto"] = "auto",
         squeeze_dims=False,
         smaps_cached=False,
         density=False,

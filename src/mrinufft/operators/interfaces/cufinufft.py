@@ -2,22 +2,22 @@
 
 import warnings
 import numpy as np
-from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy
+from numpy.typing import NDArray
+from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy, power_method
 from mrinufft._utils import (
     proper_trajectory,
-    get_array_module,
-    auto_cast,
-    power_method,
+    sizeof_fmt,
 )
 
-from .utils import (
+from mrinufft._array_compat import (
     CUPY_AVAILABLE,
     is_cuda_array,
     is_host_array,
-    nvtx_mark,
     pin_memory,
-    sizeof_fmt,
+    get_array_module,
+    auto_cast,
 )
+from mrinufft.operators.interfaces.utils import nvtx_mark
 
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
@@ -44,10 +44,10 @@ class RawCufinufftPlan:
 
     def __init__(
         self,
-        samples,
-        shape,
-        n_trans=1,
-        eps=1e-6,
+        samples: NDArray,
+        shape: tuple[int, ...],
+        n_trans: int = 1,
+        eps: float = 1e-6,
         **kwargs,
     ):
         self.shape = shape
@@ -57,7 +57,7 @@ class RawCufinufftPlan:
         self._dtype = samples.dtype
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
-        self.plans = [None, None, None]
+        self.plans: list[Plan | None] = [None, None, None]
         self.grad_plan = None
         self._kx = cp.array(samples[:, 0], copy=False)
         self._ky = cp.array(samples[:, 1], copy=False)
@@ -194,7 +194,14 @@ class MRICufiNUFFT(FourierOperatorBase):
             raise RuntimeError("cupy is not installed")
         if not CUFINUFFT_AVAILABLE:
             raise RuntimeError("Failed to found cufinufft binary.")
-
+        # set CUDA device
+        gpu_device_id = kwargs.get("gpu_device_id", 0)
+        try:
+            cp.cuda.Device(gpu_device_id).use()
+        except Exception as e:
+            warnings.warn(
+                f"Failed to set CUDA device {gpu_device_id}: {e}", RuntimeWarning
+            )
         super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
@@ -742,19 +749,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         grad /= self.norm_factor
         return grad
 
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
-
     @property
     def eps(self):
         """Return the underlying precision parameter."""
@@ -828,22 +822,32 @@ class MRICufiNUFFT(FourierOperatorBase):
         float
             Lipschitz constant of the operator.
         """
-        tmp_op = self.__class__(
-            self.samples,
-            self.shape,
-            density=self.density,
-            n_coils=1,
-            smaps=None,
-            squeeze_dims=True,
-            **kwargs,
-        )
+        # Disable coil dimension for faster computation
+        n_coils = self.n_coils
+        n_batchs = self.n_batchs
+        smaps = self.smaps
+        squeeze_dims = self.squeeze_dims
+
+        self.smaps = None
+        self.n_coils = 1
+        self.n_batchs = 1
+        self.squeeze_dims = True
+
         x = 1j * np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
         x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = cp.asarray(x)
-        return power_method(
-            max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
+        lipschitz_cst = power_method(
+            max_iter, self, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
         )
+
+        # restore coil setup
+        self.n_coils = n_coils
+        self.n_batchs = n_batchs
+        self.smaps = smaps
+        self.squeeze_dims = squeeze_dims
+
+        return lipschitz_cst
 
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
@@ -856,7 +860,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         **kwargs,
@@ -869,7 +873,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             the kspace locations
         volume_shape: np.ndarray
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -890,7 +894,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             **kwargs,
         )
         density_comp = cp.ones(kspace_loc.shape[0], dtype=grid_op.cpx_dtype)
-        for _ in range(num_iterations):
+        for _ in range(max_iter):
             density_comp /= cp.abs(
                 grid_op.op(
                     grid_op.adj_op(density_comp.astype(grid_op.cpx_dtype))

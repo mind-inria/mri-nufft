@@ -1,5 +1,6 @@
 .. include:: <isonum.txt>
 .. _NUFFT:
+
 ====================
  The NUFFT Operator
 ====================
@@ -96,6 +97,10 @@ Extension of the Acquisition model
 ----------------------------------
 The MRI acquisition model can be extended in two main ways. First by taking into account Parallel Imaging, where multiple coils are receiving data, each with a dedicated sensitivity profile.
 
+.. tip::
+   MRI-NUFFT provides the `FourierOperator` interface to implement all the physical model described below. See :ref:`nufft-interface` for the standard, and :class:`FourierOperatorBase <mrinufft.operators.base.FourierOperatorBase>`
+
+
 Parallel Imaging Model
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -123,6 +128,8 @@ Where :math:`S_1, \dots, S_L` are the sensitivity maps of each coil. Such sensit
 ..
     TODO Add ref to SENSE and CG-Sense
 
+.. _nufft-orc:
+
 Off-resonance correction model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -130,15 +137,15 @@ The constant magnetic field applied in a MRI machine :math:`B0` (with a typical 
 
 .. math::
 
-   y(t_i) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_i} + \Delta\omega(\boldsymbol{u}) t_i} d\boldsymbol{u}
+   y(t_m) = \int_{\mathbb{R}^d} x(\boldsymbol{u}) e^{-2\imath\pi \boldsymbol{u} \cdot\boldsymbol{\nu_m} + \Delta\omega(\boldsymbol{u}) t_m} d\boldsymbol{u}
 
-where :math:`t_i` is the time at which the frequency :math:`\nu_i` is acquired. Similarly at the reconstruction we have
+where :math:`t_i` is the time at which the frequency :math:`\nu_m` is acquired. Similarly at the reconstruction we have
 
 .. math::
 
-   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}
+   x(\boldsymbol{u_n}) = \sum_{m}^M y(t_m) e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_m}} e^{i\Delta\omega(\boldsymbol{u_n}) t_m}
 
-With these mixed-domain field pertubations, the Fourier model does not hold anymore and the FFT algorithm cannot be used any longer.
+With these mixed-domain field pertubations, the Fourier model does not hold anymore and the (NU)FFT algorithm cannot be used any longer.
 The main approach (initially proposed by Noll et al. [2]_) is to approximate the mixed-domain exponential term by splitting it into single-domain weights :math:`b_{m, \ell}` and :math:`c_{\ell, n}`:
 
 .. math::
@@ -151,20 +158,30 @@ Yielding the following model, where :math:`L \ll M, N` regular Fourier transform
 
    x(\boldsymbol{u_n}) = \sum_{\ell=1}^L c_{\ell, n} \sum_{m}^M y(t_m) b_{m, \ell} e^{2\imath\pi \boldsymbol{u} \cdot \boldsymbol{\nu_i}}
 
-The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C=(c_\ell, n) \in \mathbb{C}^{L\times N}` can be (optimally) estimated for any given :math:`L` by solving the following matrix factorisation problem [3]_:
+The coefficients :math:`B=(b_{m, \ell}) \in \mathbb{C}^{M\times L}` and :math:`C=(c_\ell, n) \in \mathbb{C}^{L\times N}` can be (optimally) estimated for any given :math:`L` by solving the following matrix factorisation problem [4]_:
 
 .. math::
 
    \hat{B}, \hat{C} = \arg\min_{B,C} \| E- BC\|_{fro}^2
 
-Where :math:`E_mn = e^i\Delta\omega_0(u_n)t_m`.
+Where :math:`E_{mn} = e^{i\Delta\omega_0(u_n)t_m}`.
+
+.. note::
+   
+   The estimation of the B and C methods are provided in the :py:mod:`mrinufft.extras.field_map` module.
+   Other methods like MTI [5]_ and MFI [6]_ are also available.
+
+.. tip::
+
+   You can use the method :func:`.with_off_resonance_correction <mrinufft.operators.base.FourierOperatorBase.with_off_resonance_correction>` to augment an existing operator with off-resonance correction capability.
+
 
 
 .. TODO Add Reference to the Code doing this.
 .. TODO Reference for SVI, MTI, MFI and pointers to pysap-mri for their estimation.
 
 
-.. _nufft-algo:
+.. _nufft-subspace:
 
 Subspace Projection Model
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -218,8 +235,10 @@ the projection operator :math:`\boldsymbol{\Phi}` commutes with the Fourier tran
 
 that is, computation now involves :math:`K \ll T` Fourier Transform operations, each with the same sampling trajectory, which can be computed by levaraging efficient NUFFT implementations for conventional static MRI.
 
-The Non Uniform Fast Fourier Transform
-======================================
+.. _nufft-algo:
+
+The Non Uniform Fast Fourier Transform in practice
+==================================================
 
 
 In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to :math:`O(M\log(N))`). Thus, the main steps of the *Non-Uniform Fast Fourier Transform* are for the type 1:
@@ -228,20 +247,46 @@ In order to lower the computational cost of the Non-Uniform Fourier Transform, t
 2. Perform the (I)FFT on this image
 3. Downsampling to the final grid, and apply some bias correction.
 
-This package exposes interfaces to the main NUFFT libraries available. The choice of the spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods.
+This package exposes interfaces to the main NUFFT libraries available (See :mod:`mrinufft.operators.interfaces`). The choice of the spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods. 
 
 Type 2 transforms perform those steps in reversed order.
-
-.. TODO Add Reference to all the NUFFT methods article
-   Maybe to Fessler never-going-to-be-published book.
 
 
 Density Compensation
 ====================
 
 
+In non-uniform sampling, such as radial or spiral MRI, the acquired k-space samples :math:`k_m` are not equally spaced. As a result, each sample does not contribute equally to the final image. To account for the non-uniform sampling density, a set of weights :math:`w_m`—called the density compensation function (DCF)—is applied to the measured data :math:`y_m`.
 
+In the adjoint NUFFT (type 2), which maps from non-uniform k-space onto the image grid, the operation can be mathematically written as:
 
+.. math::
+
+    x_n = \sum_{m=1}^M y_m \, w_m \, e^{-i 2\pi k_m \cdot x_n}
+
+where:
+
+- :math:`x_n` is the reconstructed pixel value at position :math:`x_n`,
+- :math:`y_m` are the measured non-uniform k-space data,
+- :math:`w_m` is the density compensation weight for sample :math:`m`,
+- :math:`k_m` is the k-space sampling location.
+
+The choice of :math:`w_m` depends on the trajectory:
+
+- **Analytical weights**: For simple trajectories (e.g., radial), :math:`w_m` may have closed forms.
+- **Voronoi weights**: :math:`w_m` corresponds to the area/volume of Voronoi cells around each sample :math:`k_m`.
+- **Iterative methods**: For arbitrary trajectories, :math:`w_m` can be estimated via iterative algorithms that minimize reconstruction artifacts.
+
+The DCF is typically applied before the NNUFFT ensuring each k-space measurement contributes proportionally to its neighborhood. Proper density compensation is crucial for artifact-free, quantitatively accurate image reconstruction.
+
+.. note::
+   In ``mri-nufft``, density compensation can be specified when initializing the NUFFT operator (via the ``density`` argument) as either a precomputed array, a method name (e.g., ``'voronoi'``, ``'pipe'``), or by providing your own function.
+   See :class:`FourierOperatorBase <mrinufft.operators.base.FourierOperatorBase>` and the ``compute_density`` API for more details. Several geometry-based and NUFFT-based DCF methods are available in the :mod:`mrinufft.density` module.
+
+.. tip::
+   For consistent scaling, density compensation weights should be normalized, so that the total signal energy is preserved across different trajectories and density choices. If you supply your own weights (See the for instance the normalization done for the :func:`pipe <mrinufft.operators.interfaces.cufinufft.MRICufinufft.pipe>` method)
+
+   
 Other Application
 =================
 Apart from MRI, The NUFFT operator is also used for:
@@ -260,3 +305,5 @@ References
 .. [2] Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., "A homogeneity correction method for magnetic resonance imaging with time-varying gradients", IEEE Transaction on Medical Imaging (1991), pp. 629-637.
 .. [3] Fessler, J. A., Lee, S., Olafsson, V. T., Shi, H. R., Noll, D. C., "Toeplitz-based iterative image reconstruction for MRI with correction for magnetic field inhomogeneity",  IEEE Transactions on Signal Processing 53.9 (2005), pp. 3393–3402.
 .. [4] D. F. McGivney et al., "SVD Compression for Magnetic Resonance Fingerprinting in the Time Domain," IEEE Transactions on Medical Imaging (2014), pp. 2311-2322.
+.. [5] D. C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, "A homogeneity correction method for magnetic resonance imaging with time-varying gradients," in IEEE Transactions on Medical Imaging, vol. 10, no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599
+.. [6] Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency interpolation for fast off-resonance correction. Magn. Reson. Med., 37: 785-792. https://doi.org/10.1002/mrm.1910370523

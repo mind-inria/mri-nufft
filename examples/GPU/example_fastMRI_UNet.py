@@ -42,18 +42,12 @@ where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}
 # %%
 # Imports
 import os
-from pathlib import Path
-import shutil
 import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from tqdm import tqdm
-import time
-import joblib
-from PIL import Image
-import tempfile as tmp
 
+import matplotlib.animation as animation
 from fastmri.models import Unet
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_cones
@@ -61,6 +55,8 @@ from mrinufft.trajectories import initialize_2D_cones
 # %%
 # Setup a simple class for the U-Net model
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
+
+plt.rcParams["animation.embed_limit"] = 2**30  # 1GiB is very large.
 
 
 class Model(torch.nn.Module):
@@ -138,94 +134,72 @@ kspace_mri_2D = model.operator.op(mri_2D)
 # Before training, here is the simple reconstruction we have using a
 # density compensated adjoint.
 dc_adjoint = model.operator.adj_op(kspace_mri_2D)
-fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-plot_state(axs, mri_2D, init_traj, dc_adjoint)
 
 
 # %%
-# Start training loop
 num_epochs = 100
 optimizer = torch.optim.RAdam(model.parameters(), lr=1e-3)
-losses = []  # Store the loss values and create an animation
-image_files = []  # Store the images to create a gif
 model.train()
 
-with tqdm(range(num_epochs), unit="steps") as tqdms:
-    for i in tqdms:
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+fig.suptitle("Training Starting")
+axs = axs.flatten()
+
+axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
+axs[0].axis("off")
+axs[0].set_title("MR Image")
+
+axs[1].scatter(*init_traj.T, s=0.5)
+axs[1].set_title("Trajectory")
+
+recon_im = axs[2].imshow(
+    np.abs(dc_adjoint[0][0].detach().cpu().numpy()),
+    cmap="gray",
+)
+axs[2].axis("off")
+axs[2].set_title("Reconstruction")
+(loss_curve,) = axs[3].plot([], [])
+axs[3].grid()
+axs[3].set_xlabel("epochs")
+axs[3].set_ylabel("loss")
+
+fig.tight_layout()
+
+
+def train():
+    """Train loop."""
+    losses = []
+    for i in range(num_epochs):
         out = model(kspace_mri_2D)  # Forward pass
 
         loss = torch.nn.functional.l1_loss(out, mri_2D[None])  # Compute loss
-        tqdms.set_postfix({"loss": loss.item()})  # Update progress bar
-        losses.append(loss.item())  # Store loss value
 
         optimizer.zero_grad()  # Zero gradients
         loss.backward()  # Backward pass
         optimizer.step()  # Update weights
-
-        # Generate images for gif
-        hashed = joblib.hash((i, "learn_traj", time.time()))
-        filename = f"{tmp.NamedTemporaryFile().name}.png"
-        fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-        plot_state(
-            axs,
-            mri_2D,
-            init_traj,
-            out,
-            losses,
-            save_name=filename,
-        )
-        image_files.append(filename)
+        losses.append(loss.item())
+        yield out.detach().cpu().numpy().squeeze(), losses
 
 
-# Make a GIF of all images.
-imgs = [Image.open(img) for img in image_files]
-imgs[0].save(
-    "mrinufft_learn_unet.gif",
-    save_all=True,
-    append_images=imgs[1:],
-    optimize=False,
-    duration=2,
-    loop=0,
+def plot_epoch(data):
+    img, losses = data
+    cur_epoch = len(losses)
+    recon_im.set_data(abs(img))
+    loss_curve.set_xdata(np.arange(cur_epoch))
+    loss_curve.set_ydata(losses)
+    axs[3].set_xlim(0, cur_epoch)
+    axs[3].set_ylim(0, 1.1 * max(losses))
+    axs[2].set_title(f"Reconstruction, frame {cur_epoch}/{num_epochs}")
+
+    if cur_epoch < num_epochs:
+        fig.suptitle("Training in progress " + "." * (1 + cur_epoch % 3))
+    else:
+        fig.suptitle("Training complete !")
+
+
+ani = animation.FuncAnimation(
+    fig, plot_epoch, train, save_count=num_epochs, repeat=False
 )
-# sphinx_gallery_start_ignore
-# Cleanup
-for f in image_files:
-    try:
-        os.remove(f)
-    except OSError:
-        continue
-# don't raise errors from pytest.
-# This will only be executed for the sphinx gallery stuff
-
-try:
-    final_dir = (
-        Path(os.getcwd()).parent.parent
-        / "docs"
-        / "generated"
-        / "autoexamples"
-        / "GPU"
-        / "images"
-    )
-    shutil.copyfile("mrinufft_learn_unet.gif", final_dir / "mrinufft_learn_unet.gif")
-except FileNotFoundError:
-    pass
-
-# sphinx_gallery_end_ignore
-
-# sphinx_gallery_thumbnail_path = 'generated/autoexamples/GPU/images/mrinufft_learn_unet.gif'
-
-# %%
-# .. image-sg:: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
-#    :alt: example learn_samples
-#    :srcset: /generated/autoexamples/GPU/images/mrinufft_learn_unet.gif
-#    :class: sphx-glr-single-img
-
-# %%
-# Reconstruction from partially trained U-Net model
-model.eval()
-new_recon = model(kspace_mri_2D)
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-plot_state(axs, mri_2D, init_traj, new_recon, losses)
 plt.show()
 
 # %%

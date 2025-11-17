@@ -89,21 +89,16 @@ def flat_operator(operator):
 @fixture(scope="module")
 def image_data(operator):
     """Generate a random image."""
-    if operator.uses_sense:
-        shape = (operator.n_batchs, *operator.shape)
-    else:
-        shape = (operator.n_batchs, operator.n_coils, *operator.shape)
-    img = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    img += np.random.rand(*shape).astype(operator.cpx_dtype)
+    img = (1j * np.random.rand(*operator.img_full_shape)).astype(operator.cpx_dtype)
+    img += np.random.rand(*operator.img_full_shape).astype(operator.cpx_dtype)
     return img
 
 
 @fixture(scope="module")
 def kspace_data(operator):
     """Generate a random image."""
-    shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
-    kspace = (1j * np.random.rand(*shape)).astype(operator.cpx_dtype)
-    kspace += np.random.rand(*shape).astype(operator.cpx_dtype)
+    kspace = (1j * np.random.rand(*operator.ksp_full_shape)).astype(operator.cpx_dtype)
+    kspace += np.random.rand(*operator.ksp_full_shape).astype(operator.cpx_dtype)
     return kspace
 
 
@@ -215,7 +210,7 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
 
 
 def test_gradient_lipschitz(operator, image_data, kspace_data):
-    """Test the gradient lipschitz constant."""
+    """Test the gradient lipschitz constant converges."""
     C = 1 if operator.uses_sense else operator.n_coils
     img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape).squeeze()
     for _ in range(10):
@@ -228,3 +223,23 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     # TODO: check that the value is "not too far" from 1
     # TODO: to do the same with density compensation
     assert (norm - norm_prev) / norm_prev < 1e-3
+
+
+@parametrize("optim", ["cg", "lsqr", "lsmr"])
+@param_array_interface
+def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
+    """Test pseudo inverse batch solver."""
+    image_data = to_interface(image_data, array_interface)
+    kspace_data = to_interface(kspace_data, array_interface)
+
+    from mrinufft.extras.optim import loss_l2_reg
+
+    img, res = operator.pinv_solver(
+        kspace_data, optim=optim, callback=loss_l2_reg, max_iter=5
+    )
+
+    assert img.shape == operator.img_full_shape
+    if operator.n_batchs > 1:
+        assert len(res[0]) == operator.n_batchs
+    else:
+        assert res[0].ndim == 0

@@ -9,14 +9,19 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 
 # Internal imports
-from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
+from mrinufft import (
+    display_2D_trajectory,
+    display_3D_trajectory,
+    displayConfig,
+    display_gradients_simply,
+)
 from mrinufft.trajectories.utils import KMAX
 
 
 def show_trajectory(trajectory, one_shot, figure_size):
     if trajectory.shape[-1] == 2:
         ax = display_2D_trajectory(
-            trajectory, size=figure_size, one_shot=one_shot % trajectory.shape[0]
+            trajectory, figsize=figure_size, one_shot=one_shot % trajectory.shape[0]
         )
         ax.set_aspect("equal")
         plt.tight_layout()
@@ -24,13 +29,72 @@ def show_trajectory(trajectory, one_shot, figure_size):
     else:
         ax = display_3D_trajectory(
             trajectory,
-            size=figure_size,
+            figsize=figure_size,
             one_shot=one_shot % trajectory.shape[0],
             per_plane=False,
         )
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.1)
         plt.show()
+
+
+def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10):
+    # General configuration
+    nb_dim = trajectory.shape[-1]
+    fig = plt.figure(figsize=(3 * figure_size, figure_size))
+    subfigs = fig.subfigures(1, 3, wspace=0)
+
+    # Trajectory display
+    subfigs[0].suptitle("Trajectory", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
+    if nb_dim == 2:
+        ax = display_2D_trajectory(
+            trajectory,
+            figsize=figure_size,
+            one_shot=one_shot,
+            subfigure=subfigs[0],
+        )
+    else:
+        ax = display_3D_trajectory(
+            trajectory,
+            figsize=figure_size,
+            one_shot=one_shot,
+            per_plane=False,
+            subfigure=subfigs[0],
+        )
+    for i in range(trajectory.shape[0]):
+        ax.scatter(*(trajectory[i, ::sample_freq].T), s=15)
+    ax.set_aspect("equal")
+
+    # Gradient display
+    subfigs[1].suptitle("Gradients", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
+    display_gradients_simply(
+        trajectory,
+        shot_ids=[one_shot],
+        figsize=figure_size,
+        subfigure=subfigs[1],
+        uni_gradient="k",
+        uni_signal="gray",
+    )
+
+    # Slew rates display
+    subfigs[2].suptitle("Slew rates", fontsize=displayConfig.fontsize, x=0.5, y=0.98)
+    display_gradients_simply(
+        np.diff(trajectory, axis=1),
+        shot_ids=[one_shot],
+        figsize=figure_size,
+        subfigure=subfigs[2],
+        uni_gradient="k",
+        uni_signal="gray",
+    )
+
+    subfigs[2].axes[0].set_ylabel("Sx")
+    subfigs[2].axes[1].set_ylabel("Sy")
+    if nb_dim == 2:
+        subfigs[2].axes[2].set_ylabel("|S|")
+    else:
+        subfigs[2].axes[2].set_ylabel("Sz")
+        subfigs[2].axes[3].set_ylabel("|S|")
+    plt.show()
 
 
 def show_trajectories(
@@ -49,7 +113,7 @@ def show_trajectories(
         if dim == "3D" and traj.shape[-1] == 3:
             ax = display_3D_trajectory(
                 traj,
-                size=subfig_size,
+                figsize=subfig_size,
                 one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
                 per_plane=False,
@@ -57,7 +121,7 @@ def show_trajectories(
         else:
             ax = display_2D_trajectory(
                 traj[..., axes],
-                size=subfig_size,
+                figsize=subfig_size,
                 one_shot=one_shot % traj.shape[0],
                 subfigure=subfig,
             )

@@ -6,22 +6,8 @@ import numpy as np
 
 from mrinufft._utils import MethodRegister, proper_trajectory
 
-register_density = MethodRegister("density_compensation")
-
-
-def get_density(name, *args, **kwargs):
-    """Get the density compensation function from its name."""
-    try:
-        method = register_density.registry["density_compensation"][name]
-    except KeyError as e:
-        raise ValueError(
-            f"Unknown density compensation method {name}. Available methods are \n"
-            f"{list(register_density.registry['density_compensation'].keys())}"
-        ) from e
-
-    if args or kwargs:
-        return method(*args, **kwargs)
-    return method
+register_density = MethodRegister("density")
+get_density = register_density.make_getter()
 
 
 def flat_traj(normalize="unit"):

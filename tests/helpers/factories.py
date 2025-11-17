@@ -54,6 +54,8 @@ def to_interface(data, interface):
 
 def from_interface(data, interface):
     """Get DATA from INTERFACE as a numpy array."""
+    if isinstance(data, np.ndarray):
+        return data
     if interface == "cupy":
         return data.get()
     elif "torch" in interface:
@@ -81,6 +83,20 @@ _param_array_interface = pytest.mark.parametrize(
             marks=pytest.mark.skipif(
                 not (TORCH_AVAILABLE and torch.cuda.is_available()),
                 reason="torch not available",
+            ),
+        ),
+    ],
+)
+
+_param_array_interface_np_cp = pytest.mark.parametrize(
+    "array_interface",
+    [
+        "numpy",
+        pytest.param(
+            "cupy",
+            marks=pytest.mark.skipif(
+                not CUPY_AVAILABLE,
+                reason="cupy not available",
             ),
         ),
     ],

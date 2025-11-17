@@ -95,7 +95,8 @@ sphinx_gallery_conf = {
         "notebooks_dir": "examples",
         "use_jupyter_lab": True,
     },
-    "parallel": 5,
+    "parallel": True,
+    "matplotlib_animations": True,
 }
 
 intersphinx_mapping = {

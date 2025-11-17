@@ -5,7 +5,8 @@ import warnings
 import numpy as np
 import scipy as sp
 from ..base import FourierOperatorCPU
-from mrinufft._utils import proper_trajectory, get_array_module
+from mrinufft._utils import proper_trajectory
+from mrinufft._array_compat import get_array_module
 
 
 def get_fourier_matrix(ktraj, shape, dtype=np.complex64, normalize=False):

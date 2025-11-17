@@ -96,7 +96,6 @@ def test_decorators_outcome(decorator_factory, array_interface):
 
 @_param_array_interface
 def test_numpy_conversion(array_interface):
-
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
 
@@ -113,7 +112,6 @@ def test_numpy_conversion(array_interface):
 
 @_param_array_interface
 def test_numpy_cupy_conversion(array_interface):
-
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
 
@@ -130,7 +128,6 @@ def test_numpy_cupy_conversion(array_interface):
 
 @_param_array_interface
 def test_torch_conversion(array_interface):
-
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
 
@@ -152,7 +149,6 @@ def test_torch_conversion(array_interface):
 @pytest.mark.skipif(TENSORFLOW_AVAILABLE is False, reason="tensorflow not available")
 @_param_array_interface
 def test_tensorflow_conversion(array_interface):
-
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
 

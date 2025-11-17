@@ -3,9 +3,15 @@
 import numpy as np
 import warnings
 
-from ..base import FourierOperatorBase, with_numpy_cupy
-from mrinufft._utils import proper_trajectory, get_array_module, auto_cast
-from mrinufft.operators.interfaces.utils import is_cuda_array, is_host_array
+from ..base import FourierOperatorBase
+from mrinufft._utils import proper_trajectory
+from mrinufft._array_compat import (
+    get_array_module,
+    auto_cast,
+    is_cuda_array,
+    is_host_array,
+    with_numpy_cupy,
+)
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -83,6 +89,7 @@ class RawGpuNUFFT:
         pinned_image=None,
         pinned_kspace=None,
         use_gpu_direct=False,
+        **kwargs,
     ):
         """Initialize the 'NUFFT' class.
 
@@ -118,6 +125,8 @@ class RawGpuNUFFT:
             In this case pinned memory is not used and this saved memory.
             It will not be an error if this is False and you pass GPU array,
             just that it is inefficient.
+        **kwargs (optional): additional arguments. These include
+            ``gpu_device_id``(GPU ID)
 
         Notes
         -----
@@ -182,6 +191,7 @@ class RawGpuNUFFT:
             sector_width,
             osf,
             balance_workload,
+            **kwargs,
         )
 
     def toggle_grad_traj(self):
@@ -200,7 +210,9 @@ class RawGpuNUFFT:
         else:
             if self.uses_sense or self.n_coils == 1:
                 # Support for one additional dimension
-                return image.squeeze().astype(xp.complex64, copy=False).T[None]
+                return xp.ascontiguousarray(
+                    image.squeeze().astype(xp.complex64, copy=False).T[None]
+                )
             return xp.asarray([c.T for c in image], dtype=xp.complex64).squeeze()
 
     def set_smaps(self, smaps):
@@ -572,7 +584,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        num_iterations=10,
+        max_iter=10,
         osf=2,
         normalize=True,
         **kwargs,
@@ -585,7 +597,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the kspace locations
         volume_shape: np.ndarray
             the volume shape
-        num_iterations: int default 10
+        max_iter: int default 10
             the number of iterations for density estimation
         osf: float or int
             The oversampling factor the volume shape
@@ -604,9 +616,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
             osf=1,
             **kwargs,
         )
-        density_comp = grid_op.raw_op.operator.estimate_density_comp(
-            max_iter=num_iterations
-        )
+        density_comp = grid_op.raw_op.operator.estimate_density_comp(max_iter=max_iter)
         if normalize:
             test_op = cls(samples=kspace_loc, shape=original_shape, **kwargs)
             test_im = np.ones(original_shape, dtype=np.complex64)
@@ -643,19 +653,6 @@ class MRIGpuNUFFT(FourierOperatorBase):
         return tmp_op.raw_op.operator.get_spectral_radius(
             max_iter=max_iter, tolerance=tolerance
         )
-
-    def _safe_squeeze(self, arr):
-        """Squeeze the first two dimensions of shape of the operator."""
-        if self.squeeze_dims:
-            try:
-                arr = arr.squeeze(axis=1)
-            except ValueError:
-                pass
-            try:
-                arr = arr.squeeze(axis=0)
-            except ValueError:
-                pass
-        return arr
 
     @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
@@ -694,6 +691,9 @@ class MRIGpuNUFFT(FourierOperatorBase):
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
+        else:
+            raise ValueError("image_data and obs_data should be both on CPU or GPU")
+
         ret = grad_func(image_data, obs_data)
         return self._safe_squeeze(ret)
 

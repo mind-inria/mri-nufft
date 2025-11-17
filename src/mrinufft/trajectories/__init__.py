@@ -3,7 +3,13 @@
 See also the trajectories examples: :ref:`sphx_glr_generated_autoexamples_trajectories`
 """
 
-from .display import display_2D_trajectory, display_3D_trajectory, displayConfig
+from .display import (
+    display_2D_trajectory,
+    display_3D_trajectory,
+    displayConfig,
+    display_gradients,
+    display_gradients_simply,
+)
 from .gradients import patch_center_anomaly
 from .inits import (
     initialize_2D_eccentric,
@@ -13,6 +19,7 @@ from .inits import (
     initialize_3D_random_walk,
     initialize_3D_travelling_salesman,
 )
+from .projection import parameterize_by_arc_length
 from .sampling import (
     create_chauffert_density,
     create_cutoff_decay_density,
@@ -82,7 +89,6 @@ __all__ = [
     "initialize_3D_golden_means_radial",
     "initialize_3D_wong_radial",
     "initialize_3D_park_radial",
-    "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
     "initialize_3D_floret",
     "initialize_3D_wave_caipi",
@@ -123,4 +129,8 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "display_gradients",
+    "display_gradients_simply",
+    # projection
+    "parameterize_by_arc_length",
 ]

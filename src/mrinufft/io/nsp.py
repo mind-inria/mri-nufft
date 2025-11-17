@@ -1,3 +1,4 @@
+# type: ignore
 """Read/Write trajectory for Neurospin sequences."""
 
 from __future__ import annotations
@@ -8,17 +9,19 @@ from array import array
 from datetime import datetime
 
 import numpy as np
-from typing import Optional
 
 from mrinufft.trajectories.utils import (
-    DEFAULT_GMAX,
-    DEFAULT_RASTER_TIME,
-    DEFAULT_SMAX,
-    KMAX,
+    Acquisition,
+    Hardware,
     Gammas,
+    SI,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
+    DEFAULT_GMAX,
+    DEFAULT_SMAX,
+    KMAX,
+    DEFAULT_RASTER_TIME,
 )
 from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
@@ -47,7 +50,7 @@ def write_gradients(
     Parameters
     ----------
     gradients : np.ndarray
-        Gradients. Shape (num_shots, num_samples_per_shot, dimension).
+        Gradients. Shape (num_shots, num_samples_per_shot, dimension). in T/m.
     initial_positions : np.ndarray
         Initial positions. Shape (num_shots, dimension).
     grad_filename : str
@@ -211,7 +214,7 @@ def write_trajectory(
     img_size: tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
-    gamma: float = Gammas.HYDROGEN,
+    gamma: float = Gammas.HYDROGEN / 1e3,
     raster_time: float = DEFAULT_RASTER_TIME,
     check_constraints: bool = True,
     TE_pos: float = 0.5,
@@ -270,22 +273,20 @@ def write_trajectory(
         These are arguments passed to write_gradients function above.
     """
     # Convert normalized trajectory to gradients
+    acq = Acquisition(
+        fov=FOV,
+        img_size=img_size,
+        gamma=gamma,
+        norm_factor=norm_factor,
+        hardware=Hardware(gmax=gmax, smax=smax, grad_raster_time=raster_time),
+    )
     gradients, initial_positions, final_positions = convert_trajectory_to_gradients(
         trajectory,
-        norm_factor=norm_factor,
-        resolution=np.asarray(FOV) / np.asarray(img_size),
-        raster_time=raster_time,
-        gamma=gamma,
+        acq=acq,
         get_final_positions=True,
     )
     Ns_to_skip_at_start = 0
     Ns_to_skip_at_end = 0
-    scan_consts = {
-        "gamma": gamma,
-        "gmax": gmax,
-        "smax": smax,
-        "raster_time": raster_time,
-    }
     if pregrad == "prephase":
         if version < 5.1:
             raise ValueError(
@@ -295,7 +296,7 @@ def write_trajectory(
         start_gradients = get_gradient_amplitudes_to_travel_for_set_time(
             kspace_end_loc=initial_positions,
             end_gradients=gradients[:, 0],
-            **scan_consts,
+            acq=acq,
         )
         initial_positions = np.zeros_like(initial_positions)
         gradients = np.hstack([start_gradients, gradients])
@@ -314,18 +315,17 @@ def write_trajectory(
             kspace_end_loc=edge_locations,
             start_gradients=gradients[:, -1],
             kspace_start_loc=final_positions,
-            **scan_consts,
+            acq=acq,
         )
         gradients = np.hstack([gradients, end_gradients])
         Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
-        slewrates, _ = convert_gradients_to_slew_rates(gradients, raster_time)
+        slewrates, _ = convert_gradients_to_slew_rates(gradients, acq)
         valid, maxG, maxS = check_hardware_constraints(
             gradients=gradients,
             slewrates=slewrates,
-            gmax=gmax,
-            smax=smax,
+            acq=acq,
         )
         if not valid:
             warnings.warn(
@@ -421,7 +421,7 @@ def read_trajectory(
                 dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
         if version > 4:
-            TE, data = _pop_elements(data)
+            TE_pos, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
             recon_tag, data = _pop_elements(data)
             recon_tag = np.around(recon_tag, 2)
@@ -525,7 +525,7 @@ def read_trajectory(
             params["min_osf"] = min_osf
             params["gamma"] = gamma
             params["recon_tag"] = recon_tag
-            params["TE"] = TE
+            params["TE_pos"] = TE_pos
             if version >= 4.2:
                 params["timestamp"] = timestamp
         if normalize_factor is not None:

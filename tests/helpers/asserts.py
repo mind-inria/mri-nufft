@@ -44,7 +44,7 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
         except AssertionError as e:
             message = getattr(e, "message", "")
             message += "\nMismatched elements: "
-            message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc*100:.2f}%)"
+            message += f"{np.sum(~val)} > {mismatch}(={mismatch_perc * 100:.2f}%)"
             raise e
 
 
@@ -54,6 +54,9 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
         a.flatten(), b.flatten()
     )
     abs_slope_reg = abs(slope_reg)
+    if np.iscomplex(rvalue):
+        rvalue = abs(rvalue)
+
     if r_value_err is not None and abs(rvalue - 1) > r_value_err:
         raise AssertionError(
             f"RValue {rvalue} != 1 ± {r_value_err}\n "

@@ -1,9 +1,10 @@
+# type: ignore
 """Display functions for trajectories."""
 
 from __future__ import annotations
-
+from collections.abc import Sequence
 import itertools
-from typing import Any
+from typing import Any, Literal
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -12,10 +13,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .utils import (
-    DEFAULT_GMAX,
-    DEFAULT_RASTER_TIME,
-    DEFAULT_SMAX,
-    KMAX,
+    Acquisition,
     compute_gradients_and_slew_rates,
     convert_trajectory_to_gradients,
 )
@@ -130,33 +128,49 @@ class displayConfig:
 ##############
 
 
-def _setup_2D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
+def _setup_2D_ticks(
+    figsize: float,
+    fig: plt.Figure | None = None,
+    acq: Acquisition | None = None,
+    scale_fov: bool = False,
+) -> plt.Axes:
     """Add ticks to 2D plot."""
+    acq = acq or Acquisition.default
+    KMAX = acq.norm_factor * (2 * np.array(acq.res) if scale_fov else np.array([1, 1]))
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig if (isinstance(fig, plt.Axes)) else fig.subplots()
     ax.grid(True)
-    ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_xlim((-KMAX, KMAX))
-    ax.set_ylim((-KMAX, KMAX))
+    ax.set_xticks([-KMAX[0], -KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
+    ax.set_yticks([-KMAX[1], -KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
+    ax.set_xlim((-KMAX[0], KMAX[0]))
+    ax.set_ylim((-KMAX[1], KMAX[1]))
     ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
     ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
     return ax
 
 
-def _setup_3D_ticks(figsize: float, fig: plt.Figure | None = None) -> plt.Axes:
+def _setup_3D_ticks(
+    figsize: float,
+    fig: plt.FigureBase | None = None,
+    acq: Acquisition = None,
+    scale_fov: bool = False,
+) -> plt.Axes:
     """Add ticks to 3D plot."""
+    acq = acq or Acquisition.default
+    KMAX = acq.norm_factor * (
+        2 * np.array(acq.res) if scale_fov else np.array([1, 1, 1])
+    )
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
     ax = fig if (isinstance(fig, plt.Axes)) else fig.add_subplot(projection="3d")
-    ax.set_xticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_yticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.set_zticks([-KMAX, -KMAX / 2, 0, KMAX / 2, KMAX])
-    ax.axes.set_xlim3d(left=-KMAX, right=KMAX)
-    ax.axes.set_ylim3d(bottom=-KMAX, top=KMAX)
-    ax.axes.set_zlim3d(bottom=-KMAX, top=KMAX)
-    ax.set_box_aspect((2 * KMAX, 2 * KMAX, 2 * KMAX))
+    ax.set_xticks([-KMAX[0] - KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
+    ax.set_yticks([-KMAX[1] - KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
+    ax.set_zticks([-KMAX[2] - KMAX[2] / 2, 0, KMAX[2] / 2, KMAX[2]])
+    ax.axes.set_xlim3d(left=-KMAX[0], right=KMAX[0])
+    ax.axes.set_ylim3d(bottom=-KMAX[1], top=KMAX[1])
+    ax.axes.set_zlim3d(bottom=-KMAX[2], top=KMAX[2])
+    ax.set_box_aspect((2 * KMAX[0], 2 * KMAX[1], 2 * KMAX[2]))
     ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
     ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
     ax.set_zlabel("kz", fontsize=displayConfig.fontsize)
@@ -174,10 +188,9 @@ def display_2D_trajectory(
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
-    constraints_order: int | str | None = None,
-    **constraints_kwargs: Any,  # noqa ANN401
+    acq: Acquisition | None = None,
+    constraints_order: float | Literal["fro"] | None = None,
+    scale_fov: bool = False,
 ) -> plt.Axes:
     """Display 2D trajectories.
 
@@ -199,30 +212,27 @@ def display_2D_trajectory(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    **constraints_kwargs
-        Acquisition parameters used to check on hardware constraints,
-        following the parameter convention from
-        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
+    scale_fov: bool, optional
+        If True the ticks are scaled to represent the k-space in m^-1
+        If False (default) the ticks are left in the normalized k-space [-0.5, 0.5]
 
     Returns
     -------
     ax : plt.Axes
         Axes of the figure.
     """
+    acq = acq or Acquisition.default
     # Setup figure and ticks
-    Nc, Ns = trajectory.shape[:2]
-    ax = _setup_2D_ticks(figsize, subfigure)
+    Nc, _ = trajectory.shape[:2]
+    ax = _setup_2D_ticks(figsize, subfigure, acq, scale_fov=scale_fov)
     colors = displayConfig.get_colorlist()
     # Display every shot
     for i in range(Nc):
@@ -250,9 +260,7 @@ def display_2D_trajectory(
 
     # Point out violated constraints if requested
     if show_constraints:
-        gradients, slews = compute_gradients_and_slew_rates(
-            trajectory, **constraints_kwargs
-        )
+        gradients, slews = compute_gradients_and_slew_rates(trajectory, acq=acq)
 
         # Pad and compute norms
         gradients = np.linalg.norm(
@@ -264,8 +272,8 @@ def display_2D_trajectory(
 
         # Check constraints
         trajectory = trajectory.reshape((-1, 2))
-        gradients = trajectory[np.where(gradients.flatten() > gmax)]
-        slews = trajectory[np.where(slews.flatten() > smax)]
+        gradients = trajectory[np.where(gradients.flatten() > acq.gmax)]
+        slews = trajectory[np.where(slews.flatten() > acq.smax)]
 
         # Scatter points with vivid colors
         ax.scatter(
@@ -291,10 +299,8 @@ def display_3D_trajectory(
     one_shot: bool | int = False,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
-    **constraints_kwargs: Any,  # noqa ANN401
 ) -> plt.Axes:
     """Display 3D trajectories.
 
@@ -322,12 +328,9 @@ def display_3D_trajectory(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
@@ -344,6 +347,8 @@ def display_3D_trajectory(
         Axes of the figure.
     """
     # Setup figure and ticks, and handle 2D trajectories
+    acq = acq or Acquisition.default
+
     ax = _setup_3D_ticks(figsize, subfigure)
     if nb_repetitions is None:
         nb_repetitions = trajectory.shape[0]
@@ -388,7 +393,8 @@ def display_3D_trajectory(
     # Point out violated constraints if requested
     if show_constraints:
         gradients, slewrates = compute_gradients_and_slew_rates(
-            trajectory.reshape((-1, Ns, 3)), **constraints_kwargs
+            trajectory.reshape((-1, Ns, 3)),
+            acq=acq,
         )
 
         # Pad and compute norms
@@ -400,8 +406,12 @@ def display_3D_trajectory(
         )
 
         # Check constraints
-        gradients = trajectory.reshape((-1, 3))[np.where(gradients.flatten() > gmax)]
-        slewrates = trajectory.reshape((-1, 3))[np.where(slewrates.flatten() > smax)]
+        gradients = trajectory.reshape((-1, 3))[
+            np.where(gradients.flatten() > acq.gmax)
+        ]
+        slewrates = trajectory.reshape((-1, 3))[
+            np.where(slewrates.flatten() > acq.smax)
+        ]
 
         # Scatter points with vivid colors
         ax.scatter(
@@ -424,13 +434,12 @@ def display_3D_trajectory(
 
 def display_gradients_simply(
     trajectory: NDArray,
-    shot_ids: tuple[int, ...] = (0,),
+    shot_ids: Sequence[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
-    show_signal: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
-    subfigure: plt.Figure | None = None,
+    subfigure: plt.Figure | Sequence[plt.Axes, ...] = None,
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
@@ -446,10 +455,6 @@ def display_gradients_simply(
     fill_area : bool, optional
         Fills the area under the curve for improved visibility and
         representation of the integral, aka trajectory.
-        The default is `True`.
-    show_signal : bool, optional
-        Show an additional illustration of the signal as
-        the modulated distance to the center.
         The default is `True`.
     uni_signal : str or None, optional
         Define whether the signal should be represented by a
@@ -471,14 +476,18 @@ def display_gradients_simply(
         Axes of the figure.
     """
     # Setup figure and labels
-    Nd = trajectory.shape[-1]
+    nb_axes = trajectory.shape[-1] + 1
     if subfigure is None:
-        fig = plt.figure(figsize=(figsize, figsize * (Nd + show_signal) / Nd))
+        fig = plt.figure(figsize=(figsize, figsize * nb_axes / (nb_axes - 1)))
+        axes = fig.subplots(nb_axes, 1)
+    elif isinstance(subfigure, Sequence) and len(subfigure) == nb_axes:
+        axes = subfigure
     else:
         fig = subfigure
-    axes = fig.subplots(Nd + show_signal, 1)
-    for i, ax in enumerate(axes[:Nd]):
+        axes = fig.subplots(nb_axes, 1)
+    for i, ax in enumerate(axes[: nb_axes - 1]):
         ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
+
     axes[-1].set_xlabel("Time", fontsize=displayConfig.fontsize)
 
     # Setup axes ticks
@@ -489,50 +498,42 @@ def display_gradients_simply(
 
     # Plot the curves for each axis
     gradients = np.diff(trajectory, axis=1)
-    vmax = 1.1 * np.max(np.abs(gradients[shot_ids, ...]))
-    x_axis = np.arange(gradients.shape[1])
+    vmax = 1.1 * np.max(np.linalg.norm(gradients[shot_ids, ...], axis=-1, ord=1))
+    for ax in axes[:-1]:
+        ax.set_ylim((-vmax, vmax))
+    axes[-1].set_ylim(-0.1 * vmax, vmax)
+
+    time_axis = np.arange(gradients.shape[1])
     colors = displayConfig.get_colorlist()
     for j, s_id in enumerate(shot_ids):
-        for i, ax in enumerate(axes[:Nd]):
-            ax.set_ylim((-vmax, vmax))
-            color = (
-                uni_gradient
-                if uni_gradient is not None
-                else colors[j % displayConfig.nb_colors]
-            )
-            ax.plot(x_axis, gradients[s_id, ..., i], color=color)
+        color = (
+            uni_gradient
+            if uni_gradient is not None
+            else colors[j % displayConfig.nb_colors]
+        )
+
+        # Set each axis individually
+        for i, ax in enumerate(axes[:-1]):
+            ax.plot(time_axis, gradients[s_id, ..., i], color=color)
             if fill_area:
                 ax.fill_between(
-                    x_axis,
+                    time_axis,
                     gradients[s_id, ..., i],
                     alpha=displayConfig.alpha,
                     color=color,
                 )
 
-    # Return axes alone
-    if not show_signal:
-        return axes
-
-    # Show signal as modulated distance to center
-    distances = np.linalg.norm(trajectory[shot_ids, 1:-1], axis=-1)
-    distances = distances / np.max(distances)
-    signal = 1 - distances.reshape((len(shot_ids), -1)) / np.max(distances)
-    signal = (
-        signal**2
-        * np.cos(figsize * 8 * 2 * np.pi * np.linspace(0, 1, signal.shape[-1]))[None, :]
-    )
-
-    colors = displayConfig.get_colorlist()
-    # Show signal for each requested shot
-    axes[-1].set_ylim((-1, 1))
-    axes[-1].set_ylabel("Signal", fontsize=displayConfig.fontsize)
-    for j in range(len(shot_ids)):
-        color = (
-            uni_signal
-            if (uni_signal is not None)
-            else colors[j % displayConfig.nb_colors]
-        )
-        axes[-1].plot(np.arange(signal.shape[1]), signal[j], color=color)
+        # Set the norm axis if requested
+        gradient_norm = np.linalg.norm(gradients[s_id], axis=-1)
+        axes[-1].set_ylabel("|G|", fontsize=displayConfig.fontsize)
+        axes[-1].plot(gradient_norm, color=color)
+        if fill_area:
+            axes[-1].fill_between(
+                time_axis,
+                gradient_norm,
+                alpha=displayConfig.alpha,
+                color=color,
+            )
     return axes
 
 
@@ -541,16 +542,13 @@ def display_gradients(
     shot_ids: tuple[int, ...] = (0,),
     figsize: float = 5,
     fill_area: bool = True,
-    show_signal: bool = True,
+    show_norm: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
-    gmax: float = DEFAULT_GMAX,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    **constraints_kwargs: Any,  # noqa ANN401
 ) -> tuple[plt.Axes]:
     """Display gradients based on trajectory of any dimension.
 
@@ -567,7 +565,7 @@ def display_gradients(
         Fills the area under the curve for improved visibility and
         representation of the integral, aka trajectory.
         The default is `True`.
-    show_signal : bool, optional
+    show_norm : bool, optional
         Show an additional illustration of the signal as
         the modulated distance to the center.
         The default is `True`.
@@ -588,38 +586,29 @@ def display_gradients(
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
         The default is `False`.
-    gmax: float, optional
-        Maximum constraint on the gradients in T/m.
-        The default is `DEFAULT_GMAX`.
-    smax: float, optional
-        Maximum constraint on the slew rates in T/m/ms.
-        The default is `DEFAULT_SMAX`.
+    acq: Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
     constraint_order: int, str, optional
         Norm order defining how the constraints are checked,
         typically 2 or `np.inf`, following the `numpy.linalg.norm`
         conventions on parameter `ord`.
         The default is None.
-    raster_time: float, optional
-        Amount of time between the acquisition of two
-        consecutive samples in ms.
-        The default is `DEFAULT_RASTER_TIME`.
-    **constraints_kwargs
-        Acquisition parameters used to check on hardware constraints,
-        following the parameter convention from
-        `mrinufft.trajectories.utils.compute_gradients_and_slew_rates`.
 
     Returns
     -------
     axes : plt.Axes
         Axes of the figure.
     """
+    acq = acq or Acquisition.default
+
     # Initialize figure with a simpler version
     axes = display_gradients_simply(
         trajectory,
         shot_ids,
         figsize,
         fill_area,
-        show_signal,
+        show_norm,
         uni_signal,
         uni_gradient,
         subfigure,
@@ -633,7 +622,7 @@ def display_gradients(
             fontsize=displayConfig.small_fontsize,
         )
     axes[-1].set_xlabel("Time (ms)", fontsize=displayConfig.small_fontsize)
-    if show_signal:
+    if show_norm:
         axes[-1].set_ylabel("Signal (a.u.)", fontsize=displayConfig.small_fontsize)
 
     # Update axis ticks with rescaled values
@@ -642,7 +631,7 @@ def display_gradients(
         if ax == axes[-1]:
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
-            scale = (0.1 if (show_signal and ax == axes[-1]) else 1) * raster_time
+            scale = (0.1 if (show_norm and ax == axes[-1]) else 1) * acq.raster_time
             locator = mticker.FixedLocator(ticks)
             formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
             ax.xaxis.set_major_locator(locator)
@@ -656,14 +645,15 @@ def display_gradients(
         norms = np.where(norms != 0, norms, 1)
         scale = (
             convert_trajectory_to_gradients(
-                trajectory[:1, :2], raster_time=raster_time, **constraints_kwargs
+                trajectory[:1, :2],
+                raster_time=acq.raster_time,
             )[0][0, 0, idx]
             / norms
         )
         scale = 1e3 * scale  # Convert from T/m to mT/m
         locator = mticker.FixedLocator(ticks)
         formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
-        if not show_signal or ax != axes[-1]:
+        if not show_norm or ax != axes[-1]:
             ax.yaxis.set_major_locator(locator)
             ax.yaxis.set_major_formatter(formatter)
 
@@ -673,7 +663,7 @@ def display_gradients(
 
     # Compute true gradients and slew rates
     gradients, slewrates = compute_gradients_and_slew_rates(
-        trajectory[shot_ids, :], **constraints_kwargs
+        trajectory[shot_ids, :], acq=acq
     )
     gradients = np.linalg.norm(gradients, axis=-1, ord=constraints_order)
     slewrates = np.linalg.norm(slewrates, axis=-1, ord=constraints_order)
@@ -681,14 +671,14 @@ def display_gradients(
 
     # Point out hardware constraint violations
     for ax in axes[:Nd]:
-        pts = np.where(gradients > gmax)
+        pts = np.where(gradients > acq.gmax)
         ax.scatter(
             pts,
             np.zeros_like(pts),
             color=displayConfig.gradient_point_color,
             s=displayConfig.pointsize,
         )
-        pts = np.where(slewrates > smax)
+        pts = np.where(slewrates > acq.smax)
         ax.scatter(
             pts,
             np.zeros_like(pts),

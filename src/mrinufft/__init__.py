@@ -10,7 +10,6 @@ from .operators import (
     get_operator,
     check_backend,
     list_backends,
-    get_interpolators_from_fieldmap,
 )
 
 from .trajectories import (
@@ -66,6 +65,8 @@ from .trajectories import (
     displayConfig,
     display_2D_trajectory,
     display_3D_trajectory,
+    display_gradients,
+    display_gradients_simply,
 )
 
 from .density import voronoi, cell_count, pipe, get_density
@@ -75,7 +76,6 @@ __all__ = [
     "get_operator",
     "check_backend",
     "list_backends",
-    "get_interpolators_from_fieldmap",
     "voronoi",
     "cell_count",
     "pipe",
@@ -98,7 +98,6 @@ __all__ = [
     "initialize_3D_golden_means_radial",
     "initialize_3D_wong_radial",
     "initialize_3D_park_radial",
-    "initialize_3D_from_2D_expansion",
     "initialize_3D_cones",
     "initialize_3D_floret",
     "initialize_3D_wave_caipi",
@@ -121,7 +120,6 @@ __all__ = [
     "shellify",
     "duplicate_along_axes",
     "radialize_center",
-    "patch_center_anomaly",
     "oversample",
     # densities
     "sample_from_density",
@@ -134,6 +132,8 @@ __all__ = [
     "displayConfig",
     "display_2D_trajectory",
     "display_3D_trajectory",
+    "display_gradients",
+    "display_gradients_simply",
 ]
 
 from importlib.metadata import version, PackageNotFoundError

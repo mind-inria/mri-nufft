@@ -1,60 +1,42 @@
 """General utility functions for MRI-NUFFT."""
 
 import warnings
+from inspect import cleandoc
 from collections import defaultdict
+from collections.abc import Callable
 from functools import wraps
+
 import numpy as np
-from numpy.typing import DTypeLike
+from numpy.typing import DTypeLike, NDArray
+
+from mrinufft._array_compat import get_array_module
 
 
-ARRAY_LIBS = {
-    "numpy": (np, np.ndarray),
-    "cupy": (None, None),
-    "torch": (None, None),
-    "tensorflow": (None, None),
-}
-try:
-    import cupy
-
-    ARRAY_LIBS["cupy"] = (cupy, cupy.ndarray)
-except ImportError:
-    pass
-try:
-    import torch
-
-    ARRAY_LIBS["torch"] = (torch, torch.Tensor)
-except ImportError:
-    pass
-    NP2TORCH = {}
-else:
-    NP2TORCH = {
-        np.dtype("float64"): torch.float64,
-        np.dtype("float32"): torch.float32,
-        np.dtype("complex64"): torch.complex64,
-        np.dtype("complex128"): torch.complex128,
-    }
-try:
-    from tensorflow.experimental import numpy as tnp
-
-    ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
-except ImportError:
-    pass
+def check_error(ier, message):  # noqa: D103
+    if ier != 0:
+        raise RuntimeError(message)
 
 
-def get_array_module(array):
-    """Get the module of the array."""
-    for lib, array_type in ARRAY_LIBS.values():
-        if lib is not None and isinstance(array, array_type):
-            return lib
-    raise ValueError(f"Unknown array library (={type(array)}.")
+def sizeof_fmt(num, suffix="B"):
+    """
+    Return a number as a XiB format.
 
+    Parameters
+    ----------
+    num: int
+        The number to format
+    suffix: str, default "B"
+        The unit suffix
 
-def auto_cast(array, dtype: DTypeLike):
-    module = get_array_module(array)
-    if module.__name__ == "torch":
-        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
-    else:
-        return array.astype(dtype, copy=False)
+    References
+    ----------
+    https://stackoverflow.com/a/1094933
+    """
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
 
 
 def proper_trajectory(trajectory, normalize="pi"):
@@ -106,55 +88,6 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
-def power_method(max_iter, operator, norm_func=None, x=None):
-    """Power method to find the Lipschitz constant of an operator.
-
-    Parameters
-    ----------
-    max_iter: int
-        Maximum number of iterations
-    operator: FourierOperatorBase or child class
-        NUFFT Operator of which to estimate the lipchitz constant.
-    norm_func: callable, optional
-        Function to compute the norm , by default np.linalg.norm.
-        Change this if you want custom norm, or for computing on GPU.
-    x: array_like, optional
-        Initial value to use, by default a random numpy array is used.
-
-    Returns
-    -------
-    float
-        The lipschitz constant of the operator.
-    """
-
-    def AHA(x):
-        return operator.adj_op(operator.op(x))
-
-    if norm_func is None:
-        norm_func = np.linalg.norm
-    if x is None:
-        x = np.random.random(operator.shape).astype(operator.cpx_dtype)
-    x_norm = norm_func(x)
-    x /= x_norm
-    for i in range(max_iter):  # noqa: B007
-        x_new = AHA(x)
-        x_new_norm = norm_func(x_new)
-        x_new /= x_new_norm
-        if abs(x_norm - x_new_norm) < 1e-6:
-            break
-        x_norm = x_new_norm
-        x = x_new
-
-    if i == max_iter - 1:
-        warnings.warn("Lipschitz constant did not converge")
-
-    if hasattr(x_new_norm, "__cuda_array_interface__"):
-        import cupy as cp
-
-        x_new_norm = cp.asarray(x_new_norm).get().item()
-    return x_new_norm
-
-
 class MethodRegister:
     """
     A Decorator to register methods of the same type in dictionnaries.
@@ -162,25 +95,33 @@ class MethodRegister:
     Parameters
     ----------
     name: str
-        The  register
+        The  register name
+    docstring_sub: dict[str,str]
+        List of potential subsititutions to apply to the docstring.
     """
 
     registry = defaultdict(dict)
 
-    def __init__(self, register_name):
+    def __init__(
+        self, register_name: str, docstring_subs: dict[str, str] | None = None
+    ):
         self.register_name = register_name
+        self.docstring_subs = docstring_subs
 
     def __call__(self, method_name=None):
-        """Register the function in the registry."""
+        """Register the function in the registry.
+
+        It also substitute placeholder in docstrings.
+        """
 
         def decorator(func):
             self.registry[self.register_name][method_name] = func
-
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
-
-            return wrapper
+            if self.docstring_subs is not None and func.__doc__:
+                docstring = cleandoc(func.__doc__)
+                for key, sub in self.docstring_subs.items():
+                    docstring = docstring.replace(f"${{{key}}}", sub)
+                func.__doc__ = docstring
+            return func
 
         if callable(method_name):
             func = method_name
@@ -188,3 +129,22 @@ class MethodRegister:
             return decorator(func)
         else:
             return decorator
+
+    def make_getter(self) -> Callable:
+        def getter(method_name, *args, **kwargs):
+            try:
+                method = self.registry[self.register_name][method_name]
+            except KeyError as e:
+                raise ValueError(
+                    f"Unknown {self.register_name} method {method_name}."
+                    " Available methods are \n"
+                    f"{list(self.registry[self.register_name].keys())}"
+                ) from e
+
+            if args or kwargs:
+                return method(*args, **kwargs)
+            return method
+
+        getter.__doc__ = f"""Get the {self.register_name} function from its name."""
+        getter.__name__ = f"get_{self.register_name}"
+        return getter

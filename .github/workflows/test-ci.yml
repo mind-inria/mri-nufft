@@ -18,7 +18,7 @@ env:
   ref_backend: "finufft"
   create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
   activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
-  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda-12.1/;export PATH=/usr/local/cuda-12.1/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64/:${LD_LIBRARY_PATH}"
+  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
   test-cpu:
@@ -105,9 +105,7 @@ jobs:
         shell: bash
         run: |
           source $RUNNER_WORKSPACE/venv/bin/activate
-          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
-          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
+          ${{ env.setup_cuda }}
           pip install -e .[${{ matrix.backend }},autodiff]
 
       - name: Run Tests
@@ -147,10 +145,10 @@ jobs:
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
           python -m pip install --upgrade pip wheel
-          python -m pip install -e .[test]
+          python -m pip install -e .[test,extra]
           python -m pip install cupy-cuda12x finufft "numpy<2.0"
 
-      - name: Install torch with CUDA 12.1
+      - name: Install torch with CUDA 12.x
         shell: bash
         run: |
           ${{ env.activate_venv }}
@@ -231,7 +229,7 @@ jobs:
           ${{ env.activate_venv }}
           ${{ env.setup_cuda }}
           python -m pip install --upgrade pip
-          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,smaps,autodiff,doc]
+          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc]
         
       - name: Run examples
         shell: bash
@@ -316,82 +314,3 @@ jobs:
           name: coverage_badge
           path: coverage_badge.svg
 
-  BuildDocs:
-    name: Build API Documentation
-    runs-on: gpu
-    needs: get-commit-message
-    if: ${{ contains(needs.get-commit-message.outputs.message, '[docs]') || github.ref == 'refs/heads/master' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Get history and tags for SCM versioning to work
-        run: |
-          git fetch --prune --unshallow
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-        
-      - name: Point to CUDA 12.4
-        run: |
-          export CUDA_BIN_PATH=/usr/local/cuda-12.4/
-          export PATH=/usr/local/cuda-12.4/bin/:${PATH}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64/:${LD_LIBRARY_PATH}
-      
-      - name: Install dependencies
-        shell: bash -l {0}
-        run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip
-          python -m pip install .[doc,finufft,autodiff,gpunufft,cufinufft,sigpy,extra] fastmri
-      
-          
-      - name: Build API documentation
-        run: |
-          ${{ env.activate_venv }}
-          export MRINUFFT_BACKEND=cufinufft
-          python -m sphinx docs docs_build
-
-      - name: Display data
-        run: ls -R
-        working-directory: docs_build/_static
-
-      - name: Upload artifact
-        id: artifact-upload-step
-        uses: actions/upload-artifact@v4
-        with:
-          # Upload the docs
-          name: docs
-          path: 'docs_build'
-          retention-days: 5
-
-  CompileDocs:
-    name: Compile the coverage badge in docs
-    runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
-    needs: [BuildDocs, coverage]
-    steps:
-      - name: Get the docs_build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docs
-          path: docs_build
-          overwrite: true
-
-      - name: Get the badge from CI
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage_badge
-          path: docs_build/_static
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: ReUpload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs_final
-          retention-days: 20
-          path: docs_build

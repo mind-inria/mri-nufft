@@ -3,10 +3,8 @@
 import numpy as np
 
 from mrinufft import get_density, get_operator
-from mrinufft.density.utils import flat_traj
 from mrinufft.trajectories.utils import (
-    DEFAULT_RASTER_TIME,
-    KMAX,
+    Acquisition,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
 )
@@ -14,11 +12,10 @@ from mrinufft.trajectories.utils import (
 
 def get_gridded_trajectory(
     trajectory: np.ndarray,
-    shape: tuple,
+    acq: Acquisition | None = None,
     grid_type: str = "density",
     osf: int = 1,
     backend: str = "gpunufft",
-    traj_params: dict = None,
     turbo_factor: int = 176,
     elliptical_samp: bool = True,
     threshold: float = 1e-3,
@@ -39,8 +36,9 @@ def get_gridded_trajectory(
     trajectory : ndarray
         The input array of shape (N, M, D), where N is the number of shots and M is the
         number of samples per shot and D is the dimension of the trajectory (usually 3)
-    shape : tuple
-        The desired shape of the gridded trajectory.
+    acq : Acquisition, optional
+        Acquisition configuration to use for normalization.
+        If `None`, the default acquisition is used.
     grid_type : str, optional
         The type of gridded trajectory to compute. Default is "density".
         It can be one of the following:
@@ -63,12 +61,6 @@ def get_gridded_trajectory(
     backend : str, optional
         The backend to use for gridding. Default is "gpunufft".
         Note that "gpunufft" is anyway used to get the `pipe` density internally.
-    traj_params : dict, optional
-        The trajectory parameters. Default is None.
-        This is only needed when `grid_type` is "gradients" or "slew".
-        The parameters needed include `img_size` (tuple), `FOV` (tuple in `m`),
-        and `gamma` (float in kHz/T) of the sequence.
-        Generally these values are stored in the header of the trajectory file.
     turbo_factor : int, optional
         The turbo factor when sampling is with inversion. Default is 176, which is
         the default turbo factor for MPRAGE acquisitions at 1mm whole
@@ -88,6 +80,7 @@ def get_gridded_trajectory(
     ndarray
         The gridded trajectory of shape `shape`.
     """
+    shape = acq.img_size
     samples = trajectory.reshape(-1, trajectory.shape[-1])
     dcomp = get_density("pipe")(trajectory, shape, backend=backend)
     gridder = get_operator(backend)(
@@ -157,20 +150,16 @@ def get_gridded_trajectory(
                 > 1
             ] = 0
     elif grid_type in ["gradients", "slew"]:
-        gradients, initial_position = convert_trajectory_to_gradients(
+        gradients, _ = convert_trajectory_to_gradients(
             trajectory,
-            norm_factor=KMAX,
-            resolution=np.asarray(traj_params["FOV"])
-            / np.asarray(traj_params["img_size"]),
-            raster_time=DEFAULT_RASTER_TIME,
-            gamma=traj_params["gamma"],
+            acq,
         )
         if grid_type == "gradients":
             data = np.hstack(
                 [gradients, np.zeros((gradients.shape[0], 1, gradients.shape[2]))]
             )
         else:
-            slews, _ = convert_gradients_to_slew_rates(gradients, DEFAULT_RASTER_TIME)
+            slews, _ = convert_gradients_to_slew_rates(gradients, acq)
             data = np.hstack([slews, np.zeros((slews.shape[0], 2, slews.shape[2]))])
         data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten()) / (
             gridded_ones + np.finfo(np.float32).eps
