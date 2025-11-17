@@ -416,7 +416,7 @@ class FourierOperatorBase(ABC):
         autograd_nufft = MRINufftAutoGrad(
             self, *args, **kwargs
         )
-        return DeepInvPhyNufft(self, autograd_nufft)
+        return DeepInvPhyNufft(autograd_nufft)
 
     def make_autograd(
         self,
@@ -485,7 +485,7 @@ class FourierOperatorBase(ABC):
         and `torchkbnufft-gpu`.
         """
         if is_host_array(method) or (CUPY_AVAILABLE and is_cuda_array(method)):
-            self.density = method
+            self._density = method
             return None
         if not method:
             self._density = None

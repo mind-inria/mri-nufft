@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from .._array_compat import NP2TORCH
 from torch.types import Tensor
+from deepinv.physics.forward import LinearPhysics
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -150,11 +151,10 @@ class MRINufftAutoGrad(torch.nn.Module):
         wrt_traj: bool = False,
         paired_batch: bool = False,
     ):
-        super().__init__()
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not supported for autodiff.")
 
-        self.nufft_op = nufft_op
+        object.__setattr__(self, "nufft_op", nufft_op)
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
             self.nufft_op._make_plan_grad()
@@ -165,7 +165,8 @@ class MRINufftAutoGrad(torch.nn.Module):
             # used for update also.
             self._samples_torch = torch.Tensor(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
-        self.paired_batch = paired_batch
+        object.__setattr__(self, "paired_batch", paired_batch)
+        super().__init__()
 
     def op(self, x, smaps=None, samples=None):
         r"""Compute the forward image -> k-space.
@@ -293,9 +294,21 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op.samples = value.detach().cpu().numpy()
 
     def __getattr__(self, name):
-        """Forward all other attributes to the nufft_op."""
-        return getattr(self.nufft_op, name)
-
+        # only called if attribute not found normally
+        nufft = object.__getattribute__(self, "nufft_op")
+        if hasattr(nufft, name):
+            return getattr(nufft, name)
+        raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
+    
+    
+    def __setattr__(self, name, value):
+        # internal attributes (adapter/LinearPhysics) go to self
+        try:
+            nufft = object.__getattribute__(self, "nufft_op")
+            setattr(nufft, name, value)
+        except AttributeError:
+            object.__setattr__(self, name, value)
+        
     def _check_input_shape(
         self, *, imgs=None, kspace=None, smaps=None, samples=None
     ) -> bool:
@@ -336,3 +349,41 @@ class MRINufftAutoGrad(torch.nn.Module):
             )
 
         return True
+
+class DeepInvPhyNufft(LinearPhysics):
+    """
+    Thin adapter that exposes an MRINufftAutoGrad instance
+    as a DeepInv LinearPhysics operator.
+    """
+
+    def __init__(self, nufft_op):
+        object.__setattr__(self, "nufft_op", nufft_op)
+        super().__init__()
+        
+        
+    # ---- Core operators ----
+    def A(self, x, **kwargs):
+        return self.nufft_op.op(x, **kwargs)
+
+    def A_adjoint(self, y, **kwargs):
+        return self.nufft_op.adj_op(y, **kwargs)
+
+    def A_dagger(self, y, **kwargs):
+        return self.pinv_solver(y, **kwargs)
+
+    def __getattr__(self, name):
+        # only called if attribute not found normally
+        nufft = object.__getattribute__(self, "nufft_op")
+        if hasattr(nufft, name):
+            return getattr(nufft, name)
+        raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
+    
+    
+    def __setattr__(self, name, value):
+        # internal attributes (adapter/LinearPhysics) go to self
+        try:
+            nufft = object.__getattribute__(self, "nufft_op")
+            setattr(nufft, name, value)
+        except AttributeError:
+            object.__setattr__(self, name, value)
+            
