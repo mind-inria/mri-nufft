@@ -4,13 +4,14 @@
 """
 
 from collections.abc import Callable
-import numpy as np
-from tqdm.auto import tqdm
-from numpy.typing import NDArray
 
-from mrinufft._array_compat import get_array_module, with_numpy_cupy, CUPY_AVAILABLE
+import numpy as np
+from numpy.typing import NDArray
+from tqdm.auto import tqdm
+
+from mrinufft._array_compat import CUPY_AVAILABLE, get_array_module, with_numpy_cupy
+from mrinufft._utils import MethodRegister, _progressbar
 from mrinufft.operators.base import FourierOperatorBase
-from mrinufft._utils import MethodRegister
 
 _optim_docs = dict(
     base_params=r"""
@@ -237,7 +238,7 @@ def lsqr(
     x0: NDArray | None = None,
     x_init: NDArray | None = None,
     callback: Callable | None = None,
-    progressbar: bool = True,
+    progressbar: bool | tqdm = True,
 ):
     r"""
     Solve a general regularized linear least-squares problem using the LSQR algorithm.
@@ -335,7 +336,8 @@ def lsqr(
     sn2 = 0.0
     istop = 0
     callback_returns = []
-    for _ in tqdm(range(max_iter), disable=not progressbar):
+    progressbar = _progressbar(progressbar, max_iter)
+    for _ in range(max_iter):
         u *= -_bc_left(alpha, u)
         u += operator.op(v).reshape(operator.ksp_full_shape)
         beta = norm_batched(u)
@@ -450,6 +452,7 @@ def lsqr(
 
         if istop:
             break
+        progressbar.update()
     if operator.squeeze_dims:
         x = operator._safe_squeeze(x)
     if callback_returns:
@@ -470,7 +473,7 @@ def lsmr(
     x0: NDArray | None = None,
     x_init: NDArray | None = None,
     callback: Callable | None = None,
-    progressbar: bool = True,
+    progressbar: bool | tqdm = True,
 ):
     r"""
     Solve a general regularized linear least-squares problem using the LSMR algorithm.
@@ -615,7 +618,8 @@ def lsmr(
     normr = beta
 
     callback_returns = []
-    for _ in tqdm(range(max_iter), disable=not progressbar):
+    progressbar = _progressbar(progressbar, max_iter)
+    for _ in range(max_iter):
 
         u *= -_bc_left(alpha, u)
         u += A(v)
@@ -738,6 +742,7 @@ def lsmr(
 
         if istop:
             break
+        progressbar.update()
 
     if operator.squeeze_dims:
         x = operator._safe_squeeze(x)
@@ -756,7 +761,7 @@ def cg(
     x_init: NDArray | None = None,
     max_iter: int = 10,
     tol: float = 1e-4,
-    progressbar: bool = True,
+    progressbar: bool | tqdm = True,
     callback: Callable | None = None,
 ):
     r"""
@@ -801,7 +806,8 @@ def cg(
     image = image - velocity
 
     callbacks_results = []
-    for _ in tqdm(range(max_iter), disable=not progressbar):
+    progressbar = _progressbar(progressbar, max_iter)
+    for _ in range(max_iter):
         grad_new = operator.data_consistency(image, kspace_data).reshape(
             operator.img_full_shape
         )
@@ -831,6 +837,7 @@ def cg(
                     x0=x0,
                 )
             )
+        progressbar.update()
     if operator.squeeze_dims:
         image = operator._safe_squeeze(image)
 

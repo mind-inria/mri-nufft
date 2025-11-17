@@ -5,6 +5,7 @@ from inspect import cleandoc
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
+from tqdm.auto import tqdm
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
@@ -164,3 +165,14 @@ class MethodRegister:
         getter.__doc__ = f"""Get the {self.register_name} function from its name."""
         getter.__name__ = f"get_{self.register_name}"
         return getter
+
+
+def _progressbar(progressbar: bool | tqdm, max_iter: int) -> tqdm:
+    """Set progressbar for iterations."""
+    if isinstance(progressbar, tqdm):
+        progressbar.reset(max_iter)
+    elif isinstance(progressbar, bool):
+        progressbar = tqdm(range(max_iter), disable=not progressbar)
+    else:
+        raise ValueError("progressbar must be bool or tqdm instance")
+    return progressbar

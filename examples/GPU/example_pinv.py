@@ -12,7 +12,7 @@ methods, to reconstruct images from non-uniform k-space data.
 
 import os
 import time
-
+from tqdm.auto import tqdm
 import cupy as cp
 import numpy as np
 from brainweb_dl import get_mri
@@ -86,15 +86,18 @@ METRICS = {
     "psnr": "PSNR",
 }
 
+MAX_ITER = 1000
 
 images = dict()
 iterations_cb = dict()
+pg = tqdm(total=MAX_ITER, position=0, leave=True)
 for optim in OPTIM:
     image, iter_cb = nufft.pinv_solver(
         kspace_data=kspace_data_gpu,
-        max_iter=1000,
+        max_iter=MAX_ITER,
         callback=mixed_cb,
         optim=optim,
+        progressbar=pg,
     )
     images[optim] = image.get().squeeze()  # retrieve image from GPU.
     iterations_cb[optim] = process_cb_results(iter_cb)
@@ -171,6 +174,8 @@ plt.show()
 
 images = dict()
 iterations_cb = dict()
+
+pg = tqdm(total=MAX_ITER, position=0, leave=True)
 for optim in OPTIM:
     image, iter_cb = nufft.pinv_solver(
         kspace_data=kspace_data_gpu,
@@ -178,6 +183,7 @@ for optim in OPTIM:
         callback=mixed_cb,
         damp=0.1,
         optim=optim,
+        progressbar=pg,
     )
     images[optim] = image.get().squeeze()  # retrieve image from GPU.
     iterations_cb[optim] = process_cb_results(iter_cb)
