@@ -447,10 +447,10 @@ def _optimize_grad_dimless(
     gs_max = gs[idx_max]
 
     # Lower bound: Assuming maximum gradient all the time
-    low = int(abs(deltak_max) / gmax) + 1
+    low = (abs(deltak_max) / gmax).astype('int') + 1
     # Upper bound: Lower bound + time to go back and forth at max slew rates
     high = low + 2 * int(gmax / smax)
-    high = min(high, N_max)
+    high = np.min([high, np.ones_like(high)*N_max], axis=0)
 
     x, N = _binary_search_int(
         partial(solver, deltak=deltak_max, gmax=gmax, smax=smax, gs=gs_max, ge=ge_max),
@@ -476,13 +476,37 @@ def _optimize_grad_dimless(
         final[:, idx] = x
     return final
 
+def _set_defaults_gradient_calc(
+    kspace_end_loc: NDArray,
+    kspace_start_loc: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+) -> tuple[NDArray, NDArray, NDArray, NDArray]:
+    kspace_end_loc = np.atleast_2d(kspace_end_loc)
+    if kspace_start_loc is None:
+        kspace_start_loc = np.zeros_like(kspace_end_loc)
+    if start_gradients is None:
+        start_gradients = np.zeros_like(kspace_end_loc)
+    if end_gradients is None:
+        end_gradients = np.zeros_like(kspace_end_loc)
+    kspace_start_loc = np.atleast_2d(kspace_start_loc)
+    start_gradients = np.atleast_2d(start_gradients)
+    end_gradients = np.atleast_2d(end_gradients)
+    assert (
+        kspace_start_loc.shape
+        == kspace_end_loc.shape
+        == start_gradients.shape
+        == end_gradients.shape
+    ), "All input arrays must have shape (nb_shots, nb_dimension)"
+    return kspace_end_loc, kspace_start_loc, start_gradients, end_gradients
+
 
 def optimize_grad(
-    ks: NDArray,
-    ke: NDArray,
-    gs: NDArray,
-    ge: NDArray,
-    acq: Acquisition,
+    kspace_end_loc: NDArray,
+    kspace_start_loc: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+    acq: Acquisition | None = None,
     N: int | None = None,
     method="lp",
 ) -> NDArray:
@@ -524,10 +548,14 @@ def optimize_grad(
     The optimization is performed independently for each dimension (x, y, z)
     using the `solve_lp_1d` function.
     """
-    deltak = (ke - ks) / acq.raster_time / acq.gamma
+    acq = acq or Acquisition.default
+    kspace_end_loc, kspace_start_loc, start_gradients, end_gradients = _set_defaults_gradient_calc(
+        kspace_end_loc, kspace_start_loc, end_gradients, start_gradients
+    )
+    deltak = (kspace_end_loc - kspace_start_loc) / acq.raster_time / acq.gamma
     if N is None:  # Auto find the best connection
         return _optimize_grad_dimless(
-            deltak, acq.gmax, acq.smax * acq.raster_time, gs, ge, method=method
+            deltak, acq.gmax, acq.smax * acq.raster_time, start_gradients, end_gradients, method=method
         )
 
     res = []
@@ -537,9 +565,9 @@ def optimize_grad(
             raise ValueError("osqp is not availble. install it with `pip install osqp`")
         solver = _solve_qp_osqp
 
-    for i in range(len(ks)):
+    for i in range(len(kspace_start_loc)):
         res.append(
-            solver(N, deltak[i], acq.gmax, acq.smax * acq.raster_time, gs[i], ge[i])
+            solver(N, deltak[i], acq.gmax, acq.smax * acq.raster_time, start_gradients[i], end_gradients[i])
         )
 
     # now try to reduce the slew rate to smooth the waveform
@@ -552,7 +580,7 @@ def optimize_grad(
             min_smax = 0.01 * orig_smax
             while (max_smax - min_smax) / min_smax >= 0.1:
                 smax = min_smax + (max_smax - min_smax) * 0.8
-                x, success = solver(N, deltak[idx], gmax, smax, gs[idx], ge[idx])
+                x, success = solver(N, deltak[idx], gmax, smax, start_gradients[idx], end_gradients[idx])
                 if success:
                     max_smax = smax
                     best = x

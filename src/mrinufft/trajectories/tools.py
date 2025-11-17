@@ -11,6 +11,7 @@ import inspect
 from functools import wraps
 from scipy.optimize import minimize_scalar
 from joblib import Parallel, delayed
+from .gradients import optimize_grad
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import (
@@ -381,178 +382,6 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory[:, readout_mask, :]
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
-
-
-def _set_defaults_gradient_calc(
-    kspace_end_loc: NDArray,
-    kspace_start_loc: Optional[NDArray] = None,
-    end_gradients: Optional[NDArray] = None,
-    start_gradients: Optional[NDArray] = None,
-):
-    kspace_end_loc = np.atleast_2d(kspace_end_loc)
-    if kspace_start_loc is None:
-        kspace_start_loc = np.zeros_like(kspace_end_loc)
-    if start_gradients is None:
-        start_gradients = np.zeros_like(kspace_end_loc)
-    if end_gradients is None:
-        end_gradients = np.zeros_like(kspace_end_loc)
-    kspace_start_loc = np.atleast_2d(kspace_start_loc)
-    start_gradients = np.atleast_2d(start_gradients)
-    end_gradients = np.atleast_2d(end_gradients)
-    assert (
-        kspace_start_loc.shape
-        == kspace_end_loc.shape
-        == start_gradients.shape
-        == end_gradients.shape
-    ), "All input arrays must have shape (nb_shots, nb_dimension)"
-    return kspace_end_loc, kspace_start_loc, start_gradients, end_gradients
-
-
-def _trapezoidal_area(gs, ge, gi, n_down, n_up, n_pl):
-    """Calculate the area traversed by the trapezoidal gradient waveform."""
-    return 0.5 * (gs + gi) * (n_down + 1) + 0.5 * (ge + gi) * (n_up - 1) + n_pl * gi
-
-
-def _trapezoidal_plateau_length(
-    gs, ge, gi, n_down, n_up, area_needed, ceil=False, buffer=0
-):
-    """Calculate the plateau length of the trapezoidal gradient waveform."""
-    n_pl = (
-        0.5
-        * (2 * area_needed - gs * (n_down + 1) - ge * (n_up - 1) + gi * (n_down + n_up))
-        / (gi + np.finfo(gi.dtype).eps)
-    )
-    if ceil:
-        n_pl = np.ceil(n_pl).astype(int)
-    return n_pl + buffer
-
-
-def _trapezoidal_ramps(gs, ge, gi, smax, raster_time, ceil=False, buffer=0):
-    """Calculate the number of time steps for the ramp down and up."""
-    n_ramp_down = np.abs(gi - gs) / (smax * raster_time)
-    n_ramp_up = np.abs(ge - gi) / (smax * raster_time)
-    if ceil:
-        n_ramp_down = np.ceil(n_ramp_down).astype(int)
-        n_ramp_up = np.ceil(n_ramp_up).astype(int)
-    return n_ramp_down + buffer, n_ramp_up + buffer
-
-
-def _plateau_value(gs, ge, n_down, n_up, n_pl, area_needed):
-    """Calculate the  value of the plateau of a trapezoidal gradient waveform."""
-    return (2 * area_needed - (n_down + 1) * gs - (n_up - 1) * ge) / (
-        n_down + n_up + 2 * n_pl
-    )
-
-
-def get_gradient_times_to_travel(
-    kspace_end_loc: NDArray,
-    kspace_start_loc: Optional[NDArray] = None,
-    end_gradients: Optional[NDArray] = None,
-    start_gradients: Optional[NDArray] = None,
-    kspace_end_loc: NDArray | None = None,
-    kspace_start_loc: NDArray | None = None,
-    end_gradients: NDArray | None = None,
-    start_gradients: NDArray | None = None,
-    acq: Acquisition | None = None,
-    n_jobs: int = 1,
-) -> tuple[NDArray, NDArray, NDArray, NDArray]:
-    """Get gradient timing values for trapezoidal or triangular waveforms.
-
-    Compute gradient timing values to take k-space trajectories
-    from position ``ks`` with gradient ``gs`` to position ``ke`` with gradient
-    ``ge``, while being hardware compliant.
-    This function calculates the minimal number of time steps required for
-    the ramp down, ramp up, and plateau phases of the gradient waveform,
-    ensuring that the area traversed in k-space matches the desired
-    trajectory while adhering to the maximum gradient amplitude and
-    slew rate constraints.
-
-    Parameters
-    ----------
-    kspace_end_loc : NDArray
-        Ending k-space positions, shape (nb_shots, nb_dimension).
-    kspace_start_loc : NDArray, default None when it is 0
-        Starting k-space positions, shape (nb_shots, nb_dimension).
-    end_gradients : NDArray, default None when it is 0
-        Ending gradient values, shape (nb_shots, nb_dimension).
-    start_gradients : NDArray, default None when it is 0
-        Starting gradient values, shape (nb_shots, nb_dimension).
-    acq : Acquisition, optional
-        Acquisition configuration to use.
-        If `None`, the default acquisition is used.
-    n_jobs : int, optional
-        Number of parallel jobs to run for optimization, by default 1.
-
-    Returns
-    -------
-    n_ramp_down: The timing values for the ramp down phase.
-    n_ramp_up: The timing values for the ramp up phase.
-    n_plateau: The timing values for the plateau phase.
-    gi: The intermediate gradient values for trapezoidal or triangular waveforms.
-
-    See Also
-    --------
-    get_gradient_amplitudes_to_travel_for_set_time :
-        To directly get the waveforms required. This is most-likely what
-        you want to use.
-    """
-    acq = acq or Acquisition.default
-    kspace_end_loc, kspace_start_loc, start_gradients, end_gradients = (
-        _set_defaults_gradient_calc(
-            kspace_end_loc,
-            kspace_start_loc,
-            end_gradients,
-            start_gradients,
-        )
-    )
-    area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time
-
-    def solve_gi_min_plateau(gs, ge, area):
-        def _residual(gi):
-            n_down, n_up = _trapezoidal_ramps(gs, ge, gi, acq.smax, acq.raster_time)
-            n_pl = _trapezoidal_plateau_length(gs, ge, gi, n_down, n_up, area)
-            if n_pl < 0:
-                return np.abs(n_pl) * 10000  # Penalize negative plateau
-            return n_pl * 100  # Penalize large plateau
-
-        res = minimize_scalar(
-            _residual,
-            bounds=(-acq.gmax, acq.gmax),
-            method="bounded",
-        )
-        if not res.success:
-            raise RuntimeError(f"Minimization failed: {res.message}")
-        return res.x
-
-    gi = Parallel(n_jobs=n_jobs)(
-        delayed(solve_gi_min_plateau)(
-            start_gradients[i, j],
-            end_gradients[i, j],
-            area_needed[i, j],
-        )
-        for i in range(start_gradients.shape[0])
-        for j in range(start_gradients.shape[1])
-    )
-    gi = np.array(gi).reshape(start_gradients.shape)
-    n_ramp_down, n_ramp_up = _trapezoidal_ramps(
-        start_gradients,
-        end_gradients,
-        gi,
-        acq.smax,
-        acq.raster_time,
-        ceil=True,
-        buffer=1,
-    )
-    n_plateau = _trapezoidal_plateau_length(
-        start_gradients,
-        end_gradients,
-        gi,
-        n_ramp_down,
-        n_ramp_up,
-        area_needed,
-        ceil=True,
-    )
-    return n_ramp_down, n_ramp_up, n_plateau, gi
 
 
 def get_gradient_amplitudes_to_travel_for_set_time(
@@ -1293,52 +1122,42 @@ def _add_slew_ramp_to_traj_func(
     func: Callable,
     func_kwargs: dict,
     ramp_to_index: int,
-    resolution: float,
-    raster_time: float,
-    gamma: float,
-    smax: float,
-):
+    acq: Acquisition | None = None,    
+) -> NDArray:
     traj = func(**func_kwargs)
-    unnormalized_traj = unnormalize_trajectory(traj, resolution=resolution)
+    acq = acq or Acquisition.default
+    unnormalized_traj = unnormalize_trajectory(traj, acq=acq)
     gradients, initial_positions = convert_trajectory_to_gradients(
-        traj, resolution=resolution, raster_time=raster_time, gamma=gamma
+        traj, acq=acq
     )
     gradients_to_reach = gradients[:, ramp_to_index]
     # Calculate the number of time steps for ramps
-    n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
+    slew_grads = optimize_grad(
         kspace_end_loc=unnormalized_traj[:, ramp_to_index],
         end_gradients=gradients_to_reach,
-        gamma=gamma,
-        raster_time=raster_time,
-        smax=smax,
-        n_jobs=-1,  # Use all available cores
+        acq=acq,
     )
     # Update the Ns of the trajectory to ensure we still give
     # same Ns as users expect. We use extra 2 points as buffer.
-    n_slew_ramp = np.max(n_ramp_down + n_ramp_up + n_plateau)
+    n_slew_ramp = slew_grads.shape[1] + 2
     func_kwargs["Ns"] -= n_slew_ramp - ramp_to_index
     new_traj = func(**func_kwargs)
     # Re-calculate the gradients
-    unnormalized_traj = unnormalize_trajectory(new_traj, resolution=resolution)
+    unnormalized_traj = unnormalize_trajectory(new_traj, acq=acq)
     gradients, initial_positions = convert_trajectory_to_gradients(
-        new_traj, resolution=resolution, raster_time=raster_time, gamma=gamma
+        new_traj, acq=acq
     )
     gradients_to_reach = gradients[:, ramp_to_index]
-    ramp_up_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+    ramp_up_gradients = optimize_grad(
         kspace_end_loc=unnormalized_traj[:, ramp_to_index],
         end_gradients=gradients_to_reach,
-        nb_raster_points=n_slew_ramp,
-        gamma=gamma,
-        raster_time=raster_time,
-        smax=smax,
-        n_jobs=-1,  # Use all available core
+        N=n_slew_ramp,
+        acq=acq,
     )[:, :-1]
     ramp_up_traj = convert_gradients_to_trajectory(
         gradients=ramp_up_gradients,
         initial_positions=initial_positions,
-        resolution=resolution,
-        raster_time=raster_time,
-        gamma=gamma,
+        acq=acq,
     )
     return np.hstack([ramp_up_traj, new_traj[:, ramp_to_index:]])
 
@@ -1346,10 +1165,7 @@ def _add_slew_ramp_to_traj_func(
 def add_slew_ramp(
     func: Optional[Callable] = None,
     ramp_to_index: int = 5,
-    resolution: float | NDArray = DEFAULT_RESOLUTION,
-    raster_time: float = DEFAULT_RASTER_TIME,
-    gamma: float = Gammas.Hydrogen,
-    smax: float = DEFAULT_SMAX,
+    acq: Acquisition | None = None,
     slew_ramp_disable: bool = False,
 ) -> Callable:
     """Add slew-compatible ramps to a trajectory function.
@@ -1413,10 +1229,7 @@ def add_slew_ramp(
         def wrapped(*args, **kwargs) -> NDArray:
             # This allows users to also call the trajectory function
             # directly giving these args.
-            _smax = kwargs.pop("smax", smax)
-            _resolution = kwargs.pop("resolution", resolution)
-            _raster_time = kwargs.pop("raster_time", raster_time)
-            _gamma = kwargs.pop("gamma", gamma)
+            _acq = kwargs.pop("acq", acq)
             _ramp_to_index = kwargs.pop("ramp_to_index", ramp_to_index)
             _slew_ramp_disable = kwargs.pop("slew_ramp_disable", slew_ramp_disable)
             # Bind all args (positional and keyword)
@@ -1431,10 +1244,7 @@ def add_slew_ramp(
                 trajectory_func,
                 bound.arguments,
                 ramp_to_index=_ramp_to_index,
-                resolution=_resolution,
-                raster_time=_raster_time,
-                gamma=_gamma,
-                smax=_smax,
+                acq=_acq,
             )
 
         return wrapped
