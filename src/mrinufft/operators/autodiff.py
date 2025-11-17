@@ -299,8 +299,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         if hasattr(nufft, name):
             return getattr(nufft, name)
         raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
-    
-    
+
     def __setattr__(self, name, value):
         # internal attributes (adapter/LinearPhysics) go to self
         try:
@@ -308,7 +307,7 @@ class MRINufftAutoGrad(torch.nn.Module):
             setattr(nufft, name, value)
         except AttributeError:
             object.__setattr__(self, name, value)
-        
+
     def _check_input_shape(
         self, *, imgs=None, kspace=None, smaps=None, samples=None
     ) -> bool:
@@ -350,6 +349,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
         return True
 
+
 class DeepInvPhyNufft(LinearPhysics):
     """
     Thin adapter that exposes an MRINufftAutoGrad instance
@@ -359,8 +359,7 @@ class DeepInvPhyNufft(LinearPhysics):
     def __init__(self, nufft_op):
         object.__setattr__(self, "nufft_op", nufft_op)
         super().__init__()
-        
-        
+
     # ---- Core operators ----
     def A(self, x, **kwargs):
         return self.nufft_op.op(x, **kwargs)
@@ -377,8 +376,7 @@ class DeepInvPhyNufft(LinearPhysics):
         if hasattr(nufft, name):
             return getattr(nufft, name)
         raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
-    
-    
+
     def __setattr__(self, name, value):
         # internal attributes (adapter/LinearPhysics) go to self
         try:
@@ -386,4 +384,3 @@ class DeepInvPhyNufft(LinearPhysics):
             setattr(nufft, name, value)
         except AttributeError:
             object.__setattr__(self, name, value)
-            

@@ -65,6 +65,7 @@ except ImportError:
     DEEPINV_AVAILABLE = False
     pass
 
+
 def get_array_module(array: NDArray | Number) -> np:  # type: ignore
     """Get the module of the array."""
     if isinstance(array, Number | np.generic):

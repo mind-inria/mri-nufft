@@ -302,7 +302,6 @@ class MRICufiNUFFT(FourierOperatorBase):
             self._density = None
             return
         self.compute_density(new_density)
-        
 
     @with_numpy_cupy
     @nvtx_mark()

@@ -39,17 +39,22 @@ BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 # %%
 # Get MRI data, 3D FLORET trajectory, and simulate k-space data
-samples_loc = initialize_3D_cones(32*64, Ns=256, nb_zigzags=100)
+samples_loc = initialize_3D_cones(32 * 64, Ns=256, nb_zigzags=100)
 # Load and downsample MRI data for speed
-mri = torch.Tensor(np.ascontiguousarray(get_mri(0)[::2, ::2, ::2][::-1, ::-1])).to(torch.complex64).to("cuda")
+mri = (
+    torch.Tensor(np.ascontiguousarray(get_mri(0)[::2, ::2, ::2][::-1, ::-1]))
+    .to(torch.complex64)
+    .to("cuda")
+)
 
 # %%
 # Simulate k-space data
 fourier_op = get_operator(BACKEND)(
-    samples_loc, shape=mri.shape, 
+    samples_loc,
+    shape=mri.shape,
 )
 y = fourier_op.op(mri)  # Simulate k-space data
-noise_level =  y.abs().max().item() * 0.001
+noise_level = y.abs().max().item() * 0.001
 y_noisy = y + 0.01 * torch.randn_like(y) + 0.01j * torch.randn_like(y)
 
 physics = fourier_op.make_deepinv_phy(wrt_data=True)
@@ -65,7 +70,7 @@ wavelet = WaveletPrior(
 data_fidelity = L2()
 # Algorithm parameters
 lamb = 0.1
-stepsize = 0.8*float(1/fourier_op.get_lipschitz_cst().get())
+stepsize = 0.8 * float(1 / fourier_op.get_lipschitz_cst().get())
 params_algo = {"stepsize": stepsize, "lambda": lamb}
 max_iter = 100
 early_stop = True
@@ -80,9 +85,7 @@ model = optim_builder(
     params_algo=params_algo,
 )
 
-x_model, metrics = model(
-    y, physics, x_gt=torch.abs(mri), compute_metrics=True
-)
+x_model, metrics = model(y, physics, x_gt=torch.abs(mri), compute_metrics=True)
 
 
 x_model
