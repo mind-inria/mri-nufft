@@ -1,4 +1,7 @@
-"""Implements the LSQR algorithm."""
+"""Implements Optimization algorithms.
+
+.. autoregistry :: optimizer
+"""
 
 from collections.abc import Callable
 import numpy as np
@@ -42,7 +45,7 @@ NDArray:
 )
 
 
-register_optim = MethodRegister("optim", _optim_docs)
+register_optim = MethodRegister("optimizer", _optim_docs)
 get_optimizer = register_optim.make_getter()
 
 
@@ -776,6 +779,8 @@ def cg(
     https://en.m.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method
     """
     lipschitz_cst = operator.get_lipschitz_cst()
+    if operator.backend == "cufinufft":
+        lipschitz_cst = float(lipschitz_cst.get())
     xp = get_array_module(kspace_data)
     image = (
         xp.zeros(operator.img_full_shape, dtype=kspace_data.dtype)

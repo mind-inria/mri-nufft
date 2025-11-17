@@ -300,7 +300,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         x += np.random.random(self.shape).astype(self.cpx_dtype, copy=False)
 
         x = np.asarray(x)
-        lipschitz_cst = power_method(
+        lipschitz_cst, _ = power_method(
             max_iter, self, norm_func=lambda x: np.linalg.norm(x.flatten()), x=x
         )
 

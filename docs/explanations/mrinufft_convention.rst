@@ -1,5 +1,6 @@
 .. include:: <isonum.txt>
 .. _mri-nufft-interface:
+
 ===============================
 MRI-NUFFT Interfaces Convention
 ===============================
@@ -44,7 +45,7 @@ Moreover, the two following methods should be implemented for each backend
 * ``op(image)`` : Forward Operation (image to k-space)
 * ``adj_op(kspace)`` Adjoint Operation (k-space to image)
 
-After initialization, defaults for the  following methods are available, as well as a range of QoL properties (``uses_sense``, ``uses_density``, ``ndim``, etc.).
+After initialization, defaults for the  following methods are available, as well as a range of usefull properties (``uses_sense``, ``uses_density``, ``ndim``, etc.).
 
 * ``data_consistency(image, obs_data)``: perform the data consistency step  :math:`\cal{F}^*(\cal{F} x - y)`
 * ``get_lipschitz_cst(max_iter)``: Estimate the spectral radius of the auto adjoint operator :math:`\cal{F}^*\cal{F}`

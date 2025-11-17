@@ -15,16 +15,23 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
-import coverage
+
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
+
+# import after updating the path.
+from link_info import linkcode_resolve_file_suffix  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = "mri-nufft"
 copyright = "2022, MRI-NUFFT Contributors"
 author = "MRI-NUFFT Contributors"
+
+
+GITHUB_REPO = "https://github.com/mind-inria/mri-nufft"
+GITHUB_VERSION = "master"
 
 # -- General configuration ---------------------------------------------------
 
@@ -34,16 +41,17 @@ author = "MRI-NUFFT Contributors"
 extensions = [
     "sphinx_copybutton",
     "sphinx.ext.duration",
-    "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.video",
     "sphinx_gallery.gen_gallery",
     "sphinx_add_colab_link",
+    "sphinx_autoregistry",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,7 +68,8 @@ autosummary_generate = True
 # autosummary_imported_members = True
 autodoc_inherit_docstrings = True
 autodoc_member_order = "bysource"
-autodoc_typehints = "description"
+autodoc_typehints = "both"
+autodoc_typehints_description_target = "documented_params"
 
 napoleon_include_private_with_doc = True
 napolon_numpy_docstring = True
@@ -73,7 +82,7 @@ highlight_language = "python"
 # -- Options for Sphinx Gallery ----------------------------------------------
 
 sphinx_gallery_conf = {
-    "doc_module": "mrinufft",
+    "doc_module": ("mrinufft",),
     "backreferences_dir": "generated/gallery_backreferences",
     "reference_url": {"mrinufft": None},
     "examples_dirs": ["../examples/"],
@@ -96,7 +105,10 @@ sphinx_gallery_conf = {
         "use_jupyter_lab": True,
     },
     "parallel": True,
-    "matplotlib_animations": True,
+    "matplotlib_animations": (True, "mp4"),
+    "first_notebook_cell": (
+        "!pip install mri-nufft[cufinufft,finufft,gpunufft,extra,autodiff]"
+    ),  # for binder and colab
 }
 
 intersphinx_mapping = {
@@ -113,21 +125,57 @@ intersphinx_mapping = {
 # a list of builtin themes.
 #
 
-html_theme = "sphinx_book_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_css_files = [
+    "custom.css",
+]
+
 html_theme_options = {
-    "repository_url": "https://github.com/mind-inria/mri-nufft/",
-    "use_repository_button": True,
-    "use_issues_button": True,
     "use_edit_page_button": True,
-    "use_download_button": True,
-    "home_page_in_toc": True,
+    "secondary_sidebar_items": {
+        "generated/autoexamples/**": [
+            "page-toc",
+            "sg_download_links",
+            "sg_launcher_links",
+            "colab_link",
+        ],
+    },
+    "header_links_before_dropdown": 4,
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            # URL where the link will redirect
+            "url": "https://github.com/mind-inria/mri-nufft",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            "icon": "fa-brands fa-github",
+            # The type of image to be used (see below for details)
+            "type": "fontawesome",
+        },
+    ],
 }
 
 html_logo = "_static/logos/mri-nufft.png"
 html_favicon = "_static/logos/mri-nufft-icon.png"
 html_title = "MRI-nufft Documentation"
+html_copy_source = False
+html_show_sourcelink = False
+html_context = {
+    "github_user": "mind-inria",
+    "github_repo": "mri-nufft",
+    "github_version": GITHUB_VERSION,
+    "doc_path": "docs/",
+}
+
+
+def linkcode_resolve(domain, info):
+    file_suffix = linkcode_resolve_file_suffix(domain, info)
+    if file_suffix is None:
+        return None
+    return f"{GITHUB_REPO}/blob/{GITHUB_VERSION}/" + file_suffix

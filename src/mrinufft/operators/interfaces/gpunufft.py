@@ -538,8 +538,8 @@ class MRIGpuNUFFT(FourierOperatorBase):
             the new sensitivity maps
 
         """
-        self._check_smaps_shape(new_smaps)
-        self._smaps = new_smaps
+        # calling the parent setter
+        FourierOperatorBase.smaps.fset(self, new_smaps)  # type: ignore
         if self._smaps is not None and hasattr(self, "raw_op"):
             self.raw_op.set_smaps(smaps=new_smaps)
 
@@ -552,11 +552,14 @@ class MRIGpuNUFFT(FourierOperatorBase):
         samples: np.ndarray
             The samples for the Fourier Operator.
         """
+        xp = get_array_module(new_samples)
+        if xp.__name__ == "cupy":
+            new_samples = new_samples.get()
         self._samples = proper_trajectory(
             new_samples.astype(np.float32, copy=False), normalize="unit"
         )
         # TODO: gpuNUFFT needs to sort the points twice in this case.
-        # It could help to have access to directly dorted arrays from gpuNUFFT.
+        # It could help to have access to directly sorted arrays from gpuNUFFT.
         self.compute_density(self._density_method)
         self.raw_op.set_pts(
             self._samples,

@@ -19,26 +19,28 @@ except ImportError:
 
 def image_from_op(operator):
     """Generate a random image."""
-    if operator.smaps is None:
-        img = np.random.randn(operator.n_coils, *operator.shape).astype(
-            operator.cpx_dtype
-        )
-    elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.randn(*operator.shape).astype(operator.cpx_dtype)
-
+    img = np.random.randn(*operator.img_full_shape).astype(operator.cpx_dtype)
     img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
     return img
 
 
 def kspace_from_op(operator):
     """Generate a random kspace data."""
-    kspace = (1j * np.random.randn(operator.n_coils, operator.n_samples)).astype(
-        operator.cpx_dtype
-    )
-    kspace += np.random.randn(operator.n_coils, operator.n_samples).astype(
-        operator.cpx_dtype
-    )
+    kspace = (1j * np.random.randn(*operator.ksp_full_shape)).astype(operator.cpx_dtype)
+    kspace += np.random.randn(*operator.ksp_full_shape).astype(operator.cpx_dtype)
     return kspace
+
+
+def batched_smaps_from_op(operator):
+    """Generate random batched smaps."""
+    smaps = 1j * np.random.randn(
+        operator.paired_batch, operator.n_coils, *operator.shape
+    ).astype(np.complex64)
+    smaps += np.random.randn(
+        operator.paired_batch, operator.n_coils, *operator.shape
+    ).astype(np.complex64)
+    smaps /= np.linalg.norm(smaps, axis=1, keepdims=True)
+    return smaps
 
 
 def to_interface(data, interface):

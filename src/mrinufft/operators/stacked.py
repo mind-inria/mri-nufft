@@ -73,6 +73,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     backend = "stacked"
     available = True  # the true availabily will be check at runtime.
+    autograd_available = False
 
     def __init__(
         self,
@@ -815,7 +816,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         x = cp.asarray(x)
         return power_method(
             max_iter, tmp_op, norm_func=lambda x: cp.linalg.norm(x.flatten()), x=x
-        )
+        )[0]
 
 
 def traj3d2stacked(samples, dim_z, n_samples=0):

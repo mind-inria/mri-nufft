@@ -59,11 +59,10 @@ def proper_trajectory(trajectory, normalize="pi"):
     # flatten to a list of point
     xp = get_array_module(trajectory)  # check if the trajectory is a tensor
     try:
-        new_traj = (
-            trajectory.clone()
-            if xp.__name__ == "torch"
-            else np.asarray(trajectory).copy()
-        )
+        if xp.__name__ == "torch":
+            new_traj = trajectory.clone()
+        else:
+            new_traj = np.asarray(trajectory).copy()
     except Exception as e:
         raise ValueError(
             "trajectory should be array_like, with the last dimension being coordinates"
@@ -86,6 +85,25 @@ def proper_trajectory(trajectory, normalize="pi"):
     if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
     return new_traj
+
+
+def _apply_docstring_subs(func: Callable, docstring_subs: dict[str, str]) -> Callable:
+    if func.__doc__:
+        docstring = cleandoc(func.__doc__)
+        for key, sub in docstring_subs.items():
+            docstring = docstring.replace(f"${{{key}}}", sub)
+        func.__doc__ = docstring
+    return func
+
+
+def _fill_doc(docstring_subs: dict[str, str]) -> Callable:
+    """Fill in docstrings with substitutions."""
+
+    @wraps(_fill_doc)
+    def wrapper(func: Callable) -> Callable:
+        return _apply_docstring_subs(func, docstring_subs)
+
+    return wrapper
 
 
 class MethodRegister:
@@ -116,11 +134,7 @@ class MethodRegister:
 
         def decorator(func):
             self.registry[self.register_name][method_name] = func
-            if self.docstring_subs is not None and func.__doc__:
-                docstring = cleandoc(func.__doc__)
-                for key, sub in self.docstring_subs.items():
-                    docstring = docstring.replace(f"${{{key}}}", sub)
-                func.__doc__ = docstring
+            func = _apply_docstring_subs(func, self.docstring_subs or {})
             return func
 
         if callable(method_name):
@@ -131,6 +145,8 @@ class MethodRegister:
             return decorator
 
     def make_getter(self) -> Callable:
+        """Create a `get_{register_name}` function to get methods from the registry."""
+
         def getter(method_name, *args, **kwargs):
             try:
                 method = self.registry[self.register_name][method_name]

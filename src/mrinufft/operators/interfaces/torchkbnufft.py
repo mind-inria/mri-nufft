@@ -1,9 +1,15 @@
 """Pytorch MRI Nufft Operators."""
 
+import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
-from mrinufft._array_compat import is_cuda_tensor, with_torch
+from mrinufft._array_compat import (
+    ArrayTypes,
+    is_cuda_tensor,
+    with_torch,
+    _array_to_torch,
+)
 
 TORCH_AVAILABLE = True
 try:
@@ -11,12 +17,6 @@ try:
     import torch
 except ImportError:
     TORCH_AVAILABLE = False
-
-CUPY_AVAILABLE = True
-try:
-    import cupy as cp
-except ImportError:
-    CUPY_AVAILABLE = False
 
 
 class MRITorchKbNufft(FourierOperatorBase):
@@ -100,7 +100,6 @@ class MRITorchKbNufft(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         # self.eps = eps
         self.compute_density(density)
-
         if isinstance(smaps, torch.Tensor):
             self.smaps = smaps
         else:
@@ -110,6 +109,36 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(self.device)
         self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(self.device)
+
+    @FourierOperatorBase.smaps.setter
+    def smaps(self, new_smaps):
+        """Update smaps.
+
+        If the number of coils is different, it is updated.
+
+        Parameters
+        ----------
+        new_smaps: Array or Tensor
+            The new sensitivity maps.
+        """
+        if new_smaps is None:
+            self._smaps = None
+            return
+
+        if not isinstance(new_smaps, ArrayTypes):
+            raise TypeError("Smaps should be an array-like object.")
+        new_smaps = _array_to_torch(new_smaps)
+
+        C = new_smaps.shape[0]
+        XYZ = new_smaps.shape[1:]
+
+        # working with internal value for efficiency
+        if XYZ != self._shape:
+            raise ValueError("Smaps should match image shape.")
+        if C != self._n_coils:
+            self._n_coils = C
+            warnings.warn("updating number of coils via Smaps.")
+        self._smaps = new_smaps
 
     @with_torch
     def op(self, data, out=None):

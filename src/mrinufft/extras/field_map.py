@@ -3,6 +3,11 @@
 This module provides methods to generate dummy B0map as well as estimation of the
 bilinearization of the off-resonance model (See :ref:`nufft-orc` for a detailed
 explanation).
+
+
+
+.. autoregistry:: orc_factorization
+
 """
 
 import numpy as np
@@ -80,7 +85,7 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
     Returns
     -------
     np.ndarray
-        T2* map of shape (*shape) in [ms].
+        T2* map of shape ``(*shape)`` in [ms].
     np.ndarray, optional
         Spatial support binary mask.
 
@@ -229,7 +234,7 @@ def _create_histogram(
         elif deltaR == 0:
             n_bins = (1, n_bins)
         else:
-            n_bins_r = np.max(1, int(xp.around(n_bins * deltaR / deltaI)))
+            n_bins_r = np.maximum(1, int(xp.around(n_bins * deltaR / deltaI)))
             n_bins_i = np.around(n_bins / n_bins_r)
             n_bins = (int(n_bins_r), int(n_bins_i))
 

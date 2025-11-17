@@ -33,11 +33,6 @@ where :math:`\mathbf{\hat{x}}` is the reconstructed MRI image, :math:`\mathbf{x}
 .. warning::
     We train on a single image here. In practice, this should be done on a database like fastMRI [fastmri]_.
 """
-# %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft] scikit-image fastmri
 
 # %%
 # Imports
