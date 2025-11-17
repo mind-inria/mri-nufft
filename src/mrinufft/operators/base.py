@@ -21,6 +21,7 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
     get_array_module,
     AUTOGRAD_AVAILABLE,
+    DEEPINV_AVAILABLE,
     CUPY_AVAILABLE,
     is_cuda_array,
     is_host_array,
@@ -31,9 +32,10 @@ from mrinufft.extras import get_smaps
 
 
 if TYPE_CHECKING:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad
+    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
 else:
+    DeepInvPhyNufft = Any  # type: ignore
     MRINufftAutoGrad = Any  # type: ignore
     MRIStackedNUFFT = Any  # type: ignore
     MRIStackedNUFFTGPU = Any  # type: ignore
@@ -378,6 +380,44 @@ class FourierOperatorBase(ABC):
         )
         linop._nufft = self  # type: ignore
 
+    def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
+        """Make a new DeepInv Physics with NUFFT operator.
+
+        Parameters
+        ----------
+        wrt_data : bool, optional
+            If the gradient with respect to the data is computed, default is true
+
+        wrt_traj : bool, optional
+            If the gradient with respect to the trajectory is computed, default is false
+
+        paired_batch : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
+
+        Returns
+        -------
+        torch.nn.module
+            A NUFFT operator with autodiff capabilities.
+
+        Raises
+        ------
+        ValueError
+            If autograd is not available.
+        
+
+        """
+        if not (DEEPINV_AVAILABLE & AUTOGRAD_AVAILABLE):
+            raise ValueError("DeepInv not available, ensure deepinv is installed.")
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
+
+        from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+        autograd_nufft = MRINufftAutoGrad(
+            self, *args, **kwargs
+        )
+        return DeepInvPhyNufft(self, autograd_nufft)
+
     def make_autograd(
         self,
         *,
@@ -398,7 +438,7 @@ class FourierOperatorBase(ABC):
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
 
-        paired_batch_size : int, optional
+        paired_batch : int, optional
             If provided, specifies batch size for varying data/smaps pairs.
             Default is None, which means no batching
 
