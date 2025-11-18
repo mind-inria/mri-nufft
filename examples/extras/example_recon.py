@@ -1,22 +1,14 @@
+# %%
 """
-Sensitivity maps estimation
-===========================
+Model-based iterative reconstruction
+====================================
 
-This example demonstrates how to estimate coil sensitivity maps from
-non-Cartesian k-space data using different methods provided in the
-:mrinufft:`mrinufft.extras.smaps` module.
-We will simulate k-space data from a known MRI image and coil sensitivity
-maps, and then estimate the sensitivity maps using the ESPIRiT method [espirit]_ and
-a low-frequency calibration method [sense]_.
-We will visualize the estimated sensitivity maps and compare them to the
-actual sensitivity maps used in the simulation.
+This example demonstrates how to reconstruct image from 
+non-Cartesian k-space data with a regularization prior, using deepinv. 
+
 """
 
 # %%
-# .. colab-link::
-#    :needs_gpu: 1
-#
-#    !pip install mri-nufft[gpunufft] cufinufft sigpy scikit-image
 
 # %%
 # Imports
@@ -52,14 +44,23 @@ mri = (
 fourier_op = get_operator(BACKEND)(
     samples_loc,
     shape=mri.shape,
+    density="pipe",
 )
 y = fourier_op.op(mri)  # Simulate k-space data
 noise_level = y.abs().max().item() * 0.001
 y_noisy = y + 0.01 * torch.randn_like(y) + 0.01j * torch.randn_like(y)
 
 physics = fourier_op.make_deepinv_phy(wrt_data=True)
+autograd = fourier_op.make_autograd(wrt_data=True)
+
+# %%
+physics.__dict__
+
+# %%
+
+# %%
+
 x_dagger = physics.A_dagger(y)
-physics.density = "pipe"
 wavelet = WaveletPrior(
     wv="sym8",
     wvdim=3,

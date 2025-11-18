@@ -412,9 +412,9 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
-        from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+        from mrinufft.operators.autodiff import DeepInvPhyNufft
 
-        autograd_nufft = MRINufftAutoGrad(self, *args, **kwargs)
+        autograd_nufft = self.make_autograd(*args, **kwargs)
         return DeepInvPhyNufft(autograd_nufft)
 
     def make_autograd(

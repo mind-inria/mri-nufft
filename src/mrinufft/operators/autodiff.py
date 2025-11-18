@@ -154,7 +154,8 @@ class MRINufftAutoGrad(torch.nn.Module):
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not supported for autodiff.")
 
-        object.__setattr__(self, "nufft_op", nufft_op)
+        super().__init__()
+        self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
             self.nufft_op._make_plan_grad()
@@ -165,8 +166,7 @@ class MRINufftAutoGrad(torch.nn.Module):
             # used for update also.
             self._samples_torch = torch.Tensor(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
-        object.__setattr__(self, "paired_batch", paired_batch)
-        super().__init__()
+        self.paired_batch = paired_batch
 
     def op(self, x, smaps=None, samples=None):
         r"""Compute the forward image -> k-space.
@@ -295,18 +295,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def __getattr__(self, name):
         """Get attribute."""
-        nufft = object.__getattribute__(self, "nufft_op")
-        if hasattr(nufft, name):
-            return getattr(nufft, name)
-        raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
-
-    def __setattr__(self, name, value):
-        """Set attribute."""
-        try:
-            nufft = object.__getattribute__(self, "nufft_op")
-            setattr(nufft, name, value)
-        except AttributeError:
-            object.__setattr__(self, name, value)
+        return getattr(self.nufft_op, name)
 
     def _check_input_shape(
         self, *, imgs=None, kspace=None, smaps=None, samples=None
@@ -351,36 +340,28 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 
 class DeepInvPhyNufft(LinearPhysics):
-    """Thin adapter that exposes an MRINufftAutoGrad as DeepInv Physics Operator."""
+    """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
 
-    def __init__(self, nufft_op):
-        object.__setattr__(self, "nufft_op", nufft_op)
+    def __init__(self, autograd_nufft):
+        if not isinstance(autograd_nufft, MRINufftAutoGrad):
+            raise ValueError("autograd_nufft should be an instance of MRINufftAutoGrad")
         super().__init__()
+        # since autograd_nufft is a nn.Module, we need to set it this way
+        # to avoid registering it as a sub-module / parameter.
+        self.__dict__["_operator"] = autograd_nufft
 
-    # ---- Core operators ----
-    def A(self, x, **kwargs):
-        """Forward operation image -> k-space."""
-        return self.nufft_op.op(x, **kwargs)
+    def A(self, x: Tensor, **kwargs) -> Tensor:
+        """Forward operation."""
+        return self._operator.op(x, **kwargs)
 
-    def A_adjoint(self, y, **kwargs):
-        """Adjoint operation k-space -> image."""
-        return self.nufft_op.adj_op(y, **kwargs)
+    def A_adjoint(self, y: Tensor, **kwargs) -> Tensor:
+        """Adjoint operation."""
+        return self._operator.adj_op(y, **kwargs)
 
-    def A_dagger(self, y, **kwargs):
-        """Moore-Penrose pseudoinverse operation."""
-        return self.pinv_solver(y, **kwargs)
+    def A_dagger(self, y: Tensor, **kwargs) -> Tensor:
+        """Adjoint operation."""
+        return self._operator.nufft_op.pinv_solver(y, **kwargs)
 
     def __getattr__(self, name):
         """Get attribute."""
-        nufft = object.__getattribute__(self, "nufft_op")
-        if hasattr(nufft, name):
-            return getattr(nufft, name)
-        raise AttributeError(f"{type(self).__name__} has no attribute '{name}'")
-
-    def __setattr__(self, name, value):
-        """Set attribute."""
-        try:
-            nufft = object.__getattribute__(self, "nufft_op")
-            setattr(nufft, name, value)
-        except AttributeError:
-            object.__setattr__(self, name, value)
+        return getattr(self._operator, name)
