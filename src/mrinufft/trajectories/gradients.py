@@ -145,15 +145,15 @@ def patch_center_anomaly(
 
 base_params_no_N = """\
 deltak: float
-    Desired change in k-space
+    Desired change in k-space, as (k_end - k_start) / (gamma * raster_time) [T/m]
 gmax: float
-    Maximum gradient amplitude
+    Maximum gradient amplitude [T/m]
 smax: float
-    Maximum slew rate
+    Maximum slew rate * raster_time (i.e., maximum gradient step) [T/m]
 gs: floats
-    Starting gradient value
+    Starting gradient value [T/m]
 ge: float
-    Ending gradient value
+    Ending gradient value [T/m]
 """
 
 
@@ -164,13 +164,14 @@ Parameters
 N: int
     Number of time points for the gradient waveform
 {base_params_no_N}
-
+""",
+    returns="""\
 Returns
 -------
 NDArray
-    Optimized gradient waveform of shape (N,)
+    Optimized gradient waveform of length N.
 bool
-    Success flag 
+    Whether the optimization was successful.
 """,
     base_params_no_N=base_params_no_N,
     params_connect="""\
@@ -208,6 +209,8 @@ def _solve_lp_1d(
     - x[N-1] = gx_end
 
     $base_params
+
+    $returns
 
     Notes
     -----
@@ -321,6 +324,8 @@ def _solve_qp_osqp(
     Such that:
 
     $base_params
+
+    $returns
 
     Notes
     -----
@@ -448,92 +453,13 @@ def _binary_search_float(
 
 
 @_fill_doc(_solver_docs)
-def _optimize_grad_dimless(
-    deltak: NDArray,
+def _optimize_grad(
+    N: int,
+    deltak: float,
     gmax: float,
     smax: float,
-    ge: NDArray,
-    gs: NDArray,
-    N_max: int = 5000,
-    method="osqp",
-) -> NDArray:
-    """Optimize gradient waveform in time-dimensionless units.
-
-    Parameters
-    ----------
-    $base_params
-
-    Returns
-    -------
-    NDArray
-        Optimized gradient waveform of shape (N, len(deltak))
-
-    Raises
-    ------
-    RuntimeError
-        If no solution is found within the maximum number of time points.
-
-    Notes
-    -----
-    This function uses a binary search to find the minimum number of time points
-    required to achieve the desired k-space change while satisfying the gradient
-    and slew rate constraints. The first dimension with the largest k-space change
-    is used to guide the search, and then the solution is applied to all dimensions.
-
-    Each dimension is optimized independently using linear programming.
-    """
-    solver = _solve_lp_1d
-    if method == "osqp":
-        if not OSQP_AVAILABLE:
-            raise ValueError(
-                "osqp package not found. Install it with `pip install osqp`"
-            )
-        solver = _solve_qp_osqp
-
-    idx_max = np.argmax(abs(deltak))
-    deltak_max = deltak[idx_max]
-    ge_max = ge[idx_max]
-    gs_max = gs[idx_max]
-
-    # Lower bound: Assuming maximum gradient all the time
-    low = int(abs(deltak_max) / gmax) + 1
-    # Upper bound: Lower bound + time to go back and forth at max slew rates
-    high = low + 2 * int(gmax / smax)
-    high = min(high, N_max)
-
-    x, N = _binary_search_int(
-        partial(solver, deltak=deltak_max, gmax=gmax, smax=smax, gs=gs_max, ge=ge_max),
-        low,
-        high,
-    )
-
-    final = np.zeros((len(x), 3))
-    # now try to reduce the slew rate to smooth the waveform
-    for idx in range(len(deltak)):
-        if method == "lp":
-            x, _ = _binary_search_float(
-                partial(
-                    solver, N=N, deltak=deltak[idx], gmax=gmax, gs=gs[idx], ge=ge[idx]
-                ),
-                low=0.001 * smax,
-                high=smax,
-            )
-        else:
-            x, success = solver(N, deltak[idx], gmax, smax, gs[idx], ge[idx])
-        if x is None or not success:
-            raise ValueError("Failed to complete optimization.")
-        final[:, idx] = x
-    return final
-
-
-@_fill_doc(_solver_docs)
-def optimize_grad(
-    ks: NDArray,
-    ke: NDArray,
-    gs: NDArray,
-    ge: NDArray,
-    acq: Acquisition,
-    N: int | None = None,
+    gs: float,
+    ge: float,
     method="lp",
 ) -> NDArray:
     """
@@ -541,17 +467,15 @@ def optimize_grad(
 
     Parameters
     ----------
-    $base_params_no_N
-    acq: Acquisition
-        Acquisition object defining hardware constraints and imaging parameters
-    N: int, optional
-        Number of time points to use. If None, the function will automatically
-        determine the optimal number of time points.
+    $base_params
+
+    method: str, optional
+        The method to use for optimization. Options are "linprog" or "osqp".
 
     Returns
     -------
     NDArray
-        Optimized gradient waveform of shape (N, len(ks))
+        Optimized gradient waveform of length N.
 
     Raises
     ------
@@ -566,40 +490,27 @@ def optimize_grad(
     None) or directly solves the linear programming problem for the provided N.
     The optimization is performed independently for each dimension (x, y, z).
     """
-    deltak = (ke - ks) / acq.raster_time / acq.gamma
-    if N is None:  # Auto find the best connection
-        return _optimize_grad_dimless(
-            deltak, acq.gmax, acq.smax * acq.raster_time, gs, ge, method=method
-        )
-
     res = []
     solver = _get_solver_grad(method)
 
-    for i in range(len(ks)):
-        res.append(
-            solver(N, deltak[i], acq.gmax, acq.smax * acq.raster_time, gs[i], ge[i])
-        )
+    res, success = solver(N, deltak, gmax, smax, gs, ge)
 
-    # now try to reduce the slew rate to smooth the waveform
-    if all(r[1] for r in res) and method == "lp":
-        final = np.zeros((len(res[0][0]), 3))
-        orig_smax = acq.smax * acq.raster_time
-        gmax = acq.gmax
-        for idx in range(len(deltak)):
-            max_smax = orig_smax
-            min_smax = 0.01 * orig_smax
-            while (max_smax - min_smax) / min_smax >= 0.1:
-                smax = min_smax + (max_smax - min_smax) * 0.8
-                x, success = solver(N, deltak[idx], gmax, smax, gs[idx], ge[idx])
-                if success:
-                    max_smax = smax
-                    best = x
-                else:
-                    min_smax = smax
-            final[:, idx] = best
-    else:
-        raise RuntimeError("N submitted and too short")
-    return final
+    if not success:
+        raise RuntimeError(
+            f"Failed to optimize gradient waveform with given N={N} and method {method}"
+        )
+    if method == "osqp":
+        return res
+
+    res, success = _binary_search_float(
+        partial(solver, N=N, deltak=deltak, gmax=gmax, gs=gs, ge=ge), 0.01 * smax, smax
+    )
+    if not success:
+        raise RuntimeError(
+            f"Failed to optimize slew-rate for gradient waveform with given N={N} and"
+            f" method {method}"
+        )
+    return res
 
 
 @_fill_doc(_solver_docs)
@@ -624,8 +535,7 @@ def min_length_connection(
         The minimum length of the gradient connection.
 
     """
-    if acq is None:
-        acq = Acquisition.default
+    acq = acq or Acquisition.default
 
     # The start point is the end of the previous shot,
     # The end point is the start of the next shot.
@@ -690,11 +600,12 @@ def connect_gradient(
     N: int | None = None,
 ) -> NDArray:
     """
-    Get the gradient connections for a trajectory.
+    Get the gradient connections for a set of start and end points.
 
     Parameters
     ----------
     $params_connect
+
     N: int, optional
         Number of time points to use. If None, the function will automatically
         determine the optimal number of time points.
@@ -702,29 +613,30 @@ def connect_gradient(
     Returns
     -------
     NDArray
-        The gradient connections of shape (N, Nshots, 3)
+        The gradient connections of shape (Nshots,N, 3)
 
     """
-    if acq is None:
-        acq = Acquisition.default
+    acq = acq or Acquisition.default
 
-    nshots, ndims = kstarts.shape
-    connections = np.zeros((nshots, N, ndims), dtype=kstarts.dtype)
+    N = N or min_length_connection(
+        kstarts, kends, gstarts, gends, acq=acq, method=method
+    )
+
+    nshots = kstarts.shape[0]
+    connections = np.zeros((nshots, N, 3), dtype=kstarts.dtype)
+    # TODO probably wants to be parallelized and/or memoized
 
     deltaks = (kends - kstarts) / acq.raster_time / acq.gamma
     max_grad_step = acq.smax * acq.raster_time
     gmax = acq.gmax
-
-    # TODO probably wants to be parallelized and/or memoized
     for i in range(nshots):
-        for j in range(ndims):
-            connections[i, :, j] = _optimize_grad(
-                N=N,
-                deltak=deltaks[i, j],
-                gmax=gmax,
-                smax=max_grad_step,
-                gs=gstarts[i, j],
-                ge=gends[i, j],
-                method=method,
-            )
+        connections[i, :, :] = _optimize_grad(
+            N=N,
+            deltak=deltaks[i],
+            gmax=gmax,
+            smax=max_grad_step,
+            gs=gstarts[i],
+            ge=gends[i],
+            method=method,
+        )
     return connections
