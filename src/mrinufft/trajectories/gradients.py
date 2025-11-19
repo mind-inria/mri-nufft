@@ -640,3 +640,90 @@ def connect_gradient(
             method=method,
         )
     return connections
+
+
+def get_prephasors_and_spoilers(
+    trajectory: NDArray,
+    spoil_grad=(0, 0, 0),
+    spoil_loc=(2, 0, 0),
+    prephase_loc=(0, 0, 0),
+    prephase_grad=(0, 0, 0),
+    acq: Acquisition | None = None,
+    N: int | None | tuple[int, int] = None,
+) -> NDArray | tuple[NDArray, NDArray]:
+    """
+    Get the prephasors and spoiler gradients for a trajectory.
+
+    Parameters
+    ----------
+    trajectory: NDArray
+        The trajectory of shape (Nshots, Ns, 3)
+    spoil_grad: tuple, optional
+        The gradient to use for the spoiler [T/m], by default ``(0, 0, 0)``
+    spoil_loc: tuple, optional
+        The k-space location to spoil to [m^-1], by default ``(2, 0, 0)``
+    prephase_loc: tuple, optional
+        The k-space location to prephase from [m^-1], by default ``(0, 0, 0)``
+    prephase_grad: tuple, optional
+        The gradient to use for the prephaseer [T/m], by default ``(0, 0, 0)``
+    acq: Acquisition
+        The acquisition object defining hardware constraints and imaging parameters
+    N: int, optional
+        Number of time points to use for the connections. If None
+
+    Returns
+    -------
+    NDArray
+        The prephase and spoiler gradients of shape (Nshots, Np, 3)
+    """
+    acq = acq or Acquisition.default
+
+    nshots, Ns, _ = trajectory.shape
+    # Get the gradient waveforms
+    gradients, _ = convert_trajectory_to_gradients(trajectory, acq)
+
+    norm_traj = unnormalize_trajectory(trajectory, acq)
+
+    # Get the starting and ending gradients and k-space points
+    gstarts = gradients[:, 0, :]
+    gends = gradients[:, -1, :]
+    kstarts = norm_traj[:, 0, :]
+    kends = norm_traj[:, -1, :]
+    if not isinstance(N, tuple):
+        N_pre = N_spoil = N
+    if prephase_loc is not None:
+        prephase_loc = unnormalize_trajectory(np.array(prephase_loc), acq)
+        prephase_start_locations = np.tile(prephase_loc, (nshots, 1))
+
+        prephase_gradients = np.tile(np.array(prephase_grad), (nshots, 1))
+        prephasers = connect_gradient(
+            prephase_start_locations,
+            kstarts,
+            prephase_gradients,
+            gstarts,
+            acq=acq,
+            N=N_pre,
+        )
+
+    if spoil_loc is not None:
+        spoil_loc = unnormalize_trajectory(np.array(spoil_loc), acq)
+        spoil_loc = np.tile(spoil_loc, (nshots, 1))
+
+        spoil_gradients = np.tile(np.array(spoil_grad), (nshots, 1))
+        spoilers = connect_gradient(
+            kends,
+            spoil_loc,
+            gends,
+            spoil_gradients,
+            acq=acq,
+            N=N_spoil,
+        )
+
+    if prephase_loc is not None and spoil_loc is not None:
+        return prephasers, spoilers
+    elif prephase_loc is not None:
+        return prephasers
+    elif spoil_loc is not None:
+        return spoilers
+    else:
+        raise ValueError("Either prephase_loc or spoil_loc must be provided.")
