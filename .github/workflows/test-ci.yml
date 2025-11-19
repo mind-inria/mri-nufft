@@ -303,10 +303,16 @@ jobs:
           echo COVERAGE_PERC=$(coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
 
       - name: Create a Coverage Badge
+        uses: emibcn/badge-action@v2.0.2
         if: ${{github.event_name == 'push'}}
-        run: |
-          wget https://img.shields.io/badge/coverage-${{env.COVERAGE_PERC}}%25-green -O coverage_badge.svg
-
+        # run: |
+        #   wget https://img.shields.io/badge/coverage-${{env.COVERAGE_PERC}}%25-green -O coverage_badge.svg
+        with:
+          path: coverage_badge.svg
+          label: coverage
+          status: ${{env.COVERAGE_PERC}}%
+          color: green
+          
       - name: Upload badge as artifact
         if: ${{github.event_name == 'push'}}
         uses: actions/upload-artifact@v4
