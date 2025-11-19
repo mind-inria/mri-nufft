@@ -17,7 +17,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
 from deepinv.optim.prior import WaveletPrior
-from deepinv.optim.prior import TVPrior
 from deepinv.optim.data_fidelity import L2
 from deepinv.optim.optimizers import optim_builder
 
