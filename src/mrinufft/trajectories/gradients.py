@@ -16,6 +16,8 @@ from mrinufft.trajectories.utils import (
     Acquisition,
     convert_gradients_to_trajectory,
     convert_trajectory_to_gradients,
+    normalize_trajectory,
+    unnormalize_trajectory,
 )
 from mrinufft._utils import MethodRegister, _fill_doc
 
@@ -410,43 +412,45 @@ def _solve_qp_osqp(
     return res.x, res.info.status == "solved"
 
 
+@_solvers("auto")
+def _solve_auto(*arg, **kwargs):
+    """Automatically select the best solver available."""
+    if OSQP_AVAILABLE:
+        return _solve_qp_osqp(*arg, **kwargs)
+    return _solve_lp_1d(*arg, **kwargs)
+
+
 def _binary_search_int(
     f: Callable[[int], tuple[NDArray, bool]], low: int, high: int
 ) -> tuple[NDArray, int]:
     """Perfom a binary search to get best integer that makes f success."""
-    i = 0
     x = None
-    val = 0
     while low <= high:
         mid = int(low + (high - low) * 0.8)
         new_x, success = f(mid)
         if success:
             x = new_x
             high = mid - 1
-            val = mid
         else:
             low = mid + 1
-        i += 1
     if x is None:
         raise RuntimeError(f"Could not find a solution {i}, {mid}, {high}, {low}")
-    return x, val
+    return x, mid
 
 
 def _binary_search_float(
     f: Callable[[float], tuple[NDArray, bool]], low: float, high: float
 ) -> tuple[NDArray, float]:
     """Perfom a binary search to get best float that makes f success."""
-    i = 0
     x = None
-    while low <= high:
-        mid = low + (high - low) * 0.8
+    while (high - low) / (high + low) > 1e-3:  # relative tolerance
+        mid = low + (high - low) * 0.5
         new_x, success = f(mid)
         if success:
             x = new_x
             high = mid
         else:
             low = mid
-        i += 1
     if x is None:
         raise RuntimeError(f"Could not find a solution {i}, {mid}, {high}, {low}")
     return x, mid
