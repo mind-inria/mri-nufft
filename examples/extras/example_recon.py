@@ -3,8 +3,8 @@
 Model-based iterative reconstruction
 ====================================
 
-This example demonstrates how to reconstruct image from 
-non-Cartesian k-space data with a regularization prior, using deepinv. 
+This example demonstrates how to reconstruct image from
+non-Cartesian k-space data with a regularization prior, using deepinv.
 
 """
 
@@ -93,15 +93,19 @@ x_wavelet = wavelet_recon(y, physics)
 # Display results
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 3, 1)
-plt.imshow(torch.abs(mri[..., mri.shape[2] // 2-5]).cpu(), cmap="gray")
+plt.imshow(torch.abs(mri[..., mri.shape[2] // 2 - 5]).cpu(), cmap="gray")
 plt.title("Ground truth")
 plt.axis("off")
 plt.subplot(1, 3, 2)
-plt.imshow(torch.abs(x_dagger[0, 0, ..., x_dagger.shape[2] // 2-5]).cpu(), cmap="gray")
+plt.imshow(
+    torch.abs(x_dagger[0, 0, ..., x_dagger.shape[2] // 2 - 5]).cpu(), cmap="gray"
+)
 plt.title("Adjoint reconstruction")
 plt.axis("off")
 plt.subplot(1, 3, 3)
-plt.imshow(torch.abs(x_wavelet[0, 0, ..., x_wavelet.shape[2] // 2-5]).cpu(), cmap="gray")
+plt.imshow(
+    torch.abs(x_wavelet[0, 0, ..., x_wavelet.shape[2] // 2 - 5]).cpu(), cmap="gray"
+)
 plt.title("Reconstruction with wavelet prior")
 plt.axis("off")
 plt.show()
