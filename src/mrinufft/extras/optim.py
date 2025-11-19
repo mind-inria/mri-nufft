@@ -279,6 +279,10 @@ def lsqr(
     .. [3] https://github.com/scipy/scipy/blob/v1.16.2/scipy/sparse/linalg/_isolve/lsqr.py
     """
     xp = get_array_module(kspace_data)
+    old_density = None
+    if operator.uses_density:
+        old_density = operator.density
+        operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
     ctol = 0
     if conlim > 0:
@@ -454,6 +458,8 @@ def lsqr(
         x = operator._safe_squeeze(x)
     if callback_returns:
         return x, callback_returns
+    if old_density is not None:
+        operator.density = old_density
     return x
 
 
@@ -517,6 +523,10 @@ def lsmr(
     - It usually converges faster than LSQR and can stop in fewer iterations.
     """
     xp = get_array_module(kspace_data)
+    old_density = None
+    if operator.uses_density:
+        old_density = operator.density
+        operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
 
     ctol = 0
@@ -743,6 +753,8 @@ def lsmr(
         x = operator._safe_squeeze(x)
     if callback_returns:
         return x, callback_returns
+    if old_density is not None:
+        operator.density = old_density
     return x
 
 
