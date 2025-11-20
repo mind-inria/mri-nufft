@@ -8,7 +8,6 @@ import warnings
 from array import array
 from datetime import datetime
 
-from mrinufft.trajectories.gradients import connect_gradient
 import numpy as np
 
 from mrinufft.trajectories.utils import (
@@ -24,7 +23,7 @@ from mrinufft.trajectories.utils import (
     KMAX,
     DEFAULT_RASTER_TIME,
 )
-from mrinuff.trajectories.gradients import get_prephasors_and_spoilers
+from mrinufft.trajectories.tools import get_gradient_amplitudes_to_travel_for_set_time
 
 from .siemens import read_siemens_rawdat
 
@@ -211,8 +210,8 @@ def _pop_elements(array, num_elements=1, type=np.float32):
 
 def write_trajectory(
     trajectory: np.ndarray,
-    FOV: tuple[float, float, float],
-    img_size: tuple[int, int, int],
+    FOV: tuple[float, ...],
+    img_size: tuple[int, ...],
     grad_filename: str,
     norm_factor: float = KMAX,
     gamma: float = Gammas.HYDROGEN / 1e3,
@@ -288,49 +287,38 @@ def write_trajectory(
     )
     Ns_to_skip_at_start = 0
     Ns_to_skip_at_end = 0
-    if pregrad or postgrad:
+    if pregrad == "prephase":
         if version < 5.1:
             raise ValueError(
-                "pregrad and postgrad are only supported for version >= 5.1, "
+                "pregrad is only supported for version >= 5.1, "
                 "please set version to 5.1 or higher."
             )
-        prephase_grad = prephase_loc = spoiler_grad = spoiler_loc = None
-        if pregrad == "prephase":
-            prephase_grad = np.zeros_like(initial_positions)
-            prephase_loc = np.zeros_like(initial_positions)
-
-            prephasors = connect_gradient(
-                prephase_loc,
-                initial_positions,
-                prephase_grad,
-                gradients[:, 0, :],
-                acq,
-                method="auto",
-                N=None,
+        start_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+            kspace_end_loc=initial_positions,
+            end_gradients=gradients[:, 0],
+            acq=acq,
+        )
+        initial_positions = np.zeros_like(initial_positions)
+        gradients = np.hstack([start_gradients, gradients])
+        Ns_to_skip_at_start = start_gradients.shape[1]
+    if postgrad:
+        if version < 5.1:
+            raise ValueError(
+                "postgrad is only supported for version >= 5.1, "
+                "please set version to 5.1 or higher."
             )
-            Ns_to_skip_at_start = prephasors.shape[1]
-            gradients = np.concatenate((prephasors, gradients), axis=1)
-        if postgrad == "slowdown_to_center":
-            spoiler_loc = np.zeros_like(final_positions)
-            spoiler_grad = np.zeros_like(final_positions)
-        elif postgrad == "slowdown_to_edge":
-            spoiler_loc = np.zeros_like(final_positions)
-            spoiler_loc[..., 0] = img_size[0] / FOV[0] / 2
-            spoiler_grad = np.zeros_like(final_positions)
-
-        if postgrad:
-            spoilers = connect_gradient(
-                final_positions,
-                spoiler_loc,
-                spoiler_grad,
-                gradients[:, -1, :],
-                acq,
-                method="auto",
-                N=None,
-            )
-            Ns_to_skip_at_end = spoilers.shape[1]
-            gradients = np.concatenate((gradients, spoilers), axis=1)
-
+        edge_locations = np.zeros_like(final_positions)
+        if postgrad == "slowdown_to_edge":
+            # Always end at KMax, the spoilers can be handeled by the sequence.
+            edge_locations[..., 0] = img_size[0] / FOV[0] / 2
+        end_gradients = get_gradient_amplitudes_to_travel_for_set_time(
+            kspace_end_loc=edge_locations,
+            start_gradients=gradients[:, -1],
+            kspace_start_loc=final_positions,
+            acq=acq,
+        )
+        gradients = np.hstack([gradients, end_gradients])
+        Ns_to_skip_at_end = end_gradients.shape[1]
     # Check constraints if requested
     if check_constraints:
         slewrates, _ = convert_gradients_to_slew_rates(gradients, acq)

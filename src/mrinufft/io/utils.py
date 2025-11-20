@@ -1,13 +1,10 @@
 """Module containing utility functions for IO in MRI NUFFT."""
 
 import numpy as np
-from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
 
-def add_phase_to_kspace_with_shifts(
-    kspace_data: NDArray, kspace_loc: NDArray, normalized_shifts: NDArray
-):
+def add_phase_to_kspace_with_shifts(kspace_data, kspace_loc, normalized_shifts):
     """
     Add phase shifts to k-space data.
 
@@ -41,7 +38,7 @@ def add_phase_to_kspace_with_shifts(
     return kspace_data * phase
 
 
-def siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
+def siemens_quat_to_rot_mat(quat, return_det=False):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
 
@@ -137,7 +134,7 @@ def nifti_affine(twixObj):
     return full_mat
 
 
-def remove_extra_kspace_samples(kspace_data: NDArray, num_samples_per_shot: int):
+def remove_extra_kspace_samples(kspace_data, num_samples_per_shot):
     """Remove extra samples from k-space data.
 
     This function is useful when the k-space data has extra samples

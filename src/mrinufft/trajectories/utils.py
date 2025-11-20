@@ -380,7 +380,7 @@ class Acquisition:
 
 # Create a default acquisition.
 Acquisition.default = Acquisition(
-    fov=(0.256, 0.256, 0.256), img_size=(256, 256, 256), hardware=Hardware()
+    fov=(0.256, 0.256, 0.176), img_size=(256, 256, 176), hardware=Hardware()
 )
 
 ###############

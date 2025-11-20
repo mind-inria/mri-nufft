@@ -20,8 +20,7 @@ from .maths import (
     Ry,
     Rz,
 )
-from .projection import parameterize_by_arc_length
-from .tools import conify, duplicate_along_axes, epify, precess, stack
+from .tools import conify, duplicate_along_axes, epify, precess, stack, add_slew_ramp
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Spirals, initialize_tilt
 
@@ -79,6 +78,7 @@ def initialize_3D_phyllotaxis_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_golden_means_radial(
     Nc: int, Ns: int, in_out: bool = False
 ) -> NDArray:
@@ -133,6 +133,7 @@ def initialize_3D_golden_means_radial(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_wong_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -246,6 +247,7 @@ def initialize_3D_park_radial(
 ############################
 
 
+@add_slew_ramp
 def initialize_3D_cones(
     Nc: int,
     Ns: int,
@@ -300,6 +302,7 @@ def initialize_3D_cones(
         spiral=spiral,
         in_out=in_out,
         nb_revolutions=nb_zigzags,
+        slew_ramp_disable=True,
     )
 
     # Estimate best cone angle based on the ratio between
@@ -529,6 +532,7 @@ def initialize_3D_wave_caipi(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_seiffert_spiral(
     Nc: int,
     Ns: int,
@@ -732,10 +736,6 @@ def initialize_3D_annular_shells(
     """Initialize 3D trajectories with annular shells.
 
     An exclusive trajectory inspired from the work proposed in [HM11]_.
-    It is similar to other trajectories based on concentric rings but
-    rings are split into halves and rotated to be recombined with
-    halves from other rings, in order to better balance the shot lengths
-    between longer and shorter rings from a same shell.
 
     Parameters
     ----------

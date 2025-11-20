@@ -1,6 +1,6 @@
 """Functions to manipulate/modify trajectories."""
 
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 from collections.abc import Callable
 from functools import partial
 
@@ -9,15 +9,24 @@ from numpy.typing import NDArray
 import numpy.linalg as nl
 from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
+import inspect
+from functools import wraps
+from scipy.optimize import minimize_scalar
+from joblib import Parallel, delayed
+from .gradients import optimize_grad
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
+    Acquisition,
     Packings,
     initialize_shape_norm,
     VDSorder,
     VDSpdf,
     initialize_tilt,
+    unnormalize_trajectory,
+    convert_gradients_to_trajectory,
+    convert_trajectory_to_gradients,
 )
 from .maths import CIRCLE_PACKING_DENSITY, generate_fibonacci_circle
 
@@ -378,6 +387,142 @@ def unepify(trajectory: NDArray, Ns_readouts: int, Ns_transitions: int) -> NDArr
     trajectory = trajectory[:, readout_mask, :]
     trajectory = trajectory.reshape((-1, Ns_readouts, Nd))
     return trajectory
+
+
+def get_gradient_amplitudes_to_travel_for_set_time(
+    kspace_end_loc: NDArray,
+    kspace_start_loc: NDArray | None = None,
+    end_gradients: NDArray | None = None,
+    start_gradients: NDArray | None = None,
+    nb_raster_points: int | None = None,
+    acq: Acquisition | None = None,
+    n_jobs: int = 1,
+) -> NDArray:
+    """Calculate timings for trapezoidal or triangular gradient waveforms.
+
+    Compute the gradient waveforms required to traverse from a starting k-space
+    position ``ks`` to an ending k-space position ``ke`` in a fixed number of time
+    steps ``N``, subject to hardware constraints on maximum gradient amplitude
+    ``gmax`` and slew rate ``smax``. The function supports both trapezoidal
+    and triangular gradient shapes, automatically adjusting the waveform to
+    meet the area constraint imposed by the desired k-space traversal
+    and the specified timing and hardware limits.
+
+    Parameters
+    ----------
+    kspace_end_loc : NDArray
+        Ending k-space positions, shape (nb_shots, nb_dimension).
+    kspace_start_loc : NDArray, default None when it is 0
+        Starting k-space positions, shape (nb_shots, nb_dimension).
+    end_gradients : NDArray, default None when it is 0
+        Ending gradient values, shape (nb_shots, nb_dimension).
+    start_gradients : NDArray, default None when it is 0
+        Starting gradient values, shape (nb_shots, nb_dimension).
+    nb_raster_points : int, default None
+        Number of time steps (samples) for the gradient waveform.
+        If None, timing is calculated based on the area needed and hardware limits.
+    acq : Acquisition, optional
+        Acquisition configuration to use.
+        If `None`, the default acquisition is used.
+    n_jobs : int, optional
+        Number of parallel jobs to run for optimization, by default 1.
+
+    Returns
+    -------
+    NDArray
+        Gradient waveforms, shape (nb_shots, nb_samples_per_shot, nb_dimension),
+        where each entry contains the gradient value at each time step for each shot
+        and dimension.
+
+    Notes
+    -----
+    - The function automatically determines whether a trapezoidal or triangular waveform
+      is needed based on the area constraint and hardware limits.
+    - The returned gradients are suitable for use in MRI pulse sequence design,
+      ensuring compliance with specified hardware constraints.
+    """
+    acq = acq or Acquisition.default
+    kspace_end_loc, kspace_start_loc, start_gradients, end_gradients = (
+        _set_defaults_gradient_calc(
+            kspace_end_loc,
+            kspace_start_loc,
+            end_gradients,
+            start_gradients,
+        )
+    )
+    if nb_raster_points is None:
+        # Calculate the number of time steps based on the area needed
+        n_ramp_down, n_ramp_up, n_plateau, gi = get_gradient_times_to_travel(
+            kspace_end_loc=kspace_end_loc,
+            kspace_start_loc=kspace_start_loc,
+            end_gradients=end_gradients,
+            start_gradients=start_gradients,
+            acq=acq,
+        )
+        # Extra 2 buffer samples
+        nb_raster_points = int(np.max(n_ramp_down + n_ramp_up + n_plateau) + 2)
+
+    area_needed = (kspace_end_loc - kspace_start_loc) / acq.gamma / acq.raster_time
+
+    def solve_gi_fixed_N(gs, ge, area):
+        def _residual(gi):
+            n_down, n_up = _trapezoidal_ramps(
+                gs, ge, gi, acq.smax, acq.raster_time, buffer=1
+            )
+            n_pl = nb_raster_points - n_down - n_up
+            if n_pl < 0:
+                return np.abs(n_pl)  # Penalize this
+            area_expr = _trapezoidal_area(gs, ge, gi, n_down, n_up, n_pl)
+            return np.abs(area - area_expr)
+
+        res = minimize_scalar(
+            _residual,
+            bounds=(-acq.gmax, acq.gmax),
+            method="bounded",
+            options={"xatol": 1e-10},
+        )
+        if not res.success:
+            raise RuntimeError(f"Minimization failed: {res.message}")
+        return res.x
+
+    gi = Parallel(n_jobs=n_jobs)(
+        delayed(solve_gi_fixed_N)(
+            start_gradients[i, j],
+            end_gradients[i, j],
+            area_needed[i, j],
+        )
+        for i in range(start_gradients.shape[0])
+        for j in range(start_gradients.shape[1])
+    )
+    gi = np.array(gi).reshape(start_gradients.shape)
+    n_ramp_down, n_ramp_up = _trapezoidal_ramps(
+        start_gradients,
+        end_gradients,
+        gi,
+        acq.smax,
+        acq.raster_time,
+        ceil=True,
+    )
+    n_plateau = nb_raster_points - n_ramp_down - n_ramp_up
+    gi = _plateau_value(
+        start_gradients, end_gradients, n_ramp_down, n_ramp_up, n_plateau, area_needed
+    )
+    nb_shots, nb_dimension = kspace_end_loc.shape
+    G = np.zeros((nb_shots, nb_raster_points, nb_dimension), dtype=np.float32)
+    for i in range(nb_shots):
+        for d in range(nb_dimension):
+            start = 0
+            G[i, : n_ramp_down[i, d], d] = np.linspace(
+                start_gradients[i, d], gi[i, d], n_ramp_down[i, d], endpoint=False
+            )
+            start += n_ramp_down[i, d]
+            if n_plateau[i, d] > 0:
+                G[i, start : start + n_plateau[i, d], d] = gi[i, d]
+                start += n_plateau[i, d]
+            G[i, start : start + n_ramp_up[i, d], d] = np.linspace(
+                gi[i, d], end_gradients[i, d], n_ramp_up[i, d], endpoint=False
+            )
+    return G
 
 
 def prewind(trajectory: NDArray, Ns_transitions: int) -> NDArray:
@@ -835,9 +980,9 @@ def get_random_loc_1d(
     dim_size: int,
     center_prop: float | int,
     accel: float = 4,
-    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray | VDSpdf = "uniform",
+    pdf: Literal["uniform", "gaussian", "equispaced"] | NDArray = "uniform",
     rng: int | np.random.Generator | None = None,
-    order: Literal["center-out", "top-down", "random"] | VDSorder = "center-out",
+    order: Literal["center-out", "top-down", "random"] = "center-out",
 ) -> NDArray:
     """Get slice index at a random position.
 
@@ -888,7 +1033,7 @@ def get_random_loc_1d(
         )
     rng = np.random.default_rng(rng)  # get RNG from a seed or existing rng.
 
-    def _get_samples(p: NDArray) -> list[int]:
+    def _get_samples(p: np.typing.ArrayLike) -> list[int]:
         p = p / np.sum(p)  # automatic casting if needed
         return list(rng.choice(borders, size=n_samples_borders, replace=False, p=p))
 
@@ -978,6 +1123,143 @@ def stack_random(
     return new_trajectory.reshape(-1, Ns, 3)
 
 
+def _add_slew_ramp_to_traj_func(
+    func: Callable,
+    func_kwargs: dict,
+    ramp_to_index: int,
+    acq: Acquisition | None = None,    
+) -> NDArray:
+    traj = func(**func_kwargs)
+    acq = acq or Acquisition.default
+    unnormalized_traj = unnormalize_trajectory(traj, acq=acq)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        traj, acq=acq
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    # Calculate the number of time steps for ramps
+    slew_grads = optimize_grad(
+        kspace_end_loc=unnormalized_traj[:, ramp_to_index],
+        end_gradients=gradients_to_reach,
+        acq=acq,
+    )
+    # Update the Ns of the trajectory to ensure we still give
+    # same Ns as users expect. We use extra 2 points as buffer.
+    n_slew_ramp = slew_grads.shape[1] + 2
+    func_kwargs["Ns"] -= n_slew_ramp - ramp_to_index
+    new_traj = func(**func_kwargs)
+    # Re-calculate the gradients
+    unnormalized_traj = unnormalize_trajectory(new_traj, acq=acq)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        new_traj, acq=acq
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    ramp_up_gradients = optimize_grad(
+        kspace_end_loc=unnormalized_traj[:, ramp_to_index],
+        end_gradients=gradients_to_reach,
+        N=n_slew_ramp,
+        acq=acq,
+    )[:, :-1]
+    ramp_up_traj = convert_gradients_to_trajectory(
+        gradients=ramp_up_gradients,
+        initial_positions=initial_positions,
+        acq=acq,
+    )
+    return np.hstack([ramp_up_traj, new_traj[:, ramp_to_index:]])
+
+
+def add_slew_ramp(
+    func: Optional[Callable] = None,
+    ramp_to_index: int = 5,
+    acq: Acquisition | None = None,
+    slew_ramp_disable: bool = False,
+) -> Callable:
+    """Add slew-compatible ramps to a trajectory function.
+
+    This decorator modifies a trajectory function to include
+    slew rate ramps, ensuring that the trajectory adheres to
+    the maximum slew rate and gradient amplitude constraints.
+    The ramps are applied to the gradients of the trajectory
+    at the specified `ramp_to_index`, which is by-default the
+    index of the 5th readout sample.
+    Note that this decorator does not change the length of the original
+    trajectory.
+
+    Parameters
+    ----------
+    func : Optional[Callable], optional
+        The trajectory function to decorate. If not provided,
+        the decorator can be used without arguments.
+    ramp_to_index : int, optional
+        The index in the trajectory where the slew ramp should be applied,
+        by default 5. This is typically the index of the first readout sample.
+    resolution : float or NDArray, optional
+        The resolution of the trajectory, by default DEFAULT_RESOLUTION.
+        This can be a single float or an array-like of shape (3,).
+    raster_time : float, optional
+        The time interval between samples in the trajectory, by default
+        DEFAULT_RASTER_TIME.
+    gamma : float, optional
+        The gyromagnetic ratio in Hz/T, by default Gammas.Hydrogen.
+    smax : float, optional
+        The maximum slew rate in T/m/s, by default DEFAULT_SMAX.
+    slew_ramp_disable : bool, optional
+        If True, disables the slew ramp and returns the trajectory as is,
+        by default False. This is useful for in-out trajectories where
+        the slew ramp is not needed.
+
+    Returns
+    -------
+    Callable
+        A decorator that modifies the trajectory function to include
+        slew rate ramps.
+
+    Notes
+    -----
+    - The decorator modifies the trajectory function to ensure that the
+        gradients at the specified `ramp_to_index` are adjusted to comply with
+        the maximum slew rate and gradient amplitude constraints.
+    - If `slew_ramp_disable` is set to True, the trajectory function will
+        return the trajectory as is, without applying any slew ramps.
+    - The decorator can be used with or without providing a function.
+    - If used without a function, it returns a decorator that can be applied later.
+    - The decorated function should accept parameters like `smax`, `resolution`,
+        `raster_time`, `gamma`, and `ramp_to_index` to control the behavior of the
+        slew ramping.
+    """
+
+    def decorator(trajectory_func):
+        sig = inspect.signature(trajectory_func)
+
+        @wraps(trajectory_func)
+        def wrapped(*args, **kwargs) -> NDArray:
+            # This allows users to also call the trajectory function
+            # directly giving these args.
+            _acq = kwargs.pop("acq", acq)
+            _ramp_to_index = kwargs.pop("ramp_to_index", ramp_to_index)
+            _slew_ramp_disable = kwargs.pop("slew_ramp_disable", slew_ramp_disable)
+            # Bind all args (positional and keyword)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            in_out = bound.arguments.get("in_out", False)
+            if in_out or _slew_ramp_disable:
+                traj = trajectory_func(*args, **kwargs)
+                # Send the trajectory as is for in-out trajectories
+                return traj
+            return _add_slew_ramp_to_traj_func(
+                trajectory_func,
+                bound.arguments,
+                ramp_to_index=_ramp_to_index,
+                acq=_acq,
+            )
+
+        return wrapped
+
+    if func is not None and callable(func):
+        return decorator(func)
+
+    return decorator
+
+  
 def get_grappa_caipi_positions(
     img_size: tuple[int, int],
     grappa_factors: tuple[int, int],
@@ -1047,7 +1329,7 @@ def get_grappa_caipi_positions(
             np.asarray(
                 np.meshgrid(
                     *[
-                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)  # type: ignore
+                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
                         for num, max_loc in zip(acs_region, acs_max_loc)
                     ],
                     indexing="ij",
@@ -1099,7 +1381,7 @@ def get_packing_spacing_positions(
     if packing_enum == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
     elif packing_enum == Packings.CIRCLE:
-        positions = np.zeros((1, 2))
+        positions = [[0, 0]]
         counter = 0
         while len(positions) < side**2:
             counter += 1
@@ -1108,7 +1390,7 @@ def get_packing_spacing_positions(
             # Add the full circle
             radius = 2 * counter
             angles = 2 * np.pi * np.arange(nb_shots) / nb_shots
-            circle: NDArray[np.complexfloating] = radius * np.exp(1j * angles)
+            circle = radius * np.exp(1j * angles)
             positions = np.concatenate(
                 [positions, np.array([circle.real, circle.imag]).T], axis=0
             )
@@ -1118,7 +1400,6 @@ def get_packing_spacing_positions(
             np.arange(-side + 1, side, 2), np.arange(-side + 1, side, 2)
         )
         positions = np.stack([px.flatten(), py.flatten()], axis=-1).astype(float)
-
     if packing_enum in [Packings.HEXAGON, Packings.TRIANGLE]:
         # Hexagonal/triangular packing based on square packing
         positions[::2, 1] += 1 / 2
