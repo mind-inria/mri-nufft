@@ -119,7 +119,7 @@ class MethodRegister:
         List of potential subsititutions to apply to the docstring.
     """
 
-    registry = defaultdict(dict)
+    registry_global = defaultdict(dict)
 
     def __init__(
         self, register_name: str, docstring_subs: dict[str, str] | None = None
@@ -134,7 +134,7 @@ class MethodRegister:
         """
 
         def decorator(func):
-            self.registry[self.register_name][method_name] = func
+            self.registry[method_name] = func
             func = _apply_docstring_subs(func, self.docstring_subs or {})
             return func
 
@@ -150,12 +150,12 @@ class MethodRegister:
 
         def getter(method_name, *args, **kwargs):
             try:
-                method = self.registry[self.register_name][method_name]
+                method = self.registry[method_name]
             except KeyError as e:
                 raise ValueError(
                     f"Unknown {self.register_name} method {method_name}."
                     " Available methods are \n"
-                    f"{list(self.registry[self.register_name].keys())}"
+                    f"{list(self.registry.keys())}"
                 ) from e
 
             if args or kwargs:
@@ -165,6 +165,11 @@ class MethodRegister:
         getter.__doc__ = f"""Get the {self.register_name} function from its name."""
         getter.__name__ = f"get_{self.register_name}"
         return getter
+
+    @property
+    def registry(self):
+        """Get the registry dictionary."""
+        return self.registry_global[self.register_name]
 
 
 def _progressbar(progressbar: bool | tqdm, max_iter: int) -> tqdm:
