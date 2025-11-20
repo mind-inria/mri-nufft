@@ -408,7 +408,9 @@ def normalize_trajectory(
         Normalized trajectory corresponding to `trajectory` input.
     """
     acq = acq or Acquisition.default
-    return trajectory * acq.norm_factor * (2 * np.array(acq.res))
+    return (
+        trajectory * acq.norm_factor * (2 * np.array(acq.res[: trajectory.shape[-1]]))
+    )
 
 
 def unnormalize_trajectory(
