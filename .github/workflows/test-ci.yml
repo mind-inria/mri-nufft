@@ -219,17 +219,10 @@ jobs:
         run: |
           ${{ env.create_venv }}
           ${{ env.activate_venv }}
-          python -m pip install --upgrade pip
-          python -m pip install -e .[extra,test,dev]
-          python -m pip install pooch brainweb-dl torch fastmri
-
-      - name: Install Python deps
-        shell: bash
-        run: |
-          ${{ env.activate_venv }}
           ${{ env.setup_cuda }}
           python -m pip install --upgrade pip
-          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc]
+          python -m pip install pooch brainweb-dl torch fastmri
+          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc,io]
         
       - name: Run examples
         shell: bash
