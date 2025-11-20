@@ -344,6 +344,13 @@ def _solve_qp_osqp(
 
     """
     # Quadratic terms
+
+    # Croping for safety
+    if abs(ge) > gmax:
+        ge = gmax * ge / abs(ge)
+    if abs(gs) > gmax:
+        gs = gmax * gs / abs(gs)
+
     if OSQP_AVAILABLE is False:
         raise RuntimeError("osqp package not found. Install it with `pip install osqp`")
 
