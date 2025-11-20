@@ -28,7 +28,7 @@ pynufft-cpu = ["pynufft"]
 pynufft-gpu = ["pynufft"]
 
 io = ["pymapvbvd"]
-extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets"]
+extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets", "osqp"]
 autodiff = ["torch"]
 
 
