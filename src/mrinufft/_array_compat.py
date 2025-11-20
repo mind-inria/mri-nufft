@@ -57,6 +57,14 @@ except ImportError:
     TENSORFLOW_AVAILABLE = False
     pass
 
+DEEPINV_AVAILABLE = TORCH_AVAILABLE
+
+try:
+    from deepinv.physics.forward import LinearPhysics
+except ImportError:
+    DEEPINV_AVAILABLE = False
+    pass
+
 
 def get_array_module(array: NDArray | Number) -> np:  # type: ignore
     """Get the module of the array."""

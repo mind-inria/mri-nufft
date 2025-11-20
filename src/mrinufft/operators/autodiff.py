@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from .._array_compat import NP2TORCH
 from torch.types import Tensor
+from deepinv.physics.forward import LinearPhysics
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -150,10 +151,10 @@ class MRINufftAutoGrad(torch.nn.Module):
         wrt_traj: bool = False,
         paired_batch: bool = False,
     ):
-        super().__init__()
         if (wrt_data or wrt_traj) and nufft_op.squeeze_dims:
             raise ValueError("Squeezing dimensions is not supported for autodiff.")
 
+        super().__init__()
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
         if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
@@ -293,7 +294,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op.samples = value.detach().cpu().numpy()
 
     def __getattr__(self, name):
-        """Forward all other attributes to the nufft_op."""
+        """Get attribute."""
         return getattr(self.nufft_op, name)
 
     def _check_input_shape(
@@ -336,3 +337,31 @@ class MRINufftAutoGrad(torch.nn.Module):
             )
 
         return True
+
+
+class DeepInvPhyNufft(LinearPhysics):
+    """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
+
+    def __init__(self, autograd_nufft):
+        if not isinstance(autograd_nufft, MRINufftAutoGrad):
+            raise ValueError("autograd_nufft should be an instance of MRINufftAutoGrad")
+        super().__init__()
+        # since autograd_nufft is a nn.Module, we need to set it this way
+        # to avoid registering it as a sub-module / parameter.
+        self.__dict__["_operator"] = autograd_nufft
+
+    def A(self, x: Tensor, **kwargs) -> Tensor:
+        """Forward operation."""
+        return self._operator.op(x, **kwargs)
+
+    def A_adjoint(self, y: Tensor, **kwargs) -> Tensor:
+        """Adjoint operation."""
+        return self._operator.adj_op(y, **kwargs)
+
+    def A_dagger(self, y: Tensor, **kwargs) -> Tensor:
+        """Adjoint operation."""
+        return self._operator.nufft_op.pinv_solver(y, **kwargs)
+
+    def __getattr__(self, name):
+        """Get attribute."""
+        return getattr(self._operator, name)
