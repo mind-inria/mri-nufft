@@ -419,7 +419,7 @@ def _solve_qp_osqp(
         P=H, q=q, A=A, l=lower, u=upper, verbose=False, eps_abs=1e-8, eps_rel=1e-8
     )
     res = prob.solve()
-    return res.x, res.info.status == "solved"
+    return res.x, res.info.status_val <= 2  # 1: solved, 2: solved inaccurate
 
 
 @_solvers("auto")

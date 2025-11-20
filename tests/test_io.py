@@ -1,5 +1,7 @@
 """Test the trajectories io module."""
 
+from mrinufft.io.pulseq import convert_trajectory_to_gradients
+from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
 import numpy as np
 from mrinufft.io import read_trajectory, write_trajectory
 from mrinufft.io.utils import add_phase_to_kspace_with_shifts
@@ -128,3 +130,63 @@ def test_add_shift(kspace_loc, shape):
 
     phase = np.exp(-2 * np.pi * 1j * np.sum(kspace_loc * shifts, axis=-1))
     np.testing.assert_almost_equal(shifted_data / phase, kspace_data, decimal=5)
+
+
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[
+        CasesTrajectories.case_radial2D,
+        CasesTrajectories.case_radial3D,
+        CasesTrajectories.case_in_out_radial2D,
+    ],
+)
+@parametrize("method", ["lp", "lp-minslew", "osqp"])
+def test_prephasors(kspace_loc, shape, acquisition, method):
+    """Test that the prephasors satisfies the gradients constraints."""
+    acq = acquisition
+    grad, init_points = convert_trajectory_to_gradients(kspace_loc, acq)
+    prephasors = get_prephasors_and_spoilers(
+        kspace_loc, acq=acq, method=method, spoil_loc=None, prephase_loc=(0, 0, 0)
+    )
+
+    assert np.all(np.abs(prephasors[:, 0, :]) <= acq.gmax)
+    assert np.all(
+        np.abs(np.diff(prephasors, axis=1) / acq.raster_time) <= acq.smax * 1.001
+    )
+
+    np.testing.assert_allclose(
+        0,
+        np.sum(prephasors, axis=1) * acq.raster_time - init_points / acq.gamma,
+        atol=5e-3 / min(acq.res),
+    )
+
+
+@parametrize_with_cases(
+    "kspace_loc, shape",
+    cases=[
+        CasesTrajectories.case_radial2D,
+        CasesTrajectories.case_radial3D,
+        CasesTrajectories.case_in_out_radial2D,
+    ],
+)
+@parametrize("method", ["lp", "lp-minslew", "osqp"])
+def test_spoilers(kspace_loc, shape, acquisition, method):
+    """Test that the prephasors satisfies the gradients constraints."""
+    acq = acquisition
+    grad, _, end_points = convert_trajectory_to_gradients(
+        kspace_loc, acq, get_final_positions=True
+    )
+    spoilers = get_prephasors_and_spoilers(
+        kspace_loc, acq=acq, method=method, prephase_loc=None, spoil_loc=(1, 0, 0)
+    )
+
+    assert np.all(np.abs(spoilers[:, 0, :]) <= acq.gmax)
+    assert np.all(
+        np.abs(np.diff(spoilers, axis=1) / acq.raster_time) <= acq.smax * 1.001
+    )
+
+    np.testing.assert_allclose(
+        0,
+        np.sum(spoilers, axis=1) * acq.raster_time - end_points / acq.gamma,
+        atol=5e-3 / min(acq.res),
+    )
