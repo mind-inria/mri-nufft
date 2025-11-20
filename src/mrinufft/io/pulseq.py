@@ -25,6 +25,7 @@ try:
     import pypulseq as pp
 except ImportError:
     PULSEQ_AVAILABLE = False
+    pp = None
 
 
 def read_pulseq_traj(
@@ -116,7 +117,7 @@ def _check_timings(seq):
         warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
 
 
-def acq2opts(acq: Acquisition) -> pp.Opts:
+def acq2opts(acq: Acquisition) -> "pp.Opts":
     """Convert an Acquisition object to pypulseq Opts.
 
     Parameters
