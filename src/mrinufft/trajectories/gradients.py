@@ -7,6 +7,7 @@ from typing import Literal
 from tqdm.auto import tqdm
 import numpy as np
 import scipy as sp
+import scipy.sparse as sps
 import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
@@ -273,10 +274,12 @@ def _solve_lp_1d(
         A_eq=A_eq,
         b_eq=b_eq,
         bounds=bounds,
-        method="highs-ds",
-        options={"verbose": 1},
     )
     return res.x, res.success
+
+
+# create alias for lp-minslew
+_solvers.registry["lp-minslew"] = _solve_lp_1d
 
 
 def _build_quadratic(
@@ -295,7 +298,7 @@ def _build_quadratic(
         rows += [i - 1, i - 1, i - 1]
         cols += [i - 1, i, i + 1]
         data += [1, -2, 1]
-    R = sp.csr_matrix((data, (rows, cols)), shape=(N - 2, N))
+    R = sps.csr_matrix((data, (rows, cols)), shape=(N - 2, N))
 
     # Quadratic form
     H_full = 2 * (R.T @ R)  # sparse symmetric
@@ -344,8 +347,8 @@ def _solve_qp_osqp(
     if OSQP_AVAILABLE is False:
         raise RuntimeError("osqp package not found. Install it with `pip install osqp`")
 
-    H, q, c = _build_quadratic(N, gs, ge)
-    nvar = N - 2
+    H, q, c = _build_quadratic(N + 2, gs, ge)
+    nvar = N
 
     # Constraint builder lists
     data = []
@@ -399,7 +402,7 @@ def _solve_qp_osqp(
         row_counter += 1
 
     # Build sparse A
-    A = sp.csc_matrix((data, (rows, cols)), shape=(row_counter, nvar))
+    A = sps.csc_matrix((data, (rows, cols)), shape=(row_counter, nvar))
     lower = np.array(lower)
     upper = np.array(upper)
 
@@ -425,17 +428,19 @@ def _binary_search_int(
 ) -> tuple[NDArray, int]:
     """Perfom a binary search to get best integer that makes f success."""
     x = None
+    val = 0
     while low <= high:
         mid = int(low + (high - low) * 0.8)
         new_x, success = f(mid)
         if success:
             x = new_x
             high = mid - 1
+            val = mid
         else:
             low = mid + 1
     if x is None:
-        raise RuntimeError(f"Could not find a solution {i}, {mid}, {high}, {low}")
-    return x, mid
+        raise RuntimeError(f"Could not find a solution {mid}, {high}, {low}")
+    return x, val
 
 
 def _binary_search_float(
@@ -452,7 +457,7 @@ def _binary_search_float(
         else:
             low = mid
     if x is None:
-        raise RuntimeError(f"Could not find a solution {i}, {mid}, {high}, {low}")
+        raise RuntimeError(f"Could not find a solution {mid}, {high}, {low}")
     return x, mid
 
 
@@ -506,9 +511,12 @@ def _optimize_grad(
     if method == "osqp":
         return res
 
-    res, success = _binary_search_float(
-        partial(solver, N=N, deltak=deltak, gmax=gmax, gs=gs, ge=ge), 0.01 * smax, smax
-    )
+    if method == "lp-minslew":  # minimize slew rate by searching for smallest smax
+        res, new_smax = _binary_search_float(
+            lambda s: solver(smax=s, N=N, deltak=deltak, gmax=gmax, gs=gs, ge=ge),
+            0.001 * smax,
+            smax,
+        )
     if not success:
         raise RuntimeError(
             f"Failed to optimize slew-rate for gradient waveform with given N={N} and"
@@ -562,15 +570,15 @@ def min_length_connection(
 
     # Quantized to the multiple of max_grad_step, to reduces the cases to check
     quantum = 0.5 * max_grad_step
-    deltak_q = np.ceil(deltak / quantum).astype(int)
-    gss_q = np.ceil(gss / quantum).astype(int)
-    ges_q = np.ceil(ges / quantum).astype(int)
+    deltak_q = np.trunc(deltak / quantum).astype(int) + np.sign(deltak)
+    gss_q = np.trunc(gss / quantum).astype(int) + np.sign(gss)
+    ges_q = np.trunc(ges / quantum).astype(int) + np.sign(ges)
 
     # loop over all possible connections, over all dimensions
     # use memoization + quantization to speed up
 
     cache: dict[tuple[int, int, int], int] = {}
-    for gs, ge, dk in tqdm(zip(gss_q, ges_q, deltak_q)):
+    for dk, gs, ge in tqdm(zip(deltak_q, gss_q, ges_q)):
         try:
             cache[(dk, gs, ge)]
         except KeyError:
@@ -600,7 +608,7 @@ def connect_gradient(
     gstarts: NDArray,
     gends: NDArray,
     acq: Acquisition | None = None,
-    method: Literal["lp", "osqp"] = "lp",
+    method: str = "lp",
     N: int | None = None,
 ) -> NDArray:
     """
@@ -619,6 +627,15 @@ def connect_gradient(
     NDArray
         The gradient connections of shape (Nshots,N, 3)
 
+
+    Notes
+    -----
+    - This functions expects k-space points that are unnormalized (i.e., in m^-1).
+    - If N is not provided, the function will compute the minimum length needed
+    to satisfy the hardware constraints for each connection, and use the minimum length
+    that satisfies all connections.
+
+
     """
     acq = acq or Acquisition.default
 
@@ -626,34 +643,36 @@ def connect_gradient(
         kstarts, kends, gstarts, gends, acq=acq, method=method
     )
 
-    nshots = kstarts.shape[0]
-    connections = np.zeros((nshots, N, 3), dtype=kstarts.dtype)
+    nshots, ndim = kstarts.shape
+    connections = np.zeros((nshots, N, ndim), dtype=kstarts.dtype)
     # TODO probably wants to be parallelized and/or memoized
 
     deltaks = (kends - kstarts) / acq.raster_time / acq.gamma
     max_grad_step = acq.smax * acq.raster_time
     gmax = acq.gmax
     for i in range(nshots):
-        connections[i, :, :] = _optimize_grad(
-            N=N,
-            deltak=deltaks[i],
-            gmax=gmax,
-            smax=max_grad_step,
-            gs=gstarts[i],
-            ge=gends[i],
-            method=method,
-        )
+        for j in range(ndim):
+            connections[i, :, j] = _optimize_grad(
+                N=N,
+                deltak=deltaks[i, j],
+                gmax=gmax,
+                smax=max_grad_step,
+                gs=gstarts[i, j],
+                ge=gends[i, j],
+                method=method,
+            )
     return connections
 
 
 def get_prephasors_and_spoilers(
     trajectory: NDArray,
-    spoil_grad=(0, 0, 0),
     spoil_loc=(2, 0, 0),
+    spoil_grad=(0, 0, 0),
     prephase_loc=(0, 0, 0),
     prephase_grad=(0, 0, 0),
     acq: Acquisition | None = None,
     N: int | None | tuple[int, int] = None,
+    method: str = "lp",
 ) -> NDArray | tuple[NDArray, NDArray]:
     """
     Get the prephasors and spoiler gradients for a trajectory.
@@ -662,10 +681,10 @@ def get_prephasors_and_spoilers(
     ----------
     trajectory: NDArray
         The trajectory of shape (Nshots, Ns, 3)
-    spoil_grad: tuple, optional
-        The gradient to use for the spoiler [T/m], by default ``(0, 0, 0)``
     spoil_loc: tuple, optional
         The k-space location to spoil to [m^-1], by default ``(2, 0, 0)``
+    spoil_grad: tuple, optional
+        The gradient to use for the spoiler [T/m], by default ``(0, 0, 0)``
     prephase_loc: tuple, optional
         The k-space location to prephase from [m^-1], by default ``(0, 0, 0)``
     prephase_grad: tuple, optional
@@ -677,29 +696,30 @@ def get_prephasors_and_spoilers(
 
     Returns
     -------
-    NDArray
+    NDArray | tuple[NDArray, NDArray]
         The prephase and spoiler gradients of shape (Nshots, Np, 3)
+
+    See Also
+    --------
+    connect_gradient
+
     """
     acq = acq or Acquisition.default
 
-    nshots, Ns, _ = trajectory.shape
+    nshots, Ns, ndim = trajectory.shape
     # Get the gradient waveforms
-    gradients, _ = convert_trajectory_to_gradients(trajectory, acq)
-
-    norm_traj = unnormalize_trajectory(trajectory, acq)
+    gradients, kstarts, kends = convert_trajectory_to_gradients(trajectory, acq, True)
 
     # Get the starting and ending gradients and k-space points
     gstarts = gradients[:, 0, :]
     gends = gradients[:, -1, :]
-    kstarts = norm_traj[:, 0, :]
-    kends = norm_traj[:, -1, :]
     if not isinstance(N, tuple):
         N_pre = N_spoil = N
     if prephase_loc is not None:
         prephase_loc = unnormalize_trajectory(np.array(prephase_loc), acq)
-        prephase_start_locations = np.tile(prephase_loc, (nshots, 1))
+        prephase_start_locations = np.tile(prephase_loc[:ndim], (nshots, 1))
 
-        prephase_gradients = np.tile(np.array(prephase_grad), (nshots, 1))
+        prephase_gradients = np.tile(np.array(prephase_grad)[:ndim], (nshots, 1))
         prephasers = connect_gradient(
             prephase_start_locations,
             kstarts,
@@ -707,13 +727,14 @@ def get_prephasors_and_spoilers(
             gstarts,
             acq=acq,
             N=N_pre,
+            method=method,
         )
 
     if spoil_loc is not None:
         spoil_loc = unnormalize_trajectory(np.array(spoil_loc), acq)
-        spoil_loc = np.tile(spoil_loc, (nshots, 1))
+        spoil_loc = np.tile(spoil_loc[:ndim], (nshots, 1))
 
-        spoil_gradients = np.tile(np.array(spoil_grad), (nshots, 1))
+        spoil_gradients = np.tile(np.array(spoil_grad)[:ndim], (nshots, 1))
         spoilers = connect_gradient(
             kends,
             spoil_loc,
@@ -721,6 +742,7 @@ def get_prephasors_and_spoilers(
             spoil_gradients,
             acq=acq,
             N=N_spoil,
+            method=method,
         )
 
     if prephase_loc is not None and spoil_loc is not None:
