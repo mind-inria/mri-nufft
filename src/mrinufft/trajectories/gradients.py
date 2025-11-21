@@ -1,7 +1,7 @@
 """Functions to improve/modify gradients."""
 
 from collections.abc import Callable
-from functools import partial
+from functools import partial, wraps
 from typing import Literal
 
 from tqdm.auto import tqdm
@@ -197,7 +197,50 @@ _solvers = MethodRegister("gradient_connection_solver", _solver_docs)
 _get_solver_grad = _solvers.make_getter()
 
 
+def solve_trivial(N, deltak, gmax, smax, gs, ge):
+    """Trivial solver that returns zeros if possible."""
+    if N == 0 and gs == ge and deltak == 0:
+        return np.array([], dtype=np.float32), True
+    elif N == 1:
+        if abs(deltak) <= gmax and abs(gs) <= gmax and abs(ge) <= gmax:
+            return np.array([deltak], dtype=np.float32), True
+    elif N == 2:
+        if (
+            abs(deltak - gs - ge) <= 1e-6
+            and abs(gs) <= gmax
+            and abs(ge) <= gmax
+            and abs(ge - gs) <= smax
+        ):
+            return np.array([gs, ge], dtype=np.float32), True
+        else:
+            return None, False
+    return None, False
+
+
+def preprocess(solver):
+    """Decorator to preprocess trivial cases."""
+
+    @wraps(solver)
+    def wrapper(
+        N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
+    ) -> tuple[NDArray, bool]:
+        """Wrapper function."""
+
+        # Croping for safety
+        if abs(ge) > gmax:
+            ge = gmax * ge / abs(ge)
+        if abs(gs) > gmax:
+            gs = gmax * gs / abs(gs)
+        if N < 3:
+            res, success = solve_trivial(N, deltak, gmax, smax, gs, ge)
+            return res, success
+        return solver(N, deltak, gmax, smax, gs, ge)
+
+    return wrapper
+
+
 @_solvers("lp")
+@preprocess
 def _solve_lp_1d(
     N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
 ) -> tuple[NDArray, bool]:
@@ -220,12 +263,6 @@ def _solve_lp_1d(
     The inputs are normalized by gamma and raster_time. You almost certainly want to
     use `optimize_grad` instead of this function directly.
     """
-    # Croping for safety
-    if abs(ge) > gmax:
-        ge = gmax * ge / abs(ge)
-    if abs(gs) > gmax:
-        gs = gmax * gs / abs(gs)
-
     c = np.ones(N)
     # 2. Variable Bounds
     # The bounds apply to all variables across all dimensions
@@ -320,6 +357,7 @@ def _build_quadratic(
 
 
 @_solvers("osqp")
+@preprocess
 def _solve_qp_osqp(
     N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
 ) -> tuple[NDArray, bool]:
@@ -345,17 +383,11 @@ def _solve_qp_osqp(
     """
     # Quadratic terms
 
-    # Croping for safety
-    if abs(ge) > gmax:
-        ge = gmax * ge / abs(ge)
-    if abs(gs) > gmax:
-        gs = gmax * gs / abs(gs)
-
     if OSQP_AVAILABLE is False:
         raise RuntimeError("osqp package not found. Install it with `pip install osqp`")
 
-    H, q, c = _build_quadratic(N + 2, gs, ge)
-    nvar = N
+    H, q, c = _build_quadratic(N, gs, ge)
+    nvar = N - 2
 
     # Constraint builder lists
     data = []
@@ -416,10 +448,26 @@ def _solve_qp_osqp(
     # OSQP setup
     prob = osqp.OSQP()
     prob.setup(
-        P=H, q=q, A=A, l=lower, u=upper, verbose=False, eps_abs=1e-8, eps_rel=1e-8
+        P=H,
+        q=q,
+        A=A,
+        l=lower,
+        u=upper,
+        verbose=False,
+        eps_abs=1e-7,
+        eps_rel=1e-7,
+        max_iter=10000,
     )
     res = prob.solve()
-    return res.x, res.info.status_val <= 2  # 1: solved, 2: solved inaccurate
+    res_x = np.zeros(N)
+    res_x[0] = gs
+    res_x[1 : N - 1] = res.x
+    res_x[N - 1] = ge
+    print(res.info.status_val)
+    return (
+        res_x,
+        res.info.status_val <= 2,
+    )  # 1: solved, 2: solved inaccurate
 
 
 @_solvers("auto")
@@ -572,8 +620,8 @@ def min_length_connection(
 
     solver = _get_solver_grad(method)
 
-    low = int(np.max(abs(deltak)) / acq.gmax) + 1
-    high = low + 2 * int(acq.gmax / max_grad_step)
+    low = int(np.max(abs(deltak)) / gmax)
+    high = low + 2 * int(gmax / max_grad_step)
 
     # Quantized to the multiple of max_grad_step, to reduces the cases to check
     quantum = 0.5 * max_grad_step

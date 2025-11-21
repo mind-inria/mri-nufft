@@ -223,6 +223,7 @@ def write_trajectory(
     smax: float = DEFAULT_SMAX,
     pregrad: str | None = None,
     postgrad: str | None = None,
+    grad_method: str = "auto",
     version: float = 5,
     **kwargs,
 ):
@@ -305,11 +306,12 @@ def write_trajectory(
                 prephase_grad,
                 gradients[:, 0, :],
                 acq,
-                method="auto",
+                method=grad_method,
                 N=None,
             )
             Ns_to_skip_at_start = prephasors.shape[1]
             gradients = np.concatenate((prephasors, gradients), axis=1)
+            initial_positions = prephase_loc
         if postgrad == "slowdown_to_center":
             spoiler_loc = np.zeros_like(final_positions)
             spoiler_grad = np.zeros_like(final_positions)
@@ -330,6 +332,7 @@ def write_trajectory(
             )
             Ns_to_skip_at_end = spoilers.shape[1]
             gradients = np.concatenate((gradients, spoilers), axis=1)
+            final_positions = spoiler_loc
 
     # Check constraints if requested
     if check_constraints:
