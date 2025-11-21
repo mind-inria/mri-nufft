@@ -79,6 +79,9 @@ for method in ["lp", "lp-minslew", "osqp"]:
 # %%
 # Show the results
 # ==================
+#
+# Setup the figure
+
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -93,6 +96,8 @@ gstraj = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs0[1])
 grad_ax = gsgrad.subplots(sharex=True)
 axs = gstraj.subplots(sharex=True, sharey=True)
 time = np.arange(full_grads["lp"].shape[1]) * acq.raster_time  # in ms
+
+# %%
 # Plot gradients
 
 for method in ["lp", "lp-minslew", "osqp"]:
@@ -125,6 +130,8 @@ grad_ax[1].axvline(
 
 grad_ax[0].legend(loc="upper center")
 
+
+# Plot trajectories
 
 for i, method in enumerate(["lp", "lp-minslew", "osqp"]):
     t = full_traj[method]
