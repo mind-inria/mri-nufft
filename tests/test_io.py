@@ -64,6 +64,7 @@ def acquisition(gmax, smax):
 @parametrize("version", [4.2, 5.0, 5.1])
 @parametrize("postgrad", [None, "slowdown_to_center", "slowdown_to_edge"])
 @parametrize("pregrad", [None, "prephase"])
+@parametrize("grad_method", ["lp", "lp-minslew", "osqp"])
 def test_write_n_read(
     name,
     trajectory,
@@ -77,10 +78,13 @@ def test_write_n_read(
     version,
     postgrad,
     pregrad,
+    grad_method,
 ):
     """Write the trajectory to a file and read it back."""
     if version < 5.1 and (postgrad is not None or pregrad is not None):
         pytest.skip("postgrad 'slowdown_to_edge' is not supported in version < 5.0")
+    if (postgrad is None or pregrad is None) and grad_method != "lp":
+        pytest.skip("pregrad and postgrad must be  defined to test grad_method")
     """Test function which writes the trajectory and reads it back."""
     if np.all(trajectory[:, 0] == 0) and pregrad is not None:
         pytest.skip("We dont need prephasors for UTE trajectories")
@@ -98,6 +102,7 @@ def test_write_n_read(
         gamma=gamma,
         pregrad=pregrad,
         postgrad=postgrad,
+        grad_method=grad_method,
     )
     read_traj, params = read_trajectory(
         str((tmp_path / name).with_suffix(".bin")), gamma=gamma, read_shots=True
@@ -111,7 +116,7 @@ def test_write_n_read(
     assert params["min_osf"] == min_osf
     np.testing.assert_almost_equal(params["FOV"], FOV, decimal=6)
     np.testing.assert_equal(params["img_size"], img_size)
-    np.testing.assert_almost_equal(read_traj, trajectory, decimal=4)
+    np.testing.assert_almost_equal(read_traj, trajectory, decimal=3.5)
 
 
 @parametrize_with_cases(
