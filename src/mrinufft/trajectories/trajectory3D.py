@@ -505,6 +505,8 @@ def initialize_3D_wave_caipi(
             / np.pi
             / nb_revolutions
         )  # Extra factor from angles
+        if np.isscalar(width):
+            width = (width, width, width)
         width = tuple(w for i, w in enumerate(width) if i != readout_axis)
     else:
         width = (width, width) if np.isscalar(width) else width
