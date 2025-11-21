@@ -6,7 +6,6 @@ from typing import Literal
 
 from tqdm.auto import tqdm
 import numpy as np
-import scipy as sp
 import scipy.sparse as sps
 import numpy.linalg as nl
 from numpy.typing import NDArray
@@ -15,9 +14,7 @@ from scipy.optimize import linprog
 
 from mrinufft.trajectories.utils import (
     Acquisition,
-    convert_gradients_to_trajectory,
     convert_trajectory_to_gradients,
-    normalize_trajectory,
     unnormalize_trajectory,
 )
 from mrinufft._utils import MethodRegister, _fill_doc
@@ -94,7 +91,7 @@ def patch_center_anomaly(
 
     if update_shot is None or update_parameters is None:
 
-        def _default_update_parameters(shot: NDArray, *parameters: list) -> list:
+        def _default_update_parameters(_: NDArray, *parameters: list) -> list:
             return parameters
 
         update_parameters = _default_update_parameters
@@ -218,14 +215,13 @@ def solve_trivial(N, deltak, gmax, smax, gs, ge):
 
 
 def preprocess(solver):
-    """Decorator to preprocess trivial cases."""
+    """Decorate solver to preprocess trivial cases."""
 
     @wraps(solver)
     def wrapper(
         N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
     ) -> tuple[NDArray, bool]:
-        """Wrapper function."""
-
+        """Wrap solver."""
         # Croping for safety
         if abs(ge) > gmax:
             ge = gmax * ge / abs(ge)
@@ -386,7 +382,7 @@ def _solve_qp_osqp(
     if OSQP_AVAILABLE is False:
         raise RuntimeError("osqp package not found. Install it with `pip install osqp`")
 
-    H, q, c = _build_quadratic(N, gs, ge)
+    H, q, _ = _build_quadratic(N, gs, ge)
     nvar = N - 2
 
     # Constraint builder lists
@@ -567,7 +563,7 @@ def _optimize_grad(
         return res
 
     if method == "lp-minslew":  # minimize slew rate by searching for smallest smax
-        res, new_smax = _binary_search_float(
+        res, _ = _binary_search_float(
             lambda s: solver(smax=s, N=N, deltak=deltak, gmax=gmax, gs=gs, ge=ge),
             0.001 * smax,
             smax,
@@ -761,7 +757,7 @@ def get_prephasors_and_spoilers(
     """
     acq = acq or Acquisition.default
 
-    nshots, Ns, ndim = trajectory.shape
+    nshots, _, ndim = trajectory.shape
     # Get the gradient waveforms
     gradients, kstarts, kends = convert_trajectory_to_gradients(trajectory, acq, True)
 
