@@ -96,6 +96,7 @@ gstraj = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs0[1])
 grad_ax = gsgrad.subplots(sharex=True)
 axs = gstraj.subplots(sharex=True, sharey=True)
 time = np.arange(full_grads["lp"].shape[1]) * acq.raster_time  # in ms
+# sphinx_gallery_defer_figures
 
 # %%
 # Plot gradients
