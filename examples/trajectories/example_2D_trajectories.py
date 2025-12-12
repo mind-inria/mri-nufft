@@ -302,7 +302,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 # A variable density sampling spiral trajectory whose density is controlled by
 # acceleration factor and/or polynomial order, while respecting hardware constraints
-# (max gradient and slew rate).
+# (max gradient and slew rate), introduced in [Lee03]_.
 #
 # Arguments:
 # - ``Nc (int)``: number of individual shots. See radial
@@ -806,3 +806,6 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #    "ECCENTRIC: a fast and unrestrained approach for high-resolution
 #    in vivo metabolic imaging at ultra-high field MR".
 #    Imaging Neuroscience 2 (2024): 1-20.
+# .. [Lee03] Lee, Hargreaves & Hu et al. : Fast 3D Imaging Using
+#    Variable-Density Spiral Trajectories with Applications
+#    to Limb Perfusion, Magnetic Resonance in Medicine (2003)
