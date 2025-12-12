@@ -62,6 +62,8 @@ def proper_trajectory(trajectory, normalize="pi"):
     try:
         if xp.__name__ == "torch":
             new_traj = trajectory.clone()
+        elif xp.__name__ == "cupy":
+            new_traj = xp.array(trajectory, copy=True)
         else:
             new_traj = np.asarray(trajectory).copy()
     except Exception as e:

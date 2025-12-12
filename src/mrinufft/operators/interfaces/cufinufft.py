@@ -22,6 +22,7 @@ from mrinufft.operators.interfaces.utils import nvtx_mark
 CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
+    import torch
     from cufinufft import Plan
 except ImportError:
     CUFINUFFT_AVAILABLE = False
@@ -85,10 +86,34 @@ class RawCufinufftPlan:
         )
 
     def _set_kxyz(self, samples):
-        self._kx.set(samples[:, 0])
-        self._ky.set(samples[:, 1])
-        if self.ndim == 3:
-            self._kz.set(samples[:, 2])
+        """
+        Set the k-space coordinates (trajectory).
+        Optimized for both CuPy (GPU) and NumPy (CPU) inputs.
+        """
+        if isinstance(samples, cp.ndarray):
+            self._kx = samples[:, 0]
+            self._ky = samples[:, 1]
+            if self.ndim == 3:
+                self._kz = samples[:, 2]
+        
+        elif torch is not None and isinstance(samples, torch.Tensor):
+            cp_samples = cp.asarray(samples)
+            self._kx = cp_samples[:, 0]
+            self._ky = cp_samples[:, 1]
+            if self.ndim == 3:
+                self._kz = cp_samples[:, 2]
+
+        else:
+            if hasattr(self._kx, "set"):
+                self._kx.set(samples[:, 0])
+                self._ky.set(samples[:, 1])
+                if self.ndim == 3:
+                    self._kz.set(samples[:, 2])
+            else:
+                self._kx = cp.array(samples[:, 0])
+                self._ky = cp.array(samples[:, 1])
+                if self.ndim == 3:
+                    self._kz = cp.array(samples[:, 2])
 
     def _set_pts(self, typ):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
@@ -213,10 +238,11 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.autograd_available = True
         # For now only single precision is supported
-        self._samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
-        )
-        self.dtype = self.samples.dtype
+        # self._samples = np.asfortranarray(
+        #     proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+        # )
+        self._samples = self._process_samples(samples)
+        self.dtype = self._samples.dtype
         # density compensation support
         if is_cuda_array(density):
             self.density = density
@@ -235,12 +261,51 @@ class MRICufiNUFFT(FourierOperatorBase):
                 "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
             )
         self.raw_op = RawCufinufftPlan(
-            self.samples,
+            self._samples,
             tuple(shape),
             n_trans=n_trans,
             **kwargs,
         )
 
+    def _process_samples(self, samples):
+        """
+        Internal helper to normalize and convert samples to GPU (CuPy) safely.
+        Handles Torch (GPU/CPU), CuPy (GPU), and NumPy (CPU).
+        """
+        # Torch Input
+        if torch is not None and isinstance(samples, torch.Tensor):
+            if samples.ndim > 2:
+                samples = samples.reshape(-1, samples.shape[-1])
+            if samples.dtype != torch.float32:
+                samples = samples.to(dtype=torch.float32)
+            max_val = samples.abs().max()
+            if max_val < 0.5 + 1e-4:
+                samples = samples * (2 * torch.pi)
+            try:
+                samples_cupy = cp.asarray(samples)
+            except Exception:
+                samples_cupy = cp.asarray(samples.detach())
+            return cp.asfortranarray(samples_cupy)
+
+        # CuPy Input
+        elif isinstance(samples, cp.ndarray):
+            processed = proper_trajectory(samples, normalize="pi")
+            if processed.dtype != np.float32:
+                processed = processed.astype(np.float32)
+            return cp.asfortranarray(processed)
+
+        # NumPy Input
+        else:
+            processed = proper_trajectory(samples, normalize="pi")
+            # xp = cp.get_array_module(processed)
+            # if xp == cp:
+                # if processed.dtype != np.float32:
+                    # processed = processed.astype(np.float32)
+                # return cp.asfortranarray(processed)
+            return np.asfortranarray(
+                processed.astype(np.float32, copy=False)
+            )
+        
     @FourierOperatorBase.smaps.setter
     def smaps(self, new_smaps):
         """Update smaps.
@@ -283,11 +348,12 @@ class MRICufiNUFFT(FourierOperatorBase):
     @FourierOperatorBase.samples.setter
     def samples(self, new_samples):
         """Update the plans when changing the samples."""
-        self._samples = np.asfortranarray(
-            proper_trajectory(new_samples, normalize="pi").astype(
-                np.float32, copy=False
-            )
-        )
+        # self._samples = np.asfortranarray(
+        #     proper_trajectory(new_samples, normalize="pi").astype(
+        #         np.float32, copy=False
+        #     )
+        # )
+        self._samples = self._process_samples(new_samples)
         self.raw_op._set_kxyz(self._samples)
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
