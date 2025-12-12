@@ -288,8 +288,8 @@ def initialize_2D_vds_spiral(
 
     References
     ----------
-
-
+    Lee, Hargreaves & Hu et al. (2003) Fast 3D Imaging Using Variable-Density Spiral
+    Trajectories with Applications to Limb Perfusion, Magnetic Resonance in Medicine.
     """
     if acq is None:
         acq = Acquisition.default
