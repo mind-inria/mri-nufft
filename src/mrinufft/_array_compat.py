@@ -337,7 +337,7 @@ def _convert(_array_to_xp, args, kwargs=None):
         elif isinstance(_arg, tuple | list) and isinstance(_arg[0], ArrayTypes):
             args[n], _ = _convert(_array_to_xp, _arg)
         elif isinstance(_arg, dict):
-            args[n], _ = _convert(_array_to_xp, [], _arg)
+            _, args[n] = _convert(_array_to_xp, [], _arg)
     # convert keyworded
     if kwargs:
         process_kwargs_vals, _ = _convert(_array_to_xp, kwargs.values())

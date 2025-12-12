@@ -101,6 +101,7 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         self.compute_interpolator(interpolator, complex_field_map, readout_time, mask)
 
+    @with_numpy_cupy
     def compute_interpolator(
         self,
         interpolators: str | dict | tuple[NDArray, NDArray],
@@ -174,6 +175,10 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.B, self.C, _ = interpolators(
             field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
+
+    def autograd_available(self) -> bool:
+        """Whether the operator supports autograd differentiation."""
+        return self._fourier_op.autograd_available
 
     def __getattr__(self, name):
         """Delegate attribute to internal operator."""
