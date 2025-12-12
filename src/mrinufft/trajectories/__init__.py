@@ -43,6 +43,7 @@ from .tools import (
 )
 from .trajectory2D import (
     initialize_2D_cones,
+    initialize_2D_vds_spiral,
     initialize_2D_fibonacci_spiral,
     initialize_2D_lissajous,
     initialize_2D_polar_lissajous,
@@ -74,6 +75,7 @@ __all__ = [
     # trajectories
     "initialize_2D_radial",
     "initialize_2D_spiral",
+    "initialize_2D_vds_spiral",
     "initialize_2D_fibonacci_spiral",
     "initialize_2D_cones",
     "initialize_2D_sinusoide",

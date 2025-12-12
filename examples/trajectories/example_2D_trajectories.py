@@ -22,7 +22,6 @@ from utils import show_trajectories, show_trajectory
 # Internal
 import mrinufft as mn
 import mrinufft.trajectories.maths as mntm
-from mrinufft import display_2D_trajectory
 
 # %%
 # Script options
@@ -57,7 +56,8 @@ one_shot = True  # Highlight one shot in particular
 #
 # - ``Nc (int)``: number of individual shots
 # - ``Ns (int)``: number of samples per shot
-# - ``tilt (str, float)``: angle between each consecutive shot (in radians) ``(default "uniform")``
+# - ``tilt (str, float)``: angle between each consecutive shot (in radians)
+#   ``(default "uniform")``
 # - ``in_out (bool)``: define whether the shots should travel toward the center
 #   then outside (in-out) or not (center-out). ``(default False)``
 #
@@ -120,11 +120,11 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   then going back to outer regions, often on the opposite side (radial, cones)
 # - center-out or center-center: when ``in_out=False`` the trajectory will start
 #   at the center, but depending on the specific trajectory formula the path might
-#   end up in the outer regions (radial, spiral, cones, etc) or back to the center (rosette,
-#   lissajous).
+#   end up in the outer regions (radial, spiral, cones, etc) or back to the center
+#   (rosette, lissajous).
 #
-# Note that the behavior of ``tilt`` is automatically adapted to the changes to avoid having
-# to update it too when switching ``in_out``.
+# Note that the behavior of ``tilt`` is automatically adapted to the changes to avoid
+# having to update it too when switching ``in_out``.
 #
 
 arguments = [True, False]
@@ -151,7 +151,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   then outside (in-out) or not (center-out). ``(default False)``. See radial
 # - ``nb_revolutions (float)``: number of revolutions performed from the
 #   center. ``(default 1)``
-# - ``spiral (str, float)``: type of spiral defined through the above-mentionned equation.
+# - ``spiral (str, float)``: type of spiral defined through the above equation.
 #   ``(default "archimedes")``
 #
 
@@ -240,7 +240,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 # - ``Nc (int)``: number of individual shots. See radial
 # - ``Ns (int)``: number of samples per shot. See radial
-# - ``spiral_reduction (float)``: factor used to reduce the automatic spiral length. ``(default 1)``
+# - ``spiral_reduction (float)``: factor to reduce the  spiral length. ``(default 1)``
 # - ``patch_center (bool)``: whether the spiral anomaly at the center should be patched.
 #   ``(default True)``
 #
@@ -294,6 +294,59 @@ function = lambda x: mn.initialize_2D_fibonacci_spiral(
     Ns,
     patch_center=x,
 )
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# Variable Density Sampling Spiral
+# --------------------------------
+#
+# A variable density sampling spiral trajectory whose density is controlled by
+# acceleration factor and/or polynomial order, while respecting hardware constraints
+# (max gradient and slew rate).
+#
+# Arguments:
+# - ``Nc (int)``: number of individual shots. See radial
+# - ``oversampling_factor int``: oversampling factor to increase the number of samples
+#    per shot.
+# - ```acq```: :py:obj:`Acquisition` object definining hardware constraints and
+#   acquisition parameters.
+# - ``Rmin``: minimum acceleration factor at the center of k-space.
+# - ``Rmax``: maximum acceleration factor at the edge of k-space.
+# - ``Fcoeff``: Polynomial coefficients controlling the variable density sampling
+#   profile, alternative to Rmin and Rmax.
+# - ``krmax``: maximum k-space radius to reach, in m^-1 (default 1 / (2 * acq.res[0])).
+# - ``normalize``: whether to normalize the trajectory
+# - ``in_out (bool)``: define whether the shots should travel toward the center then
+#    outside (in-out) or not (center-out). ``(default False)``. See radial.
+
+trajectory = mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out)
+show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
+
+# %%
+# Rmin & Rmax (floats)
+# ~~~~~~~~~~~
+#
+# The minimum and maximum acceleration factors at the center and edge of k-space.
+# These parameters control the sampling density profile of the spiral trajectory.
+# It will linearly interpolate the acceleration factor between Rmin and Rmax as it moves
+# from the center to the edge of k-space.
+
+arguments = [(1, 2), (1, 4), (1, 8), (1, 32)]
+function = lambda x: mn.initialize_2D_vds_spiral(
+    Nc, oversamp=2, in_out=in_out, Rmin=x[0], Rmax=x[1]
+)
+
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+
+# %%
+# krmax (float)
+# ~~~~~~~~~~~~~
+#
+# The maximum k-space radius to reach, in m^-1. This parameter defines the extent of
+# the spiral trajectory in k-space. By default, it is set to 1 / (2 * acq.res[0]).
+
+arguments = [0.25 / (2 * 0.003), 0.5 / (2 * 0.003), 1.0 / (2 * 0.003)]
+function = lambda x: mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out, krmax=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -675,8 +728,8 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # ``nb_zigzags (float)``
 # ~~~~~~~~~~~~~~~~~~~~~~
 #
-# The number of sinusoidal patterns along a line, similar to cones and sinusoidal trajectories.
-#
+# The number of sinusoidal patterns along a line, similar to cones and sinusoidal
+# trajectories.
 
 arguments = [1, 2.5, 5, 10]
 function = lambda x: mn.initialize_2D_waves(Nc, Ns, nb_zigzags=x)

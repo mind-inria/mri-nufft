@@ -71,7 +71,7 @@ ignore = [
 "F401", # Using ``try: import ... except:`` is nice.
 ]
 [tool.ruff.lint.per-file-ignores]
-"examples/**" = ["D"]
+"examples/**" = ["D", "E731"]
 
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
