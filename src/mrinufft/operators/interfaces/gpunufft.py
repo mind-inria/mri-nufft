@@ -2,6 +2,7 @@
 
 import numpy as np
 import warnings
+from numpy.typing import NDArray
 
 from ..base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
@@ -11,6 +12,8 @@ from mrinufft._array_compat import (
     is_cuda_array,
     is_host_array,
     with_numpy_cupy,
+    with_numpy,
+    _array_to_numpy,
 )
 
 GPUNUFFT_AVAILABLE = True
@@ -140,7 +143,7 @@ class RawGpuNUFFT:
 
         self.n_coils = n_coils
         self.shape = shape
-        self.samples = samples
+        self.samples = _array_to_numpy(samples)
         self.use_gpu_direct = use_gpu_direct
         if density_comp is None:
             density_comp = np.ones(samples.shape[0])
@@ -182,7 +185,7 @@ class RawGpuNUFFT:
         self.osf = osf
         self.pinned_smaps = pinned_smaps
         self.operator = NUFFTOp(
-            np.reshape(samples, samples.shape[::-1], order="F"),
+            np.reshape(self.samples, self.samples.shape[::-1], order="F"),
             self.shape,
             self.n_coils,
             self.pinned_smaps,
@@ -544,23 +547,35 @@ class MRIGpuNUFFT(FourierOperatorBase):
         if self._smaps is not None and hasattr(self, "raw_op"):
             self.raw_op.set_smaps(smaps=new_smaps)
 
-    @FourierOperatorBase.samples.setter
-    def samples(self, new_samples):
-        """Set the samples for the Fourier Operator.
+    @with_numpy
+    def update_samples(self, new_samples: NDArray, *, unsafe: bool = False):
+        """Update the samples of the NUFFT operator.
 
         Parameters
         ----------
-        samples: np.ndarray
-            The samples for the Fourier Operator.
+        new_samples: NDArray
+            The new samples location of shape ``Nsamples x N_dimensions``.
+        unsafe: bool, default False
+            If True, the original array is used directly without any checks.
+            This should be used with caution as it might lead to unexpected behavior.
+
+        Notes
+        -----
+        If unsafe is True, the new_samples should be of shape (Nsamples, N_dimensions),
+        F-ordered (column-major) and in the range [-pi, pi]. If not, this will lead to
+        unexpected behavior. You have been warned.
+
+        If unsafe is False, this is automatically handled.
         """
-        xp = get_array_module(new_samples)
-        if xp.__name__ == "cupy":
-            new_samples = new_samples.get()
-        self._samples = proper_trajectory(
-            new_samples.astype(np.float32, copy=False), normalize="unit"
-        )
+        if not unsafe:
+            self._samples = proper_trajectory(
+                new_samples.astype(np.float32, copy=False), normalize="unit"
+            )
+        else:
+            self._samples = new_samples
         # TODO: gpuNUFFT needs to sort the points twice in this case.
         # It could help to have access to directly sorted arrays from gpuNUFFT.
+
         self.compute_density(self._density_method)
         self.raw_op.set_pts(
             self._samples,

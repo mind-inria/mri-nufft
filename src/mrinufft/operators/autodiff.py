@@ -290,8 +290,30 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     @samples.setter
     def samples(self, value):
-        self._samples_torch = value
-        self.nufft_op.samples = value.detach().cpu().numpy()
+        """Set the samples."""
+        self.update_samples(value, unsafe=False)
+
+    def update_samples(self, new_samples: Tensor, *, unsafe: bool = False):
+        """Update the samples of the underlying nufft operator.
+
+        Parameters
+        ----------
+        new_samples: Tensor
+            New samples of shape (n_samples, ndim)
+        unsafe: bool, default False
+            If True, skip input validation checks.
+
+        Notes
+        -----
+        If unsafe is True, the new_samples should be a Tensor of shape
+        (Nsamples, N_dimensions), with the same dtype and device as the current
+        samples. The new samples should be  F-ordered (column-major) and in the
+        range [-pi, pi].
+
+        If unsafe is False, this is automatically handled.
+        """
+        self._samples_torch = new_samples
+        self.nufft_op.update_samples(new_samples.detach(), unsafe=unsafe)
 
     def __getattr__(self, name):
         """Get attribute."""
