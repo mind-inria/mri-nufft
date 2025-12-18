@@ -373,7 +373,7 @@ def _to_cupy(args, kwargs=None, device=None):
     return _convert(partial(_array_to_cupy, device=device), args, kwargs)
 
 
-def _to_numpy_cupy(args, kwargs=None, device="cpu"):
+def _to_numpy_cupy(args, kwargs=None, device=None):
     """Convert a sequence of arguments to numpy or cupy.
 
     Non-arrays are ignored.
@@ -381,6 +381,9 @@ def _to_numpy_cupy(args, kwargs=None, device="cpu"):
     This avoid transfers between different devices
     (e.g., CPU->GPU, GPU->CPU or different GPUs).
     """
+    if device is None:
+        leading_arg = _get_leading_argument(args, kwargs)
+        device = _get_device(leading_arg)
     if CUPY_AVAILABLE and str(device) != "cpu":
         return _to_cupy(args, kwargs, device)
     else:
