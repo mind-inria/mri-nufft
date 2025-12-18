@@ -23,6 +23,7 @@ CUFINUFFT_AVAILABLE = CUPY_AVAILABLE
 try:
     import cupy as cp
     from cufinufft import Plan
+    from cufinufft._compat import get_array_ptr
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
@@ -59,12 +60,9 @@ class RawCufinufftPlan:
         # and type 2 with 2.
         self.plans: list[Plan | None] = [None, None, None]
         self.grad_plan = None
-        self._kx = cp.array(samples[:, 0], copy=False)
-        self._ky = cp.array(samples[:, 1], copy=False)
-        self._kz = cp.array(samples[:, 2], copy=False) if self.ndim == 3 else None
         for i in [1, 2]:
             self._make_plan(i, **kwargs)
-            self._set_pts(i)
+            self._set_pts(i, samples)
 
     @property
     def dtype(self):
@@ -83,16 +81,28 @@ class RawCufinufftPlan:
             dtype=DTYPE_R2C[str(self._dtype)],
             **kwargs,
         )
+        self.plans[typ]._nk = 0  # no type3 points.
 
-    def _set_kxyz(self, samples):
-        self._kx.set(samples[:, 0])
-        self._ky.set(samples[:, 1])
-        if self.ndim == 3:
-            self._kz.set(samples[:, 2])
-
-    def _set_pts(self, typ):
+    def _set_pts(self, typ, samples: NDArray):
         plan = self.grad_plan if typ == "grad" else self.plans[typ]
-        plan.setpts(self._kx, self._ky, self._kz)
+        if plan is None:
+            raise ValueError(f"Plan of type {typ} has not been initialized.")
+        M, d = samples.shape
+        if d != self.ndim:
+            raise ValueError(
+                f"Samples should have shape (N_samples, {self.ndim}), "
+                f"got {samples.shape}."
+            )
+        # Samples should be F-ordered (column-major) !!
+        ptr_samples = [None, None, None]
+        ptr_samples[0] = get_array_ptr(samples[:, -1])
+        ptr_samples[1] = get_array_ptr(samples[:, -2])
+        if self.ndim == 3:
+            ptr_samples[2] = get_array_ptr(samples[:, -3])
+
+        plan._references = ptr_samples
+        plan._nj = M
+        plan._setpts(plan._plan, M, *ptr_samples, 0, None, None, None)
 
     def _destroy_plan(self, typ):
         if self.plans[typ] is not None:
@@ -212,9 +222,9 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
         self.autograd_available = True
-        # For now only single precision is supported
-        self._samples = np.asfortranarray(
-            proper_trajectory(samples, normalize="pi").astype(np.float32, copy=False)
+        self._samples = proper_trajectory(samples, normalize="pi")
+        self._samples = cp.array(
+            proper_trajectory(samples, normalize="pi"), order="F", copy=False
         )
         self.dtype = self.samples.dtype
         # density compensation support
@@ -235,7 +245,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
             )
         self.raw_op = RawCufinufftPlan(
-            self.samples,
+            self._samples,
             tuple(shape),
             n_trans=n_trans,
             **kwargs,
@@ -280,19 +290,36 @@ class MRICufiNUFFT(FourierOperatorBase):
         else:
             self._smaps = new_smaps
 
-    @FourierOperatorBase.samples.setter
-    def samples(self, new_samples):
-        """Update the plans when changing the samples."""
-        self._samples = np.asfortranarray(
-            proper_trajectory(new_samples, normalize="pi").astype(
-                np.float32, copy=False
-            )
-        )
-        self.raw_op._set_kxyz(self._samples)
+    @nvtx_mark()
+    def update_samples(self, new_samples, *, unsafe=False):
+        """Update the samples of the NUFFT operator.
+
+        Parameters
+        ----------
+        new_samples: np.ndarray or GPUArray
+            The new samples location of shape ``Nsamples x N_dimensions``.
+        unsafe: bool, default False
+            If True, the original array is used directly without any checks.
+            This should be used with caution as it might lead to unexpected behavior.
+
+        Notes
+        -----
+        If unsafe is True, the new_samples should be of shape (Nsamples, N_dimensions),
+        F-ordered (column-major) and in the range [-pi, pi]. If not, this will lead to
+        unexpected behavior. You have been warned.
+
+        If unsafe is False, this is automatically handled.
+        """
+        if not unsafe:
+            self._samples = cp.array(
+                proper_trajectory(new_samples, normalize="pi"), copy=False
+            ).astype(np.float32, order="F", copy=False)
+        else:
+            self._samples = new_samples
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ)
+            self.raw_op._set_pts(typ, self._samples)
         self.compute_density(self._density_method)
 
     @FourierOperatorBase.density.setter
@@ -808,7 +835,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             isign=1,
             **kwargs,
         )
-        self.raw_op._set_pts(typ="grad")
+        self.raw_op._set_pts("grad", self._samples)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

@@ -697,6 +697,29 @@ class FourierOperatorBase(ABC):
 
     @samples.setter
     def samples(self, new_samples: NDArray[np.floating]):
+        self.update_samples(new_samples)
+
+    def update_samples(
+        self, new_samples: NDArray[np.floating], *, unsafe: bool = False
+    ):
+        """Update the samples of the NUFFT operator.
+
+        Parameters
+        ----------
+        new_samples: np.ndarray or GPUArray
+            The new samples location of shape ``Nsamples x N_dimensions``.
+        unsafe: bool, default False
+            If True, the original array is used directly without any checks.
+            This should be used with caution as it might lead to unexpected behavior.
+
+        Notes
+        -----
+        If unsafe is True, the new_samples should be of shape (Nsamples, N_dimensions),
+        F-ordered (column-major) and in the range [-pi, pi]. If not, this will lead to
+        unexpected behavior. You have been warned.
+
+        If unsafe is False, this is automatically handled.
+        """
         self._samples = new_samples
 
     @property

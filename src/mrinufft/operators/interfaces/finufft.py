@@ -4,6 +4,7 @@ import numpy as np
 
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU, FourierOperatorBase
+from mrinufft._array_compat import _array_to_numpy
 
 FINUFFT_AVAILABLE = True
 try:
@@ -120,7 +121,8 @@ class MRIfinufft(FourierOperatorCPU):
         squeeze_dims=True,
         **kwargs,
     ):
-        samples = proper_trajectory(np.asfortranarray(samples), normalize="pi")
+        samples = _array_to_numpy(proper_trajectory(samples, normalize="pi"))
+        samples = np.asarray(samples, order="F")
         self.raw_op = RawFinufftPlan(
             samples,
             shape,
@@ -139,12 +141,33 @@ class MRIfinufft(FourierOperatorCPU):
             squeeze_dims=squeeze_dims,
         )
 
-    @FourierOperatorBase.samples.setter
-    def samples(self, new_samples):
-        """Update the plans when changing the samples."""
-        self._samples = proper_trajectory(
-            np.asfortranarray(new_samples), normalize="pi"
-        )
+    def update_samples(self, new_samples, unsafe=False):
+        """Update the samples of the NUFFT operator.
+
+        Parameters
+        ----------
+        new_samples: np.ndarray or GPUArray
+            The new samples location of shape ``Nsamples x N_dimensions``.
+        unsafe: bool, default False
+            If True, the original array is used directly without any checks.
+            This should be used with caution as it might lead to unexpected behavior.
+
+        Notes
+        -----
+        If unsafe is True, the new_samples should be of shape (Nsamples, N_dimensions),
+        F-ordered (column-major) and in the range [-pi, pi]. If not, this will lead to
+        unexpected behavior. You have been warned.
+
+        If unsafe is False, this is automatically handled.
+        """
+        if not unsafe:
+            self._samples = np.asarray(
+                proper_trajectory(new_samples, normalize="pi"), order="F"
+            )
+
+        else:
+            self._samples = new_samples
+
         for typ in [1, 2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
