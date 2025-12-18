@@ -12,6 +12,7 @@ from helpers import image_from_op, kspace_from_op, assert_correlate
 from case_trajectories import CasesTrajectories
 
 from mrinufft import get_operator
+from mrinufft._array_compat import _array_to_numpy
 from mrinufft.extras.field_map import make_b0map, make_t2smap
 
 
@@ -20,7 +21,7 @@ def get_extended_fourier_matrix(ktraj, shape, cpx_fieldmap, readout_time):
 
     For test purposes only.
     """
-    base_fourier = get_fourier_matrix(ktraj, shape, normalize=True)
+    base_fourier = get_fourier_matrix(_array_to_numpy(ktraj), shape, normalize=True)
     off_grid = np.outer(readout_time, cpx_fieldmap.ravel())
     base_fourier *= np.exp(off_grid).astype(np.complex64)
     return base_fourier

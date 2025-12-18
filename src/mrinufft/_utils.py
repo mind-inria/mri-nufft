@@ -59,16 +59,7 @@ def proper_trajectory(trajectory, normalize="pi"):
     """
     # flatten to a list of point
     xp = get_array_module(trajectory)  # check if the trajectory is a tensor
-    try:
-        if xp.__name__ == "torch":
-            new_traj = trajectory.clone()
-        else:
-            new_traj = np.asarray(trajectory).copy()
-    except Exception as e:
-        raise ValueError(
-            "trajectory should be array_like, with the last dimension being coordinates"
-        ) from e
-    new_traj = new_traj.reshape(-1, trajectory.shape[-1])
+    new_traj = trajectory.reshape(-1, trajectory.shape[-1])
 
     max_abs_val = xp.max(xp.abs(new_traj))
 
@@ -76,12 +67,12 @@ def proper_trajectory(trajectory, normalize="pi"):
         warnings.warn(
             "Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)"
         )
-        new_traj *= 2 * xp.pi
+        new_traj = new_traj * 2 * xp.pi
     elif normalize == "unit" and max_abs_val - 1e-4 > 0.5:
         warnings.warn(
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
-        new_traj *= 1 / (2 * xp.pi)
+        new_traj = new_traj * 1 / (2 * xp.pi)
 
     if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
