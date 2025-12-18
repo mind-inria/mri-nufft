@@ -138,7 +138,8 @@ def test_op_samples(
     image_data = to_interface(image_data, array_interface)
     jitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += jitter / 100
+    xp = get_array_module(operator.samples)
+    operator.samples += xp.array(jitter) / 100
     new_operator = update_operator(operator)
     kspace_changed = from_interface(operator.op(image_data), array_interface)
     kspace_true = from_interface(new_operator.op(image_data), array_interface)
@@ -155,7 +156,8 @@ def test_adj_op_samples(
     kspace_data = to_interface(kspace_data, array_interface)
     jitter = np.random.rand(*operator.samples.shape).astype(np.float32)
     # Add very little noise to the trajectory, variance of 1e-3
-    operator.samples += jitter / 100
+    xp = get_array_module(operator.samples)
+    operator.samples += xp.array(jitter) / 100
     new_operator = update_operator(operator)
     image_changed = from_interface(operator.adj_op(kspace_data), array_interface)
     image_true = from_interface(new_operator.adj_op(kspace_data), array_interface)
