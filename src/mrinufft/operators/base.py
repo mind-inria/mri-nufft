@@ -317,21 +317,23 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        if is_host_array(method) or is_cuda_array(method):
-            self.smaps = method
-            return
-        if not method:
-            self.smaps = None
-            return
         kwargs = {}
-        if isinstance(method, dict):
-            kwargs = method.copy()
-            method = kwargs.pop("name")
-        if isinstance(method, str):
-            method = get_smaps(method)
-        if not isinstance(method, Callable):
-            raise ValueError(f"Unknown smaps method: {method}")
-        smaps = method(
+        match method:
+            case None:
+                self.smaps = None
+                return
+            case arr if is_host_array(arr) or (CUPY_AVAILABLE and is_cuda_array(arr)):
+                self.smaps = arr.reshape(self.n_coils, *self.shape)
+                return
+            case {"name": str(name), **kwargs}:
+                method_ = get_smaps(name)
+            case str():
+                method_ = get_smaps(method)
+            case method_ if callable(method_):
+                pass
+            case _:
+                raise ValueError(f"Unknown smaps method: {method}")
+        smaps = method_(
             self.samples,
             self.shape,
             density=self.density,
@@ -486,32 +488,32 @@ class FourierOperatorBase(ABC):
         `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu`
         and `torchkbnufft-gpu`.
         """
-        if is_host_array(method) or (CUPY_AVAILABLE and is_cuda_array(method)):
-            self._density = method
-            return None
-        if not method:
-            self._density = None
-            return None
-        if method is True:
-            method = "pipe"
-
         kwargs = {}
-        if isinstance(method, dict):
-            kwargs = method.copy()
-            method = kwargs.pop("name")  # must be a string !
-        if method == "pipe" and "backend" not in kwargs:
-            kwargs["backend"] = self.backend
-        if isinstance(method, str):
-            method = get_density(method)
-        if not callable(method):
-            raise ValueError(f"Unknown density method: {method}")
+
+        match method:
+            case arr if is_host_array(arr) or (CUPY_AVAILABLE and is_cuda_array(arr)):
+                self._density = arr
+                return
+            case None | False:
+                self._density = None
+                return
+            case True:
+                method_ = get_density("pipe")
+                kwargs["backend"] = self.backend
+            case {"name": str(name), **kwargs}:
+                if name == "pipe" and "backend" not in kwargs:
+                    kwargs["backend"] = self.backend
+                method_ = get_density(name)
+            case str():
+                method_ = get_density(method)
+            case method_ if callable(method_):
+                pass
+            case _:
+                raise ValueError(f"Unknown density method: {method}")
+
+        self.density = method_(self.samples, self.shape, **kwargs)
         if self._density_method is None:
-            self._density_method = lambda samples, shape: method(
-                samples,
-                shape,
-                **kwargs,
-            )
-        self.density = method(self.samples, self.shape, **kwargs)
+            self._density_method = partial(method_, **kwargs)
 
     def get_lipschitz_cst(self, max_iter=10) -> np.floating | NDArray[np.floating]:
         """Return the Lipschitz constant of the operator.
@@ -665,7 +667,7 @@ class FourierOperatorBase(ABC):
         return self._density
 
     @density.setter
-    def density(self, new_density: NDArray | None):
+    def density(self, new_density: NDArray[np.floating] | None):
         if new_density is None:
             self._density = None
         elif len(new_density) != self.n_samples:
