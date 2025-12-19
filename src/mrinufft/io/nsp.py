@@ -327,7 +327,7 @@ def write_trajectory(
                 spoiler_grad,
                 gradients[:, -1, :],
                 acq,
-                method="auto",
+                method=grad_method,
                 N=None,
             )
             Ns_to_skip_at_end = spoilers.shape[1]
