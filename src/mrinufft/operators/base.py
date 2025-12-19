@@ -170,9 +170,6 @@ class FourierOperatorBase(ABC):
 
     interfaces: dict[str, tuple[bool, type[FourierOperatorBase]]] = {}
     autograd_available = False
-    _density_method = None
-    _grad_wrt_data = False
-    _grad_wrt_traj = False
 
     backend: ClassVar[str]
     available: ClassVar[bool]
@@ -185,6 +182,10 @@ class FourierOperatorBase(ABC):
         self._n_coils = 1
         self._n_batchs = 1
         self.squeeze_dims = False
+
+        self._density_method = None
+        self._grad_wrt_data = False
+        self._grad_wrt_traj = False
 
     def __init_subclass__(cls: type[FourierOperatorBase]):
         """Register the class in the list of available operators."""
