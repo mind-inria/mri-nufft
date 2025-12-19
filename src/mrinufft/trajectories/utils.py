@@ -32,11 +32,11 @@ DEFAULT_SMAX = 0.1  # T/m/ms
 class CaseInsensitiveEnumMeta(EnumMeta):
     """A case-insensitive EnumMeta."""
 
-    def __getitem__(self, name: str) -> Enum:
+    def __getitem__(self, name: str):
         """Allow ``MyEnum['Member'] == MyEnum['MEMBER']`` ."""
         return super().__getitem__(name.upper())
 
-    def __getattr__(self, name: str) -> Any:  # noqa ANN401
+    def __getattr__(self, name: str):  # noqa ANN401
         """Allow ``MyEnum.Member == MyEnum.MEMBER`` ."""
         return super().__getattribute__(name.upper())
 
@@ -686,7 +686,7 @@ def initialize_tilt(tilt: str | float | None, nb_partitions: int = 1) -> float:
 
     """
     if isinstance(tilt, Real):
-        return tilt
+        return float(tilt)
     elif tilt is None or tilt == Tilts.NONE:
         return 0
     elif tilt == Tilts.UNIFORM:

@@ -1,5 +1,7 @@
 """Stacked Operator for NUFFT."""
 
+from mrinufft.operators.interfaces.cufinufft import MRICufiNUFFT
+
 import warnings
 
 import numpy as np
@@ -134,16 +136,16 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def _init_samples(
         samples: NDArray,
         z_index: Literal["auto"] | NDArray | None,
-        shape: tuple[int, int, int],
+        shape: tuple[int, ...],
     ) -> tuple[NDArray, NDArray]:
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
-        if samples_dim == len(shape) and auto_z:
+        if samples_dim == 3 and auto_z:
             # samples describes a 3D trajectory,
             # we  convert it to a 2D + index.
             samples2d, z_index_ = traj3d2stacked(samples, shape[-1])
 
-        elif samples_dim == (len(shape) - 1) and not auto_z:
+        elif samples_dim == 2 and not auto_z:
             # samples describes a 2D trajectory
             samples2d = samples
             if z_index is None:
@@ -395,7 +397,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
             self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
-            self.operator = get_operator(backend)(
+            self.operator: MRICufiNUFFT = get_operator(backend)(
                 self._samples2d,
                 shape[:-1],
                 n_coils=self.n_trans * len(self.z_index),
