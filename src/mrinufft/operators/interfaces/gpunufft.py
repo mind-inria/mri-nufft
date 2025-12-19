@@ -416,6 +416,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
         eps=1e-3,
         **kwargs,
     ):
+        super().__init__()
         if GPUNUFFT_AVAILABLE is False:
             raise ValueError(
                 "gpuNUFFT library is not installed, "

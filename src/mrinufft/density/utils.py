@@ -1,13 +1,16 @@
 """Utilities for density compensation."""
 
 from functools import wraps
+from collections.abc import Callable
 
 import numpy as np
-
+from numpy.typing import NDArray
 from mrinufft._utils import MethodRegister, proper_trajectory
 
 register_density = MethodRegister("density")
-get_density = register_density.make_getter()
+get_density: Callable[[str], Callable[..., NDArray[np.floating]]] = (
+    register_density.make_getter()
+)
 
 
 def flat_traj(normalize="unit"):

@@ -109,12 +109,12 @@ def is_cuda_array(var) -> bool:
         return False
 
 
-def is_cuda_tensor(var) -> bool:
+def is_cuda_tensor(var: ArrayTypes) -> bool:
     """Check if var is a CUDA tensor."""
     return TORCH_AVAILABLE and isinstance(var, torch.Tensor) and var.is_cuda
 
 
-def is_host_array(var) -> bool:
+def is_host_array(var: ArrayTypes) -> bool:
     """Check if var is a host contiguous np array."""
     try:
         if isinstance(var, np.ndarray):
@@ -282,6 +282,8 @@ def _array_to_cupy(_arg, device=None):
 
 def _array_to_torch(_arg, device=None):
     """Convert array to torch."""
+    if device is None:
+        device = _get_device(_arg)
     xp = get_array_module(_arg)
     if xp.__name__ == "numpy":
         _arg = torch.as_tensor(_arg, device=device)
