@@ -73,17 +73,15 @@ def list_backends(available_only=False):
 @overload
 def get_operator(backend_name: Literal["stacked"],  wrt_data: bool= False, wrt_traj: bool = False, paired_batch: bool=False) -> partial[MRIStackedNUFFT]: ... # noqa: E501
 @overload
-def get_operator(backend_name: str, wrt_data: Literal[True] = True, wrt_traj: bool = False, paired_batch: bool=...) -> partial[MRINufftAutoGrad]: ... # noqa: E501
+def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=...) -> type[FourierOperatorBase]: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=..., *args: Any, **kwargs: Any) -> FourierOperatorBase: ... # noqa: E501
+@overload
+def get_operator(backend_name: str, wrt_data: Literal[True] = True, wrt_traj: bool = ..., paired_batch: bool=...) -> partial[MRINufftAutoGrad]: ... # noqa: E501
 @overload
 def get_operator(backend_name: str, wrt_data: bool = ..., wrt_traj: Literal[True] = True, paired_batch: bool=...) -> partial[MRINufftAutoGrad]: ... # noqa: E501
 @overload
 def get_operator(backend_name: str, wrt_data: Literal[True] = True, wrt_traj: bool = ..., paired_batch: bool=..., *args: Any, **kwargs: Any) -> MRINufftAutoGrad: ... # noqa: E501
-@overload
-def get_operator(backend_name: str, wrt_data: bool = ..., wrt_traj: Literal[True] = ..., paired_batch: bool=..., *args: Any, **kwargs: Any) -> MRINufftAutoGrad: ... # noqa: E501
-@overload
-def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=..., *args: Any, **kwargs: Any) -> FourierOperatorBase: ... # noqa: E501
-@overload
-def get_operator(backend_name: str, wrt_data: Literal[False] = False, wrt_traj: Literal[False] = False, paired_batch: bool=...) -> type[FourierOperatorBase]: ... # noqa: E501
 # fmt: on
 
 
@@ -177,9 +175,9 @@ class FourierOperatorBase(ABC):
     _grad_wrt_traj = False
 
     backend: ClassVar[str]
-    available: ClassVar[bool] | Callable[..., bool]
+    available: ClassVar[bool]
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
@@ -302,7 +300,10 @@ class FourierOperatorBase(ABC):
             self, b0_map, readout_time, r2star_map, mask, interpolator
         )
 
-    def compute_smaps(self, method: NDArray | Callable | str | dict | None = None):
+    def compute_smaps(
+        self,
+        method: NDArray | Callable[..., NDArray] | str | dict[str, Any] | None = None,
+    ):
         """Compute the sensitivity maps and set it.
 
         Parameters
@@ -462,7 +463,9 @@ class FourierOperatorBase(ABC):
             self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
         )
 
-    def compute_density(self, method: Callable[..., NDArray] = None):
+    def compute_density(
+        self, method: Callable[..., NDArray] | bool | None | str | dict[str, Any] = None
+    ):
         """Compute the density compensation weights and set it.
 
         Parameters

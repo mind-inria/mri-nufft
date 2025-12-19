@@ -169,7 +169,7 @@ def _extract_kspace_center(
 
 
 register_smaps = MethodRegister("smaps", docstring_subs=_smap_docs)
-get_smaps = register_smaps.make_getter()
+get_smaps: Callable[[str], Callable[..., NDArray]] = register_smaps.make_getter()
 
 
 def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
