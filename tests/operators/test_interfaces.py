@@ -4,7 +4,10 @@ import numpy as np
 import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
+from mrinufft.operators.base import get_toeplitz_kernel
 from case_trajectories import CasesTrajectories
+import torch
+import torch.fft as fft
 
 from helpers import (
     kspace_from_op,
@@ -173,6 +176,67 @@ def test_interface_lipschitz(operator):
             img2_data - img_data
         )
     assert np.mean(L) < 1.1 * spec_rad
+
+
+@pytest.mark.parametrize("backend", ["cufinufft", "finufft"])
+@pytest.mark.parametrize("shape", [(64, 64), (32, 32, 32)]) # Test 2D et 3D
+def test_toeplitz_consistency(backend, shape):
+    """
+    Apply A^H A x using the Toeplitz kernel
+    Then check with a given backend of the NUFFT operators using its op and adj.op methods
+    """
+    device = "cuda" if torch.cuda.is_available() and backend == "cufinufft" else "cpu"
+
+    # 1. Setup : random trajectories and samples
+    n_samples = np.prod(shape) * 2 # oversampling to make sure the image is well reconstr (Nyquist)
+    ndim = len(shape)
+    ktraj = (torch.rand((n_samples, ndim), device=device) - 0.5) # [-0.5, 0.5]   
+
+    # Initialize the NUFFT operator
+    nufft_op = get_operator(backend)(
+        samples=ktraj,
+        shape=shape,
+        backend=backend,
+        device=device
+    )
+
+    # 2. Create a random testing image
+    x = torch.randn(shape, dtype=torch.complex64, device=device)
+
+    # 3. Compute the reference method (without the Toeplitz trick)
+    #  A^H A x
+    # We apply the standard NUFFT operator
+    ref_out = nufft_op.adj(nufft_op.forward(x))
+
+    # 4. Accelerated computation using the Toeplitz trick
+    # recover the kernel from the NUFFT for the convolution in the spectral domain
+    kernel = get_toeplitz_kernel(nufft_op)
+
+    # 5. Zero-padding of image x onto the (2*N) grid to preserve linear convol (instead of circ)
+    # image x is centered in the middle of the large zero-padded tensor
+    pad_args = []
+    for s in reversed(shape):
+        pad_args += [s // 2, s // 2]
+    x_padded = torch.nn.functional.pad(x, pad_args)
+    
+    # 6. Fourier transform of the image and multiplication in k-space (convolution)
+    x_f = fft.fftn(x_padded)
+    res_f = x_f * kernel
+    res_padded = fft.ifftn(res_f)
+    
+    # 7. Crop to return to the original image size (shape)
+    # we discard the padding to only keep the central area 
+    slices = tuple(slice(s // 2, s // 2 + s) for s in shape)
+    toeplitz_out = res_padded[slices]
+    
+    # 8. Check numerical consistency
+    # A relative toleranve is used (float32 ~ 1e-5)
+    diff = torch.norm(ref_out - toeplitz_out) / torch.norm(ref_out)
+    
+    print(f"Rel. Error ({backend} {ndim}D): {diff.item():.2e}")
+    assert diff < 1e-4, f"Toeplitz output deviates too much from NUFFT reference: {diff.item()}"
+    ## call this test manually to debug as follows:
+    ## test_toeplitz_consistency("cufinufft", (128, 128))
 
 
 @param_array_interface
