@@ -13,6 +13,8 @@ from functools import partial
 from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
 import numpy as np
+import torch 
+import torch.fft as fft
 from numpy.typing import NDArray
 import warnings
 
@@ -286,19 +288,42 @@ class FourierOperatorBase(ABC):
         """
         return self.adj_op(self.op(image_data) - obs_data)
 
-    def get_toeplitz_kernel(self, image_data: NDArray) -> NDArray:
+    def get_toeplitz_kernel(self, weights=None) -> NDArray:
         """
+        weights: Poids de compensation de densité (N,)
         Computes the Toeplitz kernel (PSF in Fourier domain)
         """
-        # 1. Create Dirac at center of a 2x padded grid
-        shape_padded = [2 * s for s in image_data]
-        dirac = np.zeros(shape_padded, dtype=NDArray)
-       
-        # 2. Compute PSF: A^H A delta
-        psf = self.adj_op(self.op(dirac))
+        # 1. Initialisation de la grille de calcul (x2 pour éviter le repliement)
+        # On travaille sur une grille complexe
+        im_size = self.shape
+        grid_size = tuple(2 * s for s in im_size)
+        
+        # 2. Créer un opérateur temporaire de la taille de la grille
+        # On utilise les mêmes échantillons (ktraj) mais une shape doublée
+        # /!\ Il faut diviser ktraj par 2 car l'espace des fréquences change
+        # 2x padding is mandatory for linear convolution, so  if we  double the image
+        # size in the spatial domain ($N \to 2N$), then the résolution in k-space is divided
+        # by 2. 
+        tmp_op = get_operator(self.backend)(
+            samples=self.samples / 2, 
+            shape=grid_size,
+            density=False
+        )
+
+        # 2. Calculer la PSF (Point Spread Function)
+        # On grid les 'weights' sur la grille double
+        ones = torch.ones(self.n_samples, dtype=torch.complex64)
+        if weights is not None:
+            ones *= weights
+
+        # L'adjoint sur une grille double génère la PSF
+        # instead of  computing PSF: A^H A delta
+        psf = tmp_op.adj_op(ones)
+
+        # 3. Transformer en Kernel (Domaine fréquentiel): return FFT of PSF
+        # On centre la PSF avec ifftshift pour que le pic soit au coin (0,0,0) pour la FFT
+        return fft.fftn(fft.ifftshift(psf))
     
-        # 3. Return FFT of PSF
-        return np.fft.fftn(np.fft.ifftshift(psf))
     
     def with_off_resonance_correction(
         self,
