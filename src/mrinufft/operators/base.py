@@ -286,6 +286,20 @@ class FourierOperatorBase(ABC):
         """
         return self.adj_op(self.op(image_data) - obs_data)
 
+    def get_toeplitz_kernel(self, image_data: NDArray) -> NDArray:
+        """
+        Computes the Toeplitz kernel (PSF in Fourier domain)
+        """
+        # 1. Create Dirac at center of a 2x padded grid
+        shape_padded = [2 * s for s in image_data]
+        dirac = np.zeros(shape_padded, dtype=NDArray)
+       
+        # 2. Compute PSF: A^H A delta
+        psf = self.adj_op(self.op(dirac))
+    
+        # 3. Return FFT of PSF
+        return np.fft.fftn(np.fft.ifftshift(psf))
+    
     def with_off_resonance_correction(
         self,
         b0_map: NDArray | None = None,
