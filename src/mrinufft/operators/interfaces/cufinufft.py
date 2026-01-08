@@ -222,7 +222,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
         self.autograd_available = True
-        self._samples = proper_trajectory(samples, normalize="pi")
         self._samples = cp.array(
             proper_trajectory(samples, normalize="pi"), order="F", copy=False
         )
