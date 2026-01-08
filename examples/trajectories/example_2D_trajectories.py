@@ -345,7 +345,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # The maximum k-space radius to reach, in m^-1. This parameter defines the extent of
 # the spiral trajectory in k-space. By default, it is set to 1 / (2 * acq.res[0]).
 
-arguments = [0.25 / (2 * 0.003), 0.5 / (2 * 0.003), 1.0 / (2 * 0.003)]
+arguments = [0.1, 0.3, 0.5]
 function = lambda x: mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out, krmax=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 

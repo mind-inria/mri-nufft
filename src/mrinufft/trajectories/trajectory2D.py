@@ -267,8 +267,9 @@ def initialize_2D_vds_spiral(
         Coefficients of the polynomial describing the radial acceleration factor
         F(r) = Fcoeffs[0] + Fcoeffs[1]*(r/krmax) + Fcoeffs[2]*(r/krmax)**2 + ...
         If None, it is set to [fov/Rmin, fov/Rmax-fov/Rmin] (linear from Rmin to Rmax)
-    krmax: float, default=None
-        Maximum radius for the spiral (1/m).
+    krmax: float, default=0.5
+        Maximum radius for the spiral. If normalize is True, this is in arbitrary units,
+        else in 1/m.
 
     normalize: bool, default=True
         Whether to normalize the trajectory to the resolution (True) or return in 1/m (
@@ -295,9 +296,12 @@ def initialize_2D_vds_spiral(
         acq = Acquisition.default
     if Fcoeffs is None:
         Fcoeffs = np.array([acq.fov[0] / Rmin, acq.fov[0] / Rmax - acq.fov[0] / Rmin])
-    if krmax is None:
-        krmax = float(1 / (2 * acq.res[0]))
 
+    if normalize:
+        krmax = krmax or 0.5  # in arbitrary units
+        krmax = krmax / acq.res[0]  # convert to 1/m
+    elif krmax is None:  # not normalized, but krmax not given
+        krmax = 0.5 / acq.res[0]  # in 1/m
     To = acq.raster_time / oversamp
 
     # Pre-calculate polynomial derivatives
