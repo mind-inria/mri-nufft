@@ -1,11 +1,16 @@
 """Functions to initialize 2D trajectories."""
 
-from typing import Any, Literal
+from typing import Any
 
 import numpy as np
 import numpy.linalg as nl
+from numpy.polynomial import Polynomial
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
+
+from mrinufft.trajectories.utils import Acquisition, normalize_trajectory
+import warnings
+
 
 from .gradients import patch_center_anomaly
 from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
@@ -226,6 +231,172 @@ def initialize_2D_fibonacci_spiral(
             patched_shot, _ = patch_center_anomaly(trajectory[i], in_out=False)
             patched_trajectory.append(patched_shot)
         trajectory = np.array(patched_trajectory)
+    return trajectory
+
+
+def initialize_2D_vds_spiral(
+    Nc: int,
+    oversamp: int = 1,
+    acq: Acquisition | None = None,
+    Rmin: float = 1,
+    Rmax: float = 1,
+    Fcoeffs: list | tuple | NDArray | None = None,
+    krmax: float | None = None,
+    normalize: bool = True,
+    in_out: bool = False,
+):
+    """
+    Variable density spiral, constrained by acquisition setup.
+
+    The undersampling/acceleration factor of the spiral increase linearly
+    from Rmin to Rmax.
+
+    Parameters
+    ----------
+    Nc: int
+        Number of interleaves for the spiral
+    oversamp: int
+        Oversampling factor for the trajectory calculation
+    acq: Acquisition
+        Acquisition object defining the hardware constraints and imaging parameters
+    Rmin: float
+        Minimum radial acceleration factor
+    Rmax: float
+        Maximum radial acceleration factor (reached at krmax)
+    Fcoeffs: Alternative to describe radial acceleration factor
+        Coefficients of the polynomial describing the radial acceleration factor
+        F(r) = Fcoeffs[0] + Fcoeffs[1]*(r/krmax) + Fcoeffs[2]*(r/krmax)**2 + ...
+        If None, it is set to [fov/Rmin, fov/Rmax-fov/Rmin] (linear from Rmin to Rmax)
+    krmax: float, default=0.5
+        Maximum radius for the spiral. If normalize is True, this is in arbitrary units,
+        else in 1/m.
+
+    normalize: bool, default=True
+        Whether to normalize the trajectory to the resolution (True) or return in 1/m (
+        False)
+    in_out: bool, default=False
+        Whether to start from the center or not
+
+
+    Returns
+    -------
+    ndarray: (Nc,N,2)
+       The 2D vds spiral trajectory
+
+    Notes
+    -----
+    Adapted from Brian Hargreaves MATLAB implementation
+
+    References
+    ----------
+    Lee, Hargreaves & Hu et al. (2003) Fast 3D Imaging Using Variable-Density Spiral
+    Trajectories with Applications to Limb Perfusion, Magnetic Resonance in Medicine.
+    """
+    if acq is None:
+        acq = Acquisition.default
+    if Fcoeffs is None:
+        Fcoeffs = np.array([acq.fov[0] / Rmin, acq.fov[0] / Rmax - acq.fov[0] / Rmin])
+
+    if normalize:
+        krmax = krmax or 0.5  # in arbitrary units
+        krmax = krmax / acq.res[0]  # convert to 1/m
+    elif krmax is None:  # not normalized, but krmax not given
+        krmax = 0.5 / acq.res[0]  # in 1/m
+    To = acq.raster_time / oversamp
+
+    # Pre-calculate polynomial derivatives
+    # doubling the acceleration factor if in_out , as we will samples twice more.
+    Fpoly = Polynomial(Fcoeffs) * (1 + in_out)
+    dFpoly = Fpoly.deriv(1)
+    kxy_max = 1 / (2 * acq.res[0])
+
+    # Determine the number of steps based on a reasonable approximation
+    # For a spiral, the number of points scales with the square of the radius.
+
+    Nc = Nc * (1 + in_out)
+    num_steps = oversamp * int(
+        np.pi * kxy_max**2 / (Nc * acq.raster_time * acq.gamma * acq.gmax)
+    )
+
+    # Initialize NumPy arrays
+    radius = np.zeros(num_steps)
+    thetas = np.zeros(num_steps)
+
+    r0, r1, q0, q1 = 0.0, 0.0, 0.0, 0.0
+    i = 0
+    while r0 < krmax:
+        # Current time
+        # Handle a step towards a new radius, check constraints
+        F = Fpoly(r0 / krmax)
+        twopiFoN = 2 * np.pi * F / Nc
+        twopiFoN2 = twopiFoN**2
+        dFdr = dFpoly(r0 / krmax) / krmax
+
+        # Calculate max radius update based on gradient constraints
+        Gmax = min(1 / (acq.gamma * F * To), acq.gmax * 0.99)
+        max_r1 = np.sqrt((acq.gamma * Gmax) ** 2 / (1 + (twopiFoN * r0) ** 2))
+
+        # Slew rate constraint logic
+        if r1 > max_r1:
+            r2 = (max_r1 - r1) / To
+        else:
+            A = 1 + twopiFoN2 * r0 * r0
+            B = (
+                2 * twopiFoN2 * r0 * r1 * r1
+                + 2 * twopiFoN / F * dFdr * r1 * r1 * r0 * r0
+            )
+            C = (
+                twopiFoN2**2 * r0 * r0 * r1**4
+                + 4 * twopiFoN2 * r1**4
+                + (2 * np.pi / Nc * dFdr) ** 2 * r0 * r0 * r1**4
+                + 4 * twopiFoN2 / F * dFdr * r0 * r1**4
+                - (acq.gamma) ** 2 * acq.smax**2
+            )
+            Disc = B**2 - 4 * A * C
+            r2 = np.real((-B + np.emath.sqrt(Disc)) / (2 * A))
+
+        # Update position and velocity
+        q2 = 2 * np.pi / Nc * dFdr * r1**2 + twopiFoN * r2
+        q1 += q2 * To
+        q0 += q1 * To
+        r1 += r2 * To
+        r0 += r1 * To
+
+        # Store results
+        radius[i] = r0
+        thetas[i] = q0
+
+        # Break if radius exceeds max
+        i += 1
+
+        if i == len(radius):
+            warnings.warn("Increasing size of allocated trajectory array")
+            radius.resize(2 * len(radius), refcheck=False)
+            thetas.resize(2 * len(thetas), refcheck=False)
+
+    # Trim arrays to the actual number of points
+    valid_points = np.where(radius > 0)[0]
+    radius = radius[valid_points]
+    thetas = thetas[valid_points]
+
+    k = radius * np.exp(1j * thetas)
+    k = k.view(np.float64).reshape(-1, 2)
+
+    if in_out:
+        k2 = radius * np.exp(1j * (np.pi + thetas))
+        k2 = k2.view(np.float64).reshape(-1, 2)
+        k = np.concatenate((k2[::-1], k), axis=0)
+    Ns = len(k)
+    Nc = Nc // (1 + in_out)  # back to original number of shots
+    trajectory = np.zeros((Nc, Ns, 2))
+    trajectory[0, :, :] = k
+    # Rotate the first shot Nc times
+    rotation = R2D(initialize_tilt("uniform", Nc) / (1 + in_out)).T
+    for i in range(1, Nc):
+        trajectory[i] = trajectory[i - 1] @ rotation
+    if normalize:
+        return normalize_trajectory(trajectory, acq=acq)
+
     return trajectory
 
 
