@@ -546,6 +546,12 @@ def read_trajectory(
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
+            if np.abs(kspace_loc).max() > normalize_factor:
+                warnings.warn(
+                    "K-space locations exceed the normalization factor after "
+                    "normalization! Clipping the values."
+                )
+                kspace_loc = np.clip(kspace_loc, -normalize_factor, normalize_factor)
         if pre_skip > 0:
             if pre_skip >= num_samples_per_shot:
                 raise ValueError(
