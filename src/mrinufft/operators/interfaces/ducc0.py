@@ -12,7 +12,22 @@ except ImportError:
 
 
 class RawDUCC0:
-    """Binding for the ducc0 package."""
+    """Binding for the ducc0 package.
+
+    Parameters
+    ----------
+    samples: array
+        The samples location of shape ``Nsamples x N_dimensions``.
+        It should be C-contiguous.
+    shape: tuple
+        Shape of the image space.
+    eps: float, default=1e-6
+        Requested accuracy of the transform.
+        Useful ranges go from 1e-2 to 1e-13.
+    nthreads: int, default=1
+        Number of threads to use for the transforms.
+        0 uses as many threads as there are virtual CPU cores on the system.
+    """
 
     def __init__(self, samples, shape, eps=1e-6, **kwargs):
         self.samples = samples
