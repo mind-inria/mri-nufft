@@ -14,7 +14,7 @@ except ImportError:
 class RawDUCC0:
     """Binding for the ducc0 package."""
 
-    def __init__(self, samples, shape, eps=1e-6):
+    def __init__(self, samples, shape, eps=1e-6, **kwargs):
         self.samples = samples
         self.shape = shape
         self.plan = ducc0.nufft.plan(
@@ -22,9 +22,9 @@ class RawDUCC0:
             coord=samples,
             grid_shape=shape,
             epsilon=eps,
-            # nthreads=?,
-            periodicity=1,
-            fft_order=False,
+            periodicity=1.0,  # must be 1, otherwise conventions don't match
+            fft_order=False,  # must be False, otherwise conventions don't match
+            **kwargs,  # nthreads should be specified in here, otherwise only one thread is used
         )
 
     def op(self, coeffs, image):
@@ -47,7 +47,7 @@ class MRIDUCC0(FourierOperatorCPU):
     available = DUCC0_AVAILABLE
 
     def __init__(
-        self, samples, shape, n_coils=1, n_batchs=1, smaps=None, density=False
+        self, samples, shape, n_coils=1, n_batchs=1, smaps=None, density=False, **kwargs
     ):
         super().__init__(
             samples,
@@ -59,4 +59,4 @@ class MRIDUCC0(FourierOperatorCPU):
             density=density,
             raw_op=None,  # is set later, after normalizing samples.
         )
-        self.raw_op = RawDUCC0(self.samples, shape)
+        self.raw_op = RawDUCC0(self.samples, shape, **kwargs)
