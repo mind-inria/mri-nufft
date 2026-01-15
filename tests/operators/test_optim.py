@@ -22,6 +22,7 @@ from mrinufft.extras.optim import loss_l2_reg
         "bart",
         "finufft",
         "cufinufft",
+        "ducc0",
         "gpunufft",
         "sigpy",
         "torchkbnufft-cpu",
