@@ -24,7 +24,7 @@ class RawDUCC0:
             epsilon=eps,
             # nthreads=?,
             periodicity=1,
-            fft_order=False
+            fft_order=False,
         )
 
     def op(self, coeffs, image):
