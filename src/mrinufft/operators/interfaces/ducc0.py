@@ -22,29 +22,26 @@ class RawDUCC0:
             coord=samples,
             grid_shape=shape,
             epsilon=eps,
-            #nthreads=?,
+            # nthreads=?,
             periodicity=1,
             fft_order=False
-            )
+        )
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""
-        print("op:",image.shape, image.dtype, coeffs.shape, coeffs.dtype)
         for i in range(coeffs.shape[0]):
             self.plan.u2nu(forward=True, grid=image[i], out=coeffs[i])
         return coeffs
 
     def adj_op(self, coeffs, image):
         """Compute the adjoint NUDFT."""
-        print("adj_op:",image.shape, image.dtype, coeffs.shape, coeffs.dtype)
         for i in range(coeffs.shape[0]):
             self.plan.nu2u(forward=False, points=coeffs[i], out=image[i])
         return image
 
 
 class MRIDUCC0(FourierOperatorCPU):
-    """MRI operator using ducc0 backend.
-    """
+    """MRI operator using ducc0 backend."""
 
     backend = "ducc0"
     available = DUCC0_AVAILABLE
