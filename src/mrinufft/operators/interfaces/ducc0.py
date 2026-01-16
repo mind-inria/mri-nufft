@@ -1,6 +1,7 @@
 """An implementation of the NUDFT using numpy."""
 
 import numpy as np
+import os
 
 from ..base import FourierOperatorCPU
 
@@ -24,14 +25,19 @@ class RawDUCC0:
     eps: float, default=1e-6
         Requested accuracy of the transform.
         Useful values go from 1e-2 down to 1e-13 (for double precision).
-    nthreads: int, default=1
+    nthreads: int, default=0
         Number of threads to use for the transforms.
-        0 uses as many threads as there are virtual CPU cores on the system.
+        0 uses as many threads as there are available for the current process.
+        if negative, uses `(available threads) + 1 + nthreads` threads.
     """
 
-    def __init__(self, samples, shape, eps=1e-6, nthreads=1, **kwargs):
+    def __init__(self, samples, shape, eps=1e-6, nthreads=0, **kwargs):
         self.samples = samples
         self.shape = shape
+        if nthreads == 0:
+            nthreads = len(os.sched_getaffinity(0))
+        elif nthreads < 0:
+            nthreads = len(os.sched_getaffinity(0)) + 1 + nthreads
         self.plan = ducc0.nufft.plan(
             nu2u=False,  # can be used for both directions
             coord=samples,
