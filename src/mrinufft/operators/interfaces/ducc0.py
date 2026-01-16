@@ -23,7 +23,7 @@ class RawDUCC0:
         Shape of the image space.
     eps: float, default=1e-6
         Requested accuracy of the transform.
-        Useful ranges go from 1e-2 to 1e-13.
+        Useful values go from 1e-2 down to 1e-13 (for double precision).
     nthreads: int, default=1
         Number of threads to use for the transforms.
         0 uses as many threads as there are virtual CPU cores on the system.
@@ -44,15 +44,11 @@ class RawDUCC0:
 
     def op(self, coeffs, image):
         """Compute the forward NUDFT."""
-        for i in range(coeffs.shape[0]):
-            self.plan.u2nu(forward=True, grid=image[i], out=coeffs[i])
-        return coeffs
+        return self.plan.u2nu(forward=True, grid=image, out=coeffs)
 
     def adj_op(self, coeffs, image):
         """Compute the adjoint NUDFT."""
-        for i in range(coeffs.shape[0]):
-            self.plan.nu2u(forward=False, points=coeffs[i], out=image[i])
-        return image
+        return self.plan.nu2u(forward=False, points=coeffs, out=image)
 
 
 class MRIDUCC0(FourierOperatorCPU):
