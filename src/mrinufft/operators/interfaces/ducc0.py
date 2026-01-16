@@ -29,7 +29,7 @@ class RawDUCC0:
         0 uses as many threads as there are virtual CPU cores on the system.
     """
 
-    def __init__(self, samples, shape, eps=1e-6, **kwargs):
+    def __init__(self, samples, shape, eps=1e-6, nthreads=1, **kwargs):
         self.samples = samples
         self.shape = shape
         self.plan = ducc0.nufft.plan(
@@ -37,9 +37,10 @@ class RawDUCC0:
             coord=samples,
             grid_shape=shape,
             epsilon=eps,
+            nthreads=nthreads,
             periodicity=1.0,  # must be 1, otherwise conventions don't match
             fft_order=False,  # must be False, otherwise conventions don't match
-            **kwargs,  # nthreads should be specified in here, otherwise only one thread is used
+            **kwargs,
         )
 
     def op(self, coeffs, image):
