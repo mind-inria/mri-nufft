@@ -9,7 +9,6 @@ import numpy as np
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
 
-
 SIGPY_AVAILABLE = True
 try:
     with warnings.catch_warnings():

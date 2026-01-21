@@ -17,7 +17,6 @@ from helpers import (
     batched_smaps_from_op,
 )
 
-
 TORCH_AVAILABLE = True
 try:
     import torch

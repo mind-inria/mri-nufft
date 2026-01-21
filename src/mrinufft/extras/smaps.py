@@ -16,7 +16,6 @@ from numpy.typing import NDArray
 
 from collections.abc import Callable
 
-
 ########################################################
 # Estimation of Off-Resonance-Correction Interpolators #
 ########################################################

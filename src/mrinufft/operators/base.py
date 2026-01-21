@@ -30,7 +30,6 @@ from mrinufft._array_compat import (
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 
-
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU

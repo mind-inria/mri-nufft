@@ -22,7 +22,6 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 import mrinufft
 from mrinufft.extras.optim import loss_l2_reg, loss_l2_AHreg
 
-
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 # %%

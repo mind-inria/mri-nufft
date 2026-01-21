@@ -25,7 +25,6 @@ from mrinufft.trajectories import initialize_3D_cones
 import torch
 import os
 
-
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 # %%
