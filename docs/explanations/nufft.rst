@@ -1,9 +1,13 @@
+:orphan:
+
 .. include:: <isonum.txt>
 .. _NUFFT:
 
+   
 ====================
  The NUFFT Operator
 ====================
+
 
 This document gives a general overview of the Non-Uniform Fast fourier transform (NUFFT), and its application to MRI.
 
@@ -264,7 +268,7 @@ Type 2 transforms perform those steps in reversed order.
 
 
 Density Compensation
-====================
+--------------------
 
 
 In non-uniform sampling, such as radial or spiral MRI, the acquired k-space samples :math:`k_m` are not equally spaced. As a result, each sample does not contribute equally to the final image. To account for the non-uniform sampling density, a set of weights :math:`w_m`—called the density compensation function (DCF)—is applied to the measured data :math:`y_m`.
@@ -273,19 +277,19 @@ In the adjoint NUFFT (type 2), which maps from non-uniform k-space onto the imag
 
 .. math::
 
-    x_n = \sum_{m=1}^M y_m \, w_m \, e^{-i 2\pi k_m \cdot x_n}
+    x_n = \sum_{m=1}^M y_m \, w_m \, e^{-i 2\pi \nu_m \cdot x_n}
 
 where:
 
 - :math:`x_n` is the reconstructed pixel value at position :math:`x_n`,
 - :math:`y_m` are the measured non-uniform k-space data,
 - :math:`w_m` is the density compensation weight for sample :math:`m`,
-- :math:`k_m` is the k-space sampling location.
+- :math:`\nu_m` is the k-space sampling location.
 
 The choice of :math:`w_m` depends on the trajectory:
 
 - **Analytical weights**: For simple trajectories (e.g., radial), :math:`w_m` may have closed forms.
-- **Voronoi weights**: :math:`w_m` corresponds to the area/volume of Voronoi cells around each sample :math:`k_m`.
+- **Voronoi weights**: :math:`w_m` corresponds to the area/volume of Voronoi cells around each sample :math:`\nu_m`.
 - **Iterative methods**: For arbitrary trajectories, :math:`w_m` can be estimated via iterative algorithms that minimize reconstruction artifacts.
 
 The DCF is typically applied before the NNUFFT ensuring each k-space measurement contributes proportionally to its neighborhood. Proper density compensation is crucial for artifact-free, quantitatively accurate image reconstruction.
@@ -297,6 +301,66 @@ The DCF is typically applied before the NNUFFT ensuring each k-space measurement
 .. tip::
    For consistent scaling, density compensation weights should be normalized, so that the total signal energy is preserved across different trajectories and density choices. If you supply your own weights (See the for instance the normalization done for the :func:`pipe <mrinufft.operators.interfaces.cufinufft.MRICufinufft.pipe>` method)
 
+
+Toeplitz NUFFT
+--------------
+
+In most application of the NUFFT operator, we will frequently need to apply the Gram Operator :math:`T=A^HWA` where :math:`A` is the discretized NUFFT operator, and :math:`W` is a diagonal matrix of weights :math:`\boldsymbol{w}` (e.g density compensation weights). Direct application of this operator is computationally expensive as it requires two NUFFT operations.
+
+However, the operator :math:`T` is a Toeplitz operator, and can be efficiently applied using only one NUFFT operation and one inverse NUFFT operation, by precomputing the convolution kernel :math:`K`  associated to :math:`T`. For a given image :math:`x`, the operation is:
+
+.. math::
+   
+   (\boldsymbol{T}\boldsymbol{x})_n &= (\boldsymbol{A^HWAx})_n = \sum_{m=1}^M w_m e^{2i\pi \boldsymbol{\nu}_m \cdot \boldsymbol{u}_n} (\boldsymbol{Ax})_m\\
+            &= \sum_{m=1}^M w_m e^{2i\pi \boldsymbol{\nu}_m \cdot \boldsymbol{u}_n}  \sum_{n'=1}^N e^{-2i\pi \boldsymbol{\nu}_m \cdot \boldsymbol{u}_{n'}} \boldsymbol{x}_{n'}\\
+            &= \sum_{n'=1}^N \sum_{m=1}^M w_m e^{2i\pi \boldsymbol{\nu}_m \cdot (\boldsymbol{u}_n-\boldsymbol{u}_{n'})} x_{n'} \\
+            &= \sum_{n'=1}^N K[n-n'] x_{n'} \\
+            &= K \ast x_n
+
+
+A few things can be said about this formulation:
+
+- :math:`K` is the point-spread-function (PSF) associated to a given k-space sampling trajectory.
+
+- To capture all possible correlation (lags) between voxel in a grid of size :math:`N` the resulting convolution kernel must have a size of :math:`2N`.
+
+- for real-valued :math:`\boldsymbol{W}` the Kernel should have hermitian symetry, since :math:`\boldsymbol{A^HWA}` is an hermitian operator.
+
+- :math:`T`  has Toeplitz structure in 1D and a BTTB (Block Toeplitz with Toeplitz Block) in 2D and 3D.
+
+- :math:`T`  is not directly diagonalizable by a Fourier Transform, but Circulant matrix are, so to apply the Toeplitz kernel efficiently, we will zero-pad the image into a 2N grid, and we have:
+
+.. math::
+
+    Tx = \operatorname{iFFT}( \hat{K} \cdot  FFT(x))    
+
+With :math:`\hat{K}` the Fourier transform of the kernel. 
+
+.. note::
+
+    - Multi-coil operators (e.g with coil sensitivities) wraps around the Gram Operator easily,but don’t have a global Toeplitz structure, however they have a “toeplitz-like structure” that can be used [7]_. It is not clear yet if this is more efficient than the classic SENSE operator.
+
+    - For off-resonance correction, see [3]_
+
+      
+Computing the Toeplitz Kernel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Toeplitz Kernel can be written as:
+
+.. math::
+   
+    K[n] = \sum_{m=1}^{M} w_m e^{2i\pi \boldsymbol{\nu}_m r_n} \quad\text{with } n \in [-N,N]
+
+Which is the Adjoint NUFFT (type-1) of the input weights :math:`\boldsymbol{w}` on a grid of size :math:`2N`. Computing this adjoint NUFFT directly would thus require a 4N NUFFT (note that is is per dimension, so a 3D NUFFT would require 4\ :sup:`3`\=64 more memory for estimating the kernel). Instead we can leverage the hermitian symmetry of the kernel: :math:`K[-n] = K[n]^*`. This is done by computing the kernel by flipping the trajectory to reach the different quadrant (or octant in 3D). See the detail of the implementation in :py:mod:`mrinufft.operators.toeplitz` module.
+
+
+
+Autodifferentiation
+-------------------
+
+TBA
+   
    
 Other Application
 =================
@@ -313,8 +377,16 @@ References
 ==========
 
 .. [1] https://en.m.wikipedia.org/wiki/Non-uniform_discrete_Fourier_transform
+
 .. [2] Noll, D. C., Meyer, C. H., Pauly, J. M., Nishimura, D. G., Macovski, A., "A homogeneity correction method for magnetic resonance imaging with time-varying gradients", IEEE Transaction on Medical Imaging (1991), pp. 629-637.
+
 .. [3] Fessler, J. A., Lee, S., Olafsson, V. T., Shi, H. R., Noll, D. C., "Toeplitz-based iterative image reconstruction for MRI with correction for magnetic field inhomogeneity",  IEEE Transactions on Signal Processing 53.9 (2005), pp. 3393–3402.
-.. [4] D. F. McGivney et al., "SVD Compression for Magnetic Resonance Fingerprinting in the Time Domain," IEEE Transactions on Medical Imaging (2014), pp. 2311-2322.
-.. [5] D. C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, "A homogeneity correction method for magnetic resonance imaging with time-varying gradients," in IEEE Transactions on Medical Imaging, vol. 10, no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599
+
+.. [4] D.F. McGivney et al., "SVD Compression for Magnetic Resonance Fingerprinting in the Time Domain," IEEE Transactions on Medical Imaging (2014), pp. 2311-2322.
+
+.. [5] D.C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, "A homogeneity correction method for magnetic resonance imaging with time-varying gradients," in IEEE Transactions on Medical Imaging, vol. 10, no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599
+       
 .. [6] Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency interpolation for fast off-resonance correction. Magn. Reson. Med., 37: 785-792. https://doi.org/10.1002/mrm.1910370523
+
+.. [7] Chen, J., Christodoulou, A.G., Fan, Z. (2026). Direct Inversion Formula of the Multi-coil MR Operator Under Arbitrary Trajectories. In: Gee, J.C., et al. Medical Image Computing and Computer Assisted Intervention – MICCAI 2025. MICCAI 2025. Lecture Notes in Computer Science, vol 15963. Springer, Cham. https://doi.org/10.1007/978-3-032-04965-0_14 
+ 

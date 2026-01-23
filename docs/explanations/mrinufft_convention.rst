@@ -12,21 +12,21 @@ The NUFFT Operator
 
 MRI-NUFFT provides a common interface for computing NUFFT, regardless of the chosen computation backend. All the backends implement the following methods and attributes. More technical details are available in the API reference.
 
-All MRI-NUFFT operators inherit from :class:`FourierOperatorBase` . The minimum signature of an MRI nufft operator is:
+All MRI-NUFFT operators inherit from :class:`mrinufft.operators.base.FourierOperatorBase` . The minimum signature of an MRI nufft operator is:
 
 .. code-block:: python
 
     class MRIOperator(FourierOperatorBase):
 
-          backend = "my-nufft-backend"
+        backend = "my-nufft-backend"
 
-          def __init__(samples: np.ndarray,
+        def __init__(samples: np.ndarray,
             shape:tuple[int,...],
             density: str | callable | np.ndarray | dict = False,
             n_coils: int = 1,
             n_batchs: int = 1,
             smaps: str | callable | np.ndarray | dict = False,
-            ):
+        ):
 
             self.samples = proper_trajectory(samples)
             self.shape = shape
@@ -66,7 +66,10 @@ The base NUFFT operators can be extended to add extra functionality. With MRI-NU
 Adding a NUFFT Backend
 ----------------------
 
-Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how other backends have been inplemented. CPU-based nufft interface can use the `FourierOperatorCPU` to minimize the boiler-plate.
+Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how other backends have been inplemented. CPU-based nufft interface can use the :py:class:`mrinufft.operators.base.FourierOperatorCPU` to minimize the boiler-plate.
+
+For reference, see `this pull-request <https://github.com/mind-inria/mri-nufft/pull/345>`_ implementing the ``ducc0`` backend.
+
 
 .. _kspace_traj:
 
