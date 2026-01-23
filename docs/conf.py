@@ -107,7 +107,7 @@ sphinx_gallery_conf = {
     "matplotlib_animations": (True, "mp4"),
     "first_notebook_cell": (
         "!pip install mri-nufft[cufinufft,finufft,gpunufft,extra,autodiff]\n"
-        "!pip install brainweb-dl fastmri",
+        "!pip install brainweb-dl fastmri"
     ),  # for binder and colab
 }
 
@@ -145,6 +145,7 @@ html_theme_options = {
             "sg_launcher_links",
             "colab_link",
         ],
+        "explanations/**": ["page-toc"],
     },
     "header_links_before_dropdown": 4,
     "icon_links": [
