@@ -188,9 +188,16 @@ def apply_toeplitz_kernel(
 
     See Also
     --------
-    compute_toeplitz_kernel : Calculate the Toeplitz kernel to be used with this function.
+    compute_toeplitz_kernel : Compute Toeplitz kernel to be used with this function.
     """
     xp = get_array_module(image)
+    if xp.__name__ == "numpy":
+        from scipy.fft import fftn, ifftn
+    elif xp.__name__ == "cupy":
+        from cupy.cupyx.scipy.fft import fftn, ifftn
+    else:  # fallback for torch and others
+        fftn = xp.fft.fftn
+        ifftn = xp.fft.ifftn
     if padded_array is None:
         padded_array = xp.zeros(toeplitz_kernel.shape, dtype=image.dtype)
     elif padded_array.shape != toeplitz_kernel.shape:
@@ -199,8 +206,8 @@ def apply_toeplitz_kernel(
     tl_corner = tuple(slice(0, s) for s in image.shape)
 
     padded_array[tl_corner] = image
-    tmp = xp.fft.fftn(padded_array)
+    tmp = fftn(padded_array)
     tmp *= toeplitz_kernel
-    result = xp.fft.ifftn(tmp)
+    result = ifftn(tmp, overwrite_x=True)
 
     return result[tl_corner]
