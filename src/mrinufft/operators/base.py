@@ -327,14 +327,17 @@ class FourierOperatorBase(ABC):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
 
         dataf = data.reshape(B * C, *XYZ)
-        return self._gram_op_toeplitz_raw(dataf).reshape(B, C, *XYZ)
+        ret = xp.zeros_like(dataf)
+        for i in range(B * C):
+            ret[i] = self._gram_op_toeplitz_raw(dataf[i].reshape(*XYZ))
+        return ret.reshape(B, C, *XYZ)
 
     def _gram_op_toeplitz_raw(self, data) -> NDArray:
         from .toeplitz import apply_toeplitz_kernel
 
         if self._toeplitz_kernel is None:
             self.compute_toeplitz_kernel()
-        return apply_toeplitz_kernel(self, data, self._toeplitz_kernel)
+        return apply_toeplitz_kernel(data, self._toeplitz_kernel)
 
     def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
         """Compute the gradient data consistency.
@@ -359,11 +362,12 @@ class FourierOperatorBase(ABC):
             self, b0_map, readout_time, r2star_map, mask, interpolator
         )
 
-    def compute_toeplitz_kernel(self):
+    def compute_toeplitz_kernel(self) -> NDArray:
         """Compute the Toeplitz kernel and set it."""
         from .toeplitz import compute_toeplitz_kernel
 
         self._toeplitz_kernel = compute_toeplitz_kernel(self, self.density)
+        return self._toeplitz_kernel
 
     def compute_smaps(
         self,
