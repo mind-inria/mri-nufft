@@ -1,17 +1,30 @@
 """Toeplitz approximation of the Auto-adjoint operator for NUFFT."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import with_numpy_cupy, get_array_module
-from .base import FourierOperatorBase
+
+from mrinufft.operators.base import FourierOperatorBase
 
 
-def calc_toeplitz_kernel(
+def _get_fftn(xp):
+    if xp.__name__ == "numpy":
+        from scipy.fft import fftn, ifftn
+    elif xp.__name__ == "cupy":
+        from cupyx.scipy.fft import fftn, ifftn
+    else:  # fallback for torch and others
+        fftn = xp.fft.fftn
+        ifftn = xp.fft.ifftn
+    return fftn, ifftn
+
+
+def compute_toeplitz_kernel(
     nufft: FourierOperatorBase, weights: NDArray | None = None
 ) -> NDArray:
     """
-    Calculate the Toeplitz kernel for the NUFFT operator.
+    Compute the Toeplitz kernel for the NUFFT operator.
 
     Parameters
     ----------
@@ -29,8 +42,10 @@ def calc_toeplitz_kernel(
 
     See Also
     --------
-    apply_toeplitz: Apply the Toeplitz kernel to an image.
+    apply_toeplitz_kernel: Apply the Toeplitz kernel to an image.
     """
+    xp = get_array_module(nufft.samples)
+    fftn, ifftn = _get_fftn(xp)
     backup_density = None
     if nufft.uses_density:
         backup_density = nufft.density.copy()
@@ -38,15 +53,14 @@ def calc_toeplitz_kernel(
         backup_density_method = nufft._density_method
         nufft._density_method = None
     if weights is None and backup_density is not None:
-        weights = backup_density
+        weights = xp.astype(backup_density, dtype=nufft.cpx_dtype)
     elif weights is None:
-        xp = get_array_module(nufft.samples)
-        weights = xp.ones(nufft.n_samples, dtype=nufft.dtype)
+        weights = xp.ones(nufft.n_samples, dtype=nufft.cpx_dtype)
 
     if nufft.ndim == 2:
-        kernel = _calc_toeplitz_kernel_2d(nufft, weights)
+        kernel = _compute_toep_2d(nufft, weights)
     elif nufft.ndim == 3:
-        kernel = _calc_toeplitz_kernel_3d(nufft, weights)
+        kernel = _compute_toep_3d(nufft, weights)
     else:
         raise ValueError(
             f"Toeplitz kernel calculation not implemented for ndim={nufft.ndim}"
@@ -56,11 +70,11 @@ def calc_toeplitz_kernel(
     if backup_density is not None:
         nufft.density = backup_density
         nufft._density_method = backup_density_method
+    scale = 1 / nufft.norm_factor
+    return fftn(kernel * scale, overwrite_x=True, norm="ortho")
 
-    return kernel
 
-
-def _calc_toeplitz_kernel_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+def _compute_toep_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
 
     # Trajectory Flipping (Y-axis)
@@ -68,19 +82,22 @@ def _calc_toeplitz_kernel_2d(nufft: FourierOperatorBase, weights: NDArray) -> ND
     samples_flip_y = samples_orig.copy()
     samples_flip_y[:, 1] *= -1
 
-    k1 = nufft.adj_op(weights)
+    kernel = xp.zeros(tuple(s * 2 for s in nufft.shape), dtype=nufft.cpx_dtype)
+    tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
+
+    # compute first two quadrants
+    nufft._adj_op(weights, tmp)
+    kernel[: nufft.shape[0], : nufft.shape[1]] = tmp
+    kernel[nufft.shape[0] + 1 :, : nufft.shape[1]] = tmp[:0:-1, :].conj()
+
+    # flip samples and compute other two quadrants
     nufft.update_samples(samples_flip_y, unsafe=True)
-    k2 = nufft.adj_op(weights)
+    nufft._adj_op(weights, tmp)
+    kernel[: nufft.shape[0], nufft.shape[1] + 1 :] = tmp[:, :0:-1]
+    kernel[nufft.shape[0] + 1 :, nufft.shape[1] + 1 :] = tmp[:0:-1, :0:-1].conj()
 
     # Restore original samples for nufft object consistency
     nufft.update_samples(samples_orig, unsafe=True)
-
-    # Assemble Spatial Kernel
-    zero_y = xp.zeros((k1.shape[0], 1), dtype=k1.dtype)
-    ky = xp.concatenate([k1, zero_y, k2[:, :0:-1]], axis=1)
-
-    zero_x = xp.zeros((1, ky.shape[1]), dtype=ky.dtype)
-    kernel = xp.concatenate([ky, zero_x, ky[:0:-1, :].conj()], axis=0)
 
     # Enforce strict Hermitian symmetry
     kernel = (kernel + kernel[::-1, ::-1].conj()) / 2
@@ -88,18 +105,17 @@ def _calc_toeplitz_kernel_2d(nufft: FourierOperatorBase, weights: NDArray) -> ND
     # Move the PSF peak from center to [0, 0] to align with corner-padded image
     # This is more robust than trying to mess with fftshifts and off-by-one errors
     #
-    peak_idx = xp.unravel_index(xp.argmax(xp.abs(kernel)), kernel.shape)
+
+    pos = xp.argmax(xp.abs(kernel))
+    if xp.__name__ == "cupy":
+        pos = pos.get()
+    peak_idx = xp.unravel_index(pos, kernel.shape)
     kernel = xp.roll(kernel, shift=[-p for p in peak_idx], axis=(0, 1))
 
-    # osf is fixed to 2.0
-    # TODO: Generalize to other osf values by cropping / padding ?
-    # what is the relation with the NUFFT osf grid size ?
-    grid_size = xp.prod(xp.array(nufft.shape) * 2)
-    scale = xp.prod(xp.array(kernel.shape)) / grid_size
-    return xp.fft.fftn(kernel * scale)
+    return kernel
 
 
-def _calc_toeplitz_kernel_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
 
     # Initialize the operator (density=False to get the raw Gram kernel)
@@ -118,35 +134,46 @@ def _calc_toeplitz_kernel_3d(nufft: FourierOperatorBase, weights: NDArray) -> ND
     samples_yz[:, 1] *= -1
     samples_yz[:, 2] *= -1
 
+    NX, NY, NZ = nufft.shape
+    kernel = xp.zeros(tuple(s * 2 for s in nufft.shape), dtype=nufft.cpx_dtype)
+    tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
+
     # 2. Compute 4 Adjoints
-    k00 = nufft.adj_op(weights)  # Original
+    nufft._adj_op(weights, tmp)  # Original
+    kernel[:NX, :NY, :NZ] = tmp
 
     nufft.update_samples(samples_z, unsafe=True)
-    k01 = nufft.adj_op(weights)  # Z-flipped
+    nufft._adj_op(weights, tmp)  # Z-flipped
+    kernel[:NX, :NY, NZ + 1 :] = tmp[:, :, :0:-1]
 
     nufft.update_samples(samples_y, unsafe=True)
-    k10 = nufft.adj_op(weights)  # Y-flipped
+    nufft._adj_op(weights, tmp)  # Y-flipped
+    kernel[:NX, NY + 1 :, :NZ] = tmp[:, :0:-1, :]
 
     nufft.update_samples(samples_yz, unsafe=True)
-    k11 = nufft.adj_op(weights)  # YZ-flipped
+    nufft._adj_op(weights, tmp)  # YZ-flipped
+    kernel[:NX, NY + 1 :, NZ + 1 :] = tmp[:, :0:-1, :0:-1]
 
     nufft.update_samples(samples_orig, unsafe=True)
 
     # 3. Assemble Z-axis (axis 2)
-    zero_z = xp.zeros((*k00.shape[:2], 1), dtype=k00.dtype)
-    kz0 = xp.concatenate([k00, zero_z, k01[:, :, :0:-1]], axis=2)
-    kz1 = xp.concatenate([k10, zero_z, k11[:, :, :0:-1]], axis=2)
 
-    # 4. Assemble Y-axis (axis 1)
-    # flip and conjugate the second half of the Y-assembly relative to Z
-    # but since these are all forward lags, the kyz assembly follows the 2D logic
-    zero_y = xp.zeros((kz0.shape[0], 1, kz0.shape[2]), dtype=kz0.dtype)
-    kyz = xp.concatenate([kz0, zero_y, kz1[:, :0:-1, :]], axis=1)
+    kernel[NX + 1 :, :, :] = kernel[NX - 1 : 0 : -1, :, :].conj()
 
-    # 5. Assemble X-axis using Hermitian symmetry (axis 0)
-    zero_x = xp.zeros((1, *kyz.shape[1:]), dtype=kyz.dtype)
-    # Reflect and conjugate across all dimensions to fill the negative X lags
-    kernel = xp.concatenate([kyz, zero_x, kyz[:0:-1, :, :].conj()], axis=0)
+    # zero_z = xp.zeros((*k00.shape[:2], 1), dtype=k00.dtype)
+    # kz0 = xp.concatenate([k00, zero_z, k01[:, :, :0:-1]], axis=2)
+    # kz1 = xp.concatenate([k10, zero_z, k11[:, :, :0:-1]], axis=2)
+
+    # # 4. Assemble Y-axis (axis 1)
+    # # flip and conjugate the second half of the Y-assembly relative to Z
+    # # but since these are all forward lags, the kyz assembly follows the 2D logic
+    # zero_y = xp.zeros((kz0.shape[0], 1, kz0.shape[2]), dtype=kz0.dtype)
+    # kyz = xp.concatenate([kz0, zero_y, kz1[:, :0:-1, :]], axis=1)
+
+    # # 5. Assemble X-axis using Hermitian symmetry (axis 0)
+    # zero_x = xp.zeros((1, *kyz.shape[1:]), dtype=kyz.dtype)
+    # # Reflect and conjugate across all dimensions to fill the negative X lags
+    # kernel2 = xp.concatenate([kyz, zero_x, kyz[:0:-1, :, :].conj()], axis=0)
 
     # 6. Hermitify to ensure strict symmetry
     kernel = (kernel + kernel[::-1, ::-1, ::-1].conj()) / 2
@@ -158,13 +185,13 @@ def _calc_toeplitz_kernel_3d(nufft: FourierOperatorBase, weights: NDArray) -> ND
         pos = pos.get()
     peak_idx = xp.unravel_index(pos, kernel.shape)
     kernel = xp.roll(kernel, shift=[-p for p in peak_idx], axis=(0, 1, 2))
+    return kernel
 
-    return xp.fft.fftn(kernel)
 
-
-def apply_toeplitz(
+def apply_toeplitz_kernel(
     image: NDArray,
     toeplitz_kernel: NDArray,
+    padded_array: NDArray | None = None,
 ) -> NDArray:
     """Apply the 2D or 3D Toeplitz kernel to an image using FFT.
 
@@ -173,7 +200,10 @@ def apply_toeplitz(
     image : NDArray
         The input 2D or 3D image to which the Toeplitz kernel will be applied.
     toeplitz_kernel : NDArray
-        The 3D Toeplitz kernel in the frequency domain.
+        The 2D or 3D Toeplitz kernel in the frequency domain.
+    padded_array : NDArray | None, optional
+        An optional pre-allocated array for padding the image. If None,
+        a new array will be created. Default is None.
 
     Returns
     -------
@@ -182,20 +212,20 @@ def apply_toeplitz(
 
     See Also
     --------
-    calc_toeplitz_kernel : Calculate the Toeplitz kernel to be used with this function.
+    compute_toeplitz_kernel : Compute Toeplitz kernel to be used with this function.
     """
     xp = get_array_module(image)
-    # Use pre-allocation for speed (Corner Padding)
-    image_padded = xp.zeros(toeplitz_kernel.shape, dtype=image.dtype)
+    fftn, ifftn = _get_fftn(xp)
+    if padded_array is None:
+        padded_array = xp.zeros(toeplitz_kernel.shape, dtype=image.dtype)
+    elif padded_array.shape != toeplitz_kernel.shape:
+        raise ValueError("padded_array shape must match toeplitz_kernel shape.")
 
     tl_corner = tuple(slice(0, s) for s in image.shape)
 
-    image_padded[tl_corner] = image
-    # 3. FFT convolution
-    tmp = xp.fft.fftn(image_padded)
+    padded_array[tl_corner] = image
+    tmp = fftn(padded_array)
     tmp *= toeplitz_kernel
+    result = ifftn(tmp, overwrite_x=True)
 
-    # 4. Inverse and shift back
-    result = xp.fft.ifftn(tmp)
-    # 5. Crop to original image volume
     return result[tl_corner]
