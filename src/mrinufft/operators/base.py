@@ -178,6 +178,7 @@ class FourierOperatorBase(ABC):
             raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
         self._density = None
+        self._toeplitz_kernel = None
         self._n_coils = 1
         self._n_batchs = 1
         self.squeeze_dims = False
@@ -277,6 +278,64 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    @with_numpy_cupy
+    def gram_op(self, data, toeplitz=True):
+        """Compute the Gram operator of the NUFFT.
+
+        Parameters
+        ----------
+        data: NDArray
+            Input data array.
+
+        toeplitz: bool, default True
+            If True, use the Toeplitz method to compute the Gram operator.
+            If False, compute it using the direct method.
+
+        Returns
+        -------
+        NDArray
+            Result of the Gram operator.
+        """
+        self.check_shape(image=data)
+        data = auto_cast(data, self.cpx_dtype)
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+
+        if self.uses_sense:
+            ret = self._gram_op_sense(data)
+        else:
+            ret = self._gram_op_calibless(data)
+        return self._safe_squeeze(ret)
+
+    def _gram_op_sense(self, data):
+        """Compute the Gram operator with sensitivity maps."""
+        xp = get_array_module(data)
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        gram_img = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        for b in range(B):
+            for c in range(C):
+                coil_smap = self.smaps[c].reshape(*XYZ)
+                img_coil = data[b, c] * coil_smap
+                gram_img_coil = self._gram_op_toeplitz_raw(img_coil)
+                gram_img[b] += coil_smap.conj() * gram_img_coil.reshape(*XYZ)
+        return gram_img
+
+    def _gram_op_calibless(self, data):
+        """Compute the Gram operator without sensitivity maps."""
+        ...
+        xp = get_array_module(data)
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+
+        dataf = data.reshape(B * C, *XYZ)
+        return self._gram_op_toeplitz_raw(dataf).reshape(B, C, *XYZ)
+
+    def _gram_op_toeplitz_raw(self, data) -> NDArray:
+        from .toeplitz import apply_toeplitz_kernel
+
+        if self._toeplitz_kernel is None:
+            self.compute_toeplitz_kernel()
+        return apply_toeplitz_kernel(self, data, self._toeplitz_kernel)
+
     def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
         """Compute the gradient data consistency.
 
@@ -299,6 +358,12 @@ class FourierOperatorBase(ABC):
         return MRIFourierCorrected(
             self, b0_map, readout_time, r2star_map, mask, interpolator
         )
+
+    def compute_toeplitz_kernel(self):
+        """Compute the Toeplitz kernel and set it."""
+        from .toeplitz import compute_toeplitz_kernel
+
+        self._toeplitz_kernel = compute_toeplitz_kernel(self, self.density)
 
     def compute_smaps(
         self,
@@ -1036,7 +1101,7 @@ def power_method(
     def AHA(x):
         if isinstance(operator, Callable):
             return operator(x)
-        return operator.adj_op(operator.op(x))
+        return operator.gram_op(x, toeplitz=False)
 
     if norm_func is None:
         norm_func = np.linalg.norm
