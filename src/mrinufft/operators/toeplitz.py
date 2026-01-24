@@ -1,17 +1,19 @@
 """Toeplitz approximation of the Auto-adjoint operator for NUFFT."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import with_numpy_cupy, get_array_module
-from .base import FourierOperatorBase
+
+from mrinufft.operators.base import FourierOperatorBase
 
 
-def calc_toeplitz_kernel(
+def compute_toeplitz_kernel(
     nufft: FourierOperatorBase, weights: NDArray | None = None
 ) -> NDArray:
     """
-    Calculate the Toeplitz kernel for the NUFFT operator.
+    Compute the Toeplitz kernel for the NUFFT operator.
 
     Parameters
     ----------
@@ -29,7 +31,7 @@ def calc_toeplitz_kernel(
 
     See Also
     --------
-    apply_toeplitz: Apply the Toeplitz kernel to an image.
+    apply_toeplitz_kernel: Apply the Toeplitz kernel to an image.
     """
     backup_density = None
     if nufft.uses_density:
@@ -44,9 +46,9 @@ def calc_toeplitz_kernel(
         weights = xp.ones(nufft.n_samples, dtype=nufft.dtype)
 
     if nufft.ndim == 2:
-        kernel = _calc_toeplitz_kernel_2d(nufft, weights)
+        kernel = _compute_toep_2d(nufft, weights)
     elif nufft.ndim == 3:
-        kernel = _calc_toeplitz_kernel_3d(nufft, weights)
+        kernel = _compute_toep_3d(nufft, weights)
     else:
         raise ValueError(
             f"Toeplitz kernel calculation not implemented for ndim={nufft.ndim}"
@@ -60,7 +62,7 @@ def calc_toeplitz_kernel(
     return kernel
 
 
-def _calc_toeplitz_kernel_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+def _compute_toep_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
 
     # Trajectory Flipping (Y-axis)
@@ -99,7 +101,7 @@ def _calc_toeplitz_kernel_2d(nufft: FourierOperatorBase, weights: NDArray) -> ND
     return xp.fft.fftn(kernel * scale)
 
 
-def _calc_toeplitz_kernel_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
 
     # Initialize the operator (density=False to get the raw Gram kernel)
@@ -162,9 +164,10 @@ def _calc_toeplitz_kernel_3d(nufft: FourierOperatorBase, weights: NDArray) -> ND
     return xp.fft.fftn(kernel)
 
 
-def apply_toeplitz(
+def apply_toeplitz_kernel(
     image: NDArray,
     toeplitz_kernel: NDArray,
+    padded_array: NDArray | None = None,
 ) -> NDArray:
     """Apply the 2D or 3D Toeplitz kernel to an image using FFT.
 
@@ -173,7 +176,10 @@ def apply_toeplitz(
     image : NDArray
         The input 2D or 3D image to which the Toeplitz kernel will be applied.
     toeplitz_kernel : NDArray
-        The 3D Toeplitz kernel in the frequency domain.
+        The 2D or 3D Toeplitz kernel in the frequency domain.
+    padded_array : NDArray | None, optional
+        An optional pre-allocated array for padding the image. If None,
+        a new array will be created. Default is None.
 
     Returns
     -------
@@ -182,20 +188,19 @@ def apply_toeplitz(
 
     See Also
     --------
-    calc_toeplitz_kernel : Calculate the Toeplitz kernel to be used with this function.
+    compute_toeplitz_kernel : Calculate the Toeplitz kernel to be used with this function.
     """
     xp = get_array_module(image)
-    # Use pre-allocation for speed (Corner Padding)
-    image_padded = xp.zeros(toeplitz_kernel.shape, dtype=image.dtype)
+    if padded_array is None:
+        padded_array = xp.zeros(toeplitz_kernel.shape, dtype=image.dtype)
+    elif padded_array.shape != toeplitz_kernel.shape:
+        raise ValueError("padded_array shape must match toeplitz_kernel shape.")
 
     tl_corner = tuple(slice(0, s) for s in image.shape)
 
-    image_padded[tl_corner] = image
-    # 3. FFT convolution
-    tmp = xp.fft.fftn(image_padded)
+    padded_array[tl_corner] = image
+    tmp = xp.fft.fftn(padded_array)
     tmp *= toeplitz_kernel
-
-    # 4. Inverse and shift back
     result = xp.fft.ifftn(tmp)
-    # 5. Crop to original image volume
+
     return result[tl_corner]
