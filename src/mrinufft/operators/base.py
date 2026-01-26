@@ -311,11 +311,12 @@ class FourierOperatorBase(ABC):
         """Compute the Gram operator with sensitivity maps."""
         xp = get_array_module(data)
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        gram_img = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
+        data = data.reshape(B, *XYZ)
+        gram_img = xp.zeros((B, 1, *XYZ), dtype=self.cpx_dtype)
         for b in range(B):
             for c in range(C):
                 coil_smap = self.smaps[c].reshape(*XYZ)
-                img_coil = data[b, c] * coil_smap
+                img_coil = data[b] * coil_smap
                 gram_img_coil = self._gram_op_toeplitz_raw(img_coil)
                 gram_img[b] += coil_smap.conj() * gram_img_coil.reshape(*XYZ)
         return gram_img
