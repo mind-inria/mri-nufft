@@ -243,3 +243,23 @@ def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
         assert len(res[0]) == operator.n_batchs
     else:
         assert res[0].ndim == 0
+
+
+@param_array_interface
+def test_interface_gram(operator, array_interface, image_data):
+    """Test the Gram (toeplitz) interface of the operator."""
+    if operator.n_trans != 1:
+        pytest.skip("Gram operator not implemented for n_trans >= 2")
+    image_data_ = to_interface(image_data, array_interface)
+
+    AHA_img = operator.adj_op(operator.op(image_data_))
+    G_img = operator.gram_op(image_data_)
+
+    assert G_img.shape == AHA_img.shape
+
+    AHA_img = from_interface(AHA_img, array_interface)
+    G_img = from_interface(G_img, array_interface)
+
+    # the toeplitz approximation can be quite inaccurate depending on the trajectory
+    # we use a relative mean error metric.
+    assert np.mean(np.abs(AHA_img - G_img) / np.abs(AHA_img)) < 9e-2
