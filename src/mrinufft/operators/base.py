@@ -302,8 +302,16 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    @abstractmethod
+    def _op(self, image: NDArray, coeffs: NDArray) -> NDArray:
+        """Low level operator implementation."""
+
+    @abstractmethod
+    def _adj_op(self, coeffs: NDArray, image: NDArray) -> NDArray:
+        """Low level adjoint operator implementation."""
+
     @with_numpy_cupy
-    def gram_op(self, data, toeplitz=True):
+    def gram_op(self, data: NDArray, toeplitz: bool = True) -> NDArray:
         """Compute the Gram operator of the NUFFT.
 
         Parameters
@@ -362,7 +370,7 @@ class FourierOperatorBase(ABC):
 
         if self._toeplitz_kernel is None:
             self.compute_toeplitz_kernel()
-        return apply_toeplitz_kernel(data, self._toeplitz_kernel)
+        return apply_toeplitz_kernel(data, self._toeplitz_kernel)  # type: ignore
 
     def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
         """Compute the gradient data consistency.
