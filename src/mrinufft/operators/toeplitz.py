@@ -175,6 +175,7 @@ def apply_toeplitz_kernel(
     image: NDArray,
     toeplitz_kernel: NDArray,
     padded_array: NDArray | None = None,
+    paired_batch: bool = False,
 ) -> NDArray:
     """Apply the 2D or 3D Toeplitz kernel to an image using FFT.
 
@@ -187,6 +188,9 @@ def apply_toeplitz_kernel(
     padded_array : NDArray | None, optional
         An optional pre-allocated array for padding the image. If None,
         a new array will be created. Default is None.
+    paired_batch : bool, optional
+        If True, pairs the batch dimension of the image with the toeplitz_kernel.
+        Default is False, ie the same kernel is applied to all images in the batch.
 
     Returns
     -------
@@ -219,12 +223,13 @@ def apply_toeplitz_kernel(
     elif padded_array.shape != toeplitz_kernel.shape:
         raise ValueError("padded_array shape must match toeplitz_kernel shape.")
 
-    tl_corner = tuple(slice(0, s) for s in image.shape)
+    tl_corner = (slice(None),) + tuple(slice(0, s) for s in image.shape)
 
+    # FIXME cannot unpack slice directly in python 3.10
     padded_array[tl_corner] = image
     axis = tuple(range(1, padded_array.ndim))
     tmp = fftn(padded_array, axes=axis)
     tmp *= toeplitz_kernel
     result = ifftn(tmp, overwrite_x=True, axes=axis)
 
-    return result[tl_corner]
+    return result[tl_corner].reshape(img_shape)
