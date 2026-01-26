@@ -380,7 +380,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
             data_batched *= smaps_batched
-            self.__op(data_batched, ksp_d[i * T : (i + 1) * T])
+            self._op(data_batched, ksp_d[i * T : (i + 1) * T])
 
         return ksp_d.reshape((B, C, K))
 
@@ -404,7 +404,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 cp.copyto(coil_img_d, self.smaps[idx_coils])
             coil_img_d *= data_batched
-            self.__op(coil_img_d, ksp_batched)
+            self._op(coil_img_d, ksp_batched)
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
         ksp = ksp.reshape((B, C, K))
         return ksp
@@ -416,7 +416,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         if ksp_d is None:
             ksp_d = cp.empty((B * C, K), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
-            self.__op(
+            self._op(
                 data[i * T : (i + 1) * T],
                 ksp_d[i * T : (i + 1) * T],
             )
@@ -437,13 +437,13 @@ class MRICufiNUFFT(FourierOperatorBase):
         data_ = data.reshape(B * C, *XYZ)
         for i in range((B * C) // T):
             coil_img_d.set(data_[i * T : (i + 1) * T])
-            self.__op(coil_img_d, ksp_d)
+            self._op(coil_img_d, ksp_d)
             ksp[i * T : (i + 1) * T] = ksp_d.get()
         ksp = ksp.reshape((B, C, K))
         return ksp
 
     @nvtx_mark()
-    def __op(self, image_d, coeffs_d):
+    def _op(self, image_d, coeffs_d):
         # ensure everything is pointers before going to raw level.
         return self.raw_op.type2(image_d, coeffs_d)
 
@@ -502,7 +502,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 ksp_new *= self.density
             else:
                 ksp_new = coeffs[i * T : (i + 1) * T]
-            self.__adj_op(ksp_new, coil_img_d)
+            self._adj_op(ksp_new, coil_img_d)
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
         img_d = img_d.reshape((B, 1, *XYZ))
@@ -541,7 +541,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             ksp_batched.set(coeffs_f[i * T * K : (i + 1) * T * K].reshape(T, K))
             if self.uses_density:
                 ksp_batched *= density_batched
-            self.__adj_op(ksp_batched, coil_img_d)
+            self._adj_op(ksp_batched, coil_img_d)
 
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
@@ -563,9 +563,9 @@ class MRICufiNUFFT(FourierOperatorBase):
             if self.uses_density:
                 cp.copyto(ksp_batched, coeffs_f[i * T : (i + 1) * T])
                 ksp_batched *= density_batched
-                self.__adj_op(ksp_batched, img_d[i * T : (i + 1) * T])
+                self._adj_op(ksp_batched, img_d[i * T : (i + 1) * T])
             else:
-                self.__adj_op(
+                self._adj_op(
                     coeffs_f[i * T : (i + 1) * T],
                     img_d[i * T : (i + 1) * T],
                 )
@@ -588,14 +588,55 @@ class MRICufiNUFFT(FourierOperatorBase):
             ksp_batched.set(coeffs_[i * T : (i + 1) * T])
             if self.uses_density:
                 ksp_batched *= density_batched
-            self.__adj_op(ksp_batched, img_batched)
+            self._adj_op(ksp_batched, img_batched)
             img[i * T : (i + 1) * T] = img_batched.get()
         img = img.reshape((B, C, *XYZ))
         return img
 
     @nvtx_mark()
-    def __adj_op(self, coeffs_d, image_d):
+    def _adj_op(self, coeffs_d, image_d):
         return self.raw_op.type1(coeffs_d, image_d)
+
+    def gram_op(self, data, img_d=None, toeplitz=True):
+        """Compute the Gram operator of the NUFFT.
+
+        Parameters
+        ----------
+        data: array
+            Input data array.
+        img_d: array, optional
+            Preallocated output array.
+        toeplitz: bool, default True
+            If True, use the Toeplitz method to compute the Gram operator.
+            If False, use the direct method.
+
+        Returns
+        -------
+        NDArray
+            Array with the Gram operator applied.
+        """
+        self.check_shape(image=data)
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+        if self.uses_sense and is_cuda_array(data):
+            gram_func = self._gram_op_sense_device
+        elif self.uses_sense:
+            gram_func = self._gram_op_sense_host
+        elif is_cuda_array(data):
+            gram_func = self._gram_op_calibless_device
+        else:
+            gram_func = self._gram_op_calibless_host
+        ret = gram_func(self, data)
+        return self._safe_squeeze(ret)
+
+    def _gram_op_sense_device(self, data, img_d): ...
+    def _gram_op_sense_host(self, data, img_d): ...
+    def _gram_op_calibless_device(self, data, img_d): ...
+    def _gram_op_calibless_host(self, data, img_d): ...
+
+    def _gram_op_raw_device(self, data, img_d):
+        """Apply the toeplitz Gram operator on device on a single image."""
+        # TODO Add support for batching with n_trans.
 
     def data_consistency(self, image_data, obs_data):
         """Compute the data consistency estimation directly on gpu.
@@ -669,14 +710,14 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
             data_batched *= smaps_batched
-            self.__op(data_batched, ksp_batched)
+            self._op(data_batched, ksp_batched)
 
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_batched
 
             if self.uses_density:
                 ksp_batched *= self.density
-            self.__adj_op(ksp_batched, data_batched)
+            self._adj_op(ksp_batched, data_batched)
 
             for t, b in enumerate(idx_batch):
                 grad_d[b, :] += data_batched[t] * smaps_batched[t].conj()
@@ -708,13 +749,13 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
             data_batched *= smaps_batched
-            self.__op(data_batched, ksp_batched)
+            self._op(data_batched, ksp_batched)
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_dataf[i * T : (i + 1) * T]
 
             if self.uses_density:
                 ksp_batched *= self.density
-            self.__adj_op(ksp_batched, data_batched)
+            self._adj_op(ksp_batched, data_batched)
 
             for t, b in enumerate(idx_batch):
                 # TODO write a kernel for that.
@@ -741,12 +782,12 @@ class MRICufiNUFFT(FourierOperatorBase):
         for i in range(B * C // T):
             data_batched.set(image_dataf[i * T : (i + 1) * T])
             obs_batched.set(obs_dataf[i * T : (i + 1) * T])
-            self.__op(data_batched, ksp_batched)
+            self._op(data_batched, ksp_batched)
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_batched
             if self.uses_density:
                 ksp_batched *= self.density
-            self.__adj_op(ksp_batched, data_batched)
+            self._adj_op(ksp_batched, data_batched)
             data_batched /= self.norm_factor
             grad[i * T : (i + 1) * T] = data_batched.get()
         grad = grad.reshape((B, C, *XYZ))
@@ -767,12 +808,12 @@ class MRICufiNUFFT(FourierOperatorBase):
 
         for i in range(B * C // T):
             cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
-            self.__op(data_batched, ksp_batched)
+            self._op(data_batched, ksp_batched)
             ksp_batched /= self.norm_factor
             ksp_batched -= obs_data[i * T : (i + 1) * T]
             if self.uses_density:
                 ksp_batched *= self.density
-            self.__adj_op(ksp_batched, data_batched)
+            self._adj_op(ksp_batched, data_batched)
             grad[i * T : (i + 1) * T] = data_batched
         grad = grad.reshape((B, C, *XYZ))
         grad /= self.norm_factor
