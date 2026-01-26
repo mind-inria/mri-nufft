@@ -629,12 +629,88 @@ class MRICufiNUFFT(FourierOperatorBase):
         ret = gram_func(self, data)
         return self._safe_squeeze(ret)
 
-    def _gram_op_sense_device(self, data, img_d): ...
-    def _gram_op_sense_host(self, data, img_d): ...
-    def _gram_op_calibless_device(self, data, img_d): ...
-    def _gram_op_calibless_host(self, data, img_d): ...
+    def _gram_op_sense_host(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+        image_dataf = np.reshape(image_data, (B, *XYZ))
 
-    def _gram_op_raw_device(self, data, img_d):
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+
+        img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            data_batched.set(image_dataf[idx_batch].reshape((T, *XYZ)))
+
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
+            else:
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            data_batched *= smaps_batched
+
+            self._gram_op_raw_device(data_batched, data_batched)
+            for t, b in enumerate(idx_batch):
+                img_d[b, :] += data_batched[t] * smaps_batched[t].conj()
+        img = img_d.get()
+        img = img_d.reshape((B, 1, *XYZ))
+        return img
+
+    def _gram_op_sense_device(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+
+        image_data = cp.asarray(data)
+        image_dataf = cp.reshape(image_data, (B, *XYZ))
+        img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = np.arange(i * T, (i + 1) * T) % C
+            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            cp.copyto(data_batched, image_dataf[idx_batch])
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
+            else:
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            data_batched *= smaps_batched
+            self._gram_op_raw_device(data_batched, data_batched)
+
+            for t, b in enumerate(idx_batch):
+                # TODO write a kernel for that.
+                img_d[b] += data_batched[t] * smaps_batched[t].conj()
+        img_d = img_d.reshape((B, 1, *XYZ))
+
+    def _gram_op_calibless_host(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+
+        image_dataf = np.reshape(data, (B * C, *XYZ))
+        img_d = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            data_batched.set(image_dataf[i * T : (i + 1) * T])
+            self._gram_op_raw_device(data_batched, data_batched)
+            img_d[i * T : (i + 1) * T] = data_batched.get()
+        img_d = img_d.reshape((B, C, *XYZ))
+        return img_d
+
+    def _gram_op_calibless_device(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+
+        image_data = cp.asarray(image_data).reshape(B * C, *XYZ)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        img_d = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+
+        for i in range(B * C // T):
+            cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
+            self._gram_op_raw_device(data_batched, data_batched)
+            img_d[i * T : (i + 1) * T] = data_batched
+        img_d = img_d.reshape((B, C, *XYZ))
+        return img_d
+
+    def _gram_op_raw_device(self, in_d, out_d):
         """Apply the toeplitz Gram operator on device on a single image."""
         # TODO Add support for batching with n_trans.
 
