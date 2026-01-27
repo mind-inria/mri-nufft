@@ -618,6 +618,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.check_shape(image=data)
         if not toeplitz:
             return self.adj_op(self.op(data))
+        if self._toeplitz_kernel is None:
+            self.compute_toeplitz_kernel()
         if self.uses_sense and is_cuda_array(data):
             gram_func = self._gram_op_sense_device
         elif self.uses_sense:
@@ -626,16 +628,17 @@ class MRICufiNUFFT(FourierOperatorBase):
             gram_func = self._gram_op_calibless_device
         else:
             gram_func = self._gram_op_calibless_host
-        ret = gram_func(self, data)
+        ret = gram_func(data, img_d)
         return self._safe_squeeze(ret)
 
     def _gram_op_sense_host(self, data, img_d):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         XYZ = self.shape
-        image_dataf = np.reshape(image_data, (B, *XYZ))
+        image_dataf = np.reshape(data, (B, *XYZ))
 
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
 
         img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
@@ -649,7 +652,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
             data_batched *= smaps_batched
 
-            self._gram_op_raw_device(data_batched, data_batched)
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += data_batched[t] * smaps_batched[t].conj()
         img = img_d.get()
@@ -665,6 +668,8 @@ class MRICufiNUFFT(FourierOperatorBase):
         img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -674,7 +679,7 @@ class MRICufiNUFFT(FourierOperatorBase):
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
             data_batched *= smaps_batched
-            self._gram_op_raw_device(data_batched, data_batched)
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
 
             for t, b in enumerate(idx_batch):
                 # TODO write a kernel for that.
@@ -684,13 +689,17 @@ class MRICufiNUFFT(FourierOperatorBase):
     def _gram_op_calibless_host(self, data, img_d):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         XYZ = self.shape
-
         image_dataf = np.reshape(data, (B * C, *XYZ))
-        img_d = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        if img_d is None:
+            img_d = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        else:
+            img_d.reshape((B * C, *XYZ))
+            img_d.fill(0)
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             data_batched.set(image_dataf[i * T : (i + 1) * T])
-            self._gram_op_raw_device(data_batched, data_batched)
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
             img_d[i * T : (i + 1) * T] = data_batched.get()
         img_d = img_d.reshape((B, C, *XYZ))
         return img_d
@@ -699,20 +708,32 @@ class MRICufiNUFFT(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         XYZ = self.shape
 
-        image_data = cp.asarray(image_data).reshape(B * C, *XYZ)
+        image_data = cp.asarray(data).reshape(B * C, *XYZ)
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        img_d = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
+
+        if img_d is None:
+            img_d = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        else:
+            img_d.reshape((B * C, *XYZ))
+            img_d.fill(0)
 
         for i in range(B * C // T):
             cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
-            self._gram_op_raw_device(data_batched, data_batched)
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
             img_d[i * T : (i + 1) * T] = data_batched
         img_d = img_d.reshape((B, C, *XYZ))
         return img_d
 
-    def _gram_op_raw_device(self, in_d, out_d):
+    def _gram_op_raw_device(self, in_d, out_d, padded_array=None):
         """Apply the toeplitz Gram operator on device on a single image."""
         # TODO Add support for batching with n_trans.
+        from mrinufft.operators.toeplitz import apply_toeplitz_kernel
+
+        cp.copyto(
+            out_d, apply_toeplitz_kernel(in_d, self._toeplitz_kernel, padded_array)
+        )
+        return out_d
 
     def data_consistency(self, image_data, obs_data):
         """Compute the data consistency estimation directly on gpu.
