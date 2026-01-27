@@ -278,6 +278,16 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    @abstractmethod
+    def _op(self, image, coeffs) -> None:
+        """Low level operator implementation."""
+        pass
+
+    @abstractmethod
+    def _adj_op(self, coeffs, image) -> None:
+        """Low level adjoint operator implementation."""
+        pass
+
     @with_numpy_cupy
     def gram_op(self, data, toeplitz=True):
         """Compute the Gram operator of the NUFFT.
