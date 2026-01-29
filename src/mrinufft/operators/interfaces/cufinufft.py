@@ -599,6 +599,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     def _adj_op(self, coeffs_d, image_d):
         return self.raw_op.type1(coeffs_d, image_d)
 
+    @with_numpy_cupy
     def gram_op(self, data, img_d=None, toeplitz=True):
         """Compute the Gram operator of the NUFFT.
 
@@ -687,6 +688,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 # TODO write a kernel for that.
                 img_d[b] += data_batched[t] * smaps_batched[t].conj()
         img_d = img_d.reshape((B, 1, *XYZ))
+        return img_d
 
     def _gram_op_calibless_host(self, data, img_d):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
