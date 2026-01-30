@@ -95,9 +95,7 @@ class MRIFourierCorrected(FourierOperatorBase):
                 "b0_map  and readout_time required for off-resonance correction."
             )
 
-        complex_field_map = None
-        if b0_map is not None:
-            complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
+        complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
 
         self.compute_interpolator(interpolator, complex_field_map, readout_time, mask)
 
@@ -105,7 +103,7 @@ class MRIFourierCorrected(FourierOperatorBase):
     def compute_interpolator(
         self,
         interpolators: str | dict | tuple[NDArray, NDArray],
-        field_map: NDArray | None,
+        field_map: NDArray,
         readout_time: NDArray | None,
         mask: NDArray | None,
     ):
@@ -113,6 +111,14 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         Sets the B and C attributes.
         """
+        xp = get_array_module(field_map)
+
+        if xp.all(readout_time == 0):
+            # No off-resonance effect
+            self.B = xp.ones((self.n_samples, 1), dtype=xp.complex64)
+            self.C = xp.ones((1, *self.shape), dtype=xp.complex64)
+            return
+
         if isinstance(interpolators, tuple):
             B, C = interpolators
             try:
@@ -147,7 +153,6 @@ class MRIFourierCorrected(FourierOperatorBase):
             warnings.warn(
                 "field_map and mask will be interpolated to match image shape."
             )
-            xp = get_array_module(field_map)
             zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
             field_map = zoom_func(
                 field_map,
