@@ -33,7 +33,9 @@ from mrinufft.extras import get_smaps
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
+    from mrinufft.operators.off_resonance import MRIFourierCorrected
 else:
+    MRIFourierCorrected = Any  # type: ignore
     DeepInvPhyNufft = Any  # type: ignore
     MRINufftAutoGrad = Any  # type: ignore
     MRIStackedNUFFT = Any  # type: ignore
@@ -292,7 +294,7 @@ class FourierOperatorBase(ABC):
         r2star_map: NDArray | None = None,
         mask: NDArray | None = None,
         interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
-    ):
+    ) -> MRIFourierCorrected:
         """Return a new operator with Off Resonnance Correction."""
         from .off_resonance import MRIFourierCorrected
 
