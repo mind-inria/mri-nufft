@@ -623,20 +623,9 @@ def read_arbgrad_rawdat(
         slice_num=slice_num,
         contrast_num=contrast_num,
     )
+    data = np.swapaxes(data, 1, 2)
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["shifts"] = ()
-        for s in [6, 7, 8]:
-            shift = twixObj.search_header_for_val(
-                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            )
-            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
-        hdr["oversampling_factor"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWiPMemBlock", "alFree", "4")
-        )[0]
-        hdr["trajectory_name"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWipMemBlock", "tFree")
-        )[0][1:-1]
         if hdr["n_contrasts"] > 1:
             hdr["turboFactor"] = twixObj.search_header_for_val(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
