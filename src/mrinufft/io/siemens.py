@@ -11,7 +11,7 @@ def read_siemens_rawdat(
     removeOS: bool = False,
     doAverage: bool = True,
     squeeze: bool = True,
-    reshape: bool = True,
+    reshape: bool = False,
     return_twix: bool = True,
     slice_num: int | None = None,
     contrast_num: int | None = None,
@@ -29,8 +29,9 @@ def read_siemens_rawdat(
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
     reshape : bool, optional
-        Whether to reshape the data into a NcXNsamples X Nslices X Ncontrasts format,
-        by default True.
+        Whether to reshape the data into a
+        Nc X Nsamples X Nslices X Ncontrasts format,
+        by default False.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
     return_twix : bool, optional
@@ -121,8 +122,9 @@ def read_siemens_rawdat(
         raw_kspace = twixObj.image[""]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
-    data = np.moveaxis(raw_kspace, 1, 0)
     if reshape:
+        # Format as coils x shots x samples x slices x contrasts x averages
+        data = np.moveaxis(raw_kspace, 0, 2)
         data = data.reshape(
             hdr["n_coils"],
             hdr["n_shots"],
@@ -132,6 +134,9 @@ def read_siemens_rawdat(
             hdr["n_contrasts"] if contrast_num is None else 1,
             hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
         )
+    else:
+        # Cartesian data, format as coils x readout_samples x paritions_y x partitions_z
+        data = np.moveaxis(raw_kspace, 1, 0)
     if return_twix:
         return data, hdr, twixObj
     return data, hdr
