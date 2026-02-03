@@ -631,6 +631,12 @@ def read_arbgrad_rawdat(
                 "Phoenix", ("sFastImaging", "lTurboFactor")
             )[0]
             hdr["type"] = "ARBGRAD_MP2RAGE"
+        hdr["oversampling_factor"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWiPMemBlock", "alFree", "4")
+        )[0]
+        hdr["trajectory_name"] = twixObj.search_header_for_val(
+            "Phoenix", ("sWipMemBlock", "tFree")
+        )[0][1:-1]
     if pre_skip > 0:
         samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
         if samples_to_skip >= hdr["n_adc_samples"]:
