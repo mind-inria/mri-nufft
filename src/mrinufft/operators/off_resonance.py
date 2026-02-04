@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from scipy.ndimage import zoom
+from typing import TYPE_CHECKING
 import warnings
 
 from mrinufft._array_compat import with_numpy_cupy, CUPY_AVAILABLE
@@ -11,6 +12,12 @@ from numpy.typing import NDArray
 from .._array_compat import get_array_module, is_host_array, is_cuda_array
 from ..extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
 from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
+
+if TYPE_CHECKING:
+    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+else:
+    MRINufftAutoGrad = None
+    DeepInvPhyNufft = None
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -113,7 +120,10 @@ class MRIFourierCorrected(FourierOperatorBase):
         """
         xp = get_array_module(field_map)
 
-        if xp.all(readout_time == 0):
+        self.field_map = field_map
+        self.readout_time = readout_time
+
+        if xp.all(field_map == 0) or xp.all(readout_time == 0):
             # No off-resonance effect
             self.B = xp.ones((self.n_samples, 1), dtype=xp.complex64)
             self.C = xp.ones((1, *self.shape), dtype=xp.complex64)
@@ -180,6 +190,12 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.B, self.C, _ = interpolators(
             field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
+
+    @property
+    def full_readout_time(self) -> NDArray:
+        """Get the full readout time for all samples."""
+        xp = get_array_module(self.readout_time)
+        return xp.repeat(self.readout_time, self.n_shots)
 
     def autograd_available(self) -> bool:
         """Whether the operator supports autograd differentiation."""
@@ -373,5 +389,9 @@ class MRIFourierCorrected(FourierOperatorBase):
         from mrinufft.operators.autodiff import MRINufftAutoGrad
 
         return MRINufftAutoGrad(
-            self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
+            self,
+            wrt_data=wrt_data,
+            wrt_traj=wrt_traj,
+            wrt_field_map=wrt_field_map,
+            paired_batch=paired_batch,
         )

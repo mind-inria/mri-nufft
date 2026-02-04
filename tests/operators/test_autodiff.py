@@ -28,13 +28,15 @@ except ImportError:
 @parametrize(backend=["cufinufft", "finufft", "gpunufft"])
 @parametrize(paired_batch_size=[0, 1, 3])
 @parametrize(
-    "n_coils, n_batchs, sense",
+    "n_batchs, n_coils, sense, field_map",
     [
-        (1, 1, False),
-        (4, 1, True),
-        (4, 1, False),
-        (4, 2, True),
-        (4, 2, False),
+        (1, 1, False, False),
+        (1, 4, True, False),
+        (1, 4, False, False),
+        (2, 4, True, False),
+        (2, 4, False, False),
+        (1, 4, True, True),
+        (2, 4, True, True),
     ],
 )
 @parametrize_with_cases(
@@ -51,12 +53,15 @@ def operator(
     shape: tuple[int, ...],
     n_coils: int,
     sense: bool,
+    field_map: bool,
     n_batchs: int,
     backend: str,
     paired_batch_size: bool,
 ):
     """Create NUFFT operator with autodiff capabilities."""
     if not sense and paired_batch_size:
+        pytest.skip("Not relevant to test.")
+    if field_map and paired_batch_size:
         pytest.skip("Not relevant to test.")
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
@@ -68,9 +73,6 @@ def operator(
     kspace_loc = kspace_loc.astype(np.float32)
     nufft = get_operator(
         backend_name=backend,
-        wrt_data=True,
-        wrt_traj=True,
-        paired_batch=paired_batch_size,  # a slight abuse of attribute.
     )(
         samples=kspace_loc,
         shape=shape,
@@ -79,12 +81,41 @@ def operator(
         smaps=smaps,
         squeeze_dims=False,
     )
-    return nufft
+    if field_map:
+        return nufft.with_off_resonance_correction(
+            b0_map=torch.randn(
+                shape,
+                dtype=torch.float32,
+            ),
+            readout_time=torch.linspace(
+                0, 0.030, kspace_loc.shape[-2], dtype=torch.float32
+            ),
+        ).make_autograd(
+            wrt_data=True,
+            wrt_traj=True,
+            wrt_field_map=True,
+            paired_batch=paired_batch_size,  # a slight abuse of attribute.
+        )
+    else:
+        return nufft.make_autograd(
+            wrt_data=True,
+            wrt_traj=True,
+            paired_batch=paired_batch_size,  # a slight abuse of attribute.
+        )
 
 
 def ndft_matrix(operator):
     """Get the NDFT matrix from the operator."""
-    return get_fourier_matrix(operator.samples, operator.shape, normalize=True)
+    ndft = get_fourier_matrix(operator.samples, operator.shape, normalize=True)
+    if hasattr(operator, "field_map"):
+        readout_time = torch.from_numpy(operator.full_readout_time).to(
+            operator._field_map_torch.device
+        )
+        return ndft * torch.exp(
+            operator._field_map_torch.reshape(1, -1) * readout_time.reshape(-1, 1)
+        ).to(ndft.device)
+    else:
+        return ndft
 
 
 def get_data(operator, interface):
