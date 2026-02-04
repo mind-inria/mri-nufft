@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 from .._array_compat import get_array_module, is_host_array, is_cuda_array
 from ..extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
-from .base import FourierOperatorBase, power_method, get_operator
+from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -332,3 +332,46 @@ class MRIFourierCorrected(FourierOperatorBase):
     def n_samples_per_shot(self):
         """Number of time points in a shot."""
         return self.B.shape[0]
+
+    def make_autograd(
+        self,
+        *,
+        wrt_data: bool = True,
+        wrt_traj: bool = False,
+        wrt_field_map: bool = False,
+        paired_batch: bool = False,
+    ) -> MRINufftAutoGrad:
+        """Make a new Operator with autodiff support.
+
+        Parameters
+        ----------
+        wrt_data : bool, optional
+            If the gradient with respect to the data is computed, default is true
+        wrt_traj : bool, optional
+            If the gradient with respect to the trajectory is computed, default is false
+        wrt_field_map : bool, optional
+            If the gradient with respect to the field map is computed, default is false
+        paired_batch : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
+
+        Returns
+        -------
+        torch.nn.module
+            A NUFFT operator with autodiff capabilities.
+
+        Raises
+        ------
+        ValueError
+            If autograd is not available.
+        """
+        if not AUTOGRAD_AVAILABLE:
+            raise ValueError("Autograd not available, ensure torch is installed.")
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
+
+        from mrinufft.operators.autodiff import MRINufftAutoGrad
+
+        return MRINufftAutoGrad(
+            self, wrt_data=wrt_data, wrt_traj=wrt_traj, paired_batch=paired_batch
+        )

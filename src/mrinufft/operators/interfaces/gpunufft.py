@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 from numpy.typing import NDArray
 
-from ..base import FourierOperatorBase
+from ..base import FourierOperatorBase, _ToggleGradPlanMixin
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
     get_array_module,
@@ -373,7 +373,7 @@ class RawGpuNUFFT:
         return self._reshape_image(image, "adjoint")
 
 
-class MRIGpuNUFFT(FourierOperatorBase):
+class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     """Interface for the gpuNUFFT backend.
 
     Parameters
@@ -543,7 +543,7 @@ class MRIGpuNUFFT(FourierOperatorBase):
 
         """
         # calling the parent setter
-        FourierOperatorBase.smaps.fset(self, new_smaps)  # type: ignore
+        FourierOperatorBase.smaps.fset(self, new_smaps)
         if self._smaps is not None and hasattr(self, "raw_op"):
             self.raw_op.set_smaps(smaps=new_smaps)
 
@@ -740,9 +740,3 @@ class MRIGpuNUFFT(FourierOperatorBase):
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
-
-    def toggle_grad_traj(self):
-        """Toggle the gradient trajectory of the operator."""
-        if self.uses_sense:
-            self.smaps = self.smaps.conj()
-        self.raw_op.toggle_grad_traj()
