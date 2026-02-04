@@ -453,6 +453,9 @@ def cartesian_espirit(
         max_eig = zoom(max_eig.T[0], (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         Smaps = abs_maps * np.exp(1j * angle_maps)
     Smaps *= max_eig > crop
+    # Clean up memory after operations
+    del calib, AHA, kernels, VH, img_kernel
+    xp.get_default_memory_pool().free_all_blocks() if hasattr(xp, 'get_default_memory_pool') else None
     return Smaps
 
 
