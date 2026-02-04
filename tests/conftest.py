@@ -75,7 +75,6 @@ def pytest_generate_tests(metafunc):
                     if v.argnames[0] == "backend"
                 ][0]
             ]
-            print("backend detected", backend)
             # Only keep the callspec if the backend is available.
             if not check_backend(backend):
                 callspec.marks.append(
