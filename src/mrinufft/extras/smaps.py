@@ -455,7 +455,11 @@ def cartesian_espirit(
     Smaps *= max_eig > crop
     # Clean up memory after operations
     del calib, AHA, kernels, VH, img_kernel
-    xp.get_default_memory_pool().free_all_blocks() if hasattr(xp, 'get_default_memory_pool') else None
+gc.collect()
+try:
+    xp.get_default_memory_pool().free_all_blocks()
+except AttributeError:
+    pass
     return Smaps
 
 
