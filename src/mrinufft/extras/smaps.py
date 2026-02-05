@@ -13,6 +13,7 @@ import numpy as np
 from mrinufft.extras.cartesian import fft, ifft
 from mrinufft._array_compat import with_numpy
 from numpy.typing import NDArray
+import gc
 
 from collections.abc import Callable
 
@@ -455,11 +456,9 @@ def cartesian_espirit(
     Smaps *= max_eig > crop
     # Clean up memory after operations
     del calib, AHA, kernels, VH, img_kernel
-gc.collect()
-try:
-    xp.get_default_memory_pool().free_all_blocks()
-except AttributeError:
-    pass
+    gc.collect()
+    if xp is not np:
+        xp.get_default_memory_pool().free_all_blocks()
     return Smaps
 
 
