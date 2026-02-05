@@ -12,7 +12,7 @@ def read_siemens_rawdat(
     doAverage: bool = True,
     squeeze: bool = True,
     reshape: bool = False,
-    return_twix: bool = True,
+    return_twix: bool = False,
     slice_num: int | None = None,
     contrast_num: int | None = None,
 ):  # pragma: no cover
@@ -35,7 +35,7 @@ def read_siemens_rawdat(
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
     return_twix : bool, optional
-        Whether to return the twix object, by default True.
+        Whether to return the twix object, by default False.
     slice_num : int, optional
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional

@@ -621,6 +621,7 @@ def read_arbgrad_rawdat(
         doAverage=doAverage,
         squeeze=squeeze,
         reshape=True,
+        return_twix=True,
         slice_num=slice_num,
         contrast_num=contrast_num,
     )
