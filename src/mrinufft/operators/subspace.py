@@ -172,6 +172,7 @@ def _get_arraylib_from_operator(
         "MRIBartNUFFT": ("numpy", "numpy"),
         "MRICufiNUFFT": ("cupy", "cupy"),
         "MRIfinufft": ("numpy", "numpy"),
+        "MRIDUCC0": ("numpy", "numpy"),
         "MRIGpuNUFFT": ("cupy", "cupy"),
         "MRInfft": ("numpy", "numpy"),
         "MRIPynufft": ("numpy", "numpy"),

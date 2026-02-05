@@ -17,7 +17,6 @@ import mrinufft.trajectories.display as mtd
 import mrinufft.trajectories.trajectory3D as mtt
 from mrinufft.trajectories.display import displayConfig
 
-
 # %%
 # Script options
 # ==============

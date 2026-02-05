@@ -38,7 +38,6 @@ from utils import show_trajectory_full
 # External
 import numpy as np
 
-
 # %%
 # Script options
 # ==============

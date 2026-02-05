@@ -31,6 +31,7 @@ from helpers import (
         "pynufft-cpu",
         "finufft",
         "cufinufft",
+        "ducc0",
         "gpunufft",
         "sigpy",
         "torchkbnufft-cpu",

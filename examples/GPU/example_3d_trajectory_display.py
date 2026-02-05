@@ -18,7 +18,6 @@ from mrinufft.trajectories.utils import Gammas, Acquisition
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 

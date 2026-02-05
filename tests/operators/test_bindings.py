@@ -9,6 +9,7 @@ import pytest
     [
         ("finufft", "MRIfinufft"),
         ("cufinufft", "MRICufiNUFFT"),
+        ("ducc0", "MRIDUCC0"),
         ("tensorflow", "MRITensorflowNUFFT"),
         ("pynufft-cpu", "MRIPynufft"),
         ("pynfft", "MRInfft"),

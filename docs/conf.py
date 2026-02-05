@@ -16,7 +16,6 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 
-
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../.."))  # Source code dir relative to this file
 
@@ -107,7 +106,8 @@ sphinx_gallery_conf = {
     "parallel": True,
     "matplotlib_animations": (True, "mp4"),
     "first_notebook_cell": (
-        "!pip install mri-nufft[cufinufft,finufft,gpunufft,extra,autodiff]"
+        "!pip install mri-nufft[cufinufft,finufft,gpunufft,extra,autodiff]\n"
+        "!pip install brainweb-dl fastmri",
     ),  # for binder and colab
 }
 

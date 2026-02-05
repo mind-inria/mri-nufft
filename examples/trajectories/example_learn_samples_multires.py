@@ -33,6 +33,7 @@ Note that the NUFFT operator always holds linearly interpolated version of the c
     (see [Cha+16]_). This is implemented in the proprietary SPARKLING package [Cha+22]_.
     Users are encouraged to contact the authors if they want to use it.
 """
+
 # %%
 
 import os
