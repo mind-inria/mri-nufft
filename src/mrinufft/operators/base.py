@@ -498,7 +498,7 @@ class FourierOperatorBase(ABC):
             case None | False:
                 self._density = None
                 return
-            case True | "pipe":
+            case True:
                 method_ = get_density("pipe")
                 kwargs["backend"] = self.backend
             case {"name": str(name), **kwargs}:
