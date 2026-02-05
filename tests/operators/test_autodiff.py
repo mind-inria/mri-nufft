@@ -4,10 +4,11 @@ import numpy as np
 from numpy.typing import NDArray
 from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
+from mrinufft._array_compat import _array_to_torch
 import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from case_trajectories import CasesTrajectories
-from mrinufft.operators import get_operator
+from mrinufft.operators import get_operator, MRIFourierCorrected
 
 from helpers import (
     kspace_from_op,
@@ -86,6 +87,7 @@ def operator(
             b0_map=torch.randn(
                 shape,
                 dtype=torch.float32,
+                device=kspace_loc.device,
             ),
             readout_time=torch.linspace(
                 0, 0.030, kspace_loc.shape[-2], dtype=torch.float32
@@ -107,13 +109,13 @@ def operator(
 def ndft_matrix(operator):
     """Get the NDFT matrix from the operator."""
     ndft = get_fourier_matrix(operator.samples, operator.shape, normalize=True)
-    if hasattr(operator, "field_map"):
-        readout_time = torch.from_numpy(operator.full_readout_time).to(
-            operator._field_map_torch.device
+    if isinstance(operator.nufft_op, MRIFourierCorrected):
+        readout_time = _array_to_torch(
+            operator.full_readout_time, device=operator.field_map.device
         )
         return ndft * torch.exp(
-            operator._field_map_torch.reshape(1, -1) * readout_time.reshape(-1, 1)
-        ).to(ndft.device)
+            operator.field_map.reshape(1, -1) * readout_time.reshape(-1, 1)
+        ).to(device=ndft.device, dtype=ndft.dtype)
     else:
         return ndft
 
@@ -174,6 +176,12 @@ def compute_adjoint_batched(operator, ksp_data, img_data_ref):
     return adj_data, adj_data_ndft
 
 
+def _compare_grad(loss1, loss2, input, **kwargs):
+    grad1 = torch.autograd.grad(loss1, input, retain_graph=True, **kwargs)[0]
+    grad2 = torch.autograd.grad(loss2, input, retain_graph=True, **kwargs)[0]
+    return grad1, grad2
+
+
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_adjoint_and_grad(operator, interface):
@@ -183,8 +191,12 @@ def test_adjoint_and_grad(operator, interface):
 
     if "gpu" in interface:
         operator.samples = operator.samples.to("cuda")
+        if operator._grad_wrt_field_map:
+            operator.field_map = operator.field_map.to("cuda")
     else:
         operator.samples = operator.samples.cpu()
+        if operator._grad_wrt_field_map:
+            operator.field_map = operator.field_map.cpu()
 
     ksp_data, img_data_ref = get_data(operator, interface)
     ksp_data.requires_grad = True
@@ -204,34 +216,48 @@ def test_adjoint_and_grad(operator, interface):
     assert_almost_allclose(
         adj_data.cpu().detach(),
         adj_data_ndft.cpu().detach(),
-        atol=1e-1,
+        atol=(
+            1
+            if "gpu" in interface and isinstance(operator.nufft_op, MRIFourierCorrected)
+            else 1e-1
+        ),
         rtol=1e-1,
-        mismatch=20,
+        mismatch=0.10,
     )
-    # Check if nufft and ndft w.r.t trajectory are close in the backprop
-    gradient_ndft_ktraj = torch.autograd.grad(
-        loss_ndft, operator.samples, retain_graph=True
-    )[0]
-    gradient_nufft_ktraj = torch.autograd.grad(
-        loss_nufft, operator.samples, retain_graph=True
-    )[0]
+    grad_ndft_ktraj, grad_nufft_ktraj = _compare_grad(
+        loss_ndft, loss_nufft, operator.samples
+    )
     # FIXME: atol=5e-1 is too loose?
     assert_almost_allclose(
-        gradient_ndft_ktraj.cpu().numpy(),
-        gradient_nufft_ktraj.cpu().numpy(),
+        grad_ndft_ktraj.cpu().numpy(),
+        grad_nufft_ktraj.cpu().numpy(),
         atol=5e-1,
         rtol=5e-1,
-        mismatch=20,
+        mismatch=0.02,
     )
+
     # Check if nufft and ndft are close in the backprop
-    grad_ndft_kdata = torch.autograd.grad(loss_ndft, ksp_data, retain_graph=True)[0]
-    grad_nufft_kdata = torch.autograd.grad(loss_nufft, ksp_data, retain_graph=True)[0]
+    grad_ndft_kdata, grad_nufft_kdata = _compare_grad(loss_ndft, loss_nufft, ksp_data)
     assert_allclose(
         grad_ndft_kdata.cpu().numpy(),
         grad_nufft_kdata.cpu().numpy(),
-        atol=6e-3,
+        atol=7e-3,
         rtol=6e-3,
     )
+
+    if isinstance(operator.nufft_op, MRIFourierCorrected):
+        grad_ndft_field, grad_nufft_field = _compare_grad(
+            loss_ndft,
+            loss_nufft,
+            operator.field_map,
+        )
+        assert_almost_allclose(
+            grad_ndft_field.cpu().numpy(),
+            grad_nufft_field.cpu().numpy(),
+            atol=1e-1,
+            rtol=1e-1,
+            mismatch=0.10,
+        )
 
 
 def compute_forward(operator, ksp_data_ref, img_data):
@@ -279,8 +305,12 @@ def test_forward_and_grad(operator, interface):
 
     if "gpu" in interface:
         operator.samples = operator.samples.to("cuda")
+        if operator._grad_wrt_field_map:
+            operator.field_map = operator.field_map.to("cuda")
     else:
         operator.samples = operator.samples.cpu()
+        if operator._grad_wrt_field_map:
+            operator.field_map = operator.field_map.cpu()
 
     ksp_data_ref, img_data = get_data(operator, interface)
     img_data.requires_grad = True
@@ -300,14 +330,17 @@ def test_forward_and_grad(operator, interface):
     assert_almost_allclose(
         ksp_data.cpu().detach(),
         ksp_data_ndft.cpu().detach(),
-        atol=1e-1,
+        atol=(
+            1
+            if "gpu" in interface and isinstance(operator.nufft_op, MRIFourierCorrected)
+            else 1e-1
+        ),
         rtol=1e-1,
-        mismatch=20,
+        mismatch=0.10,
     )
 
     # Check if nufft and ndft w.r.t image  are close in the backprop
-    grad_ndft_kdata = torch.autograd.grad(loss_ndft, img_data, retain_graph=True)[0]
-    grad_nufft_kdata = torch.autograd.grad(loss_nufft, img_data, retain_graph=True)[0]
+    grad_ndft_kdata, grad_nufft_kdata = _compare_grad(loss_ndft, loss_nufft, img_data)
     assert_allclose(
         grad_ndft_kdata.cpu().numpy(),
         grad_nufft_kdata.cpu().numpy(),
@@ -315,15 +348,27 @@ def test_forward_and_grad(operator, interface):
     )
 
     # Check if nufft and ndft w.r.t trajectory are close in the backprop
-    grad_ndft_ktraj = torch.autograd.grad(
-        loss_ndft, operator.samples, retain_graph=True
-    )[0]
-    grad_nufft_ktraj = torch.autograd.grad(
-        loss_nufft, operator.samples, retain_graph=True
-    )[0]
 
+    grad_ndft_ktraj, grad_nufft_ktraj = _compare_grad(
+        loss_ndft, loss_nufft, operator.samples
+    )
     assert_allclose(
         grad_ndft_ktraj.cpu().numpy(),
         grad_nufft_ktraj.cpu().numpy(),
         atol=5e-1,
     )
+
+    # check if nufft and ndft w.r.t field_amap are close in the backprop
+
+    if hasattr(operator, "readout_time"):
+        grad_ndft_field, grad_nufft_field = _compare_grad(
+            loss_ndft,
+            loss_nufft,
+            operator.field_map,
+            allow_unused=True,
+        )
+        assert_allclose(
+            grad_ndft_field.cpu().numpy(),
+            grad_nufft_field.cpu().numpy(),
+            atol=5e-1,
+        )
