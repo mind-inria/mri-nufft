@@ -6,7 +6,7 @@ from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 import torch
 import numpy as np
-from .._array_compat import NP2TORCH
+from .._array_compat import NP2TORCH, _array_to_torch
 from torch.types import Tensor
 from deepinv.physics.forward import LinearPhysics
 
@@ -51,8 +51,12 @@ def _backward_op_field_map(
     if not nufft._grad_wrt_field_map or not isinstance(nufft, MRIFourierCorrected):
         return None
     # Compute gradient with respect to field map
-
-    return x * nufft.adj_op(dy * nufft.readout_time)
+    full_readout_time = _array_to_torch(
+        nufft.full_readout_time,
+        device=dy.device,
+    )
+    tmp = x * nufft.adj_op(dy * full_readout_time)
+    return tmp
 
 
 ##############################
@@ -93,7 +97,14 @@ def _backward_adj_field_map(nufft, y, dx):
     if not nufft._grad_wrt_field_map or not isinstance(nufft, MRIFourierCorrected):
         return None
     # Compute gradient with respect to field map
-    return dx.conj() * nufft.adj_op(y * nufft.readout_time)
+
+    full_readout_time = _array_to_torch(
+        nufft.full_readout_time,
+        device=y.device,
+    )
+
+    tmp = dx.conj() * nufft.adj_op(y * full_readout_time)
+    return tmp
 
 
 class _NUFFT_OP(torch.autograd.Function):
@@ -198,19 +209,21 @@ class MRINufftAutoGrad(torch.nn.Module):
         super().__init__()
         self.nufft_op = nufft_op
         self.nufft_op._grad_wrt_traj = wrt_traj
-        if wrt_traj and self.nufft_op.backend in ["finufft", "cufinufft"]:
-            self.nufft_op._make_plan_grad()
         self.nufft_op._grad_wrt_data = wrt_data
+        self.nufft_op._grad_wrt_field_map = wrt_field_map
         if wrt_traj:
+            if self.nufft_op.backend in ["finufft", "cufinufft"]:
+                self.nufft_op._make_plan_grad()
             # We initialize the samples as a torch tensor purely for autodiff purposes.
             # It can also be converted later to nn.Parameter, in which case it is
             # used for update also.
-            self._samples_torch = torch.Tensor(self.nufft_op.samples)
+            self._samples_torch = _array_to_torch(self.nufft_op.samples)
             self._samples_torch.requires_grad = True
         self._field_map_torch = None
         if wrt_field_map and isinstance(self.nufft_op, MRIFourierCorrected):
-            self._field_map_torch = torch.Tensor(self.nufft_op.field_map)
+            self._field_map_torch = _array_to_torch(self.nufft_op.field_map)
             self._field_map_torch.requires_grad = True
+
         self.paired_batch = paired_batch
 
     def op(self, x, smaps=None, samples=None, field_map=None):
@@ -243,7 +256,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         if field_map is not None and not isinstance(self.nufft_op, MRIFourierCorrected):
             raise ValueError("Underlying nufft operator does not support field map.")
         if isinstance(self.nufft_op, MRIFourierCorrected) and field_map is None:
-            field_map = self._field_map_torch
+            field_map = self.field_map
         return _NUFFT_OP.apply(x, self.samples, field_map, self.nufft_op)
 
     def adj_op(self, kspace, smaps=None, samples=None, field_map=None):
@@ -275,8 +288,11 @@ class MRINufftAutoGrad(torch.nn.Module):
         """
         if self.paired_batch:
             return self._adj_op_batched(kspace, smaps, samples)
+        if field_map is not None and not isinstance(self.nufft_op, MRIFourierCorrected):
+            raise ValueError("Underlying nufft operator does not support field map.")
         if isinstance(self.nufft_op, MRIFourierCorrected) and field_map is None:
-            field_map = self._field_map_torch
+            field_map = self.field_map
+
         return _NUFFT_ADJOP.apply(kspace, self.samples, field_map, self.nufft_op)
 
     def _op_batched(
@@ -343,7 +359,7 @@ class MRINufftAutoGrad(torch.nn.Module):
             return self.nufft_op.samples
 
     @samples.setter
-    def samples(self, value):
+    def samples(self, value: Tensor):
         """Set the samples."""
         self.update_samples(value, unsafe=False)
 
@@ -369,6 +385,20 @@ class MRINufftAutoGrad(torch.nn.Module):
         self._samples_torch = new_samples
         self.nufft_op.update_samples(new_samples.detach(), unsafe=unsafe)
 
+    @property
+    def field_map(self):
+        """Get the field map."""
+        if not isinstance(self.nufft_op, MRIFourierCorrected):
+            raise ValueError("Underlying nufft operator does not support field map.")
+        try:
+            return self._field_map_torch
+        except AttributeError:
+            return self.nufft_op.field_map  # will fail if not MRIFourierCorrected
+
+    @field_map.setter
+    def field_map(self, value: Tensor):
+        self.update_field_map(value)
+
     def update_field_map(self, new_field_map: Tensor):
         """Update the field map of the underlying nufft operator.
 
@@ -377,7 +407,7 @@ class MRINufftAutoGrad(torch.nn.Module):
         if not isinstance(self.nufft_op, MRIFourierCorrected):
             raise ValueError("Underlying nufft operator does not support field map.")
         self._field_map_torch = new_field_map
-        self.nufft_op.compute_field_map()
+        self.nufft_op.update_field_map(new_field_map.detach())
 
     def __getattr__(self, name):
         """Get attribute."""

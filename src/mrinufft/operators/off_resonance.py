@@ -120,8 +120,39 @@ class MRIFourierCorrected(FourierOperatorBase):
         """
         xp = get_array_module(field_map)
 
-        self.field_map = field_map
+        # Resize to match fourier shape
+        if field_map.shape != self._fourier_op.shape:
+            warnings.warn(
+                "field_map and mask will be interpolated to match image shape."
+            )
+            zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
+            field_map = zoom_func(
+                field_map,
+                zoom=tuple(
+                    np.array(self._fourier_op.shape) / np.array(field_map.shape)
+                ),
+                order=1,
+            )
+            if mask is not None:
+                mask = zoom_func(
+                    mask,
+                    zoom=tuple(np.array(self._fourier_op.shape) / np.array(mask.shape)),
+                    order=0,
+                )
+
+        self._field_map = field_map
+        self.mask = mask
         self.readout_time = readout_time
+
+        readout_time = readout_time.ravel()
+        self.n_shots = 1
+        if readout_time.size != self.n_samples:
+            n_shot, r = divmod(self.n_samples, readout_time.size)
+            if r != 0:
+                raise ValueError(
+                    "readout_time should divide or equal the size of the samples."
+                )
+            self.n_shots = n_shot
 
         if xp.all(field_map == 0) or xp.all(readout_time == 0):
             # No off-resonance effect
@@ -149,35 +180,6 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.B, self.C = B, C
             return
 
-        readout_time = readout_time.ravel()
-        self.n_shots = 1
-        if readout_time.size != self.n_samples:
-            n_shot, r = divmod(self.n_samples, readout_time.size)
-            if r != 0:
-                raise ValueError(
-                    "readout_time should divide or equal the size of the samples."
-                )
-            self.n_shots = n_shot
-        # Resize to match fourier shape
-        if field_map.shape != self._fourier_op.shape:
-            warnings.warn(
-                "field_map and mask will be interpolated to match image shape."
-            )
-            zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
-            field_map = zoom_func(
-                field_map,
-                zoom=tuple(
-                    np.array(self._fourier_op.shape) / np.array(field_map.shape)
-                ),
-                order=1,
-            )
-            if mask is not None:
-                mask = zoom_func(
-                    mask,
-                    zoom=tuple(np.array(self._fourier_op.shape) / np.array(mask.shape)),
-                    order=0,
-                )
-
         kwargs = {}
         if isinstance(interpolators, dict):
             kwargs = interpolators.copy()
@@ -187,9 +189,29 @@ class MRIFourierCorrected(FourierOperatorBase):
         if not isinstance(interpolators, Callable):
             raise ValueError(f"Unknown off-resonance interpolator ``{interpolators}``")
 
+        self.interpolator_method = interpolators
         self.B, self.C, _ = interpolators(
             field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
+
+    def update_field_map(self, new_field_map: NDArray):
+        """Update the field map and recompute the interpolators."""
+        self.compute_interpolator(
+            interpolators=self.interpolator_method,
+            field_map=new_field_map,
+            readout_time=self.readout_time,
+            mask=self.mask,
+        )
+
+    @property
+    def field_map(self) -> NDArray:
+        """Get the field map used for off-resonance correction."""
+        return self._field_map
+
+    @field_map.setter
+    def field_map(self, new_field_map: NDArray):
+        """Update the field map and recompute the interpolators."""
+        self.update_field_map(new_field_map)
 
     @property
     def full_readout_time(self) -> NDArray:
