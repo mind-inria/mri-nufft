@@ -206,3 +206,34 @@ def test_check_shape_fail_kspace(operator, array_interface, wrong_kspace_data):
     kspace_data_ = to_interface(wrong_kspace_data, array_interface)
     with pytest.raises(ValueError):
         operator.check_shape(ksp=kspace_data_)
+
+
+@param_array_interface
+def test_interface_gram(operator, array_interface, image_data):
+    """Test the Gram (toeplitz) interface of the operator."""
+    if getattr(operator, "n_trans", 1) >= 2:
+        pytest.skip("Gram operator not implemented for n_trans >= 2")
+
+    # the Toeplitz approximation is not precise on the edges of the image, so
+    # we weights the data to focus on the center of the image.
+    wins = [np.kaiser(s, 14) for s in operator.shape]
+    # outer products of the windows
+    win = np.multiply.outer(wins[0], wins[1])
+    if len(wins) == 3:
+        win = np.multiply.outer(win, wins[2])
+    image_data *= win
+    image_data_ = to_interface(image_data.copy(), array_interface)
+
+    AHA_img = operator.adj_op(operator.op(image_data_))
+    assert np.allclose(from_interface(image_data_, array_interface), image_data.copy())
+    G_img = operator.gram_op(image_data_)
+
+    assert G_img.shape == AHA_img.shape
+
+    AHA_img = from_interface(AHA_img, array_interface)
+    G_img = from_interface(G_img, array_interface)
+
+    # the toeplitz approximation can be quite inaccurate depending on the trajectory
+    # we use a relative mean error metric.
+    nmse = np.median(abs(AHA_img - G_img)) / np.median(abs(G_img))
+    assert nmse < 1e-1
