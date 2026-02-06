@@ -69,7 +69,7 @@ from .trajectories import (
     display_gradients,
     display_gradients_simply,
 )
-
+from mrinufft.trajectories.utils import Acquisition, Hardware
 from .density import voronoi, cell_count, pipe, get_density
 
 __all__ = [
@@ -136,6 +136,9 @@ __all__ = [
     "display_3D_trajectory",
     "display_gradients",
     "display_gradients_simply",
+    # Hardware and Acquisition Config
+    "Acquisition",
+    "Hardware",
 ]
 
 from importlib.metadata import version, PackageNotFoundError
