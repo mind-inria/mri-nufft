@@ -527,6 +527,23 @@ class MRIGpuNUFFT(FourierOperatorBase):
             data = get_array_module(coeffs).stack(result)
         return self._safe_squeeze(data)
 
+    def _adj_op(self, coeffs, image):
+        """Compute adjoint Non Uniform Fourier Transform in place."""
+        return self.adj_op(coeffs, image)
+
+    def _op(self, image, coeffs):
+        """Compute Non Uniform Fourier Transform in place."""
+        return self.op(image, coeffs)
+
+    # def gram_op(self, image, toeplitz=True):
+    #     """Compute the Gram operator of the Fourier Operator."""
+    #     if not toeplitz:
+    #         # TODO remove round trip to CPU for the adjoint
+    #         # by using the direct methods.
+    #         return self.adj_op(self.op(image))
+    #     else:
+    #         return super().gram_op(image, toeplitz=toeplitz)
+
     @property
     def uses_sense(self):
         """Return True if the Fourier Operator uses the SENSE method."""
