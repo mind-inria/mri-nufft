@@ -224,7 +224,7 @@ def apply_toeplitz_kernel(
         raise ValueError("padded_array shape must match toeplitz_kernel shape.")
 
     tl_corner = tuple(slice(0, s) for s in image.shape)
-
+    padded_array.fill(0)
     padded_array[tl_corner] = image
     axis = tuple(range(1, padded_array.ndim))
     tmp = fftn(padded_array, axes=axis)
