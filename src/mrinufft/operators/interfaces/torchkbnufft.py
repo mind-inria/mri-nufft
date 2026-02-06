@@ -167,6 +167,16 @@ class MRITorchKbNufft(FourierOperatorBase):
         return self._safe_squeeze(kdata)
 
     @with_torch
+    def _op(self, data, out):
+        self._tkb_op.forward(data, omega=self.samples.t())
+        return out
+
+    @with_torch
+    def _adj_op(self, coeffs, out):
+        self._tkb_adj_op.forward(data=coeffs, omega=self.samples.t())
+        return out
+
+    @with_torch
     def adj_op(self, coeffs, out=None):
         """Backward Operation.
 
@@ -214,6 +224,26 @@ class MRITorchKbNufft(FourierOperatorBase):
         obs_data = obs_data.to(self.device, copy=False)
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
+
+    @with_torch
+    def gram_op(self, data, toeplitz=True):
+        """Compute the Gram operator."""
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+        if not hasattr(self, "_gram_op"):
+            # initialize the toeplitz approximation for the gram operator.
+            self._gram_op = tkbn.ToepNufft()
+            self._gram_op_kernel = tkbn.calc_toeplitz_kernel(
+                self.samples.t(), self.shape
+            )
+
+        img = self._gram_op(
+            data.to(dtype=self._gram_op_kernel.dtype, copy=False),
+            self._gram_op_kernel,
+            smaps=self.smaps,
+            norm="ortho",
+        ).reshape(data.shape)
+        return self._safe_squeeze(img)
 
     @classmethod
     @with_torch
