@@ -74,7 +74,12 @@ def initialize_3D_phyllotaxis_radial(
        Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
     """
     trajectory = initialize_3D_cones(
-        Nc, Ns, tilt="golden", width=0, in_out=in_out, slew_ramp_disable=True,
+        Nc,
+        Ns,
+        tilt="golden",
+        width=0,
+        in_out=in_out,
+        slew_ramp_disable=True,
     )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
