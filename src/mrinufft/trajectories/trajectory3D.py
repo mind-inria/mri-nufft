@@ -21,7 +21,7 @@ from .maths import (
     Rz,
 )
 from .projection import parameterize_by_arc_length
-from .tools import conify, duplicate_along_axes, epify, precess, stack
+from .tools import conify, duplicate_along_axes, epify, precess, stack, add_slew_ramp
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Spirals, initialize_tilt
 
@@ -29,7 +29,7 @@ from .utils import KMAX, Spirals, initialize_tilt
 # 3D RADIALS #
 ##############
 
-
+@add_slew_ramp
 def initialize_3D_phyllotaxis_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:

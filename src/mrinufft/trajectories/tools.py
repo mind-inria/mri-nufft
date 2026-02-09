@@ -3,21 +3,28 @@
 from typing import Any, Literal
 from collections.abc import Callable
 from functools import partial
+import inspect
+from functools import wraps
 
 import numpy as np
 from numpy.typing import NDArray
 import numpy.linalg as nl
 from scipy.interpolate import CubicSpline, interp1d
 from scipy.stats import norm
+from .gradients import connect_gradient, min_length_connection
 
 from .maths import Rv, Rx, Ry, Rz
 from .utils import (
     KMAX,
+    Acquisition,
     Packings,
     initialize_shape_norm,
     VDSorder,
     VDSpdf,
     initialize_tilt,
+    unnormalize_trajectory,
+    convert_gradients_to_trajectory,
+    convert_trajectory_to_gradients,
 )
 from .maths import CIRCLE_PACKING_DENSITY, generate_fibonacci_circle
 
@@ -1139,3 +1146,148 @@ def get_packing_spacing_positions(
     positions = sorted(positions, key=partial(nl.norm, ord=main_order))
     positions = positions[:Nc]
     return positions
+
+def _add_slew_ramp_to_traj_func(
+    func: Callable,
+    func_kwargs: dict,
+    ramp_to_index: int,
+    method: str = "lp-minslew",
+    acq: Acquisition | None = None,    
+) -> NDArray:
+    traj = func(**func_kwargs)
+    acq = acq or Acquisition.default
+    unnormalized_traj = unnormalize_trajectory(traj, acq=acq)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        traj, acq=acq
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    # Calculate the number of time steps for ramps
+    min_length = min_length_connection(
+        kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
+        kends=unnormalized_traj[:, ramp_to_index],
+        gstarts=np.zeros_like(gradients_to_reach),
+        gends=gradients_to_reach,
+        acq=acq,
+    )
+    # Update the Ns of the trajectory to ensure we still give
+    # same Ns as users expect. We use extra 2 points as buffer.
+    n_slew_ramp = min_length + 2
+    func_kwargs["Ns"] -= n_slew_ramp - ramp_to_index
+    new_traj = func(**func_kwargs)
+    # Re-calculate the gradients
+    unnormalized_traj = unnormalize_trajectory(new_traj, acq=acq)
+    gradients, initial_positions = convert_trajectory_to_gradients(
+        new_traj, acq=acq
+    )
+    gradients_to_reach = gradients[:, ramp_to_index]
+    ramp_up_gradients = connect_gradient(
+                kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
+        kends=unnormalized_traj[:, ramp_to_index],
+        gstarts=np.zeros_like(gradients_to_reach),
+        gends=gradients_to_reach,
+        acq=acq,
+    )[:, :-1]
+    ramp_up_traj = convert_gradients_to_trajectory(
+        gradients=ramp_up_gradients,
+        initial_positions=initial_positions,
+        acq=acq,
+    )
+    return np.hstack([ramp_up_traj, new_traj[:, ramp_to_index:]])
+
+
+def add_slew_ramp(
+    func: Callable | None = None,
+    ramp_to_index: int = 5,
+    acq: Acquisition | None = None,
+    slew_ramp_disable: bool = False,
+    method: str = "lp-minslew",
+) -> Callable:
+    """Add slew-compatible ramps to a trajectory function.
+
+    This decorator modifies a trajectory function to include
+    slew rate ramps, ensuring that the trajectory adheres to
+    the maximum slew rate and gradient amplitude constraints.
+    The ramps are applied to the gradients of the trajectory
+    at the specified `ramp_to_index`, which is by-default the
+    index of the 5th readout sample.
+    Note that this decorator does not change the length of the original
+    trajectory.
+
+    Parameters
+    ----------
+    func : Optional[Callable], optional
+        The trajectory function to decorate. If not provided,
+        the decorator can be used without arguments.
+    ramp_to_index : int, optional
+        The index in the trajectory where the slew ramp should be applied,
+        by default 5. This is typically the index of the first readout sample.
+    resolution : float or NDArray, optional
+        The resolution of the trajectory, by default DEFAULT_RESOLUTION.
+        This can be a single float or an array-like of shape (3,).
+    raster_time : float, optional
+        The time interval between samples in the trajectory, by default
+        DEFAULT_RASTER_TIME.
+    gamma : float, optional
+        The gyromagnetic ratio in Hz/T, by default Gammas.Hydrogen.
+    smax : float, optional
+        The maximum slew rate in T/m/s, by default DEFAULT_SMAX.
+    slew_ramp_disable : bool, optional
+        If True, disables the slew ramp and returns the trajectory as is,
+        by default False. This is useful for in-out trajectories where
+        the slew ramp is not needed.
+    method : str, optional
+        The method to use for connecting the gradients, by default "lp-minslew".
+
+    Returns
+    -------
+    Callable
+        A decorator that modifies the trajectory function to include
+        slew rate ramps.
+
+    Notes
+    -----
+    - The decorator modifies the trajectory function to ensure that the
+        gradients at the specified `ramp_to_index` are adjusted to comply with
+        the maximum slew rate and gradient amplitude constraints.
+    - If `slew_ramp_disable` is set to True, the trajectory function will
+        return the trajectory as is, without applying any slew ramps.
+    - The decorator can be used with or without providing a function.
+    - If used without a function, it returns a decorator that can be applied later.
+    - The decorated function should accept parameters like `smax`, `resolution`,
+        `raster_time`, `gamma`, and `ramp_to_index` to control the behavior of the
+        slew ramping.
+    """
+
+    def decorator(trajectory_func):
+        sig = inspect.signature(trajectory_func)
+
+        @wraps(trajectory_func)
+        def wrapped(*args, **kwargs) -> NDArray:
+            # This allows users to also call the trajectory function
+            # directly giving these args.
+            _acq = kwargs.pop("acq", acq)
+            _ramp_to_index = kwargs.pop("ramp_to_index", ramp_to_index)
+            _slew_ramp_disable = kwargs.pop("slew_ramp_disable", slew_ramp_disable)
+            _method = kwargs.pop("method", method)
+            # Bind all args (positional and keyword)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            in_out = bound.arguments.get("in_out", False)
+            if in_out or _slew_ramp_disable:
+                traj = trajectory_func(*args, **kwargs)
+                # Send the trajectory as is for in-out trajectories
+                return traj
+            return _add_slew_ramp_to_traj_func(
+                trajectory_func,
+                bound.arguments,
+                ramp_to_index=_ramp_to_index,
+                acq=_acq,
+                method=_method,
+            )
+
+        return wrapped
+
+    if func is not None and callable(func):
+        return decorator(func)
+
+    return decorator
