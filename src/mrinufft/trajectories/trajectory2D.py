@@ -14,7 +14,7 @@ import warnings
 
 from .gradients import patch_center_anomaly
 from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
-from .tools import rotate
+from .tools import rotate, add_slew_ramp
 from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 
 #####################
@@ -22,6 +22,7 @@ from .utils import KMAX, initialize_algebraic_spiral, initialize_tilt
 #####################
 
 
+@add_slew_ramp
 def initialize_2D_radial(
     Nc: int, Ns: int, tilt: str | float = "uniform", in_out: bool = False
 ) -> NDArray:
@@ -56,6 +57,7 @@ def initialize_2D_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_spiral(
     Nc: int,
     Ns: int,
@@ -234,6 +236,7 @@ def initialize_2D_fibonacci_spiral(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_vds_spiral(
     Nc: int,
     oversamp: int = 1,
@@ -400,6 +403,7 @@ def initialize_2D_vds_spiral(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_cones(
     Nc: int,
     Ns: int,
@@ -446,6 +450,7 @@ def initialize_2D_cones(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_sinusoide(
     Nc: int,
     Ns: int,
@@ -586,6 +591,7 @@ def initialize_2D_rings(Nc: int, Ns: int, nb_rings: int) -> NDArray:
     return KMAX * np.array(trajectory)
 
 
+@add_slew_ramp
 def initialize_2D_rosette(
     Nc: int, Ns: int, in_out: bool = False, coprime_index: int = 0
 ) -> NDArray:
@@ -629,6 +635,7 @@ def initialize_2D_rosette(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_polar_lissajous(
     Nc: int, Ns: int, in_out: bool = False, nb_segments: int = 1, coprime_index: int = 0
 ) -> NDArray:
