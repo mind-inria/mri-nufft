@@ -1147,19 +1147,18 @@ def get_packing_spacing_positions(
     positions = positions[:Nc]
     return positions
 
+
 def _add_slew_ramp_to_traj_func(
     func: Callable,
     func_kwargs: dict,
     ramp_to_index: int,
     method: str = "lp-minslew",
-    acq: Acquisition | None = None,    
+    acq: Acquisition | None = None,
 ) -> NDArray:
     traj = func(**func_kwargs)
     acq = acq or Acquisition.default
     unnormalized_traj = unnormalize_trajectory(traj, acq=acq)
-    gradients, initial_positions = convert_trajectory_to_gradients(
-        traj, acq=acq
-    )
+    gradients, initial_positions = convert_trajectory_to_gradients(traj, acq=acq)
     gradients_to_reach = gradients[:, ramp_to_index]
     # Calculate the number of time steps for ramps
     min_length = min_length_connection(
@@ -1176,12 +1175,10 @@ def _add_slew_ramp_to_traj_func(
     new_traj = func(**func_kwargs)
     # Re-calculate the gradients
     unnormalized_traj = unnormalize_trajectory(new_traj, acq=acq)
-    gradients, initial_positions = convert_trajectory_to_gradients(
-        new_traj, acq=acq
-    )
+    gradients, initial_positions = convert_trajectory_to_gradients(new_traj, acq=acq)
     gradients_to_reach = gradients[:, ramp_to_index]
     ramp_up_gradients = connect_gradient(
-                kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
+        kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
         kends=unnormalized_traj[:, ramp_to_index],
         gstarts=np.zeros_like(gradients_to_reach),
         gends=gradients_to_reach,
