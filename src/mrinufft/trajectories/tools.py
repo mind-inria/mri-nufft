@@ -1183,6 +1183,7 @@ def _add_slew_ramp_to_traj_func(
         gstarts=np.zeros_like(gradients_to_reach),
         gends=gradients_to_reach,
         acq=acq,
+        N=n_slew_ramp,
     )[:, :-1]
     ramp_up_traj = convert_gradients_to_trajectory(
         gradients=ramp_up_gradients,
