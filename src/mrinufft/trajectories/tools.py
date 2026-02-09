@@ -1166,6 +1166,7 @@ def _add_slew_ramp_to_traj_func(
         kends=unnormalized_traj[:, ramp_to_index],
         gstarts=np.zeros_like(gradients_to_reach),
         gends=gradients_to_reach,
+        method=method,
         acq=acq,
     )
     # Update the Ns of the trajectory to ensure we still give
@@ -1184,6 +1185,7 @@ def _add_slew_ramp_to_traj_func(
         gends=gradients_to_reach,
         acq=acq,
         N=n_slew_ramp,
+        method=method,
     )[:, :-1]
     ramp_up_traj = convert_gradients_to_trajectory(
         gradients=ramp_up_gradients,
@@ -1225,16 +1227,14 @@ def add_slew_ramp(
     raster_time : float, optional
         The time interval between samples in the trajectory, by default
         DEFAULT_RASTER_TIME.
-    gamma : float, optional
-        The gyromagnetic ratio in Hz/T, by default Gammas.Hydrogen.
-    smax : float, optional
-        The maximum slew rate in T/m/s, by default DEFAULT_SMAX.
+    acq : Optional[Acquisition], optional
+        An Acquisition object containing the acquisition parameters, by default None.
     slew_ramp_disable : bool, optional
-        If True, disables the slew ramp and returns the trajectory as is,
-        by default False. This is useful for in-out trajectories where
-        the slew ramp is not needed.
+        If True, the slew ramp will not be applied and the trajectory will be
+        returned as is, by default False.
     method : str, optional
-        The method to use for connecting the gradients, by default "lp-minslew".
+        The method to use for calculating the slew ramp, by default "lp-minslew".
+        This can be any method supported by the `connect_gradient` function.
 
     Returns
     -------
