@@ -541,7 +541,7 @@ def read_trajectory(
             params["gamma"] = gamma
             params["recon_tag"] = recon_tag
             params["TE_pos"] = TE_pos
-            if version >= 4.2:
+            if version >= 42:
                 params["timestamp"] = timestamp
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
