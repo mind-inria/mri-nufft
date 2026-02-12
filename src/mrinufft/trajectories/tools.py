@@ -1162,7 +1162,7 @@ def _add_slew_ramp_to_traj_func(
     gradients_to_reach = gradients[:, ramp_to_index]
     # Calculate the number of time steps for ramps
     min_length = min_length_connection(
-        kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
+        kstarts=initial_positions, 
         kends=unnormalized_traj[:, ramp_to_index],
         gstarts=np.zeros_like(gradients_to_reach),
         gends=gradients_to_reach,
@@ -1179,7 +1179,7 @@ def _add_slew_ramp_to_traj_func(
     gradients, initial_positions = convert_trajectory_to_gradients(new_traj, acq=acq)
     gradients_to_reach = gradients[:, ramp_to_index]
     ramp_up_gradients = connect_gradient(
-        kstarts=np.zeros_like(unnormalized_traj[:, ramp_to_index]),
+        kstarts=initial_positions,
         kends=unnormalized_traj[:, ramp_to_index],
         gstarts=np.zeros_like(gradients_to_reach),
         gends=gradients_to_reach,
