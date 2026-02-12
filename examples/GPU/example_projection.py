@@ -106,7 +106,7 @@ s_projected_flat = GeneralizedProximalGradient(
     [f], 
     [prox_grad, prox_slew], 
     x0=A*c, 
-    niter=5000,
+    niter=50000,
     tau=1/L, 
     epsg=[c1, c2],
     show=True,
