@@ -427,8 +427,8 @@ def cartesian_espirit(
 
     max_eig, Smaps = power_method(
         max_iter=100,
-        operator=lambda x : AHA @ x,
-        norm_func=lambda x : xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5,
+        operator=lambda x: AHA @ x,
+        norm_func=lambda x: xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5,
         x=Smaps,
     )
     Smaps = Smaps.T[0]
