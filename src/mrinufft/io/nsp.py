@@ -422,7 +422,7 @@ def read_trajectory(
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
-            version = int(np.around(version*10))
+            version = int(np.around(version * 10))
         else:
             version = 10
         dimension, data = _pop_elements(data, type="int")
