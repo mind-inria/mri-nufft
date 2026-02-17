@@ -8,6 +8,7 @@ from mrinufft.trajectories.trajectory2D import initialize_2D_spiral
 acq = Acquisition(fov=(0.256, 0.256, 0.003), img_size=(256, 256, 1))
 
 step_size = 0.01
+Ns = 512
 c = np.cumsum(np.random.normal(0, step_size, (Ns, 2)), axis=0)
 c *= acq.kmax[: c.shape[-1]] * c
 

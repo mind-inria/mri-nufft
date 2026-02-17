@@ -188,8 +188,6 @@ class LinearProjection:
     Note
     ----
     - Provide either a linear operator A or a mask and locations for projection.
-    - If both A and mask are provided, the projection will be performed using mask
-
     """
 
     def __init__(
@@ -202,6 +200,11 @@ class LinearProjection:
             raise ValueError(
                 "Provide either a linear operator A or a mask and locations for "
                 "projection."
+            )
+        if A is not None and mask is not None:
+            raise ValueError(
+                "Provide either a linear operator A or a mask and locations for "
+                "projection, not both."
             )
         self.target = v
         self.mask = mask
@@ -314,7 +317,6 @@ def project_trajectory(
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
     Nc, Ns, Nd = trajectory.shape
-
     D1 = FirstDerivative((Nc, Ns, Nd), axis=1, sampling=1, kind="backward", edge=True)
     c1 = 1 / 2
     c2 = 1 / 4
@@ -322,10 +324,22 @@ def project_trajectory(
     M = pylops.VStack([c1 * D1, c2 * D1.T * D1])
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
     prox_grad = GroupL2SoftThresholding(
-        (Nc, Ns, Nd), c1 * acq.gamma * acq.hardware.gmax * acq.raster_time
+        (Nc, Ns, Nd),
+        c1
+        * acq.gamma
+        * acq.hardware.gmax
+        * acq.raster_time
+        / np.asarray(acq.kmax[:Nd])
+        / 2,
     )
     prox_slew = GroupL2SoftThresholding(
-        (Nc, Ns, Nd), c2 * acq.gamma * acq.hardware.smax * acq.raster_time**2
+        (Nc, Ns, Nd),
+        c2
+        * acq.gamma
+        * acq.hardware.smax
+        * acq.raster_time**2
+        / np.asarray(acq.kmax[:Nd])
+        / 2,
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
     linear_proj = (
