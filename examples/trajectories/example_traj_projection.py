@@ -110,7 +110,6 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 #
 
 from mrinufft.trajectories.projection import project_trajectory
-
 projected_trajectory = project_trajectory(
     original_trajectory,
     acq,

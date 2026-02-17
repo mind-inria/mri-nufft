@@ -133,9 +133,9 @@ class GroupL2SoftThresholding(ProxOperator):
         x_mat = self._reshape(x)
         thresholds = self.alphas * tau
         norm2_vec = xp.linalg.norm(x_mat, axis=-1)
-        denom = np.maximum(norm2_vec, eps)[..., np.newaxis]
-        norm_minus_alpha = norm2_vec[..., np.newaxis] - thresholds
-        numer = np.maximum(0, norm_minus_alpha)
+        denom = xp.maximum(norm2_vec, eps)[..., None]
+        norm_minus_alpha = norm2_vec[..., None] - thresholds
+        numer = xp.maximum(0, norm_minus_alpha)
         scaling_factor = numer / denom
         y = x_mat * scaling_factor
         return y.flatten()
@@ -321,7 +321,7 @@ def project_trajectory(
     c1 = 1 / 2
     c2 = 1 / 4
     # Define the weighted first and second derivative operators
-    M = pylops.VStack([c1 * D1, c2 * D1.T * D1])
+    M = pylops.VStack([c1 * D1, c2 * D1 * D1])
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
@@ -329,7 +329,7 @@ def project_trajectory(
         * acq.gamma
         * acq.hardware.gmax
         * acq.raster_time
-        / np.asarray(acq.kmax[:Nd])
+        / xp.asarray(acq.kmax[:Nd])
         / 2,
     )
     prox_slew = GroupL2SoftThresholding(
@@ -338,7 +338,7 @@ def project_trajectory(
         * acq.gamma
         * acq.hardware.smax
         * acq.raster_time**2
-        / np.asarray(acq.kmax[:Nd])
+        / xp.asarray(acq.kmax[:Nd])
         / 2,
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
