@@ -309,7 +309,7 @@ def project_trajectory(
 
     ${proj_ref}
     """
-    acq = acq if acq is not None else Acquisition.default
+    acq = acq or Acquisition.default
     if trajectory.ndim == 2:
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
