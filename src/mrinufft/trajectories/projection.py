@@ -7,7 +7,7 @@ from scipy.interpolate import CubicSpline
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
 from pyproximal import ProxOperator
 from mrinufft._utils import _fill_doc
-from mrinufft import Acquisition
+from mrinufft.trajectories.utils import Acquisition
 from tqdm import tqdm
 from pylops import LinearOperator, FirstDerivative
 import pylops
@@ -276,7 +276,7 @@ def project_trajectory(
     acq: Acquisition | None = None,
     max_iter: int = 1000,
     in_out: bool = True,
-    linear_projector: LinearProjection | None = None,
+    linear_projector: LinearProjection | None | str = None,
     verbose: int = 1,
 ) -> NDArray:
     """
@@ -297,11 +297,12 @@ def project_trajectory(
         If True, the linear projection ensures each trajectory passes through k-space
         center in middle of trajectory. If False, the trajectory is constrained
         to start from k-space center (UTE trajectories). Defaults to True.
-    linear_projector: LinearProjection, optional
+    linear_projector: LinearProjection or str, optional
         An instance of the LinearProjection class to perform the projection onto the
         constraint set. This is available for advanced users who want to specify
         custom linear constraints.
         If not provided, the projection is performed according to `in_out`
+        If provided as `no_proj`, no linear projection is performed (i.e., s^* = z).
     verbose: int, optional
         The verbosity level. If 0, no progress bar is shown. If 1, a progress bar is
         displayed. If 2 we show the iteration level cost function.
@@ -340,10 +341,12 @@ def project_trajectory(
         )
     )
     f = GradientLinearProjection(
-        initial_trajectory=trajectory, kinetic_op=M, linear_projector=linear_proj
+        initial_trajectory=trajectory,
+        kinetic_op=M,
+        linear_projector=linear_proj if linear_proj != "no_proj" else None,
     )
     pbar = tqdm(total=max_iter, desc="Projecting trajectory", unit="iter")
-    pyproximal.optimization.primal.ProximalGradient(
+    q_star = pyproximal.optimization.primal.ProximalGradient(
         f,
         prox,
         x0=M * trajectory,
@@ -353,3 +356,4 @@ def project_trajectory(
         show=verbose > 1,
         callback=lambda x: pbar.update(1) if verbose == 1 else None,
     )
+    return f.get_primal_variables(q_star)
