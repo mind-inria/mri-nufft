@@ -4,6 +4,14 @@ import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
+from mrinufft._array_compat import get_array_module, with_numpy_cupy
+from pyproximal import ProxOperator
+from mrinufft._utils import _fill_doc
+from mrinufft import Acquisition
+from tqdm import tqdm
+from pylops import LinearOperator, FirstDerivative
+import pylops
+import pyproximal
 
 
 def parameterize_by_arc_length(
@@ -69,3 +77,279 @@ def parameterize_by_arc_length(
             projection = arc_func(time)
         new_trajectory[i] = projection
     return new_trajectory
+
+
+class GroupL2SoftThresholding(ProxOperator):
+    """
+    Group L2 Soft Thresholding (Shrinkage) Operator.
+
+    This operator applies a soft-thresholding on the L2 norm of vectors
+    grouped along the last dimension. It is effectively the proximal operator
+    of the Group Lasso (L2,1) penalty.
+
+    The logic follows: y = x * max(0, ||x|| - alpha) / ||x||
+
+    Parameters
+    ----------
+    shape : Tuple[int, ...]
+        The shape of the input vector, expected to be (Nc, Ns, D).
+    alphas : NDArray or float
+        The threshold parameter(s). Can be a scalar or a vector of shape (D,).
+        If a vector is provided, the thresholding is applied per-channel
+        broadcasting against the joint L2 norm.
+    """
+
+    def __init__(self, shape, alphas: NDArray):
+        # We pass None as the function value evaluator for now,
+        # or we could implement the L21 norm evaluation.
+        super().__init__(None, False)
+        self.shape = shape
+        # Ensure alphas is the correct shape/type
+        self.alphas = alphas
+
+    def _reshape(self, x: NDArray) -> NDArray:
+        """Reshapes the flat input vector to (Nc, Ns, D)."""
+        return x.reshape(self.shape)
+
+    @with_numpy_cupy
+    def __call__(self, x: NDArray) -> bool:
+        """
+        Evaluate the regularization function value (L2,1 norm weighted by alphas).
+
+        Note: This returns the penalty value, not a boolean check.
+        """
+        xp = get_array_module(x)
+        norms = xp.linalg.norm(self._reshape(x), axis=-1)
+        return xp.sum(norms * np.mean(self.alphas))
+
+    @with_numpy_cupy
+    def prox(self, x: NDArray, tau: float, eps: float = 1e-10) -> NDArray:
+        """
+        Apply the Group L2 Soft Thresholding.
+
+        y = x * ( ||x||_2 - (alphas * tau) )_+ / ||x||_2
+        """
+        xp = get_array_module(x)
+        x_mat = self._reshape(x)
+        thresholds = self.alphas * tau
+        norm2_vec = xp.linalg.norm(x_mat, axis=-1)
+        denom = np.maximum(norm2_vec, eps)[..., np.newaxis]
+        norm_minus_alpha = norm2_vec[..., np.newaxis] - thresholds
+        numer = np.maximum(0, norm_minus_alpha)
+        scaling_factor = numer / denom
+        y = x_mat * scaling_factor
+        return y.flatten()
+
+
+_proj_docs = dict(
+    proj_ref="""
+References
+----------
+
+.. [Proj] N. Chauffert, P. Weiss, J. Kahn and P. Ciuciu, "A Projection Algorithm for
+       Gradient Waveforms Design in Magnetic Resonance Imaging," in
+       IEEE Transactions on Medical Imaging, vol. 35, no. 9, pp. 2026-2039, Sept. 2016,
+       doi: 10.1109/TMI.2016.2544251.
+""",
+)
+
+
+class LinearProjection:
+    r"""
+    Implements the projection on linear constraints set given by Eq 10 in_[Proj].
+
+    The linear constraint set if defined by a linear operator A and a target vector v:
+
+    .. math::
+            \\mathcal{C} = \\{ x \\in \\mathbb{R}^n : Ax = v \\}
+
+    The projection of an input vector z onto this set is given by:
+
+    .. math::
+            s = z + A^\\dagger (v - Az)
+
+    The constraint set can also be provided by a mask m in which case:
+
+    .. math::
+            \\mathcal{C} = \\{ x \\in \\mathbb{R}^n : x[mask] = v \\}
+
+
+    Parameters
+    ----------
+    v: NDArray
+        The target values for the linear constraints.
+    A: LinearOperator, optional
+        The linear operator defining the constraints.
+    mask: NDArray, optional
+        A boolean mask indicating the indices of the input vector to be projected
+        onto v. If provided, the projection is performed by directly setting
+        z[mask] = v.
+
+    Note
+    ----
+    - Provide either a linear operator A or a mask and locations for projection.
+    - If both A and mask are provided, the projection will be performed using mask
+
+    """
+
+    def __init__(
+        self,
+        v: NDArray,
+        A: LinearOperator | None = None,
+        mask: NDArray | tuple | None = None,
+    ):
+        if A is None and mask is None:
+            raise ValueError(
+                "Provide either a linear operator A or a mask and locations for "
+                "projection."
+            )
+        self.target = v
+        self.mask = mask
+        self.linear_op = A
+
+    def __call__(self, x: NDArray) -> NDArray:
+        """Apply the projection to the input vector x."""
+        if self.mask is not None:
+            x[self.mask] = self.target
+            return x
+        else:
+            return self.linear_op.div(self.target - self.linear_op * x)
+
+
+class GradientLinearProjection:
+    r"""
+    Implements the gradient of F(q1, q2) given by Eq 11 in_[Proj].
+
+    The gradient is given by:
+    .. math::
+            \\nabla F(q) = - A s^*
+
+    where s^* is the projection of the primal variable z = c - M^H q
+    onto the linear constraint set defined by A and v.
+
+    Parameters
+    ----------
+    M: LinearOperator
+        The kinetic operator M.
+    c: NDArray
+        The initial trajectory c.
+    linear_projector: LinearProjection, optional
+        An instance of the LinearProjection class to perform the projection
+        onto the constraint set. If not provided, the projection will be
+        performed without any constraints (i.e., s^* = z).
+
+    """
+
+    def __init__(
+        self,
+        initial_trajectory: NDArray,
+        kinetic_op: LinearOperator,
+        linear_projector: LinearProjection | None = None,
+    ):
+        self.M = kinetic_op
+        self.c = initial_trajectory
+        self.linear_projector = linear_projector
+
+    def get_primal_variables(self, q: NDArray) -> NDArray:
+        """Compute the primal variables z = c - M^H q."""
+        return self.c - (self.M.H * q)
+
+    def grad(self, q: NDArray) -> NDArray:
+        """
+        Compute the gradient of the objective function w.r.t q.
+
+        grad F(q) = - M * s_star
+        """
+        z = self.get_primal_variables(q)
+        s_star = self.linear_projector(z) if self.linear_projector is not None else z
+        return -(self.M * s_star).flatten()
+
+
+LinearProjection.__doc__ += _proj_docs["proj_ref"]
+GradientLinearProjection.__doc__ += _proj_docs["proj_ref"]
+
+
+@_fill_doc(_proj_docs)
+@with_numpy_cupy
+def project_trajectory(
+    trajectory: NDArray,
+    acq: Acquisition | None = None,
+    max_iter: int = 1000,
+    in_out: bool = True,
+    linear_projector: LinearProjection | None = None,
+    verbose: int = 1,
+) -> NDArray:
+    """
+    Projects the trajectory onto hardware constraint set.
+
+    This function implements ALgorithm 1 in _[Proj].
+
+    Parameters
+    ----------
+    trajectory: NDArray
+        The input trajectory to be projected, of shape (Nc, Ns, Nd).
+    acq: Acquisition, optional
+        An instance of the Acquisition class containing the gradient constraints.
+        If not provided, the projection will be performed without any constraints.
+    max_iter: int
+        The maximum number of iterations for the projection algorithm. Defaults to 1000.
+    in_out: bool
+        If True, the linear projection ensures each trajectory passes through k-space
+        center in middle of trajectory. If False, the trajectory is constrained
+        to start from k-space center (UTE trajectories). Defaults to True.
+    linear_projector: LinearProjection, optional
+        An instance of the LinearProjection class to perform the projection onto the
+        constraint set. This is available for advanced users who want to specify
+        custom linear constraints.
+        If not provided, the projection is performed according to `in_out`
+    verbose: int, optional
+        The verbosity level. If 0, no progress bar is shown. If 1, a progress bar is
+        displayed. If 2 we show the iteration level cost function.
+
+    ${proj_ref}
+    """
+    acq = acq if acq is not None else Acquisition.default
+    if trajectory.ndim == 2:
+        trajectory = trajectory[None]
+    xp = get_array_module(trajectory)
+    Nc, Ns, Nd = trajectory.shape
+
+    D1 = FirstDerivative((Nc, Ns, Nd), axis=1, sampling=1, kind="backward", edge=True)
+    c1 = 1 / 2
+    c2 = 1 / 4
+    # Define the weighted first and second derivative operators
+    M = pylops.VStack([c1 * D1, c2 * D1.T * D1])
+    lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
+    prox_grad = GroupL2SoftThresholding(
+        (Nc, Ns, Nd), c1 * acq.gamma * acq.hardware.gmax * acq.raster_time
+    )
+    prox_slew = GroupL2SoftThresholding(
+        (Nc, Ns, Nd), c2 * acq.gamma * acq.hardware.smax * acq.raster_time**2
+    )
+    prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
+    linear_proj = (
+        linear_projector
+        if linear_projector is not None
+        else LinearProjection(
+            v=xp.zeros((Nc, Nd)),
+            mask=(
+                (slice(None), Ns // 2, slice(None))
+                if in_out
+                else (slice(None), 0, slice(None))
+            ),
+        )
+    )
+    f = GradientLinearProjection(
+        initial_trajectory=trajectory, kinetic_op=M, linear_projector=linear_proj
+    )
+    pbar = tqdm(total=max_iter, desc="Projecting trajectory", unit="iter")
+    pyproximal.optimization.primal.ProximalGradient(
+        f,
+        prox,
+        x0=M * trajectory,
+        niter=max_iter,
+        acceleration="fista",
+        tau=1 / lipchitz_constant,
+        show=verbose > 1,
+        callback=lambda x: pbar.update(1) if verbose == 1 else None,
+    )

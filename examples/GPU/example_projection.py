@@ -2,9 +2,10 @@ import numpy as np
 import pylops
 import pyproximal
 from pyproximal.proximal import L2, EuclideanBall
-from pyproximal.optimization.primal import GeneralizedProximalGradient
+from pyproximal.optimization.primal import ProximalGradient
 from mrinufft import Acquisition
 import matplotlib.pyplot as plt
+from mrinufft.trajectories.projection import GroupL2SoftThresholding
 
 class PylopsProjectedGradient:
     def __init__(self, kinetic_op, actual_data, linear_constraint_op=None, v=None):
@@ -68,13 +69,18 @@ c_flat = c.flatten()
 # 3. Operators via PyLops [cite: 234, 235]
 # Gradient operator (M)
 D1 = pylops.FirstDerivative((n_time_points, 2), axis=0, sampling=1, kind="backward", edge=True)
-A = pylops.VStack([D1, D1.T*D1])
+c1 = 1/2
+c2 = 1/4
+D1.forceflat = True
+A = pylops.VStack([c1*D1, c2*D1.T*D1])
 
 f = PylopsProjectedGradient(kinetic_op=A, actual_data=c)
 
 
-prox_grad = EuclideanBall(center=0, radius=acq.gamma*acq.hardware.gmax*acq.raster_time)
-prox_slew = EuclideanBall(center=0, radius=acq.gamma*acq.hardware.smax*acq.raster_time**2)
+prox_grad = GroupL2SoftThresholding((n_time_points, 2), c1*acq.gamma*acq.hardware.gmax*acq.raster_time)
+prox_slew = GroupL2SoftThresholding((n_time_points, 2), c2*acq.gamma*acq.hardware.smax*acq.raster_time**2)
+
+prox = pyproximal.VStack([prox_grad, prox_slew], nn=[n_time_points*2, n_time_points*2])
 
 def first_derivative(data, dwell_time=1):
     update_value = np.diff(data, axis=1)
@@ -99,20 +105,21 @@ def second_derivative(data, dwell_time=1):
     return second_d
 
 dt = 1
-c1 = 1/2
-c2 = 1/4
+from tqdm import tqdm
 L = (2*c1/dt)**2+(4*c2/dt**2)**2
-s_projected_flat = GeneralizedProximalGradient(
-    [f], 
-    [prox_grad, prox_slew], 
+pbar = tqdm(total=50000)
+s_projected_flat = ProximalGradient(
+    f, 
+    prox, 
     x0=A*c, 
     niter=50000,
+    acceleration="fista",
     tau=1/L, 
-    epsg=[c1, c2],
-    show=True,
+    show=False,
+    callback=lambda x: pbar.update(1),
 )
 
 c_proj = c - A.T * s_projected_flat
 plt.plot(*c.T, label='Original trajectory')
 plt.plot(*c_proj.T, label='Projected trajectory')
-plt.legend()
+pltplt.legend()
