@@ -280,7 +280,7 @@ def project_trajectory(
     acq: Acquisition | None = None,
     safety_factor: float = 0.99,
     max_iter: int = 1000,
-    in_out: bool = True,
+    in_out: bool = False,
     linear_projector: LinearProjection | None | str = None,
     verbose: int = 1,
 ) -> NDArray:
@@ -322,13 +322,25 @@ def project_trajectory(
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
     Nc, Ns, Nd = trajectory.shape
-    D1 = FirstDerivative((Nc, Ns, Nd), axis=1, sampling=1, kind="backward", edge=True)
+    D1 = FirstDerivative(
+        (Nc, Ns, Nd),
+        axis=1,
+        sampling=1,
+        kind="backward",
+        edge=True,
+        dtype=trajectory.dtype,
+    )
     c1 = 1 / 2
     c2 = 1 / 4
     # Define the weighted first and second derivative operators
-    M = pylops.VStack([c1 * D1, c2 * D1 * D1])
+    M = pylops.VStack([c1 * D1, c2 * D1 * D1], dtype=trajectory.dtype)
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
-    maxstep = acq.gamma * acq.raster_time / xp.asarray(acq.kmax[:Nd]) / 2
+    maxstep = (
+        acq.gamma
+        * acq.raster_time
+        / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
+        / 2
+    )
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
         c1 * maxstep * acq.gmax * safety_factor,
@@ -366,4 +378,5 @@ def project_trajectory(
         show=verbose > 1,
         callback=lambda x: progressbar.update(1),
     )
-    return f.get_primal_variables(q_star)
+    s_s = f.get_primal_variables(q_star)
+    return linear_proj(s_s) if linear_proj != "no_proj" else s_s
