@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
 from pyproximal import ProxOperator
-from mrinufft._utils import _fill_doc
+from mrinufft._utils import _fill_doc, _progressbar
 from mrinufft.trajectories.utils import Acquisition
 from tqdm import tqdm
 from pylops import LinearOperator, FirstDerivative
@@ -328,9 +328,7 @@ def project_trajectory(
     # Define the weighted first and second derivative operators
     M = pylops.VStack([c1 * D1, c2 * D1 * D1])
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
-    prox_grad = GroupL2SoftThresholding(
-        (Nc, Ns, Nd),
-    maxstep = acq.gamma * acq.raster_time / xp.asarray(acq.kmax[:Nd])/ 2
+    maxstep = acq.gamma * acq.raster_time / xp.asarray(acq.kmax[:Nd]) / 2
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
         c1 * maxstep * acq.gmax,
@@ -357,7 +355,8 @@ def project_trajectory(
         kinetic_op=M,
         linear_projector=linear_proj if linear_proj != "no_proj" else None,
     )
-    pbar = tqdm(total=max_iter, desc="Projecting trajectory", unit="iter")
+    if verbose == 1:
+        progressbar = _progressbar(progressbar, max_iter)
     q_star = pyproximal.optimization.primal.ProximalGradient(
         f,
         prox,
@@ -366,6 +365,6 @@ def project_trajectory(
         acceleration="fista",
         tau=1 / lipchitz_constant,
         show=verbose > 1,
-        callback=lambda x: pbar.update(1) if verbose == 1 else None,
+        callback=lambda x: progressbar.update(1) if verbose == 1 else None,
     )
     return f.get_primal_variables(q_star)
