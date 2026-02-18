@@ -277,6 +277,7 @@ GradientLinearProjection.__doc__ += _proj_docs["proj_ref"]
 def project_trajectory(
     trajectory: NDArray,
     acq: Acquisition | None = None,
+    extra_factor: float = 0.99,
     max_iter: int = 1000,
     in_out: bool = True,
     linear_projector: LinearProjection | None | str = None,
@@ -294,6 +295,9 @@ def project_trajectory(
     acq: Acquisition, optional
         An instance of the Acquisition class containing the gradient constraints.
         If not provided, the projection will be performed without any constraints.
+    extra_factor: float
+        An extra safety factor to ensure the projected trajectory is within hardware
+        limits. Defaults to 0.99 (i.e., 1% margin).
     max_iter: int
         The maximum number of iterations for the projection algorithm. Defaults to 1000.
     in_out: bool
@@ -326,6 +330,7 @@ def project_trajectory(
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
         c1
+        * extra_factor
         * acq.gamma
         * acq.hardware.gmax
         * acq.raster_time
@@ -335,6 +340,7 @@ def project_trajectory(
     prox_slew = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
         c2
+        * extra_factor
         * acq.gamma
         * acq.hardware.smax
         * acq.raster_time**2

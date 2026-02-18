@@ -54,10 +54,10 @@ acq = Acquisition.default
 # %%
 
 # Trajectory parameters
-Nc = 16  # Number of shots
-Ns = 3000  # Number of samples per shot
+Nc = 4  # Number of shots
+Ns = 512  # Number of samples per shot
 in_out = False  # Choose between in-out or center-out trajectories
-nb_zigzags = 5  # Number of zigzags for base trajectories
+nb_revolutions = 4  # Number of zigzags for base trajectories
 
 # %%
 
@@ -71,11 +71,13 @@ sample_freq = 60  # Frequency of samples to display in the trajectory plots
 # We will be using a cone trajectory to showcase the different methods as
 # it switches several times between high gradients and slew rates.
 
-original_trajectory = mn.initialize_2D_cones(
-    Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags
+original_trajectory = mn.initialize_2D_spiral(
+    Nc, Ns, in_out=in_out, nb_revolutions=nb_revolutions
 )
 
-show_trajectory_full(original_trajectory, one_shot, subfigure_size, sample_freq)
+show_trajectory_full(
+    original_trajectory, one_shot, subfigure_size, sample_freq, acq=acq
+)
 
 grads, slews = compute_gradients_and_slew_rates(original_trajectory, acq)
 grad_max, slew_max = np.max(grads), np.max(slews)
@@ -99,7 +101,9 @@ projected_trajectory = parameterize_by_arc_length(original_trajectory)
 
 # %%
 
-show_trajectory_full(projected_trajectory, one_shot, subfigure_size, sample_freq)
+show_trajectory_full(
+    projected_trajectory, one_shot, subfigure_size, sample_freq, acq=acq
+)
 
 grads, slews = compute_gradients_and_slew_rates(projected_trajectory, acq)
 grad_max, slew_max = np.max(grads), np.max(slews)
@@ -110,14 +114,17 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 #
 
 from mrinufft.trajectories.projection import project_trajectory
+
 projected_trajectory = project_trajectory(
     original_trajectory,
     acq,
-    max_iter=5000,
+    max_iter=10000,
     in_out=False,
 )
 
-show_trajectory_full(projected_trajectory, one_shot, subfigure_size, sample_freq)
+show_trajectory_full(
+    projected_trajectory, one_shot, subfigure_size, sample_freq, acq=acq
+)
 grads, slews = compute_gradients_and_slew_rates(projected_trajectory, acq)
 grad_max, slew_max = np.max(grads), np.max(slews)
 print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
