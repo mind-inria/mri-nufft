@@ -336,18 +336,19 @@ def project_trajectory(
     M = pylops.VStack([c1 * D1, c2 * D1 * D1], dtype=trajectory.dtype)
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
     maxstep = (
-        acq.gamma
+        safety_factor
+        * acq.gamma
         * acq.raster_time
         / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
         / 2
     )
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c1 * maxstep * acq.gmax * safety_factor,
+        c1 * maxstep * acq.gmax,
     )
     prox_slew = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c2 * maxstep * acq.smax * acq.raster_time * safety_factor,
+        c2 * maxstep * acq.smax * acq.raster_time,
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
     linear_proj = (
