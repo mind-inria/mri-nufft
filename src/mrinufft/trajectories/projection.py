@@ -154,6 +154,7 @@ References
 )
 
 
+@_fill_doc(_proj_docs)
 class LinearProjection:
     r"""
     Implements the projection on linear constraints set given by Eq 10 in_[Proj].
@@ -188,6 +189,8 @@ class LinearProjection:
     Note
     ----
     - Provide either a linear operator A or a mask and locations for projection.
+
+    ${proj_ref}
     """
 
     def __init__(
@@ -219,6 +222,7 @@ class LinearProjection:
             return self.linear_op.div(self.target - self.linear_op * x)
 
 
+@_fill_doc(_proj_docs)
 class GradientLinearProjection:
     r"""
     Implements the gradient of F(q1, q2) given by Eq 11 in_[Proj].
@@ -241,6 +245,7 @@ class GradientLinearProjection:
         onto the constraint set. If not provided, the projection will be
         performed without any constraints (i.e., s^* = z).
 
+    ${proj_ref}
     """
 
     def __init__(
@@ -266,10 +271,6 @@ class GradientLinearProjection:
         z = self.get_primal_variables(q)
         s_star = self.linear_projector(z) if self.linear_projector is not None else z
         return -(self.M * s_star).flatten()
-
-
-LinearProjection.__doc__ += _proj_docs["proj_ref"]
-GradientLinearProjection.__doc__ += _proj_docs["proj_ref"]
 
 
 @_fill_doc(_proj_docs)
