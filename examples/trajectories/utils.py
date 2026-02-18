@@ -74,7 +74,7 @@ def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10, acq=
         subfigure=subfigs[1],
         uni_gradient="k",
         uni_signal="gray",
-        show_constraints=True,
+        show_constraints=True if acq else False,
         acq=acq,
     )
     if nb_dim == 2:
@@ -92,7 +92,7 @@ def show_trajectory_full(trajectory, one_shot, figure_size, sample_freq=10, acq=
         subfigure=subfigs[2],
         uni_gradient="k",
         uni_signal="gray",
-        show_constraints=True,
+        show_constraints=True if acq else False,
         data_type="slew",
         acq=acq,
     )
