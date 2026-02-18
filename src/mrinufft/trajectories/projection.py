@@ -5,13 +5,20 @@ import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
-from pyproximal import ProxOperator
 from mrinufft._utils import _fill_doc, _progressbar
 from mrinufft.trajectories.utils import Acquisition
-from tqdm import tqdm
-from pylops import LinearOperator, FirstDerivative
-import pylops
-import pyproximal
+
+PYPROXIMAL_AVAILABLE = True
+
+try:
+    from pylops import LinearOperator, FirstDerivative
+    from pyproximal import ProxOperator
+    import pylops
+    import pyproximal
+except ImportError:
+    ProxOperator = object
+    LinearOperator = object
+    PYPROXIMAL_AVAILABLE = False
 
 
 def parameterize_by_arc_length(
@@ -318,6 +325,11 @@ def project_trajectory(
     ${proj_ref}
     """
     acq = acq or Acquisition.default
+    if not PYPROXIMAL_AVAILABLE:
+        raise ImportError(
+            "pyproximal is required for trajectory projection. "
+            "Please install it to use this function."
+        )
     if trajectory.ndim == 2:
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
