@@ -355,8 +355,7 @@ def project_trajectory(
         kinetic_op=M,
         linear_projector=linear_proj if linear_proj != "no_proj" else None,
     )
-    if verbose == 1:
-        progressbar = _progressbar(progressbar, max_iter)
+    progressbar = _progressbar(verbose == 1, max_iter)
     q_star = pyproximal.optimization.primal.ProximalGradient(
         f,
         prox,
@@ -365,6 +364,6 @@ def project_trajectory(
         acceleration="fista",
         tau=1 / lipchitz_constant,
         show=verbose > 1,
-        callback=lambda x: progressbar.update(1) if verbose == 1 else None,
+        callback=lambda x: progressbar.update(1),
     )
     return f.get_primal_variables(q_star)
