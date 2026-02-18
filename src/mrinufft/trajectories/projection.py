@@ -278,7 +278,7 @@ class GradientLinearProjection:
 def project_trajectory(
     trajectory: NDArray,
     acq: Acquisition | None = None,
-    extra_factor: float = 0.99,
+    safety_factor: float = 0.99,
     max_iter: int = 1000,
     in_out: bool = True,
     linear_projector: LinearProjection | None | str = None,
@@ -296,7 +296,7 @@ def project_trajectory(
     acq: Acquisition, optional
         An instance of the Acquisition class containing the gradient constraints.
         If not provided, the projection will be performed without any constraints.
-    extra_factor: float
+    safety_factor: float
         An extra safety factor to ensure the projected trajectory is within hardware
         limits. Defaults to 0.99 (i.e., 1% margin).
     max_iter: int
@@ -331,11 +331,11 @@ def project_trajectory(
     maxstep = acq.gamma * acq.raster_time / xp.asarray(acq.kmax[:Nd]) / 2
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c1 * maxstep * acq.gmax,
+        c1 * maxstep * acq.gmax * safety_factor,
     )
     prox_slew = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c2 * maxstep * acq.smax * acq.raster_time,
+        c2 * maxstep * acq.smax * acq.raster_time * safety_factor,
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
     linear_proj = (
