@@ -111,6 +111,15 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 
 
 # %%
+# Projection onto convex sets
+# ===========================
+# The projection step is a primal-dual algorithm to project any trajectory
+# into the convex constraint set. This step guarantees that the final trajectory
+# is playably by the scanner. Also, as the constraint set if convex, the 
+# projection results in unique trajectory which is closest to the original
+# one while being hardware compliant.
+
+# %%
 #
 
 from mrinufft.trajectories.projection import project_trajectory
@@ -121,7 +130,8 @@ projected_trajectory = project_trajectory(
     max_iter=10000,
     in_out=False,
 )
-
+# %%
+#
 show_trajectory_full(
     projected_trajectory, one_shot, subfigure_size, sample_freq, acq=acq
 )
