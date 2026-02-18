@@ -329,23 +329,14 @@ def project_trajectory(
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
     prox_grad = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c1
-        * extra_factor
-        * acq.gamma
-        * acq.hardware.gmax
-        * acq.raster_time
-        / xp.asarray(acq.kmax[:Nd])
-        / 2,
+    maxstep = acq.gamma * acq.raster_time / xp.asarray(acq.kmax[:Nd])/ 2
+    prox_grad = GroupL2SoftThresholding(
+        (Nc, Ns, Nd),
+        c1 * maxstep * acq.gmax,
     )
     prox_slew = GroupL2SoftThresholding(
         (Nc, Ns, Nd),
-        c2
-        * extra_factor
-        * acq.gamma
-        * acq.hardware.smax
-        * acq.raster_time**2
-        / xp.asarray(acq.kmax[:Nd])
-        / 2,
+        c2 * maxstep * acq.smax * acq.raster_time,
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * Ns * Nd])
     linear_proj = (
