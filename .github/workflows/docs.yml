@@ -29,20 +29,6 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - name: Get PR branch name
-        if: ${{ github.event.issue.pull_request }}
-        id: pr
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const prNumber = context.payload.issue.number;
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            core.setOutput('head_ref', pr.head.ref);
 
       - name: Comment That docs building is starting
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && success()
@@ -53,13 +39,19 @@ jobs:
              🛠️  Documentation Build started !
           edit-mode: append
 
+      # - uses: actions/checkout@v4
+      #   with:
+      #     # if this was triggered by a PR-comment we use the PR branch,
+      #     # otherwise fall back to default (e.g. workflow_dispatch)
+      #     ref: ${{ github.event.issue.pull_request && steps.pr.outputs.head_ref || github.ref }}
+      #     fetch-depth: 0
       - uses: actions/checkout@v4
-        with:
-          # if this was triggered by a PR-comment we use the PR branch,
-          # otherwise fall back to default (e.g. workflow_dispatch)
-          ref: ${{ github.event.issue.pull_request && steps.pr.outputs.head_ref || github.ref }}
-          fetch-depth: 0
-
+      - name: fetch PR from fork
+        if: github.event.issue.pull_request
+        run: gh pr checkout ${{ github.event.issue.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
