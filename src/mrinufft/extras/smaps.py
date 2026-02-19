@@ -13,6 +13,7 @@ import numpy as np
 from mrinufft.extras.cartesian import fft, ifft
 from mrinufft._array_compat import with_numpy
 from numpy.typing import NDArray
+import gc
 
 from collections.abc import Callable
 
@@ -424,16 +425,10 @@ def cartesian_espirit(
     AHA *= np.prod(kspace.shape[1:]) / np.prod(kernel_width)
     Smaps = xp.ones(kspace.shape[::-1] + (1,), dtype=kspace.dtype)
 
-    def forward(x):
-        return AHA @ x
-
-    def normalize(x):
-        return xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5
-
     max_eig, Smaps = power_method(
+        operator=AHA.__matmul__,
         max_iter=100,
-        operator=forward,
-        norm_func=normalize,
+        norm_func=lambda x: xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5,
         x=Smaps,
     )
     Smaps = Smaps.T[0]
@@ -453,6 +448,11 @@ def cartesian_espirit(
         max_eig = zoom(max_eig.T[0], (1,) + (decim,) * (Smaps.ndim - 1), order=1)
         Smaps = abs_maps * np.exp(1j * angle_maps)
     Smaps *= max_eig > crop
+    # Clean up memory after operations
+    del calib, AHA, kernels, VH, img_kernel
+    gc.collect()
+    if xp is not np:
+        xp.get_default_memory_pool().free_all_blocks()
     return Smaps
 
 
