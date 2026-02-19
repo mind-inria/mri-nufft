@@ -47,7 +47,8 @@ jobs:
       #     fetch-depth: 0
       - uses: actions/checkout@v4
       - name: fetch PR from fork
-        run: gh pr checkout ${{ github.event.number }}
+        if: github.event.issue.pull_request
+        run: gh pr checkout ${{ github.event.issue.number }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
