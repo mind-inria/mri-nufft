@@ -11,13 +11,13 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda12x"]
+gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda12x[ctk]"]
 
-torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
-torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x"]
-torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x"]
+torchkbnufft = ["torchkbnufft", "cupy-cuda12x[ctk]"]
+torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x[ctk]"]
+torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x[ctk]"]
 
-cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x"]
+cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x[ctk]"]
 tensorflow = ["tensorflow-mri>=0.22.0"]
 finufft = ["finufft>=2.4.0"]
 sigpy = ["sigpy"]
