@@ -115,7 +115,7 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 # ===========================
 # The projection step is a primal-dual algorithm to project any trajectory
 # into the convex constraint set. This step guarantees that the final trajectory
-# is playably by the scanner. Also, as the constraint set if convex, the 
+# is playably by the scanner. Also, as the constraint set if convex, the
 # projection results in unique trajectory which is closest to the original
 # one while being hardware compliant.
 
