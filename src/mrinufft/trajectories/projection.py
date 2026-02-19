@@ -2,6 +2,7 @@
 
 import numpy as np
 import numpy.linalg as nl
+from collections.abc import Callable
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
@@ -162,9 +163,13 @@ References
 
 
 @_fill_doc(_proj_docs)
-class LinearProjection:
-    r"""
-    Implements the projection on linear constraints set given by Eq 10 in_[Proj].
+def linear_projection(
+    x: NDArray,
+    target: NDArray,
+    A: LinearOperator | None = None,
+    mask: NDArray | tuple | None = None,
+):
+    r"""Implement the projection on linear constraints set given by Eq 10 in_[Proj].
 
     The linear constraint set if defined by a linear operator A and a target vector v:
 
@@ -184,7 +189,9 @@ class LinearProjection:
 
     Parameters
     ----------
-    v: NDArray
+    x: NDArray
+        The input vector to project
+    target: NDArray
         The target values for the linear constraints.
     A: LinearOperator, optional
         The linear operator defining the constraints.
@@ -199,34 +206,21 @@ class LinearProjection:
 
     ${proj_ref}
     """
-
-    def __init__(
-        self,
-        v: NDArray,
-        A: LinearOperator | None = None,
-        mask: NDArray | tuple | None = None,
-    ):
-        if A is None and mask is None:
-            raise ValueError(
-                "Provide either a linear operator A or a mask and locations for "
-                "projection."
-            )
-        if A is not None and mask is not None:
-            raise ValueError(
-                "Provide either a linear operator A or a mask and locations for "
-                "projection, not both."
-            )
-        self.target = v
-        self.mask = mask
-        self.linear_op = A
-
-    def __call__(self, x: NDArray) -> NDArray:
-        """Apply the projection to the input vector x."""
-        if self.mask is not None:
-            x[self.mask] = self.target
-            return x
-        else:
-            return self.linear_op.div(self.target - self.linear_op * x)
+    if A is None and mask is None:
+        raise ValueError(
+            "Provide either a linear operator A or a mask and locations for "
+            "projection."
+        )
+    if A is not None and mask is not None:
+        raise ValueError(
+            "Provide either a linear operator A or a mask and locations for "
+            "projection, not both."
+        )
+    if mask is not None:
+        x[mask] = target
+        return x
+    else:
+        return A.div(target - A * x)
 
 
 @_fill_doc(_proj_docs)
@@ -259,7 +253,7 @@ class GradientLinearProjection:
         self,
         initial_trajectory: NDArray,
         kinetic_op: LinearOperator,
-        linear_projector: LinearProjection | None = None,
+        linear_projector: Callable | None = None,
     ):
         self.M = kinetic_op
         self.c = initial_trajectory
@@ -288,7 +282,7 @@ def project_trajectory(
     safety_factor: float = 0.99,
     max_iter: int = 1000,
     in_out: bool = False,
-    linear_projector: LinearProjection | None | str = None,
+    linear_projector: Callable | None | str = None,
     verbose: int = 1,
 ) -> NDArray:
     """
@@ -366,8 +360,9 @@ def project_trajectory(
     linear_proj = (
         linear_projector
         if linear_projector is not None
-        else LinearProjection(
-            v=xp.zeros((Nc, Nd)),
+        else lambda x: linear_projection(
+            x,
+            target=xp.zeros((Nc, Nd)),
             mask=(
                 (slice(None), Ns // 2, slice(None))
                 if in_out
