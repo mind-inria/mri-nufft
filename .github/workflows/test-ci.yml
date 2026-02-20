@@ -18,6 +18,21 @@ env:
   ref_backend: "finufft"
 
 jobs:
+  get-commit-message:
+    runs-on: ubuntu-latest
+    outputs:
+       message: ${{ steps.get_commit_message.outputs.message }}
+    steps:
+       - uses: actions/checkout@v4
+         with:
+           ref: ${{ github.event.pull_request.head.sha }}
+       - name: Get commit message
+         id: get_commit_message
+         run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output name=message::$COMMIT_MESSAGE"
+
   test-cpu:
     runs-on: cpu
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
@@ -104,7 +119,6 @@ jobs:
           name: coverage_${{ matrix.backend }}
           path: coverage_${{ matrix.backend }}
 
-
   test-other:
     runs-on: [gpu]
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
@@ -133,21 +147,6 @@ jobs:
           name: coverage_other
           path: coverage_other
 
-  get-commit-message:
-    runs-on: ubuntu-latest
-    outputs:
-       message: ${{ steps.get_commit_message.outputs.message }}
-    steps:
-       - uses: actions/checkout@v4
-         with:
-           ref: ${{ github.event.pull_request.head.sha }}
-       - name: Get commit message
-         id: get_commit_message
-         run: |
-            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-            echo "Commit message $COMMIT_MESSAGE"
-            echo "::set-output name=message::$COMMIT_MESSAGE"
-
   test-examples:
     runs-on: gpu
     needs: get-commit-message
@@ -160,6 +159,10 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
       - name: Restore cached brainweb-dl directory
         uses: actions/cache/restore@v4
         id: cache-restore
@@ -170,7 +173,7 @@ jobs:
       - name: Install Python deps
         shell: bash
         run: |
-          uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra autodiff --extra doc --extra io
+          uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra extra --extra autodiff --extra doc --extra io
         
       - name: Run examples
         shell: bash
@@ -195,7 +198,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
-    needs: [test-cpu, test-gpu, test-examples]
+    needs: [test-cpu, test-gpu, test-examples, test-other]
     if: ${{ always() }}
     steps:
       - name: Checkout
@@ -218,7 +221,7 @@ jobs:
         shell: bash
         run: |
           uv sync
-          uv pip install coverage 
+          uv pip install coverage[toml] 
       - name: Combine coverage
         run: |
           export COVERAGE_FILE=coverage_combined
