@@ -14,13 +14,25 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.10"
-  BART_VERSION: "0.8.00"
+  BART_VERSION: "1.0.0"
   ref_backend: "finufft"
-  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
-  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
-  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
+  get-commit-message:
+    runs-on: ubuntu-latest
+    outputs:
+       message: ${{ steps.get_commit_message.outputs.message }}
+    steps:
+       - uses: actions/checkout@v4
+         with:
+           ref: ${{ github.event.pull_request.head.sha }}
+       - name: Get commit message
+         id: get_commit_message
+         run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output name=message::$COMMIT_MESSAGE"
+
   test-cpu:
     runs-on: cpu
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
@@ -39,19 +51,16 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install Dependencies
-        shell: bash
-        run: |
-          python --version
+      - name: Setup UV
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          
 
       - name: Install Python Deps
         shell: bash
         run: |
-          python --version
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip
-          python -m pip install -e .[test,${{ env.ref_backend }},${{ matrix.backend }}]
+          uv sync --extra test --extra ${{env.ref_backend}} --extra ${{ matrix.backend }}
           
       - name: Install BART if needed
         if: ${{ matrix.backend == 'bart'  || env.ref_backend == 'bart'}}
@@ -68,9 +77,8 @@ jobs:
       - name: Run Tests
         shell: bash
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          python -m pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term --durations=10
+          uv run pytest -k='operators' --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --disable-pytest-warnings --cov-branch --cov-report=term --durations=10
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
@@ -86,35 +94,23 @@ jobs:
         exclude:
             # There is an issue with tensorflow and cupy. This was working. See #156
           - backend: tensorflow
-
     steps:
       - uses: actions/checkout@v4
 
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          cd $RUNNER_WORKSPACE
-          python --version
-          python -m venv venv
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          pip install --upgrade pip wheel
-          pip install -e mri-nufft[test,finufft]
-
-
-      - name: Install backend
-        shell: bash
-        run: |
-          source $RUNNER_WORKSPACE/venv/bin/activate
-          ${{ env.setup_cuda }}
-          pip install -e .[${{ matrix.backend }},autodiff]
+          uv sync --extra finufft --extra ${{ matrix.backend }} --extra autodiff --extra test 
 
       - name: Run Tests
         shell: bash
         run: |
-          ${{ env.activate_venv }}
-          cd $RUNNER_WORKSPACE/mri-nufft
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          python -m pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term --durations=10
+          uv run pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
@@ -123,44 +119,26 @@ jobs:
           name: coverage_${{ matrix.backend }}
           path: coverage_${{ matrix.backend }}
 
-      - name: Cleanup
-        if: always()
-        shell: bash
-        run: |
-          cd $RUNNER_WORKSPACE
-          ls -al
-          rm -rf finufft
-          rm -rf gpuNUFFT
-          rm -rf venv
-
   test-other:
     runs-on: [gpu]
     if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip wheel
-          python -m pip install -e .[test,extra]
-          python -m pip install cupy-cuda12x finufft "numpy<2.0"
-
-      - name: Install torch with CUDA 12.x
-        shell: bash
-        run: |
-          ${{ env.activate_venv }}
-          ${{ env.setup_cuda }}
-          python -m pip install torch
+          uv sync --extra test --extra autodiff --extra finufft --extra extra
+          uv pip install cupy-cuda13x[ctk]
 
       - name: Run non operators tests
         shell: bash
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_other
-          python -m pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
+          uv run pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
 
       - name: Upload coverage
         if: success()
@@ -168,32 +146,6 @@ jobs:
         with:
           name: coverage_other
           path: coverage_other
-
-      - name: Cleanup
-        if: always()
-        shell: bash
-        run: |
-          cd $RUNNER_WORKSPACE
-          ls -al
-          rm -rf finufft
-          rm -rf gpuNUFFT
-          rm -rf venv
-
-
-  get-commit-message:
-    runs-on: ubuntu-latest
-    outputs:
-       message: ${{ steps.get_commit_message.outputs.message }}
-    steps:
-       - uses: actions/checkout@v4
-         with:
-           ref: ${{ github.event.pull_request.head.sha }}
-       - name: Get commit message
-         id: get_commit_message
-         run: |
-            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-            echo "Commit message $COMMIT_MESSAGE"
-            echo "::set-output name=message::$COMMIT_MESSAGE"
 
   test-examples:
     runs-on: gpu
@@ -207,6 +159,10 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
       - name: Restore cached brainweb-dl directory
         uses: actions/cache/restore@v4
         id: cache-restore
@@ -217,20 +173,14 @@ jobs:
       - name: Install Python deps
         shell: bash
         run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          ${{ env.setup_cuda }}
-          python -m pip install --upgrade pip
-          python -m pip install pooch brainweb-dl torch fastmri
-          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc,io]
+          uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra extra --extra autodiff --extra doc --extra io
         
       - name: Run examples
         shell: bash
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
           export MRINUFFT_BACKEND=cufinufft
-          python -m pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
+          uv run pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
         uses: actions/cache/save@v4
@@ -248,7 +198,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
-    needs: [test-cpu, test-gpu, test-examples]
+    needs: [test-cpu, test-gpu, test-examples, test-other]
     if: ${{ always() }}
     steps:
       - name: Checkout
@@ -266,20 +216,16 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - uses: astral-sh/setup-uv@v7
       - name: add the coverage tool
         shell: bash
         run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip
-          python -m pip install coverage[toml]
-          python -m pip install -e .
-
+          uv sync
+          uv pip install coverage[toml] 
       - name: Combine coverage
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
-          coverage combine -a coverage_data/*
+          uv run coverage combine -a coverage_data/*
 
       - name: Upload Combined coverage
         uses: actions/upload-artifact@v4
@@ -289,11 +235,10 @@ jobs:
 
       - name: Reports
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
-          coverage xml
-          coverage report
-          echo COVERAGE_PERC=$(coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
+          uv run coverage xml
+          uv run coverage report
+          echo COVERAGE_PERC=$(uv run coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
 
       - name: Create a Coverage Badge
         uses: emibcn/badge-action@v2.0.2
