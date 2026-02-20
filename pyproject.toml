@@ -13,9 +13,10 @@ dynamic = ["version"]
 
 gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda13x[ctk]"]
 
-torchkbnufft = ["torchkbnufft", "cupy-cuda13x[ctk]"]
-torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda13x[ctk]"]
-torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda13x[ctk]"]
+torchkbnufft = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
+torchkbnufft-cpu = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
+torchkbnufft-gpu = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
+
 
 cufinufft = ["cufinufft>=2.4.0", "cupy-cuda13x[ctk]"]
 tensorflow = ["tensorflow-mri>=0.22.0 ; python_version<'3.11'"]
@@ -31,7 +32,7 @@ pynufft-gpu = ["pynufft"]
 
 io = ["pymapvbvd", "pypulseq"]
 extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets", "osqp", "ptwt"]
-autodiff = ["torch", "deepinv"]
+autodiff = ["torch", "torchvision", "deepinv"]
 
 
 test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
