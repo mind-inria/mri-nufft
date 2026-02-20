@@ -206,14 +206,15 @@ def linear_projection(
 
     ${proj_ref}
     """
-    if A is None and mask is None:
+    if A is not None and mask is not None:
         raise ValueError("Provide either a linear operator A or a mask")
-    elif A is not None and mask is not None:
-        raise ValueError("Provide either a linear operator A or a mask")
+    elif A is None and mask is None:
+        return x
     elif mask is not None:
         x[mask] = target
         return x
-    return A.div(target - A * x)
+    else:
+        return A.div(target - A * x)
 
 
 @_fill_doc(_proj_docs)
@@ -295,10 +296,11 @@ def project_trajectory(
         limits. Defaults to 0.99 (i.e., 1% margin).
     max_iter: int
         The maximum number of iterations for the projection algorithm. Defaults to 1000.
-    in_out: bool
+    in_out: bool or None
         If True, the linear projection ensures each trajectory passes through k-space
         center in middle of trajectory. If False, the trajectory is constrained
-        to start from k-space center (UTE trajectories). Defaults to True.
+        to start from k-space center (UTE trajectories). If None, no such constraints is
+        applied. Defaults to True.
     linear_projector: LinearProjection, optional
         An instance of the LinearProjection class to perform the projection onto the
         constraint set. This is available for advanced users who want to specify
@@ -349,7 +351,7 @@ def project_trajectory(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
-    if linear_projector is None:
+    if linear_projector is None and in_out is not None:
         linear_projector_ = partial(
             linear_projection,
             target=xp.zeros((Nc, Nd), dtype=trajectory.dtype),
