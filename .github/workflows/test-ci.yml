@@ -14,11 +14,8 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.10"
-  BART_VERSION: "0.8.00"
+  BART_VERSION: "1.0.0"
   ref_backend: "finufft"
-  create_venv: "python -m venv $RUNNER_WORKSPACE/venv"
-  activate_venv: "source $RUNNER_WORKSPACE/venv/bin/activate"
-  setup_cuda: "export CUDA_BIN_PATH=/usr/local/cuda/;export PATH=/usr/local/cuda/bin/:${PATH};export LD_LIBRARY_PATH=/usr/local/cuda/lib64/:${LD_LIBRARY_PATH}"
 
 jobs:
   test-cpu:
@@ -120,7 +117,8 @@ jobs:
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          uv sync --extra test --extra autodiff --extra finufft
+          uv sync --extra test --extra autodiff --extra finufft --extra extra
+          uv pip install cupy-cuda13x[ctk]
 
       - name: Run non operators tests
         shell: bash
@@ -173,18 +171,13 @@ jobs:
         shell: bash
         run: |
           uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra autodiff --extra doc --extra io
-          uv pip install fastmri pooch brainweb-dl
-          python -m pip install --upgrade pip
-          python -m pip install pooch brainweb-dl torch fastmri
-          python -m pip install -e .[test,dev,finufft,cufinufft,gpuNUFFT,sigpy,extra,autodiff,doc,io]
         
       - name: Run examples
         shell: bash
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_plots
           export MRINUFFT_BACKEND=cufinufft
-          python -m pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
+          uv run pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Cache brainweb-dl directory
         uses: actions/cache/save@v4
@@ -220,20 +213,16 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - uses: astral-sh/uv@v7
       - name: add the coverage tool
         shell: bash
         run: |
-          ${{ env.create_venv }}
-          ${{ env.activate_venv }}
-          python -m pip install --upgrade pip
-          python -m pip install coverage[toml]
-          python -m pip install -e .
-
+          uv sync
+          uv pip install coverage 
       - name: Combine coverage
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
-          coverage combine -a coverage_data/*
+          uv run coverage combine -a coverage_data/*
 
       - name: Upload Combined coverage
         uses: actions/upload-artifact@v4
@@ -243,11 +232,10 @@ jobs:
 
       - name: Reports
         run: |
-          ${{ env.activate_venv }}
           export COVERAGE_FILE=coverage_combined
-          coverage xml
-          coverage report
-          echo COVERAGE_PERC=$(coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
+          uv run coverage xml
+          uv run coverage report
+          echo COVERAGE_PERC=$(uv run coverage report | tail -n 1 | grep -oE [0-9\.]*?% | cut -d '%' -f1) >> $GITHUB_ENV
 
       - name: Create a Coverage Badge
         uses: emibcn/badge-action@v2.0.2
