@@ -275,7 +275,7 @@ def project_trajectory(
     acq: Acquisition | None = None,
     safety_factor: float = 0.99,
     max_iter: int = 1000,
-    in_out: bool = False,
+    TE_pos: float | None = -1,
     linear_projector: Callable | None = None,
     verbose: int = 1,
 ) -> NDArray:
@@ -296,11 +296,13 @@ def project_trajectory(
         limits. Defaults to 0.99 (i.e., 1% margin).
     max_iter: int
         The maximum number of iterations for the projection algorithm. Defaults to 1000.
-    in_out: bool or None
-        If True, the linear projection ensures each trajectory passes through k-space
-        center in middle of trajectory. If False, the trajectory is constrained
-        to start from k-space center (UTE trajectories). If None, no such constraints is
-        applied. Defaults to True.
+    TE_pos: float | None | -1
+        Specifies the constrained position of the k-space center in the
+        trajectory. If a float is provided, it should be in the range [0, 1] and
+        indicates the relative position of the k-space center along the
+        trajectory (e.g., 0.5 for the middle). If None, no such constraint is
+        applied. Defaults to -1, which detect the position of the original
+        k-space center and set the constraint accordingly.
     linear_projector: LinearProjection, optional
         An instance of the LinearProjection class to perform the projection onto the
         constraint set. This is available for advanced users who want to specify
@@ -324,19 +326,19 @@ def project_trajectory(
         )
     if trajectory.ndim == 2:
         trajectory = trajectory[None]
-    xp = get_array_module(trajectory)
-    Nc, Ns, Nd = trajectory.shape
-    D1 = FirstDerivative(
-        (Nc, Ns, Nd),
-        axis=1,
-        sampling=1,
-        kind="backward",
-        edge=True,
-        dtype=trajectory.dtype,
-    )
-    c1 = 1 / 2
-    c2 = 1 / 4
-    # Define the weighted first and second derivative operators
+        xp = get_array_module(trajectory)
+        Nc, Ns, Nd = trajectory.shape
+        D1 = FirstDerivative(
+            (Nc, Ns, Nd),
+            axis=1,
+            sampling=1,
+            kind="backward",
+            edge=True,
+            dtype=trajectory.dtype,
+        )
+        c1 = 1 / 2
+        c2 = 1 / 4
+        # Define the weighted first and second derivative operators
     M = pylops.VStack([c1 * D1, c2 * D1 * D1], dtype=trajectory.dtype)
     lipchitz_constant = 2  #  (2 * c1) ** 2 + (4 * c2) ** 2
     maxstep = (
@@ -351,27 +353,35 @@ def project_trajectory(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
-    if linear_projector is None and in_out is not None:
+
+    if TE_pos == -1:
+        # detect the position of the original k-space center and
+        # set the constraint accordingly
+        TE_pos = np.argmin(np.linalg.norm(trajectory, axis=-1), axis=1) / Ns
+
+    if linear_projector is None and TE_pos is not None:
         linear_projector_ = partial(
             linear_projection,
             target=xp.zeros((Nc, Nd), dtype=trajectory.dtype),
-            mask=(slice(None), (Ns // 2) * in_out, slice(None)),
+            mask=(slice(None), int(Ns * TE_pos), slice(None)),
         )
     else:
         linear_projector_ = linear_projector
-    f = GradientLinearProjection(
-        initial_trajectory=trajectory, kinetic_op=M, linear_projector=linear_projector_
-    )
-    progressbar = _progressbar(verbose == 1, max_iter)
-    q_star = pyproximal.optimization.primal.ProximalGradient(
-        f,
-        prox,
-        x0=M * trajectory,
-        niter=max_iter,
-        acceleration="fista",
-        tau=1 / lipchitz_constant,
-        show=verbose > 1,
-        callback=lambda x: progressbar.update(1),
-    )
-    s_s = f.get_primal_variables(q_star)
-    return linear_projector_(s_s)
+        f = GradientLinearProjection(
+            initial_trajectory=trajectory,
+            kinetic_op=M,
+            linear_projector=linear_projector_,
+        )
+        progressbar = _progressbar(verbose == 1, max_iter)
+        q_star = pyproximal.optimization.primal.ProximalGradient(
+            f,
+            prox,
+            x0=M * trajectory,
+            niter=max_iter,
+            acceleration="fista",
+            tau=1 / lipchitz_constant,
+            show=verbose > 1,
+            callback=lambda x: progressbar.update(1),
+        )
+        s_s = f.get_primal_variables(q_star)
+    return linear_projector_(s_s) if linear_projector_ is not None else s_s
