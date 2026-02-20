@@ -213,7 +213,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - uses: astral-sh/uv@v7
+      - uses: astral-sh/setup-uv@v7
       - name: add the coverage tool
         shell: bash
         run: |
