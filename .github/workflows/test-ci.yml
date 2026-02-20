@@ -145,7 +145,10 @@ jobs:
            ref: ${{ github.event.pull_request.head.sha }}
        - name: Get commit message
          id: get_commit_message
-         run: echo "message=$(git log -1 --pretty=%B)" >> "$GITHUB_OUTPUT"
+         run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            echo "Commit message $COMMIT_MESSAGE"
+            echo "::set-output name=message::$COMMIT_MESSAGE"
 
   test-examples:
     runs-on: gpu
