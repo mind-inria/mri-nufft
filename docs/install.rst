@@ -6,28 +6,34 @@ mri-nufft is available on `PyPi <https://pypi.org/project/mri-nufft/>`_
 
 .. tip::
 
-   TLDR: If you have a GPU and CUDA>=12.0, you probably want to install MRI-NUFFT with one of the two options: 
+   TLDR: If you have a GPU you probably want to install MRI-NUFFT with one of the following options:
+   
+   - ``uv add mri-nufft[cufinufft]`` generally faster, but memory hungry
+   - ``uv add mri-nufft[gpunufft]`` memory efficient, and still fast.
+   - ``uv add mri-nufft[finufft]`` for non-cuda setup (CPU only) setup.
 
-   - ``pip install mri-nufft[cufinufft]`` generally faster, but memory hungry
-   - ``pip install mri-nufft[gpunufft]`` memory efficient, and still fast.
-   - ``pip install mri-nufft[finufft]`` for non-cuda setup (CPU only) setup.
-
+   (the regular `pip install` or `uv pip install` would work as well).
+     
    Then, use the ``get_operator(backend=<your backend>, ... )`` to initialize your MRI-NUFFT operator.
 
-   For more information , check the :ref:`general_examples`
+   You are ready to use MRI-NUFFT ! Go check the :ref:`general_examples` for more information.
 
 
 .. code-block:: sh
 
-    pip install mri-nufft
+  pip install mri-nufft
 
     
-However, if you want to use some specific backends or develop on mri-nufft, you can install it with extra dependencies. notably `extra`, `io`,  and `autodiff`
+However, if you want to use some specific backend or develop on mri-nufft, you can install it with extra dependencies. notably `extra`, `io`,  and `autodiff`
 
 .. code-block:: sh
 
-    pip install mri-nufft[extra,io,autodiff]
+   uv add mri-nufft[extra,io,autodiff]
 
+.. tip::
+
+  using uv will ensure that the correction version of pytorch (with CUDA) is installed. for more info see `this < https://docs.astral.sh/uv/guides/integration/pytorch/>`__
+  
 
 Using ``uv``
 ~~~~~~~~~~~~
@@ -35,7 +41,7 @@ If you are using ``uv`` as your package installer you will need to do
   
 .. code-block:: sh
 
-        uv pip install mri-nufft[extra,io,autodiff] --no-build-isolation
+        uv add mri-nufft[extra,io,autodiff]
 
     
 Development Version
@@ -55,3 +61,9 @@ or using ``uv``:
     git clone https://github.com:mind-inria/mri-nufft
     uv venv 
     uv sync --all-extras --no-build-isolation --no-extra <backend-you-dont-need>
+
+
+Contributing to MRI-NUFFT
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Check our `CONTRIBUTING.md <https://github.com/mind-inria/mri-nufft/blob/master/CONTRIBUTING.md>`__

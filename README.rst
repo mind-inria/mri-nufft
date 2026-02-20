@@ -77,13 +77,23 @@ Want to see more ?
 
 Installation
 ------------
+Recommended: uv
+~~~~~~~~~~~~~~~
 
+You can install MRI-nufft in a virtual environment using `uv <https://astral-sh/uv>`__ with::
+
+  uv venv # create a virtual env if needed
+  uv add mri-nufft[finufft,cufinufft,extra,autodiff]
+
+
+Regular pip install
+~~~~~~~~~~~~~~~~~~~
 MRI-nufft is available on `PyPi <https://pypi.org/project/mri-nufft>`__ and can be installed with::
 
   pip install mri-nufft
 
 Additionally, you will have to install at least one NUFFT computation backend. See the `Documentation <https://mind-inria.github.io/mri-nufft/getting_started.html#choosing-a-nufft-backend>`__ for more guidance.
-Typically we recommend:: 
+Typically we recommend::
 
   pip install mri-nufft[finufft] 
   pip install mri-nufft[cufinufft] # if you have a NVIDIA GPU and CUDA>=12
