@@ -21,7 +21,7 @@ from .maths import (
     Rz,
 )
 from .projection import parameterize_by_arc_length
-from .tools import conify, duplicate_along_axes, epify, precess, stack
+from .tools import conify, duplicate_along_axes, epify, precess, stack, add_slew_ramp
 from .trajectory2D import initialize_2D_radial, initialize_2D_spiral
 from .utils import KMAX, Spirals, initialize_tilt
 
@@ -30,6 +30,7 @@ from .utils import KMAX, Spirals, initialize_tilt
 ##############
 
 
+@add_slew_ramp
 def initialize_3D_phyllotaxis_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -72,13 +73,21 @@ def initialize_3D_phyllotaxis_radial(
        a 3D radial trajectory in MRI."
        Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
     """
-    trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
+    trajectory = initialize_3D_cones(
+        Nc,
+        Ns,
+        tilt="golden",
+        width=0,
+        in_out=in_out,
+        slew_ramp_disable=True,
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_golden_means_radial(
     Nc: int, Ns: int, in_out: bool = False
 ) -> NDArray:
@@ -133,6 +142,7 @@ def initialize_3D_golden_means_radial(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_wong_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -193,8 +203,9 @@ def initialize_3D_wong_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_park_radial(
-    Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
+    Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False, **kwargs: dict
 ) -> NDArray:
     """Initialize 3D radial trajectories with a spiral structure.
 
@@ -234,7 +245,9 @@ def initialize_3D_park_radial(
        in 3D ultrashort‐echo‐time lung imaging."
        NMR in Biomedicine 29, no. 5 (2016): 576-587.
     """
-    trajectory = initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=in_out)
+    trajectory = initialize_3D_wong_radial(
+        Nc, Ns, nb_interleaves=1, in_out=in_out, **kwargs
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
@@ -254,6 +267,7 @@ def initialize_3D_cones(
     nb_zigzags: float = 5,
     spiral: str | float = "archimedes",
     width: float = 1,
+    **kwargs: dict,
 ) -> NDArray:
     """Initialize 3D trajectories with cones.
 
@@ -300,6 +314,7 @@ def initialize_3D_cones(
         spiral=spiral,
         in_out=in_out,
         nb_revolutions=nb_zigzags,
+        **kwargs,
     )
 
     # Estimate best cone angle based on the ratio between
@@ -341,6 +356,7 @@ def initialize_3D_floret(
     cone_tilt: str | float = "golden",
     max_angle: float = np.pi / 2,
     axes: tuple[int, ...] = (2,),
+    **kwargs: dict,
 ) -> NDArray:
     """Initialize 3D trajectories with FLORET.
 
@@ -394,6 +410,7 @@ def initialize_3D_floret(
         spiral=spiral,
         in_out=in_out,
         nb_revolutions=nb_revolutions,
+        **kwargs,
     )
 
     # Initialize first cone
@@ -531,6 +548,7 @@ def initialize_3D_wave_caipi(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_seiffert_spiral(
     Nc: int,
     Ns: int,

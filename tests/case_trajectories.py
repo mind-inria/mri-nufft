@@ -36,29 +36,29 @@ class CasesTrajectories:
 
     def case_radial2D(self, Nc=10, Ns=500, N=64):
         """Create a 2D radial trajectory."""
-        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = initialize_2D_radial(Nc, Ns, slew_ramp_disable=True)
         return trajectory, (N, N)
 
     def case_nyquist_radial2D(self, Nc=32 * 4, Ns=16, N=32):
         """Create a 2D radial trajectory."""
-        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = initialize_2D_radial(Nc, Ns, slew_ramp_disable=True)
         return trajectory, (N, N)
 
     def case_radial3D(self, Nc=20, Ns=1000, Nr=20, N=64, expansion="rotations"):
         """Create a 3D radial trajectory."""
-        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = initialize_2D_radial(Nc, Ns, slew_ramp_disable=True)
         trajectory = stack(trajectory, nb_stacks=Nr)
         return trajectory, (N, N, N)
 
     def case_nyquist_radial3D(self, Nc=32 * 4, Ns=16, Nr=32 * 4, N=32):
         """Create a 3D radial trajectory."""
-        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = initialize_2D_radial(Nc, Ns, slew_ramp_disable=True)
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
     def case_nyquist_lowmem_radial3D(self, Nc=2, Ns=16, Nr=2, N=10):
         """Create a 3D radial trajectory with low memory."""
-        trajectory = initialize_2D_radial(Nc, Ns)
+        trajectory = initialize_2D_radial(Nc, Ns, slew_ramp_disable=True)
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
@@ -87,5 +87,7 @@ def case_grid1D(N=256):
 # in the cases collection.
 def case_multicontrast2D(Nt=48, Nc=10, Ns=500, N=64):
     """Create a 2D radial trajectory."""
-    trajectory = initialize_2D_radial(Nc * Nt, Ns, tilt="mri-golden")
+    trajectory = initialize_2D_radial(
+        Nc * Nt, Ns, tilt="mri-golden", slew_ramp_disable=True
+    )
     return trajectory.reshape(Nt, Nc, Ns, 2), (N, N)
