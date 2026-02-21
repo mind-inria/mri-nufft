@@ -4,33 +4,35 @@ description = "MRI Non-Cartesian Fourier Operators with multiple computation bac
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
 readme = "README.rst"
-dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "joblib>=1.4"]
+dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm"]
 requires-python = ">=3.10"
 
 dynamic = ["version"]
 
 [project.optional-dependencies]
 
-gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda12x[ctk]"]
+gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda13x[ctk]"]
 
-torchkbnufft = ["torchkbnufft", "cupy-cuda12x[ctk]"]
-torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x[ctk]"]
-torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x[ctk]"]
+torchkbnufft = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
+torchkbnufft-cpu = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
+torchkbnufft-gpu = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
 
-cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x[ctk]"]
-tensorflow = ["tensorflow-mri>=0.22.0"]
+
+cufinufft = ["cufinufft>=2.4.0", "cupy-cuda13x[ctk]"]
+tensorflow = ["tensorflow-mri>=0.22.0 ; python_version<'3.11'"]
 finufft = ["finufft>=2.4.0"]
 sigpy = ["sigpy"]
 pynfft = ["pynfft3"]
 ducc0 = ["ducc0>=0.40.0"]
 
 pynufft = ["pynufft"]
+# for easier test deployment
 pynufft-cpu = ["pynufft"]
 pynufft-gpu = ["pynufft"]
 
 io = ["pymapvbvd", "pypulseq"]
 extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets", "osqp", "ptwt", "pyproximal"]
-autodiff = ["torch", "deepinv"]
+autodiff = ["torch","torchvision", "deepinv"]
 
 
 test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
@@ -40,6 +42,17 @@ doc = ["sphinx-book-theme","sphinx-copybutton", "sphinxcontrib-video", "sphinx-g
 
 [build-system]
 requires = ["setuptools", "setuptools-scm[toml]", "wheel"]
+
+# https://docs.astral.sh/uv/guides/integration/pytorch/
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+torchvision = [{ index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+
 
 [tool.setuptools_scm]
 write_to = "src/mrinufft/_version.py"
@@ -97,3 +110,4 @@ reportPossiblyUnboundVariable = false
 typeCheckingMode = "basic"
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
+
