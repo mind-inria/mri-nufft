@@ -3,7 +3,12 @@
 import warnings
 import numpy as np
 from numpy.typing import NDArray
-from mrinufft.operators.base import FourierOperatorBase, with_numpy_cupy, power_method
+from mrinufft.operators.base import (
+    FourierOperatorBase,
+    with_numpy_cupy,
+    power_method,
+    _ToggleGradPlanMixin,
+)
 from mrinufft._utils import (
     proper_trajectory,
     sizeof_fmt,
@@ -129,7 +134,7 @@ class RawCufinufftPlan:
         self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
 
 
-class MRICufiNUFFT(FourierOperatorBase):
+class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     """MRI Transform operator, build around cufinufft.
 
     This operator adds density estimation and compensation (preconditioning)
@@ -877,12 +882,6 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.squeeze_dims = squeeze_dims
 
         return lipschitz_cst
-
-    def toggle_grad_traj(self):
-        """Toggle between the gradient trajectory and the plan for type 1 transform."""
-        if self.uses_sense:
-            self.smaps = self.smaps.conj()
-        self.raw_op.toggle_grad_traj()
 
     @classmethod
     def pipe(
