@@ -244,6 +244,7 @@ def lsqr(
     Solve a general regularized linear least-squares problem using the LSQR algorithm.
 
     Solves problems of the form
+
     .. math::
 
         \arg\min \|A x - b\|_2^2 + \gamma^2 \|x - x0\|_2^2

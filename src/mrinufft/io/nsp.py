@@ -24,7 +24,6 @@ from mrinufft.trajectories.utils import (
     KMAX,
     DEFAULT_RASTER_TIME,
 )
-from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
 
 from .siemens import read_siemens_rawdat
 
