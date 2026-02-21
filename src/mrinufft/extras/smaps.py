@@ -426,7 +426,7 @@ def cartesian_espirit(
     Smaps = xp.ones(kspace.shape[::-1] + (1,), dtype=kspace.dtype)
 
     max_eig, Smaps = power_method(
-        operator=AHA.matmul,
+        operator=AHA.__matmul__,
         max_iter=100,
         norm_func=lambda x: xp.sum(xp.abs(x) ** 2, axis=-2, keepdims=True) ** 0.5,
         x=Smaps,
