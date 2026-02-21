@@ -759,8 +759,8 @@ class FourierOperatorBase(ABC):
         )
 
 
-class FourierOperatorCPU(FourierOperatorBase):
-    """Base class for CPU-based NUFFT operator.
+class FourierOperatorSimple(FourierOperatorBase):
+    """Base class With simple implementation for  NUFFT operator.
 
     The NUFFT operation will be done sequentially and looped over coils and batches.
 
@@ -816,7 +816,6 @@ class FourierOperatorCPU(FourierOperatorBase):
 
         self.raw_op = raw_op
 
-    @with_numpy
     def op(self, data, ksp=None):
         r"""Non Cartesian MRI forward operator.
 
@@ -853,7 +852,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         K, XYZ = self.n_samples, self.shape
         dataf = data.reshape((B, *XYZ))
         if ksp is None:
-            ksp = np.empty((B * C, K), dtype=self.cpx_dtype)
+            xp = get_array_module(data)
+            ksp = xp.empty((B * C, K), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -867,7 +867,8 @@ class FourierOperatorCPU(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         if ksp is None:
-            ksp = np.empty((B * C, K), dtype=self.cpx_dtype)
+            xp = get_array_module(data)
+            ksp = xp.empty((B * C, K), dtype=self.cpx_dtype)
         dataf = np.reshape(data, (B * C, *XYZ))
         for i in range((B * C) // T):
             self._op(
@@ -880,7 +881,6 @@ class FourierOperatorCPU(FourierOperatorBase):
     def _op(self, image, coeffs):
         self.raw_op.op(coeffs, image)
 
-    @with_numpy
     def adj_op(self, coeffs, img=None):
         """Non Cartesian MRI adjoint operator.
 
@@ -905,10 +905,11 @@ class FourierOperatorCPU(FourierOperatorBase):
     def _adj_op_sense(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
+        xp = get_array_module(coeffs)
         if img is None:
-            img = np.zeros((B, *XYZ), dtype=self.cpx_dtype)
+            img = xp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
-        img_batched = np.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        img_batched = xp.zeros((T, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -922,9 +923,10 @@ class FourierOperatorCPU(FourierOperatorBase):
     def _adj_op_calibless(self, coeffs, img=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
+        xp = get_array_module(coeffs)
         if img is None:
-            img = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
-        coeffs_f = np.reshape(coeffs, (B * C, K))
+            img = xp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        coeffs_f = coeffs.reshape((B * C, K))
         for i in range((B * C) // T):
             self._adj_op(coeffs_f[i * T : (i + 1) * T], img[i * T : (i + 1) * T])
 
@@ -940,7 +942,6 @@ class FourierOperatorCPU(FourierOperatorBase):
             coeffs2 = coeffs
         self.raw_op.adj_op(coeffs2, image)
 
-    @with_numpy_cupy
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
 
@@ -964,12 +965,13 @@ class FourierOperatorCPU(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
+        xp = get_array_module(image_data)
         dataf = image_data.reshape((B, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.zeros_like(dataf)
+        grad = xp.zeros_like(dataf)
 
-        coil_img = np.empty((T, *XYZ), dtype=self.cpx_dtype)
-        coil_ksp = np.empty((T, K), dtype=self.cpx_dtype)
+        coil_img = xp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        coil_ksp = xp.empty((T, K), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -989,10 +991,11 @@ class FourierOperatorCPU(FourierOperatorBase):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
+        xp = get_array_module(image_data)
         dataf = image_data.reshape((B * C, *XYZ))
         obs_dataf = obs_data.reshape((B * C, K))
-        grad = np.empty_like(dataf)
-        ksp = np.empty((T, K), dtype=self.cpx_dtype)
+        grad = xp.empty_like(dataf)
+        ksp = xp.empty((T, K), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             self._op(dataf[i * T : (i + 1) * T], ksp)
             ksp /= self.norm_factor
@@ -1002,6 +1005,19 @@ class FourierOperatorCPU(FourierOperatorBase):
             self._adj_op(ksp, grad[i * T : (i + 1) * T])
         grad /= self.norm_factor
         return grad.reshape(B, C, *XYZ)
+
+
+class FourierOperatorCPU(FourierOperatorSimple):
+    """CPU implementation of the Fourier Operator.
+
+    This ensure that
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.op = with_numpy(self.op)
+        self.adj_op = with_numpy(self.adj_op)
+        self.data_consistency = with_numpy(self.data_consistency)
 
 
 def power_method(

@@ -13,6 +13,7 @@ from .base import (
 from .off_resonance import MRIFourierCorrected
 from .stacked import MRIStackedNUFFT
 from .subspace import MRISubspace
+from .cartesian import MRICartesianOperator
 
 #
 # load all the interfaces modules
@@ -27,6 +28,7 @@ __all__ = [
     "MRIFourierCorrected",
     "MRIStackedNUFFT",
     "MRISubspace",
+    "MRICartesianOperator",
     "check_backend",
     "get_operator",
     "list_backends",
