@@ -241,6 +241,17 @@ class MRIStackedNUFFT(FourierOperatorBase):
         return ksp
 
     @with_numpy_cupy
+    def _op(self, data, ksp=None):
+        """Forward operator."""
+        NS, NZ = len(self._samples2d), len(self.z_index)
+        tmp = self._fftz(data)
+        xp = get_array_module(data)
+        ksp = xp.zeros(NZ, NS, dtype=self.cpx_dtype)
+        for i in range(NZ):
+            self.operator._op(tmp[..., self.z_index[i], :], ksp[i])
+        return ksp
+
+    @with_numpy_cupy
     def adj_op(self, coeffs, img=None):
         """Adjoint operator."""
         if self.uses_sense:
@@ -284,6 +295,15 @@ class MRIStackedNUFFT(FourierOperatorBase):
             imgz[b][..., self.z_index] = xp.ascontiguousarray(adj)
         imgz = xp.reshape(imgz, (B, C, *XYZ))
         img = self._ifftz(imgz)
+        return img
+
+    @with_numpy_cupy
+    def _adj_op(self, coeffs, img):
+        """Adjoint operator."""
+        tmp = np.zeros(self.shape, dtype=self.cpx_dtype)
+        for i in range(len(self.z_index)):
+            self.operator._adj_op(coeffs[i], tmp[..., self.z_index[i]])
+        img = self._ifftz(tmp)
         return img
 
     def get_lipschitz_cst(self, max_iter=10):

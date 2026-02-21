@@ -13,10 +13,8 @@ actual sensitivity maps used in the simulation.
 """
 
 # %%
-# .. colab-link::
-#    :needs_gpu: 1
 #
-#    !pip install mri-nufft[gpunufft] cufinufft sigpy scikit-image
+#    !pip install mri-nufft[gpunufft, cufinufft] sigpy scikit-image
 
 # %%
 # Imports

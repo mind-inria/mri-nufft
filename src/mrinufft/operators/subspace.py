@@ -1,5 +1,6 @@
 """Subspace NUFFT Operator wrapper."""
 
+from numpy.typing import NDArray
 from mrinufft._array_compat import (
     _get_device,
     _to_interface,
@@ -47,7 +48,14 @@ class MRISubspace(FourierOperatorBase):
 
     """
 
-    def __init__(self, fourier_op, subspace_basis, use_gpu=False):
+    available = True
+
+    def __init__(
+        self,
+        fourier_op: FourierOperatorBase,
+        subspace_basis: NDArray,
+        use_gpu: bool = False,
+    ):
         self._fourier_op = fourier_op
 
         self.subspace_basis = subspace_basis
@@ -93,7 +101,6 @@ class MRISubspace(FourierOperatorBase):
             # actual transform
             _y = self._fourier_op.op(data_d[idx], *args)
             _y = _y.reshape(*_y.shape[:-1], self.n_frames, -1)
-
             # back-project on time domain
             y += basis_element.conj() * _y.swapaxes(-2, -1)
 
@@ -159,6 +166,12 @@ class MRISubspace(FourierOperatorBase):
             y = y.swapaxes(0, 1)
 
         return y
+
+    def _op(self, image, coeffs):
+        return self._fourier_op._op(image, coeffs)
+
+    def _adj_op(self, coeffs, image):
+        return self._fourier_op._adj_op(coeffs, image)
 
     def __getattr__(self, name):
         """Delegate attribute access to the underlying fourier operator."""
