@@ -223,7 +223,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         self.n_coils = n_coils
         self.autograd_available = True
         self._samples = cp.array(
-            proper_trajectory(samples, normalize="pi"), order="F", copy=False
+            proper_trajectory(samples, normalize="pi"), order="F", copy=None
         )
         self.dtype = self.samples.dtype
         # density compensation support
@@ -275,7 +275,7 @@ class MRICufiNUFFT(FourierOperatorBase):
                     "used on gpu for smaps."
                 )
                 self._smaps = cp.array(
-                    new_smaps, order="C", copy=False, dtype=self.cpx_dtype
+                    new_smaps, order="C", copy=None, dtype=self.cpx_dtype
                 )
             else:
                 if self._smaps is None:
@@ -311,7 +311,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         """
         if not unsafe:
             self._samples = cp.array(
-                proper_trajectory(new_samples, normalize="pi"), copy=False
+                proper_trajectory(new_samples, normalize="pi"), copy=None
             ).astype(np.float32, order="F", copy=False)
         else:
             self._samples = new_samples
@@ -327,7 +327,7 @@ class MRICufiNUFFT(FourierOperatorBase):
         if new_density is None:
             self._density = None
             return
-        self._density = cp.array(new_density, copy=False)
+        self._density = cp.array(new_density, copy=None)
 
     @with_numpy_cupy
     @nvtx_mark()

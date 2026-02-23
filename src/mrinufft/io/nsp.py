@@ -422,11 +422,11 @@ def read_trajectory(
         data = np.fromfile(binfile, dtype=np.float32)
         if float(data[0]) > 4:
             version, data = _pop_elements(data)
-            version = np.around(version, 2)
+            version = int(np.around(version * 10))
         else:
-            version = 1
+            version = 10
         dimension, data = _pop_elements(data, type="int")
-        if version >= 4.1:
+        if version >= 41:
             fov, data = _pop_elements(data, dimension)
             img_size, data = _pop_elements(data, dimension, type="int")
             min_osf, data = _pop_elements(data, type="int")
@@ -435,17 +435,17 @@ def read_trajectory(
             if dwell_time == "min_osf":
                 dwell_time = raster_time / min_osf
         (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
-        if version > 4:
+        if version > 40:
             TE_pos, data = _pop_elements(data)
             grad_max, data = _pop_elements(data)
             recon_tag, data = _pop_elements(data)
             recon_tag = np.around(recon_tag, 2)
             left_over = 10
-            if version > 4.1:
+            if version > 41:
                 timestamp, data = _pop_elements(data)
                 timestamp = datetime.fromtimestamp(float(timestamp))
                 left_over -= 1
-            if version > 5:
+            if version > 50:
                 packed_skips, data = _pop_elements(data, num_elements=2, type="int")
                 start_skip_samples, end_skip_samples = packed_skips
                 left_over -= 2
@@ -455,12 +455,12 @@ def read_trajectory(
             _, data = _pop_elements(data, left_over)
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
-        if version > 4.5:
+        if version > 45:
             final_positions, data = _pop_elements(data, dimension * num_shots)
             final_positions = np.reshape(final_positions, (num_shots, dimension))
         dwell_time_ns = dwell_time * 1e6
         gradient_raster_time_ns = raster_time * 1e6
-        if version < 4.1:
+        if version < 41:
             grad_max, data = _pop_elements(data)
         gradients, data = _pop_elements(
             data,
@@ -529,19 +529,19 @@ def read_trajectory(
                         * 1e-6
                     )
         params = {
-            "version": version,
+            "version": version / 10,
             "dimension": dimension,
             "num_shots": num_shots,
             "num_samples_per_shot": num_samples_per_shot,
         }
-        if version >= 4.1:
+        if version >= 41:
             params["FOV"] = fov
             params["img_size"] = img_size
             params["min_osf"] = min_osf
             params["gamma"] = gamma
             params["recon_tag"] = recon_tag
             params["TE_pos"] = TE_pos
-            if version >= 4.2:
+            if version >= 42:
                 params["timestamp"] = timestamp
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
@@ -620,28 +620,24 @@ def read_arbgrad_rawdat(
         removeOS=removeOS,
         doAverage=doAverage,
         squeeze=squeeze,
+        reshape=True,
+        return_twix=True,
         slice_num=slice_num,
         contrast_num=contrast_num,
     )
     if "ARBGRAD_VE11C" in data_type:
         hdr["type"] = "ARBGRAD_GRE"
-        hdr["shifts"] = ()
-        for s in [6, 7, 8]:
-            shift = twixObj.search_header_for_val(
-                "Phoenix", ("sWiPMemBlock", "adFree", str(s))
-            )
-            hdr["shifts"] += (0,) if shift == [] else (shift[0],)
+        if hdr["n_contrasts"] > 1:
+            hdr["turboFactor"] = twixObj.search_header_for_val(
+                "Phoenix", ("sFastImaging", "lTurboFactor")
+            )[0]
+            hdr["type"] = "ARBGRAD_MP2RAGE"
         hdr["oversampling_factor"] = twixObj.search_header_for_val(
             "Phoenix", ("sWiPMemBlock", "alFree", "4")
         )[0]
         hdr["trajectory_name"] = twixObj.search_header_for_val(
             "Phoenix", ("sWipMemBlock", "tFree")
         )[0][1:-1]
-        if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj.search_header_for_val(
-                "Phoenix", ("sFastImaging", "lTurboFactor")
-            )[0]
-            hdr["type"] = "ARBGRAD_MP2RAGE"
     if pre_skip > 0:
         samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
         if samples_to_skip >= hdr["n_adc_samples"]:

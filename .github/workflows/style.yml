@@ -13,11 +13,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PYTHON_VERSION: "3.10"
-  BART_VERSION: "0.8.00"
-  ref_backend: "finufft"
-
 jobs:
   linter-check:
     runs-on: ubuntu-latest
@@ -26,20 +21,15 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
 
-      - name: Install Python deps
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[test,dev]
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Black Check
         shell: bash
-        run: black . --diff --color --check
+        run: uvx black . --diff --color --check
 
       - name: ruff Check
         shell: bash
-        run: ruff check src
+        run: uvx ruff check src

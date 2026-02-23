@@ -203,7 +203,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             data = data.get()
         elif is_cuda_array(self.B) and not on_gpu:
             warnings.warn("Interpolators are on GPU, moving CPU image data to GPU")
-            data = cp.array(data, copy=False)
+            data = cp.array(data, copy=None)
 
         xp = get_array_module(self.B)
         y = xp.zeros((self.n_batchs, self.n_coils, self.n_samples), dtype=xp.complex64)
@@ -214,7 +214,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             y += (self.B[:, ll] * ytmp).reshape(B, C, K)
 
         if on_gpu:
-            y = cp.array(y, copy=False)
+            y = cp.array(y, copy=None)
         elif is_cuda_array(y):
             y = y.get()
         return self._safe_squeeze(y)
@@ -245,7 +245,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         if is_host_array(self.B) and on_gpu:
             coeffs = coeffs.get()
         elif is_cuda_array(self.B) and not on_gpu:
-            coeffs = cp.array(coeffs, copy=False)
+            coeffs = cp.array(coeffs, copy=None)
 
         if not self.uses_sense:
             img = xp.zeros((B, C, *XYZ), dtype=xp.complex64)
@@ -259,7 +259,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             img += Cconj * self._fourier_op.adj_op(ytmp)
 
         if on_gpu:
-            img = cp.array(img, copy=False)
+            img = cp.array(img, copy=None)
         elif is_cuda_array(img):
             img = img.get()
         return self._safe_squeeze(img)

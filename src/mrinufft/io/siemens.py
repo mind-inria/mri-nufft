@@ -11,7 +11,8 @@ def read_siemens_rawdat(
     removeOS: bool = False,
     doAverage: bool = True,
     squeeze: bool = True,
-    return_twix: bool = True,
+    reshape: bool = False,
+    return_twix: bool = False,
     slice_num: int | None = None,
     contrast_num: int | None = None,
 ):  # pragma: no cover
@@ -27,10 +28,14 @@ def read_siemens_rawdat(
         Whether to average the data acquired along NAve dimension.
     squeeze : bool, optional
         Whether to squeeze the dimensions of the data, by default True.
+    reshape : bool, optional
+        Whether to reshape the data into a
+        Nc X Nsamples X Nslices X Ncontrasts format,
+        by default False.
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
     return_twix : bool, optional
-        Whether to return the twix object, by default True.
+        Whether to return the twix object, by default False.
     slice_num : int, optional
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
@@ -79,6 +84,7 @@ def read_siemens_rawdat(
         "n_reps": int(twixObj.image.NRep),
         "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
         "affine": nifti_affine(twixObj),
+        "shifts": twixObj.image.slicePos[0][:3][::-1],
         "acs": None,
     }
     # Add sequence information
@@ -116,17 +122,21 @@ def read_siemens_rawdat(
         raw_kspace = twixObj.image[""]
     if squeeze:
         raw_kspace = np.squeeze(raw_kspace)
-    data = np.moveaxis(raw_kspace, 0, 2)
-
-    data = data.reshape(
-        hdr["n_coils"],
-        hdr["n_shots"],
-        hdr["n_adc_samples"],
-        hdr["n_slices"] if slice_num is None else 1,
-        hdr["n_reps"],
-        hdr["n_contrasts"] if contrast_num is None else 1,
-        hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
-    )
+    if reshape:
+        # Format as coils x shots x samples x slices x contrasts x averages
+        data = np.moveaxis(raw_kspace, 0, 2)
+        data = data.reshape(
+            hdr["n_coils"],
+            hdr["n_shots"],
+            hdr["n_adc_samples"],
+            hdr["n_slices"] if slice_num is None else 1,
+            hdr["n_reps"],
+            hdr["n_contrasts"] if contrast_num is None else 1,
+            hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
+        )
+    else:
+        # Cartesian data, format as coils x readout_samples x paritions_y x partitions_z
+        data = np.moveaxis(raw_kspace, 1, 0)
     if return_twix:
         return data, hdr, twixObj
     return data, hdr
