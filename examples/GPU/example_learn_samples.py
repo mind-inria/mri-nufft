@@ -82,7 +82,7 @@ init_traj += 0.01 * np.random.randn(*init_traj.shape).astype(
     np.float32
 )  # Add some noise to the initial trajectory
 init_traj = project_trajectory(
-    init_traj, max_iter=100, verbose=0
+    init_traj, max_iter=100, verbose=0, TE_pos=0
 )  # Project the initial trajectory to satisfy hardware constraints
 model = Model(init_traj)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)

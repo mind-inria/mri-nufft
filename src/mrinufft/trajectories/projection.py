@@ -367,21 +367,21 @@ def project_trajectory(
         )
     else:
         linear_projector_ = linear_projector
-        f = GradientLinearProjection(
-            initial_trajectory=trajectory,
-            kinetic_op=M,
-            linear_projector=linear_projector_,
-        )
-        progressbar = _progressbar(verbose == 1, max_iter)
-        q_star = pyproximal.optimization.primal.ProximalGradient(
-            f,
-            prox,
-            x0=M * trajectory,
-            niter=max_iter,
-            acceleration="fista",
-            tau=1 / lipchitz_constant,
-            show=verbose > 1,
-            callback=lambda x: progressbar.update(1),
-        )
-        s_s = f.get_primal_variables(q_star)
+    f = GradientLinearProjection(
+        initial_trajectory=trajectory,
+        kinetic_op=M,
+        linear_projector=linear_projector_,
+    )
+    progressbar = _progressbar(verbose == 1, max_iter)
+    q_star = pyproximal.optimization.primal.ProximalGradient(
+        f,
+        prox,
+        x0=M * trajectory,
+        niter=max_iter,
+        acceleration="fista",
+        tau=1 / lipchitz_constant,
+        show=verbose > 1,
+        callback=lambda x: progressbar.update(1),
+    )
+    s_s = f.get_primal_variables(q_star)
     return linear_projector_(s_s) if linear_projector_ is not None else s_s
