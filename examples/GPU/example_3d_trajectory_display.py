@@ -80,7 +80,10 @@ def create_grid(grid_type, trajectories, **kwargs):
 trajectories = {
     "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64, in_out=True),
     "FLORET": mtt.initialize_3D_floret(
-        64 * 8, 64, nb_revolutions=2, disable_slew_ramp=True
+        64 * 8,
+        64,
+        nb_revolutions=2,
+        slew_ramp_disable=True,  # Disable slew ramp for simplicity
     ),
     "Seiffert Spirals": mtt.initialize_3D_seiffert_spiral(64 * 8, 64, in_out=True),
 }
