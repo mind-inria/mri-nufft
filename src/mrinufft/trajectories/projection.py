@@ -326,19 +326,19 @@ def project_trajectory(
         )
     if trajectory.ndim == 2:
         trajectory = trajectory[None]
-        xp = get_array_module(trajectory)
-        Nc, Ns, Nd = trajectory.shape
-        D1 = FirstDerivative(
-            (Nc, Ns, Nd),
-            axis=1,
-            sampling=1,
-            kind="backward",
-            edge=True,
-            dtype=trajectory.dtype,
-        )
-        c1 = 1 / 2
-        c2 = 1 / 4
-        # Define the weighted first and second derivative operators
+    xp = get_array_module(trajectory)
+    Nc, Ns, Nd = trajectory.shape
+    c1 = 1 / 2
+    c2 = 1 / 4
+    D1 = FirstDerivative(
+        (Nc, Ns, Nd),
+        axis=1,
+        sampling=1,
+        kind="backward",
+        edge=True,
+        dtype=trajectory.dtype,
+    )
+    # Define the weighted first and second derivative operators
     M = pylops.VStack([c1 * D1, c2 * D1 * D1], dtype=trajectory.dtype)
     lipchitz_constant = 2  #  (2 * c1) ** 2 + (4 * c2) ** 2
     maxstep = (

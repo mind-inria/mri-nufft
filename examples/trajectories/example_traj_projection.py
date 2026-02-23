@@ -128,7 +128,7 @@ projected_trajectory = project_trajectory(
     original_trajectory,
     acq,
     max_iter=10000,
-    in_out=False,
+    TE_pos=0,
 )
 # %%
 #

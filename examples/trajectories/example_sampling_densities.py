@@ -454,7 +454,8 @@ function = lambda x: project_trajectory(
         10 * Ns,
     ),
     acq=acq,
-    linear_projector="no_proj",
+    linear_projector=None,
+    TE_pos=None,
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
