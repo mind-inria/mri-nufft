@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from scipy.ndimage import zoom
+from typing import TYPE_CHECKING
 import warnings
 
 from mrinufft._array_compat import with_numpy_cupy, CUPY_AVAILABLE
@@ -10,7 +11,13 @@ from numpy.typing import NDArray
 
 from .._array_compat import get_array_module, is_host_array, is_cuda_array
 from ..extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
-from .base import FourierOperatorBase, power_method, get_operator
+from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
+
+if TYPE_CHECKING:
+    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+else:
+    MRINufftAutoGrad = None
+    DeepInvPhyNufft = None
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -95,16 +102,15 @@ class MRIFourierCorrected(FourierOperatorBase):
                 "b0_map  and readout_time required for off-resonance correction."
             )
 
-        complex_field_map = None
-        if b0_map is not None:
-            complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
+        complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
 
         self.compute_interpolator(interpolator, complex_field_map, readout_time, mask)
 
+    @with_numpy_cupy
     def compute_interpolator(
         self,
         interpolators: str | dict | tuple[NDArray, NDArray],
-        field_map: NDArray | None,
+        field_map: NDArray,
         readout_time: NDArray | None,
         mask: NDArray | None,
     ):
@@ -112,6 +118,48 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         Sets the B and C attributes.
         """
+        xp = get_array_module(field_map)
+
+        # Resize to match fourier shape
+        if field_map.shape != self._fourier_op.shape:
+            warnings.warn(
+                "field_map and mask will be interpolated to match image shape."
+            )
+            zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
+            field_map = zoom_func(
+                field_map,
+                zoom=tuple(
+                    np.array(self._fourier_op.shape) / np.array(field_map.shape)
+                ),
+                order=1,
+            )
+            if mask is not None:
+                mask = zoom_func(
+                    mask,
+                    zoom=tuple(np.array(self._fourier_op.shape) / np.array(mask.shape)),
+                    order=0,
+                )
+
+        self._field_map = field_map
+        self.mask = mask
+        self.readout_time = readout_time
+
+        readout_time = readout_time.ravel()
+        self.n_shots = 1
+        if readout_time.size != self.n_samples:
+            n_shot, r = divmod(self.n_samples, readout_time.size)
+            if r != 0:
+                raise ValueError(
+                    "readout_time should divide or equal the size of the samples."
+                )
+            self.n_shots = n_shot
+
+        if xp.all(field_map == 0) or xp.all(readout_time == 0):
+            # No off-resonance effect
+            self.B = xp.ones((self.n_samples, 1), dtype=xp.complex64)
+            self.C = xp.ones((1, *self.shape), dtype=xp.complex64)
+            return
+
         if isinstance(interpolators, tuple):
             B, C = interpolators
             try:
@@ -132,36 +180,6 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.B, self.C = B, C
             return
 
-        readout_time = readout_time.ravel()
-        self.n_shots = 1
-        if readout_time.size != self.n_samples:
-            n_shot, r = divmod(self.n_samples, readout_time.size)
-            if r != 0:
-                raise ValueError(
-                    "readout_time should divide or equal the size of the samples."
-                )
-            self.n_shots = n_shot
-        # Resize to match fourier shape
-        if field_map.shape != self._fourier_op.shape:
-            warnings.warn(
-                "field_map and mask will be interpolated to match image shape."
-            )
-            xp = get_array_module(field_map)
-            zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
-            field_map = zoom_func(
-                field_map,
-                zoom=tuple(
-                    np.array(self._fourier_op.shape) / np.array(field_map.shape)
-                ),
-                order=1,
-            )
-            if mask is not None:
-                mask = zoom_func(
-                    mask,
-                    zoom=tuple(np.array(self._fourier_op.shape) / np.array(mask.shape)),
-                    order=0,
-                )
-
         kwargs = {}
         if isinstance(interpolators, dict):
             kwargs = interpolators.copy()
@@ -171,9 +189,39 @@ class MRIFourierCorrected(FourierOperatorBase):
         if not isinstance(interpolators, Callable):
             raise ValueError(f"Unknown off-resonance interpolator ``{interpolators}``")
 
+        self.interpolator_method = interpolators
         self.B, self.C, _ = interpolators(
             field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
+
+    def update_field_map(self, new_field_map: NDArray):
+        """Update the field map and recompute the interpolators."""
+        self.compute_interpolator(
+            interpolators=self.interpolator_method,
+            field_map=new_field_map,
+            readout_time=self.readout_time,
+            mask=self.mask,
+        )
+
+    @property
+    def field_map(self) -> NDArray:
+        """Get the field map used for off-resonance correction."""
+        return self._field_map
+
+    @field_map.setter
+    def field_map(self, new_field_map: NDArray):
+        """Update the field map and recompute the interpolators."""
+        self.update_field_map(new_field_map)
+
+    @property
+    def full_readout_time(self) -> NDArray:
+        """Get the full readout time for all samples."""
+        xp = get_array_module(self.readout_time)
+        return xp.repeat(self.readout_time, self.n_shots)
+
+    def autograd_available(self) -> bool:
+        """Whether the operator supports autograd differentiation."""
+        return self._fourier_op.autograd_available
 
     def __getattr__(self, name):
         """Delegate attribute to internal operator."""
@@ -322,3 +370,50 @@ class MRIFourierCorrected(FourierOperatorBase):
     def n_samples_per_shot(self):
         """Number of time points in a shot."""
         return self.B.shape[0]
+
+    def make_autograd(
+        self,
+        *,
+        wrt_data: bool = True,
+        wrt_traj: bool = False,
+        wrt_field_map: bool = False,
+        paired_batch: bool = False,
+    ) -> MRINufftAutoGrad:
+        """Make a new Operator with autodiff support.
+
+        Parameters
+        ----------
+        wrt_data : bool, optional
+            If the gradient with respect to the data is computed, default is true
+        wrt_traj : bool, optional
+            If the gradient with respect to the trajectory is computed, default is false
+        wrt_field_map : bool, optional
+            If the gradient with respect to the field map is computed, default is false
+        paired_batch : int, optional
+            If provided, specifies batch size for varying data/smaps pairs.
+            Default is None, which means no batching
+
+        Returns
+        -------
+        torch.nn.module
+            A NUFFT operator with autodiff capabilities.
+
+        Raises
+        ------
+        ValueError
+            If autograd is not available.
+        """
+        if not AUTOGRAD_AVAILABLE:
+            raise ValueError("Autograd not available, ensure torch is installed.")
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
+
+        from mrinufft.operators.autodiff import MRINufftAutoGrad
+
+        return MRINufftAutoGrad(
+            self,
+            wrt_data=wrt_data,
+            wrt_traj=wrt_traj,
+            wrt_field_map=wrt_field_map,
+            paired_batch=paired_batch,
+        )

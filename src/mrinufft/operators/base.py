@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import partial
+from contextlib import contextmanager
 from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
 import numpy as np
@@ -33,7 +34,9 @@ from mrinufft.extras import get_smaps
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
+    from mrinufft.operators.off_resonance import MRIFourierCorrected
 else:
+    MRIFourierCorrected = Any  # type: ignore
     DeepInvPhyNufft = Any  # type: ignore
     MRINufftAutoGrad = Any  # type: ignore
     MRIStackedNUFFT = Any  # type: ignore
@@ -185,6 +188,7 @@ class FourierOperatorBase(ABC):
         self._density_method = None
         self._grad_wrt_data = False
         self._grad_wrt_traj = False
+        self._grad_wrt_field_map = False
 
     def __init_subclass__(cls: type[FourierOperatorBase]):
         """Register the class in the list of available operators."""
@@ -287,12 +291,12 @@ class FourierOperatorBase(ABC):
 
     def with_off_resonance_correction(
         self,
+        readout_time: NDArray,
         b0_map: NDArray | None = None,
-        readout_time: NDArray | None = None,
         r2star_map: NDArray | None = None,
         mask: NDArray | None = None,
         interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
-    ):
+    ) -> MRIFourierCorrected:
         """Return a new operator with Off Resonnance Correction."""
         from .off_resonance import MRIFourierCorrected
 
@@ -431,15 +435,10 @@ class FourierOperatorBase(ABC):
 
         Parameters
         ----------
-        variable: , default data
-            variable on which the gradient is computed with respect to.
-
         wrt_data : bool, optional
             If the gradient with respect to the data is computed, default is true
-
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
-
         paired_batch : int, optional
             If provided, specifies batch size for varying data/smaps pairs.
             Default is None, which means no batching
@@ -602,7 +601,7 @@ class FourierOperatorBase(ABC):
         return self._shape
 
     @shape.setter
-    def shape(self, shape):
+    def shape(self, shape: tuple[int, ...]):
         self._shape = tuple(int(i) for i in shape)
 
     @property
@@ -1083,3 +1082,20 @@ def power_method(
 
         x_new_norm = cp.asarray(x_new_norm).get().item()
     return x_new_norm, x_new
+
+
+class _ToggleGradPlanMixin:
+    """Mixin class to toggle gradient computation on and off."""
+
+    @contextmanager
+    def grad_traj_plan(self):
+        """Context manager to enable gradient computation with respect to trajectory."""
+        self.toggle_grad_traj()
+        yield
+        self.toggle_grad_traj()
+
+    def toggle_grad_traj(self):
+        """Toggle gradient computation with respect to trajectory."""
+        if self.uses_sense:  # type: ignore
+            self.smaps = self.smaps.conj()
+        self.raw_op.toggle_grad_traj()  # type: ignore
