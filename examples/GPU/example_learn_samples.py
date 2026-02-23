@@ -15,9 +15,6 @@ In this example, we solve the following optimization problem:
     \mathbf{\hat{K}} =  \mathrm{arg} \min_{\mathbf{K}} ||  \mathcal{F}_\mathbf{K}^* D_\mathbf{K} \mathcal{F}_\mathbf{K} \mathbf{x} - \mathbf{x} ||_2^2
 
 where :math:`\mathcal{F}_\mathbf{K}` is the forward NUFFT operator and :math:`D_\mathbf{K}` is the density compensators for trajectory :math:`\mathbf{K}`,  :math:`\mathbf{x}` is the MR image which is also the target image to be reconstructed.
-
-.. warning::
-    This example only showcases the autodiff capabilities, the learned sampling pattern is not scanner compliant as the scanner gradients required to implement it violate the hardware constraints. In practice, a projection :math:`\Pi_\mathcal{Q}(\mathbf{K})` into the scanner constraints set :math:`\mathcal{Q}` is recommended (see [Proj]_). This is implemented in the proprietary SPARKLING package [Sparks]_. Users are encouraged to contact the authors if they want to use it.
 """
 
 import os
@@ -30,6 +27,7 @@ import torch
 
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
+from mrinufft.trajectories.projection import project_trajectory
 
 # %%
 # Setup a simple class to learn trajectory
@@ -60,7 +58,7 @@ class Model(torch.nn.Module):
     def forward(self, x):
         # Update the trajectory in the NUFFT operator.
         # Note that the re-computation of density compensation happens internally.
-        self.operator.samples = self.trajectory.clone()
+        self.operator.samples = self.trajectory.clone().reshape(-1, 2)
 
         # A simple acquisition model simulated with a forward NUFFT operator
         kspace = self.operator.op(x)
@@ -74,16 +72,22 @@ class Model(torch.nn.Module):
 # Setup Data and Model
 # --------------------
 #
-num_epochs = 100
+num_epochs = 50
 
 mri_2D = torch.Tensor(np.flipud(bwdl.get_mri(4, "T1")[80, ...]).astype(np.complex64))
 mri_2D = mri_2D[None, ...] / torch.linalg.norm(mri_2D)
 
-init_traj = initialize_2D_radial(16, 512).reshape(-1, 2).astype(np.float32)
+init_traj = initialize_2D_radial(32, 512).astype(np.float32)
+init_traj += 0.01 * np.random.randn(*init_traj.shape).astype(
+    np.float32
+)  # Add some noise to the initial trajectory
+init_traj = project_trajectory(
+    init_traj, max_iter=100, verbose=0, TE_pos=0
+)  # Project the initial trajectory to satisfy hardware constraints
 model = Model(init_traj)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 schedulder = torch.optim.lr_scheduler.LinearLR(
-    optimizer, start_factor=1, end_factor=0.1, total_iters=num_epochs
+    optimizer, start_factor=1, end_factor=1e-4, total_iters=num_epochs
 )
 
 
@@ -104,7 +108,9 @@ axs[0].imshow(np.abs(mri_2D[0]), cmap="gray")
 axs[0].axis("off")
 axs[0].set_title("MR Image")
 
-traj_scat = axs[1].scatter(*init_traj.T, s=0.5)
+traj_plot = []
+for traj in init_traj:
+    traj_plot.append(axs[1].plot(*traj.T, c="b"))
 axs[1].set_title("Trajectory")
 
 recon_im = axs[2].imshow(np.abs(recon.squeeze().detach().cpu().numpy()), cmap="gray")
@@ -131,7 +137,8 @@ def train():
         with torch.no_grad():
             # clamp the value of trajectory between [-0.5, 0.5]
             for param in model.parameters():
-                param.clamp_(-0.5, 0.5)
+                param = project_trajectory(param, max_iter=100, verbose=0)
+                model.trajectory.data = param.clamp_(-0.5, 0.5)
         schedulder.step()
         losses.append(loss.item())
         yield (
@@ -148,7 +155,8 @@ def plot_epoch(data):
     recon_im.set_data(abs(img))
     loss_curve.set_xdata(np.arange(cur_epoch))
     loss_curve.set_ydata(losses)
-    traj_scat.set_offsets(traj)
+    for plot, t in zip(traj_plot, traj):
+        plot[0].set_data(*t.T)
 
     axs[3].set_xlim(0, cur_epoch)
     axs[3].set_ylim(0, 1.1 * max(losses))

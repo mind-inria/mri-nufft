@@ -546,6 +546,7 @@ def display_gradients(
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
     subfigure: plt.Figure | plt.Axes | None = None,
+    data_type: str = "grad",
     show_constraints: bool = False,
     acq: Acquisition | None = None,
     constraints_order: int | str | None = None,
@@ -582,6 +583,10 @@ def display_gradients(
     subfigure: plt.Figure or plt.SubFigure, optional
         The figure where the trajectory should be displayed.
         The default is `None`.
+    data_type: str, optional
+        Type of data to display, either 'grad' for gradients or 'slew' for
+        slew rates. This is used to determine the y-axis labels and colors
+        for constraint violations. The default is 'grad'.
     show_constraints : bool, optional
         Display the points where the gradients and slew rates
         are above the `gmax` and `smax` limits, respectively.
@@ -604,11 +609,10 @@ def display_gradients(
 
     # Initialize figure with a simpler version
     axes = display_gradients_simply(
-        trajectory,
+        trajectory if data_type == "grad" else np.diff(trajectory, axis=1),
         shot_ids,
         figsize,
         fill_area,
-        show_norm,
         uni_signal,
         uni_gradient,
         subfigure,
@@ -631,7 +635,7 @@ def display_gradients(
         if ax == axes[-1]:
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
-            scale = (0.1 if (show_norm and ax == axes[-1]) else 1) * acq.raster_time
+            scale = acq.raster_time * 1e3
             locator = mticker.FixedLocator(ticks)
             formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
             ax.xaxis.set_major_locator(locator)
@@ -646,11 +650,15 @@ def display_gradients(
         scale = (
             convert_trajectory_to_gradients(
                 trajectory[:1, :2],
-                raster_time=acq.raster_time,
-            )[0][0, 0, idx]
+                acq=acq,
+            )[
+                0
+            ][0, 0, idx]
             / norms
         )
-        scale = 1e3 * scale  # Convert from T/m to mT/m
+        scale = scale * (
+            1e3 if data_type == "grad" else 1e5
+        )  # Convert from T/m to mT/m
         locator = mticker.FixedLocator(ticks)
         formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
         if not show_norm or ax != axes[-1]:
@@ -670,19 +678,41 @@ def display_gradients(
     slewrates = np.pad(slewrates, ((0, 0), (0, 1)))
 
     # Point out hardware constraint violations
-    for ax in axes[:Nd]:
-        pts = np.where(gradients > acq.gmax)
-        ax.scatter(
-            pts,
-            np.zeros_like(pts),
-            color=displayConfig.gradient_point_color,
-            s=displayConfig.pointsize,
-        )
-        pts = np.where(slewrates > acq.smax)
-        ax.scatter(
-            pts,
-            np.zeros_like(pts),
-            color=displayConfig.slewrate_point_color,
-            s=displayConfig.pointsize,
-        )
+    for ax in axes:
+        if data_type == "grad":
+            ax.plot(
+                np.ones_like(gradients.flatten()) * acq.gmax / scale * 1e3,
+                "--",
+                color=displayConfig.gradient_point_color,
+            )
+            ax.plot(
+                -np.ones_like(slewrates.flatten()) * acq.smax / scale,
+                "--",
+                color=displayConfig.slewrate_point_color,
+            )
+            pts = np.where(gradients > acq.gmax)
+            ax.scatter(
+                pts,
+                np.zeros_like(pts),
+                color=displayConfig.gradient_point_color,
+                s=displayConfig.pointsize,
+            )
+        if data_type == "slew":
+            ax.plot(
+                np.ones_like(slewrates.flatten()) * acq.smax / scale,
+                "--",
+                color=displayConfig.slewrate_point_color,
+            )
+            ax.plot(
+                -np.ones_like(slewrates.flatten()) * acq.smax / scale,
+                "--",
+                color=displayConfig.slewrate_point_color,
+            )
+            pts = np.where(slewrates > acq.smax)
+            ax.scatter(
+                pts,
+                np.zeros_like(pts),
+                color=displayConfig.slewrate_point_color,
+                s=displayConfig.pointsize,
+            )
     return axes

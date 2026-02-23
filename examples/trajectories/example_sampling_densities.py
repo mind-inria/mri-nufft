@@ -192,7 +192,6 @@ chauffert_density = mn.create_chauffert_density(
 )
 show_density(chauffert_density, figure_size=figure_size)
 
-
 # %%
 # ``wavelet_basis (str)``
 # ~~~~~~~~~~~~~~~~~~~~~~~
@@ -277,6 +276,7 @@ densities = {
 arguments = densities.keys()
 function = lambda x: densities[x]
 show_densities(function, arguments, subfig_size=subfigure_size)
+"""
 
 
 # %%
@@ -425,7 +425,39 @@ function = lambda x: mn.initialize_2D_travelling_salesman(
     method="lloyd",
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
+"""
+# %%
+# Projection
+# ==========
+#
+# The trajectories generated above may not always satisfy the hardware constraints
+# of the scanner, and a projection step can be used to enforce them while preserving
+# the original trajectory as much as possible. The projection is based on
+# the work from [Cha+22]_.
 
+from mrinufft.trajectories.projection import project_trajectory
+
+acq = mn.Acquisition(
+    fov=(0.24, 0.24, 0.03),
+    img_size=(256, 256, 3),
+)
+
+arguments = densities.keys()
+function = lambda x: project_trajectory(
+    mn.oversample(
+        mn.initialize_2D_travelling_salesman(
+            Nc,
+            Ns,
+            density=densities[x],
+            method="lloyd",
+        ),
+        10 * Ns,
+    ),
+    acq=acq,
+    linear_projector=None,
+    TE_pos=None,
+)
+show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
 # References
