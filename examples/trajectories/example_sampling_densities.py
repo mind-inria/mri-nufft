@@ -276,8 +276,6 @@ densities = {
 arguments = densities.keys()
 function = lambda x: densities[x]
 show_densities(function, arguments, subfig_size=subfigure_size)
-"""
-
 
 # %%
 # Random sampling
@@ -425,7 +423,7 @@ function = lambda x: mn.initialize_2D_travelling_salesman(
     method="lloyd",
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
-"""
+
 # %%
 # Projection
 # ==========

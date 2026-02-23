@@ -59,7 +59,7 @@ jobs:
       - name: Build API documentation
         run: |
           export MRINUFFT_BACKEND=cufinufft
-          uv run sphinx docs docs_build ${{ contains(github.event.comment.body, 'fast') && '-D plot_gallery=0' || '' }} -j 5
+          uv run sphinx-build docs docs_build ${{ contains(github.event.comment.body, 'fast') && '-D plot_gallery=0' || '' }} -j 5
 
       - name: Upload artifact for pages
         if: ${{ github.event_name == 'workflow_run' }}
