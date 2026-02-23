@@ -39,7 +39,7 @@ import mrinufft as mn
 # Trajectory parameters
 Nc = 120  # Number of shots
 Ns = 500  # Number of samples per shot
-in_out = False  # Choose between in-out or center-out trajectories
+in_out = True  # Choose between in-out or center-out trajectories
 tilt = "uniform"  # Angular distance between shots
 nb_repetitions = 6  # Number of stacks, rotations, cones, shells etc.
 nb_revolutions = 1  # Number of revolutions for base trajectories
