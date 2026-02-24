@@ -1,5 +1,6 @@
 """Functions to initialize 2D trajectories."""
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -9,8 +10,6 @@ from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
 from mrinufft.trajectories.utils import Acquisition, normalize_trajectory
-import warnings
-
 
 from .gradients import patch_center_anomaly
 from .maths import R2D, compute_coprime_factors, is_from_fibonacci_sequence
@@ -245,43 +244,42 @@ def initialize_2D_vds_spiral(
     normalize: bool = True,
     in_out: bool = False,
 ):
-    """
-    Variable density spiral, constrained by acquisition setup.
+    """Initialize a 2D variable density spiral (VDS) trajectory.
 
-    The undersampling/acceleration factor of the spiral increase linearly
-    from Rmin to Rmax.
+    A hardware-constrained spiral trajectory introduced by Lee, Hargreaves
+    & Hu [Lee03]_, where the undersampling/acceleration factor increases
+    linearly from Rmin at the center to Rmax at the edge of k-space.
 
     Parameters
     ----------
-    Nc: int
+    Nc : int
         Number of interleaves for the spiral
-    oversamp: int
-        Oversampling factor for the trajectory calculation
-    acq: Acquisition
-        Acquisition object defining the hardware constraints and imaging parameters
-    Rmin: float
-        Minimum radial acceleration factor
-    Rmax: float
-        Maximum radial acceleration factor (reached at krmax)
-    Fcoeffs: Alternative to describe radial acceleration factor
+    oversamp : int, optional
+        Oversampling factor for the trajectory calculation, by default 1
+    acq : Acquisition, optional
+        Acquisition object defining the hardware constraints and imaging parameters,
+        by default Acquisition.default
+    Rmin : float, optional
+        Minimum radial acceleration factor, by default 1
+    Rmax : float, optional
+        Maximum radial acceleration factor (reached at krmax), by default 1
+    Fcoeffs : list | tuple | NDArray, optional
         Coefficients of the polynomial describing the radial acceleration factor
         F(r) = Fcoeffs[0] + Fcoeffs[1]*(r/krmax) + Fcoeffs[2]*(r/krmax)**2 + ...
         If None, it is set to [fov/Rmin, fov/Rmax-fov/Rmin] (linear from Rmin to Rmax)
-    krmax: float, default=0.5
+    krmax : float, optional
         Maximum radius for the spiral. If normalize is True, this is in arbitrary units,
-        else in 1/m.
-
-    normalize: bool, default=True
-        Whether to normalize the trajectory to the resolution (True) or return in 1/m (
-        False)
-    in_out: bool, default=False
-        Whether to start from the center or not
-
+        else in 1/m. By default 0.5 when normalize is True.
+    normalize : bool, optional
+        Whether to normalize the trajectory to the resolution (True) or return in 1/m
+        (False), by default True
+    in_out : bool, optional
+        Whether to start from the center or not, by default False
 
     Returns
     -------
-    ndarray: (Nc,N,2)
-       The 2D vds spiral trajectory
+    NDArray
+        The 2D VDS spiral trajectory of shape (Nc, Ns, 2)
 
     Notes
     -----
@@ -289,8 +287,9 @@ def initialize_2D_vds_spiral(
 
     References
     ----------
-    Lee, Hargreaves & Hu et al. (2003) Fast 3D Imaging Using Variable-Density Spiral
-    Trajectories with Applications to Limb Perfusion, Magnetic Resonance in Medicine.
+    .. [Lee03] Lee, Jin Hyung, Brian A. Hargreaves, Bob S. Hu, and Dwight G. Nishimura.
+       "Fast 3D imaging using variable‐density spiral trajectories with applications to
+       limb perfusion." Magnetic Resonance in Medicine 50, no. 6 (2003): 1276-1285.
     """
     if acq is None:
         acq = Acquisition.default
