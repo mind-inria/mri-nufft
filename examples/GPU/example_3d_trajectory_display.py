@@ -78,9 +78,14 @@ def create_grid(grid_type, trajectories, **kwargs):
 # =======================
 # We instantiate a bunch of sampling trajectories to display hereafter with `get_gridded_trajectory` and previous helper functions.
 trajectories = {
-    "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64),
-    "FLORET": mtt.initialize_3D_floret(64 * 8, 64, nb_revolutions=2),
-    "Seiffert Spirals": mtt.initialize_3D_seiffert_spiral(64 * 8, 64),
+    "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64, in_out=True),
+    "FLORET": mtt.initialize_3D_floret(
+        64 * 8,
+        64,
+        nb_revolutions=2,
+        slew_ramp_disable=True,  # Disable slew ramp for simplicity
+    ),
+    "Seiffert Spirals": mtt.initialize_3D_seiffert_spiral(64 * 8, 64, in_out=True),
 }
 
 # %%
