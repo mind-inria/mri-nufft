@@ -195,4 +195,3 @@ def test_spoilers(kspace_loc, shape, acquisition, method):
         np.sum(spoilers, axis=1) * acq.raster_time - end_points / acq.gamma,
         atol=5e-3 / min(acq.res),
     )
-    )
