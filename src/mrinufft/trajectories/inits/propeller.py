@@ -3,8 +3,8 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.utils import KMAX
 from mrinufft.trajectories.tools import rotate
+from mrinufft.trajectories.utils import KMAX
 
 
 def initialize_2D_propeller(Nc: int, Ns: int, nb_strips: int) -> NDArray:

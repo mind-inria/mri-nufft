@@ -3,11 +3,14 @@
 from functools import partial
 
 import numpy as np
-from numpy.typing import NDArray
 import numpy.linalg as nl
+from numpy.typing import NDArray
 
+from mrinufft.trajectories.maths import (
+    CIRCLE_PACKING_DENSITY,
+    generate_fibonacci_circle,
+)
 from mrinufft.trajectories.utils import KMAX, Packings, initialize_shape_norm
-from mrinufft.trajectories.maths import CIRCLE_PACKING_DENSITY, generate_fibonacci_circle
 
 
 def get_grappa_caipi_positions(

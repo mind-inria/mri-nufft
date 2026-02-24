@@ -1,6 +1,7 @@
 """Gradient display functions."""
 
 from __future__ import annotations
+
 from collections.abc import Sequence
 from typing import Any
 
@@ -9,12 +10,12 @@ import matplotlib.ticker as mticker
 import numpy as np
 from numpy.typing import NDArray
 
+from mrinufft.trajectories.display.config import displayConfig
 from mrinufft.trajectories.utils import (
     Acquisition,
     compute_gradients_and_slew_rates,
     convert_trajectory_to_gradients,
 )
-from mrinufft.trajectories.display.config import displayConfig
 
 
 def display_gradients_simply(

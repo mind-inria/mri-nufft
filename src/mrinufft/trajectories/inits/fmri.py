@@ -5,11 +5,11 @@ from typing import Literal
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import R2D
-from mrinufft.trajectories.utils import initialize_tilt
-from mrinufft.trajectories.tools import stack, epify
 from mrinufft.trajectories.inits.radial import initialize_2D_radial
 from mrinufft.trajectories.inits.spiral import initialize_2D_spiral
+from mrinufft.trajectories.maths import R2D
+from mrinufft.trajectories.tools import epify, stack
+from mrinufft.trajectories.utils import initialize_tilt
 
 
 def initialize_3D_turbine(

@@ -1,7 +1,7 @@
 """Functional trajectory tools: stack_spherically, shellify."""
 
-from typing import Any, Literal
 from collections.abc import Callable
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray

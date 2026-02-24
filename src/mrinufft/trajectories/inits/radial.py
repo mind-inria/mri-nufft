@@ -4,7 +4,7 @@ import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import R2D, EIGENVECTOR_2D_FIBONACCI
+from mrinufft.trajectories.maths import EIGENVECTOR_2D_FIBONACCI, R2D
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 
@@ -85,6 +85,7 @@ def initialize_3D_phyllotaxis_radial(
        Magnetic resonance in medicine 66, no. 4 (2011): 1049-1056.
     """
     from mrinufft.trajectories.inits.cones import initialize_3D_cones
+
     trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)

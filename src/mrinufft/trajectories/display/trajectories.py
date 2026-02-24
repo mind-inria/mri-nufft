@@ -1,17 +1,18 @@
 """Trajectory display functions: display_2D_trajectory, display_3D_trajectory."""
 
 from __future__ import annotations
+
 from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 
+from mrinufft.trajectories.display.config import displayConfig
 from mrinufft.trajectories.utils import (
     Acquisition,
     compute_gradients_and_slew_rates,
 )
-from mrinufft.trajectories.display.config import displayConfig
 
 
 def _setup_2D_ticks(

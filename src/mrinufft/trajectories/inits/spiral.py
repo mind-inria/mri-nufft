@@ -9,10 +9,15 @@ from numpy.polynomial import Polynomial
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 
-from mrinufft.trajectories.utils import Acquisition, normalize_trajectory
 from mrinufft.trajectories.gradients import patch_center_anomaly
 from mrinufft.trajectories.maths import R2D, is_from_fibonacci_sequence
-from mrinufft.trajectories.utils import KMAX, initialize_algebraic_spiral, initialize_tilt
+from mrinufft.trajectories.utils import (
+    KMAX,
+    Acquisition,
+    initialize_algebraic_spiral,
+    initialize_tilt,
+    normalize_trajectory,
+)
 
 
 def initialize_2D_spiral(

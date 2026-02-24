@@ -5,8 +5,8 @@ from numpy.typing import NDArray
 from scipy.special import ellipj, ellipk
 
 from mrinufft.trajectories.maths import Ra, Rz
-from mrinufft.trajectories.utils import KMAX, initialize_tilt
 from mrinufft.trajectories.tools import precess
+from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 
 def initialize_3D_seiffert_spiral(

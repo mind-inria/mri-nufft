@@ -3,8 +3,15 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.utils import KMAX, Acquisition, convert_gradients_to_trajectory
-from mrinufft.trajectories.tools import get_grappa_caipi_positions, get_packing_spacing_positions
+from mrinufft.trajectories.tools import (
+    get_grappa_caipi_positions,
+    get_packing_spacing_positions,
+)
+from mrinufft.trajectories.utils import (
+    KMAX,
+    Acquisition,
+    convert_gradients_to_trajectory,
+)
 
 
 def initialize_3D_wave_caipi(

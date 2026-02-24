@@ -6,8 +6,8 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import norm
 
-from mrinufft.trajectories.utils import KMAX, VDSorder, VDSpdf
 from mrinufft.trajectories.tools.transforms import _flip2center
+from mrinufft.trajectories.utils import KMAX, VDSorder, VDSpdf
 
 
 def get_random_loc_1d(

@@ -1,6 +1,7 @@
 """Display configuration class."""
 
 from __future__ import annotations
+
 import itertools
 from typing import Any
 
