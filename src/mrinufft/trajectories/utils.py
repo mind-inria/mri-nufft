@@ -137,7 +137,7 @@ class Packings(StrEnum):
 
     See Also
     --------
-    mrinufft.trajectories.trajectories3D.initialize_3D_wave_caipi
+    mrinufft.trajectories.inits.initialize_3D_wave_caipi
 
     """
 

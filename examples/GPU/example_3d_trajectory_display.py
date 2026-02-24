@@ -12,11 +12,13 @@ Another key feature is to display the sampling density in k-space, for example t
 
 # Imports
 import os
-from mrinufft.trajectories.display3D import get_gridded_trajectory
-import mrinufft.trajectories.trajectory3D as mtt
-from mrinufft.trajectories.utils import Acquisition
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+import mrinufft.trajectories.inits as mtt
+from mrinufft.trajectories.display3D import get_gridded_trajectory
+from mrinufft.trajectories.utils import Acquisition
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 

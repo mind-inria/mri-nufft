@@ -8,12 +8,12 @@ An animation to show 2D trajectory customization.
 """
 
 import matplotlib.animation as animation
-from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.gridspec import GridSpec
 
 import mrinufft.trajectories.display as mtd
-import mrinufft.trajectories.trajectory2D as mtt
+import mrinufft.trajectories.inits as mtt
 from mrinufft.trajectories.display import displayConfig
 
 # %%
