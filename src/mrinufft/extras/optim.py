@@ -799,6 +799,17 @@ def cg(
     if operator.backend == "cufinufft":
         lipschitz_cst = float(lipschitz_cst.get())
     xp = get_array_module(kspace_data)
+    old_density = None
+    if operator.uses_density:
+        if x_init is None:
+            # If we have density compensation but no x_init,
+            # initialize with DCp adjoint to accelerate
+            # convergence.
+            x_init = operator.adj_op(kspace_data)
+            y = operator.op(x_init)
+            x_init *= xp.linalg.norm(kspace_data) / xp.linalg.norm(y)
+        old_density = operator.density
+        operator.density = None
     image = (
         xp.zeros(operator.img_full_shape, dtype=kspace_data.dtype)
         if x_init is None
@@ -852,6 +863,9 @@ def cg(
         progressbar.update()
     if operator.squeeze_dims:
         image = operator._safe_squeeze(image)
+
+    if old_density is not None:
+        operator.density = old_density
 
     if callbacks_results:
         return image, callbacks_results
