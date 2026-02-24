@@ -357,7 +357,7 @@ def project_trajectory(
     if TE_pos == -1:
         # detect the position of the original k-space center and
         # set the constraint accordingly
-        TE_pos = np.argmin(np.linalg.norm(trajectory, axis=-1), axis=1) / Ns
+        TE_pos = np.median(np.argmin(np.linalg.norm(trajectory, axis=-1), axis=1) / Ns)
 
     if linear_projector is None and TE_pos is not None:
         linear_projector_ = partial(
