@@ -305,26 +305,27 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # (max gradient and slew rate), introduced in [Lee03]_.
 #
 # Arguments:
+#
 # - ``Nc (int)``: number of individual shots. See radial
-# - ``oversampling_factor int``: oversampling factor to increase the number of samples
-#    per shot.
-# - ```acq```: :py:obj:`Acquisition` object definining hardware constraints and
+# - ``oversamp (int)``: oversampling factor to increase the number of samples
+#   per shot.
+# - ``acq``: :py:obj:`Acquisition` object defining hardware constraints and
 #   acquisition parameters.
-# - ``Rmin``: minimum acceleration factor at the center of k-space.
-# - ``Rmax``: maximum acceleration factor at the edge of k-space.
-# - ``Fcoeff``: Polynomial coefficients controlling the variable density sampling
+# - ``Rmin (float)``: minimum acceleration factor at the center of k-space.
+# - ``Rmax (float)``: maximum acceleration factor at the edge of k-space.
+# - ``Fcoeffs``: polynomial coefficients controlling the variable density sampling
 #   profile, alternative to Rmin and Rmax.
-# - ``krmax``: maximum k-space radius to reach, in m^-1 (default 1 / (2 * acq.res[0])).
-# - ``normalize``: whether to normalize the trajectory
-# - ``in_out (bool)``: define whether the shots should travel toward the center then
-#    outside (in-out) or not (center-out). ``(default False)``. See radial.
+# - ``krmax (float)``: maximum k-space radius to reach. ``(default 0.5)``
+# - ``normalize (bool)``: whether to normalize the trajectory. ``(default True)``
+# - ``in_out (bool)``: define whether the shots should travel toward the center
+#   then outside (in-out) or not (center-out). ``(default False)``. See radial.
 
 trajectory = mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
 # Rmin & Rmax (floats)
-# ~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~
 #
 # The minimum and maximum acceleration factors at the center and edge of k-space.
 # These parameters control the sampling density profile of the spiral trajectory.
