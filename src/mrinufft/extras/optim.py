@@ -143,10 +143,11 @@ def loss_l2_reg(
         norm_res += norm_damp
     return norm_res
 
+
 def scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
     """
     Compute a scaled Density compensated adjoint.
-     
+
     Parameters
     ----------
     operator : FourierOperatorBase
