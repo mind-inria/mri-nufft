@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import mrinufft.trajectories.inits as mtt
-from mrinufft.trajectories.display3D import get_gridded_trajectory
+from mrinufft.trajectories.display import get_gridded_trajectory
 from mrinufft.trajectories.utils import Acquisition
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
