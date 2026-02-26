@@ -1,12 +1,12 @@
 """Utility functions in general."""
 
 from __future__ import annotations
+
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum, EnumMeta
 from numbers import Real
-from typing import Any, ClassVar
-from typing import Literal
+from typing import Any, ClassVar, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -137,7 +137,7 @@ class Packings(StrEnum):
 
     See Also
     --------
-    mrinufft.trajectories.trajectories3D.initialize_3D_wave_caipi
+    mrinufft.trajectories.inits.initialize_3D_wave_caipi
 
     """
 

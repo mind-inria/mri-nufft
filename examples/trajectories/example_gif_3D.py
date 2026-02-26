@@ -7,14 +7,13 @@ An animation to show 3D trajectory customization.
 
 """
 
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.gridspec import GridSpec
 
-import numpy as np
-
 import mrinufft.trajectories.display as mtd
-import mrinufft.trajectories.trajectory3D as mtt
+import mrinufft.trajectories.inits as mtt
 from mrinufft.trajectories.display import displayConfig
 
 # %%

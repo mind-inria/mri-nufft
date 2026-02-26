@@ -4,20 +4,20 @@ from collections.abc import Callable
 from functools import partial, wraps
 from typing import Literal
 
-from tqdm.auto import tqdm
 import numpy as np
-import scipy.sparse as sps
 import numpy.linalg as nl
+import scipy.sparse as sps
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from scipy.optimize import linprog
+from tqdm.auto import tqdm
 
+from mrinufft._utils import MethodRegister, _fill_doc
 from mrinufft.trajectories.utils import (
     Acquisition,
     convert_trajectory_to_gradients,
     unnormalize_trajectory,
 )
-from mrinufft._utils import MethodRegister, _fill_doc
 
 OSQP_AVAILABLE = True
 try:

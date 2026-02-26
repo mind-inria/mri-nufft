@@ -1,11 +1,13 @@
 """Functions to fit gradient constraints."""
 
+from collections.abc import Callable
+from functools import partial
+
 import numpy as np
 import numpy.linalg as nl
-from functools import partial
-from collections.abc import Callable
 from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
+
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
 from mrinufft._utils import _fill_doc, _progressbar
 from mrinufft.trajectories.utils import Acquisition
@@ -13,10 +15,10 @@ from mrinufft.trajectories.utils import Acquisition
 PYPROXIMAL_AVAILABLE = True
 
 try:
-    from pylops import LinearOperator, FirstDerivative
-    from pyproximal import ProxOperator
     import pylops
     import pyproximal
+    from pylops import FirstDerivative, LinearOperator
+    from pyproximal import ProxOperator
 except ImportError:
     ProxOperator = object
     LinearOperator = object
