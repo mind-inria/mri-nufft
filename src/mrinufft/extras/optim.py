@@ -144,6 +144,23 @@ def loss_l2_reg(
     return norm_res
 
 
+def scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
+    """
+    Compute a scaled Density compensated adjoint.
+
+    Parameters
+    ----------
+    operator : FourierOperatorBase
+        The NUFFT (non-uniform FFT) operator used for forward modeling.
+    kspace_data : NDArray
+        Measured k-space data. Shape must match the output of the operator.op(image).
+    """
+    xp = get_array_module(kspace_data)
+    x_init = operator.adj_op(kspace_data)
+    y = operator.op(x_init)
+    return x_init * xp.linalg.norm(kspace_data) / xp.linalg.norm(y)
+
+
 @with_numpy_cupy
 def loss_l2_AHreg(
     image: NDArray,
@@ -283,6 +300,8 @@ def lsqr(
     xp = get_array_module(kspace_data)
     old_density = None
     if operator.uses_density:
+        if x_init is None:
+            x_init = scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -529,6 +548,8 @@ def lsmr(
     xp = get_array_module(kspace_data)
     old_density = None
     if operator.uses_density:
+        if x_init is None:
+            x_init = scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -800,6 +821,12 @@ def cg(
     if operator.backend == "cufinufft":
         lipschitz_cst = float(lipschitz_cst.get())
     xp = get_array_module(kspace_data)
+    old_density = None
+    if operator.uses_density:
+        if x_init is None:
+            x_init = scaled_dcp(operator, kspace_data)
+        old_density = operator.density
+        operator.density = None
     image = (
         xp.zeros(operator.img_full_shape, dtype=kspace_data.dtype)
         if x_init is None
@@ -853,6 +880,9 @@ def cg(
         progressbar.update()
     if operator.squeeze_dims:
         image = operator._safe_squeeze(image)
+
+    if old_density is not None:
+        operator.density = old_density
 
     if callbacks_results:
         return image, callbacks_results
