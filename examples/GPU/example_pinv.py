@@ -50,6 +50,29 @@ kspace_data_gpu = nufft.op(image_gpu)  # get the k-space data
 kspace_data = kspace_data_gpu.get()  # convert back to numpy array for display
 adjoint = nufft.adj_op(kspace_data_gpu).get()  # adjoint NUFFT
 
+# %%
+# Pseudo-inverse solver
+# =====================
+# The least-square solution to the inverse problem can be obtained by solving
+# the following optimization problem:
+#
+# .. math::
+#    \min_x \|Ax - b\|_2^2
+#
+# where :math:`A` is the NUFFT operator, :math:`x` is the image to be
+# reconstructed, and :math:`b` is the k-space data. The optimization problem can
+# be solved using different iterative solvers, such as Conjugate Gradient (CG),
+# LSQR and LSMR. The solvers are implemented in the :meth:`mrinufft.pinv_solver`
+# method, which takes as input the k-space data, the maximum number of
+# iterations, and the optimization method to use.
+
+# %%
+# Callback monitoring
+# -------------------
+# We can monitor the convergence of the optimization by using a callback function
+# that is called at each iteration of the optimization. The callback function can
+# compute different metrics, such as the residual norm, the PSNR, or the time taken
+
 
 def mixed_cb(*args, **kwargs):
     """A compound callback function, to track iterations time and convergence."""
@@ -76,7 +99,9 @@ def process_cb_results(cb_results):
     return {"time": time_it, "res": r, "AHres": rH, "psnr": psnrs}
 
 
-# Run the least-square minimization for all the solvers:
+# %%
+# Run the least-square minimization for all the solvers
+# -----------------------------------------------------
 
 OPTIM = ["cg", "lsqr", "lsmr"]
 METRICS = {
@@ -167,8 +192,10 @@ plt.show()
 # This is done by solving the following optimization problem:
 #
 # .. math::
+
 #    \min_x \|Ax - b\|_2^2 + \gamma \|x\|_2^2
-#    where :math:`\gamma` is the regularization parameter.
+
+# where :math:`\gamma` is the regularization parameter.
 
 
 images = dict()
