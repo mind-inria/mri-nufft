@@ -388,6 +388,7 @@ def cartesian_espirit(
 
     xp = get_array_module(kspace)
     n_coils = kspace.shape[0]
+    decim_shape = shape
     if decim > 1:
         try:
             from skimage.restoration import unwrap_phase
@@ -397,10 +398,12 @@ def cartesian_espirit(
                 "it along with the [extra] dependencies "
                 "or using `pip install scikit-image`."
             ) from err
+        decim_shape = tuple(sh // decim for sh in shape)
         kspace = _crop_or_pad(
             kspace,
-            (kspace.shape[0],) + tuple(sh // decim for i, sh in enumerate(shape)),
+            (kspace.shape[0],) + decim_shape,
         )
+
     calib_shape = (n_coils, *calib_width)
     calib = _crop_or_pad(kspace, calib_shape)
     calib = _unfold_blocks(calib, kernel_width)
@@ -442,10 +445,15 @@ def cartesian_espirit(
             [with_numpy(unwrap_phase)(smap) for smap in xp.angle(Smaps)],
             dtype=xp.float32,
         )
-        abs_maps = zoom(abs(Smaps), (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        zoom_fac = (1.0,) + tuple(s / ds for s, ds in zip(shape, decim_shape))
+        abs_maps = zoom(
+            abs(Smaps),
+            zoom_fac,
+            order=1,
+        )
         # Phase zoom with 0 order to prevent residual unwrapping causing artifacts
-        angle_maps = zoom(unwrapped_phase, (1,) + (decim,) * (Smaps.ndim - 1), order=0)
-        max_eig = zoom(max_eig.T[0], (1,) + (decim,) * (Smaps.ndim - 1), order=1)
+        angle_maps = zoom(unwrapped_phase, zoom_fac, order=0)
+        max_eig = zoom(max_eig.T[0], zoom_fac, order=1)
         Smaps = abs_maps * np.exp(1j * angle_maps)
     Smaps *= max_eig > crop
     # Clean up memory after operations
