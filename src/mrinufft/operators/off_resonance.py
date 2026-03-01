@@ -312,6 +312,12 @@ class MRIFourierCorrected(FourierOperatorBase):
             img = img.get()
         return self._safe_squeeze(img)
 
+    def _op(self, image, coeffs):
+        return self._fourier_op._op(image, coeffs)
+
+    def _adj_op(self, coeffs, image):
+        return self._fourier_op._adj_op(coeffs, image)
+
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.
 
