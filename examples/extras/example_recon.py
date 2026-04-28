@@ -3,8 +3,21 @@
 Model-based iterative reconstruction
 ====================================
 
-This example demonstrates how to reconstruct image from
-non-Cartesian k-space data with a regularization prior, using deepinv.
+This example demonstrates how to reconstruct a 3D MRI image from undersampled
+non-Cartesian k-space measurements using MRI-NUFFT and DeepInverse.
+
+We first simulate non-Cartesian acquisitions from a reference MRI volume using
+a 3D cones trajectory. We then compare several reconstruction approaches:
+
+1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
+2. Wavelet-regularized reconstruction solved with FISTA.
+3. Total Variation (TV)-regularized reconstruction solved with proximal
+   gradient descent.
+
+The goal of this example is to illustrate how MRI-NUFFT physics operators can
+be coupled with DeepInverse optimization tools to solve model-based MRI inverse
+problems and compare different regularization priors.
+
 
 """
 
@@ -16,14 +29,15 @@ non-Cartesian k-space data with a regularization prior, using deepinv.
 import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
-from deepinv.optim.prior import WaveletPrior
 from deepinv.optim.data_fidelity import L2
 from deepinv.optim.optimizers import optim_builder
-
+from deepinv.optim.prior import WaveletPrior, TVPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
 import torch
 import os
+
+
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
@@ -63,20 +77,49 @@ wavelet = WaveletPrior(
 # Initial reconstruction with adjoint
 x_dagger = physics.A_dagger(y)
 
+
+# %%
+# Wavelet reconstruction with FISTA
+# ---------------------------------
+#
+# The adjoint reconstruction is fast, but it contains artifacts due to
+# undersampling. We therefore solve a regularized inverse problem using a
+# wavelet sparsity prior.
+#
+# The reconstruction minimizes a data-fidelity term together with a wavelet
+# regularization term:
+#
+#     min_x  1/2 || A x - y ||_2^2 + lambda * || W x ||_1
+#
+# where A is the MRI forward operator, y is the measured k-space data, and W is
+# a wavelet transform. The L2 data-fidelity term enforces consistency with the
+# acquired measurements, while the wavelet prior promotes sparse image
+# representations.
+#
+# We use FISTA, an accelerated proximal-gradient algorithm, to solve this
+# optimization problem.
+
+
 # %%
 # Setup and run the reconstruction algorithm
 # Data fidelity term
 data_fidelity = L2()
 # Algorithm parameters
 lamb = 1e1
-stepsize = 0.8 * float(1 / fourier_op.get_lipschitz_cst().get())
+L = fourier_op.get_lipschitz_cst()
+if hasattr(L, "get"):
+    L = L.get()
+
+stepsize = 0.8 / float(L)
 params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
 max_iter = 100
 early_stop = True
 
+
+
 # %%
 # Instantiate the algorithm class to solve the problem.
-wavelet_recon = optim_builder(
+wavelet_model = optim_builder(
     iteration="FISTA",
     prior=wavelet,
     data_fidelity=data_fidelity,
@@ -84,26 +127,119 @@ wavelet_recon = optim_builder(
     max_iter=max_iter,
     params_algo=params_algo,
 )
-x_wavelet = wavelet_recon(y, physics)
+x_wavelet = wavelet_model(y, physics)
+
+
 
 
 # %%
-# Display results
-plt.figure(figsize=(12, 6))
-plt.subplot(1, 3, 1)
-plt.imshow(torch.abs(mri[..., mri.shape[2] // 2 - 5]).cpu(), cmap="gray")
-plt.title("Ground truth")
-plt.axis("off")
-plt.subplot(1, 3, 2)
-plt.imshow(
-    torch.abs(x_dagger[0, 0, ..., x_dagger.shape[2] // 2 - 5]).cpu(), cmap="gray"
-)
-plt.title("Adjoint reconstruction")
-plt.axis("off")
-plt.subplot(1, 3, 3)
-plt.imshow(
-    torch.abs(x_wavelet[0, 0, ..., x_wavelet.shape[2] // 2 - 5]).cpu(), cmap="gray"
-)
-plt.title("Reconstruction with wavelet prior")
-plt.axis("off")
+# Total variation reconstruction with proximal gradient descent
+# ------------------------------------------------------------
+#
+# As an additional model-based reconstruction baseline, we reconstruct the
+# image using a Total Variation (TV) prior. TV regularization promotes images
+# that are piecewise smooth while preserving sharp edges, which is useful in
+# MRI where anatomical structures often have smooth regions separated by
+# boundaries.
+#
+# We solve the following variational problem:
+#
+#     min_x  1/2 || A x - y ||_2^2 + lambda * TV(x)
+#
+# where A is the non-Cartesian MRI forward operator, y is the measured k-space
+# data, and x is the reconstructed image.
+#
+# Since the MRI image is complex-valued, and TVPrior is applied to real-valued
+# tensors here, we apply the TV proximal operator separately to the real and
+# imaginary parts before recombining them.
+
+tv = TVPrior(n_it_max=20)
+
+# Regularization and algorithm parameters
+# The TV regularization weight was selected separately using Optuna.
+lamb_tv = 0.05789015101052105
+stepsize_tv = stepsize
+max_iter_tv = 20
+
+# Initialize with the adjoint reconstruction
+x_tv = physics.A_dagger(y).clone()
+
+costs_tv = []
+
+with torch.no_grad():
+    for _ in range(max_iter_tv):
+        # Data-consistency gradient step
+        u = x_tv - stepsize_tv * data_fidelity.grad(x_tv, y, physics)
+
+        # TV proximal step applied separately to real and imaginary parts
+        u_real = tv.prox(u.real, gamma=lamb_tv * stepsize_tv)
+        u_imag = tv.prox(u.imag, gamma=lamb_tv * stepsize_tv)
+
+        # Recombine into a complex-valued image
+        x_tv = u_real + 1j * u_imag
+
+        # Monitor the data-fidelity term
+        data_term = data_fidelity(x_tv, y, physics).item()
+        costs_tv.append(data_term)
+
+
+# %%
+# Quantitative evaluation
+# -----------------------
+#
+# We evaluate the reconstructions with PSNR and SSIM. PSNR measures the
+# reconstruction fidelity with respect to the reference image: higher PSNR
+# means lower pixel-wise error. SSIM measures structural similarity and is often
+# more informative for images because it compares local contrast and structure.
+#
+# Metrics are computed on magnitude images, since the reconstructions are
+# complex-valued.
+
+
+# %%
+from deepinv.loss.metric import PSNR, SSIM
+
+psnr = PSNR()
+ssim = SSIM()
+
+x_ref = torch.abs(mri).unsqueeze(0).unsqueeze(0)
+x_adjoint_mag = torch.abs(x_dagger)
+x_wavelet_mag = torch.abs(x_wavelet)
+x_tv_mag = torch.abs(x_tv)
+
+print(f"Adjoint PSNR: {psnr(x_adjoint_mag, x_ref).item():.2f}")
+print(f"Wavelet PSNR: {psnr(x_wavelet_mag, x_ref).item():.2f}")
+print(f"TV PSNR: {psnr(x_tv_mag, x_ref).item():.2f}")
+
+print(f"Adjoint SSIM: {ssim(x_adjoint_mag, x_ref).item():.4f}")
+print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
+print(f"TV SSIM: {ssim(x_tv_mag, x_ref).item():.4f}")
+
+
+# %%
+# Visualize the reconstructions
+# -----------------------------
+#
+# We compare the ground-truth image, the adjoint reconstruction, the wavelet
+# reconstruction, and the TV reconstruction on the same slice.
+
+slice_idx = mri.shape[-1] // 2 - 5
+
+fig, axes = plt.subplots(1, 4, figsize=(16, 6))
+
+images = [
+    (torch.abs(mri[..., slice_idx]).detach().cpu(), "Ground truth"),
+    (torch.abs(x_dagger[0, 0, ..., slice_idx]).detach().cpu(), "Adjoint"),
+    (torch.abs(x_wavelet[0, 0, ..., slice_idx]).detach().cpu(), "Wavelet"),
+    (torch.abs(x_tv[0, 0, ..., slice_idx]).detach().cpu(), "TV"),
+]
+
+for ax, (image, title) in zip(axes, images):
+    ax.imshow(image, cmap="gray")
+    ax.set_title(title)
+    ax.axis("off")
+
+plt.tight_layout()
+plt.savefig("reconstruction.png", dpi=150, bbox_inches="tight")
+plt.close()
 plt.show()
