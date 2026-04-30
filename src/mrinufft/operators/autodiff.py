@@ -411,7 +411,10 @@ class MRINufftAutoGrad(torch.nn.Module):
 
     def __getattr__(self, name):
         """Get attribute."""
-        return getattr(self.nufft_op, name)
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            return getattr(self.nufft_op, name)
 
     def _check_input_shape(
         self,
@@ -485,4 +488,8 @@ class DeepInvPhyNufft(LinearPhysics):
 
     def __getattr__(self, name):
         """Get attribute."""
-        return getattr(self._operator, name)
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            operator = super().__getattr__("_operator")
+            return getattr(operator, name)
