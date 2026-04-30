@@ -18,10 +18,7 @@ The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
 problems and compare different regularization priors.
 
-
 """
-
-# %%
 
 # %%
 # Imports
@@ -36,8 +33,6 @@ from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
 import torch
 import os
-
-
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
@@ -89,7 +84,9 @@ x_dagger = physics.A_dagger(y)
 # The reconstruction minimizes a data-fidelity term together with a wavelet
 # regularization term:
 #
-#     min_x  1/2 || A x - y ||_2^2 + lambda * || W x ||_1
+# .. math::
+#
+#    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \|Wx\|_1
 #
 # where A is the MRI forward operator, y is the measured k-space data, and W is
 # a wavelet transform. The L2 data-fidelity term enforces consistency with the
@@ -116,7 +113,6 @@ max_iter = 100
 early_stop = True
 
 
-
 # %%
 # Instantiate the algorithm class to solve the problem.
 wavelet_model = optim_builder(
@@ -128,8 +124,6 @@ wavelet_model = optim_builder(
     params_algo=params_algo,
 )
 x_wavelet = wavelet_model(y, physics)
-
-
 
 
 # %%
@@ -144,7 +138,9 @@ x_wavelet = wavelet_model(y, physics)
 #
 # We solve the following variational problem:
 #
-#     min_x  1/2 || A x - y ||_2^2 + lambda * TV(x)
+# .. math::
+#
+#    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
 #
 # where A is the non-Cartesian MRI forward operator, y is the measured k-space
 # data, and x is the reconstructed image.
@@ -153,35 +149,52 @@ x_wavelet = wavelet_model(y, physics)
 # tensors here, we apply the TV proximal operator separately to the real and
 # imaginary parts before recombining them.
 
-tv = TVPrior(n_it_max=20)
 
-# Regularization and algorithm parameters
+class ComplexTVPrior(TVPrior):
+    
+    """TV prior for complex-valued images.
+
+    TVPrior is designed for real-valued tensors. Since MRI reconstructions are
+    complex-valued, we apply the TV prior independently to the real and
+    imaginary parts.
+    """
+    def prox(self, x, *args, gamma=None, **kwargs):
+        """Apply TV proximal operator separately to real and imaginary parts."""
+
+        if torch.is_complex(x):
+            x_real = super().prox(x.real, *args, gamma=gamma, **kwargs)
+            x_imag = super().prox(x.imag, *args, gamma=gamma, **kwargs)
+            return x_real + 1j * x_imag
+
+        return super().prox(x, *args, gamma=gamma, **kwargs)
+
+    def forward(self, x, *args, **kwargs):
+        """Compute TV cost for complex tensors."""
+        if torch.is_complex(x):
+            return super().forward(x.real, *args, **kwargs) + super().forward(
+                x.imag, *args, **kwargs
+            )
+
+        return super().forward(x, *args, **kwargs)
+
+
+tv = ComplexTVPrior(n_it_max=20)
+
 # The TV regularization weight was selected separately using Optuna.
 lamb_tv = 0.05789015101052105
-stepsize_tv = stepsize
-max_iter_tv = 20
 
-# Initialize with the adjoint reconstruction
-x_tv = physics.A_dagger(y).clone()
+tv_model = optim_builder(
+    iteration="PGD",
+    prior=tv,
+    data_fidelity=data_fidelity,
+    max_iter=20,
+    params_algo={
+        "stepsize": stepsize,
+        "lambda": lamb_tv,
+    },
+)
 
-costs_tv = []
-
-with torch.no_grad():
-    for _ in range(max_iter_tv):
-        # Data-consistency gradient step
-        u = x_tv - stepsize_tv * data_fidelity.grad(x_tv, y, physics)
-
-        # TV proximal step applied separately to real and imaginary parts
-        u_real = tv.prox(u.real, gamma=lamb_tv * stepsize_tv)
-        u_imag = tv.prox(u.imag, gamma=lamb_tv * stepsize_tv)
-
-        # Recombine into a complex-valued image
-        x_tv = u_real + 1j * u_imag
-
-        # Monitor the data-fidelity term
-        data_term = data_fidelity(x_tv, y, physics).item()
-        costs_tv.append(data_term)
-
+x_tv = tv_model(y, physics)
 
 # %%
 # Quantitative evaluation
@@ -240,6 +253,4 @@ for ax, (image, title) in zip(axes, images):
     ax.axis("off")
 
 plt.tight_layout()
-plt.savefig("reconstruction.png", dpi=150, bbox_inches="tight")
-plt.close()
 plt.show()
