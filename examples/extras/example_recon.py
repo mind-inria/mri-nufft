@@ -60,7 +60,15 @@ y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
 # %%
 # Setup the physics and prior
-physics = fourier_op.make_deepinv_phy()
+physics_complex = fourier_op.make_deepinv_phy()
+
+# With viewed_as_real=True, complex tensors are represented as
+# real-valued tensors with a final dimension of size 2:
+# (..., 2) = (real part, imaginary part).
+physics_real = fourier_op.make_deepinv_phy(viewed_as_real=True)
+
+y_real = torch.view_as_real(y.contiguous())
+
 wavelet = WaveletPrior(
     wv="sym8",
     wvdim=3,
@@ -70,8 +78,7 @@ wavelet = WaveletPrior(
 
 # %%
 # Initial reconstruction with adjoint
-x_dagger = physics.A_dagger(y)
-
+x_dagger = physics_complex.A_dagger(y)
 
 # %%
 # Wavelet reconstruction with FISTA
@@ -123,7 +130,7 @@ wavelet_model = optim_builder(
     max_iter=max_iter,
     params_algo=params_algo,
 )
-x_wavelet = wavelet_model(y, physics)
+x_wavelet = wavelet_model(y, physics_complex)
 
 
 # %%
@@ -145,43 +152,58 @@ x_wavelet = wavelet_model(y, physics)
 # where A is the non-Cartesian MRI forward operator, y is the measured k-space
 # data, and x is the reconstructed image.
 #
-# Since the MRI image is complex-valued, and TVPrior is applied to real-valued
-# tensors here, we apply the TV proximal operator separately to the real and
-# imaginary parts before recombining them.
+# TVPrior is designed for real-valued tensors. With the new
+# `viewed_as_real=True` option, complex MRI data are represented as
+# real-valued tensors with a final dimension of size 2:
+# (..., 2) = (real part, imaginary part).
+# For 3D MRI data, this representation produces 6D tensors of shape
+# (B, C, D, H, W, 2), while DeepInverse TVPrior expects 4D or 5D inputs.
+# We therefore pack the final real/imaginary dimension into the channel
+# dimension before applying TVPrior, and unpack it afterwards.
+# This avoids manually splitting complex tensors into separate real and
+# imaginary TV proximal operations.
+# The TV regularization weight was selected separately using Optuna.
 
+lamb_tv = 0.05789015101052105
 
-class ComplexTVPrior(TVPrior):
-    
-    """TV prior for complex-valued images.
+class RealViewTVPrior(TVPrior):
+    """Adapt TVPrior to tensors represented with torch.view_as_real.
 
-    TVPrior is designed for real-valued tensors. Since MRI reconstructions are
-    complex-valued, we apply the TV prior independently to the real and
-    imaginary parts.
+    This helper packs the final real/imaginary dimension into the channel
+    dimension before applying TV regularization, then restores the original
+    layout afterwards.
     """
+
+    def _pack(self, x):
+        if x.shape[-1] != 2:
+            return x, None
+
+        original_shape = x.shape
+        b, c, *spatial, two = original_shape
+        x = x.movedim(-1, 2)          # (B, C, 2, D, H, W)
+        x = x.reshape(b, c * 2, *spatial)  # (B, 2*C, D, H, W)
+        return x, original_shape
+
+    def _unpack(self, x, original_shape):
+        if original_shape is None:
+            return x
+
+        b, c, *spatial, two = original_shape
+        x = x.reshape(b, c, 2, *spatial)
+        x = x.movedim(2, -1)          # back to (B, C, D, H, W, 2)
+        return x
+
     def prox(self, x, *args, gamma=None, **kwargs):
-        """Apply TV proximal operator separately to real and imaginary parts."""
-
-        if torch.is_complex(x):
-            x_real = super().prox(x.real, *args, gamma=gamma, **kwargs)
-            x_imag = super().prox(x.imag, *args, gamma=gamma, **kwargs)
-            return x_real + 1j * x_imag
-
-        return super().prox(x, *args, gamma=gamma, **kwargs)
+        x_packed, original_shape = self._pack(x)
+        out = super().prox(x_packed, *args, gamma=gamma, **kwargs)
+        return self._unpack(out, original_shape)
 
     def forward(self, x, *args, **kwargs):
-        """Compute TV cost for complex tensors."""
-        if torch.is_complex(x):
-            return super().forward(x.real, *args, **kwargs) + super().forward(
-                x.imag, *args, **kwargs
-            )
-
-        return super().forward(x, *args, **kwargs)
+        x_packed, _ = self._pack(x)
+        return super().forward(x_packed, *args, **kwargs)
 
 
-tv = ComplexTVPrior(n_it_max=20)
-
-# The TV regularization weight was selected separately using Optuna.
-lamb_tv = 0.05789015101052105
+tv = RealViewTVPrior(n_it_max=20)
 
 tv_model = optim_builder(
     iteration="PGD",
@@ -194,7 +216,8 @@ tv_model = optim_builder(
     },
 )
 
-x_tv = tv_model(y, physics)
+x_tv_real = tv_model(y_real, physics_real)
+x_tv = torch.view_as_complex(x_tv_real.contiguous())
 
 # %%
 # Quantitative evaluation

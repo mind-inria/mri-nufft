@@ -421,8 +421,10 @@ class FourierOperatorBase(ABC):
 
         from mrinufft.operators.autodiff import DeepInvPhyNufft
 
+        viewed_as_real = kwargs.pop("viewed_as_real", False)
+
         autograd_nufft = self.make_autograd(*args, **kwargs)
-        return DeepInvPhyNufft(autograd_nufft)
+        return DeepInvPhyNufft(autograd_nufft, viewed_as_real=viewed_as_real)
 
     def make_autograd(
         self,

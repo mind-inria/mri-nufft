@@ -463,27 +463,51 @@ class MRINufftAutoGrad(torch.nn.Module):
         return True
 
 
+def complex_view_wrapper(method):
+    """Handle real-view tensors for complex MRI operators."""
+    def wrapper(self, x: torch.Tensor, **kwargs):
+        if self.viewed_as_real:
+            if x.shape[-1] != 2:
+                raise ValueError(
+                    "When viewed_as_real=True, the last dimension must be 2."
+                )
+            x = torch.view_as_complex(x.contiguous())
+
+        out = method(self, x, **kwargs)
+
+        if self.viewed_as_real:
+            return torch.view_as_real(out)
+
+        return out
+
+    return wrapper
+
+
 class DeepInvPhyNufft(LinearPhysics):
     """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
 
-    def __init__(self, autograd_nufft):
+    def __init__(self, autograd_nufft, viewed_as_real=False):
         if not isinstance(autograd_nufft, MRINufftAutoGrad):
             raise ValueError("autograd_nufft should be an instance of MRINufftAutoGrad")
         super().__init__()
         # since autograd_nufft is a nn.Module, we need to set it this way
         # to avoid registering it as a sub-module / parameter.
         self.__dict__["_operator"] = autograd_nufft
+        self.viewed_as_real = viewed_as_real
 
+    @complex_view_wrapper
     def A(self, x: Tensor, **kwargs) -> Tensor:
         """Forward operation."""
         return self._operator.op(x, **kwargs)
 
+    @complex_view_wrapper
     def A_adjoint(self, y: Tensor, **kwargs) -> Tensor:
         """Adjoint operation."""
         return self._operator.adj_op(y, **kwargs)
 
+    @complex_view_wrapper
     def A_dagger(self, y: Tensor, **kwargs) -> Tensor:
-        """Adjoint operation."""
+        """Pseudo-inverse operation."""
         return self._operator.nufft_op.pinv_solver(y, **kwargs)
 
     def __getattr__(self, name):
