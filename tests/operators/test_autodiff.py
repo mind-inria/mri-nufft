@@ -397,6 +397,6 @@ def test_deepinv_phy_nufft_viewed_as_real(operator):
         y_real = physics.A(img_real)
         adj_real = physics.A_adjoint(y_real)
 
-    assert img_real.shape[-1] == 2
-    assert y_real.shape[-1] == 2
-    assert adj_real.shape[-1] == 2
+    assert img_real.shape == (*img_data.shape, 2)
+    assert y_real.shape == (*operator.op(img_data).shape, 2)
+    assert adj_real.shape == img_real.shape

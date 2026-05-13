@@ -402,6 +402,11 @@ class FourierOperatorBase(ABC):
             If provided, specifies batch size for varying data/smaps pairs.
             Default is None, which means no batching
 
+        viewed_as_real : bool, optional
+            If True, the DeepInverse physics wrapper accepts and returns
+            real-view tensors with a final dimension of size 2 representing
+            the real and imaginary parts. Default is False.
+
         Returns
         -------
         torch.nn.module

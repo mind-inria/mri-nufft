@@ -465,12 +465,9 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 def complex_view_wrapper(method):
     """Handle real-view tensors for complex MRI operators."""
+
     def wrapper(self, x: torch.Tensor, **kwargs):
         if self.viewed_as_real:
-            if x.shape[-1] != 2:
-                raise ValueError(
-                    "When viewed_as_real=True, the last dimension must be 2."
-                )
             x = torch.view_as_complex(x.contiguous())
 
         out = method(self, x, **kwargs)
