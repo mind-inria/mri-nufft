@@ -11,10 +11,7 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
-3. Total Variation (TV)-regularized reconstruction solved with proximal
-   gradient descent.
-4. Total Variation reconstruction solved with a primal-dual hybrid gradient
-   algorithm inspired by Chambolle-Pock.   
+3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
 
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
@@ -28,14 +25,12 @@ problems and compare different regularization priors.
 import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
-from deepinv.optim.data_fidelity import L2
+from deepinv.optim import PDCP
+from deepinv.optim.data_fidelity import L2, L2Distance
 from deepinv.optim.optimizers import optim_builder
 from deepinv.optim.prior import WaveletPrior, TVPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
-import torch.nn as nn
-from deepinv.models import TVDenoiser
-from tqdm import tqdm
 import torch
 import os
 
@@ -57,6 +52,7 @@ fourier_op = get_operator(BACKEND)(
     samples_loc,
     shape=mri.shape,
     density="pipe",
+    squeeze_dims=False,
 )
 y = fourier_op.op(mri)  # Simulate k-space data
 noise_level = y.abs().max().item() * 0.0002
@@ -65,12 +61,13 @@ y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
 # %%
 # Setup the physics and prior
-physics_complex = fourier_op.make_deepinv_phy()
-
 # With viewed_as_real=True, complex tensors are represented as
 # real-valued tensors with a final dimension of size 2:
 # (..., 2) = (real part, imaginary part).
-physics_real = fourier_op.make_deepinv_phy(viewed_as_real=True)
+physics = fourier_op.make_deepinv_phy(viewed_as_real=True)
+
+# Complex-valued physics used for methods that operate directly on complex tensors.
+physics_complex = fourier_op.make_deepinv_phy()
 
 y_real = torch.view_as_real(y.contiguous())
 
@@ -116,10 +113,8 @@ data_fidelity = L2()
 # Algorithm parameters
 lamb = 1e1
 L = fourier_op.get_lipschitz_cst()
-if hasattr(L, "get"):
-    L = L.get()
-
 stepsize = 0.8 / float(L)
+
 params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
 max_iter = 100
 early_stop = True
@@ -139,8 +134,8 @@ x_wavelet = wavelet_model(y, physics_complex)
 
 
 # %%
-# Total variation reconstruction with proximal gradient descent
-# ------------------------------------------------------------
+# Total variation reconstruction with DeepInverse PDCP
+# ----------------------------------------------------
 #
 # As an additional model-based reconstruction baseline, we reconstruct the
 # image using a Total Variation (TV) prior. TV regularization promotes images
@@ -209,161 +204,49 @@ class RealViewTVPrior(TVPrior):
         return super().forward(x_packed, *args, **kwargs)
 
 
-class RealViewPDHGTV(nn.Module):
-    """Primal-dual TV reconstruction for real-view complex MRI tensors.
-
-    The input image is represented as (..., 2), where the last dimension stores
-    the real and imaginary parts. Since TVDenoiser expects 4D or 5D tensors,
-    we temporarily pack the real/imaginary dimension into the channel dimension.
-    """
-
-    def __init__(
-        self,
-        lambda_reg,
-        max_iter,
-        lipschitz,
-        data_fidelity,
-        stopping_criterion=1e-5,
-        relaxation_param=1.0,
-    ):
-        super().__init__()
-        self.lambda_reg = lambda_reg
-        self.max_iter = max_iter
-        self.data_fidelity = data_fidelity
-        self.stopping_criterion = stopping_criterion
-        self.rho = relaxation_param
-
-        # Primal step size for the image update.
-        self.tau = 1.0 / lipschitz
-
-        # Dual step size. The value 12 is a conservative bound for the squared
-        # norm of the 3D finite-difference gradient operator.
-        self.sigma = 0.9 / (self.tau * 12)
-
-    @staticmethod
-    def _pack_real_view(x):
-        """Convert (B, C, D, H, W, 2) into (B, 2*C, D, H, W)."""
-        if x.shape[-1] != 2:
-            return x, None
-
-        original_shape = x.shape
-        b, c, *spatial, two = original_shape
-        x = x.movedim(-1, 2)
-        x = x.reshape(b, c * 2, *spatial)
-        return x, original_shape
-
-    @staticmethod
-    def _unpack_real_view(x, original_shape):
-        """Convert (B, 2*C, D, H, W) back into (B, C, D, H, W, 2)."""
-        if original_shape is None:
-            return x
-
-        b, c, *spatial, two = original_shape
-        x = x.reshape(b, c, 2, *spatial)
-        x = x.movedim(2, -1)
-        return x
-
-    @staticmethod
-    def _project_l2_ball_pointwise(p, radius):
-        """Project the dual TV variable onto an L2 ball pointwise."""
-        norm = torch.linalg.norm(p, dim=-1, keepdim=True)
-        scale = torch.clamp(norm / radius, min=1.0)
-        return p / scale
-
-    def forward(self, y, physics, init):
-        """Run primal-dual TV reconstruction."""
-        x = init
-
-        # TVDenoiser.nabla expects a 4D or 5D real tensor.
-        x_packed, original_shape = self._pack_real_view(x)
-        p = torch.zeros_like(TVDenoiser.nabla(x_packed))
-
-        for _ in tqdm(range(self.max_iter)):
-            x_old = x.clone()
-            p_old = p.clone()
-
-            # Pack x before applying the TV gradient.
-            x_packed, original_shape = self._pack_real_view(x)
-
-            # Dual update: update the TV dual variable.
-            p = p + self.sigma * TVDenoiser.nabla(x_packed)
-            p = self._project_l2_ball_pointwise(p, self.lambda_reg)
-
-            # TV adjoint gradient, then unpack back to real-view MRI format.
-            tv_grad_packed = TVDenoiser.nabla_adjoint(2.0 * p - p_old)
-            tv_grad = self._unpack_real_view(tv_grad_packed, original_shape)
-
-            # Primal update: data-fidelity gradient + TV contribution.
-            data_grad = self.data_fidelity.grad(x, y, physics)
-            x = x - self.tau * (data_grad + tv_grad)
-
-            # Optional relaxation.
-            x = x_old + self.rho * (x - x_old)
-            p = p_old + self.rho * (p - p_old)
-
-            rel_err = torch.linalg.norm(
-                x_old.flatten() - x.flatten()
-            ) / (torch.linalg.norm(x.flatten()) + 1e-12)
-
-            if rel_err < self.stopping_criterion:
-                break
-
-        return x
-
-
 tv = RealViewTVPrior(n_it_max=20)
-
-tv_model = optim_builder(
-    iteration="PGD",
-    prior=tv,
-    data_fidelity=data_fidelity,
-    max_iter=20,
-    params_algo={
-        "stepsize": stepsize,
-        "lambda": lamb_tv,
-    },
-)
-
-x_tv_real = tv_model(y_real, physics_real)
-x_tv = torch.view_as_complex(x_tv_real.contiguous())
 
 
 # %%
-# Total variation reconstruction with primal-dual hybrid gradient
-# ---------------------------------------------------------------
-#
 # We now solve the same TV-regularized MRI reconstruction problem using the
-# primal-dual hybrid gradient algorithm inspired by Chambolle-Pock
+# official DeepInverse PDCP optimizer. PDCP implements a Chambolle-Pock
+# primal-dual splitting method for objectives of the form F(Kx) + lambda G(x).
 #
-# Compared with proximal gradient descent, this primal-dual approach introduces
-# an additional dual variable associated with the TV regularization term.
-# This often leads tofaster convergence and better handling of non-smooth priors such as Total
-# Variation.
-#
+# In the PDCP formulation, the problem is written as F(Kx) + lambda G(x).
+# Here, K is the MRI forward operator A, so F acts directly on k-space data.
+# We use L2Distance to compare A(x) and y, and define a custom cost function
+# so that the monitored objective is evaluated as L2Distance(A(x), y) + lambda TV(x).
 # The optimization problem remains:
 #
 # .. math::
 #
 #    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
 #
-# but the optimization is performed using alternating primal and dual updates.
+# Since F acts directly on K(x) = A(x), both inputs of the data-fidelity
+# term are k-space tensors.
 
-pdhg_tv_model = RealViewPDHGTV(
+data_fidelity_distance = L2Distance()
+
+
+def pdcp_cost_fn(x, data_fidelity, prior, cur_params, y, physics):
+    return data_fidelity(cur_params["K"](x), y) + cur_params["lambda"] * prior(x)
+
+pdcp_model = PDCP(
+    K=physics.A,
+    K_adjoint=physics.A_adjoint,
+    data_fidelity=data_fidelity_distance,
+    prior=tv,
     lambda_reg=lamb_tv,
+    stepsize=stepsize,
+    stepsize_dual=1.0,
     max_iter=20,
-    lipschitz=float(L),
-    data_fidelity=data_fidelity,
+    g_first=False,
+    cost_fn=pdcp_cost_fn,
 )
 
-x0_real = torch.view_as_real(x_dagger.contiguous())
+x_pdcp_real = pdcp_model(y_real, physics)
+x_pdcp = torch.view_as_complex(x_pdcp_real.contiguous())
 
-x_pdhg_real = pdhg_tv_model(
-    y_real,
-    physics_real,
-    init=x0_real,
-)
-
-x_pdhg = torch.view_as_complex(x_pdhg_real.contiguous())
 
 # %%
 # Quantitative evaluation
@@ -387,36 +270,32 @@ ssim = SSIM()
 x_ref = torch.abs(mri).unsqueeze(0).unsqueeze(0)
 x_adjoint_mag = torch.abs(x_dagger)
 x_wavelet_mag = torch.abs(x_wavelet)
-x_tv_mag = torch.abs(x_tv)
-x_pdhg_mag = torch.abs(x_pdhg)
+x_pdcp_mag = torch.abs(x_pdcp)
 
 print(f"Adjoint PSNR: {psnr(x_adjoint_mag, x_ref).item():.2f}")
 print(f"Wavelet PSNR: {psnr(x_wavelet_mag, x_ref).item():.2f}")
-print(f"TV-PGD PSNR: {psnr(x_tv_mag, x_ref).item():.2f}")
-print(f"TV-PDHG PSNR: {psnr(x_pdhg_mag, x_ref).item():.2f}")
+print(f"TV-PDCP PSNR: {psnr(x_pdcp_mag, x_ref).item():.2f}")
 
 print(f"Adjoint SSIM: {ssim(x_adjoint_mag, x_ref).item():.4f}")
 print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
-print(f"TV-PGD SSIM: {ssim(x_tv_mag, x_ref).item():.4f}")
-print(f"TV-PDHG SSIM: {ssim(x_pdhg_mag, x_ref).item():.4f}")
+print(f"TV-PDCP SSIM: {ssim(x_pdcp_mag, x_ref).item():.4f}")
 
 # %%
 # Visualize the reconstructions
 # -----------------------------
 #
 # We compare the ground-truth image, the adjoint reconstruction, the wavelet
-# reconstruction, the TV-PGD reconstruction, and the TV-PDHG reconstruction.
+# reconstruction, and the TV-PDCP reconstruction.
 
 slice_idx = mri.shape[-1] // 2 - 5
 
-fig, axes = plt.subplots(1, 5, figsize=(20, 6))
+fig, axes = plt.subplots(1, 4, figsize=(16, 6))
 
 images = [
     (torch.abs(mri[..., slice_idx]).detach().cpu(), "Ground truth"),
     (torch.abs(x_dagger[0, 0, ..., slice_idx]).detach().cpu(), "Adjoint"),
     (torch.abs(x_wavelet[0, 0, ..., slice_idx]).detach().cpu(), "Wavelet"),
-    (torch.abs(x_tv[0, 0, ..., slice_idx]).detach().cpu(), "TV-PGD"),
-    (torch.abs(x_pdhg[0, 0, ..., slice_idx]).detach().cpu(), "TV-PDHG"),
+    (torch.abs(x_pdcp[0, 0, ..., slice_idx]).detach().cpu(), "TV-PDCP"),
 ]
 
 for ax, (image, title) in zip(axes, images):
