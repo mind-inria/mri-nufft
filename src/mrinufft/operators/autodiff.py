@@ -466,22 +466,23 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 def complex_view_wrapper(method):
     """
-    Decorator to automatically handle real-to-complex viewing 
+    Decorator to automatically handle real-to-complex viewing
     based on the 'viewed_as_real' attribute of the instance.
     """
+
     @wraps(method)
     def wrapper(self, x: torch.Tensor, **kwargs):
-        is_real = getattr(self, 'viewed_as_real', False)
-        
+        is_real = getattr(self, "viewed_as_real", False)
+
         if is_real:
             x = torch.view_as_complex(x)
-        
+
         out = method(self, x, **kwargs)
-        
+
         if is_real:
             return torch.view_as_real(out)[0]
         return out
-        
+
     return wrapper
 
 
