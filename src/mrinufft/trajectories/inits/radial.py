@@ -89,7 +89,9 @@ def initialize_3D_phyllotaxis_radial(
     """
     from mrinufft.trajectories.inits.cones import initialize_3D_cones
 
-    trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
+    trajectory = initialize_3D_cones(
+        Nc, Ns, tilt="golden", width=0, in_out=in_out, slew_ramp_disable=True
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
@@ -254,7 +256,9 @@ def initialize_3D_park_radial(
        in 3D ultrashort-echo-time lung imaging."
        NMR in Biomedicine 29, no. 5 (2016): 576-587.
     """
-    trajectory = initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=in_out)
+    trajectory = initialize_3D_wong_radial(
+        Nc, Ns, nb_interleaves=1, in_out=in_out, slew_ramp_disable=True
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))

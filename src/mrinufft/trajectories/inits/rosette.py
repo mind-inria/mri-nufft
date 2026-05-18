@@ -5,8 +5,10 @@ from numpy.typing import NDArray
 
 from mrinufft.trajectories.maths import compute_coprime_factors
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_2D_rosette(
     Nc: int, Ns: int, in_out: bool = False, coprime_index: int = 0
 ) -> NDArray:

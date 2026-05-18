@@ -7,6 +7,7 @@ from mrinufft.trajectories.maths import R2D
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 from mrinufft.trajectories.tools import add_slew_ramp
 
+
 @add_slew_ramp
 def initialize_2D_sinusoide(
     Nc: int,
