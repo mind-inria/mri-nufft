@@ -6,8 +6,10 @@ from numpy.typing import NDArray
 from mrinufft.trajectories.maths import CIRCLE_PACKING_DENSITY, R2D
 from mrinufft.trajectories.tools import conify, precess
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_2D_cones(
     Nc: int,
     Ns: int,

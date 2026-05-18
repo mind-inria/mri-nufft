@@ -18,8 +18,10 @@ from mrinufft.trajectories.utils import (
     initialize_tilt,
     normalize_trajectory,
 )
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_2D_spiral(
     Nc: int,
     Ns: int,
@@ -127,6 +129,7 @@ def initialize_2D_spiral(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_fibonacci_spiral(
     Nc: int, Ns: int, spiral_reduction: float = 1, patch_center: bool = True
 ) -> NDArray:
@@ -198,6 +201,7 @@ def initialize_2D_fibonacci_spiral(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_vds_spiral(
     Nc: int,
     oversamp: int = 1,
