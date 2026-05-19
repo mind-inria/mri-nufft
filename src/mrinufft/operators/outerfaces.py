@@ -106,7 +106,6 @@ class DeepInvPhyNufft:
         if not isinstance(autograd_nufft, MRINufftAutoGrad):
             raise ValueError("autograd_nufft should be an instance of MRINufftAutoGrad")
 
-        self.__class__.__bases__ = (LinearPhysics,)
         LinearPhysics.__init__(self)
 
         # Avoid nn.Module registration
