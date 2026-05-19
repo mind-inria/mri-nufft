@@ -65,6 +65,13 @@ except ImportError:
     DEEPINV_AVAILABLE = False
     pass
 
+MRPRO_AVAILABLE = TORCH_AVAILABLE
+
+try:
+    import mrpro  # noqa: F401
+except ImportError:
+    MRPRO_AVAILABLE = False
+
 
 def get_array_module(array: NDArray | Number) -> np:  # type: ignore
     """Get the module of the array."""

@@ -14,7 +14,8 @@ from ..extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
 from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
 
 if TYPE_CHECKING:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+    from mrinufft.operators.outerfaces import DeepInvPhyNufft
 else:
     MRINufftAutoGrad = None
     DeepInvPhyNufft = None
