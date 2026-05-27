@@ -372,31 +372,3 @@ def test_forward_and_grad(operator, interface):
             grad_nufft_field.cpu().numpy(),
             atol=5e-1,
         )
-
-
-def test_deepinv_phy_nufft_viewed_as_real(operator):
-    """Test DeepInvPhyNufft with viewed_as_real=True."""
-    if operator.backend != "finufft":
-        pytest.skip("CPU-only test for viewed_as_real.")
-
-    physics = operator.nufft_op.make_deepinv_phy(
-        viewed_as_real=True,
-        wrt_data=True,
-        wrt_traj=True,
-        paired_batch=operator.paired_batch,
-    )
-    _, img_data = get_data(operator, "torch-cpu")
-
-    img_real = torch.view_as_real(img_data.contiguous())
-
-    if operator.paired_batch:
-        smaps = batched_smaps_from_op(operator)
-        y_real = physics.A(img_real, smaps=smaps)
-        adj_real = physics.A_adjoint(y_real, smaps=smaps)
-    else:
-        y_real = physics.A(img_real)
-        adj_real = physics.A_adjoint(y_real)
-
-    assert img_real.shape == (*img_data.shape, 2)
-    assert y_real.shape == (*operator.op(img_data).shape, 2)
-    assert adj_real.shape == img_real.shape

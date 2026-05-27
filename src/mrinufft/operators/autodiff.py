@@ -3,7 +3,7 @@
 from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
 
 from mrinufft.operators.off_resonance import MRIFourierCorrected
-
+from functools import wraps
 import torch
 import numpy as np
 from .._array_compat import NP2TORCH, _array_to_torch
@@ -464,19 +464,51 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 
 def complex_view_wrapper(method):
-    """Handle real-view tensors for complex MRI operators."""
+    """Handle real-view tensors for complex MRI operators.
+    Supports both single and multiple tensor arguments.
+    Auto-detects tensor dimensionality and applies appropriate conversion.
+
+    - Image-space (input to forward op): (B, 2C, D, H, W) - 5D real-packed
+    - K-space (output of forward op): (B, C, N, 2) - 4D real-packed
+    """
 
     def wrapper(self, x: torch.Tensor, **kwargs):
-        if self.viewed_as_real:
-            x = torch.view_as_complex(x.contiguous())
+        if not self.viewed_as_real:
+            return method(self, x, **kwargs)
+        is_image_space = x.ndim == 5
+        is_kspace = x.ndim == 4
 
+        # Handle image-space input conversion (B, 2C, D, H, W) → complex (B, C, D, H, W)
+        if is_image_space:
+            b, c2, *spatial = x.shape
+            c = c2 // 2
+            x = x.reshape(b, c, 2, *spatial)
+            x = x.movedim(2, -1)
+            # Convert to complex: (B, C, D, H, W, 2)
+            x = torch.view_as_complex(x.contiguous())
+        # Handle k-space input conversion (B, C, N, 2) → complex (B, C, N)
+        elif is_kspace:
+            # Directly convert real-packed k-space to complex tensor
+            x = torch.view_as_complex(x.contiguous())
+        # Execute the wrapped method with complex tensor input
         out = method(self, x, **kwargs)
 
-        if self.viewed_as_real:
+        # Convert output back to real-packed format (image-space input case)
+        # When input was image, output is k-space: (B, C, N) → (B, C, N, 2)
+        if is_image_space:
+            # K-space output: convert complex to real-packed format
             return torch.view_as_real(out)
 
-        return out
+        # Convert output back to real-packed format (k-space input case)
+        # When input was k-space, output is image: (B, C, D, H, W) → (B, 2C, D, H, W)
+        elif is_kspace:
+            b, c, *spatial = out.shape
+            out = torch.view_as_real(out)
+            out = out.movedim(-1, 2)
+            out = out.reshape(b, c * 2, *spatial)
+            return out
 
+        return out
     return wrapper
 
 

@@ -61,12 +61,24 @@ y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
 # %%
 # Setup the physics and prior
-# With viewed_as_real=True, complex tensors are represented as
-# real-valued tensors with a final dimension of size 2:
-# (..., 2) = (real part, imaginary part).
+# With ``viewed_as_real=True``, the MRI-NUFFT DeepInverse interface exposes
+# complex-valued MRI tensors through real-valued tensor representations
+# compatible with DeepInverse optimization methods.
+#
+# The wrapper automatically converts between:
+#
+# - image-space tensors:
+#   ``(B, 2C, D, H, W)`` real-packed
+#   ↔
+#   ``(B, C, D, H, W)`` complex
+#
+# - k-space tensors:
+#   ``(B, C, N, 2)``
+#   ↔
+#   ``(B, C, N)`` complex
 physics = fourier_op.make_deepinv_phy(viewed_as_real=True)
 
-# Complex-valued physics used for methods that operate directly on complex tensors.
+# Complex-valued physics for methods that need complex tensors directly
 physics_complex = fourier_op.make_deepinv_phy()
 
 y_real = torch.view_as_real(y.contiguous())
@@ -123,12 +135,12 @@ early_stop = True
 # %%
 # Instantiate the algorithm class to solve the problem.
 wavelet_model = optim_builder(
-    iteration="FISTA",
-    prior=wavelet,
-    data_fidelity=data_fidelity,
-    early_stop=early_stop,
-    max_iter=max_iter,
-    params_algo=params_algo,
+   iteration="FISTA",
+   prior=wavelet,
+   data_fidelity=data_fidelity,
+   early_stop=early_stop,
+   max_iter=max_iter,
+   params_algo=params_algo,
 )
 x_wavelet = wavelet_model(y, physics_complex)
 
@@ -138,9 +150,9 @@ x_wavelet = wavelet_model(y, physics_complex)
 # ----------------------------------------------------
 #
 # As an additional model-based reconstruction baseline, we reconstruct the
-# image using a Total Variation (TV) prior. TV regularization promotes images
-# that are piecewise smooth while preserving sharp edges, which is useful in
-# MRI where anatomical structures often have smooth regions separated by
+# image using a Total Variation (TV) prior. TV regularization promotes
+# piecewise-smooth images while preserving sharp edges, which is useful in MRI
+# because anatomical structures often contain smooth regions separated by clear
 # boundaries.
 #
 # We solve the following variational problem:
@@ -152,89 +164,60 @@ x_wavelet = wavelet_model(y, physics_complex)
 # where A is the non-Cartesian MRI forward operator, y is the measured k-space
 # data, and x is the reconstructed image.
 #
-# TVPrior is designed for real-valued tensors. With the new
-# `viewed_as_real=True` option, complex MRI data are represented as
-# real-valued tensors with a final dimension of size 2:
-# (..., 2) = (real part, imaginary part).
-# For 3D MRI data, this representation produces 6D tensors of shape
-# (B, C, D, H, W, 2), while DeepInverse TVPrior expects 4D or 5D inputs.
-# We therefore pack the final real/imaginary dimension into the channel
-# dimension before applying TVPrior, and unpack it afterwards.
-# This avoids manually splitting complex tensors into separate real and
-# imaginary TV proximal operations.
-# The TV regularization weight was selected separately using Optuna.
+# ``TVPrior`` operates on real-valued image tensors. With
+# ``viewed_as_real=True``, complex MRI images are exposed through a real-valued
+# channel representation:
+#
+# .. math::
+#
+#    (B, C, D, H, W)_{\mathbb{C}}
+#    \longrightarrow
+#    (B, 2C, D, H, W)_{\mathbb{R}}
+#
+# This keeps the tensor compatible with DeepInverse priors expecting 4D or 5D
+# real-valued image tensors, while internally preserving the complex-valued MRI
+# representation.
 
-lamb_tv = 0.05789015101052105
-
-
-class RealViewTVPrior(TVPrior):
-    """Adapt TVPrior to tensors represented with torch.view_as_real.
-
-    This helper packs the final real/imaginary dimension into the channel
-    dimension before applying TV regularization, then restores the original
-    layout afterwards.
-    """
-
-    def _pack(self, x):
-        if x.shape[-1] != 2:
-            return x, None
-
-        original_shape = x.shape
-        b, c, *spatial, two = original_shape
-        x = x.movedim(-1, 2)          # (B, C, 2, D, H, W)
-        x = x.reshape(b, c * 2, *spatial)  # (B, 2*C, D, H, W)
-        return x, original_shape
-
-    def _unpack(self, x, original_shape):
-        if original_shape is None:
-            return x
-
-        b, c, *spatial, two = original_shape
-        x = x.reshape(b, c, 2, *spatial)
-        x = x.movedim(2, -1)          # back to (B, C, D, H, W, 2)
-        return x
-
-    def prox(self, x, *args, gamma=None, **kwargs):
-        x_packed, original_shape = self._pack(x)
-        out = super().prox(x_packed, *args, gamma=gamma, **kwargs)
-        return self._unpack(out, original_shape)
-
-    def forward(self, x, *args, **kwargs):
-        x_packed, _ = self._pack(x)
-        return super().forward(x_packed, *args, **kwargs)
-
-
-tv = RealViewTVPrior(n_it_max=20)
+lamb_tv = 50
+tv = TVPrior(n_it_max=20)
 
 
 # %%
-# We now solve the same TV-regularized MRI reconstruction problem using the
+# We now solve the TV-regularized MRI reconstruction problem using the
 # official DeepInverse PDCP optimizer. PDCP implements a Chambolle-Pock
 # primal-dual splitting method for objectives of the form F(Kx) + lambda G(x).
 #
-# In the PDCP formulation, the problem is written as F(Kx) + lambda G(x).
-# Here, K is the MRI forward operator A, so F acts directly on k-space data.
-# We use L2Distance to compare A(x) and y, and define a custom cost function
-# so that the monitored objective is evaluated as L2Distance(A(x), y) + lambda TV(x).
+# In this formulation, K is the MRI forward operator A. Therefore, F acts on
+# the predicted k-space data A(x), not directly on the image x.
+#
+# We use ``L2Distance`` as the data-fidelity term. Since ``L2Distance`` directly
+# compares its two inputs, the monitored objective must be evaluated as:
+#
+# .. math::
+#
+#    \frac{1}{2}\|A(x) - y\|_2^2 + \lambda \operatorname{TV}(x)
+#
+# We therefore define a custom cost function to compare ``A(x)`` with the
+# measured k-space data ``y``. Without this custom cost function, the default
+# objective would incorrectly compare the image tensor ``x`` with the k-space
+# measurements ``y``.
+#
 # The optimization problem remains:
 #
 # .. math::
 #
 #    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
 #
-# Since F acts directly on K(x) = A(x), both inputs of the data-fidelity
-# term are k-space tensors.
-
-data_fidelity_distance = L2Distance()
-
+# Both arguments of the data-fidelity term are k-space tensors..
 
 def pdcp_cost_fn(x, data_fidelity, prior, cur_params, y, physics):
     return data_fidelity(cur_params["K"](x), y) + cur_params["lambda"] * prior(x)
 
+
 pdcp_model = PDCP(
     K=physics.A,
     K_adjoint=physics.A_adjoint,
-    data_fidelity=data_fidelity_distance,
+    data_fidelity=L2Distance(),
     prior=tv,
     lambda_reg=lamb_tv,
     stepsize=stepsize,
@@ -244,8 +227,17 @@ pdcp_model = PDCP(
     cost_fn=pdcp_cost_fn,
 )
 
+
+
 x_pdcp_real = pdcp_model(y_real, physics)
-x_pdcp = torch.view_as_complex(x_pdcp_real.contiguous())
+
+
+# Convert from 5D real-packed to complex for visualization
+b, c2, *spatial = x_pdcp_real.shape
+c = c2 // 2
+x_pdcp = torch.view_as_complex(
+    x_pdcp_real.reshape(b, c, 2, *spatial).movedim(2, -1).contiguous()
+)
 
 
 # %%
@@ -289,7 +281,7 @@ print(f"TV-PDCP SSIM: {ssim(x_pdcp_mag, x_ref).item():.4f}")
 
 slice_idx = mri.shape[-1] // 2 - 5
 
-fig, axes = plt.subplots(1, 4, figsize=(16, 6))
+fig, axes = plt.subplots(1, 4, figsize=(20, 6))
 
 images = [
     (torch.abs(mri[..., slice_idx]).detach().cpu(), "Ground truth"),
