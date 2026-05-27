@@ -509,6 +509,7 @@ def complex_view_wrapper(method):
             return out
 
         return out
+
     return wrapper
 
 

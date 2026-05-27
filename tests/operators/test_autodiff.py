@@ -280,7 +280,6 @@ def compute_forward(operator, ksp_data_ref, img_data):
     return ksp_data, ksp_data_ndft
 
 
-
 def compute_forward_batched(operator, ksp_data_ref, img_data):
     """Compute ksps for batched mode."""
     smaps = batched_smaps_from_op(operator)
@@ -295,6 +294,7 @@ def compute_forward_batched(operator, ksp_data_ref, img_data):
         ),
     )
     return ksp_data, ksp_data_ndft
+
 
 @pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")

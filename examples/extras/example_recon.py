@@ -135,12 +135,12 @@ early_stop = True
 # %%
 # Instantiate the algorithm class to solve the problem.
 wavelet_model = optim_builder(
-   iteration="FISTA",
-   prior=wavelet,
-   data_fidelity=data_fidelity,
-   early_stop=early_stop,
-   max_iter=max_iter,
-   params_algo=params_algo,
+    iteration="FISTA",
+    prior=wavelet,
+    data_fidelity=data_fidelity,
+    early_stop=early_stop,
+    max_iter=max_iter,
+    params_algo=params_algo,
 )
 x_wavelet = wavelet_model(y, physics_complex)
 
@@ -210,6 +210,7 @@ tv = TVPrior(n_it_max=20)
 #
 # Both arguments of the data-fidelity term are k-space tensors..
 
+
 def pdcp_cost_fn(x, data_fidelity, prior, cur_params, y, physics):
     return data_fidelity(cur_params["K"](x), y) + cur_params["lambda"] * prior(x)
 
@@ -226,7 +227,6 @@ pdcp_model = PDCP(
     g_first=False,
     cost_fn=pdcp_cost_fn,
 )
-
 
 
 x_pdcp_real = pdcp_model(y_real, physics)
