@@ -465,6 +465,7 @@ class MRINufftAutoGrad(torch.nn.Module):
 
 def complex_view_wrapper(method):
     """Handle real-view tensors for complex MRI operators.
+
     Supports both single and multiple tensor arguments.
     Auto-detects tensor dimensionality and applies appropriate conversion.
 
