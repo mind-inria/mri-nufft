@@ -11,7 +11,6 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
-3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
 
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
@@ -27,10 +26,9 @@ regularizations.
 import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
-from deepinv.optim import PDCP
 from deepinv.optim.data_fidelity import L2
 from deepinv.optim.optimizers import optim_builder
-from deepinv.optim.prior import WaveletPrior, TVPrior
+from deepinv.optim.prior import WaveletPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
 from mrinufft import kspace_as_real
@@ -165,8 +163,8 @@ print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
 # Visualize the reconstructions
 # -----------------------------
 #
-# We compare the ground-truth image, the adjoint reconstruction, the wavelet
-# reconstruction, and the TV-FISTA reconstruction.
+# We compare the ground-truth image, the adjoint reconstruction, and the
+# wavelet reconstruction.
 
 slice_idx = mri.shape[-1] // 2 - 5
 
