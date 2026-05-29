@@ -129,41 +129,6 @@ wavelet_model = optim_builder(
 x_wavelet = wavelet_model(y_real, physics)
 
 # %%
-# Total variation reconstruction with DeepInverse PDCP
-# ----------------------------------------------------
-#
-# As an additional model-based reconstruction baseline, we reconstruct the
-# image using a Total Variation (TV) prior. TV regularization promotes
-# piecewise-smooth images while preserving sharp edges, which is useful in MRI
-# because anatomical structures often contain smooth regions separated by clear
-# boundaries.
-#
-# We solve the following variational problem:
-#
-# .. math::
-#
-#    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
-#
-# where A is the non-Cartesian MRI forward operator, y is the measured k-space
-# data, and x is the reconstructed image.
-
-# %%
-# TV reconstruction with FISTA
-tv_prior = TVPrior(n_it_max=20)
-params_tv = {"stepsize": stepsize, "lambda": 10.0,"a": 3}
-tv_model = optim_builder(
-    iteration="FISTA",
-    prior=tv_prior,
-    data_fidelity=L2(),
-    early_stop=False,
-    max_iter=50,
-    params_algo=params_tv,
-)
-with torch.no_grad():
-    x_tv = tv_model(y_real, physics)
-print("TV-FISTA works with viewed_as_real=True !")
-
-# %%
 # Quantitative evaluation
 # -----------------------
 #
@@ -189,15 +154,12 @@ def to_magnitude(x):
 
 x_adjoint_mag = to_magnitude(x_dagger)
 x_wavelet_mag = to_magnitude(x_wavelet)
-x_tv_mag = to_magnitude(x_tv)
 
 print(f"Adjoint PSNR: {psnr(x_adjoint_mag, x_ref).item():.2f}")
 print(f"Wavelet PSNR: {psnr(x_wavelet_mag, x_ref).item():.2f}")
-print(f"TV-FISTA PSNR: {psnr(x_tv_mag, x_ref).item():.2f}")
 
 print(f"Adjoint SSIM: {ssim(x_adjoint_mag, x_ref).item():.4f}")
 print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
-print(f"TV-FISTA SSIM: {ssim(x_tv_mag, x_ref).item():.4f}")
 
 # %%
 # Visualize the reconstructions
@@ -208,13 +170,12 @@ print(f"TV-FISTA SSIM: {ssim(x_tv_mag, x_ref).item():.4f}")
 
 slice_idx = mri.shape[-1] // 2 - 5
 
-fig, axes = plt.subplots(1, 4, figsize=(20, 6))
+fig, axes = plt.subplots(1, 3, figsize=(20, 6))
 
 images = [
     (torch.abs(mri[..., slice_idx]).detach().cpu(), "Ground truth"),
     (torch.abs(x_dagger[0, 0, ..., slice_idx]).detach().cpu(), "Adjoint"),
     (torch.abs(x_wavelet[0, 0, ..., slice_idx]).detach().cpu(), "Wavelet"),
-    (torch.abs(x_tv[0, 0, ..., slice_idx]).detach().cpu(), "TV-FISTA"),
 ]
 
 for ax, (image, title) in zip(axes, images):
@@ -223,5 +184,4 @@ for ax, (image, title) in zip(axes, images):
     ax.axis("off")
 
 plt.tight_layout()
-plt.savefig("reconstruction_results.png", dpi=150, bbox_inches="tight") 
 plt.show()
