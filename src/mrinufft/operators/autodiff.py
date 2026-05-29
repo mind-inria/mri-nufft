@@ -551,7 +551,7 @@ def image_as_cpx(x):
 
 
 def complex_view_wrapper(in_space, out_space):
-    """Decorator factory for viewed_as_real forward/adjoint methods.
+    """Create a decorator for viewed_as_real forward/adjoint methods.
 
     Wraps a method so that if ``self.viewed_as_real`` is True, the input
     is converted from real to complex before the call, and the output is
