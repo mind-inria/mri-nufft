@@ -59,7 +59,6 @@ y = fourier_op.op(mri)  # Simulate k-space data
 noise_level = y.abs().max().item() * 0.0002
 y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
-
 # %%
 # real-valued physics
 physics = fourier_op.make_deepinv_phy(viewed_as_real=True)
