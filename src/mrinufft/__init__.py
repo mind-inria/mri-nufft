@@ -71,12 +71,16 @@ from .trajectories import (
 )
 from mrinufft.trajectories.utils import Acquisition, Hardware
 from .density import voronoi, cell_count, pipe, get_density
-from .operators.autodiff import (
-    kspace_as_real,
-    kspace_as_cpx,
-    image_as_real,
-    image_as_cpx,
-)
+
+try:
+    from .operators.autodiff import (
+        kspace_as_real,
+        kspace_as_cpx,
+        image_as_real,
+        image_as_cpx,
+    )
+except ImportError:
+    pass
 
 __all__ = [
     # nufft
