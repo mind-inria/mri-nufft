@@ -146,8 +146,11 @@ ssim = SSIM()
 x_ref = torch.abs(mri).unsqueeze(0).unsqueeze(0)
 
 from mrinufft.operators.autodiff import image_as_cpx
+
+
 def to_magnitude(x):
     return torch.abs(image_as_cpx(x))
+
 
 x_adjoint_mag = to_magnitude(x_dagger)
 x_wavelet_mag = to_magnitude(x_wavelet)

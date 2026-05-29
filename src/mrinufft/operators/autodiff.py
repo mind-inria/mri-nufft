@@ -463,8 +463,6 @@ class MRINufftAutoGrad(torch.nn.Module):
         return True
 
 
-
-
 def kspace_as_real(y):
     """View k-space data as real-valued tensor.
 
@@ -523,8 +521,8 @@ def image_as_real(x):
     """
     b, c, *spatial = x.shape
     # view_as_real gives (B, C, *XYZ, 2); move last dim to channel position
-    x = torch.view_as_real(x)          # (B, C, *XYZ, 2)
-    x = x.movedim(-1, 2)               # (B, C, 2, *XYZ)
+    x = torch.view_as_real(x)  # (B, C, *XYZ, 2)
+    x = x.movedim(-1, 2)  # (B, C, 2, *XYZ)
     x = x.reshape(b, c * 2, *spatial)  # (B, 2C, *XYZ)
     return x
 
@@ -547,8 +545,8 @@ def image_as_cpx(x):
     """
     b, c2, *spatial = x.shape
     c = c2 // 2
-    x = x.reshape(b, c, 2, *spatial)   # (B, C, 2, *XYZ)
-    x = x.movedim(2, -1)               # (B, C, *XYZ, 2)
+    x = x.reshape(b, c, 2, *spatial)  # (B, C, 2, *XYZ)
+    x = x.movedim(2, -1)  # (B, C, *XYZ, 2)
     return torch.view_as_complex(x.contiguous())
 
 
@@ -575,8 +573,11 @@ def complex_view_wrapper(in_space, out_space):
             if not self.viewed_as_real:
                 return method(self, x, *args, **kwargs)
             return out_view(method(self, in_view(x), *args, **kwargs))
+
         return wrapper
+
     return decorator
+
 
 class DeepInvPhyNufft(LinearPhysics):
     """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
