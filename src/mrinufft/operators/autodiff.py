@@ -463,56 +463,120 @@ class MRINufftAutoGrad(torch.nn.Module):
         return True
 
 
-def complex_view_wrapper(method):
-    """Handle real-view tensors for complex MRI operators.
 
-    Supports both single and multiple tensor arguments.
-    Auto-detects tensor dimensionality and applies appropriate conversion.
 
-    - Image-space (input to forward op): (B, 2C, D, H, W) - 5D real-packed
-    - K-space (output of forward op): (B, C, N, 2) - 4D real-packed
+def kspace_as_real(y):
+    """View k-space data as real-valued tensor.
+
+    Converts a complex k-space tensor of shape (B, C, K) to a real-valued
+    tensor of shape (B, C, K, 2) where the last dimension holds the real
+    and imaginary parts.
+
+    Parameters
+    ----------
+    y : torch.Tensor
+        Complex k-space tensor of shape (B, C, K).
+
+    Returns
+    -------
+    torch.Tensor
+        Real-valued tensor of shape (B, C, K, 2).
     """
+    return torch.view_as_real(y)
 
-    def wrapper(self, x: torch.Tensor, **kwargs):
-        if not self.viewed_as_real:
-            return method(self, x, **kwargs)
-        is_image_space = x.ndim == 5
-        is_kspace = x.ndim == 4
 
-        # Handle image-space input conversion (B, 2C, D, H, W) → complex (B, C, D, H, W)
-        if is_image_space:
-            b, c2, *spatial = x.shape
-            c = c2 // 2
-            x = x.reshape(b, c, 2, *spatial)
-            x = x.movedim(2, -1)
-            # Convert to complex: (B, C, D, H, W, 2)
-            x = torch.view_as_complex(x.contiguous())
-        # Handle k-space input conversion (B, C, N, 2) → complex (B, C, N)
-        elif is_kspace:
-            # Directly convert real-packed k-space to complex tensor
-            x = torch.view_as_complex(x.contiguous())
-        # Execute the wrapped method with complex tensor input
-        out = method(self, x, **kwargs)
+def kspace_as_cpx(y):
+    """View real-packed k-space tensor as complex.
 
-        # Convert output back to real-packed format (image-space input case)
-        # When input was image, output is k-space: (B, C, N) → (B, C, N, 2)
-        if is_image_space:
-            # K-space output: convert complex to real-packed format
-            return torch.view_as_real(out)
+    Converts a real-valued tensor of shape (B, C, K, 2) back to a complex
+    tensor of shape (B, C, K).
 
-        # Convert output back to real-packed format (k-space input case)
-        # When input was k-space, output is image: (B, C, D, H, W) → (B, 2C, D, H, W)
-        elif is_kspace:
-            b, c, *spatial = out.shape
-            out = torch.view_as_real(out)
-            out = out.movedim(-1, 2)
-            out = out.reshape(b, c * 2, *spatial)
-            return out
+    Parameters
+    ----------
+    y : torch.Tensor
+        Real-valued tensor of shape (B, C, K, 2).
 
-        return out
+    Returns
+    -------
+    torch.Tensor
+        Complex tensor of shape (B, C, K).
+    """
+    return torch.view_as_complex(y.contiguous())
 
-    return wrapper
 
+def image_as_real(x):
+    """View image tensor as real channel-packed tensor.
+
+    Converts a complex image tensor of shape (B, C, *XYZ) to a real-valued
+    tensor of shape (B, 2C, *XYZ) by moving the real/imaginary parts into
+    the channel dimension.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Complex image tensor of shape (B, C, *XYZ).
+
+    Returns
+    -------
+    torch.Tensor
+        Real-valued channel-packed tensor of shape (B, 2C, *XYZ).
+    """
+    b, c, *spatial = x.shape
+    # view_as_real gives (B, C, *XYZ, 2); move last dim to channel position
+    x = torch.view_as_real(x)          # (B, C, *XYZ, 2)
+    x = x.movedim(-1, 2)               # (B, C, 2, *XYZ)
+    x = x.reshape(b, c * 2, *spatial)  # (B, 2C, *XYZ)
+    return x
+
+
+def image_as_cpx(x):
+    """View real channel-packed image tensor as complex.
+
+    Converts a real-valued tensor of shape (B, 2C, *XYZ) back to a complex
+    tensor of shape (B, C, *XYZ).
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Real-valued channel-packed tensor of shape (B, 2C, *XYZ).
+
+    Returns
+    -------
+    torch.Tensor
+        Complex tensor of shape (B, C, *XYZ).
+    """
+    b, c2, *spatial = x.shape
+    c = c2 // 2
+    x = x.reshape(b, c, 2, *spatial)   # (B, C, 2, *XYZ)
+    x = x.movedim(2, -1)               # (B, C, *XYZ, 2)
+    return torch.view_as_complex(x.contiguous())
+
+
+def complex_view_wrapper(in_space, out_space):
+    """Decorator factory for viewed_as_real forward/adjoint methods.
+
+    Wraps a method so that if ``self.viewed_as_real`` is True, the input
+    is converted from real to complex before the call, and the output is
+    converted back from complex to real afterward.
+
+    Parameters
+    ----------
+    in_space : {"img", "ksp"}
+        Whether the method input is image-space or k-space.
+    out_space : {"img", "ksp"}
+        Whether the method output is image-space or k-space.
+    """
+    in_view = kspace_as_cpx if in_space == "ksp" else image_as_cpx
+    out_view = kspace_as_real if out_space == "ksp" else image_as_real
+
+    def decorator(method):
+        @wraps(method)
+        def wrapper(self, x, *args, **kwargs):
+            if not self.viewed_as_real:
+                return method(self, x, *args, **kwargs)
+            return out_view(method(self, in_view(x), *args, **kwargs))
+        return wrapper
+    return decorator
 
 class DeepInvPhyNufft(LinearPhysics):
     """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
@@ -526,17 +590,17 @@ class DeepInvPhyNufft(LinearPhysics):
         self.__dict__["_operator"] = autograd_nufft
         self.viewed_as_real = viewed_as_real
 
-    @complex_view_wrapper
+    @complex_view_wrapper(in_space="img", out_space="ksp")
     def A(self, x: Tensor, **kwargs) -> Tensor:
         """Forward operation."""
         return self._operator.op(x, **kwargs)
 
-    @complex_view_wrapper
+    @complex_view_wrapper(in_space="ksp", out_space="img")
     def A_adjoint(self, y: Tensor, **kwargs) -> Tensor:
         """Adjoint operation."""
         return self._operator.adj_op(y, **kwargs)
 
-    @complex_view_wrapper
+    @complex_view_wrapper(in_space="ksp", out_space="img")
     def A_dagger(self, y: Tensor, **kwargs) -> Tensor:
         """Pseudo-inverse operation."""
         return self._operator.nufft_op.pinv_solver(y, **kwargs)

@@ -71,6 +71,12 @@ from .trajectories import (
 )
 from mrinufft.trajectories.utils import Acquisition, Hardware
 from .density import voronoi, cell_count, pipe, get_density
+from .operators.autodiff import (
+    kspace_as_real,
+    kspace_as_cpx,
+    image_as_real,
+    image_as_cpx,
+)
 
 __all__ = [
     # nufft
@@ -139,6 +145,11 @@ __all__ = [
     # Hardware and Acquisition Config
     "Acquisition",
     "Hardware",
+    # autodiff converters
+    "kspace_as_real",
+    "kspace_as_cpx",
+    "image_as_real",
+    "image_as_cpx",
 ]
 
 from importlib.metadata import version, PackageNotFoundError
