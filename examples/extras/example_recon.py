@@ -11,7 +11,8 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
-
+3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
+.
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
 problems and compare different regularization priors, supporting both
@@ -28,7 +29,7 @@ import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
 from deepinv.optim.data_fidelity import L2
 from deepinv.optim.optimizers import optim_builder
-from deepinv.optim.prior import WaveletPrior
+from deepinv.optim.prior import WaveletPrior, TVPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
 from mrinufft import kspace_as_real
@@ -124,6 +125,43 @@ wavelet_model = optim_builder(
     params_algo=params_algo,
 )
 x_wavelet = wavelet_model(y_real, physics)
+
+# %%
+# Total variation reconstruction with PDCP
+# ----------------------------------------------------
+#
+# .. note::
+#
+#    TV + PDCP is currently blocked by a compatibility issue between
+#    DeepInverse PDCP and our viewed_as_real wrapper. The code below
+#    shows the intended usage but will raise an error until the issue
+#    is resolved.
+
+try:
+    from deepinv.optim import PDCP
+    from deepinv.optim.data_fidelity import L2Distance
+
+    lamb_tv = 50
+    tv = TVPrior(n_it_max=20)
+    stepsize_pdcp = 1.0 / float(L)
+
+    pdcp_model = PDCP(
+        K=physics.A,
+        K_adjoint=physics.A_adjoint,
+        data_fidelity=L2Distance(),
+        prior=tv,
+        lambda_reg=lamb_tv,
+        stepsize=stepsize_pdcp,
+        stepsize_dual=1.0,
+        max_iter=20,
+        g_first=False,
+        early_stop=False,
+        verbose=False,
+    )
+    x_pdcp_real = pdcp_model(y_real, physics)
+
+except Exception as e:
+    print(f"TV-PDCP not yet working: {e}")
 
 # %%
 # Quantitative evaluation
