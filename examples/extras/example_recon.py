@@ -130,38 +130,43 @@ x_wavelet = wavelet_model(y_real, physics)
 # Total variation reconstruction with PDCP
 # ----------------------------------------------------
 #
-# .. note::
+# We reconstruct the image using a Total Variation (TV) prior solved with
+# the Chambolle-Pock primal-dual algorithm (PDCP). TV promotes piecewise-
+# smooth images while preserving sharp edges.
 #
-#    TV + PDCP is currently blocked by a compatibility issue between
-#    DeepInverse PDCP and our viewed_as_real wrapper. The code below
-#    shows the intended usage but will raise an error until the issue
-#    is resolved.
+# We solve:
+#
+# .. math::
+#
+#    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
 
-try:
-    from deepinv.optim import PDCP
-    from deepinv.optim.data_fidelity import L2Distance
+from deepinv.optim import PDCP
+from deepinv.optim.data_fidelity import L2Distance
 
-    lamb_tv = 50
-    tv = TVPrior(n_it_max=20)
-    stepsize_pdcp = 1.0 / float(L)
 
-    pdcp_model = PDCP(
-        K=physics.A,
-        K_adjoint=physics.A_adjoint,
-        data_fidelity=L2Distance(),
-        prior=tv,
-        lambda_reg=lamb_tv,
-        stepsize=stepsize_pdcp,
-        stepsize_dual=1.0,
-        max_iter=20,
-        g_first=False,
-        early_stop=False,
-        verbose=False,
-    )
-    x_pdcp_real = pdcp_model(y_real, physics)
+def pdcp_cost_fn(x, data_fidelity, prior, cur_params, y, physics):
+    return data_fidelity(cur_params["K"](x), y) + cur_params["lambda"] * prior(x)
 
-except Exception as e:
-    print(f"TV-PDCP not yet working: {e}")
+
+lamb_tv = 50
+tv = TVPrior(n_it_max=20)
+stepsize_pdcp = 1.0 / float(L)
+
+pdcp_model = PDCP(
+    K=physics.A,
+    K_adjoint=physics.A_adjoint,
+    data_fidelity=L2Distance(),
+    prior=tv,
+    lambda_reg=lamb_tv,
+    stepsize=stepsize_pdcp,
+    stepsize_dual=1.0,
+    max_iter=20,
+    g_first=False,
+    cost_fn=pdcp_cost_fn,
+)
+
+x_pdcp_real = pdcp_model(y_real, physics)
+
 
 # %%
 # Quantitative evaluation
@@ -192,12 +197,15 @@ def to_magnitude(x):
 
 x_adjoint_mag = to_magnitude(x_dagger)
 x_wavelet_mag = to_magnitude(x_wavelet)
+x_pdcp_mag = to_magnitude(x_pdcp_real)
 
 print(f"Adjoint PSNR: {psnr(x_adjoint_mag, x_ref).item():.2f}")
 print(f"Wavelet PSNR: {psnr(x_wavelet_mag, x_ref).item():.2f}")
+print(f"TV-PDCP PSNR: {psnr(x_pdcp_mag, x_ref).item():.2f}")
 
 print(f"Adjoint SSIM: {ssim(x_adjoint_mag, x_ref).item():.4f}")
 print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
+print(f"TV-PDCP SSIM: {ssim(x_pdcp_mag, x_ref).item():.4f}")
 
 # %%
 # Visualize the reconstructions
@@ -208,12 +216,13 @@ print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
 
 slice_idx = mri.shape[-1] // 2 - 5
 
-fig, axes = plt.subplots(1, 3, figsize=(20, 6))
+fig, axes = plt.subplots(1, 4, figsize=(20, 6))
 
 images = [
     (torch.abs(mri[..., slice_idx]).detach().cpu(), "Ground truth"),
     (torch.abs(x_dagger[0, 0, ..., slice_idx]).detach().cpu(), "Adjoint"),
     (torch.abs(x_wavelet[0, 0, ..., slice_idx]).detach().cpu(), "Wavelet"),
+    (torch.abs(x_pdcp_mag[0, 0, ..., slice_idx]).detach().cpu(), "TV-PDCP"),
 ]
 
 for ax, (image, title) in zip(axes, images):
