@@ -6,6 +6,7 @@ from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 import torch
 import numpy as np
+from functools import wraps
 from .._array_compat import NP2TORCH, _array_to_torch
 from torch.types import Tensor
 from deepinv.physics.forward import LinearPhysics
@@ -463,25 +464,51 @@ class MRINufftAutoGrad(torch.nn.Module):
         return True
 
 
+def complex_view_wrapper(method):
+    """
+    Decorator to automatically handle real-to-complex viewing
+    based on the 'viewed_as_real' attribute of the instance.
+    """
+
+    @wraps(method)
+    def wrapper(self, x: torch.Tensor, **kwargs):
+        is_real = getattr(self, "viewed_as_real", False)
+
+        if is_real:
+            x = torch.view_as_complex(x)
+
+        out = method(self, x, **kwargs)
+
+        if is_real:
+            return torch.view_as_real(out)[0]
+        return out
+
+    return wrapper
+
+
 class DeepInvPhyNufft(LinearPhysics):
     """Expose an MRINufftAutoGrad as as DeepInv Physics Operator."""
 
-    def __init__(self, autograd_nufft):
+    def __init__(self, autograd_nufft, viewed_as_real=False):
         if not isinstance(autograd_nufft, MRINufftAutoGrad):
             raise ValueError("autograd_nufft should be an instance of MRINufftAutoGrad")
         super().__init__()
         # since autograd_nufft is a nn.Module, we need to set it this way
         # to avoid registering it as a sub-module / parameter.
         self.__dict__["_operator"] = autograd_nufft
+        self.viewed_as_real = viewed_as_real
 
+    @complex_view_wrapper
     def A(self, x: Tensor, **kwargs) -> Tensor:
         """Forward operation."""
         return self._operator.op(x, **kwargs)
 
+    @complex_view_wrapper
     def A_adjoint(self, y: Tensor, **kwargs) -> Tensor:
         """Adjoint operation."""
         return self._operator.adj_op(y, **kwargs)
 
+    @complex_view_wrapper
     def A_dagger(self, y: Tensor, **kwargs) -> Tensor:
         """Adjoint operation."""
         return self._operator.nufft_op.pinv_solver(y, **kwargs)

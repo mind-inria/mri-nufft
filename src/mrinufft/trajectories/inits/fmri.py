@@ -8,10 +8,11 @@ from numpy.typing import NDArray
 from mrinufft.trajectories.inits.radial import initialize_2D_radial
 from mrinufft.trajectories.inits.spiral import initialize_2D_spiral
 from mrinufft.trajectories.maths import R2D
-from mrinufft.trajectories.tools import epify, stack
+from mrinufft.trajectories.tools import epify, stack, add_slew_ramp
 from mrinufft.trajectories.utils import initialize_tilt
 
 
+@add_slew_ramp
 def initialize_3D_turbine(
     Nc: int,
     Ns_readouts: int,
@@ -120,6 +121,7 @@ def initialize_3D_turbine(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_repi(
     Nc: int,
     Ns_readouts: int,
@@ -198,7 +200,12 @@ def initialize_3D_repi(
 
     # Initialize trajectory as a stack of single shots
     single_shot = initialize_2D_spiral(
-        1, Ns_readouts, in_out=in_out, tilt=0, nb_revolutions=nb_spiral_revolutions
+        1,
+        Ns_readouts,
+        in_out=in_out,
+        tilt=0,
+        nb_revolutions=nb_spiral_revolutions,
+        slew_ramp_disable=True,
     )
     shot_tilt = 2 * np.pi * nb_blade_revolutions / Nc
     trajectory = stack(single_shot, Nc, z_tilt=shot_tilt)

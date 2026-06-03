@@ -20,6 +20,7 @@ from mrinufft.trajectories.tools.transforms import (
     stack,
 )
 from mrinufft.trajectories.tools.winding import prewind, rewind
+from mrinufft.trajectories.tools.slew_ramp import add_slew_ramp
 
 __all__ = [
     # transforms
@@ -45,4 +46,6 @@ __all__ = [
     # caipi
     "get_grappa_caipi_positions",
     "get_packing_spacing_positions",
+    # Slew ramps for UTE
+    "add_slew_ramp",
 ]

@@ -105,7 +105,9 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [10, 25, 40, 100]
-function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, x, in_out=in_out)
+function = lambda x: mn.initialize_3D_phyllotaxis_radial(
+    Nc, x, in_out=in_out, slew_ramp_disable=True
+)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 

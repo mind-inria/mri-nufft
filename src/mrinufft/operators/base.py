@@ -387,11 +387,16 @@ class FourierOperatorBase(ABC):
         )
         linop._nufft = self  # type: ignore
 
-    def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
+    def make_deepinv_phy(
+        self, viewed_as_real=False, *args, **kwargs
+    ) -> DeepInvPhyNufft:
         """Make a new DeepInv Physics with NUFFT operator.
 
         Parameters
         ----------
+        viewed_as_real: bool, optional
+            If the data is always viewed as real, default is false
+
         wrt_data : bool, optional
             If the gradient with respect to the data is computed, default is true
 
@@ -422,7 +427,7 @@ class FourierOperatorBase(ABC):
         from mrinufft.operators.autodiff import DeepInvPhyNufft
 
         autograd_nufft = self.make_autograd(*args, **kwargs)
-        return DeepInvPhyNufft(autograd_nufft)
+        return DeepInvPhyNufft(autograd_nufft, viewed_as_real)
 
     def make_autograd(
         self,

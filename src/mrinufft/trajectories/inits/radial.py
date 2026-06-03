@@ -6,8 +6,10 @@ from numpy.typing import NDArray
 
 from mrinufft.trajectories.maths import EIGENVECTOR_2D_FIBONACCI, R2D
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_2D_radial(
     Nc: int, Ns: int, tilt: str | float = "uniform", in_out: bool = False
 ) -> NDArray:
@@ -42,6 +44,7 @@ def initialize_2D_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_phyllotaxis_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -86,13 +89,16 @@ def initialize_3D_phyllotaxis_radial(
     """
     from mrinufft.trajectories.inits.cones import initialize_3D_cones
 
-    trajectory = initialize_3D_cones(Nc, Ns, tilt="golden", width=0, in_out=in_out)
+    trajectory = initialize_3D_cones(
+        Nc, Ns, tilt="golden", width=0, in_out=in_out, slew_ramp_disable=True
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_golden_means_radial(
     Nc: int, Ns: int, in_out: bool = False
 ) -> NDArray:
@@ -147,6 +153,7 @@ def initialize_3D_golden_means_radial(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_wong_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -207,6 +214,7 @@ def initialize_3D_wong_radial(
     return trajectory
 
 
+@add_slew_ramp
 def initialize_3D_park_radial(
     Nc: int, Ns: int, nb_interleaves: int = 1, in_out: bool = False
 ) -> NDArray:
@@ -248,7 +256,9 @@ def initialize_3D_park_radial(
        in 3D ultrashort-echo-time lung imaging."
        NMR in Biomedicine 29, no. 5 (2016): 576-587.
     """
-    trajectory = initialize_3D_wong_radial(Nc, Ns, nb_interleaves=1, in_out=in_out)
+    trajectory = initialize_3D_wong_radial(
+        Nc, Ns, nb_interleaves=1, in_out=in_out, slew_ramp_disable=True
+    )
     trajectory = trajectory.reshape((-1, nb_interleaves, Ns, 3))
     trajectory = np.swapaxes(trajectory, 0, 1)
     trajectory = trajectory.reshape((Nc, Ns, 3))

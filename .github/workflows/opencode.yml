@@ -1,0 +1,42 @@
+name: OpenCode Auto-Fix
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  opencode-agent:
+    if: github.event.label.name == 'fix-it'
+    runs-on: self-hosted # Crucial: tells GitHub to use your local machine
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Allow the runner to push changes back
+          persist-credentials: true 
+
+      - name: Run OpenCode Fix
+        timeout-minutes: 60  # Explicitly allow up to 1 hour
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        run: |
+          opencode run "TASK: Fix the issue: ${{ github.event.issue.title }}.
+          CONTEXT:  ${{ github.event.issue.body }} 
+          STRICT WORKFLOW:
+          0. Understand what needs to be done
+          1. Create branch: feat/fix-${{ github.event.issue.number }}
+          2. Apply code changes.
+          3. Stage changes using 'git add'.
+          4. Commit changes using 'git commit -m \"fix: ${{ github.event.issue.title }}\"'.
+          5. Push to origin.
+          6. Run 'gh pr create --title \"fix: ${{ github.event.issue.title }}\" --body \"Closes #${{ github.event.issue.number }}\"'.
+          
+          VERIFICATION: You are NOT finished until you provide the URL of the created Pull Request. 
+          If any command fails, try to fix it and retry." --agent build
+

@@ -4,8 +4,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft.trajectories.tools import conify, duplicate_along_axes
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_3D_floret(
     Nc: int,
     Ns: int,
@@ -70,6 +72,7 @@ def initialize_3D_floret(
         spiral=spiral,
         in_out=in_out,
         nb_revolutions=nb_revolutions,
+        slew_ramp_disable=True,
     )
 
     # Initialize first cone

@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 
 from mrinufft.trajectories.maths import R2D, compute_coprime_factors
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
 def initialize_2D_lissajous(Nc: int, Ns: int, density: float = 1) -> NDArray:
@@ -37,6 +38,7 @@ def initialize_2D_lissajous(Nc: int, Ns: int, density: float = 1) -> NDArray:
     return trajectory
 
 
+@add_slew_ramp
 def initialize_2D_polar_lissajous(
     Nc: int, Ns: int, in_out: bool = False, nb_segments: int = 1, coprime_index: int = 0
 ) -> NDArray:

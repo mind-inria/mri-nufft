@@ -7,8 +7,10 @@ from scipy.special import ellipj, ellipk
 from mrinufft.trajectories.maths import Ra, Rz
 from mrinufft.trajectories.tools import precess
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools import add_slew_ramp
 
 
+@add_slew_ramp
 def initialize_3D_seiffert_spiral(
     Nc: int,
     Ns: int,
@@ -109,6 +111,7 @@ def initialize_3D_seiffert_spiral(
     return KMAX * trajectory
 
 
+@add_slew_ramp
 def initialize_3D_seiffert_shells(
     Nc: int,
     Ns: int,
