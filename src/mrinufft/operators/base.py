@@ -402,6 +402,11 @@ class FourierOperatorBase(ABC):
             If provided, specifies batch size for varying data/smaps pairs.
             Default is None, which means no batching
 
+        viewed_as_real : bool, optional
+            If True, the DeepInverse physics wrapper accepts and returns
+            real-view tensors with a final dimension of size 2 representing
+            the real and imaginary parts. Default is False.
+
         Returns
         -------
         torch.nn.module
@@ -421,8 +426,10 @@ class FourierOperatorBase(ABC):
 
         from mrinufft.operators.autodiff import DeepInvPhyNufft
 
+        viewed_as_real = kwargs.pop("viewed_as_real", False)
+
         autograd_nufft = self.make_autograd(*args, **kwargs)
-        return DeepInvPhyNufft(autograd_nufft)
+        return DeepInvPhyNufft(autograd_nufft, viewed_as_real=viewed_as_real)
 
     def make_autograd(
         self,
