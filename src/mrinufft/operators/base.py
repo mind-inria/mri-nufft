@@ -23,6 +23,7 @@ from mrinufft._array_compat import (
     get_array_module,
     AUTOGRAD_AVAILABLE,
     DEEPINV_AVAILABLE,
+    MRPRO_AVAILABLE,
     CUPY_AVAILABLE,
     is_cuda_array,
     is_host_array,
@@ -32,12 +33,17 @@ from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 
 if TYPE_CHECKING:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+    from mrinufft.operators.outerfaces import (
+        DeepInvPhyNufft,
+        MRProNufftInterface,
+    )
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
     from mrinufft.operators.off_resonance import MRIFourierCorrected
 else:
     MRIFourierCorrected = Any  # type: ignore
     DeepInvPhyNufft = Any  # type: ignore
+    MRProNufftInterface = Any  # type: ignore
     MRINufftAutoGrad = Any  # type: ignore
     MRIStackedNUFFT = Any  # type: ignore
     MRIStackedNUFFTGPU = Any  # type: ignore
@@ -361,31 +367,9 @@ class FourierOperatorBase(ABC):
         - https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.LinearOperator.html
         - https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html
         """
-        if cupy and not CUPY_AVAILABLE:
-            raise ValueError("cupy is not available")
-        elif cupy:
-            from cupyx.scipy.sparse.linalg import LinearOperator
-        else:
-            from scipy.sparse.linalg import LinearOperator
+        from .outerfaces import ScipyLinearOperatorInterface
 
-        linop = LinearOperator(
-            shape=(
-                self.n_batchs * self.n_coils * self.n_samples,
-                self.n_batchs
-                * (1 if self.uses_sense else self.n_coils)
-                * np.prod(self.shape),
-            ),
-            matvec=lambda x: self.op(  # type: ignore
-                x.reshape(
-                    self.n_batchs, (1 if self.uses_sense else self.n_coils), *self.shape
-                )
-            ).ravel(),
-            rmatvec=lambda x: self.adj_op(  # type: ignore
-                x.reshape(self.n_batchs, self.n_coils, self.n_samples)
-            ).ravel(),
-            dtype=self.cpx_dtype,
-        )
-        linop._nufft = self  # type: ignore
+        return ScipyLinearOperatorInterface(self, cupy=cupy)
 
     def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
         """Make a new DeepInv Physics with NUFFT operator.
@@ -398,20 +382,18 @@ class FourierOperatorBase(ABC):
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
 
-        paired_batch : int, optional
-            If provided, specifies batch size for varying data/smaps pairs.
-            Default is None, which means no batching
+        paired_batch : bool, optional
+            If True, use paired batched data/smaps. Default is False.
 
         Returns
         -------
-        torch.nn.module
-            A NUFFT operator with autodiff capabilities.
+        DeepInvPhyNufft
+            A DeepInv Physics object wrapping the NUFFT operator with autodiff.
 
         Raises
         ------
         ValueError
-            If autograd is not available.
-
+            If DeepInv or autograd is not available.
 
         """
         if not (DEEPINV_AVAILABLE & AUTOGRAD_AVAILABLE):
@@ -419,10 +401,45 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
-        from mrinufft.operators.autodiff import DeepInvPhyNufft
+        from mrinufft.operators.outerfaces import DeepInvPhyNufft
 
         autograd_nufft = self.make_autograd(*args, **kwargs)
         return DeepInvPhyNufft(autograd_nufft)
+
+    def make_mrpro(self, *args, **kwargs) -> MRProNufftInterface:
+        """Make a new MRPro LinearOperator with NUFFT operator.
+
+        Parameters
+        ----------
+        wrt_data : bool, optional
+            If the gradient with respect to the data is computed, default is true
+
+        wrt_traj : bool, optional
+            If the gradient with respect to the trajectory is computed, default is false
+
+        paired_batch : bool, optional
+            If True, use paired batched data/smaps. Default is False.
+
+        Returns
+        -------
+        mrpro.algorithms.LinearOperator
+            A NUFFT operator compatible with MRPro.
+
+        Raises
+        ------
+        ValueError
+            If MRPro or autograd is not available.
+        """
+        if not (MRPRO_AVAILABLE & AUTOGRAD_AVAILABLE):
+            raise ValueError(
+                "MRPro not available, ensure mrpro and torch are installed."
+            )
+        if not self.autograd_available:
+            raise ValueError("Backend does not support auto-differentiation.")
+
+        from mrinufft.operators.outerfaces import MRProNufftInterface
+
+        return MRProNufftInterface(self, *args, **kwargs)
 
     def make_autograd(
         self,
@@ -439,9 +456,8 @@ class FourierOperatorBase(ABC):
             If the gradient with respect to the data is computed, default is true
         wrt_traj : bool, optional
             If the gradient with respect to the trajectory is computed, default is false
-        paired_batch : int, optional
-            If provided, specifies batch size for varying data/smaps pairs.
-            Default is None, which means no batching
+        paired_batch : bool, optional
+            If True, use paired batched data/smaps. Default is False.
 
         Returns
         -------
