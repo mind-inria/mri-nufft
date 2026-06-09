@@ -838,7 +838,7 @@ def cg(
         operator.img_full_shape
     )
     if damp:
-        if x0:
+        if x0 is not None:
             grad += damp * (image - x0)
         else:
             grad += damp * image

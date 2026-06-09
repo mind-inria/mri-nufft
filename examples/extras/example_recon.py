@@ -11,7 +11,7 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
-3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
+3. Total Variation reconstruction solved with the DeepInverse PDCP optimiz
 
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
@@ -61,7 +61,6 @@ y = fourier_op.op(mri)  # Simulate k-space data
 noise_level = y.abs().max().item() * 0.0002
 y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
-
 # %%
 # Setup the physics and priors
 # ----------------------------
@@ -87,6 +86,7 @@ y_real = kspace_as_real(y).float()
 
 # ``is_complex=False`` because the wavelet prior now receives the real-valued
 # channel-packed image representation from the physics interface.
+
 wavelet = WaveletPrior(
     wv="sym8",
     wvdim=3,
