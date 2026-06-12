@@ -11,14 +11,12 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
-3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
-.
+3. Total Variation reconstruction solved with the DeepInverse PDCP optimiz
+
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
 problems and compare different regularization priors, supporting both
-complex-valued and real-valued (applied on the real and imaginary part)
-regularizations.
-
+complex-valued and real-valued regularizations applied to real and imaginary components.
 """
 
 # %%
@@ -27,12 +25,15 @@ regularizations.
 import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
-from deepinv.optim.data_fidelity import L2
+from deepinv.optim.data_fidelity import L2, L2Distance
+from deepinv.optim import PDCP
 from deepinv.optim.optimizers import optim_builder
 from deepinv.optim.prior import WaveletPrior, TVPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
 from mrinufft import kspace_as_real
+from deepinv.loss.metric import PSNR, SSIM
+from mrinufft.operators.autodiff import image_as_cpx
 import torch
 import os
 
@@ -61,10 +62,30 @@ noise_level = y.abs().max().item() * 0.0002
 y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 
 # %%
-# real-valued physics
+# Setup the physics and priors
+# ----------------------------
+#
+# The same complex MRI problem can be exposed to DeepInverse in two ways:
+#
+# - as complex-valued tensors, using ``viewed_as_real=False``. This is useful
+#   for priors that natively support complex tensors, such as ``WaveletPrior``
+#   with ``is_complex=True``.
+#
+# - as real-valued tensors, using ``viewed_as_real=True``. In this case,
+#   complex images are represented by packing the real and imaginary parts into
+#   the channel dimension. This is useful for real-valued priors such as
+#   ``TVPrior``.
+#
+# In this example, both FISTA and PDCP use the real-valued interface so that
+# all reconstruction methods follow the same tensor convention.
 physics = fourier_op.make_deepinv_phy(viewed_as_real=True)
 
+# Convert the complex k-space measurements to the real-valued representation
+# expected by the ``viewed_as_real=True`` physics.
 y_real = kspace_as_real(y).float()
+
+# ``is_complex=False`` because the wavelet prior now receives the real-valued
+# channel-packed image representation from the physics interface.
 
 wavelet = WaveletPrior(
     wv="sym8",
@@ -73,9 +94,11 @@ wavelet = WaveletPrior(
     is_complex=False,
 )
 
+
 # %%
 # Initial reconstruction with adjoint
 x_dagger = physics.A_dagger(y_real)
+
 
 # %%
 # Wavelet reconstruction with FISTA
@@ -114,6 +137,7 @@ params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
 max_iter = 100
 early_stop = True
 
+
 # %%
 # Instantiate the algorithm class to solve the problem.
 wavelet_model = optim_builder(
@@ -126,9 +150,10 @@ wavelet_model = optim_builder(
 )
 x_wavelet = wavelet_model(y_real, physics)
 
+
 # %%
 # Total variation reconstruction with PDCP
-# ----------------------------------------------------
+# ----------------------------------------
 #
 # We reconstruct the image using a Total Variation (TV) prior solved with
 # the Chambolle-Pock primal-dual algorithm (PDCP). TV promotes piecewise-
@@ -139,9 +164,32 @@ x_wavelet = wavelet_model(y_real, physics)
 # .. math::
 #
 #    \min_x \frac{1}{2}\|Ax - y\|_2^2 + \lambda \operatorname{TV}(x)
-
-from deepinv.optim import PDCP
-from deepinv.optim.data_fidelity import L2Distance
+#
+# where A is the MRI forward operator, y is the measured k-space data,
+# and x is the reconstructed image.
+#
+# While the wavelet prior can also be used with complex-valued tensors, here we
+# use the same real-valued interface for both Wavelet and TV reconstructions.
+# We therefore use the ``viewed_as_real=True`` DeepInverse interface, which
+# exposes the complex MRI reconstruction problem through real-valued tensors
+# compatible with standard DeepInverse priors and optimization algorithms.
+#
+# PDCP is configured with:
+#
+# - ``K = A`` and ``K_adjoint = A^H``,
+# - a TV regularization prior,
+# - an ``L2Distance`` data-fidelity term acting on predicted and measured
+#   k-space data.
+#
+# Since ``L2Distance`` directly compares its two inputs, we define a custom
+# cost function so that the monitored objective corresponds to
+#
+# .. math::
+#
+#    \frac{1}{2}\|A(x)-y\|_2^2 + \lambda \operatorname{TV}(x).
+#
+# Without this custom cost function, the default PDCP objective would compare
+# the image variable ``x`` directly with the k-space measurements ``y``.
 
 
 def pdcp_cost_fn(x, data_fidelity, prior, cur_params, y, physics):
@@ -180,15 +228,12 @@ x_pdcp_real = pdcp_model(y_real, physics)
 # Metrics are computed on magnitude images, since the reconstructions are
 # complex-valued.
 
-# %%
-from deepinv.loss.metric import PSNR, SSIM
 
+# %%
 psnr = PSNR(max_pixel=None)
 ssim = SSIM()
 
 x_ref = torch.abs(mri).unsqueeze(0).unsqueeze(0)
-
-from mrinufft.operators.autodiff import image_as_cpx
 
 
 def to_magnitude(x):
@@ -207,12 +252,13 @@ print(f"Adjoint SSIM: {ssim(x_adjoint_mag, x_ref).item():.4f}")
 print(f"Wavelet SSIM: {ssim(x_wavelet_mag, x_ref).item():.4f}")
 print(f"TV-PDCP SSIM: {ssim(x_pdcp_mag, x_ref).item():.4f}")
 
+
 # %%
 # Visualize the reconstructions
 # -----------------------------
 #
-# We compare the ground-truth image, the adjoint reconstruction, and the
-# wavelet reconstruction.
+# We compare the ground-truth image, the adjoint reconstruction, the wavelet
+# reconstruction, and the TV-PDCP reconstruction.
 
 slice_idx = mri.shape[-1] // 2 - 5
 
