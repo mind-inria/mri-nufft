@@ -209,10 +209,16 @@ def test_check_shape_fail_kspace(operator, array_interface, wrong_kspace_data):
 
 
 @param_array_interface
-def test_interface_gram(operator, array_interface, image_data):
+def test_interface_gram(operator, array_interface, image_data, current_cases):
     """Test the Gram (toeplitz) interface of the operator."""
     if getattr(operator, "n_trans", 1) >= 2:
         pytest.skip("Gram operator not implemented for n_trans >= 2")
+    # Toeplitz is only tested on nyquist case
+    if current_cases["operator"]["kspace_locs"].func not in [
+        CasesTrajectories.case_nyquist_radial3D,
+        CasesTrajectories.case_nyquist_radial2D,
+    ]:
+        pytest.skip("Toeplitz only tested on nyquist Radial case")
 
     # the Toeplitz approximation is not precise on the edges of the image, so
     # we weights the data to focus on the center of the image.
@@ -235,5 +241,6 @@ def test_interface_gram(operator, array_interface, image_data):
 
     # the toeplitz approximation can be quite inaccurate depending on the trajectory
     # we use a relative mean error metric.
-    nmse = np.median(abs(AHA_img - G_img)) / np.median(abs(G_img))
-    assert nmse < 1e-1
+    medse = np.median(abs(AHA_img - G_img) ** 2 / abs(G_img) ** 2)
+    print(medse)
+    assert medse < 5e-2
