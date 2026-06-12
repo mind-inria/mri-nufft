@@ -59,6 +59,7 @@ def operator(
         smaps += np.random.rand(n_coils, *shape)
         smaps = smaps.astype(np.complex64)
         smaps /= np.linalg.norm(smaps, axis=0)
+        smaps = smaps.astype(np.complex64)
     else:
         smaps = None
     kspace_locs = kspace_locs.astype(np.float32)
