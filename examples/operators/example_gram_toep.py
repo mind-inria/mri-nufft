@@ -32,12 +32,12 @@ plt.rcParams["image.cmap"] = "gray"
 
 from brainweb_dl import get_mri
 
-mri_data = get_mri(0, "T1")
+mri_data = get_mri(0, "T1").astype(np.complex64)
 mri_data = np.flip(mri_data, axis=(0, 1, 2))[90]
 mri_data = np.ascontiguousarray(mri_data)
 # %%
 
-plt.imshow(mri_data)
+plt.imshow(abs(mri_data))
 plt.axis("off")
 plt.title("Groundtruth")
 plt.show()
@@ -49,7 +49,7 @@ plt.show()
 from mrinufft import initialize_2D_spiral
 from mrinufft.density import voronoi
 
-samples = initialize_2D_spiral(Nc=16, Ns=500, nb_revolutions=10)
+samples = initialize_2D_spiral(Nc=24, Ns=5000, nb_revolutions=10)
 density = voronoi(samples)
 
 # %%
@@ -72,6 +72,7 @@ gram_naive = nufft.adj_op(nufft.op(mri_data))
 gram_optim = nufft.gram_op(mri_data)  # will compute the kernel internally once.
 # %%
 
+relative_squared_error = (np.abs(gram_naive - gram_optim) / np.abs(gram_naive)) ** 2
 plt.figure(figsize=(12, 4))
 plt.subplot(131)
 plt.imshow(np.abs(gram_naive), vmin=0, vmax=np.percentile(np.abs(gram_naive), 99))
@@ -82,10 +83,17 @@ plt.imshow(np.abs(gram_optim), vmin=0, vmax=np.percentile(np.abs(gram_optim), 99
 plt.title("Gram Optimized")
 plt.axis("off")
 plt.subplot(133)
-plt.imshow((np.abs(gram_naive - gram_optim) / np.abs(gram_naive)) ** 2)
+plt.imshow(
+    relative_squared_error,
+    vmin=0,
+    vmax=np.percentile(relative_squared_error, 99),
+)
 plt.title("Relative Squared Error")
 plt.axis("off")
+plt.colorbar(fraction=0.046, pad=0.04)
 plt.show()
+
+
 # %%
 # Comparing the timings
 # ---------------------
