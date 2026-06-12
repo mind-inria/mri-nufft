@@ -1063,9 +1063,13 @@ def power_method(
     if norm_func is None:
         norm_func = np.linalg.norm
     return_as_is = True
-    if x is None:
+    if x is None and isinstance(operator, FourierOperatorBase):
         return_as_is = False
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    elif x is None:
+        raise ValueError(
+            "If operator is not a FourierOperatorBase, an initial x should be provided."
+        )
     xp = get_array_module(x)
     x_norm = norm_func(x)
     x /= x_norm
