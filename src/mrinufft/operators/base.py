@@ -35,13 +35,7 @@ if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
     from mrinufft.operators.off_resonance import MRIFourierCorrected
-else:
-    MRIFourierCorrected = Any  # type: ignore
-    DeepInvPhyNufft = Any  # type: ignore
-    MRINufftAutoGrad = Any  # type: ignore
-    MRIStackedNUFFT = Any  # type: ignore
-    MRIStackedNUFFTGPU = Any  # type: ignore
-    #
+
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
