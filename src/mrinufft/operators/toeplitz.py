@@ -57,6 +57,8 @@ def compute_toeplitz_kernel(
     elif weights is None:
         weights = xp.ones(nufft.n_samples, dtype=nufft.cpx_dtype)
 
+    weights = weights.astype(dtype=nufft.cpx_dtype, copy=False)
+
     if nufft.ndim == 2:
         kernel = _compute_toep_2d(nufft, weights)
     elif nufft.ndim == 3:
@@ -216,7 +218,7 @@ def apply_toeplitz_kernel(
 
     if padded_array is None:
         padded_array = xp.zeros((batch_size, *toeplitz_kernel.shape), dtype=image.dtype)
-    elif batch_size == 1 and padded_array.ndim != toeplitz_kernel.ndim:
+    elif batch_size == 1 and padded_array.ndim != image.ndim:
         # expand padded_array to have batch dimension
         padded_array = padded_array[None, :]
 
