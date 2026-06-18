@@ -117,7 +117,7 @@ def _check_timings(seq):
         warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
 
 
-def acq2opts(acq: Acquisition) -> "pp.Opts":
+def _acq2opts(acq: Acquisition) -> "pp.Opts":
     """Convert an Acquisition object to pypulseq Opts.
 
     Parameters
@@ -232,7 +232,7 @@ def pulseq_gre(
 
     TR = TR / 1000.0  # convert to seconds
     TE = TE / 1000.0  # convert to seconds
-    system = acq2opts(acq)
+    system = _acq2opts(acq)
     seq = pp.Sequence(system=system)
 
     if rf_pulse is None and FA is not None:
