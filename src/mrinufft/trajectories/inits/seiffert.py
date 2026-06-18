@@ -4,8 +4,8 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.special import ellipj, ellipk
 
-from mrinufft.trajectories.maths import Ra, Rz
-from mrinufft.trajectories.tools import precess
+from mrinufft.trajectories.maths.rotations import Ra, Rz
+from mrinufft.trajectories.tools.transforms import precess
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 

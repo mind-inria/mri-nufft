@@ -4,7 +4,8 @@ import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import EIGENVECTOR_2D_FIBONACCI, R2D
+from mrinufft.trajectories.maths.fibonacci import EIGENVECTOR_2D_FIBONACCI
+from mrinufft.trajectories.maths.rotations import R2D
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 

@@ -167,7 +167,7 @@ References
 
 
 @_fill_doc(_proj_docs)
-def linear_projection(
+def _linear_projection(
     x: NDArray,
     target: NDArray,
     A: LinearOperator | None = None,
@@ -363,7 +363,7 @@ def project_trajectory(
 
     if linear_projector is None and TE_pos is not None:
         linear_projector_ = partial(
-            linear_projection,
+            _linear_projection,
             target=xp.zeros((Nc, Nd), dtype=trajectory.dtype),
             mask=(slice(None), int(Ns * TE_pos), slice(None)),
         )

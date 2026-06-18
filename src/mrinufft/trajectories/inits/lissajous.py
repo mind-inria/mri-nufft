@@ -3,7 +3,8 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import R2D, compute_coprime_factors
+from mrinufft.trajectories.maths.rotations import R2D
+from mrinufft.trajectories.maths.primes import compute_coprime_factors
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 

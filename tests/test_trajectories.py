@@ -1,5 +1,5 @@
 import numpy as np
-from mrinufft import initialize_3D_wave_caipi
+from mrinufft.trajectories.inits.wave_caipi import initialize_3D_wave_caipi
 from mrinufft.trajectories.utils import Acquisition, convert_trajectory_to_gradients
 
 
