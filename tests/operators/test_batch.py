@@ -232,7 +232,7 @@ def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
     image_data = to_interface(image_data, array_interface)
     kspace_data = to_interface(kspace_data, array_interface)
 
-    from mrinufft.extras.optim import loss_l2_reg
+    from mrinufft.extras import loss_l2_reg
 
     img, res = operator.pinv_solver(
         kspace_data, optim=optim, callback=loss_l2_reg, max_iter=5

@@ -577,7 +577,7 @@ class FourierOperatorBase(ABC):
         NDArray
             Reconstructed image
         """
-        from mrinufft.extras.optim import get_optimizer
+        from mrinufft.extras import get_optimizer
 
         return get_optimizer(optim)(operator=self, kspace_data=kspace_data, **kwargs)
 

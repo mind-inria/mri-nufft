@@ -27,7 +27,7 @@ from brainweb_dl import get_mri
 from sigpy.mri.sim import birdcage_maps
 
 from mrinufft import get_operator
-from mrinufft.extras.smaps import get_smaps
+from mrinufft.extras import get_smaps
 from mrinufft.trajectories import initialize_3D_floret
 import cupy as cp
 import os

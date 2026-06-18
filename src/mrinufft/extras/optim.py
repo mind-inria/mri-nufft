@@ -144,7 +144,7 @@ def loss_l2_reg(
     return norm_res
 
 
-def scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
+def _scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
     """
     Compute a scaled Density compensated adjoint.
 
@@ -301,7 +301,7 @@ def lsqr(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -549,7 +549,7 @@ def lsmr(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -824,7 +824,7 @@ def cg(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     image = (

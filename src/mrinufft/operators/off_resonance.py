@@ -10,7 +10,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import get_array_module, is_host_array, is_cuda_array
-from mrinufft.extras.field_map import get_orc_factorization, get_complex_fieldmap_rad
+from mrinufft.extras import get_orc_factorization, get_complex_fieldmap_rad
 from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
 
 if TYPE_CHECKING:
