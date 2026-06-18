@@ -3,13 +3,6 @@
 See also the trajectories examples: :ref:`sphx_glr_generated_autoexamples_trajectories`
 """
 
-from .display import (
-    display_2D_trajectory,
-    display_3D_trajectory,
-    display_gradients,
-    display_gradients_simply,
-    displayConfig,
-)
 from .gradients import patch_center_anomaly
 from .inits import (
     initialize_2D_cones,
@@ -123,12 +116,6 @@ __all__ = [
     "create_energy_density",
     "create_chauffert_density",
     "create_fast_chauffert_density",
-    # display
-    "displayConfig",
-    "display_2D_trajectory",
-    "display_3D_trajectory",
-    "display_gradients",
-    "display_gradients_simply",
     # projection
     "parameterize_by_arc_length",
 ]

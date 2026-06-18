@@ -7,7 +7,7 @@ from pytest_cases import parametrize, parametrize_with_cases
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
 from mrinufft.density import cell_count, voronoi
-from mrinufft.density.utils import normalize_weights
+from mrinufft.density.utils import _normalize_weights
 from mrinufft._utils import proper_trajectory
 
 
@@ -34,7 +34,7 @@ def slow_cell_count2D(traj, shape, osf):
                 & (traj[:, 1] <= bymax)
             ] = h[i, j]
 
-    return normalize_weights(weights)
+    return _normalize_weights(weights)
 
 
 def radial_distance(traj, shape):
