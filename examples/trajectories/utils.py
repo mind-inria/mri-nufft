@@ -9,7 +9,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 
 # Internal imports
-from mrinufft import (
+from mrinufft.display import (
     display_2D_trajectory,
     display_3D_trajectory,
     displayConfig,

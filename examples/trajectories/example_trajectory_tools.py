@@ -27,9 +27,7 @@ import numpy as np
 from utils import show_trajectories, show_trajectory
 
 # Internal
-import mrinufft as mn
-import mrinufft.trajectories.tools as tools
-from mrinufft.trajectories.utils import KMAX
+import mrinufft.trajectories as mt
 
 # %%
 # Script options
@@ -71,14 +69,14 @@ one_shot = 2 * Nc // 3  # Highlight one shot in particular
 #
 
 single_trajectories = {
-    "Radial": mn.initialize_2D_radial(1, Ns, in_out=in_out),
-    "Spiral": mn.initialize_2D_spiral(
+    "Radial": mt.initialize_2D_radial(1, Ns, in_out=in_out),
+    "Spiral": mt.initialize_2D_spiral(
         1, Ns, in_out=in_out, spiral="fermat", nb_revolutions=nb_revolutions
     ),
-    "2D Cones": mn.initialize_2D_cones(
+    "2D Cones": mt.initialize_2D_cones(
         Nc // nb_repetitions, Ns, in_out=in_out, nb_zigzags=nb_zigzags
     )[:1],
-    "3D Cones": mn.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags)[
+    "3D Cones": mt.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags)[
         :1
     ],
 }
@@ -103,16 +101,16 @@ Nc_planes = Nc // nb_repetitions
 z_tilt = 2 * np.pi / Nc_planes / (1 + in_out)
 
 planar_trajectories = {
-    "Radial": tools.rotate(
+    "Radial": mt.rotate(
         single_trajectories["Radial"], nb_rotations=Nc_planes, z_tilt=z_tilt
     ),
-    "Spiral": tools.rotate(
+    "Spiral": mt.rotate(
         single_trajectories["Spiral"], nb_rotations=Nc_planes, z_tilt=z_tilt
     ),
-    "2D Cones": tools.rotate(
+    "2D Cones": mt.rotate(
         single_trajectories["2D Cones"], nb_rotations=Nc_planes, z_tilt=z_tilt
     ),
-    "3D Cones": tools.rotate(
+    "3D Cones": mt.rotate(
         single_trajectories["3D Cones"], nb_rotations=Nc_planes, z_tilt=z_tilt
     ),
 }
@@ -145,7 +143,7 @@ show_trajectories(
 #   strictly bounded to k-space. ``(default True)``
 #
 
-trajectory = tools.stack(planar_trajectories["Radial"], nb_stacks=nb_repetitions)
+trajectory = mt.stack(planar_trajectories["Radial"], nb_stacks=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
@@ -163,7 +161,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.stack(planar_trajectories[x], nb_stacks=nb_repetitions)
+function = lambda x: mt.stack(planar_trajectories[x], nb_stacks=nb_repetitions)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 # %%
 show_trajectories(
@@ -184,9 +182,9 @@ show_trajectories(
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.stack(
+function = lambda x: mt.stack(
     np.roll(
-        tools.stack(single_trajectories[x], nb_stacks=Nc_planes),
+        mt.stack(single_trajectories[x], nb_stacks=Nc_planes),
         axis=-1,
         shift=1,
     ),
@@ -209,7 +207,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 arguments = [True, False]
 trajectory = np.copy(planar_trajectories["3D Cones"])
 trajectory[..., 2] *= 2
-function = lambda x: tools.stack(trajectory, nb_stacks=nb_repetitions, hard_bounded=x)
+function = lambda x: mt.stack(trajectory, nb_stacks=nb_repetitions, hard_bounded=x)
 show_trajectories(
     function,
     arguments,
@@ -237,7 +235,7 @@ show_trajectories(
 # - ``order (int)``: Order of the shots in the stack
 
 
-trajectory = tools.stack_random(
+trajectory = mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=128,
     center_prop=0.1,
@@ -255,7 +253,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # The main use case is to stack trajectories consisting of
 # flat or thick planes that will match the image slices.
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories[x],
     dim_size=128,
     center_prop=0.1,
@@ -273,7 +271,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # is used to normalize the stack positions, and is used with the ``accel``
 # factor and ``center_prop`` to determine the number of stacks.
 arguments = [32, 64, 128]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=x,
     center_prop=0.1,
@@ -293,7 +291,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # of the total ``dim_size``. If ``int`` it is directly the number of lines.
 
 arguments = [1, 5, 0.1, 0.5]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=128,
     center_prop=x,
@@ -313,7 +311,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 
 arguments = [1, 4, 8, 16, 32]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=128,
     center_prop=0.1,
@@ -340,7 +338,7 @@ arguments = [
     "equispaced",
     np.arange(dim_size),
 ]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=128,
     center_prop=0.1,
@@ -362,7 +360,7 @@ arguments = [
     "random",
     "top-down",
 ]
-function = lambda x: tools.stack_random(
+function = lambda x: mt.stack_random(
     planar_trajectories["Spiral"],
     dim_size=128,
     center_prop=0.1,
@@ -393,7 +391,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   over the :math:`k_z`-axis. ``(default None)``
 #
 
-trajectory = tools.rotate(
+trajectory = mt.rotate(
     planar_trajectories["Radial"], nb_rotations=nb_repetitions, x_tilt="uniform"
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -410,7 +408,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.rotate(
+function = lambda x: mt.rotate(
     planar_trajectories[x],
     nb_rotations=nb_repetitions,
     x_tilt="uniform",
@@ -457,7 +455,7 @@ show_trajectories(
 #   of the first shot as the axis. ``(default None)``
 #
 
-trajectory = tools.precess(
+trajectory = mt.precess(
     planar_trajectories["Radial"],
     nb_rotations=nb_repetitions,
     tilt="golden",
@@ -476,7 +474,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     planar_trajectories[x],
     nb_rotations=nb_repetitions,
     tilt="golden",
@@ -495,7 +493,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories[x],
     nb_rotations=Nc,
     tilt="golden",
@@ -519,7 +517,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 
 arguments = [True, False]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories["Radial"][:, Ns // (1 + in_out) :],
     nb_rotations=Nc,
     tilt="golden",
@@ -546,7 +544,7 @@ show_trajectories(
 #
 
 arguments = ["axial", "polar"]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories["Radial"],
     nb_rotations=Nc,
     tilt=None,
@@ -572,7 +570,7 @@ show_trajectories(
 #
 
 arguments = ["axial", "polar"]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories["Radial"],
     nb_rotations=Nc,
     tilt="golden",
@@ -595,7 +593,7 @@ show_trajectories(
 #
 
 arguments = ["axial", "polar"]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories["Radial"][:, -5:],
     nb_rotations=Nc,
     tilt="golden",
@@ -628,7 +626,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [None, 0, 1, 2]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     single_trajectories["Radial"],
     nb_rotations=Nc,
     tilt="golden",
@@ -651,7 +649,7 @@ show_trajectories(
 #
 
 arguments = [None, 0, 1, 2]
-function = lambda x: tools.precess(
+function = lambda x: mt.precess(
     planar_trajectories["Radial"],
     nb_rotations=nb_repetitions,
     tilt="golden",
@@ -693,7 +691,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   mostly to avoid 1D cones if ``max_angle`` is equal to pi / 2, by default True.
 #
 
-trajectory = tools.conify(
+trajectory = mt.conify(
     planar_trajectories["Radial"], nb_cones=nb_repetitions, in_out=in_out
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -710,7 +708,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.conify(
+function = lambda x: mt.conify(
     planar_trajectories[x], nb_cones=nb_repetitions, in_out=in_out
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -732,7 +730,7 @@ show_trajectories(
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.conify(
+function = lambda x: mt.conify(
     single_trajectories[x], nb_cones=Nc, z_tilt="golden", in_out=in_out
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -758,7 +756,7 @@ show_trajectories(
 #
 
 arguments = [np.pi / 2, np.pi / 3, np.pi / 4, np.pi / 5]
-function = lambda x: tools.conify(
+function = lambda x: mt.conify(
     planar_trajectories["Radial"],
     nb_cones=nb_repetitions,
     in_out=in_out,
@@ -784,7 +782,7 @@ show_trajectories(
 #
 
 arguments = [True, False]
-function = lambda x: tools.conify(
+function = lambda x: mt.conify(
     planar_trajectories["Radial"],
     nb_cones=nb_repetitions,
     in_out=in_out,
@@ -825,7 +823,7 @@ show_trajectories(
 #   the start of odd shots.
 #
 
-trajectory = tools.epify(
+trajectory = mt.epify(
     planar_trajectories["Radial"],
     Ns_transitions=Ns // 10,
     nb_trains=Nc_planes // 2,
@@ -842,7 +840,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.epify(
+function = lambda x: mt.epify(
     planar_trajectories[x],
     Ns_transitions=Ns // 10,
     nb_trains=Nc_planes // 2,
@@ -867,7 +865,7 @@ show_trajectories(
 #
 
 arguments = [25, 50, 75, 100]
-function = lambda x: tools.epify(
+function = lambda x: mt.epify(
     planar_trajectories["2D Cones"],
     Ns_transitions=x,
     nb_trains=Nc_planes // 2,
@@ -886,7 +884,7 @@ show_trajectories(
 #
 
 arguments = [Nc_planes, Nc_planes // 2, Nc_planes // 4, 1]
-function = lambda x: tools.epify(
+function = lambda x: mt.epify(
     planar_trajectories["Radial"],
     Ns_transitions=50,
     nb_trains=x,
@@ -906,7 +904,7 @@ show_trajectories(
 #
 
 arguments = [True, False]
-function = lambda x: tools.epify(
+function = lambda x: mt.epify(
     planar_trajectories["Radial"],
     Ns_transitions=100,
     nb_trains=Nc_planes // 2,
@@ -936,8 +934,8 @@ show_trajectories(
 #
 
 
-trajectory = tools.prewind(planar_trajectories["Spiral"], Ns_transitions=Ns // 10)
-trajectory = tools.rewind(trajectory, Ns_transitions=Ns // 10)
+trajectory = mt.prewind(planar_trajectories["Spiral"], Ns_transitions=Ns // 10)
+trajectory = mt.rewind(trajectory, Ns_transitions=Ns // 10)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
@@ -952,8 +950,8 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.prewind(
-    tools.rewind(planar_trajectories[x], Ns_transitions=Ns // 10),
+function = lambda x: mt.prewind(
+    mt.rewind(planar_trajectories[x], Ns_transitions=Ns // 10),
     Ns_transitions=Ns // 10,
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -974,8 +972,8 @@ show_trajectories(
 #
 
 arguments = [25, 50, 75, 100]
-function = lambda x: tools.prewind(
-    tools.rewind(planar_trajectories["2D Cones"], Ns_transitions=x),
+function = lambda x: mt.prewind(
+    mt.rewind(planar_trajectories["2D Cones"], Ns_transitions=x),
     Ns_transitions=x,
 )
 show_trajectories(
@@ -996,14 +994,14 @@ show_trajectories(
 #
 
 init_trajectories = {
-    "Radial": lambda Nc: mn.initialize_2D_radial(Nc, Ns, in_out=in_out),
-    "Spiral": lambda Nc: mn.initialize_2D_spiral(
+    "Radial": lambda Nc: mt.initialize_2D_radial(Nc, Ns, in_out=in_out),
+    "Spiral": lambda Nc: mt.initialize_2D_spiral(
         Nc, Ns, in_out=in_out, spiral="fermat", nb_revolutions=nb_revolutions
     ),
-    "2D Cones": lambda Nc: mn.initialize_2D_cones(
+    "2D Cones": lambda Nc: mt.initialize_2D_cones(
         Nc, Ns, in_out=in_out, nb_zigzags=nb_zigzags
     ),
-    "3D Cones": lambda Nc: tools.rotate(
+    "3D Cones": lambda Nc: mt.rotate(
         single_trajectories["3D Cones"],
         nb_rotations=Nc,
         z_tilt=2 * np.pi / Nc / (1 + in_out),
@@ -1015,7 +1013,7 @@ init_trajectories = {
 # Stack spherically
 # -----------------
 #
-# A tool similar to ``tools.stack`` but with stacks shrinked
+# A tool similar to ``mt.stack`` but with stacks shrinked
 # in order to cover the k-space sphere and a variable number
 # of shot per stack to improve the coverage over larger stacks.
 #
@@ -1035,7 +1033,7 @@ init_trajectories = {
 #   function provided with ``trajectory_func``.
 #
 
-trajectory = tools.stack_spherically(
+trajectory = mt.stack_spherically(
     init_trajectories["Radial"], Nc=Nc, nb_stacks=nb_repetitions
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -1047,12 +1045,12 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # A function that takes at least one argument ``Nc`` to control
 # the number of shots, in order to adapt that value for each stack
 # and focus more ressources over larger areas. In opposition to
-# ``tools.stack``, it is not possible to use stacked-NUFFT operators
-# with ``tools.stack_spherically``.
+# ``mt.stack``, it is not possible to use stacked-NUFFT operators
+# with ``mt.stack_spherically``.
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.stack_spherically(
+function = lambda x: mt.stack_spherically(
     init_trajectories[x], Nc=Nc, nb_stacks=nb_repetitions
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -1075,12 +1073,12 @@ show_trajectories(
 # cover a cylinder with variable density over :math:`k_z`.
 #
 
-traj_classic = tools.stack_spherically(
+traj_classic = mt.stack_spherically(
     init_trajectories["Radial"], Nc=Nc, nb_stacks=nb_repetitions
 )
 traj_normal = np.copy(traj_classic)
 traj_normal[..., :2] = (
-    KMAX
+    0.5  # Edge of the k-space sphere
     * traj_normal[..., :2]
     / np.max(
         np.linalg.norm(traj_classic[..., :2], axis=2, keepdims=True),
@@ -1122,9 +1120,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   function provided with ``trajectory_func``.
 #
 
-trajectory = tools.shellify(
-    init_trajectories["Radial"], Nc=Nc, nb_shells=nb_repetitions
-)
+trajectory = mt.shellify(init_trajectories["Radial"], Nc=Nc, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
@@ -1142,9 +1138,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["Radial", "Spiral", "2D Cones", "3D Cones"]
-function = lambda x: tools.shellify(
-    init_trajectories[x], Nc=Nc, nb_shells=nb_repetitions
-)
+function = lambda x: mt.shellify(init_trajectories[x], Nc=Nc, nb_shells=nb_repetitions)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -1159,7 +1153,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["symmetric", "reversed"]
-function = lambda x: tools.shellify(
+function = lambda x: mt.shellify(
     init_trajectories["Spiral"], Nc=Nc, nb_shells=nb_repetitions, hemisphere_mode=x
 )
 show_trajectories(

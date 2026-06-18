@@ -20,7 +20,8 @@ import brainweb_dl as bwdl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import get_density, get_operator
+from mrinufft import get_operator
+from mrinufft.density import get_density
 from mrinufft.trajectories import initialize_2D_radial
 from mrinufft.display import display_2D_trajectory
 

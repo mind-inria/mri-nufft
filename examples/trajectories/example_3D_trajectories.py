@@ -29,7 +29,7 @@ import numpy as np
 from utils import show_trajectories, show_trajectory
 
 # Internal
-import mrinufft as mn
+import mrinufft.trajectories as mt
 
 # %%
 # Script options
@@ -79,7 +79,7 @@ one_shot = -5  # Highlight one shot in particular
 #   the center then outside (in-out) or not (center-out). ``(default False)``
 #
 
-trajectory = mn.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -92,7 +92,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [Nc // 4, Nc // 2, Nc, Nc * 2]
-function = lambda x: mn.initialize_3D_phyllotaxis_radial(x, Ns, in_out=in_out)
+function = lambda x: mt.initialize_3D_phyllotaxis_radial(x, Ns, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -105,7 +105,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [10, 25, 40, 100]
-function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, x, in_out=in_out)
+function = lambda x: mt.initialize_3D_phyllotaxis_radial(Nc, x, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -128,7 +128,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [True, False]
-function = lambda x: mn.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=x)
+function = lambda x: mt.initialize_3D_phyllotaxis_radial(Nc, Ns, in_out=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -156,7 +156,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default False)``. See 3D radial
 #
 
-trajectory = mn.initialize_3D_golden_means_radial(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_golden_means_radial(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -185,7 +185,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #   ``(default False)``. See 3D radial
 #
 
-trajectory = mn.initialize_3D_wong_radial(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_wong_radial(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -215,7 +215,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #   ``(default False)``. See 3D radial
 #
 
-trajectory = mn.initialize_3D_park_radial(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_park_radial(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -248,7 +248,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #   by default. ``(default 1)``
 #
 
-trajectory = mn.initialize_3D_cones(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_cones(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -264,7 +264,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
+function = lambda x: mt.initialize_3D_cones(Nc, Ns, tilt=x, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -277,7 +277,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0.5, 2, 5, 10]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=x)
+function = lambda x: mt.initialize_3D_cones(Nc, Ns, in_out=in_out, nb_zigzags=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -292,7 +292,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["archimedes", "fermat", 0.5, 1.5]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, spiral=x)
+function = lambda x: mt.initialize_3D_cones(Nc, Ns, in_out=in_out, spiral=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -307,7 +307,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0.2, 1, 2, 3]
-function = lambda x: mn.initialize_3D_cones(Nc, Ns, in_out=in_out, width=x)
+function = lambda x: mt.initialize_3D_cones(Nc, Ns, in_out=in_out, width=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -338,7 +338,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # - ``axes (tuple)``: axes over which cones are created, by default (2,)
 #
 
-trajectory = mn.initialize_3D_floret(
+trajectory = mt.initialize_3D_floret(
     Nc * nb_repetitions,
     Ns,
     in_out=in_out,
@@ -364,7 +364,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [(0,), (1,), (0, 1), (0, 1, 2)]
-function = lambda x: mn.initialize_3D_floret(
+function = lambda x: mt.initialize_3D_floret(
     Nc * nb_repetitions,
     Ns,
     in_out=in_out,
@@ -406,7 +406,7 @@ show_trajectories(
 # - ``spacing (tuple(int, int))``: Spacing between helices over the
 #   2D :math:`k_x`-:math:`k_y` plane normalized similarly to `width`. ``(default (1, 1))``
 
-trajectory = mn.initialize_3D_wave_caipi(Nc, Ns)
+trajectory = mt.initialize_3D_wave_caipi(Nc, Ns)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
@@ -417,7 +417,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0.5, 2.5, 5, 10]
-function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=x)
+function = lambda x: mt.initialize_3D_wave_caipi(Nc, Ns, nb_revolutions=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -433,7 +433,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0.2, 1, 2, 3]
-function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, width=x)
+function = lambda x: mt.initialize_3D_wave_caipi(Nc, Ns, width=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -455,7 +455,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["triangular", "square", "circular", "fibonacci", "random"]
-function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing=x)
+function = lambda x: mt.initialize_3D_wave_caipi(Nc, Ns, packing=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -481,7 +481,7 @@ show_trajectories(
 #
 
 arguments = ["circle", "square", "diamond", 0.5]
-function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, shape=x)
+function = lambda x: mt.initialize_3D_wave_caipi(Nc, Ns, shape=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -502,7 +502,7 @@ show_trajectories(
 #
 
 arguments = [(1, 1), (2, 1), (1, 2), (2.3, 1.8)]
-function = lambda x: mn.initialize_3D_wave_caipi(Nc, Ns, packing="square", spacing=x)
+function = lambda x: mt.initialize_3D_wave_caipi(Nc, Ns, packing="square", spacing=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -544,7 +544,7 @@ show_trajectories(
 #   then outside (in-out) or not (center-out). ``(default False)``. See 3D radial
 #
 
-trajectory = mn.initialize_3D_seiffert_spiral(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_3D_seiffert_spiral(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -558,7 +558,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0, 0.3, 0.9, 0.99]
-function = lambda x: mn.initialize_3D_seiffert_spiral(
+function = lambda x: mt.initialize_3D_seiffert_spiral(
     Nc, Ns, in_out=in_out, curve_index=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -575,7 +575,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, 0.5, 1, 2]
-function = lambda x: mn.initialize_3D_seiffert_spiral(
+function = lambda x: mt.initialize_3D_seiffert_spiral(
     Nc,
     Ns,
     in_out=in_out,
@@ -598,7 +598,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
-function = lambda x: mn.initialize_3D_seiffert_spiral(
+function = lambda x: mt.initialize_3D_seiffert_spiral(
     Nc,
     Ns,
     in_out=in_out,
@@ -624,7 +624,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, "uniform", "golden", 20 * 2 * np.pi / Nc]
-function = lambda x: mn.initialize_3D_seiffert_spiral(
+function = lambda x: mt.initialize_3D_seiffert_spiral(
     Nc,
     Ns,
     in_out=in_out,
@@ -660,7 +660,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # - ``seed (int)``: random seed for reproducibility, used only
 #   to draw the circle centers (default None).
 
-trajectory = mn.initialize_3D_eccentric(
+trajectory = mt.initialize_3D_eccentric(
     Nc, Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, seed=seed
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -674,7 +674,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [2, 5, 7, 13]
-function = lambda x: mn.initialize_3D_eccentric(
+function = lambda x: mt.initialize_3D_eccentric(
     Nc=Nc, Ns=Ns, nb_stacks=x, radius_ratio=0.3, seed=seed
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -688,7 +688,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0.05, 0.2, 0.35, 0.5]
-function = lambda x: mn.initialize_3D_eccentric(
+function = lambda x: mt.initialize_3D_eccentric(
     Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=x, seed=seed
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -702,7 +702,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, 0.3, 0.6, 1]
-function = lambda x: mn.initialize_3D_eccentric(
+function = lambda x: mt.initialize_3D_eccentric(
     Nc=Nc, Ns=Ns, nb_stacks=nb_repetitions, radius_ratio=0.3, center_ratio=x, seed=seed
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -739,7 +739,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   over a sphere (in radians). ``(default "uniform")``
 #
 
-trajectory = mn.initialize_3D_helical_shells(Nc, Ns, nb_shells=nb_repetitions)
+trajectory = mt.initialize_3D_helical_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -751,7 +751,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [1, 2, nb_repetitions // 2, nb_repetitions]
-function = lambda x: mn.initialize_3D_helical_shells(
+function = lambda x: mt.initialize_3D_helical_shells(
     Nc=x, Ns=Ns, nb_shells=x, spiral_reduction=2
 )
 show_trajectories(function, arguments, one_shot=False, subfig_size=subfigure_size)
@@ -770,7 +770,7 @@ show_trajectories(function, arguments, one_shot=False, subfig_size=subfigure_siz
 #
 
 arguments = [0.5, 1, 2, 4]
-function = lambda x: mn.initialize_3D_helical_shells(
+function = lambda x: mt.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -784,7 +784,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["uniform", "intergaps", "golden", 3.1415]
-function = lambda x: mn.initialize_3D_helical_shells(
+function = lambda x: mt.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shell_tilt=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -801,7 +801,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["uniform", "intergaps", "golden", 0.1]
-function = lambda x: mn.initialize_3D_helical_shells(
+function = lambda x: mt.initialize_3D_helical_shells(
     Nc=Nc, Ns=Ns, nb_shells=nb_repetitions, spiral_reduction=2, shot_tilt=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -829,7 +829,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   (in radians). ``(default pi / 2)``
 #
 
-trajectory = mn.initialize_3D_annular_shells(Nc, Ns, nb_shells=nb_repetitions)
+trajectory = mt.initialize_3D_annular_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -853,7 +853,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4]
-function = lambda x: mn.initialize_3D_annular_shells(
+function = lambda x: mt.initialize_3D_annular_shells(
     Nc, Ns, nb_shells=nb_repetitions, ring_tilt=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -884,7 +884,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   over a sphere (in radians). ``(default "uniform")``. See helical shells
 #
 
-trajectory = mn.initialize_3D_seiffert_shells(Nc, Ns, nb_shells=nb_repetitions)
+trajectory = mt.initialize_3D_seiffert_shells(Nc, Ns, nb_shells=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -930,7 +930,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 nb_blades = Nc // 15
-trajectory = mn.initialize_3D_turbine(
+trajectory = mt.initialize_3D_turbine(
     Nc, Ns_readouts=Ns, Ns_transitions=Ns // 10, nb_blades=nb_blades
 )
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
@@ -946,7 +946,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [1, 50, 100, 200]
-function = lambda x: mn.initialize_3D_turbine(
+function = lambda x: mt.initialize_3D_turbine(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=x,
@@ -965,7 +965,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [Nc // 5, Nc // 15, Nc // 30, Nc // 60]
-function = lambda x: mn.initialize_3D_turbine(
+function = lambda x: mt.initialize_3D_turbine(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -982,7 +982,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["uniform", "golden"]
-function = lambda x: mn.initialize_3D_turbine(
+function = lambda x: mt.initialize_3D_turbine(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -1008,7 +1008,7 @@ show_trajectories(
 #
 
 arguments = [nb_blades, 3 * nb_blades, 5 * nb_blades, 15 * nb_blades]
-function = lambda x: mn.initialize_3D_turbine(
+function = lambda x: mt.initialize_3D_turbine(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -1032,7 +1032,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [1, 2, 4, nb_blades + 2]
-function = lambda x: mn.initialize_3D_turbine(
+function = lambda x: mt.initialize_3D_turbine(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -1096,7 +1096,7 @@ show_trajectories(
 #   then outside (in-out) or not (center-out). ``(default True)``. See 3D radial
 #
 
-trajectory = mn.initialize_3D_repi(
+trajectory = mt.initialize_3D_repi(
     Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -1120,7 +1120,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0, 0.5, 1, 2]
-function = lambda x: mn.initialize_3D_repi(
+function = lambda x: mt.initialize_3D_repi(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
@@ -1137,7 +1137,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, 0.5, 1, 2]
-function = lambda x: mn.initialize_3D_repi(
+function = lambda x: mt.initialize_3D_repi(
     Nc=Nc,
     Ns_readouts=Ns,
     Ns_transitions=Ns // 10,
