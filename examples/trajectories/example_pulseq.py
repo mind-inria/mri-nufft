@@ -8,7 +8,7 @@ Example how to create sequences using PyPulseq.
 """
 
 import numpy as np
-from mrinufft.trajectories.display import display_3D_trajectory
+from mrinufft.display import display_3D_trajectory
 from mrinufft.trajectories import initialize_2D_spiral, stack
 
 from mrinufft.io.pulseq import pulseq_gre, read_pulseq_traj

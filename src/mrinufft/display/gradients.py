@@ -10,7 +10,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.display.config import displayConfig
+from .config import displayConfig
 from mrinufft.trajectories.utils import (
     Acquisition,
     compute_gradients_and_slew_rates,

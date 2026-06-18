@@ -22,7 +22,7 @@ import numpy as np
 
 from mrinufft import get_density, get_operator
 from mrinufft.trajectories import initialize_2D_radial
-from mrinufft.trajectories.display import display_2D_trajectory
+from mrinufft.display import display_2D_trajectory
 
 # %%
 # Create sample data

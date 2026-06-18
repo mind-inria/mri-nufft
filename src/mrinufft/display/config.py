@@ -20,7 +20,7 @@ class displayConfig:
 
     Examples
     --------
-    >>> from mrinufft.trajectories.display import displayConfig
+    >>> from mrinufft.display import displayConfig
     >>> displayConfig.alpha
     0.2
     >>> with displayConfig(alpha=0.5):

@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 
-import mrinufft.trajectories.display as mtd
+import mrinufft.display as mtd
 import mrinufft.trajectories.inits as mtt
-from mrinufft.trajectories.display import displayConfig
+from mrinufft.display import displayConfig
 
 # %%
 # Script options
