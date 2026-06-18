@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 import inspect
+
 from docutils import nodes
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective  # <--- New Base Class
-
-logger = logging.getLogger(__name__)
+import re
 
 from mrinufft._utils import MethodRegister
 
-import inspect
-import re
+logger = logging.getLogger(__name__)
 
 
 def get_signature(func):
@@ -41,7 +40,7 @@ class AutoregistryDirective(SphinxDirective):  # <--- Inherit from SphinxDirecti
 
         try:
             # 1. Build rendering context
-            registry_dict = MethodRegister.registry[registry_key]
+            registry_dict = MethodRegister.registry_global[registry_key]
             items_context = [
                 {
                     "name": name,

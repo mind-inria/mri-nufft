@@ -64,7 +64,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # generate autosummary even if no references
 autosummary_generate = True
-# autosummary_imported_members = True
+autosummary_imported_members = True
 autodoc_inherit_docstrings = True
 autodoc_member_order = "bysource"
 autodoc_typehints = "both"

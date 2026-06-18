@@ -3,6 +3,7 @@
 .. autoregistry :: optimizer
 """
 
+from typing import TYPE_CHECKING
 from collections.abc import Callable
 
 import numpy as np
@@ -11,7 +12,9 @@ from tqdm.auto import tqdm
 
 from mrinufft._array_compat import CUPY_AVAILABLE, get_array_module, with_numpy_cupy
 from mrinufft._utils import MethodRegister, _progressbar
-from mrinufft.operators.base import FourierOperatorBase
+
+if TYPE_CHECKING:
+    from mrinufft.operators.base import FourierOperatorBase
 
 _optim_docs = dict(
     base_params=r"""
