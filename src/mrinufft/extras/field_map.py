@@ -254,7 +254,7 @@ def _create_histogram(
     return h_counts, h_centers_cpx
 
 
-class C_lazy:
+class _C_lazy:
     """A lazy version of the C interpolator.
 
     Instead of storing C as a ``(L, Nx, Ny, Nz)`` array, we store the quantize
@@ -352,7 +352,7 @@ def _full_C(
     C_sr = C_small.reshape(-1, *n_bins)
 
     if lazy:
-        C_big = C_lazy(C_sr, idxr, idxi, field_map.shape)
+        C_big = _C_lazy(C_sr, idxr, idxi, field_map.shape)
         return C_big
     else:
 

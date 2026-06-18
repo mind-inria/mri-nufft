@@ -10,7 +10,7 @@ from typing import Literal
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import _to_interface, get_array_module, with_numpy_cupy
-from mrinufft.extras.cartesian import fft, ifft
+from mrinufft.extras import fft, ifft
 
 from .base import FourierOperatorSimple
 

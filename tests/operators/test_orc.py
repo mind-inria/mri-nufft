@@ -1,6 +1,6 @@
 """Test that the ORC NUFFT approximates the Conjugate Phase (CP) expression."""
 
-from mrinufft.extras.field_map import get_complex_fieldmap_rad
+from mrinufft.extras import get_complex_fieldmap_rad
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 import numpy as np
 import numpy.testing as npt
@@ -13,7 +13,7 @@ from case_trajectories import CasesTrajectories
 
 from mrinufft import get_operator
 from mrinufft._array_compat import _array_to_numpy
-from mrinufft.extras.field_map import make_b0map, make_t2smap
+from mrinufft.extras import make_b0map, make_t2smap
 
 
 def get_extended_fourier_matrix(ktraj, shape, cpx_fieldmap, readout_time):
