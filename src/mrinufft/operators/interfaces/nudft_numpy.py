@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 import scipy as sp
-from ..base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import get_array_module
 

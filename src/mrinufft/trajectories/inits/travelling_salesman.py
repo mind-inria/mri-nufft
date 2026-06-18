@@ -8,9 +8,9 @@ from numpy.typing import NDArray
 from scipy.interpolate import CubicSpline
 from tqdm.auto import tqdm
 
-from ..maths import solve_tsp_with_2opt
-from ..sampling import sample_from_density
-from ..tools import oversample
+from mrinufft.trajectories.maths import solve_tsp_with_2opt
+from mrinufft.trajectories.sampling import sample_from_density
+from mrinufft.trajectories.tools import oversample
 
 Coordinate: TypeAlias = Literal["x", "y", "z", "r", "phi", "theta"]
 

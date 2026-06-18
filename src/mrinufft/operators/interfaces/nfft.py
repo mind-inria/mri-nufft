@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from ..base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU
 
 PYNFFT_AVAILABLE = True
 try:

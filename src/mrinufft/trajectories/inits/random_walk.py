@@ -5,8 +5,8 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
-from ..sampling import sample_from_density
-from ..utils import KMAX
+from mrinufft.trajectories.sampling import sample_from_density
+from mrinufft.trajectories.utils import KMAX
 
 
 def _get_adjacent_neighbors_offsets(nb_dims: int) -> NDArray:
