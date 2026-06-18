@@ -100,6 +100,7 @@ wavelet = WaveletPrior(
 # Initial reconstruction with adjoint
 x_dagger = physics.A_dagger(y_real)
 
+
 # %%
 # Wavelet reconstruction with FISTA
 # ---------------------------------
@@ -227,7 +228,6 @@ x_pdcp_real = pdcp_model(y_real, physics)
 #
 # Metrics are computed on magnitude images, since the reconstructions are
 # complex-valued.
-
 psnr = PSNR(max_pixel=None)
 ssim = SSIM()
 
