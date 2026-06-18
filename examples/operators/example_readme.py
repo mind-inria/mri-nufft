@@ -11,7 +11,7 @@ from scipy.datasets import face
 
 import mrinufft
 from mrinufft.density import voronoi
-from mrinufft.trajectories import display
+from mrinufft.display import display_2D_trajectory
 
 # Create a 2D radial trajectory for demo
 samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)
@@ -27,7 +27,11 @@ density = voronoi(samples_loc)
 
 # And create the associated operator
 nufft = NufftOperator(
-    samples_loc, shape=image.shape, density=density, n_coils=1, squeeze_dims=True
+    samples=samples_loc,
+    shape=image.shape,
+    density=density,
+    n_coils=1,
+    squeeze_dims=True,
 )
 
 kspace_data = nufft.op(image)  # Image -> K-space
@@ -43,7 +47,7 @@ ax[0].imshow(abs(image), cmap="gray")
 ax[0].axis("off")
 ax[0].set_title("original image")
 # Upper right trajectory
-display.display_2D_trajectory(samples_loc, subfigure=ax[1])
+display_2D_trajectory(samples_loc, subfigure=ax[1])
 ax[1].set_aspect("equal")
 ax[1].set_title("Sampled points in k-space")
 # Bottom left reconstructed image

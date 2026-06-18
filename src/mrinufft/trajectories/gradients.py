@@ -143,7 +143,7 @@ def patch_center_anomaly(
 # Gradients connections #
 #########################
 
-base_params_no_N = """\
+_base_params_no_N = """\
 deltak: float
     Desired change in k-space, as (k_end - k_start) / (gamma * raster_time) [T/m]
 gmax: float
@@ -163,7 +163,7 @@ Parameters
 ----------
 N: int
     Number of time points for the gradient waveform
-{base_params_no_N}
+{_base_params_no_N}
 """,
     returns="""\
 Returns
@@ -173,7 +173,7 @@ NDArray
 bool
     Whether the optimization was successful.
 """,
-    base_params_no_N=base_params_no_N,
+    base_params_no_N=_base_params_no_N,
     params_connect="""\
 kstarts: NDArray
     The starting k-space points of shape (Nshots, 3), [m^-1]
@@ -194,7 +194,7 @@ _solvers = MethodRegister("gradient_connection_solver", _solver_docs)
 _get_solver_grad = _solvers.make_getter()
 
 
-def solve_trivial(N, deltak, gmax, smax, gs, ge):
+def _solve_trivial(N, deltak, gmax, smax, gs, ge):
     """Trivial solver that returns zeros if possible."""
     if N == 0 and gs == ge and deltak == 0:
         return np.array([], dtype=np.float32), True
@@ -214,7 +214,7 @@ def solve_trivial(N, deltak, gmax, smax, gs, ge):
     return None, False
 
 
-def preprocess(solver):
+def _preprocess(solver):
     """Decorate solver to preprocess trivial cases."""
 
     @wraps(solver)
@@ -228,7 +228,7 @@ def preprocess(solver):
         if abs(gs) > gmax:
             gs = gmax * gs / abs(gs)
         if N < 3:
-            res, success = solve_trivial(N, deltak, gmax, smax, gs, ge)
+            res, success = _solve_trivial(N, deltak, gmax, smax, gs, ge)
             return res, success
         return solver(N, deltak, gmax, smax, gs, ge)
 
@@ -236,7 +236,7 @@ def preprocess(solver):
 
 
 @_solvers("lp")
-@preprocess
+@_preprocess
 def _solve_lp_1d(
     N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
 ) -> tuple[NDArray, bool]:
@@ -353,7 +353,7 @@ def _build_quadratic(
 
 
 @_solvers("osqp")
-@preprocess
+@_preprocess
 def _solve_qp_osqp(
     N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
 ) -> tuple[NDArray, bool]:

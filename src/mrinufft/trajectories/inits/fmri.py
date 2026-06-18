@@ -7,8 +7,9 @@ from numpy.typing import NDArray
 
 from mrinufft.trajectories.inits.radial import initialize_2D_radial
 from mrinufft.trajectories.inits.spiral import initialize_2D_spiral
-from mrinufft.trajectories.maths import R2D
-from mrinufft.trajectories.tools import epify, stack
+from mrinufft.trajectories.maths.rotations import R2D
+from mrinufft.trajectories.tools.epi import epify
+from mrinufft.trajectories.tools.transforms import stack
 from mrinufft.trajectories.utils import initialize_tilt
 
 

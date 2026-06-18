@@ -4,7 +4,7 @@ import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import Ry, Rz
+from mrinufft.trajectories.maths.rotations import Ry, Rz
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 

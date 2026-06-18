@@ -3,7 +3,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.tools import conify, duplicate_along_axes
+from mrinufft.trajectories.tools.transforms import conify, duplicate_along_axes
 
 
 def initialize_3D_floret(

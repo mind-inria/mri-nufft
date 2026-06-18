@@ -6,11 +6,12 @@ import numpy as np
 import numpy.linalg as nl
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import (
-    CIRCLE_PACKING_DENSITY,
+from mrinufft.trajectories.maths.fibonacci import (
     generate_fibonacci_circle,
 )
 from mrinufft.trajectories.utils import KMAX, Packings, initialize_shape_norm
+
+CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
 
 
 def get_grappa_caipi_positions(

@@ -2,6 +2,8 @@
 
 import numpy as np
 
+EIGENVECTOR_2D_FIBONACCI = (0.4656, 0.6823, 1)
+
 
 def is_from_fibonacci_sequence(n: int) -> bool:
     """Check if an integer belongs to the Fibonacci sequence.
