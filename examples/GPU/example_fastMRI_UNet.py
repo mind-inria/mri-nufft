@@ -5,7 +5,8 @@ Supervised vs Self-supervised UNet for MRI.
 ==============================================
 
 This example compares two UNet training strategies for non-Cartesian
-MRI reconstruction:
+MRI reconstruction. It works in 2D only, reconstructing a single brain
+slice at a time.
 
 **Supervised** (left): the standard approach from [fastmri]_, which
 requires a ground truth image for training.
@@ -186,7 +187,7 @@ op_lambda = get_operator(BACKEND, wrt_data=True)(
 
 # %%
 # SSDU loss predicts k-space at Lambda from the reconstruction and
-# compares it with the true measurements. No ground truth needed.
+# compares it with the true measurements in the k-space. No ground truth needed.
 def ssdu_loss(recon, kspace_lambda, op_lambda):
     """Compute the SSDU self-supervised loss.
 
@@ -346,9 +347,11 @@ plt.show()
 # References
 # ==========
 #
-# .. [fastmri] O. Ronneberger, P. Fischer, and Thomas Brox. U-net:
-#           Convolutional networks for biomedical image segmentation.
-#           MICCAI 2015. https://github.com/facebookresearch/fastMRI
+# .. [fastmri] M. J. Muckley, B. Riemenschneider, A. Radmanesh, et al.
+#          Results of the 2020 fastMRI challenge for machine learning
+#         MR image reconstruction. IEEE Transactions on Medical
+#         Imaging, 40(9):2306-2317, 2021.
+#          https://doi.org/10.1109/TMI.2021.3075856
 #
 # .. [ssdu] B. Yaman et al. Self-supervised learning of physics-guided
 #           reconstruction neural networks without fully sampled
