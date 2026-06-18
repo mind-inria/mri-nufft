@@ -1,5 +1,6 @@
 """Off Resonance correction Operator wrapper."""
 
+from __future__ import annotations
 from collections.abc import Callable
 from scipy.ndimage import zoom
 from typing import TYPE_CHECKING
@@ -15,9 +16,6 @@ from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAI
 
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
-else:
-    MRINufftAutoGrad = None
-    DeepInvPhyNufft = None
 
 if CUPY_AVAILABLE:
     import cupy as cp
