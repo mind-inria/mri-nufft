@@ -12,9 +12,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 
-import mrinufft.display as mtd
-import mrinufft.trajectories.inits as mtt
-from mrinufft.display import displayConfig
+import mrinufft.display as md
+import mrinufft.trajectories as mt
+from mrinufft.display import (
+    displayConfig,
+    display_2D_trajectory,
+    display_gradients_simply,
+)
 
 # %%
 # Script options
@@ -38,50 +42,50 @@ duration = 150  # seconds
 # Initialize trajectory function
 functions = [
     # Radial
-    ("Radial", lambda x: mtt.initialize_2D_radial(x, Ns)),
-    ("Radial", lambda x: mtt.initialize_2D_radial(Nc, Ns, tilt=x)),
+    ("Radial", lambda x: mt.initialize_2D_radial(x, Ns)),
+    ("Radial", lambda x: mt.initialize_2D_radial(Nc, Ns, tilt=x)),
     (
         "Radial",
-        lambda x: mtt.initialize_2D_radial(Nc, Ns, tilt=(1 + x) * np.pi / Nc, in_out=x),
+        lambda x: mt.initialize_2D_radial(Nc, Ns, tilt=(1 + x) * np.pi / Nc, in_out=x),
     ),
-    ("Radial", lambda x: mtt.initialize_2D_radial(Nc, Ns, tilt=x)),
-    ("Radial", lambda x: mtt.initialize_2D_radial(Nc, Ns, tilt="uniform")),
+    ("Radial", lambda x: mt.initialize_2D_radial(Nc, Ns, tilt=x)),
+    ("Radial", lambda x: mt.initialize_2D_radial(Nc, Ns, tilt="uniform")),
     # Spiral
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, spiral=x)),
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, spiral=x)),
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
-    ("Spiral", lambda x: mtt.initialize_2D_spiral(Nc, Ns, nb_revolutions=1e-5)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, spiral=x)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, spiral=x)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, nb_revolutions=x)),
+    ("Spiral", lambda x: mt.initialize_2D_spiral(Nc, Ns, nb_revolutions=1e-5)),
     # Cones
-    ("Cones", lambda x: mtt.initialize_2D_cones(Nc, Ns, nb_zigzags=x)),
-    ("Cones", lambda x: mtt.initialize_2D_cones(Nc, Ns, width=x)),
-    ("Cones", lambda x: mtt.initialize_2D_cones(Nc, Ns, width=x)),
-    ("Cones", lambda x: mtt.initialize_2D_cones(Nc, Ns, width=0)),
+    ("Cones", lambda x: mt.initialize_2D_cones(Nc, Ns, nb_zigzags=x)),
+    ("Cones", lambda x: mt.initialize_2D_cones(Nc, Ns, width=x)),
+    ("Cones", lambda x: mt.initialize_2D_cones(Nc, Ns, width=x)),
+    ("Cones", lambda x: mt.initialize_2D_cones(Nc, Ns, width=0)),
     # Sinusoids
     (
         "Sinusoids",
-        lambda x: mtt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=3 * x, width=x),
+        lambda x: mt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=3 * x, width=x),
     ),
     (
         "Sinusoids",
-        lambda x: mtt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=3 * x, width=x),
+        lambda x: mt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=3 * x, width=x),
     ),
-    ("Sinusoids", lambda x: mtt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=0, width=0)),
+    ("Sinusoids", lambda x: mt.initialize_2D_sinusoide(Nc, Ns, nb_zigzags=0, width=0)),
     # Rings
-    ("Rings", lambda x: mtt.initialize_2D_rings(x, Ns, nb_rings=x)[::-1]),
-    ("Rings", lambda x: mtt.initialize_2D_rings(x, Ns, nb_rings=nb_repetitions)[::-1]),
-    ("Rings", lambda x: mtt.initialize_2D_rings(Nc, Ns, nb_rings=nb_repetitions)[::-1]),
+    ("Rings", lambda x: mt.initialize_2D_rings(x, Ns, nb_rings=x)[::-1]),
+    ("Rings", lambda x: mt.initialize_2D_rings(x, Ns, nb_rings=nb_repetitions)[::-1]),
+    ("Rings", lambda x: mt.initialize_2D_rings(Nc, Ns, nb_rings=nb_repetitions)[::-1]),
     # Rosette
-    ("Rosette", lambda x: mtt.initialize_2D_rosette(Nc, Ns, coprime_index=x)),
-    ("Rosette", lambda x: mtt.initialize_2D_rosette(Nc, Ns, coprime_index=30)),
+    ("Rosette", lambda x: mt.initialize_2D_rosette(Nc, Ns, coprime_index=x)),
+    ("Rosette", lambda x: mt.initialize_2D_rosette(Nc, Ns, coprime_index=30)),
     # Waves
-    ("Waves", lambda x: mtt.initialize_2D_waves(Nc, Ns, nb_zigzags=6 * x, width=x)),
-    ("Waves", lambda x: mtt.initialize_2D_waves(Nc, Ns, nb_zigzags=6 * x, width=x)),
-    ("Waves", lambda x: mtt.initialize_2D_waves(Nc, Ns, nb_zigzags=6, width=1)),
+    ("Waves", lambda x: mt.initialize_2D_waves(Nc, Ns, nb_zigzags=6 * x, width=x)),
+    ("Waves", lambda x: mt.initialize_2D_waves(Nc, Ns, nb_zigzags=6 * x, width=x)),
+    ("Waves", lambda x: mt.initialize_2D_waves(Nc, Ns, nb_zigzags=6, width=1)),
     # Lissajous
-    ("Lissajous", lambda x: mtt.initialize_2D_lissajous(Nc, Ns, density=x)),
-    ("Lissajous", lambda x: mtt.initialize_2D_lissajous(Nc, Ns, density=10)),
+    ("Lissajous", lambda x: mt.initialize_2D_lissajous(Nc, Ns, density=x)),
+    ("Lissajous", lambda x: mt.initialize_2D_lissajous(Nc, Ns, density=10)),
 ]
 
 # Initialize trajectory arguments
@@ -152,9 +156,9 @@ def plot_frame(frame_data):
     [ax.clear() for ax in axs_grad]
     trajectory = func(arg)
     ksp_ax.set_title(name, fontsize=displayConfig.fontsize)
-    mtd.display_2D_trajectory(trajectory, one_shot=one_shot, subfigure=ksp_ax)
+    display_2D_trajectory(trajectory, one_shot=one_shot, subfigure=ksp_ax)
     ksp_ax.set_aspect("equal")
-    mtd.display_gradients_simply(
+    display_gradients_simply(
         trajectory,
         shot_ids=[one_shot],
         subfigure=axs_grad,

@@ -14,7 +14,7 @@ Hereafter a 2D spiral trajectory is used for demonstration.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import display_2D_trajectory
+from mrinufft.display import display_2D_trajectory
 
 plt.rcParams["image.cmap"] = "gray"
 
@@ -66,6 +66,7 @@ plt.show()
 #
 # A dummy B0 field map is generated for this example using the input shape.
 
+
 from mrinufft.extras import make_b0map
 
 b0map, _ = make_b0map(mri_data.shape, b0range=(-200, 200), mask=brain_mask)
@@ -83,9 +84,8 @@ plt.show()
 # Trajectory generation
 # ---------------------
 
-from mrinufft import initialize_2D_spiral
+from mrinufft.trajectories import initialize_2D_spiral, Acquisition
 from mrinufft.density import voronoi
-from mrinufft.trajectories.utils import Acquisition
 
 samples = initialize_2D_spiral(Nc=48, Ns=600, nb_revolutions=10)
 t_read = np.arange(samples.shape[1]) * Acquisition.default.raster_time
@@ -102,7 +102,7 @@ plt.show()
 # ==============
 
 from mrinufft import get_operator
-from mrinufft.operators.off_resonance import MRIFourierCorrected
+from mrinufft.operators import MRIFourierCorrected
 
 # Generate standard NUFFT operator
 nufft = get_operator("finufft")(

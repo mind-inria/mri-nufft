@@ -20,8 +20,7 @@ import numpy as np
 from utils import show_trajectories, show_trajectory
 
 # Internal
-import mrinufft as mn
-import mrinufft.trajectories.maths as mntm
+import mrinufft.trajectories as mt
 
 # %%
 # Script options
@@ -62,7 +61,7 @@ one_shot = True  # Highlight one shot in particular
 #   then outside (in-out) or not (center-out). ``(default False)``
 #
 
-trajectory = mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=in_out)
+trajectory = mt.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -75,7 +74,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [8, 16, 32, 64]
-function = lambda x: mn.initialize_2D_radial(x, Ns, tilt=tilt, in_out=in_out)
+function = lambda x: mt.initialize_2D_radial(x, Ns, tilt=tilt, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -89,7 +88,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [8, 16, 32, 64]
-function = lambda x: mn.initialize_2D_radial(Nc, x, tilt=tilt, in_out=in_out)
+function = lambda x: mt.initialize_2D_radial(Nc, x, tilt=tilt, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -105,7 +104,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["uniform", "golden", "mri-golden", np.pi / 17]
-function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=x, in_out=in_out)
+function = lambda x: mt.initialize_2D_radial(Nc, Ns, tilt=x, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -128,7 +127,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [True, False]
-function = lambda x: mn.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=x)
+function = lambda x: mt.initialize_2D_radial(Nc, Ns, tilt=tilt, in_out=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -155,7 +154,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default "archimedes")``
 #
 
-trajectory = mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, in_out=in_out)
+trajectory = mt.initialize_2D_spiral(Nc, Ns, tilt=tilt, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -168,7 +167,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [1 / 8, 1 / 2, 1, 3]
-function = lambda x: mn.initialize_2D_spiral(
+function = lambda x: mt.initialize_2D_spiral(
     Nc, Ns, tilt=tilt, nb_revolutions=x, in_out=in_out
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -194,7 +193,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = ["galilean", "archimedes", "fermat", 1 / 4]
-function = lambda x: mn.initialize_2D_spiral(Nc, Ns, tilt=tilt, spiral=x, in_out=in_out)
+function = lambda x: mt.initialize_2D_spiral(Nc, Ns, tilt=tilt, spiral=x, in_out=in_out)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -217,7 +216,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [False, True]
-function = lambda x: mn.initialize_2D_spiral(
+function = lambda x: mt.initialize_2D_spiral(
     Nc,
     Ns,
     patch_center=x,
@@ -245,8 +244,8 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default True)``
 #
 
-Nc_fibonacci = mntm.get_closest_fibonacci_number(Nc)
-trajectory = mn.initialize_2D_fibonacci_spiral(Nc_fibonacci, Ns)
+Nc_fibonacci = mt.get_closest_fibonacci_number(Nc)
+trajectory = mt.initialize_2D_fibonacci_spiral(Nc_fibonacci, Ns)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -263,7 +262,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0.5, 1, 2, 3]
-function = lambda x: mn.initialize_2D_fibonacci_spiral(
+function = lambda x: mt.initialize_2D_fibonacci_spiral(
     Nc_fibonacci,
     Ns,
     spiral_reduction=x,
@@ -289,7 +288,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [False, True]
-function = lambda x: mn.initialize_2D_fibonacci_spiral(
+function = lambda x: mt.initialize_2D_fibonacci_spiral(
     Nc_fibonacci,
     Ns,
     patch_center=x,
@@ -320,7 +319,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # - ``in_out (bool)``: define whether the shots should travel toward the center
 #   then outside (in-out) or not (center-out). ``(default False)``. See radial.
 
-trajectory = mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out)
+trajectory = mt.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 # %%
@@ -333,7 +332,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # from the center to the edge of k-space.
 
 arguments = [(1, 2), (1, 4), (1, 8), (1, 32)]
-function = lambda x: mn.initialize_2D_vds_spiral(
+function = lambda x: mt.initialize_2D_vds_spiral(
     Nc, oversamp=2, in_out=in_out, Rmin=x[0], Rmax=x[1]
 )
 
@@ -347,7 +346,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # the spiral trajectory in k-space. By default, it is set to 1 / (2 * acq.res[0]).
 
 arguments = [0.1, 0.3, 0.5]
-function = lambda x: mn.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out, krmax=x)
+function = lambda x: mt.initialize_2D_vds_spiral(Nc, oversamp=2, in_out=in_out, krmax=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -372,7 +371,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default 1)``
 #
 
-trajectory = mn.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out)
+trajectory = mt.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -385,7 +384,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0.5, 2, 5, 10]
-function = lambda x: mn.initialize_2D_cones(
+function = lambda x: mt.initialize_2D_cones(
     Nc, Ns, tilt=tilt, in_out=in_out, nb_zigzags=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -402,7 +401,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0.2, 1, 2, 3]
-function = lambda x: mn.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out, width=x)
+function = lambda x: mt.initialize_2D_cones(Nc, Ns, tilt=tilt, in_out=in_out, width=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -427,7 +426,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default 1)``. See cones
 #
 
-trajectory = mn.initialize_2D_sinusoide(Nc, Ns, tilt=tilt, in_out=in_out)
+trajectory = mt.initialize_2D_sinusoide(Nc, Ns, tilt=tilt, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -453,7 +452,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #   ``(default "uniform")``. See radial
 #
 
-trajectory = mn.initialize_2D_propeller(Nc, Ns, nb_strips=nb_repetitions)
+trajectory = mt.initialize_2D_propeller(Nc, Ns, nb_strips=nb_repetitions)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -467,7 +466,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [2, 3, 4, 6]
-function = lambda x: mn.initialize_2D_propeller(Nc, Ns, nb_strips=x)
+function = lambda x: mt.initialize_2D_propeller(Nc, Ns, nb_strips=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -487,7 +486,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   It should be lower than or equal to ``Nc``.
 #
 
-trajectory = mn.initialize_2D_rings(Nc, Ns, nb_rings=Nc)
+trajectory = mt.initialize_2D_rings(Nc, Ns, nb_rings=Nc)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -502,7 +501,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [Nc, int(2 * Nc / 3), int(Nc / 3)]
-function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=x)
+function = lambda x: mt.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -513,7 +512,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [Nc, int(4 * Nc / 3), 2 * Nc]
-function = lambda x: mn.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=Nc)
+function = lambda x: mt.initialize_2D_rings(Nc=x, Ns=Ns, nb_rings=Nc)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -542,7 +541,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # - ``seed (int)``: random seed for reproducibility, used only
 #   to draw the circle centers (default None).
 
-trajectory = mn.initialize_2D_eccentric(Nc, Ns, radius_ratio=0.3, seed=seed)
+trajectory = mt.initialize_2D_eccentric(Nc, Ns, radius_ratio=0.3, seed=seed)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -555,7 +554,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0.05, 0.2, 0.35, 0.5]
-function = lambda x: mn.initialize_2D_eccentric(Nc=Nc, Ns=Ns, radius_ratio=x, seed=seed)
+function = lambda x: mt.initialize_2D_eccentric(Nc=Nc, Ns=Ns, radius_ratio=x, seed=seed)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 # %%
@@ -567,7 +566,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, 0.3, 0.6, 1]
-function = lambda x: mn.initialize_2D_eccentric(
+function = lambda x: mt.initialize_2D_eccentric(
     Nc=Nc, Ns=Ns, radius_ratio=0.3, center_ratio=x, seed=seed
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -590,7 +589,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   to define the shot curvature. ``(default 0)``
 #
 
-trajectory = mn.initialize_2D_rosette(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_2D_rosette(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -609,7 +608,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0, 1, 5, 10]
-function = lambda x: mn.initialize_2D_rosette(Nc, Ns, in_out=in_out, coprime_index=x)
+function = lambda x: mt.initialize_2D_rosette(Nc, Ns, in_out=in_out, coprime_index=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -633,7 +632,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   different segments of the k-space. ``(default 1)``
 #
 
-trajectory = mn.initialize_2D_polar_lissajous(Nc, Ns, in_out=in_out)
+trajectory = mt.initialize_2D_polar_lissajous(Nc, Ns, in_out=in_out)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -647,7 +646,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [0, 3, 12, 15]
-function = lambda x: mn.initialize_2D_polar_lissajous(
+function = lambda x: mt.initialize_2D_polar_lissajous(
     Nc, Ns, in_out=in_out, coprime_index=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -670,7 +669,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [1, 2, 3, 4, 6, 8, 12]
-function = lambda x: mn.initialize_2D_polar_lissajous(
+function = lambda x: mt.initialize_2D_polar_lissajous(
     Nc, Ns, in_out=in_out, nb_segments=x
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -694,7 +693,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 for io in [True, False]:
     for cpi in [0, 6]:
         arguments = [1, 2, 4, 12]
-        function = lambda x: mn.initialize_2D_polar_lissajous(
+        function = lambda x: mt.initialize_2D_polar_lissajous(
             Nc, Ns, in_out=io, coprime_index=cpi, nb_segments=x
         )
         show_trajectories(
@@ -721,7 +720,7 @@ for io in [True, False]:
 #   to covering the full band without overlapping other bands. ``(default 1)``
 #
 
-trajectory = mn.initialize_2D_waves(Nc, Ns, nb_zigzags=5)
+trajectory = mt.initialize_2D_waves(Nc, Ns, nb_zigzags=5)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -733,7 +732,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 # trajectories.
 
 arguments = [1, 2.5, 5, 10]
-function = lambda x: mn.initialize_2D_waves(Nc, Ns, nb_zigzags=x)
+function = lambda x: mt.initialize_2D_waves(Nc, Ns, nb_zigzags=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -752,7 +751,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #
 
 arguments = [0, 1, 1.5, 3]
-function = lambda x: mn.initialize_2D_waves(Nc, Ns, width=x)
+function = lambda x: mt.initialize_2D_waves(Nc, Ns, width=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 
@@ -774,7 +773,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 #   ``(default "1")``
 #
 
-trajectory = mn.initialize_2D_lissajous(Nc, Ns, density=1)
+trajectory = mt.initialize_2D_lissajous(Nc, Ns, density=1)
 show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 
 
@@ -787,7 +786,7 @@ show_trajectory(trajectory, figure_size=figure_size, one_shot=one_shot)
 #
 
 arguments = [1, 1.5, 2, 3]
-function = lambda x: mn.initialize_2D_lissajous(Nc, Ns, density=x)
+function = lambda x: mt.initialize_2D_lissajous(Nc, Ns, density=x)
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
 
 

@@ -32,7 +32,7 @@ from deepinv.optim.optimizers import optim_builder
 from deepinv.optim.prior import WaveletPrior, TVPrior
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
-from mrinufft import kspace_as_real
+from mrinufft.operators import kspace_as_real
 import torch
 import os
 

@@ -13,7 +13,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import display_2D_trajectory, display_3D_trajectory, displayConfig
+from mrinufft.display import display_2D_trajectory, display_3D_trajectory, displayConfig
 from mrinufft.trajectories import conify, initialize_2D_spiral
 from mrinufft.trajectories.utils import Acquisition, Hardware
 

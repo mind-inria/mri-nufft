@@ -38,3 +38,10 @@ for _, name, _ in pkgutil.iter_modules(
 for v in FourierOperatorBase.interfaces.values():
     __all__.append(v[1].__name__)  # add the interface to the __all__ list
     globals()[v[1].__name__] = v[1]  # add the interface to the module namespace
+
+try:
+    from .autodiff import kspace_as_real, kspace_as_cpx, image_as_real, image_as_cpx
+
+    __all__ += ["kspace_as_real", "kspace_as_cpx", "image_as_real", "image_as_cpx"]
+except ImportError:
+    pass

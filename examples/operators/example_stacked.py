@@ -14,7 +14,7 @@ Hereafter a stack of 2D spirals is used for demonstration.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import display_2D_trajectory
+from mrinufft.display import display_2D_trajectory
 
 plt.rcParams["image.cmap"] = "gray"
 
@@ -52,7 +52,7 @@ plt.show()
 # the location of the different slices.
 #
 
-from mrinufft import initialize_2D_spiral
+from mrinufft.trajectories import initialize_2D_spiral
 from mrinufft.density import voronoi
 
 samples = initialize_2D_spiral(Nc=16, Ns=500, nb_revolutions=10)
@@ -69,7 +69,7 @@ plt.show()
 # Operator setup
 # ==============
 
-from mrinufft.operators.stacked import MRIStackedNUFFT
+from mrinufft.operators import MRIStackedNUFFT
 
 stacked_nufft = MRIStackedNUFFT(
     samples=2 * np.pi * samples,  # normalize for finufft

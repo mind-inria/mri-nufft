@@ -9,18 +9,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.datasets import face
 
-import mrinufft
+from mrinufft import get_operator
 from mrinufft.density import voronoi
 from mrinufft.display import display_2D_trajectory
+from mrinufft.trajectories import initialize_2D_radial
 
 # Create a 2D radial trajectory for demo
-samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)
+samples_loc = initialize_2D_radial(Nc=100, Ns=500)
 # Get a 2D image for the demo (512x512)
 image = np.complex64(face(gray=True)[256:768, 256:768])
 
 ## The real deal starts here ##
 # Choose your NUFFT backend (installed independly from the package)
-NufftOperator = mrinufft.get_operator("finufft")
+NufftOperator = get_operator("finufft")
 
 # For better image quality we use a density compensation
 density = voronoi(samples_loc)

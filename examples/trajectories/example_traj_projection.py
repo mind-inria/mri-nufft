@@ -36,8 +36,13 @@ A collection of methods to make trajectories fit hardware constraints.
 #
 
 # Internal
-import mrinufft as mn
-from mrinufft.trajectories.utils import Acquisition, compute_gradients_and_slew_rates
+from mrinufft.trajectories import (
+    Acquisition,
+    compute_gradients_and_slew_rates,
+    initialize_2D_spiral,
+    project_trajectory,
+    parameterize_by_arc_length,
+)
 from utils import show_trajectory_full
 
 # External
@@ -71,7 +76,7 @@ sample_freq = 60  # Frequency of samples to display in the trajectory plots
 # We will be using a cone trajectory to showcase the different methods as
 # it switches several times between high gradients and slew rates.
 
-original_trajectory = mn.initialize_2D_spiral(
+original_trajectory = initialize_2D_spiral(
     Nc, Ns, in_out=in_out, nb_revolutions=nb_revolutions
 )
 
@@ -95,7 +100,6 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 # %%
 #
 
-from mrinufft.trajectories.projection import parameterize_by_arc_length
 
 projected_trajectory = parameterize_by_arc_length(original_trajectory)
 
@@ -122,7 +126,6 @@ print(f"Max gradient: {grad_max:.3f} T/m, Max slew rate: {slew_max:.3f} T/m/ms")
 # %%
 #
 
-from mrinufft.trajectories.projection import project_trajectory
 
 projected_trajectory = project_trajectory(
     original_trajectory,
