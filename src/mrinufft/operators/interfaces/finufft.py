@@ -37,47 +37,45 @@ class RawFinufftPlan:
         self.n_samples = len(samples)
         # the first element is dummy to index type 1 with 1
         # and type 2 with 2.
-        self.plans = [None, None, None]
-        self.grad_plan = None
 
-        for i in [1, 2]:
-            self._make_plan(i, samples, **kwargs)
-            self._set_pts(i, samples)
-
-    def _make_plan(self, typ, samples, **kwargs):
-        self.plans[typ] = Plan(
-            typ,
+        self.plan = Plan(
+            2,
             self.shape,
             self.n_trans,
             self.eps,
             dtype=DTYPE_R2C[str(samples.dtype)],
             **kwargs,
         )
+        self.grad_plan: Plan
 
-    def _set_pts(self, typ, samples):
+        self._set_pts(samples)
+
+    def _set_pts(self, samples, typ=2):
         fpts_axes = [None, None, None]
         for i in range(self.ndim):
             fpts_axes[i] = np.array(samples[:, i], dtype=samples.dtype)
-        plan = self.grad_plan if typ == "grad" else self.plans[typ]
-        plan.setpts(*fpts_axes)
+        if typ == 2:
+            self.plan.setpts(*fpts_axes)
+        elif typ == "grad":
+            self.grad_plan.setpts(*fpts_axes)
 
     def adj_op(self, coeffs_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
         if self.n_trans == 1:
             grid_data = grid_data.reshape(self.shape)
             coeffs_data = coeffs_data.reshape(self.n_samples)
-        return self.plans[1].execute(coeffs_data, grid_data)
+        return self.plan.execute_adjoint(coeffs_data, grid_data)
 
     def op(self, coeffs_data, grid_data):
         """Type 2 transform. Uniform to non-uniform."""
         if self.n_trans == 1:
             grid_data = grid_data.reshape(self.shape)
             coeffs_data = coeffs_data.reshape(self.n_samples)
-        return self.plans[2].execute(grid_data, coeffs_data)
+        return self.plan.execute(grid_data, coeffs_data)
 
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
-        self.plans[2], self.grad_plan = self.grad_plan, self.plans[2]
+        self.plan, self.grad_plan = self.grad_plan, self.plan
 
 
 class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
@@ -127,7 +125,7 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
     ):
         samples = _array_to_numpy(proper_trajectory(samples, normalize="pi"))
         samples = np.asarray(samples, order="F")
-        self.raw_op = RawFinufftPlan(
+        raw_op = RawFinufftPlan(
             samples,
             shape,
             n_trans=n_trans,
@@ -141,9 +139,11 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
             n_batchs=n_batchs,
             n_trans=n_trans,
             smaps=smaps,
-            raw_op=self.raw_op,
+            raw_op=raw_op,
             squeeze_dims=squeeze_dims,
         )
+
+        self.raw_op: RawFinufftPlan
 
     def update_samples(self, new_samples, unsafe=False):
         """Update the samples of the NUFFT operator.
@@ -172,10 +172,10 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
         else:
             self._samples = new_samples
 
-        for typ in [1, 2, "grad"]:
+        for typ in [2, "grad"]:
             if typ == "grad" and not self._grad_wrt_traj:
                 continue
-            self.raw_op._set_pts(typ, self._samples)
+            self.raw_op._set_pts(self._samples, typ=typ)
         self.compute_density(self._density_method)
 
     def _make_plan_grad(self, **kwargs):
