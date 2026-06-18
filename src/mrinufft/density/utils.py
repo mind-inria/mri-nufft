@@ -33,7 +33,7 @@ def flat_traj(normalize="unit"):
         return decorator
 
 
-def normalize_weights(weights):
+def _normalize_weights(weights):
     """Normalize samples weights to reflect their importance.
 
     Higher weights have lower importance.
