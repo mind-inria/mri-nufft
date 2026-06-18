@@ -1,6 +1,6 @@
 """PyNUFFT CPU Interface."""
 
-from ..base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU
 from mrinufft._utils import proper_trajectory
 
 PYNUFFT_CPU_AVAILABLE = True

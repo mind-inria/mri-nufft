@@ -6,7 +6,7 @@ from mrinufft.operators.off_resonance import MRIFourierCorrected
 from functools import wraps
 import torch
 import numpy as np
-from .._array_compat import NP2TORCH, _array_to_torch
+from mrinufft._array_compat import NP2TORCH, _array_to_torch
 from torch.types import Tensor
 from deepinv.physics.forward import LinearPhysics
 

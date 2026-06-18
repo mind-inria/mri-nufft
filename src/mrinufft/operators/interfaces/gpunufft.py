@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 from numpy.typing import NDArray
 
-from ..base import FourierOperatorBase, _ToggleGradPlanMixin
+from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
     get_array_module,

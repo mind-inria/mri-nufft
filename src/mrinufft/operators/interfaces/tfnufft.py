@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from ..base import FourierOperatorBase
+from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._array_compat import with_tensorflow, TENSORFLOW_AVAILABLE
 from mrinufft._utils import proper_trajectory
 

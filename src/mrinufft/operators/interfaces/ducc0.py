@@ -3,7 +3,7 @@
 import numpy as np
 import os
 
-from ..base import FourierOperatorCPU
+from mrinufft.operators.base import FourierOperatorCPU
 
 DUCC0_AVAILABLE = True
 try:
