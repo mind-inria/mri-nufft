@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from mrinufft import get_density, get_operator
+from mrinufft.density.utils import get_density
+from mrinufft.operators.base import get_operator
 from mrinufft.trajectories.utils import (
     Acquisition,
     convert_gradients_to_slew_rates,

@@ -1,0 +1,1 @@
+"""Trajectories initialization module."""
