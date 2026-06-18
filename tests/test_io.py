@@ -6,9 +6,11 @@ from case_trajectories import CasesTrajectories
 from pytest_cases import fixture, parametrize, parametrize_with_cases
 
 from mrinufft.io import read_trajectory, write_trajectory
-from mrinufft.io.pulseq import convert_trajectory_to_gradients
-from mrinufft.io.utils import add_phase_to_kspace_with_shifts
-from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
+from mrinufft.io import add_phase_to_kspace_with_shifts
+from mrinufft.trajectories.gradients import (
+    get_prephasors_and_spoilers,
+    convert_trajectory_to_gradients,
+)
 from mrinufft.trajectories.inits import initialize_2D_radial, initialize_3D_cones
 from mrinufft.trajectories.utils import Acquisition, Gammas, Hardware
 
