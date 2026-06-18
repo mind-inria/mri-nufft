@@ -87,7 +87,6 @@ class Model(torch.nn.Module):
         return self.unet(image_2ch)
 
 
-
 # %%
 # Split utility : works for any branch-based trajectory (radial, cones, etc.)
 #  ordered as n_cones consecutive blocks of n_samples points.
@@ -318,7 +317,6 @@ def plot_epoch(data):
     """Update both columns of the figure at each epoch."""
     img_sup, img_ss, losses_sup, losses_ss = data
     cur_epoch = len(losses_sup)
-
 
     recon_sup.set_data(np.abs(img_sup[0] + 1j * img_sup[1]))
     loss_curve_sup.set_xdata(np.arange(cur_epoch))
