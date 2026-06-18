@@ -8,6 +8,8 @@ Doing non-Cartesian MRI has never been so easy.
 
 from . import display, trajectories, operators, density, extras, io
 
+from mrinufft.operators import get_operator
+
 __all__ = [
     "display",
     "trajectories",
@@ -15,6 +17,7 @@ __all__ = [
     "density",
     "extras",
     "io",
+    "get_operator",
 ]
 
 from importlib.metadata import version, PackageNotFoundError
