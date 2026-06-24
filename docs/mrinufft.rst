@@ -12,5 +12,4 @@ Core Functions
 .. autosummary::
    :toctree: generated/_autosummary
    :nosignatures:
-
       

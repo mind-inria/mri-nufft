@@ -17,6 +17,7 @@ A collection of methods to make trajectories fit hardware constraints.
 # %%
 # .. list-table:: Constraint fitting methods
 #    :header-rows: 1
+#    :stub-columns: 1
 #
 #    * -
 #      - Gradient strength
@@ -28,12 +29,11 @@ A collection of methods to make trajectories fit hardware constraints.
 #      - No
 #      - Yes
 #      - No
-#   * - Projection onto convex sets
+#    * - Projection onto convex sets
 #      - Yes
 #      - Yes
 #      - No
 #      - No
-#
 
 # Internal
 from mrinufft.trajectories import (

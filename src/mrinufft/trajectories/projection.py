@@ -226,10 +226,11 @@ class GradientLinearProjection:
 
     The gradient is given by:
     .. math::
-            \nabla F(q) = - A s^*
 
-    where s^* is the projection of the primal variable :math:`z = c - M^H q`
-    onto the linear constraint set defined by A and v.
+       \nabla F(q) = - A s^*
+
+    where :math:`s^*` is the projection of the primal variable :math:`z = c - M^H q`
+    onto the linear constraint set defined by :math:`A` and :math:`v`.
 
     Parameters
     ----------
@@ -240,7 +241,7 @@ class GradientLinearProjection:
     linear_projector: LinearProjection, optional
         An instance of the LinearProjection class to perform the projection
         onto the constraint set. If not provided, the projection will be
-        performed without any constraints (i.e., s^* = z).
+        performed without any constraints (i.e., :math:`s^* = z`).
 
     ${proj_ref}
     """

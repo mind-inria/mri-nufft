@@ -539,7 +539,6 @@ def lsmr(
     .. [1] D. C.-L. Fong and M. A. Saunders,
            "LSMR: An iterative algorithm for sparse least-squares problems",
            SIAM J. Sci. Comput., vol. 33, pp. 2950-2971, 2011.
-           :arxiv:`1006.0758`
     .. [2] LSMR Software, https://web.stanford.edu/group/SOL/software/lsmr/
 
     Notes

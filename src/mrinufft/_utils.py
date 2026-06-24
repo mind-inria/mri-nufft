@@ -79,12 +79,53 @@ def proper_trajectory(trajectory, normalize="pi"):
     return new_traj
 
 
-def _apply_docstring_subs(func: Callable, docstring_subs: dict[str, str]) -> Callable:
+_SEE_ALSO_REGISTRY = """
+
+
+.. seealso::
+
+    - This function is part of the `{registry}` registry.
+    You can find other registered functions in this registry below:
+
+    .. autoregistry:: {registry}
+"""
+
+_GETTER_DOCSTRING = """
+Get the {registry} function from its name.
+
+Available methods are:
+
+.. autoregistry:: {registry}
+
+Parameters
+----------
+method_name: str
+    The name of the method to retrieve.
+*args, **kwargs:
+    Arguments to pass to the method if it is callable.
+
+Returns
+-------
+The method corresponding to the given name, or the result of calling it with the
+provided arguments.
+
+Raises
+------
+ValueError
+    If the method name is not found in the registry.
+"""
+
+
+def _apply_docstring_subs(
+    func: Callable, docstring_subs: dict[str, str], registry: str = ""
+) -> Callable:
     if func.__doc__:
         docstring = cleandoc(func.__doc__)
         for key, sub in docstring_subs.items():
             docstring = docstring.replace(f"${{{key}}}", sub)
         func.__doc__ = docstring
+        if registry:
+            func.__doc__ += _SEE_ALSO_REGISTRY.format(registry=registry)
     return func
 
 
@@ -116,6 +157,8 @@ class MethodRegister:
         self, register_name: str, docstring_subs: dict[str, str] | None = None
     ):
         self.register_name = register_name
+        if docstring_subs is None:
+            docstring_subs = {}
         self.docstring_subs = docstring_subs
 
     def __call__(self, method_name=None):
@@ -126,7 +169,9 @@ class MethodRegister:
 
         def decorator(func):
             self.registry[method_name] = func
-            func = _apply_docstring_subs(func, self.docstring_subs or {})
+            func = _apply_docstring_subs(
+                func, self.docstring_subs, registry=self.register_name
+            )
             return func
 
         if callable(method_name):
@@ -153,7 +198,7 @@ class MethodRegister:
                 return method(*args, **kwargs)
             return method
 
-        getter.__doc__ = f"""Get the {self.register_name} function from its name."""
+        getter.__doc__ = _GETTER_DOCSTRING.format(registry=self.register_name)
         getter.__name__ = f"get_{self.register_name}"
         return getter
 
