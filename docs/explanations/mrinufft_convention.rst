@@ -66,7 +66,7 @@ The base NUFFT operators can be extended to add extra functionality. With MRI-NU
 Adding a NUFFT Backend
 ----------------------
 
-Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how other backends have been inplemented. CPU-based nufft interface can use the `FourierOperatorCPU` to minimize the boiler-plate.
+Adding a NUFFT backend to MRI-NUFFT should be easy. We recommend to check how other backends have been inplemented. CPU-based nufft interface can use the `FourierOperatorCPU` to minimize the boiler-plate. You can take inspiration from the following pull-request on GitHub: https://github.com/mind-inria/mri-nufft/pull/345
 
 .. _kspace_traj:
 

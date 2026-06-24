@@ -54,12 +54,14 @@ class MRIFourierCorrected(FourierOperatorBase):
     interpolators: str, dict, tuple[NDArray, NDArray]
         Determine how to decompose the field-map.
 
-        - If ``str``, use an existing method in `extra/field_map.py` with
-          default parameters
-        - If ``{"name":name, **kwargs}`` use an existing
-          method in `extra_field_map.py` parameterize by kwargs.
-        - If``tuple[NDArray, NDArray]`` use this directly as the decomposition
-          (B and C)
+        - If ``str``, use an existing method from
+          py:func:`~mrinufft.extras.get_orc_factorization` with default
+          parameters
+        - If ``{"name":name, **kwargs}`` use an existing method
+          py:func:`~mrinufft.extras.get_orc_factorization` parameterize by
+          kwargs.
+        - If``tuple[NDArray, NDArray]`` use this directly as the
+          decomposition (B and C)
 
     Notes
     -----

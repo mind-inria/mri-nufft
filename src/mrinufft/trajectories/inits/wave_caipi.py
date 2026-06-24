@@ -27,7 +27,8 @@ def initialize_3D_wave_caipi(
     caipi_delta: int = 0,
     acq: Acquisition | None = None,
 ) -> NDArray:
-    """Initialize 3D trajectories with Wave-CAIPI.
+    """
+    Initialize 3D trajectories with Wave-CAIPI.
 
     This implementation is based on the work from [Bil+15]_.
 
@@ -36,6 +37,7 @@ def initialize_3D_wave_caipi(
     Nc_or_R : int or tuple[int, int]
         Number of shots `Nc` or GRAPPA `R` factors along the two
         phase-encoding directions.
+
         - If an **int** is provided, it is interpreted as `Nc` (number of shots).
         - If a **tuple[int, int]** is provided, it is interpreted as
           `R` (GRAPPA factors).

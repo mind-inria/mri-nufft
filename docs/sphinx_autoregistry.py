@@ -36,31 +36,24 @@ class AutoregistryDirective(SphinxDirective):  # <--- Inherit from SphinxDirecti
     # We now have access to self.env, self.app, and self.parse_text_to_nodes
 
     def run(self):
+        """Generate a list of registered methods for the specified registry key."""
         registry_key = self.arguments[0]
 
         try:
             # 1. Build rendering context
             registry_dict = MethodRegister.registry_global[registry_key]
-            items_context = [
-                {
-                    "name": name,
-                    "truename": (
-                        func.__name__ if hasattr(func, "__name__") else str(func)
-                    ),
-                    "path": (
-                        (func.__module__ + "." + func.__name__)
-                        if hasattr(func, "__module__")
-                        else str(func)
-                    ),
-                    "sig": get_signature(func),
-                    # ... (rest of your context building logic) ...
-                }
-                for name, func in registry_dict.items()
-            ]
-
             context = {
-                "registry_key": registry_key,
-                "items": items_context,
+                "items": [
+                    {
+                        "name": name,
+                        "truename": (
+                            func.__name__ if hasattr(func, "__name__") else str(func)
+                        ),
+                        "module": ".".join(str(func.__module__).split(".")[:2]),
+                        "sig": get_signature(func),
+                    }
+                    for name, func in registry_dict.items()
+                ]
             }
 
             # 2. Render template to RST string

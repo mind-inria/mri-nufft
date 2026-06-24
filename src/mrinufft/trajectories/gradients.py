@@ -683,10 +683,8 @@ def connect_gradient(
     -----
     - This functions expects k-space points that are unnormalized (i.e., in m^-1).
     - If N is not provided, the function will compute the minimum length needed
-    to satisfy the hardware constraints for each connection, and use the minimum length
-    that satisfies all connections.
-
-
+      to satisfy the hardware constraints for each connection, and use the
+      minimum length that satisfies all connections.
     """
     acq = acq or Acquisition.default
 

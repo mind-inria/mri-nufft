@@ -170,6 +170,7 @@ def _extract_kspace_center(
 
 
 register_smaps = MethodRegister("smaps", docstring_subs=_smap_docs)
+
 get_smaps: Callable[[str], Callable[..., NDArray]] = register_smaps.make_getter()
 
 
@@ -235,7 +236,7 @@ def low_frequency(
     window_fun: "Hann", "Hanning", "Hamming", or a callable, default None.
         The window function to apply to the selected data. It is computed with
         the center locations selected. Only works with circular mask.
-        If window_fun is a callable, it takes as input the array (n_samples x n_dims)
+        If window_fun is a callable, it takes as input the array ``(n_samples, n_dims)``
         of sample positions and returns an array of n_samples weights to be
         applied to the selected k-space values, before the smaps estimation.
     blurr_factor : float or list, optional
@@ -371,7 +372,7 @@ def cartesian_espirit(
     Parameters
     ----------
     kspace: NDArray
-        The k-space data in Cartesian grid. Shape (n_coils, *kspace_shape)
+        The k-space data in Cartesian grid. Shape ``(n_coils, *kspace_shape)``
     shape : tuple
         The shape of the image.
     ${espirit_params}

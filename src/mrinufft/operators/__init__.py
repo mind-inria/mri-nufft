@@ -1,4 +1,20 @@
-"""Collection of operators applying the NUFFT used in a MRI context."""
+"""Collection of operators applying the NUFFT used in a MRI context.
+
+The recommended way to create a Fourier operator is to use the
+:py:func:`~mrinufft.operators.get_operator` function, select a NUFFT backend and
+provide the trajectory, shape and extras parameters. The Fourier operator can
+then be used to apply the forward :py:meth:`~.FourierOperatorBase.op` or adjoint
+NUFFT (:py:meth:`~.FourierOperatorBase.adj_op`), or to compute the
+pseudo-inverse of the operator (:py:meth:`~.FourierOperatorBase.pinv_solver`).
+
+.. tip::
+
+   All the operators abide by the same interface, and could (mostly) be used
+   interchangeably. See :ref:`mri-nufft-interface` for a detailed description of
+   the interface.
+
+
+"""
 
 import importlib
 import pkgutil

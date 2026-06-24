@@ -505,19 +505,19 @@ def kspace_as_cpx(y):
 def image_as_real(x):
     """View image tensor as real channel-packed tensor.
 
-    Converts a complex image tensor of shape (B, C, *XYZ) to a real-valued
-    tensor of shape (B, 2C, *XYZ) by moving the real/imaginary parts into
+    Converts a complex image tensor of shape ``(B, C, *XYZ)`` to a real-valued
+    tensor of shape ``(B, 2C, *XYZ)`` by moving the real/imaginary parts into
     the channel dimension.
 
     Parameters
     ----------
     x : torch.Tensor
-        Complex image tensor of shape (B, C, *XYZ).
+        Complex image tensor of shape ``(B, C, *XYZ)``.
 
     Returns
     -------
     torch.Tensor
-        Real-valued channel-packed tensor of shape (B, 2C, *XYZ).
+        Real-valued channel-packed tensor of shape ``(B, 2C, *XYZ)``.
     """
     b, c, *spatial = x.shape
     # view_as_real gives (B, C, *XYZ, 2); move last dim to channel position
@@ -530,18 +530,18 @@ def image_as_real(x):
 def image_as_cpx(x):
     """View real channel-packed image tensor as complex.
 
-    Converts a real-valued tensor of shape (B, 2C, *XYZ) back to a complex
-    tensor of shape (B, C, *XYZ).
+    Converts a real-valued tensor of shape ``(B, 2C, *XYZ)`` back to a complex
+    tensor of shape ``(B, C, *XYZ)``.
 
     Parameters
     ----------
     x : torch.Tensor
-        Real-valued channel-packed tensor of shape (B, 2C, *XYZ).
+        Real-valued channel-packed tensor of shape ``(B, 2C, *XYZ)``.
 
     Returns
     -------
     torch.Tensor
-        Complex tensor of shape (B, C, *XYZ).
+        Complex tensor of shape ``(B, C, *XYZ)``.
     """
     b, c2, *spatial = x.shape
     c = c2 // 2

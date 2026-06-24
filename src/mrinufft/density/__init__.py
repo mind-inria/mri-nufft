@@ -1,6 +1,12 @@
 """Density compensation methods.
 
-.. autoregistry:: density
+.. tip::
+
+    Density methods are available through the `get_density` function, that can be used
+    by calling ``get_density(<key>)`` or with ``get_density(<key>, *args, **kwargs)``.
+    Here are the function available from the registry:
+
+    .. autoregistry:: density
 """
 
 from .geometry_based import cell_count, voronoi

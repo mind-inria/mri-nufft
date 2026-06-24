@@ -98,6 +98,11 @@ def get_operator(
 ):
     """Return an MRI Fourier operator interface using the correct backend.
 
+    .. tip::
+
+       Don't be scared of by the huge type signature, it is here to help IDEs
+       and linters to understand the return type of this function.
+
     Parameters
     ----------
     backend_name: str
@@ -120,6 +125,21 @@ def get_operator(
     Raises
     ------
     ValueError if the backend is not available.
+
+    Examples
+    --------
+    >>> from mrinufft import get_operator
+    # Return a constructor for the finufft backend with autograd support for data.
+    >>> nufftKlass = get_operator("finufft", wrt_data=True, wrt_traj=False)
+    # create an instance of this operator with the given samples and shape
+    >>> nufft = nufftKlass(samples, shape, density=True)
+
+
+    Alternatively, you can create an instance directly by passing the arguments to
+    ``get_operator``:
+
+    >>> nufft = get_operator("finufft", wrt_data=True, wrt_traj=False, samples=samples,\
+    shape=shape, density=True. ...)
     """
     available = True
     backend_name = backend_name.lower()

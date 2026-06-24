@@ -32,7 +32,7 @@ However, if you want to use some specific backend or develop on mri-nufft, you c
 
 .. tip::
 
-  using uv will ensure that the correction version of pytorch (with CUDA) is installed. for more info see `this < https://docs.astral.sh/uv/guides/integration/pytorch/>`__
+  using uv will ensure that the correction version of pytorch (with CUDA) is installed. for more info see: https://docs.astral.sh/uv/guides/integration/pytorch/
   
 
 Using ``uv``
