@@ -132,12 +132,20 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get the coverage badge from CI
+        id: download-badge
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: coverage_badge
           path: docs_build/examples/_static
           run-id: ${{ github.event.workflow_run.id}}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create fallback coverage badge
+        if: steps.download-badge.outcome == 'failure'
+        run: |
+          mkdir -p docs_build/examples/_static
+          curl -s "https://img.shields.io/badge/coverage-not--found-lightgrey" -o docs_build/examples/_static/coverage_badge.svg
 
       - name: Deploy Examples for Colab import
         uses: peaceiris/actions-gh-pages@v4
