@@ -933,4 +933,4 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             test_im = cp.ones(volume_shape, dtype=test_op.cpx_dtype)
             test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
             density_comp /= cp.mean(cp.abs(test_im_recon))
-        return density_comp.squeeze()
+        return abs(density_comp.squeeze())
