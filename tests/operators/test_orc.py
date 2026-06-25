@@ -10,20 +10,20 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import image_from_op, kspace_from_op, assert_correlate
 
 from case_trajectories import CasesTrajectories
-
+from mrinufft.operators.base import DTYPE_R2C
 from mrinufft import get_operator
 from mrinufft._array_compat import _array_to_numpy
 from mrinufft.extras import make_b0map, make_t2smap
 
 
-def get_extended_fourier_matrix(ktraj, shape, cpx_fieldmap, readout_time):
+def get_extended_fourier_matrix(ktraj, shape, cpx_fieldmap, readout_time, cpx_dtype):
     """Generate the extended fourier matrix with off-resonnance.
 
     For test purposes only.
     """
     base_fourier = get_fourier_matrix(_array_to_numpy(ktraj), shape, normalize=True)
     off_grid = np.outer(readout_time, cpx_fieldmap.ravel())
-    base_fourier *= np.exp(off_grid).astype(np.complex64)
+    base_fourier *= np.exp(off_grid).astype(cpx_dtype)
     return base_fourier
 
 
@@ -51,7 +51,11 @@ def orc_info(operator):
     cpx_fieldmap = get_complex_fieldmap_rad(b0_map, r2s_map)
     readout_time = np.linspace(0, 5e-2, len(operator.samples), dtype=np.float32)
     cp_matrix = get_extended_fourier_matrix(
-        operator.samples, operator.shape, cpx_fieldmap, readout_time
+        operator.samples,
+        operator.shape,
+        cpx_fieldmap,
+        readout_time,
+        operator.cpx_dtype,
     )
 
     orc_nufft = operator.with_off_resonance_correction(

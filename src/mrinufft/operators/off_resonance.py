@@ -154,8 +154,8 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         if xp.all(field_map == 0) or xp.all(readout_time == 0):
             # No off-resonance effect
-            self.B = xp.ones((self.n_samples, 1), dtype=xp.complex64)
-            self.C = xp.ones((1, *self.shape), dtype=xp.complex64)
+            self.B = xp.ones((self.n_samples, 1), dtype=self.cpx_dtype)
+            self.C = xp.ones((1, *self.shape), dtype=self.cpx_dtype)
             return
 
         if isinstance(interpolators, tuple):
@@ -252,7 +252,9 @@ class MRIFourierCorrected(FourierOperatorBase):
             data = cp.array(data, copy=None)
 
         xp = get_array_module(self.B)
-        y = xp.zeros((self.n_batchs, self.n_coils, self.n_samples), dtype=xp.complex64)
+        y = xp.zeros(
+            (self.n_batchs, self.n_coils, self.n_samples), dtype=self.cpx_dtype
+        )
 
         data_d = xp.asarray(data)
         for ll in range(self.n_interpolators):
@@ -286,7 +288,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         B, C = self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         NS, NK = self.n_shots, self.n_samples_per_shot
-        ytmp = xp.zeros((B, C, K), dtype=xp.complex64)
+        ytmp = xp.zeros((B, C, K), dtype=self.cpx_dtype)
         on_gpu = is_cuda_array(coeffs)
         if is_host_array(self.B) and on_gpu:
             coeffs = coeffs.get()
@@ -294,9 +296,9 @@ class MRIFourierCorrected(FourierOperatorBase):
             coeffs = cp.array(coeffs, copy=None)
 
         if not self.uses_sense:
-            img = xp.zeros((B, C, *XYZ), dtype=xp.complex64)
+            img = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
         else:
-            img = xp.zeros((B, 1, *XYZ), dtype=xp.complex64)
+            img = xp.zeros((B, 1, *XYZ), dtype=self.cpx_dtype)
         coeffs = coeffs.reshape(B, C, NS, NK)
         for ll in range(self.n_interpolators):
             Bconj = self.B[:, ll].conj()
