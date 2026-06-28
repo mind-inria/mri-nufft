@@ -226,6 +226,8 @@ class MRITorchKbNufft(FourierOperatorBase):
     @with_torch
     def gram_op(self, data, toeplitz=True):
         """Compute the Gram operator."""
+        import torchkbnufft as tkbn
+
         if not toeplitz:
             return self.adj_op(self.op(data))
         if not hasattr(self, "_gram_op"):
