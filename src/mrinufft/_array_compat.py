@@ -1,78 +1,98 @@
 """Array libraries compatibility utils."""
 
+from __future__ import annotations
+
+import importlib.util
 import warnings
-from numbers import Number  # abstract base type for python numeric type
-from functools import wraps, partial
+from functools import partial, wraps
 from inspect import cleandoc
-from numpy.typing import NDArray, DTypeLike
+from numbers import Number  # abstract base type for python numeric type
+from typing import Any
+
 import numpy as np
-
-ARRAY_LIBS = {
-    "numpy": (np, np.ndarray),
-    "cupy": (None, None),
-    "torch": (None, None),
-    "tensorflow": (None, None),
-}
-
-ArrayTypes = np.ndarray
-# TEST import of array libraries.
-
-TENSORFLOW_AVAILABLE = True
-CUPY_AVAILABLE = True
-AUTOGRAD_AVAILABLE = True
-TORCH_AVAILABLE = True
-
-try:
-    import cupy as cp
-
-    ARRAY_LIBS["cupy"] = (cp, cp.ndarray)
-    ArrayTypes = ArrayTypes | cp.ndarray
-except ImportError:
-    CUPY_AVAILABLE = False
-
-try:
-    import torch
-
-    ARRAY_LIBS["torch"] = (torch, torch.Tensor)
-    ArrayTypes = ArrayTypes | torch.Tensor
-except ImportError:
-    AUTOGRAD_AVAILABLE = False
-    TORCH_AVAILABLE = False
-    pass
-    NP2TORCH = {}
-else:
-    NP2TORCH = {
-        np.dtype("float64"): torch.float64,
-        np.dtype("float32"): torch.float32,
-        np.dtype("complex64"): torch.complex64,
-        np.dtype("complex128"): torch.complex128,
-    }
-try:
-    import tensorflow as tf
-    from tensorflow.experimental import numpy as tnp
-
-    ARRAY_LIBS["tensorflow"] = (tnp, tnp.ndarray)
-    ArrayTypes = ArrayTypes | tnp.ndarray
-except ImportError:
-    TENSORFLOW_AVAILABLE = False
-    pass
-
-DEEPINV_AVAILABLE = TORCH_AVAILABLE
-
-try:
-    from deepinv.physics.forward import LinearPhysics
-except ImportError:
-    DEEPINV_AVAILABLE = False
-    pass
+from numpy.typing import DTypeLike, NDArray
 
 
-def get_array_module(array: NDArray | Number) -> np:  # type: ignore
-    """Get the module of the array."""
+def _module_available(name: str) -> bool:
+    """Check availability of an optional dependency without importing it."""
+    return importlib.util.find_spec(name) is not None
+
+
+CUPY_AVAILABLE = _module_available("cupy")
+TORCH_AVAILABLE = _module_available("torch")
+AUTOGRAD_AVAILABLE = TORCH_AVAILABLE
+TENSORFLOW_AVAILABLE = _module_available("tensorflow")
+DEEPINV_AVAILABLE = TORCH_AVAILABLE and _module_available("deepinv")
+
+_ARRAY_NAMESPACES = ("numpy", "cupy", "torch", "tensorflow")
+
+
+def is_array(x: Any) -> bool:
+    """Return True if x is a numpy/cupy/torch/tensorflow array (not a np scalar)."""
+    return (
+        not isinstance(x, np.generic) and _get_array_module_name(x) in _ARRAY_NAMESPACES
+    )
+
+
+_NP2TORCH = None
+_TF_CUDA_AVAILABLE = None
+
+
+def _np2torch():
+    """Lazily build and cache the numpy->torch dtype mapping."""
+    global _NP2TORCH
+    if _NP2TORCH is None:
+        import torch
+
+        _NP2TORCH = {
+            np.dtype("float64"): torch.float64,
+            np.dtype("float32"): torch.float32,
+            np.dtype("complex64"): torch.complex64,
+            np.dtype("complex128"): torch.complex128,
+        }
+    return _NP2TORCH
+
+
+def _tf_cuda_is_available():
+    """Check (and cache) whether Tensorflow has CUDA support."""
+    global _TF_CUDA_AVAILABLE
+    if _TF_CUDA_AVAILABLE is None:
+        if TENSORFLOW_AVAILABLE:
+            import tensorflow as tf
+
+            devices = tf.config.list_physical_devices()
+            _TF_CUDA_AVAILABLE = "GPU" in [d.device_type for d in devices]
+        else:
+            _TF_CUDA_AVAILABLE = False
+    return _TF_CUDA_AVAILABLE
+
+
+def __getattr__(name):
+    """Expose lazily-computed values as module attributes (PEP 562)."""
+    if name == "NP2TORCH":
+        return _np2torch()
+    if name == "TF_CUDA_AVAILABLE":
+        return _tf_cuda_is_available()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def _get_array_module_name(array) -> str:
+    return type(array).__module__.partition(".")[0]
+
+
+def get_array_module(array):
+    """Get the array module (numpy/cupy/torch/tnp) of an array."""
     if isinstance(array, Number | np.generic):
         return np
-    for lib, array_type in ARRAY_LIBS.values():
-        if lib is not None and isinstance(array, array_type):
-            return lib
+    root = _get_array_module_name(array)
+    if root == "numpy":
+        return np
+    if root in ("cupy", "torch"):
+        return importlib.import_module(root)
+    if root == "tensorflow":
+        from tensorflow.experimental import numpy as tnp
+
+        return tnp
     raise ValueError(f"Unknown array library (={type(array)}.")
 
 
@@ -81,24 +101,9 @@ def auto_cast(array, dtype: DTypeLike):
 
     This automatically convert numpy/torch dtype to suitable format.
     """
-    module = get_array_module(array)
-    if module.__name__ == "torch":
-        return array.to(NP2TORCH[np.dtype(dtype)], copy=False)
-    else:
-        return array.astype(dtype, copy=False)
-
-
-def _tf_cuda_is_available():
-    """Check whether Tensorflow has CUDA support or not."""
-    if TENSORFLOW_AVAILABLE:
-        devices = tf.config.list_physical_devices()
-        device_type = [device.device_type for device in devices]
-        return "GPU" in device_type
-    else:
-        return False
-
-
-TF_CUDA_AVAILABLE = _tf_cuda_is_available()
+    if _get_array_module_name(array) == "torch":
+        return array.to(_np2torch()[np.dtype(dtype)], copy=False)
+    return array.astype(dtype, copy=False)
 
 
 def is_cuda_array(var) -> bool:
@@ -109,12 +114,12 @@ def is_cuda_array(var) -> bool:
         return False
 
 
-def is_cuda_tensor(var: ArrayTypes) -> bool:
+def is_cuda_tensor(var: Any) -> bool:
     """Check if var is a CUDA tensor."""
-    return TORCH_AVAILABLE and isinstance(var, torch.Tensor) and var.is_cuda
+    return _get_array_module_name(var) == "torch" and var.is_cuda
 
 
-def is_host_array(var: ArrayTypes) -> bool:
+def is_host_array(var: Any) -> bool:
     """Check if var is a host contiguous np array."""
     try:
         if isinstance(var, np.ndarray):
@@ -129,6 +134,8 @@ def is_host_array(var: ArrayTypes) -> bool:
 
 def pin_memory(array: NDArray) -> NDArray:
     """Create a copy of the array in pinned memory."""
+    import cupy as cp
+
     mem = cp.cuda.alloc_pinned_memory(array.nbytes)
     ret = np.frombuffer(mem, array.dtype, array.size).reshape(array.shape)
     ret[...] = array
@@ -250,6 +257,8 @@ def _array_to_numpy(_arg):
     if xp.__name__ == "torch":
         _arg = _arg.numpy(force=True)
     elif xp.__name__ == "cupy":
+        import cupy as cp
+
         _arg = cp.asnumpy(_arg)
     elif "tensorflow" in xp.__name__:
         _arg = _arg.numpy()
@@ -258,6 +267,8 @@ def _array_to_numpy(_arg):
 
 def _array_to_cupy(_arg, device=None):
     """Convert array to Cupy."""
+    import cupy as cp
+
     xp = get_array_module(_arg)
     if xp.__name__ == "numpy":
         with cp.cuda.Device(device):
@@ -271,6 +282,8 @@ def _array_to_cupy(_arg, device=None):
         else:
             _arg = cp.from_dlpack(_arg)
     elif "tensorflow" in xp.__name__:
+        import tensorflow as tf
+
         if "CPU" in _arg.device:
             with cp.cuda.Device(device):
                 _arg = cp.asarray(_arg.numpy())
@@ -282,6 +295,8 @@ def _array_to_cupy(_arg, device=None):
 
 def _array_to_torch(_arg, device=None):
     """Convert array to torch."""
+    import torch
+
     if device is None:
         device = _get_device(_arg)
     xp = get_array_module(_arg)
@@ -291,9 +306,13 @@ def _array_to_torch(_arg, device=None):
         if torch.cuda.is_available():
             _arg = torch.from_dlpack(_arg)
         else:
+            import cupy as cp
+
             warnings.warn("data is on gpu, it will be moved to CPU.")
             _arg = torch.as_tensor(cp.asnumpy(_arg))
     elif "tensorflow" in xp.__name__:
+        import tensorflow as tf
+
         if "CPU" in _arg.device:
             _arg = torch.as_tensor(_arg.numpy(), device=device)
         else:
@@ -302,22 +321,28 @@ def _array_to_torch(_arg, device=None):
 
 
 def _array_to_tensorflow(_arg):
+    import tensorflow as tf
+
     xp = get_array_module(_arg)
     if xp.__name__ == "numpy":
         with tf.device("CPU"):
             _arg = tf.convert_to_tensor(_arg)
     elif xp.__name__ == "cupy":
-        if TF_CUDA_AVAILABLE:
+        if _tf_cuda_is_available():
             _arg = tf.experimental.dlpack.from_dlpack(_arg.toDlpack())
         else:
+            import cupy as cp
+
             warnings.warn("data is on gpu, it will be moved to CPU.")
             _arg = tf.convert_to_tensor(cp.asnumpy(_arg))
     elif xp.__name__ == "torch":
+        import torch
+
         if _arg.requires_grad:
             _arg = _arg.detach()
         if _arg.is_cpu:
             _arg = tf.convert_to_tensor(_arg)
-        elif TF_CUDA_AVAILABLE:
+        elif _tf_cuda_is_available():
             _arg = tf.experimental.dlpack.from_dlpack(
                 torch.utils.dlpack.to_dlpack(_arg)
             )
@@ -332,9 +357,9 @@ def _convert(_array_to_xp, args, kwargs=None):
         _arg = args[n]
         # All array are converted to the detected module
         # but numpy scalars are left as is.
-        if isinstance(_arg, ArrayTypes):
+        if is_array(_arg):
             args[n] = _array_to_xp(_arg)
-        elif isinstance(_arg, tuple | list) and isinstance(_arg[0], ArrayTypes):
+        elif isinstance(_arg, tuple | list) and is_array(_arg[0]):
             args[n], _ = _convert(_array_to_xp, _arg)
         elif isinstance(_arg, dict):
             _, args[n] = _convert(_array_to_xp, [], _arg)
