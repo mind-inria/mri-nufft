@@ -4,18 +4,12 @@ The SigPy NUFFT is fully implemented in Python.
 """
 
 import warnings
-
+from mrinufft._array_compat import _module_available
 import numpy as np
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
 
-SIGPY_AVAILABLE = True
-try:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        import sigpy.fourier as sgf
-except ImportError:
-    SIGPY_AVAILABLE = False
+SIGPY_AVAILABLE = _module_available("sigpy")
 
 
 class RawSigpyNUFFT:
@@ -64,6 +58,8 @@ class RawSigpyNUFFT:
 
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
+        import sigpy.fourier as sgf
+
         grid_data_ = grid_data.reshape(self.n_trans, *self.shape)
         ret = sgf.nufft(
             grid_data_,
@@ -77,6 +73,8 @@ class RawSigpyNUFFT:
 
     def adj_op(self, coeffs_data, grid_data):
         """Adjoint Operator."""
+        import sigpy.fourier as sgf
+
         coeffs_data_ = coeffs_data.reshape(self.n_trans, len(self.samples))
         ret = sgf.nufft_adjoint(
             coeffs_data_,

@@ -3,7 +3,6 @@
 from mrinufft._array_compat import (
     _get_device,
     _to_interface,
-    ARRAY_LIBS,
     get_array_module,
 )
 
@@ -163,23 +162,3 @@ class MRISubspace(FourierOperatorBase):
     def __getattr__(self, name):
         """Delegate attribute access to the underlying fourier operator."""
         return getattr(self._fourier_op, name)
-
-
-def _get_arraylib_from_operator(
-    fourier_op, use_gpu
-):  # maybe that is usefull for MRIFourierCorrected constructor?
-    LUT = {
-        "MRIBartNUFFT": ("numpy", "numpy"),
-        "MRICufiNUFFT": ("cupy", "cupy"),
-        "MRIfinufft": ("numpy", "numpy"),
-        "MRIDUCC0": ("numpy", "numpy"),
-        "MRIGpuNUFFT": ("cupy", "cupy"),
-        "MRInfft": ("numpy", "numpy"),
-        "MRIPynufft": ("numpy", "numpy"),
-        "MRISigpyNUFFT": ("numpy", "cupy"),
-        "MRITensorflowNUFFT": ("tensorflow", "tensorflow"),
-        "MRITorchKbNufft": ("torch", "torch"),
-        "TorchKbNUFFTcpu": ("torch", "torch"),
-        "TorchKbNUFFTgpu": ("torch", "torch"),
-    }
-    return ARRAY_LIBS[LUT[fourier_op.__class__.__name__][use_gpu]][0]

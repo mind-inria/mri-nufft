@@ -2,7 +2,6 @@
 
 import numpy as np
 import numpy.testing as npt
-import scipy as sp
 
 from .factories import from_interface
 
@@ -50,24 +49,24 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
 
 def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
     """Assert the correlation between two arrays."""
-    slope_reg, intercept, rvalue, stderr, intercept_stderr = sp.stats.linregress(
-        a.flatten(), b.flatten()
-    )
+    # Concatenate real and imaginary parts so complex64/complex128 inputs work correctly.
+    a_flat = np.concatenate([np.real(a).ravel(), np.imag(a).ravel()]).astype(np.float64)
+    b_flat = np.concatenate([np.real(b).ravel(), np.imag(b).ravel()]).astype(np.float64)
+
+    rvalue = np.corrcoef(a_flat, b_flat)[0, 1]
+    a_var = np.var(a_flat)
+    slope_reg = np.cov(a_flat, b_flat)[0, 1] / a_var if a_var != 0 else np.nan
+    intercept = np.mean(b_flat) - slope_reg * np.mean(a_flat)
     abs_slope_reg = abs(slope_reg)
-    if np.iscomplex(rvalue):
-        rvalue = abs(rvalue)
 
     if r_value_err is not None and abs(rvalue - 1) > r_value_err:
         raise AssertionError(
-            f"RValue {rvalue} != 1 ± {r_value_err}\n "
-            f"intercept={intercept}, stderr={stderr}, "
-            f"intercept_stderr={intercept_stderr}"
+            f"RValue {rvalue} != 1 ± {r_value_err}\n intercept={intercept}"
         )
     if slope_err is not None and abs(abs_slope_reg - slope) > slope_err:
         raise AssertionError(
-            f"Slope {abs_slope_reg} != {slope} ± {slope_err}\n r={rvalue},"
-            f"intercept={intercept}, stderr={stderr}, "
-            f"intercept_stderr={intercept_stderr}"
+            f"Slope {abs_slope_reg} != {slope} ± {slope_err}\n r={rvalue}, "
+            f"intercept={intercept}"
         )
 
 
