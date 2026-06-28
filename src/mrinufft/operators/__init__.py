@@ -44,7 +44,13 @@ for v in FourierOperatorBase.interfaces.values():
 # does not drag in those heavy deps; they load only on first access.
 from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
 
-_AUTODIFF_HELPERS = ("kspace_as_real", "kspace_as_cpx", "image_as_real", "image_as_cpx")
+_AUTODIFF_HELPERS = (
+    "kspace_as_real",
+    "kspace_as_cpx",
+    "image_as_real",
+    "image_as_cpx",
+    "DeepInvPhyNufft",
+)
 
 if AUTOGRAD_AVAILABLE and DEEPINV_AVAILABLE:
     __all__ += list(_AUTODIFF_HELPERS)
