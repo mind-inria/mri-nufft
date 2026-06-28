@@ -6,19 +6,35 @@ reconstruction.
 Doing non-Cartesian MRI has never been so easy.
 """
 
-from . import display, trajectories, operators, density, extras, io
+import importlib as _importlib
+from typing import TYPE_CHECKING
 
-from mrinufft.operators import get_operator
+submodules = ["display", "trajectories", "operators", "density", "extras", "io"]
 
-__all__ = [
-    "display",
-    "trajectories",
-    "operators",
-    "density",
-    "extras",
-    "io",
-    "get_operator",
-]
+__all__ = submodules + ["get_operator", "__version__"]
+
+
+def __getattr__(name):
+    """Lazily import submodules on first access (PEP 562)."""
+    if name in submodules:
+        return _importlib.import_module(f"mrinufft.{name}")
+    if name == "get_operator":
+        return _importlib.import_module("mrinufft.operators").get_operator
+    try:
+        return globals()[name]
+    except KeyError:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from None
+
+
+def __dir__():
+    return __all__
+
+
+if TYPE_CHECKING:
+    # Static visibility for the one re-exported symbol; the submodules above
+    # are real packages and resolve without help.
+    from mrinufft.operators import get_operator
+
 
 from importlib.metadata import version, PackageNotFoundError
 
