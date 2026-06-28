@@ -79,7 +79,3 @@ def __getattr__(name):
 
         return getattr(autodiff, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-        "DeepInvPhyNufft",
-    ]
-except ImportError:
-    pass
