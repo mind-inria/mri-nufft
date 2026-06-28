@@ -6,16 +6,17 @@
 
 from __future__ import annotations
 
-from mrinufft.density.utils import flat_traj
-from mrinufft._array_compat import with_numpy_cupy, get_array_module
-from mrinufft._utils import MethodRegister, _fill_doc
-import numpy as np
-from mrinufft.extras.cartesian import fft, ifft
-from mrinufft._array_compat import with_numpy
-from numpy.typing import NDArray
 import gc
-
 from collections.abc import Callable
+
+import numpy as np
+from numpy.typing import NDArray
+
+from mrinufft._array_compat import get_array_module, with_numpy, with_numpy_cupy
+from mrinufft._utils import MethodRegister, _fill_doc
+from mrinufft.density.utils import flat_traj
+
+from .cartesian import fft, ifft
 
 ########################################################
 # Estimation of Off-Resonance-Correction Interpolators #
@@ -257,7 +258,7 @@ def low_frequency(
     from mrinufft import get_operator
 
     try:
-        from skimage.filters import threshold_otsu, gaussian
+        from skimage.filters import gaussian, threshold_otsu
         from skimage.morphology import convex_hull_image
     except ImportError as err:
         raise ImportError(

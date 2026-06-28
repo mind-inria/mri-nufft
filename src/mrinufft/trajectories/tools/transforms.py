@@ -7,7 +7,7 @@ import numpy.linalg as nl
 from numpy.typing import NDArray
 from scipy.interpolate import interp1d
 
-from mrinufft.trajectories.maths import Rv, Rx, Ry, Rz
+from mrinufft.trajectories.maths.rotations import Rv, Rx, Ry, Rz
 from mrinufft.trajectories.utils import (
     KMAX,
     initialize_tilt,

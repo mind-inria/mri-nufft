@@ -26,8 +26,8 @@ from utils import (
 )
 
 # Internal
-import mrinufft as mn
-from mrinufft import display_2D_trajectory, display_3D_trajectory
+import mrinufft.trajectories as mt
+from mrinufft.display import display_2D_trajectory, display_3D_trajectory
 
 # %%
 # Script options
@@ -63,7 +63,7 @@ one_shot = 0  # Highlight one shot in particular
 # defined by a cutoff ratio, followed by a polynomial decay over
 # outer regions as defined in [Cha+22]_.
 
-cutoff_density = mn.create_cutoff_decay_density(shape=shape_2d, cutoff=0.2, decay=2)
+cutoff_density = mt.create_cutoff_decay_density(shape=shape_2d, cutoff=0.2, decay=2)
 show_density(cutoff_density, figure_size=figure_size)
 
 # %%
@@ -78,7 +78,7 @@ show_density(cutoff_density, figure_size=figure_size)
 # simply calls this function with ``cutoff=0``.
 
 arguments = [0, 0.1, 0.2, 0.3]
-function = lambda x: mn.create_cutoff_decay_density(
+function = lambda x: mt.create_cutoff_decay_density(
     shape=shape_2d,
     cutoff=x,
     decay=2,
@@ -98,7 +98,7 @@ show_densities(
 # are expected have decays in the positive range.
 
 arguments = [-1, 0, 0.5, 2]
-function = lambda x: mn.create_cutoff_decay_density(
+function = lambda x: mt.create_cutoff_decay_density(
     shape=shape_2d,
     cutoff=0.2,
     decay=x,
@@ -123,7 +123,7 @@ show_densities(
 
 
 arguments = [None, (1, 1), (1, 2), (1e-3, 0.5e-3)]
-function = lambda x: mn.create_cutoff_decay_density(
+function = lambda x: mt.create_cutoff_decay_density(
     shape=shape_2d,
     cutoff=0.2,
     decay=2,
@@ -145,7 +145,7 @@ show_densities(
 # learned from existing datasets and used for new acquisitions.
 
 dataset = bwdl.get_mri(4, "T1")[:, ::2, ::2]
-energy_density = mn.create_energy_density(dataset=dataset)
+energy_density = mt.create_energy_density(dataset=dataset)
 show_density(energy_density, figure_size=figure_size, log_scale=True)
 
 # %%
@@ -163,7 +163,7 @@ show_density(energy_density, figure_size=figure_size, log_scale=True)
 # different organs and/or contrasts.
 
 arguments = [50, 100, 150]
-function = lambda x: mn.create_energy_density(dataset=bwdl.get_mri(4, "T1")[x : x + 20])
+function = lambda x: mt.create_energy_density(dataset=bwdl.get_mri(4, "T1")[x : x + 20])
 show_densities(
     function,
     arguments,
@@ -185,7 +185,7 @@ show_densities(
 # for convenience it was limited to wavelets as in the
 # original implementation.
 
-chauffert_density = mn.create_chauffert_density(
+chauffert_density = mt.create_chauffert_density(
     shape=shape_2d,
     wavelet_basis="haar",
     nb_wavelet_scales=3,
@@ -201,7 +201,7 @@ show_density(chauffert_density, figure_size=figure_size)
 # or as a custom ``pywt.Wavelet`` object.
 
 arguments = ["haar", "rbio2.2", "coif4", "sym8"]
-function = lambda x: mn.create_chauffert_density(
+function = lambda x: mt.create_chauffert_density(
     shape=shape_2d,
     wavelet_basis=x,
     nb_wavelet_scales=3,
@@ -219,7 +219,7 @@ show_densities(
 # The number of wavelet scales to use in decomposition.
 
 arguments = [1, 2, 3, 4]
-function = lambda x: mn.create_chauffert_density(
+function = lambda x: mt.create_chauffert_density(
     shape=shape_2d,
     wavelet_basis="haar",
     nb_wavelet_scales=x,
@@ -285,7 +285,7 @@ show_densities(function, arguments, subfig_size=subfigure_size)
 # density grid locations.
 
 arguments = densities.keys()
-function = lambda x: mn.sample_from_density(Nc * Ns, densities[x], method="random")
+function = lambda x: mt.sample_from_density(Nc * Ns, densities[x], method="random")
 show_locations(function, arguments, subfig_size=subfigure_size)
 
 
@@ -299,7 +299,7 @@ show_locations(function, arguments, subfig_size=subfigure_size)
 # in 3D, mostly to reduce computation times in the most demanding cases.
 
 arguments = densities.keys()
-function = lambda x: mn.sample_from_density(Nc * Ns, densities[x], method="lloyd")
+function = lambda x: mt.sample_from_density(Nc * Ns, densities[x], method="lloyd")
 show_locations(function, arguments, subfig_size=subfigure_size)
 
 
@@ -323,7 +323,7 @@ show_locations(function, arguments, subfig_size=subfigure_size)
 # is provided to have pseudo-random walks to improve coverage.
 
 arguments = densities.keys()
-function = lambda x: mn.initialize_2D_random_walk(
+function = lambda x: mt.initialize_2D_random_walk(
     Nc, Ns, density=densities[x][::4, ::4]
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -337,7 +337,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # ``mrinufft.sample_from_density``.
 
 arguments = densities.keys()
-function = lambda x: mn.initialize_2D_random_walk(
+function = lambda x: mt.initialize_2D_random_walk(
     Nc, Ns, density=densities[x][::4, ::4], method="lloyd"
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -348,8 +348,8 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # trajectory by oversampling the shots with cubic splines.
 
 arguments = densities.keys()
-function = lambda x: mn.oversample(
-    mn.initialize_2D_random_walk(
+function = lambda x: mt.oversample(
+    mt.initialize_2D_random_walk(
         Nc, Ns, density=densities[x][::4, ::4], method="lloyd"
     ),
     4 * Ns,
@@ -366,7 +366,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # with a complexity in O(n²) in time and memory.
 
 arguments = densities.keys()
-function = lambda x: mn.initialize_2D_travelling_salesman(
+function = lambda x: mt.initialize_2D_travelling_salesman(
     Nc,
     Ns,
     density=densities[x],
@@ -381,7 +381,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # spaced point distributions and obtain a more deterministic coverage.
 
 arguments = densities.keys()
-function = lambda x: mn.initialize_2D_travelling_salesman(
+function = lambda x: mt.initialize_2D_travelling_salesman(
     Nc,
     Ns,
     density=densities[x],
@@ -397,8 +397,8 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # and then oversample up to the desired shot length.
 
 arguments = densities.keys()
-function = lambda x: mn.oversample(
-    mn.initialize_2D_travelling_salesman(Nc, Ns, density=densities[x], method="lloyd"),
+function = lambda x: mt.oversample(
+    mt.initialize_2D_travelling_salesman(Nc, Ns, density=densities[x], method="lloyd"),
     4 * Ns,
 )
 show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_size)
@@ -413,7 +413,7 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 # shot direction as shown below.
 
 arguments = ((None, None, None), ("y", None, "x"), ("phi", None, "r"), ("y", "x", "r"))
-function = lambda x: mn.initialize_2D_travelling_salesman(
+function = lambda x: mt.initialize_2D_travelling_salesman(
     Nc,
     Ns,
     density=densities["Custom"],
@@ -435,15 +435,15 @@ show_trajectories(function, arguments, one_shot=one_shot, subfig_size=subfigure_
 
 from mrinufft.trajectories.projection import project_trajectory
 
-acq = mn.Acquisition(
+acq = mt.Acquisition(
     fov=(0.24, 0.24, 0.03),
     img_size=(256, 256, 3),
 )
 
 arguments = densities.keys()
 function = lambda x: project_trajectory(
-    mn.oversample(
-        mn.initialize_2D_travelling_salesman(
+    mt.oversample(
+        mt.initialize_2D_travelling_salesman(
             Nc,
             Ns,
             density=densities[x],

@@ -3,15 +3,15 @@
 .. autoregistry:: density
 """
 
-from .geometry_based import voronoi, voronoi_unique, cell_count
+from .geometry_based import cell_count, voronoi
 from .nufft_based import pipe
-from .utils import get_density
+from .utils import flat_traj, get_density, register_density
 
 __all__ = [
+    "cell_count",
+    "flat_traj",
+    "get_density",
+    "pipe",
     "register_density",
     "voronoi",
-    "voronoi_unique",
-    "pipe",
-    "cell_count",
-    "get_density",
 ]

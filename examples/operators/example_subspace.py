@@ -16,7 +16,7 @@ Hereafter a 2D spiral trajectory is used for demonstration.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import display_2D_trajectory
+from mrinufft.display import display_2D_trajectory
 
 # %%
 # Data preparation
@@ -148,7 +148,7 @@ plt.show()
 # Trajectory generation
 # ---------------------
 
-from mrinufft import initialize_2D_spiral
+from mrinufft.trajectories import initialize_2D_spiral
 from mrinufft.density import voronoi
 
 samples = initialize_2D_spiral(

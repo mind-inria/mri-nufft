@@ -1,7 +1,9 @@
 {{ "``{}.{}``".format(module.split(".")[-1], objname) | underline}}
 
 .. automodule:: {{ fullname }}
-
+   :no-members:
+   :no-inherited-members:
+      
    {% block attributes %}
    {% if attributes %}
    .. rubric:: Module attributes
@@ -52,13 +54,3 @@
    {% endif %}
    {% endblock %}
 
-{% block modules %}
-{% if modules %}
-.. autosummary::
-   :toctree:
-   :recursive:
-{% for item in modules %}
-   {{ item }}
-{%- endfor %}
-{% endif %}
-{% endblock %}

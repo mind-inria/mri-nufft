@@ -16,8 +16,12 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-import mrinufft.trajectories.inits as mtt
-from mrinufft.trajectories.display import get_gridded_trajectory
+from mrinufft.trajectories import (
+    initialize_3D_floret,
+    initialize_3D_phyllotaxis_radial,
+    initialize_3D_seiffert_spiral,
+)
+from mrinufft.display import get_gridded_trajectory
 from mrinufft.trajectories.utils import Acquisition
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
@@ -80,9 +84,9 @@ def create_grid(grid_type, trajectories, **kwargs):
 # =======================
 # We instantiate a bunch of sampling trajectories to display hereafter with `get_gridded_trajectory` and previous helper functions.
 trajectories = {
-    "Radial": mtt.initialize_3D_phyllotaxis_radial(64 * 8, 64),
-    "FLORET": mtt.initialize_3D_floret(64 * 8, 64, nb_revolutions=2),
-    "Seiffert Spirals": mtt.initialize_3D_seiffert_spiral(64 * 8, 64),
+    "Radial": initialize_3D_phyllotaxis_radial(64 * 8, 64),
+    "FLORET": initialize_3D_floret(64 * 8, 64, nb_revolutions=2),
+    "Seiffert Spirals": initialize_3D_seiffert_spiral(64 * 8, 64),
 }
 
 # %%

@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.spatial import Voronoi
 
-from .utils import flat_traj, normalize_weights, register_density
+from .utils import flat_traj, _normalize_weights, register_density
 
 
 def _vol3d(points):
@@ -47,9 +47,7 @@ def _vol2d(points):
     return abs(area) / 2.0
 
 
-@register_density
-@flat_traj
-def voronoi_unique(traj, *args, **kwargs):
+def _voronoi_unique(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
     This assume unicity of the point in the kspace.
@@ -122,12 +120,12 @@ def voronoi(traj, *args, **kwargs):
         i0f = i0f[0]
         i0[i0f] = False
         wi = np.zeros(len(traj))
-        wi[~i0] = voronoi_unique(traj[~i0])
+        wi[~i0] = _voronoi_unique(traj[~i0])
         i0[i0f] = True
         wi[i0] = wi[i0f] / np.sum(i0)
     else:
-        wi = voronoi_unique(traj)
-    return 1 / normalize_weights(wi)
+        wi = _voronoi_unique(traj)
+    return 1 / _normalize_weights(wi)
 
 
 @register_density
@@ -189,4 +187,4 @@ def cell_count(traj, shape, osf=1.0):
                 if sxyz:
                     weights[list(sxyz)] = len(sxyz)
 
-    return normalize_weights(weights)
+    return _normalize_weights(weights)

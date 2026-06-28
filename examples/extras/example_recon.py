@@ -22,20 +22,22 @@ complex-valued and real-valued regularizations applied to real and imaginary com
 # %%
 # Imports
 # -------
+import os
+
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from brainweb_dl import get_mri
+
 from deepinv.optim.data_fidelity import L2, L2Distance
 from deepinv.optim import PDCP
 from deepinv.optim.optimizers import optim_builder
 from deepinv.optim.prior import WaveletPrior, TVPrior
+from deepinv.loss.metric import PSNR, SSIM
+
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_3D_cones
-from mrinufft import kspace_as_real
-from deepinv.loss.metric import PSNR, SSIM
-from mrinufft.operators.autodiff import image_as_cpx
-import torch
-import os
+from mrinufft.operators import image_as_cpx, kspace_as_real
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 

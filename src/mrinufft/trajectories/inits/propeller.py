@@ -3,7 +3,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.tools import rotate
+from mrinufft.trajectories.tools.transforms import rotate
 from mrinufft.trajectories.utils import KMAX
 
 

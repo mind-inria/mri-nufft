@@ -35,13 +35,7 @@ if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
     from mrinufft.operators.off_resonance import MRIFourierCorrected
-else:
-    MRIFourierCorrected = Any  # type: ignore
-    DeepInvPhyNufft = Any  # type: ignore
-    MRINufftAutoGrad = Any  # type: ignore
-    MRIStackedNUFFT = Any  # type: ignore
-    MRIStackedNUFFTGPU = Any  # type: ignore
-    #
+
 # Mapping between numpy float and complex types.
 DTYPE_R2C = {"float32": "complex64", "float64": "complex128"}
 
@@ -503,7 +497,7 @@ class FourierOperatorBase(ABC):
             case None | False:
                 self._density = None
                 return
-            case True:
+            case True | "pipe":
                 method_ = get_density("pipe")
                 kwargs["backend"] = self.backend
             case {"name": str(name), **kwargs}:
@@ -583,7 +577,7 @@ class FourierOperatorBase(ABC):
         NDArray
             Reconstructed image
         """
-        from ..extras.optim import get_optimizer
+        from mrinufft.extras import get_optimizer
 
         return get_optimizer(optim)(operator=self, kspace_data=kspace_data, **kwargs)
 
@@ -1063,9 +1057,13 @@ def power_method(
     if norm_func is None:
         norm_func = np.linalg.norm
     return_as_is = True
-    if x is None:
+    if x is None and isinstance(operator, FourierOperatorBase):
         return_as_is = False
         x = np.random.random(operator.shape).astype(operator.cpx_dtype)
+    elif x is None:
+        raise ValueError(
+            "If operator is not a FourierOperatorBase, an initial x should be provided."
+        )
     xp = get_array_module(x)
     x_norm = norm_func(x)
     x /= x_norm

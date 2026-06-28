@@ -254,7 +254,7 @@ class Hardware:
 
 
 # fmt: off
-class SIEMENS:
+class SiemensGradient:
     """Common hardware configurations for Siemens MRI systems."""
 
     TERRA          = Hardware(gmax=80*SI.milli, smax=200, field_strength=7)
@@ -311,7 +311,7 @@ class Acquisition:
 
     fov: tuple[float, float, float]  # Field of View in m
     img_size: tuple[int, int, int]  # Image size in pixels
-    hardware: Hardware = SIEMENS.TERRA  # Hardware configuration
+    hardware: Hardware = SiemensGradient.TERRA  # Hardware configuration
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
     adc_dwell_time: float = 5 * SI.micro  # us
     norm_factor: float = 0.5

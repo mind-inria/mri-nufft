@@ -20,13 +20,14 @@ from matplotlib import pyplot as plt
 from skimage.metrics import peak_signal_noise_ratio as psnr
 
 import mrinufft
-from mrinufft.extras.optim import loss_l2_reg, loss_l2_AHreg
+from mrinufft.extras import loss_l2_reg, loss_l2_AHreg
+from mrinufft.trajectories import initialize_2D_spiral
 
 BACKEND = os.environ.get("MRINUFFT_BACKEND", "cufinufft")
 
 # %%
 # Setup Inputs
-samples_loc = mrinufft.initialize_2D_spiral(Nc=64, Ns=512, nb_revolutions=8)
+samples_loc = initialize_2D_spiral(Nc=64, Ns=512, nb_revolutions=8)
 ground_truth = get_mri(sub_id=4)
 ground_truth = ground_truth[90]
 # Normalize the ground truth image

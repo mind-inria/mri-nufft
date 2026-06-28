@@ -21,7 +21,7 @@ torchkbnufft-gpu = ["torchkbnufft", "torch", "torchvision", "cupy-cuda13x[ctk]"]
 cufinufft = ["cufinufft>=2.4.0", "cupy-cuda13x[ctk]"]
 tensorflow = ["tensorflow-mri>=0.22.0 ; python_version<'3.11'"]
 finufft = ["finufft>=2.4.0"]
-sigpy = ["sigpy"]
+sigpy = ["sigpy", "numba>=0.65"]
 pynfft = ["pynfft3"]
 ducc0 = ["ducc0>=0.40.0"]
 
@@ -85,7 +85,7 @@ ignore = [
 ]
 [tool.ruff.lint.per-file-ignores]
 "examples/**" = ["D", "E731"]
-
+"__init__.py" = ["E402"] # ignore module order
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
 

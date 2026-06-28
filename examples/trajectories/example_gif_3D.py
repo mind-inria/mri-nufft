@@ -12,9 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 
-import mrinufft.trajectories.display as mtd
-import mrinufft.trajectories.inits as mtt
-from mrinufft.trajectories.display import displayConfig
+import mrinufft.trajectories as mt
+from mrinufft.display import (
+    displayConfig,
+    display_3D_trajectory,
+    display_gradients_simply,
+)
 
 # %%
 # Script options
@@ -38,73 +41,73 @@ duration = 150  # seconds
 # Initialize trajectory function
 functions = [
     # 3D Cones
-    ("3D Cones", lambda x: mtt.initialize_3D_cones(Nc, Ns, width=x)[::-1]),
-    ("3D Cones", lambda x: mtt.initialize_3D_cones(Nc, Ns, width=x)[::-1]),
-    ("3D Cones", lambda x: mtt.initialize_3D_cones(Nc, Ns, nb_zigzags=x)[::-1]),
-    ("3D Cones", lambda x: mtt.initialize_3D_cones(Nc, Ns, nb_zigzags=x)[::-1]),
-    ("3D Cones", lambda x: mtt.initialize_3D_cones(Nc, Ns)[::-1]),
+    ("3D Cones", lambda x: mt.initialize_3D_cones(Nc, Ns, width=x)[::-1]),
+    ("3D Cones", lambda x: mt.initialize_3D_cones(Nc, Ns, width=x)[::-1]),
+    ("3D Cones", lambda x: mt.initialize_3D_cones(Nc, Ns, nb_zigzags=x)[::-1]),
+    ("3D Cones", lambda x: mt.initialize_3D_cones(Nc, Ns, nb_zigzags=x)[::-1]),
+    ("3D Cones", lambda x: mt.initialize_3D_cones(Nc, Ns)[::-1]),
     # FLORET
-    ("FLORET", lambda x: mtt.initialize_3D_floret(Nc, Ns, nb_revolutions=x)),
-    ("FLORET", lambda x: mtt.initialize_3D_floret(Nc, Ns, nb_revolutions=x)),
-    ("FLORET", lambda x: mtt.initialize_3D_floret(Nc, Ns, max_angle=x)),
-    ("FLORET", lambda x: mtt.initialize_3D_floret(Nc, Ns, max_angle=x)),
-    ("FLORET", lambda x: mtt.initialize_3D_floret(Nc, Ns)),
+    ("FLORET", lambda x: mt.initialize_3D_floret(Nc, Ns, nb_revolutions=x)),
+    ("FLORET", lambda x: mt.initialize_3D_floret(Nc, Ns, nb_revolutions=x)),
+    ("FLORET", lambda x: mt.initialize_3D_floret(Nc, Ns, max_angle=x)),
+    ("FLORET", lambda x: mt.initialize_3D_floret(Nc, Ns, max_angle=x)),
+    ("FLORET", lambda x: mt.initialize_3D_floret(Nc, Ns)),
     # Seiffert spirals
     (
         "Seiffert spiral / Yarnball",
-        lambda x: mtt.initialize_3D_seiffert_spiral(Nc, Ns, curve_index=x),
+        lambda x: mt.initialize_3D_seiffert_spiral(Nc, Ns, curve_index=x),
     ),
     (
         "Seiffert spiral / Yarnball",
-        lambda x: mtt.initialize_3D_seiffert_spiral(
+        lambda x: mt.initialize_3D_seiffert_spiral(
             Nc, Ns, curve_index=0.7, nb_revolutions=x
         ),
     ),
     (
         "Seiffert spiral / Yarnball",
-        lambda x: mtt.initialize_3D_seiffert_spiral(
+        lambda x: mt.initialize_3D_seiffert_spiral(
             Nc, Ns, curve_index=0.7, nb_revolutions=x
         ),
     ),
     (
         "Seiffert spiral / Yarnball",
-        lambda x: mtt.initialize_3D_seiffert_spiral(
+        lambda x: mt.initialize_3D_seiffert_spiral(
             Nc, Ns, curve_index=0.7, nb_revolutions=1
         ),
     ),
     # Helical shells
     (
         "Concentric shells",
-        lambda x: mtt.initialize_3D_helical_shells(
+        lambda x: mt.initialize_3D_helical_shells(
             x * Nc // nb_repetitions, Ns, nb_shells=x
         )[::-1],
     ),
     (
         "Concentric shells",
-        lambda x: mtt.initialize_3D_helical_shells(
+        lambda x: mt.initialize_3D_helical_shells(
             Nc, Ns, nb_shells=nb_repetitions, spiral_reduction=x
         )[::-1],
     ),
     (
         "Concentric shells",
-        lambda x: mtt.initialize_3D_helical_shells(
+        lambda x: mt.initialize_3D_helical_shells(
             Nc, Ns, nb_shells=nb_repetitions, spiral_reduction=3
         )[::-1],
     ),
     # Wave-CAIPI
     (
         "Wave-CAIPI",
-        lambda x: mtt.initialize_3D_wave_caipi(
+        lambda x: mt.initialize_3D_wave_caipi(
             2 * Nc, Ns, nb_revolutions=5 * x, width=x
         ),
     ),
     (
         "Wave-CAIPI",
-        lambda x: mtt.initialize_3D_wave_caipi(
+        lambda x: mt.initialize_3D_wave_caipi(
             2 * Nc, Ns, nb_revolutions=5 * x, width=x
         ),
     ),
-    ("Wave-CAIPI", lambda x: mtt.initialize_3D_wave_caipi(2 * Nc, Ns)),
+    ("Wave-CAIPI", lambda x: mt.initialize_3D_wave_caipi(2 * Nc, Ns)),
 ]
 
 # Initialize trajectory arguments
@@ -160,9 +163,9 @@ def plot_frame(frame_data):
     [ax.clear() for ax in axs_grad]
     trajectory = func(arg)
     ksp_ax.set_title(name, fontsize=displayConfig.fontsize)
-    mtd.display_3D_trajectory(trajectory, one_shot=one_shot, subfigure=ksp_ax)
+    display_3D_trajectory(trajectory, one_shot=one_shot, subfigure=ksp_ax)
     ksp_ax.set_aspect("equal")
-    mtd.display_gradients_simply(
+    display_gradients_simply(
         trajectory,
         shot_ids=[one_shot],
         subfigure=axs_grad,

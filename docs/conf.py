@@ -64,11 +64,23 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # generate autosummary even if no references
 autosummary_generate = True
-# autosummary_imported_members = True
+autosummary_imported_members = True
 autodoc_inherit_docstrings = True
 autodoc_member_order = "bysource"
 autodoc_typehints = "both"
 autodoc_typehints_description_target = "documented_params"
+# conf.py
+
+# Force autosummary to respect the exact state of __all__ at runtime
+autosummary_ignore_module_all = False
+
+# Tell autodoc to automatically include inherited methods and members
+autodoc_default_options = {
+    "members": True,
+    "inherited-members": True,
+    "show-inheritance": True,
+    "undoc-members": False,
+}
 
 napoleon_include_private_with_doc = True
 napolon_numpy_docstring = True

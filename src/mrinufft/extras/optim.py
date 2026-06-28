@@ -3,6 +3,8 @@
 .. autoregistry :: optimizer
 """
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from collections.abc import Callable
 
 import numpy as np
@@ -11,7 +13,9 @@ from tqdm.auto import tqdm
 
 from mrinufft._array_compat import CUPY_AVAILABLE, get_array_module, with_numpy_cupy
 from mrinufft._utils import MethodRegister, _progressbar
-from mrinufft.operators.base import FourierOperatorBase
+
+if TYPE_CHECKING:
+    from mrinufft.operators.base import FourierOperatorBase
 
 _optim_docs = dict(
     base_params=r"""
@@ -144,7 +148,7 @@ def loss_l2_reg(
     return norm_res
 
 
-def scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
+def _scaled_dcp(operator: FourierOperatorBase, kspace_data: NDArray):
     """
     Compute a scaled Density compensated adjoint.
 
@@ -301,7 +305,7 @@ def lsqr(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -549,7 +553,7 @@ def lsmr(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     norm_batched = _norm_batched_cp if xp.__name__ == "cupy" else _norm_batched_np
@@ -824,7 +828,7 @@ def cg(
     old_density = None
     if operator.uses_density:
         if x_init is None:
-            x_init = scaled_dcp(operator, kspace_data)
+            x_init = _scaled_dcp(operator, kspace_data)
         old_density = operator.density
         operator.density = None
     image = (

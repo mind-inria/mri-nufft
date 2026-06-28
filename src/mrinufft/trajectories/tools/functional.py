@@ -6,7 +6,7 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import Rz
+from mrinufft.trajectories.maths.rotations import Rz
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
 
 

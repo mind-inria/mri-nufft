@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 from numpy.typing import NDArray
 
-from ..base import FourierOperatorBase, _ToggleGradPlanMixin
+from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
     get_array_module,
@@ -641,7 +641,7 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             test_im = np.ones(original_shape, dtype=np.complex64)
             test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
             density_comp /= np.mean(np.abs(test_im_recon))
-        return density_comp.squeeze()
+        return abs(density_comp.squeeze())
 
     def get_lipschitz_cst(self, max_iter=10, tolerance=1e-5, **kwargs):
         """Return the Lipschitz constant of the operator.

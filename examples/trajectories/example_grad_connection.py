@@ -29,13 +29,11 @@ This example shows how to create such gradient waveforms using MRI-NUFFT.
 # %%
 import numpy as np
 
-from mrinufft import initialize_2D_cones
-from mrinufft.trajectories.utils import (
+from mrinufft.trajectories import (
+    initialize_2D_cones,
     Acquisition,
     convert_gradients_to_trajectory,
     convert_trajectory_to_gradients,
-)
-from mrinufft.trajectories.gradients import (
     connect_gradient,
     get_prephasors_and_spoilers,
 )

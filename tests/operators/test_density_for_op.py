@@ -48,4 +48,10 @@ def test_pipe(backend, traj, shape, osf):
         slope_err = slope_err * 4 if slope_err is not None else None
     elif backend == "tensorflow":
         r_err = 0.5
-    assert_correlate(result, distance, slope=1, slope_err=slope_err, r_value_err=r_err)
+    assert_correlate(
+        result,
+        distance.astype(result.dtype),
+        slope=1,
+        slope_err=slope_err,
+        r_value_err=r_err,
+    )

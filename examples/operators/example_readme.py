@@ -9,25 +9,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.datasets import face
 
-import mrinufft
+from mrinufft import get_operator
 from mrinufft.density import voronoi
-from mrinufft.trajectories import display
+from mrinufft.display import display_2D_trajectory
+from mrinufft.trajectories import initialize_2D_radial
 
 # Create a 2D radial trajectory for demo
-samples_loc = mrinufft.initialize_2D_radial(Nc=100, Ns=500)
+samples_loc = initialize_2D_radial(Nc=100, Ns=500)
 # Get a 2D image for the demo (512x512)
 image = np.complex64(face(gray=True)[256:768, 256:768])
 
 ## The real deal starts here ##
 # Choose your NUFFT backend (installed independly from the package)
-NufftOperator = mrinufft.get_operator("finufft")
+NufftOperator = get_operator("finufft")
 
 # For better image quality we use a density compensation
 density = voronoi(samples_loc)
 
 # And create the associated operator
 nufft = NufftOperator(
-    samples_loc, shape=image.shape, density=density, n_coils=1, squeeze_dims=True
+    samples=samples_loc,
+    shape=image.shape,
+    density=density,
+    n_coils=1,
+    squeeze_dims=True,
 )
 
 kspace_data = nufft.op(image)  # Image -> K-space
@@ -43,7 +48,7 @@ ax[0].imshow(abs(image), cmap="gray")
 ax[0].axis("off")
 ax[0].set_title("original image")
 # Upper right trajectory
-display.display_2D_trajectory(samples_loc, subfigure=ax[1])
+display_2D_trajectory(samples_loc, subfigure=ax[1])
 ax[1].set_aspect("equal")
 ax[1].set_title("Sampled points in k-space")
 # Bottom left reconstructed image

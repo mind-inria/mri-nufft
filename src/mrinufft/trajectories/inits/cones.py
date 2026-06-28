@@ -3,9 +3,10 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.maths import CIRCLE_PACKING_DENSITY, R2D
-from mrinufft.trajectories.tools import conify, precess
+from mrinufft.trajectories.maths.rotations import R2D
+from mrinufft.trajectories.tools.transforms import conify, precess
 from mrinufft.trajectories.utils import KMAX, initialize_tilt
+from mrinufft.trajectories.tools.caipi import CIRCLE_PACKING_DENSITY
 
 
 def initialize_2D_cones(

@@ -12,7 +12,7 @@ from helpers import (
 )
 from helpers import assert_almost_allclose
 
-from mrinufft.extras.optim import loss_l2_reg
+from mrinufft.extras import loss_l2_reg
 
 
 @fixture(scope="module")

@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.12"
   BART_VERSION: "1.0.0"
   ref_backend: "finufft"
 
@@ -29,14 +29,16 @@ jobs:
        - name: Get commit message
          id: get_commit_message
          run: |
-            COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+            COMMIT_MESSAGE=$(git log -1 --pretty=%s)
             echo "Commit message $COMMIT_MESSAGE"
-            echo "::set-output name=message::$COMMIT_MESSAGE"
+            echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
   test-cpu:
     runs-on: cpu
-    if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
+      fail-fast: false
       matrix:
         backend: [finufft, pynfft, pynufft-cpu, bart, sigpy, torchkbnufft-cpu, ducc0]
         exclude:
@@ -46,16 +48,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Setup UV
         uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: true
-          
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Python Deps
         shell: bash
@@ -87,8 +84,10 @@ jobs:
 
   test-gpu:
     runs-on: gpu
-    if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
+      fail-fast: false
       matrix:
         backend: [cufinufft, gpunufft, torchkbnufft-gpu, tensorflow]
         exclude:
@@ -99,8 +98,8 @@ jobs:
 
       - uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: true
-          
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
@@ -110,7 +109,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          uv run pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --disable-pytest-warnings --cov --cov-branch --cov-report=term --durations=10
+          uv run pytest -k='operators' --ref ${{ env.ref_backend }} --backend ${{ matrix.backend }} --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
@@ -121,12 +120,13 @@ jobs:
 
   test-other:
     runs-on: [gpu]
-    if: ${{ !contains(github.event.head_commit.message, '[style]') || github.ref == 'refs/heads/master' }}
+    needs: get-commit-message
+    if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: true
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install mri-nufft and finufft
         shell: bash
@@ -138,7 +138,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_other
-          uv run pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10 --disable-pytest-warnings
+          uv run pytest -n=4 -k "not operators" --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
@@ -154,21 +154,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
 
       - uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: true
-
-      - name: Restore cached brainweb-dl directory
-        uses: actions/cache/restore@v4
-        id: cache-restore
-        with:
-          path: ~/.cache/brainweb
-          key: ${{ runner.os }}-Brainweb
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Python deps
         shell: bash
@@ -181,13 +170,6 @@ jobs:
           export COVERAGE_FILE=coverage_plots
           export MRINUFFT_BACKEND=cufinufft
           uv run pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
-
-      - name: Cache brainweb-dl directory
-        uses: actions/cache/save@v4
-        if: ${{ steps.cache-restore.outputs.cache-hit != 'true' }}
-        with:
-          path: ~/.cache/brainweb
-          key: ${{ runner.os }}-Brainweb
 
       - name: Upload coverage
         if: success()
@@ -211,12 +193,10 @@ jobs:
           pattern: coverage_*
           merge-multiple: true
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - uses: astral-sh/setup-uv@v7
+          enable-cache: true
       - name: add the coverage tool
         shell: bash
         run: |

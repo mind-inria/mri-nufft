@@ -3,7 +3,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.trajectories.tools import (
+from mrinufft.trajectories.tools.caipi import (
     get_grappa_caipi_positions,
     get_packing_spacing_positions,
 )

@@ -3,8 +3,7 @@
 import numpy as np
 import scipy as sp
 
-from mrinufft.trajectories import initialize_2D_radial
-from mrinufft.trajectories.tools import stack, rotate
+from mrinufft.trajectories import initialize_2D_radial, stack, rotate
 
 
 class CasesTrajectories:
