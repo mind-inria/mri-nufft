@@ -5,7 +5,7 @@ import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
-    ArrayTypes,
+    is_array,
     is_cuda_tensor,
     with_torch,
     _array_to_torch,
@@ -125,7 +125,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             self._smaps = None
             return
 
-        if not isinstance(new_smaps, ArrayTypes):
+        if not is_array(new_smaps):
             raise TypeError("Smaps should be an array-like object.")
         new_smaps = _array_to_torch(new_smaps)
 

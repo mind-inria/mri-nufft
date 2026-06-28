@@ -39,9 +39,27 @@ for v in FourierOperatorBase.interfaces.values():
     __all__.append(v[1].__name__)  # add the interface to the __all__ list
     globals()[v[1].__name__] = v[1]  # add the interface to the module namespace
 
-try:
-    from .autodiff import kspace_as_real, kspace_as_cpx, image_as_real, image_as_cpx
+# Autodiff helpers live in `.autodiff`, which imports torch + deepinv at module
+# scope. Expose them lazily so importing `operators` (e.g. via `get_operator`)
+# does not drag in those heavy deps; they load only on first access.
+from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
 
-    __all__ += ["kspace_as_real", "kspace_as_cpx", "image_as_real", "image_as_cpx"]
-except ImportError:
-    pass
+_AUTODIFF_HELPERS = (
+    "kspace_as_real",
+    "kspace_as_cpx",
+    "image_as_real",
+    "image_as_cpx",
+    "DeepInvPhyNufft",
+)
+
+if AUTOGRAD_AVAILABLE and DEEPINV_AVAILABLE:
+    __all__ += list(_AUTODIFF_HELPERS)
+
+
+def __getattr__(name):
+    """Lazily resolve the autodiff helpers (PEP 562)."""
+    if name in _AUTODIFF_HELPERS:
+        from . import autodiff
+
+        return getattr(autodiff, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
