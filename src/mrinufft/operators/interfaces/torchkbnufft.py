@@ -9,14 +9,11 @@ from mrinufft._array_compat import (
     is_cuda_tensor,
     with_torch,
     _array_to_torch,
+    TORCH_AVAILABLE,
+    _module_available,
 )
 
-TORCH_AVAILABLE = True
-try:
-    import torchkbnufft as tkbn
-    import torch
-except ImportError:
-    TORCH_AVAILABLE = False
+TORCHKBNUFFT_AVAILABLE = _module_available("torchkbnufft") and TORCH_AVAILABLE
 
 
 class MRITorchKbNufft(FourierOperatorBase):
@@ -60,7 +57,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     """
 
-    available = TORCH_AVAILABLE
+    available = TORCHKBNUFFT_AVAILABLE
     autograd_available = False
 
     def __init__(
@@ -78,6 +75,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         **kwargs,
     ):
         super().__init__()
+        import torch
+        import torchkbnufft as tkbn
 
         if use_gpu:
             self.device = "cuda"
@@ -221,10 +220,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         cls,
         kspace_loc,
         volume_shape,
-        max_iter=10,
-        osf=2,
-        normalize=True,
-        use_gpu=False,
+        max_iter: int = 10,
+        osf: float = 2,
+        normalize: bool = True,
+        use_gpu: bool = False,
         **kwargs,
     ):
         """Compute the density compensation weights for a given set of kspace locations.
@@ -245,7 +244,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         use_gpu: bool, default False
             Whether to use the GPU
         """
-        volume_shape = (np.array(volume_shape) * osf).astype(int)
+        import torchkbnufft as tkbn
+        import torch
+
+        volume_shape = tuple((np.array(volume_shape) * osf).astype(int))
         grid_op = MRITorchKbNufft(
             samples=kspace_loc,
             shape=volume_shape,
@@ -254,7 +256,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             **kwargs,
         )
         density_comp = tkbn.calc_density_compensation_function(
-            ktraj=kspace_loc, im_size=volume_shape, max_iter=max_iter
+            ktraj=kspace_loc, im_size=volume_shape, num_iterations=max_iter
         )
         if normalize:
             spike = torch.zeros(volume_shape, dtype=torch.float32).to(grid_op.device)
