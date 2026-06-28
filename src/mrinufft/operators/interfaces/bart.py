@@ -14,7 +14,6 @@ from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
 
 import numpy as np
-from mrinufft.io.cfl import traj2cfl, _writecfl, _readcfl
 
 # available if return code is 0
 try:
@@ -29,6 +28,12 @@ class RawBartNUFFT:
     """Wrapper around BART NUFFT CLI."""
 
     def __init__(self, samples, shape, extra_op_args=None, extra_adj_op_args=None):
+
+        from mrinufft.io.cfl import traj2cfl, _writecfl, _readcfl
+
+        self._writecfl = _writecfl
+        self._readcfl = _readcfl
+
         self.samples = samples  # To normalize and send to file
         self.shape = shape
         self.shape_str = ":".join([str(s) for s in shape])
@@ -56,7 +61,7 @@ class RawBartNUFFT:
     def op(self, coeffs_data, grid_data):
         """Forward Operator."""
         grid_data_ = grid_data.reshape(self.shape)
-        _writecfl(grid_data_, self._grid_file)
+        self._writecfl(grid_data_, self._grid_file)
         cmd = [
             "bart",
             "nufft",
@@ -77,7 +82,7 @@ class RawBartNUFFT:
             msg += f"stderr: {exc.stderr}"
             raise RuntimeError(msg) from exc
 
-        ksp_raw = _readcfl(self._ksp_file)
+        ksp_raw = self._readcfl(self._ksp_file)
         np.copyto(coeffs_data, ksp_raw)
         return coeffs_data
 
@@ -87,7 +92,7 @@ class RawBartNUFFT:
         # Run bart nufft with argument in subprocess
 
         coeffs_ = coeffs_data.reshape(len(self.samples))
-        _writecfl(coeffs_[None, ..., None, None, None], self._ksp_file)
+        self._writecfl(coeffs_[None, ..., None, None, None], self._ksp_file)
 
         cmd = [
             "bart",
@@ -110,7 +115,7 @@ class RawBartNUFFT:
             msg += f"stderr: {exc.stderr}"
             raise RuntimeError(msg) from exc
 
-        grid_raw = _readcfl(self._grid_file)
+        grid_raw = self._readcfl(self._grid_file)
         np.copyto(grid_data, grid_raw)
         return grid_data
 

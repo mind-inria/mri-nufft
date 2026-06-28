@@ -1,20 +1,19 @@
 """An implementation of the NUDFT using numpy."""
 
+import importlib.util
 import numpy as np
 
 from mrinufft.operators.base import FourierOperatorCPU
 
-PYNFFT_AVAILABLE = True
-try:
-    import pyNFFT3 as pynfft3
-except ImportError:
-    PYNFFT_AVAILABLE = False
+PYNFFT_AVAILABLE = importlib.util.find_spec("pyNFFT3") is not None
 
 
 class RawPyNFFT3:
     """Binding for the pyNFFT3 package."""
 
     def __init__(self, samples, shape):
+        import pyNFFT3 as pynfft3
+
         self.samples = samples
         self.shape = shape
         self.plan = pynfft3.NFFT(N=np.array(shape, dtype="int32"), M=len(samples))
