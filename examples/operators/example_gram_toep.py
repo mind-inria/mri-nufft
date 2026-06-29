@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mrinufft import get_operator
-from mrinufft.operators.toeplitz import compute_toeplitz_kernel, apply_toeplitz_kernel
-from mrinufft import display_2D_trajectory
+from mrinufft.operators import compute_toeplitz_kernel, apply_toeplitz_kernel
+from mrinufft.display import display_2D_trajectory
 
 plt.rcParams["image.cmap"] = "gray"
 
