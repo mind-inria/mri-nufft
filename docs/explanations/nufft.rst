@@ -255,16 +255,58 @@ If the k-space trajectory consists of a stacked of equally (or a subsampling of)
 The Non Uniform Fast Fourier Transform in practice
 ==================================================
 
+In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to :math:`O(M\log(N))`).
 
-In order to lower the computational cost of the Non-Uniform Fourier Transform, the main idea is to move back to a regular grid where an FFT would be performed (going from a typical :math:`O(MN)` complexity to :math:`O(M\log(N))`). Thus, the main steps of the *Non-Uniform Fast Fourier Transform* are for the type 1:
+The three steps of the type 1 NUFFT (non-uniform to uniform) are:
 
-1. Spreading/Interpolation of the non-uniform points to an oversampled Cartesian grid (typically with twice the resolution of the final image)
-2. Perform the (I)FFT on this image
-3. Downsampling to the final grid, and apply some bias correction.
+1. Spreading
+------------
 
-This package exposes interfaces to the main NUFFT libraries available (See :mod:`mrinufft.operators.interfaces`). The choice of the spreading method (ie the interpolation kernel) in step 1. and the correction applied in step 3. are the main theoretical differences between the methods. 
+Each non-uniform source point :math:`x(p_n)` is convolved with a compactly supported *spreading kernel* :math:`\phi` and accumulated onto an oversampled Cartesian grid of size :math:`\sigma N` (with oversampling factor :math:`\sigma \approx 2`):
 
-Type 2 transforms perform those steps in reversed order.
+.. math::
+
+   \hat{g}_k = \sum_{n=0}^{N-1} x(p_n)\, \phi\!\left(\frac{k}{\sigma} - p_n\right), \quad k = 0, \ldots, \sigma N - 1
+
+The kernel :math:`\phi` must be concentrated in the spatial domain (to limit the width of the convolution, i.e. the number of grid points touched per source point) while having a well-behaved Fourier transform (for the deapodization step). Two common choices are:
+
+**Kaiser-Bessel (KB)** kernel — used by libraries such as NFFT, MIRT, and BART:
+
+.. math::
+
+   \phi_{\mathrm{KB}}(z) = \frac{I_0\!\left(\beta\sqrt{1-z^2}\right)}{I_0(\beta)}\, \mathbf{1}_{|z| \leq 1}
+
+where :math:`I_0` is the zeroth-order modified Bessel function and :math:`\beta` is a shape parameter. Its Fourier transform is known analytically, which makes the deapodization step cheap.
+
+**Exponential-of-semicircle (ES)** kernel — used by FINUFFT [8]_:
+
+.. math::
+
+   \phi_{\mathrm{ES}}(z) = e^{\beta(\sqrt{1-z^2}-1)}\, \mathbf{1}_{|z| \leq 1}
+
+The ES kernel is simpler and faster to evaluate than KB and achieves essentially the same error-convergence rate, but has no known analytic Fourier transform; its deapodization correction is therefore obtained by numerical quadrature (negligible extra cost).
+
+In both cases :math:`\beta` and the half-width :math:`W` (number of grid cells touched per source point) govern the accuracy–cost tradeoff.
+
+2. FFT
+------
+
+A standard FFT is applied to the oversampled grid :math:`\hat{g}`, yielding the oversampled frequency representation. The oversampled grid is then cropped (or subsampled for type 2) to obtain the :math:`N` desired output frequencies.
+
+3. Deapodization
+----------------
+
+The spreading step is equivalent to a convolution with :math:`\phi`, which in the frequency domain corresponds to a multiplication by :math:`\hat{\phi}`. This introduces a systematic bias that is corrected by dividing each output by the Fourier transform of the kernel, evaluated at the output frequencies:
+
+.. math::
+
+   X_k = \frac{\hat{G}_k}{\hat{\phi}(k/N)}, \quad k = 0, \ldots, N-1
+
+The accuracy of the NUFFT depends primarily on the kernel half-width :math:`W` (larger means fewer approximation errors but more work per point) and the oversampling factor :math:`\sigma`.
+
+Type 2 transforms (uniform to non-uniform, i.e. the MRI forward model) perform these steps in reversed order: deapodization, IFFT, interpolation at the non-uniform locations.
+
+This package exposes interfaces to the main NUFFT libraries available (See :mod:`mrinufft.operators.interfaces`). The choice of spreading kernel and correction are the main theoretical differences between backends.
 
 
 Density Compensation
@@ -338,9 +380,9 @@ With :math:`\hat{K}` the Fourier transform of the kernel.
 
 .. note::
 
-    - Multi-coil operators (e.g with coil sensitivities) wraps around the Gram Operator easily,but don’t have a global Toeplitz structure, however they have a “toeplitz-like structure” that can be used [7]_. It is not clear yet if this is more efficient than the classic SENSE operator.
+    - Multi-coil operators (e.g with coil sensitivities) wraps around the Gram Operator easily,but don’t have a global Toeplitz structure, however they have a “toeplitz-like structure” that can be used [9]_. It is not clear yet if this is more efficient than the classic SENSE operator, and is not implemented in MRI-NUFFT yet.
 
-    - For off-resonance correction, see [3]_
+    - For off-resonance correction, see [3]_, this is not implemented as well.
 
       
 Computing the Toeplitz Kernel
@@ -377,6 +419,92 @@ Autodifferentiation
 TBA
    
    
+.. _nufft-autodiff:
+
+Autodifferentiation
+===================
+
+Several MRI applications require differentiating through the NUFFT operator, most notably:
+
+- **Trajectory optimisation**: learning the k-space sampling locations :math:`\boldsymbol{\nu}_m` to minimise a reconstruction metric.
+- **Deep-learning reconstruction**: end-to-end training of networks whose forward model includes the NUFFT.
+- **Field-map estimation**: jointly estimating the image and the off-resonance map :math:`\Delta\omega`.
+
+NUFFT backends (finufft, cufinufft, …) do not expose native autograd, so ``mri-nufft`` implements custom :class:`torch.autograd.Function <torch.autograd.Function>` wrappers in :mod:`mrinufft.operators.autodiff`. Three gradient modes are supported.
+
+Gradient with respect to data
+-----------------------------
+
+Because :math:`\mathcal{F}_\Omega` is a *linear* operator, the vector-Jacobian product (VJP) needed by reverse-mode autodiff reduces to the adjoint (or forward) operator:
+
+.. math::
+
+   \frac{\partial L}{\partial \boldsymbol{x}} = \mathcal{F}_\Omega^*\!\left(\frac{\partial L}{\partial \boldsymbol{y}}\right), \qquad
+   \frac{\partial L}{\partial \boldsymbol{y}} = \mathcal{F}_\Omega\!\left(\frac{\partial L}{\partial \boldsymbol{x}}\right)
+
+No additional computation beyond the paired operator is needed.
+
+Gradient with respect to the trajectory
+---------------------------------------
+
+The partial derivative of a single k-space sample :math:`y_m` with respect to a trajectory coordinate :math:`\nu_{m,d}` is:
+
+.. math::
+
+   \frac{\partial y_m}{\partial \nu_{m,d}}
+   = \sum_{n=1}^N (-2i\pi\, u_{n,d})\, x_n\, e^{-2i\pi\, \boldsymbol{u}_n \cdot \boldsymbol{\nu}_m}
+   = -2i\pi\, \bigl[\mathcal{F}_\Omega(\boldsymbol{x} \odot \boldsymbol{r}_d)\bigr]_m
+
+where :math:`\boldsymbol{r}_d = (u_{1,d}, \ldots, u_{N,d})^T` is the vector of pixel coordinates along dimension :math:`d`. The VJP with respect to the full trajectory is then:
+
+.. math::
+
+   \frac{\partial L}{\partial \nu_{m,d}}
+   = -i\, \overline{\delta y_m}\cdot\bigl[\mathcal{F}_\Omega(\boldsymbol{x} \odot \boldsymbol{r}_d)\bigr]_m
+
+where :math:`\delta \boldsymbol{y} = \partial L / \partial \boldsymbol{y}` is the upstream gradient. Computing this requires :math:`d` additional forward NUFFT evaluations — one per spatial dimension — applied to the image weighted by the pixel coordinates. This efficient approximation is described in [7]_.
+
+Similarly, for the adjoint operator :math:`x_n = [\mathcal{F}_\Omega^* \boldsymbol{y}]_n`, the VJP is:
+
+.. math::
+
+   \frac{\partial L}{\partial \nu_{m,d}}
+   = i\, y_m\cdot\bigl[\mathcal{F}_\Omega(\overline{\delta \boldsymbol{x}} \odot \boldsymbol{r}_d)\bigr]_m
+
+Gradient with respect to the field map
+--------------------------------------
+
+For the off-resonance corrected model (see :ref:`nufft-orc`), with:
+
+.. math::
+
+   y_m = \int x(\boldsymbol{u})\,e^{-2i\pi\boldsymbol{u}\cdot\boldsymbol{\nu}_m + \Delta\omega(\boldsymbol{u})\,t_m}\,d\boldsymbol{u}
+
+the gradient of a real loss :math:`L` with respect to the (real-valued) field map :math:`\Delta\omega(\boldsymbol{u}_n)` is:
+
+.. math::
+
+   \frac{\partial L}{\partial \Delta\omega(\boldsymbol{u}_n)}
+   = x_n \,\bigl[\mathcal{F}_{\Omega,t}^*(\delta\boldsymbol{y})\bigr]_n
+
+where :math:`\mathcal{F}_{\Omega,t}^*` is the corrected adjoint operator with the readout time :math:`t_m` absorbed into the weights.
+
+.. tip::
+
+   Use :class:`MRINufftAutoGrad <mrinufft.operators.autodiff.MRINufftAutoGrad>` to wrap any existing NUFFT operator for PyTorch autodiff. The flags ``wrt_data``, ``wrt_traj``, and ``wrt_field_map`` individually enable each gradient mode.
+
+.. code-block:: python
+
+   from mrinufft import get_operator
+   from mrinufft.operators.autodiff import MRINufftAutoGrad
+
+   nufft = get_operator("finufft")(samples, shape)
+   # gradient w.r.t. image data only (default)
+   autograd_nufft = MRINufftAutoGrad(nufft, wrt_data=True)
+   # gradient w.r.t. k-space trajectory
+   autograd_nufft = MRINufftAutoGrad(nufft, wrt_data=True, wrt_traj=True)
+
+
 Other Application
 =================
 Apart from MRI, The NUFFT operator is also used for:
@@ -402,6 +530,9 @@ References
 .. [5] D.C. Noll, C. H. Meyer, J. M. Pauly, D. G. Nishimura and A. Macovski, "A homogeneity correction method for magnetic resonance imaging with time-varying gradients," in IEEE Transactions on Medical Imaging, vol. 10, no. 4, pp. 629-637, Dec. 1991, doi: 10.1109/42.108599
        
 .. [6] Man, L.-C., Pauly, J.M. and Macovski, A. (1997), Multifrequency interpolation for fast off-resonance correction. Magn. Reson. Med., 37: 785-792. https://doi.org/10.1002/mrm.1910370523
-
-.. [7] Chen, J., Christodoulou, A.G., Fan, Z. (2026). Direct Inversion Formula of the Multi-coil MR Operator Under Arbitrary Trajectories. In: Gee, J.C., et al. Medical Image Computing and Computer Assisted Intervention – MICCAI 2025. MICCAI 2025. Lecture Notes in Computer Science, vol 15963. Springer, Cham. https://doi.org/10.1007/978-3-032-04965-0_14 
  
+.. [7] Wang, G., Fessler, J. A., "Efficient approximation of Jacobian matrices involving a non-uniform fast Fourier transform (NUFFT)." IEEE Transactions on Computational Imaging 9 (2023), pp. 43–54.
+       
+.. [8] Barnett, A. H., Magland, J., af Klinteberg, L., "A parallel non-uniform fast Fourier transform library based on an exponential of semicircle kernel." SIAM Journal on Scientific Computing 41.5 (2019), pp. C479–C504.
+
+.. [9] Chen, J., Christodoulou, A.G., Fan, Z. (2026). Direct Inversion Formula of the Multi-coil MR Operator Under Arbitrary Trajectories. In: Gee, J.C., et al. Medical Image Computing and Computer Assisted Intervention – MICCAI 2025. MICCAI 2025. Lecture Notes in Computer Science, vol 15963. Springer, Cham. https://doi.org/10.1007/978-3-032-04965-0_14 
