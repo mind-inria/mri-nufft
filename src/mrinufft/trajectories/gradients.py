@@ -253,9 +253,9 @@ def _solve_lp_1d(
     - x[0] = gx_start
     - x[N-1] = gx_end
 
-    $base_params
+    ${base_params}
 
-    $returns
+    ${returns}
 
     Notes
     -----
@@ -365,9 +365,9 @@ def _solve_qp_osqp(
 
     Such that:
 
-    $base_params
+    ${base_params}
 
-    $returns
+    ${returns}
 
     Notes
     -----
@@ -530,7 +530,7 @@ def _optimize_grad(
 
     Parameters
     ----------
-    $base_params
+    ${base_params}
 
     method: str, optional
         The method to use for optimization. Options are "linprog" or "osqp".
