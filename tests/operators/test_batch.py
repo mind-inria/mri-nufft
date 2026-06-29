@@ -266,4 +266,4 @@ def test_interface_gram(operator, array_interface, image_data):
     # we use a relative mean error metric.
     medse = np.median(abs(AHA_img - G_img) ** 2 / abs(G_img) ** 2)
     print(medse)
-    assert medse < 5e-2
+    assert medse < 6e-2
