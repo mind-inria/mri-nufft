@@ -17,7 +17,6 @@ from mrinufft.io.pulseq import (
 from mrinufft.io.siemens import (
     read_siemens_rawdat,
     twix2nifti_affine,
-    siemens_quat_to_rot_mat,
 )
 from mrinufft.io.utils import (
     add_phase_to_kspace_with_shifts,
@@ -34,7 +33,6 @@ __all__ = [
     "read_siemens_rawdat",
     "read_trajectory",
     "remove_extra_kspace_samples",
-    "siemens_quat_to_rot_mat",
     "traj2cfl",
     "write_gradients",
     "write_trajectory",

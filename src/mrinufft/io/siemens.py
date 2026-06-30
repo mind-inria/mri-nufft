@@ -151,7 +151,7 @@ def read_siemens_rawdat(
     return data, hdr
 
 
-def siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
+def _siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
 
@@ -167,6 +167,13 @@ def siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
     np.ndarray
         The affine rotation matrix which is a 4x4 matrix.
         This can be passed as input to `affine` parameter in `nibabel`.
+
+    See Also
+    --------
+    twix2nifti_affine
+        Calculate the affine transformation matrix from Siemens Twix object.
+        This is the preferred method to get the affine matrix from a Siemens Twix file.
+
     """
     R = np.zeros((4, 4))
     R[:3, :3] = Rotation.from_quat([quat[1], quat[2], quat[3], quat[0]]).as_matrix()
@@ -194,6 +201,17 @@ def twix2nifti_affine(twixObj):
     np.ndarray
         The affine transformation matrix which is a 4x4 matrix.
         This can be passed as input to `affine` parameter in `nibabel`.
+
+    See Also
+    --------
+    siemens_quat_to_rot_mat
+        Calculate the rotation matrix from Siemens Twix quaternion.
+    read_siemens_rawdat
+        Read raw data from a Siemens MRI file,
+        use return_twix=True to get the twix object.
+    read_arbgrad_rawdat
+        Read raw data from a Siemens MRI file from neurospin,
+        use return_twix=True to get the twix object.
     """
     # required keys
     keys = {
@@ -205,7 +223,7 @@ def twix2nifti_affine(twixObj):
         "ucdim": ("sKSpace", "ucDimension"),
     }
     sos = ("sKSpace", "dSliceOversamplingForDialog")
-    rot, det = siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], True)
+    rot, det = _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], True)
     my = twixObj.hdr.MeasYaps
 
     for k in keys.keys():
