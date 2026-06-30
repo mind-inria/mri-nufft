@@ -7,6 +7,43 @@ from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
 
+def _parse_twix_header(twixObj):
+    """Parse the header of a Siemens Twix object."""
+    hdr = {
+        "n_coils": int(twixObj.image.NCha),
+        "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
+        "n_contrasts": int(twixObj.image.NSet),
+        "n_adc_samples": int(twixObj.image.NCol),
+        "n_slices": int(twixObj.image.NSli),
+        "n_average": int(twixObj.image.NAve),
+        "n_reps": int(twixObj.image.NRep),
+        "orientation": _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
+        "affine": twix2nifti_affine(twixObj),
+        "shifts": twixObj.image.slicePos[0][:3][::-1],
+        "acs": None,
+    }
+
+    for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
+        # get a list of all sequences times in the sequence
+        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))
+        nice_key = key[2:]  # strip prefix "al /ad"
+        if len(vals) == 1:
+            hdr[nice_key] = vals[0]
+        elif len(vals) > 0:
+            # the first element found is the length of the list, we dicard it.
+            if vals[0] == len(vals[1:]):
+                vals = vals[1:]
+            hdr[nice_key] = vals
+        # don't populate if not found.
+
+    if "refscan" in twixObj.keys():
+        twixObj.refscan.squeeze = True
+        acs = twixObj.refscan[""].astype(np.complex64)
+        hdr["acs"] = acs.swapaxes(0, 1)
+
+    return hdr
+
+
 def read_siemens_rawdat(
     filename: str,
     removeOS: bool = False,
@@ -75,37 +112,8 @@ def read_siemens_rawdat(
         twixObj = twixObj[-1]
     twixObj.image.flagRemoveOS = removeOS
     twixObj.image.flagDoAverage = doAverage
-    hdr = {
-        "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
-        "n_contrasts": int(twixObj.image.NSet),
-        "n_adc_samples": int(twixObj.image.NCol),
-        "n_slices": int(twixObj.image.NSli),
-        "n_average": int(twixObj.image.NAve),
-        "n_reps": int(twixObj.image.NRep),
-        "orientation": siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
-        "affine": twix2nifti_affine(twixObj),
-        "shifts": twixObj.image.slicePos[0][:3][::-1],
-        "acs": None,
-    }
+    hdr = _parse_twix_header(twixObj)
     # Add sequence information
-    for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
-        # get a list of all sequences times in the sequence
-        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))
-        nice_key = key[2:]  # strip prefix "al /ad"
-        if len(vals) == 1:
-            hdr[nice_key] = vals[0]
-        elif len(vals) > 0:
-            # the first element found is the length of the list, we dicard it.
-            if vals[0] == len(vals[1:]):
-                vals = vals[1:]
-            hdr[nice_key] = vals
-        # don't populate if not found.
-
-    if "refscan" in twixObj.keys():
-        twixObj.refscan.squeeze = True
-        acs = twixObj.refscan[""].astype(np.complex64)
-        hdr["acs"] = acs.swapaxes(0, 1)
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:

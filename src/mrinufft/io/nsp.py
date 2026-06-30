@@ -572,6 +572,7 @@ def read_arbgrad_rawdat(
     contrast_num: int | None = None,
     pre_skip: int = 0,
     data_type: str = "ARBGRAD_VE11C",
+    return_twix: bool = False,
 ):  # pragma: no cover
     """Read raw data from a Siemens MRI file.
 
@@ -602,6 +603,9 @@ def read_arbgrad_rawdat(
         Imported data formatted as n_coils X n_samples X n_slices X n_contrasts
     hdr: dict
         Extra information about the data parsed from the twix file
+    twixObj: mapVBVD object
+        The mapVBVD object containing the raw data and header information.
+        If return_twix is False, this will not be returned.
 
     Raises
     ------
@@ -645,4 +649,6 @@ def read_arbgrad_rawdat(
             )
         data = data[:, :, samples_to_skip:]
         hdr["n_adc_samples"] -= samples_to_skip
+    if return_twix:
+        return data, hdr, twixObj
     return data, hdr
