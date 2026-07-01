@@ -1,6 +1,6 @@
 """2D spiral trajectory initializations."""
 
-import warnings
+import logging
 from typing import Any
 
 import numpy as np
@@ -19,6 +19,8 @@ from mrinufft.trajectories.utils import (
     initialize_tilt,
     normalize_trajectory,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def initialize_2D_spiral(
@@ -335,7 +337,7 @@ def initialize_2D_vds_spiral(
         i += 1
 
         if i == len(radius):
-            warnings.warn("Increasing size of allocated trajectory array")
+            logger.warning("Increasing size of allocated trajectory array")
             radius.resize(2 * len(radius), refcheck=False)
             thetas.resize(2 * len(thetas), refcheck=False)
 

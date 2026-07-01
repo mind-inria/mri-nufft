@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
-import warnings
+import logging
 from functools import partial, wraps
 from inspect import cleandoc
 from numbers import Number  # abstract base type for python numeric type
@@ -11,6 +11,8 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
+
+logger = logging.getLogger(__name__)
 
 
 def _module_available(name: str) -> bool:
@@ -124,7 +126,7 @@ def is_host_array(var: Any) -> bool:
     try:
         if isinstance(var, np.ndarray):
             if not var.flags.c_contiguous:
-                warnings.warn("The input is CPU array but not C-contiguous. ")
+                logger.warning("The input is CPU array but not C-contiguous. ")
                 return False
             return True
     except Exception:
@@ -252,7 +254,7 @@ def _get_leading_argument(args, kwargs):
 def _array_to_numpy(_arg):
     """Convert array to Numpy."""
     if is_cuda_array(_arg):
-        warnings.warn("data is on gpu, it will be moved to CPU.")
+        logger.warning("data is on gpu, it will be moved to CPU.")
     xp = get_array_module(_arg)
     if xp.__name__ == "torch":
         _arg = _arg.numpy(force=True)
@@ -308,7 +310,7 @@ def _array_to_torch(_arg, device=None):
         else:
             import cupy as cp
 
-            warnings.warn("data is on gpu, it will be moved to CPU.")
+            logger.warning("data is on gpu, it will be moved to CPU.")
             _arg = torch.as_tensor(cp.asnumpy(_arg))
     elif "tensorflow" in xp.__name__:
         import tensorflow as tf
@@ -333,7 +335,7 @@ def _array_to_tensorflow(_arg):
         else:
             import cupy as cp
 
-            warnings.warn("data is on gpu, it will be moved to CPU.")
+            logger.warning("data is on gpu, it will be moved to CPU.")
             _arg = tf.convert_to_tensor(cp.asnumpy(_arg))
     elif xp.__name__ == "torch":
         import torch
