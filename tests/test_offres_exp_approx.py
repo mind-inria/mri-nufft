@@ -1,18 +1,22 @@
 """Test off-resonance spatial coefficient and temporal interpolator estimation."""
 
-from mrinufft.extras import get_orc_factorization, get_complex_fieldmap_rad
+import logging
+
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest_cases import parametrize_with_cases, parametrize
-
-
-from mrinufft.operators.off_resonance import MRIFourierCorrected
-from mrinufft import get_operator
-from mrinufft.extras import make_b0map, make_t2smap
-
 from helpers import to_interface
 from helpers.factories import _param_array_interface_np_cp, from_interface
+from pytest_cases import parametrize, parametrize_with_cases
+
+from mrinufft import get_operator
+from mrinufft.extras import (
+    get_complex_fieldmap_rad,
+    get_orc_factorization,
+    make_b0map,
+    make_t2smap,
+)
+from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 
 class CasesB0maps:
@@ -104,7 +108,7 @@ def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
     npt.assert_allclose(E2, E_full, atol=5e-3, rtol=5e-3)
 
 
-def test_b0_map_upsampling_warns_and_matches_shape():
+def test_b0_map_upsampling_warns_and_matches_shape(caplog):
     """Test that MRIFourierCorrected upscales the b0_map and warns if shape mismatch exists."""
     shape_target = (16, 16, 16)
     b0_shape = (8, 8, 8)
@@ -122,13 +126,16 @@ def test_b0_map_upsampling_warns_and_matches_shape():
         density=False,
     )
 
-    with pytest.warns(UserWarning):
+    with caplog.at_level(logging.WARNING):
         op = MRIFourierCorrected(
             nufft,
             b0_map=b0_map,
             readout_time=readout_time,
         )
 
-        # check that no exception is raised and internal shape matches
-        assert op.B.shape[0] == len(readout_time)
-        assert op.shape == shape_target
+    assert (
+        "field_map and mask will be interpolated to match image shape." in caplog.text
+    )
+    # check that no exception is raised and internal shape matches
+    assert op.B.shape[0] == len(readout_time)
+    assert op.shape == shape_target

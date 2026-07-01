@@ -2,8 +2,6 @@
 
 from mrinufft.operators.interfaces.cufinufft import MRICufiNUFFT
 
-import warnings
-
 import numpy as np
 
 from mrinufft._utils import proper_trajectory, sizeof_fmt
@@ -441,7 +439,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                     "Smaps should be either a C-ordered ndarray, or a GPUArray."
                 )
             if smaps_cached:
-                warnings.warn(
+                self.log.warning(
                     f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )
