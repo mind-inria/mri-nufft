@@ -138,9 +138,9 @@ def _extract_kspace_center(
         threshold = (threshold,) * kspace_loc.shape[1]
 
     if window_fun == "rect":
-        condition = np.logical_and.reduce(
+        condition = xp.logical_and.reduce(
             tuple(
-                np.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
+                xp.abs(kspace_loc[:, i]) <= threshold[i] for i in range(len(threshold))
             )
         )
         center_locations = kspace_loc[condition, :]
@@ -155,11 +155,11 @@ def _extract_kspace_center(
             window = window_fun(kspace_loc)
         else:
             if window_fun in ["hann", "hanning", "hamming"]:
-                radius = np.linalg.norm(kspace_loc, axis=1)
+                radius = xp.linalg.norm(kspace_loc, axis=1)
                 a_0 = 0.5 if window_fun in ["hann", "hanning"] else 0.53836
-                window = a_0 + (1 - a_0) * np.cos(np.pi * radius / threshold[0])
+                window = a_0 + (1 - a_0) * xp.cos(xp.pi * radius / threshold[0])
             elif window_fun == "ellipse":
-                window = np.sum(kspace_loc**2 / np.asarray(threshold) ** 2, axis=1) <= 1
+                window = xp.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
             else:
                 raise ValueError("Unsupported window function.")
             if xp != np:
@@ -312,6 +312,7 @@ def _unfold_blocks(calib, calib_width):
 
 
 @register_smaps
+@with_numpy_cupy
 @flat_traj
 def espirit(
     traj: NDArray,
@@ -358,6 +359,7 @@ def espirit(
 
 
 @_fill_doc(_smap_docs)
+@with_numpy_cupy
 def cartesian_espirit(
     kspace: NDArray,
     shape: tuple[int, ...],
