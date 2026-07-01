@@ -1,5 +1,6 @@
 """Provides Operator for MR Image processing on GPU."""
 
+import weakref
 import numpy as np
 from numpy.typing import NDArray
 from mrinufft.operators.base import (
@@ -28,6 +29,21 @@ try:
     import cupy as cp
     from cufinufft import Plan
     from cufinufft._compat import get_array_ptr
+
+    _coil_combine_kernel = cp.ElementwiseKernel(
+        "raw T data, raw T smaps, int64 b, int32 n_t, int64 vol",
+        "raw T img",
+        """
+        long long off = b * vol + i;
+        for (int t = 0; t < n_t; t++) {
+            T d = data[t * vol + i];
+            T s = smaps[t * vol + i];
+            img[off] += d * T(s.real(), -s.imag());
+        }
+        """,
+        "coil_combine_kernel",
+    )
+
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
@@ -167,6 +183,12 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         If True, will try to remove the singleton dimension for batch and coils.
     n_trans: int, default 1
         Number of transform to perform in parallel by cufinufft.
+    async_transfer: bool, default False
+        If True, pipeline host<->device transfers with compute (double
+        buffering) in the host-input code paths, using dedicated
+        non-blocking CUDA streams. This overlaps H2D/D2H copies with
+        cufinufft compute across batches, at the cost of extra pinned
+        host buffers and device buffers (roughly 2x the per-batch memory).
     kwargs :
         Extra kwargs for the raw cufinufft operator
 
@@ -201,6 +223,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         verbose=False,
         squeeze_dims=False,
         n_trans=1,
+        async_transfer=False,
         **kwargs,
     ):
         # run the availaility check here to get detailled output.
@@ -215,12 +238,11 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         except Exception as e:
             self.log.warning(f"Failed to set CUDA device {gpu_device_id}: {e}")
         super().__init__()
-        if (n_batchs * n_coils) % n_trans != 0:
-            raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
-
         self.shape = shape
         self.n_batchs = n_batchs
         self.n_trans = n_trans
+        self.async_transfer = async_transfer
+        self._host_registry = {}
         self.squeeze_dims = squeeze_dims
         self.n_coils = n_coils
         self.autograd_available = True
@@ -244,6 +266,19 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         ):
             raise ValueError(
                 "Smaps should be either a C-ordered np.ndarray, or a GPUArray."
+            )
+        # n_trans must tile a batch's coils exactly (or a single coil's
+        # batches, when there is only one coil): every per-chunk loop
+        # below assumes a chunk never straddles a batch boundary, so the
+        # per-chunk batch index is a single constant instead of an array.
+        if self.n_coils > 1:
+            if self.n_coils % n_trans != 0:
+                raise ValueError(
+                    f"n_trans={n_trans} must divide n_coils={self.n_coils}"
+                )
+        elif n_batchs % n_trans != 0:
+            raise ValueError(
+                f"n_trans={n_trans} must divide n_batchs={n_batchs} when n_coils=1"
             )
         self.raw_op = RawCufinufftPlan(
             self._samples,
@@ -352,19 +387,136 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=data, ksp=ksp_d)
         data = auto_cast(data, self.cpx_dtype)
-        # Dispatch to special case.
+        # Dispatch to special case. The *_device variants are also called
+        # directly by other operators (e.g. MRIStackedNUFFTGPU), which
+        # apply their own normalization on top -- they must keep returning
+        # an unnormalized result, so `op` normalizes for them here. The
+        # *_host variants are only used through this wrapper, so they
+        # normalize their own result in-place, on-device, before any
+        # device->host copy: multiplying by the reciprocal is much faster
+        # than dividing (complex/real division is poorly vectorized,
+        # ~5-6x slower for the same array), and doing it on the GPU avoids
+        # a slow single-threaded host-side pass over what can be a
+        # multi-GiB array.
         if self.uses_sense and is_cuda_array(data):
             op_func = self._op_sense_device
+            needs_norm = True
         elif self.uses_sense:
             op_func = self._op_sense_host
+            needs_norm = False
         elif is_cuda_array(data):
             op_func = self._op_calibless_device
+            needs_norm = True
         else:
             op_func = self._op_calibless_host
-        ret = op_func(data, ksp_d)
+            needs_norm = False
 
-        ret /= self.norm_factor
+        ret = op_func(data, ksp_d)
+        if needs_norm:
+            ret *= 1.0 / self.norm_factor
         return self._safe_squeeze(ret)
+
+    def _get_async_streams(self):
+        """Return (and lazily create) the dedicated H2D/D2H transfer streams.
+
+        Compute keeps running on the default stream (where cufinufft's
+        Plans already run, since a Plan's CUDA stream cannot be changed
+        after construction). These streams are created non-blocking so
+        they do not implicitly synchronize with the default stream,
+        allowing real overlap of transfers with compute.
+        """
+        if not hasattr(self, "_h2d_stream"):
+            self._h2d_stream = cp.cuda.Stream(non_blocking=True)
+            self._d2h_stream = cp.cuda.Stream(non_blocking=True)
+        return self._h2d_stream, self._d2h_stream
+
+    def _coil_slice(self, i):
+        """Return the coil ``slice`` for chunk ``i`` of the ``(B*C)//T`` loop.
+
+        ``n_trans`` (``T``) is required to divide ``n_coils`` (``C``, see
+        `__init__`), so a chunk's ``T`` coils are always a contiguous,
+        non-wrapping range within a single batch: a plain slice into
+        ``self.smaps`` is a zero-copy view (unlike fancy/advanced indexing
+        with an int array, which always allocates and copies).
+        """
+        start = (i * self.n_trans) % self.n_coils
+        return slice(start, start + self.n_trans)
+
+    def _host_register(self, arr, anchor=None):
+        """Page-lock ARR's memory in place (no copy), for async H2D/D2H.
+
+        ``cudaHostRegister``/``cudaHostUnregister`` are expensive (roughly
+        size-proportional: ~230ms combined for a 4GiB array), so the
+        registration is cached by memory address and reused across calls
+        as long as the underlying buffer is still alive, instead of paying
+        that cost on every ``op``/``adj_op`` call. It is released
+        automatically via a :class:`weakref.finalize` callback once
+        ``anchor`` (the array whose lifetime owns that memory -- ``arr``
+        itself if not given explicitly) is garbage collected.
+
+        Returns True on success. On failure (e.g. the memory cannot be
+        pinned), returns False so the caller can fall back to the
+        synchronous path rather than silently doing unsafe transfers.
+        """
+        anchor = arr if anchor is None else anchor
+        ptr = arr.ctypes.data
+        key = (ptr, arr.nbytes)
+        fin = self._host_registry.get(key)
+        if fin is not None and fin.alive:
+            return True
+        try:
+            cp.cuda.runtime.hostRegister(ptr, arr.nbytes, 0)
+        except Exception:
+            return False
+
+        registry = self._host_registry
+
+        def _cleanup(ptr=ptr, key=key):
+            registry.pop(key, None)
+            try:
+                cp.cuda.runtime.hostUnregister(ptr)
+            except Exception:
+                pass
+
+        self._host_registry[key] = weakref.finalize(anchor, _cleanup)
+        return True
+
+    @staticmethod
+    def _contiguous_anchor(arr):
+        """Return ``(contiguous_view, anchor)`` for ``arr``.
+
+        ``anchor`` is the longest-lived object that owns the returned
+        memory: ``arr`` itself if it was already contiguous (no copy
+        needed), or the freshly made contiguous copy otherwise. Meant to
+        be passed straight to `_host_register`'s ``anchor=`` so repeat
+        calls with the same (contiguous) caller array hit the
+        registration cache instead of anchoring on a short-lived view.
+        """
+        contig = np.ascontiguousarray(arr)
+        anchor = arr if contig.ctypes.data == arr.ctypes.data else contig
+        return contig, anchor
+
+    def _accumulate_coil_combine(self, img_d, i, data_batched, smaps_batched):
+        """``img_d[b] += sum_t data_batched[t] * conj(smaps_batched[t])``.
+
+        A single custom kernel: conj, multiply and the reduction over the
+        ``T`` coils all happen in one pass over memory, with no
+        intermediate arrays and no extra kernel launches -- instead of
+        the previous conj -> multiply -> sum -> add chain. It's just
+        another kernel queued on the current stream right after
+        `_op`/`_adj_op`, so it doesn't introduce any blocking sync of
+        its own.
+
+        Since ``n_trans`` is required to divide ``n_coils`` (see
+        `__init__`), a chunk never straddles a batch boundary: the batch
+        index for every one of the ``T`` coils in chunk ``i`` is the same
+        single value ``(i*T)//n_coils``, computed on the host as a plain
+        Python int (no device array/upload needed at all).
+        """
+        T = data_batched.shape[0]
+        vol = data_batched[0].size
+        b = (i * T) // self.n_coils
+        _coil_combine_kernel(data_batched, smaps_batched, b, T, vol, img_d, size=vol)
 
     def _op_sense_device(self, data, ksp_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -373,15 +525,18 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         image_dataf = cp.reshape(data, (B, *XYZ))
         ksp_d = ksp_d or cp.empty((B * C, K), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            data_batched = image_dataf[idx_batch].reshape((T, *XYZ))
+            idx_coils = self._coil_slice(i)
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
-            data_batched *= smaps_batched
+            # A chunk's T coils share a single batch (see `_coil_slice`):
+            # a single fused broadcast-multiply kernel straight from the
+            # caller's image view, instead of gathering (and copying) a
+            # redundant T-way repeat of it via fancy indexing.
+            cp.multiply(image_dataf[(i * T) // C], smaps_batched, out=data_batched)
             self._op(data_batched, ksp_d[i * T : (i + 1) * T])
 
         return ksp_d.reshape((B, C, K))
@@ -389,27 +544,110 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     def _op_sense_host(self, data, ksp=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        dataf = data.reshape((B, *XYZ))
-        data_batched = cp.zeros((T, *XYZ), dtype=self.cpx_dtype)
         if ksp is None:
             ksp = np.zeros((B, C, K), dtype=self.cpx_dtype)
-        ksp = ksp.reshape((B * C, K))
-        ksp_batched = cp.zeros((T, K), dtype=self.cpx_dtype)
+        n_call = (B * C) // T
 
-        for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            data_batched.set(dataf[idx_batch].reshape((T, *XYZ)))
+        if self.async_transfer and n_call > 1:
+            ret = self._op_sense_host_async(data, ksp)
+            if ret is not None:
+                return ret
+
+        ksp_flat = ksp.reshape((B * C, K))
+        dataf = data.reshape((B, *XYZ))
+        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        # A chunk's T coils share a single batch (see `_coil_slice`), so
+        # only one copy of that image needs to cross PCIe; broadcasting it
+        # against the T smaps directly with `cp.multiply(..., out=...)` (a
+        # single fused kernel) is much cheaper than gathering T redundant
+        # host-side copies of the same image and multiplying separately.
+        data_single_d = cp.empty((1, *XYZ), dtype=self.cpx_dtype)
+        ksp_batched = cp.zeros((T, K), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
+        for i in range(n_call):
+            idx_coils = self._coil_slice(i)
+            data_single_d[0].set(dataf[(i * T) // C])
             if not self.smaps_cached:
                 coil_img_d.set(self.smaps[idx_coils])
             else:
                 cp.copyto(coil_img_d, self.smaps[idx_coils])
-            coil_img_d *= data_batched
+            coil_img_d *= data_single_d
             self._op(coil_img_d, ksp_batched)
-            ksp[i * T : (i + 1) * T] = ksp_batched.get()
-        ksp = ksp.reshape((B, C, K))
-        return ksp
+            ksp_batched *= inv_norm
+            ksp_flat[i * T : (i + 1) * T] = ksp_batched.get()
+        return ksp_flat.reshape((B, C, K))
+
+    def _op_sense_host_async(self, data, ksp):
+        """Pipelined (double-buffered) forward SENSE op for host data.
+
+        Registers ``data``/``ksp`` in place (no staging copy) and issues
+        H2D/compute/D2H in an overlapped double-buffered pipeline. Returns
+        None (caller falls back to the synchronous loop) if the arrays
+        cannot be page-locked.
+        """
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        n_call = (B * C) // T
+
+        dataf, data_anchor = self._contiguous_anchor(data)
+        dataf = dataf.reshape((B, *XYZ))
+        if not self._host_register(dataf, anchor=data_anchor):
+            return None
+        ksp_flat = ksp.reshape((B * C, K))
+        if not self._host_register(ksp_flat, anchor=ksp):
+            return None
+
+        h2d_stream, d2h_stream = self._get_async_streams()
+        # `n_trans` divides `n_coils` (enforced in `__init__`), so every
+        # chunk's T coils belong to a single, constant batch -- only one
+        # copy of that image is needed, broadcast against the T smaps
+        # during the multiply, instead of T redundant copies of the same
+        # image transferred and stored.
+        data_batched_d = [cp.empty((1, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        ksp_batched_d = [cp.empty((T, K), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+        inv_norm = 1.0 / self.norm_factor
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                # buffer slot b is still being read by the compute
+                # issued two iterations ago; wait before overwriting
+                # the device buffer. No host-side wait is needed:
+                # dataf/self.smaps are read directly (in place,
+                # host-registered), not staged into a shared buffer.
+                h2d_stream.wait_event(compute_done[b])
+            batch_idx = (i * T) // C
+            idx_coils = self._coil_slice(i)
+            with h2d_stream:
+                data_batched_d[b][0].set(dataf[batch_idx])
+                if not self.smaps_cached:
+                    coil_img_d[b].set(self.smaps[idx_coils])
+                else:
+                    cp.copyto(coil_img_d[b], self.smaps[idx_coils])
+                coil_img_d[b] *= data_batched_d[b]
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            self._op(coil_img_d[b], ksp_batched_d[b])
+            # Scale on-device (cheap, GPU-parallel) rather than the
+            # returned host array afterward (single-threaded, and much
+            # slower for large arrays -- see `op`/`adj_op`).
+            ksp_batched_d[b] *= inv_norm
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            ksp_batched_d[b].get(
+                out=ksp_flat[i * T : (i + 1) * T], stream=d2h_stream, blocking=False
+            )
+        d2h_stream.synchronize()
+        return ksp_flat.reshape((B, C, K))
 
     def _op_calibless_device(self, data, ksp_d=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
@@ -429,20 +667,83 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        ksp_d = cp.empty((T, K), dtype=self.cpx_dtype)
         if ksp is None:
             ksp = np.zeros((B * C, K), dtype=self.cpx_dtype)
-        ksp = ksp.reshape((B * C, K))
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device
-        # and batch n-1 to host
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._op_calibless_host_async(data, ksp)
+            if ret is not None:
+                return ret
+
+        ksp_flat = ksp.reshape((B * C, K))
         data_ = data.reshape(B * C, *XYZ)
-        for i in range((B * C) // T):
+        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        ksp_d = cp.empty((T, K), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
+        for i in range(n_call):
             coil_img_d.set(data_[i * T : (i + 1) * T])
             self._op(coil_img_d, ksp_d)
-            ksp[i * T : (i + 1) * T] = ksp_d.get()
-        ksp = ksp.reshape((B, C, K))
-        return ksp
+            ksp_d *= inv_norm
+            ksp_flat[i * T : (i + 1) * T] = ksp_d.get()
+        return ksp_flat.reshape((B, C, K))
+
+    def _op_calibless_host_async(self, data, ksp):
+        """Pipelined (double-buffered) forward calibrationless op for host data.
+
+        Registers ``data``/``ksp`` in place (no staging copy) and issues
+        H2D/compute/D2H in an overlapped double-buffered pipeline. Returns
+        None (caller falls back to the synchronous loop) if the arrays
+        cannot be page-locked.
+        """
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        n_call = (B * C) // T
+
+        data_, data_anchor = self._contiguous_anchor(data)
+        data_ = data_.reshape(B * C, *XYZ)
+        if not self._host_register(data_, anchor=data_anchor):
+            return None
+        ksp_flat = ksp.reshape((B * C, K))
+        if not self._host_register(ksp_flat, anchor=ksp):
+            return None
+
+        h2d_stream, d2h_stream = self._get_async_streams()
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        ksp_d = [cp.empty((T, K), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+        inv_norm = 1.0 / self.norm_factor
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                # buffer slot b is still being read by the compute
+                # issued two iterations ago; wait before overwriting
+                # it. No host-side wait is needed: data_ is read
+                # directly (in place, host-registered).
+                h2d_stream.wait_event(compute_done[b])
+            coil_img_d[b].set(data_[i * T : (i + 1) * T], stream=h2d_stream)
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            self._op(coil_img_d[b], ksp_d[b])
+            # Scale on-device (cheap, GPU-parallel) rather than the
+            # returned host array afterward (single-threaded, and much
+            # slower for large arrays -- see `op`/`adj_op`).
+            ksp_d[b] *= inv_norm
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            ksp_d[b].get(
+                out=ksp_flat[i * T : (i + 1) * T], stream=d2h_stream, blocking=False
+            )
+        d2h_stream.synchronize()
+        return ksp_flat.reshape((B, C, K))
 
     @nvtx_mark()
     def _op(self, image_d, coeffs_d):
@@ -464,19 +765,24 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=img_d, ksp=coeffs)
         coeffs = auto_cast(coeffs, self.cpx_dtype)
-        # Dispatch to special case.
+        # See the comment in `op` for why the device variants need
+        # normalizing here while the host variants normalize themselves.
         if self.uses_sense and is_cuda_array(coeffs):
             adj_op_func = self._adj_op_sense_device
+            needs_norm = True
         elif self.uses_sense:
             adj_op_func = self._adj_op_sense_host
+            needs_norm = False
         elif is_cuda_array(coeffs):
             adj_op_func = self._adj_op_calibless_device
+            needs_norm = True
         else:
             adj_op_func = self._adj_op_calibless_host
+            needs_norm = False
 
         ret = adj_op_func(coeffs, img_d)
-        ret /= self.norm_factor
-
+        if needs_norm:
+            ret *= 1.0 / self.norm_factor
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
@@ -493,8 +799,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             ksp_new = cp.empty((T, K), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = self._coil_slice(i)
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils])
             else:
@@ -505,8 +810,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             else:
                 ksp_new = coeffs[i * T : (i + 1) * T]
             self._adj_op(ksp_new, coil_img_d)
-            for t, b in enumerate(idx_batch):
-                img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
+            self._accumulate_coil_combine(img_d, i, coil_img_d, smaps_batched)
         img_d = img_d.reshape((B, 1, *XYZ))
         return img_d
 
@@ -524,18 +828,24 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
-        coeffs_f = coeffs.flatten()
         # Allocate memory
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         if img_d is None:
             img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
-        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._adj_op_sense_host_async(coeffs, img_d)
+            if ret is not None:
+                return ret
+
         if self.uses_density:
             density_batched = cp.repeat(self.density[None, :], T, axis=0)
-        for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+        coeffs_f = coeffs.flatten()
+        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
+        for i in range(n_call):
+            idx_coils = self._coil_slice(i)
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils])
             else:
@@ -545,8 +855,78 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 ksp_batched *= density_batched
             self._adj_op(ksp_batched, coil_img_d)
 
-            for t, b in enumerate(idx_batch):
-                img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
+            self._accumulate_coil_combine(img_d, i, coil_img_d, smaps_batched)
+        img_d *= 1.0 / self.norm_factor
+        img = img_d.get()
+        img = img.reshape((B, 1, *XYZ))
+        return img
+
+    def _adj_op_sense_host_async(self, coeffs, img_d):
+        """Pipelined (double-buffered) adjoint SENSE op for host data.
+
+        Only the input (ksp + smaps) side is pipelined: the output
+        accumulates in-place into the shared ``img_d`` across every coil, so
+        a single readback after the loop is used instead of a per-batch D2H
+        copy. Registers ``coeffs`` in place (no staging copy). Returns None
+        (caller falls back to the synchronous loop) if it cannot be
+        page-locked.
+        """
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        n_call = (B * C) // T
+        if self.uses_density:
+            density_batched = cp.repeat(self.density[None, :], T, axis=0)
+
+        coeffs_reg, coeffs_anchor = self._contiguous_anchor(coeffs)
+        coeffs_reg = coeffs_reg.reshape(B * C, K)
+        if not self._host_register(coeffs_reg, anchor=coeffs_anchor):
+            return None
+
+        h2d_stream, _ = self._get_async_streams()
+        ksp_batched_d = [cp.empty((T, K), dtype=self.cpx_dtype) for _ in range(2)]
+        smaps_batched_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                # buffer slot b is still being read by the compute
+                # issued two iterations ago; wait before overwriting
+                # the device buffer. No host-side wait is needed:
+                # coeffs_reg/self.smaps are read directly (in place,
+                # host-registered), not staged into a shared buffer.
+                h2d_stream.wait_event(compute_done[b])
+            idx_coils = self._coil_slice(i)
+            with h2d_stream:
+                # One copy per buffer instead of one per coil: T separate
+                # `.set()`/`copyto()` calls each carry their own Python +
+                # CUDA-API dispatch overhead, which adds up fast for small
+                # per-coil chunks and was serializing the "prefetch" step
+                # far more than the actual transferred byte count justifies.
+                ksp_batched_d[b].set(coeffs_reg[i * T : (i + 1) * T])
+                if not self.smaps_cached:
+                    smaps_batched_d[b].set(self.smaps[idx_coils])
+                else:
+                    cp.copyto(smaps_batched_d[b], self.smaps[idx_coils])
+                if self.uses_density:
+                    ksp_batched_d[b] *= density_batched
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            self._adj_op(ksp_batched_d[b], coil_img_d[b])
+            self._accumulate_coil_combine(img_d, i, coil_img_d[b], smaps_batched_d[b])
+            compute_done[b].record()
+        # Scale on-device (cheap, GPU-parallel) rather than the returned
+        # host array afterward (single-threaded, and much slower for
+        # large arrays -- see `op`/`adj_op`).
+        img_d *= 1.0 / self.norm_factor
         img = img_d.get()
         img = img.reshape((B, 1, *XYZ))
         return img
@@ -576,24 +956,91 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     def _adj_op_calibless_host(self, coeffs, img_batched=None):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
-        coeffs_ = coeffs.reshape(B * C, K)
-        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
 
         img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._adj_op_calibless_host_async(coeffs, img)
+            if ret is not None:
+                return ret
+
+        coeffs_ = coeffs.reshape(B * C, K)
+        if self.uses_density:
+            density_batched = cp.repeat(self.density[None, :], T, axis=0)
+        ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         if img_batched is None:
             img_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        # TODO: Add concurrency compute batch n while copying batch n+1 to device
-        # and batch n-1 to host
-        for i in range((B * C) // T):
+        inv_norm = 1.0 / self.norm_factor
+        for i in range(n_call):
             ksp_batched.set(coeffs_[i * T : (i + 1) * T])
             if self.uses_density:
                 ksp_batched *= density_batched
             self._adj_op(ksp_batched, img_batched)
+            img_batched *= inv_norm
             img[i * T : (i + 1) * T] = img_batched.get()
-        img = img.reshape((B, C, *XYZ))
-        return img
+        return img.reshape((B, C, *XYZ))
+
+    def _adj_op_calibless_host_async(self, coeffs, img):
+        """Pipelined (double-buffered) adjoint calibrationless op for host data.
+
+        Registers ``coeffs``/``img`` in place (no staging copy) and issues
+        H2D/compute/D2H in an overlapped double-buffered pipeline. Returns
+        None (caller falls back to the synchronous loop) if the arrays
+        cannot be page-locked.
+        """
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        K, XYZ = self.n_samples, self.shape
+        n_call = (B * C) // T
+        if self.uses_density:
+            density_batched = cp.repeat(self.density[None, :], T, axis=0)
+
+        coeffs_, coeffs_anchor = self._contiguous_anchor(coeffs)
+        coeffs_ = coeffs_.reshape(B * C, K)
+        if not self._host_register(coeffs_, anchor=coeffs_anchor):
+            return None
+        if not self._host_register(img):
+            return None
+
+        h2d_stream, d2h_stream = self._get_async_streams()
+        ksp_batched_d = [cp.empty((T, K), dtype=self.cpx_dtype) for _ in range(2)]
+        img_batched_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+        inv_norm = 1.0 / self.norm_factor
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                # buffer slot b is still being read by the compute
+                # issued two iterations ago; wait before overwriting
+                # it. No host-side wait is needed: coeffs_ is read
+                # directly (in place, host-registered).
+                h2d_stream.wait_event(compute_done[b])
+            with h2d_stream:
+                ksp_batched_d[b].set(coeffs_[i * T : (i + 1) * T])
+                if self.uses_density:
+                    ksp_batched_d[b] *= density_batched
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            self._adj_op(ksp_batched_d[b], img_batched_d[b])
+            # Scale on-device (cheap, GPU-parallel) rather than the
+            # returned host array afterward (single-threaded, and much
+            # slower for large arrays -- see `op`/`adj_op`).
+            img_batched_d[b] *= inv_norm
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            img_batched_d[b].get(
+                out=img[i * T : (i + 1) * T], stream=d2h_stream, blocking=False
+            )
+        d2h_stream.synchronize()
+        return img.reshape((B, C, *XYZ))
 
     @nvtx_mark()
     def _adj_op(self, coeffs_d, image_d):
@@ -640,24 +1087,28 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         image_dataf = np.reshape(data, (B, *XYZ))
 
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        # A chunk's T coils share a single batch (see `_coil_slice`), so
+        # only one copy of that image needs to cross PCIe; broadcasting it
+        # against the T smaps directly with `cp.multiply(..., out=...)` (a
+        # single fused kernel) is much cheaper than gathering T redundant
+        # host-side copies of the same image and multiplying separately.
+        data_single_d = cp.empty((1, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
 
         img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            data_batched.set(image_dataf[idx_batch].reshape((T, *XYZ)))
+            idx_coils = self._coil_slice(i)
+            data_single_d[0].set(image_dataf[(i * T) // C])
 
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
-            data_batched *= smaps_batched
+            cp.multiply(data_single_d, smaps_batched, out=data_batched)
 
             self._gram_op_raw_device(data_batched, data_batched, padded_array)
-            for t, b in enumerate(idx_batch):
-                img_d[b, :] += data_batched[t] * smaps_batched[t].conj()
+            self._accumulate_coil_combine(img_d, i, data_batched, smaps_batched)
         img = img_d.get()
         img = img_d.reshape((B, 1, *XYZ))
         return img
@@ -674,19 +1125,19 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
 
         padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            cp.copyto(data_batched, image_dataf[idx_batch])
+            idx_coils = self._coil_slice(i)
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
-            data_batched *= smaps_batched
+            # A chunk's T coils share a single batch (see `_coil_slice`):
+            # a single fused broadcast-multiply kernel straight from the
+            # caller's image view, instead of gathering (and copying) a
+            # redundant T-way repeat of it via fancy indexing.
+            cp.multiply(image_dataf[(i * T) // C], smaps_batched, out=data_batched)
             self._gram_op_raw_device(data_batched, data_batched, padded_array)
 
-            for t, b in enumerate(idx_batch):
-                # TODO write a kernel for that.
-                img_d[b] += data_batched[t] * smaps_batched[t].conj()
+            self._accumulate_coil_combine(img_d, i, data_batched, smaps_batched)
         img_d = img_d.reshape((B, 1, *XYZ))
         return img_d
 
@@ -793,6 +1244,12 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         obs_dataf = np.reshape(obs_data, (B * C, K))
 
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        # A chunk's T coils share a single batch (see `_coil_slice`), so
+        # only one copy of that image needs to cross PCIe; broadcasting it
+        # against the T smaps directly with `cp.multiply(..., out=...)` (a
+        # single fused kernel) is much cheaper than gathering T redundant
+        # host-side copies of the same image and multiplying separately.
+        data_single_d = cp.empty((1, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
 
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
@@ -800,29 +1257,28 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
 
         grad_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         grad = np.empty((B, *XYZ), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            data_batched.set(image_dataf[idx_batch].reshape((T, *XYZ)))
+            idx_coils = self._coil_slice(i)
+            data_single_d[0].set(image_dataf[(i * T) // C])
             obs_batched.set(obs_dataf[i * T : (i + 1) * T])
 
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
-            data_batched *= smaps_batched
+            cp.multiply(data_single_d, smaps_batched, out=data_batched)
             self._op(data_batched, ksp_batched)
 
-            ksp_batched /= self.norm_factor
+            ksp_batched *= inv_norm
             ksp_batched -= obs_batched
 
             if self.uses_density:
                 ksp_batched *= self.density
             self._adj_op(ksp_batched, data_batched)
 
-            for t, b in enumerate(idx_batch):
-                grad_d[b, :] += data_batched[t] * smaps_batched[t].conj()
-        grad_d /= self.norm_factor
+            self._accumulate_coil_combine(grad_d, i, data_batched, smaps_batched)
+        grad_d *= inv_norm
         grad = grad_d.get()
         grad = grad.reshape((B, 1, *XYZ))
         return grad
@@ -840,29 +1296,30 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         grad = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
 
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            cp.copyto(data_batched, image_dataf[idx_batch])
+            idx_coils = self._coil_slice(i)
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
                 smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
-            data_batched *= smaps_batched
+            # A chunk's T coils share a single batch (see `_coil_slice`):
+            # a single fused broadcast-multiply kernel straight from the
+            # caller's image view, instead of gathering (and copying) a
+            # redundant T-way repeat of it via fancy indexing.
+            cp.multiply(image_dataf[(i * T) // C], smaps_batched, out=data_batched)
             self._op(data_batched, ksp_batched)
-            ksp_batched /= self.norm_factor
+            ksp_batched *= inv_norm
             ksp_batched -= obs_dataf[i * T : (i + 1) * T]
 
             if self.uses_density:
                 ksp_batched *= self.density
             self._adj_op(ksp_batched, data_batched)
 
-            for t, b in enumerate(idx_batch):
-                # TODO write a kernel for that.
-                grad[b] += data_batched[t] * smaps_batched[t].conj()
+            self._accumulate_coil_combine(grad, i, data_batched, smaps_batched)
         grad = grad.reshape((B, 1, *XYZ))
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad
 
     def _dc_calibless_host(self, image_data, obs_data):
@@ -879,17 +1336,18 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         obs_batched = cp.empty((T, K), dtype=self.cpx_dtype)
 
         grad = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
 
         for i in range(B * C // T):
             data_batched.set(image_dataf[i * T : (i + 1) * T])
             obs_batched.set(obs_dataf[i * T : (i + 1) * T])
             self._op(data_batched, ksp_batched)
-            ksp_batched /= self.norm_factor
+            ksp_batched *= inv_norm
             ksp_batched -= obs_batched
             if self.uses_density:
                 ksp_batched *= self.density
             self._adj_op(ksp_batched, data_batched)
-            data_batched /= self.norm_factor
+            data_batched *= inv_norm
             grad[i * T : (i + 1) * T] = data_batched.get()
         grad = grad.reshape((B, C, *XYZ))
         return grad
@@ -906,18 +1364,19 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
 
         grad = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        inv_norm = 1.0 / self.norm_factor
 
         for i in range(B * C // T):
             cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
             self._op(data_batched, ksp_batched)
-            ksp_batched /= self.norm_factor
+            ksp_batched *= inv_norm
             ksp_batched -= obs_data[i * T : (i + 1) * T]
             if self.uses_density:
                 ksp_batched *= self.density
             self._adj_op(ksp_batched, data_batched)
             grad[i * T : (i + 1) * T] = data_batched
         grad = grad.reshape((B, C, *XYZ))
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad
 
     @property
@@ -962,6 +1421,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             f"  uses_density: {self.uses_density}\n"
             f"  uses_sense: {self.uses_sense}\n"
             f"  smaps_cached: {self.smaps_cached}\n"
+            f"  async_transfer: {self.async_transfer}\n"
             f"  eps:{self.raw_op.eps:.0e}\n"
             ")"
         )
