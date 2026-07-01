@@ -237,10 +237,17 @@ class MRITorchKbNufft(FourierOperatorBase):
                 self.samples.t(), self.shape
             )
 
+        data = data.to(dtype=self._gram_op_kernel.dtype, copy=False)
+        smaps = self.smaps
+        if smaps is not None:
+            smaps = smaps.to(data.dtype, copy=False)
+            # ToepNufft expects one smaps set per batch element.
+            smaps = smaps.unsqueeze(0).expand(data.shape[0], *smaps.shape)
+
         img = self._gram_op(
-            data.to(dtype=self._gram_op_kernel.dtype, copy=False),
+            data,
             self._gram_op_kernel,
-            smaps=self.smaps,
+            smaps=smaps,
             norm="ortho",
         ).reshape(data.shape)
         return self._safe_squeeze(img)
