@@ -78,7 +78,7 @@ if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
     import cupy as cp
 
     kspace_data = cp.asarray(kspace_data, dtype=cp.complex64)
-
+    samples_loc = cp.asarray(samples_loc, dtype=cp.float32)
 
 # %%
 # Estimate sensitivity maps using ESPIRiT
@@ -90,7 +90,9 @@ Smaps = get_smaps("espirit")(
     backend=BACKEND,
     decim=4,
 )
-show_maps(Smaps.get())
+if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
+    Smaps = Smaps.get()
+show_maps(Smaps)
 
 # %%
 # Estimate the sensitivity map using low-frequency calibration
@@ -101,7 +103,10 @@ Smaps = get_smaps("low_frequency")(
     density=forward_op.density,
     backend=BACKEND,
 )
-show_maps(Smaps.get())
+
+if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
+    Smaps = Smaps.get()
+show_maps(Smaps)
 
 # %%
 # References
