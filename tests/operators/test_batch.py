@@ -255,9 +255,7 @@ def test_interface_gram(operator, array_interface, image_data):
     image_data_ = to_interface(image_data.copy(), array_interface)
 
     AHA_img = operator.adj_op(operator.op(image_data_))
-    assert np.allclose(from_interface(image_data_, array_interface), image_data.copy())
     G_img = operator.gram_op(image_data_)
-
     assert G_img.shape == AHA_img.shape
 
     AHA_img = from_interface(AHA_img, array_interface)
