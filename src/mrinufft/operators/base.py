@@ -946,7 +946,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
-        ret /= self.norm_factor
+        ret *= 1 / self.norm_factor
 
         ret = self._safe_squeeze(ret)
         return ret
@@ -1003,7 +1003,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        ret /= self.norm_factor
+        ret *= 1 / self.norm_factor
         return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
@@ -1076,19 +1076,20 @@ class FourierOperatorSimple(FourierOperatorBase):
 
         coil_img = xp.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = xp.empty((T, K), dtype=self.cpx_dtype)
+        inv_norm = 1 / self.norm_factor
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
             coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, coil_ksp)
-            coil_ksp /= self.norm_factor
+            coil_ksp *= inv_norm
             coil_ksp -= obs_dataf[i * T : (i + 1) * T]
             self._adj_op(coil_ksp, coil_img)
             coil_img *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):
                 grad[b] += coil_img[t]
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad.reshape(B, 1, *XYZ)
 
     def _grad_calibless(self, image_data, obs_data):
@@ -1100,14 +1101,15 @@ class FourierOperatorSimple(FourierOperatorBase):
         obs_dataf = obs_data.reshape((B * C, K))
         grad = xp.empty_like(dataf)
         ksp = xp.empty((T, K), dtype=self.cpx_dtype)
+        inv_norm = 1 / self.norm_factor
         for i in range(B * C // T):
             self._op(dataf[i * T : (i + 1) * T], ksp)
-            ksp /= self.norm_factor
+            ksp *= inv_norm
             ksp -= obs_dataf[i * T : (i + 1) * T]
             if self.uses_density:
                 ksp *= self.density
             self._adj_op(ksp, grad[i * T : (i + 1) * T])
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad.reshape(B, C, *XYZ)
 
 
