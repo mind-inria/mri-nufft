@@ -262,7 +262,10 @@ def lsqr(
     progressbar: bool | tqdm = True,
 ):
     r"""
-    Solve a general regularized linear least-squares problem using the LSQR algorithm.
+    Solve a regularized linear least-squares problem with the LSQR algorithm [1]_.
+
+    This implementation follows the numerically stable formulation described in
+    [2]_ and is adapted from the SciPy implementation [3]_.
 
     Solves problems of the form
 
@@ -506,7 +509,9 @@ def lsmr(
     progressbar: bool | tqdm = True,
 ):
     r"""
-    Solve a general regularized linear least-squares problem using the LSMR algorithm.
+    Solve a regularized linear least-squares problem with the LSMR algorithm [1]_.
+
+    See the reference LSMR software [2]_ for further details.
 
     Solves problems of the form
     .. math::

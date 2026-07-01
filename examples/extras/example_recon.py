@@ -12,7 +12,7 @@ a 3D cones trajectory. We then compare several reconstruction approaches:
 1. Adjoint reconstruction, providing a fast baseline with sampling artifacts.
 2. Wavelet-regularized reconstruction solved with FISTA.
 3. Total Variation reconstruction solved with the DeepInverse PDCP optimizer.
-.
+
 The goal of this example is to illustrate how MRI-NUFFT physics operators can
 be coupled with DeepInverse optimization tools to solve model-based MRI inverse
 problems and compare different regularization priors, supporting both

@@ -1,5 +1,5 @@
 # %%
-"""
+r"""
 ============================================
 Prephasors, Spoilers and arbitrary Waveforms
 ============================================
@@ -10,11 +10,12 @@ When designing MRI sequences It's often necessary to have some way of going from
 a point A to point B in the kspace. For instance:
 
 - At the beginning of an acquisition we may want to go from the center of the
-k-space to the starting point of the trajectory. This is usually call the
-"prephasor" or "prewinder" gradient. - At the end of an acquisition we may want
-to go from the end point of the trajectory back to the center, or to crush any
-residual magnetization by going to the edge of the k-space. This is usually
-called a "rewind" or "spoiler" gradient.
+  k-space to the starting point of the trajectory. This is usually called the
+  "prephasor" or "prewinder" gradient.
+- At the end of an acquisition we may want to go from the end point of the
+  trajectory back to the center, or to crush any residual magnetization by
+  going to the edge of the k-space. This is usually called a "rewind" or
+  "spoiler" gradient.
 
 However, these gradient waveforms needs to be designed under the hardware system
 constraints: The maximum gradient strength :math:`g_\max`, and slew rate

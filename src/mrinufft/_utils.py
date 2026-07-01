@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 baselogger = logging.getLogger("mrinufft")
-baselogger.addHandler(logging.NullHandler())
+# avoid null handler duplications.
+if not any(isinstance(h, logging.NullHandler) for h in baselogger.handlers):
+    baselogger.addHandler(logging.NullHandler())
 
 
 def set_log_level(level):
@@ -104,7 +106,7 @@ _SEE_ALSO_REGISTRY = """
 .. seealso::
 
     - This function is part of the `{registry}` registry.
-    You can find other registered functions in this registry below:
+      You can find other registered functions in this registry below:
 
     .. autoregistry:: {registry}
 """

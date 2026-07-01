@@ -1,9 +1,8 @@
-"""MRI-NUFFT.
+"""
+Base module.
 
-MRI-NUFFT provides an easy to use Fourier operator for non-Cartesian
-reconstruction.
-
-Doing non-Cartesian MRI has never been so easy.
+This module contains the main entry points for the package, including the
+submodules and utility functions.
 """
 
 import importlib as _importlib
