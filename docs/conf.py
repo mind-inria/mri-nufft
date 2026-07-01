@@ -151,6 +151,8 @@ html_css_files = [
 html_theme_options = {
     "use_edit_page_button": True,
     "secondary_sidebar_items": {
+        "*": ["page-toc", "edit-this-page"],
+        "explanations/*": ["page-toc", "edit-this-page"],
         "generated/autoexamples/**": [
             "page-toc",
             "sg_download_links",
