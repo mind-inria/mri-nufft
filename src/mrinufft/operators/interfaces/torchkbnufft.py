@@ -1,6 +1,5 @@
 """Pytorch MRI Nufft Operators."""
 
-import warnings
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
@@ -136,7 +135,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             raise ValueError("Smaps should match image shape.")
         if C != self._n_coils:
             self._n_coils = C
-            warnings.warn("updating number of coils via Smaps.")
+            self.log.warning("updating number of coils via Smaps.")
         self._smaps = new_smaps
 
     @with_torch

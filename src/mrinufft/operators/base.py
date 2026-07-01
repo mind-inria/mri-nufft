@@ -13,6 +13,7 @@ from functools import partial
 from contextlib import contextmanager
 from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
+import logging
 import numpy as np
 from numpy.typing import NDArray
 import warnings
@@ -212,6 +213,11 @@ class FourierOperatorBase(ABC):
             available = available()
         if backend := getattr(cls, "backend", None):
             cls.interfaces[backend] = (available, cls)
+
+    @property
+    def log(self) -> logging.Logger:
+        """Logger for this operator instance, named after its defining module."""
+        return logging.getLogger(type(self).__module__)
 
     def check_shape(self, *, image=None, ksp=None):
         """
@@ -678,7 +684,7 @@ class FourierOperatorBase(ABC):
             raise ValueError("Smaps should match image shape.")
         if C != self._n_coils:
             self._n_coils = C
-            warnings.warn("updating number of coils via Smaps.")
+            self.log.warning("updating number of coils via Smaps.")
         self._smaps = new_smaps
 
     @property

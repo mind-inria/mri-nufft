@@ -1,6 +1,5 @@
 """Provides Operator for MR Image processing on GPU."""
 
-import warnings
 import numpy as np
 from numpy.typing import NDArray
 from mrinufft.operators.base import (
@@ -214,9 +213,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         try:
             cp.cuda.Device(gpu_device_id).use()
         except Exception as e:
-            warnings.warn(
-                f"Failed to set CUDA device {gpu_device_id}: {e}", RuntimeWarning
-            )
+            self.log.warning(f"Failed to set CUDA device {gpu_device_id}: {e}")
         super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
@@ -271,11 +268,11 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             if XYZ != self.shape:
                 raise ValueError("Smaps shape does not match image shape.")
             if C != self.n_coils:
-                warnings.warn("n_coils updated via smaps.")
+                self.log.warning("n_coils updated via smaps.")
                 self.n_coils = C
             if self.smaps_cached or is_cuda_array(new_smaps):
                 self.smaps_cached = True
-                warnings.warn(
+                self.log.warning(
                     f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
                     "used on gpu for smaps."
                 )

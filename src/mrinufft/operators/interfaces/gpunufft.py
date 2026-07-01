@@ -470,7 +470,7 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         if is_cuda_array(data):
             op_func = self.raw_op.op_direct
             if not self.raw_op.use_gpu_direct:
-                warnings.warn(
+                self.log.warning(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
@@ -510,7 +510,7 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         if is_cuda_array(coeffs):
             adj_op_func = self.raw_op.adj_op_direct
             if not self.raw_op.use_gpu_direct:
-                warnings.warn(
+                self.log.warning(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
@@ -700,13 +700,13 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             grad_func = self._dc_host
         elif is_cuda_array(image_data) and is_cuda_array(obs_data):
             if B > 1 or (C > 1 and not self.uses_sense):
-                warnings.warn(
+                self.log.warning(
                     "Having all the batches / coils on GPU could be faster, "
                     "but is memory inefficient!"
                 )
             grad_func = super().data_consistency
             if not self.raw_op.use_gpu_direct:
-                warnings.warn(
+                self.log.warning(
                     "Using direct GPU array without passing "
                     "`use_gpu_direct=True`, this is memory inefficient."
                 )
