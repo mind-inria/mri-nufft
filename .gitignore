@@ -23,3 +23,4 @@ docs/generated/
 docs_build/
 
 src/mrinufft/_version.py
+docs/_build/
