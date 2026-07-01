@@ -15,9 +15,19 @@ from mrinufft._array_compat import get_array_module
 logger = logging.getLogger(__name__)
 
 
-def check_error(ier, message):  # noqa: D103
-    if ier != 0:
-        raise RuntimeError(message)
+baselogger = logging.getLogger("mrinufft")
+baselogger.addHandler(logging.NullHandler())
+
+
+def set_log_level(level):
+    """Set the log level of the mrinufft logger.
+
+    Parameters
+    ----------
+    level: int | str
+        Logging level, e.g. ``logging.DEBUG`` or ``"DEBUG"``.
+    """
+    baselogger.setLevel(level)
 
 
 def sizeof_fmt(num, suffix="B"):
