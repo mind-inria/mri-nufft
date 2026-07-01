@@ -14,9 +14,14 @@ problems.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from mrinufft import get_operator
-from mrinufft.operators import compute_toeplitz_kernel, apply_toeplitz_kernel
+from mrinufft.operators import (
+    get_operator,
+    compute_toeplitz_kernel,
+    apply_toeplitz_kernel,
+)
 from mrinufft.display import display_2D_trajectory
+from mrinufft.trajectories import initialize_2D_spiral
+from mrinufft.density import voronoi
 
 plt.rcParams["image.cmap"] = "gray"
 
@@ -46,8 +51,6 @@ plt.show()
 # Trajectory generation
 # ---------------------
 
-from mrinufft import initialize_2D_spiral
-from mrinufft.density import voronoi
 
 samples = initialize_2D_spiral(Nc=24, Ns=5000, nb_revolutions=10)
 density = voronoi(samples)
