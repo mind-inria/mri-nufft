@@ -9,9 +9,19 @@ Doing non-Cartesian MRI has never been so easy.
 import importlib as _importlib
 from typing import TYPE_CHECKING
 
+from mrinufft._utils import proper_trajectory, set_log_level, MethodRegister
+from mrinufft._array_compat import get_array_module
+
 submodules = ["display", "trajectories", "operators", "density", "extras", "io"]
 
-__all__ = submodules + ["get_operator", "__version__"]
+__all__ = submodules + [
+    "get_operator",
+    "set_log_level",
+    "proper_trajectory",
+    "MethodRegister",
+    "get_array_module",
+    "__version__",
+]
 
 
 def __getattr__(name):
