@@ -13,6 +13,10 @@ actual sensitivity maps used in the simulation.
 """
 
 # %%
+#
+#    !pip install mri-nufft[gpunufft, cufinufft] sigpy scikit-image
+
+# %%
 # Imports
 # -------
 import matplotlib.pyplot as plt
