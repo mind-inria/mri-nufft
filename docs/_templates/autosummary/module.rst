@@ -1,4 +1,8 @@
+{% if objname == "mrinufft" %}
+{{ "``{}``".format(objname) | underline}}
+{% else %}
 {{ "``{}.{}``".format(module.split(".")[-1], objname) | underline}}
+{% endif %}
 
 .. automodule:: {{ fullname }}
    :no-members:

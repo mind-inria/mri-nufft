@@ -64,6 +64,7 @@ decim : int, optional
     and significantly reduce memory usage. The final result is
     upsampled back to the original size through linear
     interpolation.
+
 Returns
 -------
 Smaps : NDArray

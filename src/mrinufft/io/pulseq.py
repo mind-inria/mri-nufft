@@ -208,10 +208,9 @@ def pulseq_gre(
     1. RF pulse
     2. Delay to sync TE
     3. Gradients plays: The gradients consist in a prewind to the first point
-    of the trajectory, the trajectory itself, and a rewind to the edge of
-    k-space.
-    3bis. The ADC is opened on the trajectory points (ignoring the prewind and
-    rewinds parts)
+       of the trajectory, the trajectory itself, and a rewind to the edge of
+       k-space. The ADC is opened on the trajectory points (ignoring the
+       prewind and rewind parts).
     4. Gradient spoilers
     5. Delay to sync the next TR
 
