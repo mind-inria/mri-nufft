@@ -6,7 +6,7 @@ facilitate the integration of arbitrary k-space trajectories into Pulseq
 sequences. Requires the `pypulseq` package to be installed.
 """
 
-import warnings
+import logging
 from types import SimpleNamespace
 
 import numpy as np
@@ -19,6 +19,8 @@ from mrinufft.trajectories.utils import (
 )
 
 from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
+
+logger = logging.getLogger(__name__)
 
 PULSEQ_AVAILABLE = True
 try:
@@ -114,7 +116,9 @@ def _check_timings(seq):
     if ok:
         return None
     else:
-        warnings.warn("Timing check failed. Error listing follows:" + str(error_report))
+        logger.warning(
+            "Timing check failed. Error listing follows:" + str(error_report)
+        )
 
 
 def _acq2opts(acq: Acquisition) -> "pp.Opts":

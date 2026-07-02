@@ -1,9 +1,13 @@
 """Compute density compensation weights using geometry-based methods."""
 
+import logging
+
 import numpy as np
 from scipy.spatial import Voronoi
 
 from .utils import flat_traj, _normalize_weights, register_density
+
+logger = logging.getLogger(__name__)
 
 
 def _vol3d(points):
@@ -88,7 +92,7 @@ def _voronoi_unique(traj, *args, **kwargs):
     rho = np.sum(traj**2, axis=1)
     igood = (rho > 0.6 * np.max(rho)) & ~np.isinf(wi)
     if len(igood) < 10:
-        print("dubious extrapolation with", len(igood), "points")
+        logger.info(f"dubious extrapolation with {len(igood)} points")
     poly = np.polynomial.Polynomial.fit(rho[igood], wi[igood], 3)
     wi[np.isinf(wi)] = poly(rho[np.isinf(wi)])
     return wi

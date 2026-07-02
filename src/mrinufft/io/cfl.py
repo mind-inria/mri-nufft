@@ -10,8 +10,10 @@ BART Toolbox: https://bart-doc.readthedocs.io/en/latest/data.html
 from pathlib import Path
 import os
 import mmap
-import warnings
+import logging
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def _readcfl(cfl_file, hdr_file=None):
@@ -130,13 +132,13 @@ def cfl2traj(basename, shape=None):
     # Convert to float array and take only the real part
     traj = np.ascontiguousarray(traj_raw.T.view("(2,)float32")[..., 0])
     if np.all(traj[..., -1] == 0):
-        warnings.warn("2D Trajectory Detected")
+        logger.warning("2D Trajectory Detected")
         traj = traj[..., :-1]
     if shape is None:
         maxs = [np.max(traj[..., i]) for i in range(traj.shape[-1])]
         mins = [np.min(traj[..., i]) for i in range(traj.shape[-1])]
         shape = np.array(maxs) - np.array(mins)
-        warnings.warn(f"Estimated shape {shape}")
+        logger.warning(f"Estimated shape {shape}")
     else:
         shape = np.asarray(shape) - 1
 

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import os
-import warnings
+import logging
 from array import array
 from datetime import datetime
 
@@ -26,6 +26,8 @@ from mrinufft.trajectories.utils import (
 )
 
 from .siemens import read_siemens_rawdat
+
+logger = logging.getLogger(__name__)
 
 
 def write_gradients(
@@ -117,7 +119,7 @@ def write_gradients(
     if version >= 4.1:
         if TE_pos == 0:
             if np.sum(initial_positions) != 0:
-                warnings.warn(
+                logger.warning(
                     "The initial positions are not all zero for center-out trajectory"
                 )
         file.write(str(TE_pos) + "\n")
@@ -147,7 +149,7 @@ def write_gradients(
     )
     if version >= 5:
         if final_positions is None:
-            warnings.warn(
+            logger.warning(
                 "Final positions not provided for version >= 5,"
                 "calculating final positions from gradients"
             )
@@ -342,7 +344,7 @@ def write_trajectory(
             acq=acq,
         )
         if not valid:
-            warnings.warn(
+            logger.warning(
                 "Hard constraints violated! "
                 f"Maximum gradient amplitude: {maxG:.3f} > {gmax:.3f}"
                 f"Maximum slew rate: {maxS:.3f} > {smax:.3f}"
@@ -350,7 +352,7 @@ def write_trajectory(
         if pregrad != "prephase":
             border_slew_rate = gradients[:, 0] / raster_time
             if np.any(np.abs(border_slew_rate) > smax):
-                warnings.warn(
+                logger.warning(
                     "Slew rate at start of trajectory exceeds maximum slew rate!"
                     f"Maximum slew rate: {np.max(np.abs(border_slew_rate)):.3f}"
                     f" > {smax:.3f}. Please use prephase gradient to avoid this "
@@ -496,12 +498,12 @@ def read_trajectory(
                 Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
             )
         ):
-            warnings.warn("Binary file doesn't seem right! Proceeding anyway")
+            logger.warning("Binary file doesn't seem right! Proceeding anyway")
         grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
         for i, (q, r) in enumerate(zip(Q, R)):
             if q >= gradients.shape[1]:
                 if q > gradients.shape[1]:
-                    warnings.warn(
+                    logger.warning(
                         "Number of samples is more than what was "
                         "obtained in binary file!\n"
                         "Data will be extended"
@@ -546,7 +548,7 @@ def read_trajectory(
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
             if np.abs(kspace_loc).max() > normalize_factor:
-                warnings.warn(
+                logger.warning(
                     "K-space locations exceed the normalization factor after "
                     "normalization! Clipping the values."
                 )

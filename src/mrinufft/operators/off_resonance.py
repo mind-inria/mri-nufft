@@ -4,7 +4,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from scipy.ndimage import zoom
 from typing import TYPE_CHECKING
-import warnings
 
 from mrinufft._array_compat import with_numpy_cupy, CUPY_AVAILABLE
 import numpy as np
@@ -122,7 +121,7 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         # Resize to match fourier shape
         if field_map.shape != self._fourier_op.shape:
-            warnings.warn(
+            self.log.warning(
                 "field_map and mask will be interpolated to match image shape."
             )
             zoom_func = cp_zoom if xp.__name__ == "cupy" else zoom
@@ -247,10 +246,10 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         on_gpu = is_cuda_array(data)
         if is_host_array(self.B) and on_gpu:
-            warnings.warn("Interpolators are on CPU, moving GPU image data to CPU.")
+            self.log.warning("Interpolators are on CPU, moving GPU image data to CPU.")
             data = data.get()
         elif is_cuda_array(self.B) and not on_gpu:
-            warnings.warn("Interpolators are on GPU, moving CPU image data to GPU")
+            self.log.warning("Interpolators are on GPU, moving CPU image data to GPU")
             data = cp.array(data, copy=None)
 
         xp = get_array_module(self.B)
