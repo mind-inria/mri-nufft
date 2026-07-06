@@ -21,6 +21,7 @@ from mrinufft._array_compat import (
     pin_memory,
     get_array_module,
     auto_cast,
+    _array_to_cupy,
 )
 from mrinufft.operators.interfaces.utils import nvtx_mark
 
@@ -305,6 +306,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 self.log.warning("n_coils updated via smaps.")
                 self.n_coils = C
             if self.smaps_cached or is_cuda_array(new_smaps):
+                new_smaps = _array_to_cupy(new_smaps)
                 self.smaps_cached = True
                 self.log.warning(
                     "%s used on gpu for smaps.",

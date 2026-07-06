@@ -28,6 +28,7 @@ from mrinufft._array_compat import (
     is_cuda_array,
     is_host_array,
     auto_cast,
+    _to_numpy_cupy,
 )
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
@@ -425,6 +426,7 @@ class FourierOperatorBase(ABC):
                 self.smaps = None
                 return
             case arr if is_host_array(arr) or (CUPY_AVAILABLE and is_cuda_array(arr)):
+                arr = _to_numpy_cupy([arr])[0][0]
                 self.smaps = arr.reshape(self.n_coils, *self.shape)
                 return
             case {"name": str(name), **kwargs}:
