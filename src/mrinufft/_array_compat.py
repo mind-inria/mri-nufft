@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import logging
 from functools import partial, wraps
 from inspect import cleandoc
@@ -254,7 +255,16 @@ def _get_leading_argument(args, kwargs):
 def _array_to_numpy(_arg):
     """Convert array to Numpy."""
     if is_cuda_array(_arg):
-        logger.warning("data is on gpu, it will be moved to CPU.")
+        # go up the call stack, and get a more useful logger
+        caller_logger = logger
+        for frame_info in inspect.stack():
+            module = inspect.getmodule(frame_info.frame)
+            if module and module.__name__ != __name__:
+                caller_logger = logging.getLogger(module.__name__)
+                break
+        caller_logger.warning(
+            f"{frame_info.function}: data is on gpu, it will be moved to CPU."
+        )
     xp = get_array_module(_arg)
     if xp.__name__ == "torch":
         _arg = _arg.numpy(force=True)

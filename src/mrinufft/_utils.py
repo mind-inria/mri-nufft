@@ -1,5 +1,6 @@
 """General utility functions for MRI-NUFFT."""
 
+import inspect
 import logging
 from inspect import cleandoc
 from collections import defaultdict
@@ -65,13 +66,19 @@ def proper_trajectory(trajectory, normalize="pi"):
 
     max_abs_val = xp.max(xp.abs(new_traj))
 
+    caller_logger = logger
+    for frame_info in inspect.stack():
+        module = inspect.getmodule(frame_info.frame)
+        if module and module.__name__ != __name__:
+            caller_logger = logging.getLogger(module.__name__)
+            break
     if normalize == "pi" and max_abs_val - 1e-4 < 0.5:
-        logger.warning(
+        caller_logger.warning(
             "Samples will be rescaled to [-pi, pi), assuming they were in [-0.5, 0.5)"
         )
         new_traj = new_traj * 2 * xp.pi
     elif normalize == "unit" and max_abs_val - 1e-4 > 0.5:
-        logger.warning(
+        caller_logger.warning(
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
         new_traj = new_traj * 1 / (2 * xp.pi)
