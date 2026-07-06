@@ -3,29 +3,34 @@
 
 from __future__ import annotations
 
-import os
 import logging
+import os
 from array import array
 from datetime import datetime
+from typing import TYPE_CHECKING, Literal, overload
+
+import numpy as np
+from numpy.typing import NDArray
 
 from mrinufft.trajectories.gradients import connect_gradient
-import numpy as np
-
 from mrinufft.trajectories.utils import (
-    Acquisition,
-    Hardware,
-    Gammas,
+    DEFAULT_GMAX,
+    DEFAULT_RASTER_TIME,
+    DEFAULT_SMAX,
+    KMAX,
     SI,
+    Acquisition,
+    Gammas,
+    Hardware,
     check_hardware_constraints,
     convert_gradients_to_slew_rates,
     convert_trajectory_to_gradients,
-    DEFAULT_GMAX,
-    DEFAULT_SMAX,
-    KMAX,
-    DEFAULT_RASTER_TIME,
 )
 
-from .siemens import read_siemens_rawdat
+from .siemens import TwixHeaderDict, read_siemens_rawdat
+
+if TYPE_CHECKING:
+    from mrinufft.io.siemens import TwixObj
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +301,7 @@ def write_trajectory(
                 "pregrad and postgrad are only supported for version >= 5.1, "
                 "please set version to 5.1 or higher."
             )
-        prephase_grad = prephase_loc = spoiler_grad = spoiler_loc = None
+        spoiler_grad = spoiler_loc = None
         if pregrad == "prephase":
             prephase_grad = np.zeros_like(initial_positions)
             prephase_loc = np.zeros_like(initial_positions)
@@ -457,13 +462,16 @@ def read_trajectory(
         initial_positions, data = _pop_elements(data, dimension * num_shots)
         initial_positions = np.reshape(initial_positions, (num_shots, dimension))
         if version > 45:
-            final_positions, data = _pop_elements(data, dimension * num_shots)
-            final_positions = np.reshape(final_positions, (num_shots, dimension))
+            # Final positions are present in the file,
+            # but we don't need them for k-space calculation
+            _, data = _pop_elements(data, dimension * num_shots)
         dwell_time_ns = dwell_time * 1e6
         gradient_raster_time_ns = raster_time * 1e6
         if version < 41:
             grad_max, data = _pop_elements(data)
-        gradients, data = _pop_elements(
+        # Pop gradients from data
+        # we are done doing the parsing !
+        gradients, _ = _pop_elements(
             data,
             dimension * num_samples_per_shot * num_shots,
         )
@@ -565,6 +573,34 @@ def read_trajectory(
         return kspace_loc, params
 
 
+@overload
+def read_arbgrad_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    doAverage: bool = True,
+    squeeze: bool = True,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
+    pre_skip: int = 0,
+    data_type: str = "ARBGRAD_VE11C",
+    return_twix: Literal[True] = True,
+) -> tuple[NDArray, TwixHeaderDict, TwixObj]: ...
+
+
+@overload
+def read_arbgrad_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    doAverage: bool = True,
+    squeeze: bool = True,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
+    pre_skip: int = 0,
+    data_type: str = "ARBGRAD_VE11C",
+    return_twix: Literal[False] = False,
+) -> tuple[NDArray, TwixHeaderDict]: ...
+
+
 def read_arbgrad_rawdat(
     filename: str,
     removeOS: bool = False,
@@ -575,7 +611,7 @@ def read_arbgrad_rawdat(
     pre_skip: int = 0,
     data_type: str = "ARBGRAD_VE11C",
     return_twix: bool = False,
-):  # pragma: no cover
+):
     """Read raw data from a Siemens MRI file.
 
     Parameters

@@ -5,11 +5,52 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
+from typing import TypedDict, overload, TYPE_CHECKING, Literal
+from typing_extensions import NotRequired  # backport for Python < 3.11
+
+if TYPE_CHECKING:
+    from mapvbvd.mapVBVD import AttrDict as TwixObj
 
 
-def _parse_twix_header(twixObj):
+class TwixHeaderDict(TypedDict, total=False):
+    """Header information extracted from a Siemens Twix object."""
+
+    n_coils: int
+    n_shots: int
+    n_contrasts: int
+    n_adc_samples: int
+    n_slices: int
+    n_average: int
+    n_reps: int
+    dwell_time: float  # in seconds
+    orientation: NDArray
+    affine: NDArray
+    shifts: tuple[float, ...]
+    acs: NDArray | None
+    type: NotRequired[str]
+    oversampling_factor: NotRequired[int]
+    trajectory_name: NotRequired[str]
+
+
+def _slice_position_shifts(twixObj) -> tuple[float, float, float]:
+    """Get the slice/volume position offset from ``sSliceArray``.
+
+    ``sSliceArray`` is the standard MrProt field for slice/volume position
+    and is populated identically across sequences, unlike the raw
+    ``slicePos`` mdh field which can be sequence-dependent.
+    """
+    my = twixObj.hdr.Phoenix
+    keys = {
+        "dTra": ("sSliceArray", "asSlice", "0", "sPosition", "dTra"),
+        "dSag": ("sSliceArray", "asSlice", "0", "sPosition", "dSag"),
+        "dCor": ("sSliceArray", "asSlice", "0", "sPosition", "dCor"),
+    }
+    return tuple(my.get(keys[ax], 0.0) for ax in ("dTra", "dCor", "dSag"))
+
+
+def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
     """Parse the header of a Siemens Twix object."""
-    hdr = {
+    hdr: TwixHeaderDict = {
         "n_coils": int(twixObj.image.NCha),
         "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
         "n_contrasts": int(twixObj.image.NSet),
@@ -17,10 +58,12 @@ def _parse_twix_header(twixObj):
         "n_slices": int(twixObj.image.NSli),
         "n_average": int(twixObj.image.NAve),
         "n_reps": int(twixObj.image.NRep),
-        "orientation": _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:]),
+        "orientation": _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], False),
         "affine": twix2nifti_affine(twixObj),
-        "shifts": twixObj.image.slicePos[0][:3][::-1],
+        "shifts": _slice_position_shifts(twixObj),
         "acs": None,
+        "dwell_time": float(twixObj.hdr["Phoenix"][("sRXSPEC", "alDwellTime", "0")])
+        * 1e-9,  # convert from ns to s
     }
 
     for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
@@ -28,12 +71,12 @@ def _parse_twix_header(twixObj):
         vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))
         nice_key = key[2:]  # strip prefix "al /ad"
         if len(vals) == 1:
-            hdr[nice_key] = vals[0]
+            hdr[nice_key] = vals[0]  # type: ignore
         elif len(vals) > 0:
             # the first element found is the length of the list, we dicard it.
             if vals[0] == len(vals[1:]):
                 vals = vals[1:]
-            hdr[nice_key] = vals
+            hdr[nice_key] = vals  # type: ignore
         # don't populate if not found.
 
     if "refscan" in twixObj.keys():
@@ -42,6 +85,32 @@ def _parse_twix_header(twixObj):
         hdr["acs"] = acs.swapaxes(0, 1)
 
     return hdr
+
+
+@overload
+def read_siemens_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    doAverage: bool = True,
+    squeeze: bool = True,
+    reshape: bool = False,
+    return_twix: Literal[True] = True,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
+) -> tuple[NDArray, TwixHeaderDict, TwixObj]: ...
+
+
+@overload
+def read_siemens_rawdat(
+    filename: str,
+    removeOS: bool = False,
+    doAverage: bool = True,
+    squeeze: bool = True,
+    reshape: bool = False,
+    return_twix: Literal[False] = False,
+    slice_num: int | None = None,
+    contrast_num: int | None = None,
+) -> tuple[NDArray, TwixHeaderDict]: ...
 
 
 def read_siemens_rawdat(
@@ -151,7 +220,21 @@ def read_siemens_rawdat(
     return data, hdr
 
 
-def _siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
+@overload
+def _siemens_quat_to_rot_mat(
+    quat: NDArray, return_det: Literal[True]
+) -> tuple[NDArray, float]: ...
+
+
+@overload
+def _siemens_quat_to_rot_mat(
+    quat: NDArray, return_det: Literal[False] = False
+) -> NDArray: ...
+
+
+def _siemens_quat_to_rot_mat(
+    quat: NDArray, return_det=False
+) -> NDArray | tuple[NDArray, float]:
     """
     Calculate the rotation matrix from Siemens Twix quaternion.
 
@@ -187,7 +270,7 @@ def _siemens_quat_to_rot_mat(quat: NDArray, return_det=False):
     return R
 
 
-def twix2nifti_affine(twixObj):
+def twix2nifti_affine(twixObj: TwixObj) -> NDArray:
     """
     Calculate the affine transformation matrix from Siemens Twix object.
 
