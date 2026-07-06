@@ -213,7 +213,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         try:
             cp.cuda.Device(gpu_device_id).use()
         except Exception as e:
-            self.log.warning(f"Failed to set CUDA device {gpu_device_id}: {e}")
+            self.log.warning("Failed to set CUDA device %s: %s", gpu_device_id, e)
         super().__init__()
         if (n_batchs * n_coils) % n_trans != 0:
             raise ValueError("n_batchs * n_coils should be a multiple of n_transf")
@@ -273,8 +273,8 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             if self.smaps_cached or is_cuda_array(new_smaps):
                 self.smaps_cached = True
                 self.log.warning(
-                    f"{sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
-                    "used on gpu for smaps."
+                    "%s used on gpu for smaps.",
+                    sizeof_fmt(new_smaps.size * np.dtype(self.cpx_dtype).itemsize),
                 )
                 self._smaps = cp.array(
                     new_smaps, order="C", copy=None, dtype=self.cpx_dtype

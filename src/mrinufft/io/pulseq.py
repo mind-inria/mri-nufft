@@ -116,9 +116,7 @@ def _check_timings(seq):
     if ok:
         return None
     else:
-        logger.warning(
-            "Timing check failed. Error listing follows:" + str(error_report)
-        )
+        logger.warning("Timing check failed. Error listing follows: %s", error_report)
 
 
 def _acq2opts(acq: Acquisition) -> "pp.Opts":

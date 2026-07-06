@@ -138,7 +138,7 @@ def cfl2traj(basename, shape=None):
         maxs = [np.max(traj[..., i]) for i in range(traj.shape[-1])]
         mins = [np.min(traj[..., i]) for i in range(traj.shape[-1])]
         shape = np.array(maxs) - np.array(mins)
-        logger.warning(f"Estimated shape {shape}")
+        logger.warning("Estimated shape %s", shape)
     else:
         shape = np.asarray(shape) - 1
 

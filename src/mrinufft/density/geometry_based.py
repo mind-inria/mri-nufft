@@ -92,7 +92,7 @@ def _voronoi_unique(traj, *args, **kwargs):
     rho = np.sum(traj**2, axis=1)
     igood = (rho > 0.6 * np.max(rho)) & ~np.isinf(wi)
     if len(igood) < 10:
-        logger.info(f"dubious extrapolation with {len(igood)} points")
+        logger.info("dubious extrapolation with %d points", len(igood))
     poly = np.polynomial.Polynomial.fit(rho[igood], wi[igood], 3)
     wi[np.isinf(wi)] = poly(rho[np.isinf(wi)])
     return wi

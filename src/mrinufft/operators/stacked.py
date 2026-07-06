@@ -440,8 +440,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 )
             if smaps_cached:
                 self.log.warning(
-                    f"{sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize)}"
-                    "used on gpu for smaps."
+                    "%s used on gpu for smaps.",
+                    sizeof_fmt(smaps.size * np.dtype(self.cpx_dtype).itemsize),
                 )
                 self.smaps = cp.array(
                     smaps, order="C", copy=False, dtype=self.cpx_dtype

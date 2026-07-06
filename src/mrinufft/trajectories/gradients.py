@@ -462,7 +462,7 @@ def _solve_qp_osqp(
     res_x[0] = gs
     res_x[1 : N - 1] = res.x
     res_x[N - 1] = ge
-    logger.info(f"OSQP solve status: {res.info.status_val}")
+    logger.info("OSQP solve status: %s", res.info.status_val)
     return (
         res_x,
         res.info.status_val <= 2,
