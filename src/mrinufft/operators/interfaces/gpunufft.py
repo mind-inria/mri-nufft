@@ -642,16 +642,6 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         # so we don't need to normalize it again.
         return 1
 
-    def compute_toeplitz_kernel(self) -> NDArray:
-        """Compute the Toeplitz kernel and set it."""
-        from mrinufft.operators.toeplitz import compute_toeplitz_kernel
-
-        # extra scaling for kernel is required.
-        self._toeplitz_kernel = compute_toeplitz_kernel(self, self.density) * int(
-            np.prod(self.shape) * 2**self.ndim
-        )
-        return self._toeplitz_kernel
-
     @classmethod
     def pipe(
         cls,

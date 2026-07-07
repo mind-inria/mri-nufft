@@ -349,10 +349,25 @@ Computing the Toeplitz Kernel
 The Toeplitz Kernel can be written as:
 
 .. math::
-   
+
     K[n] = \sum_{m=1}^{M} w_m e^{2i\pi \boldsymbol{\nu}_m r_n} \quad\text{with } n \in [-N,N]
 
-Which is the Adjoint NUFFT (type-1) of the input weights :math:`\boldsymbol{w}` on a grid of size :math:`2N`. Computing this adjoint NUFFT directly would thus require a 4N NUFFT (note that is is per dimension, so a 3D NUFFT would require 4\ :sup:`3`\=64 more memory for estimating the kernel). Instead we can leverage the hermitian symmetry of the kernel: :math:`K[-n] = K[n]^*`. This is done by computing the kernel by flipping the trajectory to reach the different quadrant (or octant in 3D). See the detail of the implementation in :py:mod:`mrinufft.operators.toeplitz` module.
+This is the Adjoint NUFFT (type-1) of the input weights :math:`\boldsymbol{w}`, but evaluated on the extended lag grid :math:`n \in [-N, N]` of size :math:`2N`. Computing this adjoint directly would require an oversized NUFFT plan (twice the resolution *per dimension*, i.e. :math:`2^d` more memory: :math:`2^3=8\times` in 3D, on top of the NUFFT's own internal gridding oversampling). We avoid this entirely: the kernel is assembled from adjoint NUFFTs computed on the **native** :math:`N`-sized grid, so the memory footprint is that of a single adjoint.
+
+Two observations make this possible:
+
+**Fourier-shift modulation.** A single adjoint NUFFT on the :math:`N`-grid yields the kernel only on the *inner* lags :math:`n \in [-N/2, N/2)`. Modulating the weights by a linear phase before the adjoint shifts the window of computed lags: by the shift theorem,
+
+.. math::
+
+   \sum_{m=1}^{M} \big(w_m e^{i \boldsymbol{\omega}_m \cdot \boldsymbol{s}}\big)\, e^{i \boldsymbol{\omega}_m r_n}
+   = \sum_{m=1}^{M} w_m\, e^{i \boldsymbol{\omega}_m (r_n + \boldsymbol{s})} = K[n + \boldsymbol{s}]
+
+where :math:`\boldsymbol{\omega}_m = 2\pi\boldsymbol{\nu}_m` are the sampling locations in radians. Choosing the integer shift :math:`\boldsymbol{s} = \pm N/2` along each axis slides the window onto the *outer* lags, recovering the full :math:`2N` support at :math:`N`-resolution.
+
+**Hermitian symmetry.** For real-valued weights :math:`\boldsymbol{w}`, the operator :math:`\boldsymbol{A^HWA}` is Hermitian, so :math:`K[-n] = K[n]^*`. This halves the work: only the half-space :math:`n_0 \geq 0` of the first axis is computed by modulation (the remaining sign combinations of the other axes), and the opposite half is filled by conjugate symmetry.
+
+The kernel is therefore built from :math:`2^{d-1}` adjoint NUFFTs (2 in 2D, 4 in 3D), each on the native :math:`N`-grid, covering every combination of inner/outer lags. Because the shifts land the zero lag at index :math:`[0, \dots, 0]` by construction, no post-hoc re-centering is needed. This scheme is exact for **any** trajectory but requires even grid sizes. See the detail of the implementation in :py:mod:`mrinufft.operators.toeplitz` module.
 
 
 

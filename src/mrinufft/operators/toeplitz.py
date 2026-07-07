@@ -5,6 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import with_numpy_cupy, get_array_module
+from mrinufft._utils import proper_trajectory
 
 from mrinufft.operators.base import FourierOperatorBase
 
@@ -45,9 +46,9 @@ def compute_toeplitz_kernel(
     apply_toeplitz_kernel: Apply the Toeplitz kernel to an image.
     """
     xp = get_array_module(nufft.samples)
-    fftn, ifftn = _get_fftn(xp)
+    fftn, _ = _get_fftn(xp)
     backup_density = None
-    if nufft.uses_density:
+    if nufft.density is not None:
         backup_density = nufft.density.copy()
         nufft.density = None
         backup_density_method = nufft._density_method
@@ -73,103 +74,86 @@ def compute_toeplitz_kernel(
         nufft.density = backup_density
         nufft._density_method = backup_density_method
     scale = 1 / nufft.norm_factor
-    return fftn(kernel * scale, overwrite_x=True, norm="ortho")
+    # T = A^H W A is Hermitian for real weights, so its circulant spectrum (the
+    # frequency-domain kernel) is real. Keeping only the real part halves the
+    # kernel memory (dominant in 3D, where it is 2**d the image size) and is
+    # equivalent to enforcing exact Hermitian symmetry of the image-domain kernel.
+    return fftn(kernel * scale, overwrite_x=True, norm="ortho").real
+
+
+def _modulated_weights(
+    weights: NDArray, omega: NDArray, shifts: tuple[int, ...], cpx_dtype
+) -> NDArray:
+    """Fourier-shift the adjoint's lag window by ``shifts`` pixels.
+
+    Modulating the weights by ``exp(i * omega . shifts)`` slides the ``N``-wide
+    window of lags produced by a single ``_adj_op`` onto the ``[N/2, N)`` outer
+    lags, so the full ``2N-1`` support of the Toeplitz kernel is recovered at
+    ``N``-resolution (no extra memory versus a plain adjoint).
+    """
+    xp = get_array_module(weights)
+    shift_vec = xp.asarray(shifts, dtype=omega.dtype)
+    phase = xp.exp(1j * (omega @ shift_vec))
+    return (weights * phase).astype(cpx_dtype, copy=False)
+
+
+def _check_even_shape(shape: tuple[int, ...]) -> None:
+    if any(s % 2 for s in shape):
+        raise ValueError(
+            f"Toeplitz kernel computation only supports even grid sizes, got {shape}."
+        )
 
 
 def _compute_toep_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
+    _check_even_shape(nufft.shape)
+    N0, N1 = nufft.shape
+    h0, h1 = N0 // 2, N1 // 2
+    omega = proper_trajectory(nufft.samples, normalize="pi")
 
-    # Trajectory Flipping (Y-axis)
-    samples_orig = nufft.samples.copy()
-    samples_flip_y = samples_orig.copy()
-    samples_flip_y[:, 1] *= -1
-
-    kernel = xp.zeros(tuple(s * 2 for s in nufft.shape), dtype=nufft.cpx_dtype)
+    kernel = xp.zeros((2 * N0, 2 * N1), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
 
-    # compute first two quadrants
-    nufft._adj_op(weights, tmp)
-    kernel[: nufft.shape[0], : nufft.shape[1]] = tmp
-    kernel[nufft.shape[0] + 1 :, : nufft.shape[1]] = tmp[:0:-1, :].conj()
+    # Two adjoints cover the positive-x half of the kernel: the y-window is shifted
+    # by +h1 (inner lags) then -h1 (outer lags). Column/row index N is the circulant
+    # "don't-care" slot (never touched by the zero-padded apply), so we skip it.
+    nufft._adj_op(_modulated_weights(weights, omega, (h0, h1), nufft.cpx_dtype), tmp)
+    kernel[:N0, :N1] = tmp
+    nufft._adj_op(_modulated_weights(weights, omega, (h0, -h1), nufft.cpx_dtype), tmp)
+    kernel[:N0, N1 + 1 :] = tmp[:, 1:]
 
-    # flip samples and compute other two quadrants
-    nufft.update_samples(samples_flip_y, unsafe=True)
-    nufft._adj_op(weights, tmp)
-    kernel[: nufft.shape[0], nufft.shape[1] + 1 :] = tmp[:, :0:-1]
-    kernel[nufft.shape[0] + 1 :, nufft.shape[1] + 1 :] = tmp[:0:-1, :0:-1].conj()
-
-    # Restore original samples for nufft object consistency
-    nufft.update_samples(samples_orig, unsafe=True)
-
-    # Enforce strict Hermitian symmetry
-    kernel = (kernel + kernel[::-1, ::-1].conj()) / 2
-
-    # Move the PSF peak from center to [0, 0] to align with corner-padded image
-    # This is more robust than trying to mess with fftshifts and off-by-one errors
-    #
-
-    pos = xp.argmax(xp.abs(kernel))
-    if xp.__name__ == "cupy":
-        pos = pos.get()
-    peak_idx = xp.unravel_index(pos, kernel.shape)
-    kernel = xp.roll(kernel, shift=[-p for p in peak_idx], axis=(0, 1))
-
+    # negative-x half by Hermitian symmetry (c[-d] = conj(c[d]) for real weights)
+    ksym = xp.roll(xp.roll(kernel[::-1, ::-1], 1, axis=0), 1, axis=1).conj()
+    kernel[N0 + 1 :, :] = ksym[N0 + 1 :, :]
     return kernel
 
 
 def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     xp = get_array_module(nufft.samples)
+    _check_even_shape(nufft.shape)
+    N0, N1, N2 = nufft.shape
+    h0, h1, h2 = N0 // 2, N1 // 2, N2 // 2
+    omega = proper_trajectory(nufft.samples, normalize="pi")
 
-    # Initialize the operator (density=False to get the raw Gram kernel)
-
-    # Prepare Trajectories for 4 octants
-    # We flip Y, Z, and YZ. X is handled by Hermitian symmetry later.
-    samples_orig = nufft.samples.copy()
-
-    samples_z = samples_orig.copy()
-    samples_z[:, 2] *= -1
-
-    samples_y = samples_orig.copy()
-    samples_y[:, 1] *= -1
-
-    samples_yz = samples_orig.copy()
-    samples_yz[:, 1] *= -1
-    samples_yz[:, 2] *= -1
-
-    NX, NY, NZ = nufft.shape
-    kernel = xp.zeros(tuple(s * 2 for s in nufft.shape), dtype=nufft.cpx_dtype)
+    kernel = xp.zeros((2 * N0, 2 * N1, 2 * N2), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
 
-    # 2. Compute 4 Adjoints
-    nufft._adj_op(weights, tmp)  # Original
-    kernel[:NX, :NY, :NZ] = tmp
+    # Four adjoints cover the positive-x half; the four sign combinations of the
+    # (y, z) shift recover the inner/outer lags along each axis.
+    def adj(shifts):
+        nufft._adj_op(_modulated_weights(weights, omega, shifts, nufft.cpx_dtype), tmp)
+        return tmp
 
-    nufft.update_samples(samples_z, unsafe=True)
-    nufft._adj_op(weights, tmp)  # Z-flipped
-    kernel[:NX, :NY, NZ + 1 :] = tmp[:, :, :0:-1]
+    kernel[:N0, :N1, :N2] = adj((h0, h1, h2))
+    kernel[:N0, :N1, N2 + 1 :] = adj((h0, h1, -h2))[:, :, 1:]
+    kernel[:N0, N1 + 1 :, :N2] = adj((h0, -h1, h2))[:, 1:, :]
+    kernel[:N0, N1 + 1 :, N2 + 1 :] = adj((h0, -h1, -h2))[:, 1:, 1:]
 
-    nufft.update_samples(samples_y, unsafe=True)
-    nufft._adj_op(weights, tmp)  # Y-flipped
-    kernel[:NX, NY + 1 :, :NZ] = tmp[:, :0:-1, :]
-
-    nufft.update_samples(samples_yz, unsafe=True)
-    nufft._adj_op(weights, tmp)  # YZ-flipped
-    kernel[:NX, NY + 1 :, NZ + 1 :] = tmp[:, :0:-1, :0:-1]
-
-    nufft.update_samples(samples_orig, unsafe=True)
-
-    # fill in the other 4 octants by Hermitian symmetry
-    kernel[NX + 1 :, :, :] = kernel[NX - 1 : 0 : -1, :, :].conj()
-    # Hermitify to ensure symmetry.
-    kernel = (kernel + kernel[::-1, ::-1, ::-1].conj()) / 2
-
-    # Move the PSF peak from center to [0, 0] to align with corner-padded image
-    # This is more robust than trying to mess with fftshifts and off-by-one errors
-    pos = xp.argmax(xp.abs(kernel))
-    if xp.__name__ == "cupy":
-        pos = pos.get()
-    peak_idx = xp.unravel_index(pos, kernel.shape)
-    kernel = xp.roll(kernel, shift=[-p for p in peak_idx], axis=(0, 1, 2))
+    # negative-x half by Hermitian symmetry (c[-d] = conj(c[d]) for real weights)
+    ksym = xp.roll(
+        xp.roll(xp.roll(kernel[::-1, ::-1, ::-1], 1, axis=0), 1, axis=1), 1, axis=2
+    ).conj()
+    kernel[N0 + 1 :] = ksym[N0 + 1 :]
     return kernel
 
 
@@ -218,19 +202,24 @@ def apply_toeplitz_kernel(
 
     if padded_array is None:
         padded_array = xp.zeros((batch_size, *toeplitz_kernel.shape), dtype=image.dtype)
-    elif batch_size == 1 and padded_array.ndim != image.ndim:
-        # expand padded_array to have batch dimension
-        padded_array = padded_array[None, :]
+    else:
+        if batch_size == 1 and padded_array.ndim != image.ndim:
+            # expand padded_array to have batch dimension
+            padded_array = padded_array[None, :]
+        elif padded_array.shape != toeplitz_kernel.shape:
+            raise ValueError("padded_array shape must match toeplitz_kernel shape.")
+        # padded_array is caller-provided scratch memory (e.g. cp.empty, reused
+        # across calls): the padding region is not guaranteed to be zero, so it
+        # must be cleared here or the "zero-padding" invariant the FFT
+        # convolution relies on is silently broken.
+        padded_array[...] = 0
 
-    elif padded_array.shape != toeplitz_kernel.shape:
-        raise ValueError("padded_array shape must match toeplitz_kernel shape.")
-
-    tl_corner = (slice(None),) + tuple(slice(0, s) for s in image.shape)
+    tl_corner = tuple(slice(0, s) for s in image.shape)
 
     # FIXME cannot unpack slice directly in python 3.10
     padded_array[tl_corner] = image
     axis = tuple(range(1, padded_array.ndim))
-    tmp = fftn(padded_array, axes=axis)
+    tmp = fftn(padded_array, axes=axis, overwrite_x=True)
     tmp *= toeplitz_kernel
     result = ifftn(tmp, overwrite_x=True, axes=axis)
 

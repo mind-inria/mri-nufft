@@ -669,14 +669,14 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         image_data = cp.asarray(data)
         image_dataf = cp.reshape(image_data, (B, *XYZ))
         img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
-        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
 
         padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
-            cp.copyto(data_batched, image_dataf[idx_batch])
+            # fancy indexing already returns a fresh array, safe to mutate in place
+            data_batched = image_dataf[idx_batch]
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
             else:
@@ -695,10 +695,9 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         XYZ = self.shape
         image_dataf = np.reshape(data, (B * C, *XYZ))
         if img_d is None:
-            img_d = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+            img_d = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
         else:
-            img_d.reshape((B * C, *XYZ))
-            img_d.fill(0)
+            img_d = img_d.reshape((B * C, *XYZ))
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
         for i in range(B * C // T):
@@ -713,19 +712,19 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         XYZ = self.shape
 
         image_data = cp.asarray(data).reshape(B * C, *XYZ)
-        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
 
         if img_d is None:
-            img_d = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+            img_d = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
         else:
-            img_d.reshape((B * C, *XYZ))
-            img_d.fill(0)
+            img_d = img_d.reshape((B * C, *XYZ))
 
         for i in range(B * C // T):
-            cp.copyto(data_batched, image_data[i * T : (i + 1) * T])
-            self._gram_op_raw_device(data_batched, data_batched, padded_array)
-            img_d[i * T : (i + 1) * T] = data_batched
+            self._gram_op_raw_device(
+                image_data[i * T : (i + 1) * T],
+                img_d[i * T : (i + 1) * T],
+                padded_array,
+            )
         img_d = img_d.reshape((B, C, *XYZ))
         return img_d
 

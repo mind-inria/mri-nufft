@@ -261,8 +261,7 @@ def test_interface_gram(operator, array_interface, image_data):
     AHA_img = from_interface(AHA_img, array_interface)
     G_img = from_interface(G_img, array_interface)
 
-    # the toeplitz approximation can be quite inaccurate depending on the trajectory
-    # we use a relative mean error metric.
-    medse = np.median(abs(AHA_img - G_img) ** 2 / abs(G_img) ** 2)
-    print(medse)
-    assert medse < 6e-2
+    # gpunufft is less accurate than the other backends, so we relax the tolerance for it
+    npt.assert_allclose(
+        AHA_img, G_img, rtol=2e-3 if operator.backend == "gpunufft" else 2e-4, atol=1e-4
+    )
