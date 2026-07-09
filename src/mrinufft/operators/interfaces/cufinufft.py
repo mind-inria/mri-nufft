@@ -527,7 +527,8 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         K, XYZ = self.n_samples, self.shape
         data = cp.asarray(data)
         image_dataf = cp.reshape(data, (B, *XYZ))
-        ksp_d = ksp_d or cp.empty((B * C, K), dtype=self.cpx_dtype)
+        if ksp_d is None:
+            ksp_d = cp.empty((B * C, K), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
@@ -939,7 +940,8 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         if self.uses_density:
             density_batched = cp.repeat(self.density[None, :], T, axis=0)
-        img_d = img_d or cp.empty((B, C, *XYZ), dtype=self.cpx_dtype)
+        if img_d is None:
+            img_d = cp.empty((B, C, *XYZ), dtype=self.cpx_dtype)
         img_d = img_d.reshape(B * C, *XYZ)
         for i in range((B * C) // T):
             if self.uses_density:
@@ -1108,8 +1110,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
 
             self._gram_op_raw_device(data_batched, data_batched, padded_array)
             self._accumulate_coil_combine(img_d, i, data_batched, smaps_batched)
-        img = img_d.get()
-        img = img_d.reshape((B, 1, *XYZ))
+        img = img_d.get().reshape((B, 1, *XYZ))
         return img
 
     def _gram_op_sense_device(self, data, img_d):

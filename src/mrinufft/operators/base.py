@@ -486,6 +486,7 @@ class FourierOperatorBase(ABC):
             dtype=self.cpx_dtype,
         )
         linop._nufft = self  # type: ignore
+        return linop
 
     def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
         """Make a new DeepInv Physics with NUFFT operator.

@@ -361,6 +361,7 @@ def _array_to_tensorflow(_arg):
         else:
             _arg = tf.convert_to_tensor(_arg.numpy(force=True))
 
+    return _arg
 
 def _convert(_array_to_xp, args, kwargs=None):
     # convert positional arguments
