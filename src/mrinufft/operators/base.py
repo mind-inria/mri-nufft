@@ -361,7 +361,7 @@ class FourierOperatorBase(ABC):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
 
         dataf = data.reshape(B * C, *XYZ)
-        ret = xp.zeros_like(dataf)
+        ret = xp.empty_like(dataf)  # every element is overwritten in the loop
         for i in range(B * C):
             ret[i] = self._gram_op_toeplitz_raw(dataf[i].reshape(*XYZ))
         return ret.reshape(B, C, *XYZ)
@@ -964,7 +964,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
-            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, ksp[i * T : (i + 1) * T])
         ksp = ksp.reshape((B, C, K))
@@ -1083,7 +1083,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         for i in range(B * C // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
-            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, coil_ksp)
             coil_ksp *= inv_norm

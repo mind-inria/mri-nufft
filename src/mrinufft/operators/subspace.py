@@ -138,8 +138,7 @@ class MRISubspace(FourierOperatorBase):
 
         coeffs_d = coeffs_d[..., None].swapaxes(0, -1)[0, ...]
 
-        # perform computation
-        y = []
+        y = xp.empty((self.n_coeffs, *self.img_full_shape), dtype=coeffs_d.dtype)
         for idx in range(self.n_coeffs):
             # select basis element
             basis_element = subspace_basis[idx]
@@ -155,14 +154,10 @@ class MRISubspace(FourierOperatorBase):
                 _coeffs_d = xp.ascontiguousarray(_coeffs_d)
 
             # actual transform
-            y.append(self._fourier_op.adj_op(_coeffs_d, *args))
-
-        # stack coefficients
-        y = xp.stack(y, axis=0)
+            y[idx] = self._fourier_op.adj_op(_coeffs_d, *args)
 
         # bring back subspace index to original position (B, S, ...)
-        if self.n_batchs != 1 or coeffs.shape[0] == 1:
-            y = y.swapaxes(0, 1)
+        y = y.swapaxes(0, 1)
 
         return y
 

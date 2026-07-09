@@ -535,7 +535,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         if ksp is None:
             ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
-        ksp_batched = cp.empty((T * NZ, NS), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -568,13 +567,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         data = cp.asarray(data)
         dataf = data.reshape((B, *XYZ))
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
 
         if ksp is None:
             ksp = cp.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
 
         ksp = ksp.reshape((B * C, NZ * NS))
-        ksp_batched = cp.empty((T * NZ, NS), dtype=self.cpx_dtype)
         for i in range((B * C) // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
             idx_batch = np.arange(i * T, (i + 1) * T) // C
@@ -606,7 +603,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         NS, NZ = len(self._samples2d), len(self.z_index)
 
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        ksp_batched = cp.empty((T, NZ * NS), dtype=self.dtype)
         if ksp is None:
             ksp = np.zeros((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
@@ -635,8 +631,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         NS, NZ = len(self._samples2d), len(self.z_index)
         data = cp.asarray(data)
 
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        ksp_batched = cp.empty((T, NZ * NS), dtype=self.dtype)
         if ksp is None:
             ksp = cp.zeros((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
@@ -726,7 +720,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         if img is None:
             img = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        ksp_batched = cp.empty((T, NS * NZ), dtype=self.cpx_dtype)
 
         for i in range((B * C) // T):
             idx_coils = np.arange(i * T, (i + 1) * T) % C
@@ -785,7 +778,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         coeffs_f = coeffs_f.reshape(B * C, NZ, NS)
         coeffs_f = coeffs_f.reshape(B * C * NZ, NS)
         # Allocate Memory
-        ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
         if img is None:
             img = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)

@@ -823,7 +823,6 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         - coil_img(S, T, 1, X,Y,Z)
         - ksp_batch(B, 1, X,Y,Z)
         - smaps_batched(S, T, X,Y,Z)
-        - density_batched(T, K)
 
         """
         # Define short name
@@ -840,8 +839,6 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             if ret is not None:
                 return ret
 
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
         coeffs_f = coeffs.flatten()
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -854,7 +851,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 smaps_batched = self.smaps[idx_coils]
             ksp_batched.set(coeffs_f[i * T * K : (i + 1) * T * K].reshape(T, K))
             if self.uses_density:
-                ksp_batched *= density_batched
+                ksp_batched *= self.density
             self._adj_op(ksp_batched, coil_img_d)
 
             self._accumulate_coil_combine(img_d, i, coil_img_d, smaps_batched)
@@ -876,8 +873,6 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         n_call = (B * C) // T
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
 
         coeffs_reg = self._register_contiguous(coeffs, shape=(B * C, K))
         if coeffs_reg is None:
@@ -912,7 +907,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 else:
                     cp.copyto(smaps_batched_d[b], self.smaps[idx_coils])
                 if self.uses_density:
-                    ksp_batched_d[b] *= density_batched
+                    ksp_batched_d[b] *= self.density
             h2d_done[b].record(h2d_stream)
 
         prefetch(0)
@@ -938,15 +933,13 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         coeffs = cp.asarray(coeffs)
         coeffs_f = coeffs.reshape(B * C, K)
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
         if img_d is None:
             img_d = cp.empty((B, C, *XYZ), dtype=self.cpx_dtype)
         img_d = img_d.reshape(B * C, *XYZ)
         for i in range((B * C) // T):
             if self.uses_density:
                 cp.copyto(ksp_batched, coeffs_f[i * T : (i + 1) * T])
-                ksp_batched *= density_batched
+                ksp_batched *= self.density
                 self._adj_op(ksp_batched, img_d[i * T : (i + 1) * T])
             else:
                 self._adj_op(
@@ -968,8 +961,6 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 return ret
 
         coeffs_ = coeffs.reshape(B * C, K)
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
         ksp_batched = cp.empty((T, K), dtype=self.cpx_dtype)
         if img_batched is None:
             img_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
@@ -977,7 +968,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         for i in range(n_call):
             ksp_batched.set(coeffs_[i * T : (i + 1) * T])
             if self.uses_density:
-                ksp_batched *= density_batched
+                ksp_batched *= self.density
             self._adj_op(ksp_batched, img_batched)
             img_batched *= inv_norm
             img[i * T : (i + 1) * T] = img_batched.get()
@@ -994,8 +985,6 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         n_call = (B * C) // T
-        if self.uses_density:
-            density_batched = cp.repeat(self.density[None, :], T, axis=0)
 
         coeffs_ = self._register_contiguous(coeffs, shape=(B * C, K))
         if coeffs_ is None:
@@ -1021,7 +1010,7 @@ class MRICufiNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             with h2d_stream:
                 ksp_batched_d[b].set(coeffs_[i * T : (i + 1) * T])
                 if self.uses_density:
-                    ksp_batched_d[b] *= density_batched
+                    ksp_batched_d[b] *= self.density
             h2d_done[b].record(h2d_stream)
 
         prefetch(0)

@@ -262,9 +262,11 @@ class MRIFourierCorrected(FourierOperatorBase):
             ytmp = self._fourier_op.op(self.C[ll] * data_d, *args).reshape(B, C, NS, NK)
             y += (self.B[:, ll] * ytmp).reshape(B, C, K)
 
-        if on_gpu:
-            y = cp.array(y, copy=None)
-        elif is_cuda_array(y):
+        # Return on the same device as the input; only transfer on a genuine
+        # device mismatch (no-op wrapper when y is already on the right device).
+        if on_gpu and is_host_array(y):
+            y = cp.asarray(y)
+        elif not on_gpu and is_cuda_array(y):
             y = y.get()
         return self._safe_squeeze(y)
 
@@ -289,7 +291,6 @@ class MRIFourierCorrected(FourierOperatorBase):
         B, C = self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         NS, NK = self.n_shots, self.n_samples_per_shot
-        ytmp = xp.zeros((B, C, K), dtype=self.cpx_dtype)
         on_gpu = is_cuda_array(coeffs)
         if is_host_array(self.B) and on_gpu:
             coeffs = coeffs.get()
@@ -307,9 +308,11 @@ class MRIFourierCorrected(FourierOperatorBase):
             ytmp = (Bconj * coeffs).reshape(B, C, K)
             img += Cconj * self._fourier_op.adj_op(ytmp)
 
-        if on_gpu:
-            img = cp.array(img, copy=None)
-        elif is_cuda_array(img):
+        # Return on the same device as the input; only transfer on a genuine
+        # device mismatch (no-op wrapper when img is already on the right device).
+        if on_gpu and is_host_array(img):
+            img = cp.asarray(img)
+        elif not on_gpu and is_cuda_array(img):
             img = img.get()
         return self._safe_squeeze(img)
 
