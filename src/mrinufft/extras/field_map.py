@@ -336,7 +336,7 @@ def _full_C(
     xp = get_array_module(field_map)
     fr = field_map.real.ravel()
     fi = field_map.imag.ravel()
-    minr, maxr = xp.min(fr), xp.max(fi)
+    minr, maxr = xp.min(fr), xp.max(fr)
     mini, maxi = xp.min(fi), xp.max(fi)
 
     dr = (maxr - minr) / n_bins[0]

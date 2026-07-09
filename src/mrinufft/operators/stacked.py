@@ -271,7 +271,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
             tmp_adj = xp.moveaxis(tmp_adj, 1, -1)
             imgz[b][..., self.z_index] = tmp_adj
         imgc = self._ifftz(imgz)
-        img = img or xp.empty((B, *XYZ), dtype=self.cpx_dtype)
+        if img is None:
+            img = xp.empty((B, *XYZ), dtype=self.cpx_dtype)
         for b in range(B):
             img[b] = xp.sum(imgc[b] * self.smaps.conj(), axis=0)
         return img
