@@ -114,12 +114,12 @@ def read_siemens_rawdat(
             "or using `pip install pymapVBVD`."
         ) from err
     twixObj = mapVBVD(filename)
-    if not isinstance(twixObj, list):
-        twixObj = [twixObj]
     for tObj in twixObj:
         tObj.image.flagRemoveOS = removeOS
     twixObj[-1].image.flagDoAverage = doAverage
     hdr = _parse_twix_header(twixObj)
+    if isinstance(twixObj, list):
+        twixObj = twixObj[-1]
     # Add sequence information
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
