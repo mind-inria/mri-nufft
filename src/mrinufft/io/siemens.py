@@ -11,7 +11,7 @@ def _parse_twix_header(twixObj):
     noise = None
     if isinstance(twixObj, list):
         if 'noise' in twixObj[0].keys():
-            noise = twixObj[0]['noise'][""].squeeze()
+            noise = np.moveaxis(twixObj[0]['noise'][""].squeeze(), 1, 0)
         twixObj = twixObj[-1]
     """Parse the header of a Siemens Twix object."""
     hdr = {
@@ -115,6 +115,8 @@ def read_siemens_rawdat(
         ) from err
     twixObj = mapVBVD(filename)
     for tObj in twixObj:
+        if 'noise' in tObj.keys():
+            tObj.noise.flagRemoveOS = removeOS
         tObj.image.flagRemoveOS = removeOS
     twixObj[-1].image.flagDoAverage = doAverage
     hdr = _parse_twix_header(twixObj)
