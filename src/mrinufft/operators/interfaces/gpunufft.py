@@ -5,6 +5,7 @@ import warnings
 from numpy.typing import NDArray
 
 from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
+from mrinufft.operators.toeplitz import _GramOpGpuMixin
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
     get_array_module,
@@ -373,7 +374,7 @@ class RawGpuNUFFT:
         return self._reshape_image(image, "adjoint")
 
 
-class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
+class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
     """Interface for the gpuNUFFT backend.
 
     Parameters
@@ -396,7 +397,9 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     smaps: np.ndarray default None
         Holds the sensitivity maps for SENSE reconstruction.
     n_trans: int, default =1
-        This has no effect for now.
+        Has no effect on ``op``/``adj_op`` (gpuNUFFT's C++ backend already
+        batches over all coils in a single call). Used to chunk the
+        ``gram_op`` (Toeplitz) loop instead: must divide ``n_coils``.
     kwargs: extra keyword args
         these arguments are passed to gpuNUFFT operator. This is used
         only in gpuNUFFT
@@ -434,6 +437,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
+        if n_coils % n_trans != 0:
+            raise ValueError(f"n_trans={n_trans} must divide n_coils={n_coils}")
+        self.n_trans = n_trans
+        self.smaps_cached = False
         self.squeeze_dims = squeeze_dims
         self.compute_density(density)
         self.compute_smaps(smaps)
@@ -793,181 +800,14 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
 
-    @with_numpy_cupy
-    def gram_op(self, data, img_d=None, toeplitz=True):
-        """Compute the Gram operator of the NUFFT.
+    def _get_toeplitz_kernel_gpu(self):
+        """Return a cached GPU copy of the (host-computed) Toeplitz kernel.
 
-        Parameters
-        ----------
-        data: array
-            Input data array.
-        img_d: array, optional
-            Preallocated output array.
-        toeplitz: bool, default True
-            If True, use the Toeplitz method to compute the Gram operator.
-            If False, use the direct method.
-
-        Returns
-        -------
-        NDArray
-            Array with the Gram operator applied.
+        gpuNUFFT's samples/adj_op live on host memory, so the kernel from
+        `compute_toeplitz_kernel` is a host array; upload and cache a GPU
+        copy once instead of re-uploading it on every `gram_op` call.
         """
-        self.check_shape(image=data)
-        if not toeplitz:
-            return self.adj_op(self.op(data))
-        if self._toeplitz_kernel is None:
-            self.compute_toeplitz_kernel()
-        if self.uses_sense and is_cuda_array(data):
-            gram_func = self._gram_op_sense_device
-        elif self.uses_sense:
-            gram_func = self._gram_op_sense_host
-        elif is_cuda_array(data):
-            gram_func = self._gram_op_calibless_device
-        else:
-            gram_func = self._gram_op_calibless_host
-        ret = gram_func(data, img_d)
-        return self._safe_squeeze(ret)
-
-    def _make_smap_prefetcher(self, smap_buffers, stream):
-        """Build a double-buffered, event-synchronized smap prefetch closure.
-
-        Two alternating GPU buffers let the H2D transfer of coil ``c + 1``'s
-        smap run on ``stream`` while the default stream is still computing
-        with coil ``c``'s smap. Ordering is enforced purely with GPU-side
-        events (``Stream.wait_event``) rather than a host-blocking
-        ``stream.synchronize()``, so the transfer and compute genuinely
-        overlap instead of being serialized.
-        """
-        compute_stream = cp.cuda.get_current_stream()
-        transfer_done = [cp.cuda.Event() for _ in smap_buffers]
-        read_done = [cp.cuda.Event() for _ in smap_buffers]
-        for event in read_done:
-            event.record(compute_stream)
-
-        def prefetch(idx, coil_idx):
-            # wait for the previous compute using this buffer to finish
-            # before overwriting it.
-            stream.wait_event(read_done[idx])
-            smap_buffers[idx].set(self.raw_op.pinned_smaps[:, coil_idx], stream=stream)
-            transfer_done[idx].record(stream)
-
-        def wait_ready(idx):
-            compute_stream.wait_event(transfer_done[idx])
-            return smap_buffers[idx].reshape(self.shape, order="F")
-
-        def mark_read(idx):
-            read_done[idx].record(compute_stream)
-
-        return prefetch, wait_ready, mark_read
-
-    def _gram_op_sense_host(self, data, img_d):
-        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        image_dataf = np.reshape(data, (B, *XYZ))
-
-        if img_d is None:
-            img_d = np.zeros((B, *XYZ), dtype=self.cpx_dtype)
-        else:
-            img_d = img_d.reshape((B, *XYZ))
-            img_d.fill(0)
-
-        data_gpu = cp.empty(XYZ, dtype=self.cpx_dtype)
-        smap_buffers = [
-            cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype) for _ in range(2)
-        ]
-        padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
-        stream = cp.cuda.Stream(non_blocking=True)
-        prefetch, wait_ready, mark_read = self._make_smap_prefetcher(
-            smap_buffers, stream
-        )
-
-        for b in range(B):
-            data_gpu.set(image_dataf[b])
-            prefetch(0, 0)
-            for c in range(C):
-                idx = c % 2
-                smap_gpu = wait_ready(idx)
-                if c + 1 < C:
-                    prefetch((c + 1) % 2, c + 1)
-                coil_img = data_gpu * smap_gpu
-                self._gram_op_raw_device(coil_img, coil_img, padded_array)
-                img_d[b] += (coil_img * smap_gpu.conj()).get()
-                mark_read(idx)
-        return img_d.reshape((B, 1, *XYZ))
-
-    def _gram_op_sense_device(self, data, img_d):
-        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        image_dataf = cp.asarray(data).reshape((B, *XYZ))
-
-        img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
-        smap_buffers = [
-            cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype) for _ in range(2)
-        ]
-        padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
-        stream = cp.cuda.Stream(non_blocking=True)
-        prefetch, wait_ready, mark_read = self._make_smap_prefetcher(
-            smap_buffers, stream
-        )
-
-        for b in range(B):
-            prefetch(0, 0)
-            for c in range(C):
-                idx = c % 2
-                smap_gpu = wait_ready(idx)
-                if c + 1 < C:
-                    prefetch((c + 1) % 2, c + 1)
-                coil_img = image_dataf[b] * smap_gpu
-                self._gram_op_raw_device(coil_img, coil_img, padded_array)
-                img_d[b] += coil_img * smap_gpu.conj()
-                mark_read(idx)
-        return img_d.reshape((B, 1, *XYZ))
-
-    def _gram_op_calibless_host(self, data, img_d):
-        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        image_dataf = np.reshape(data, (B, C, *XYZ))
-
-        if img_d is None:
-            img_d = np.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
-        else:
-            img_d = img_d.reshape((B, C, *XYZ))
-            img_d.fill(0)
-
-        data_gpu = cp.empty(XYZ, dtype=self.cpx_dtype)
-        padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
-        for b in range(B):
-            for c in range(C):
-                data_gpu.set(image_dataf[b, c])
-                self._gram_op_raw_device(data_gpu, data_gpu, padded_array)
-                img_d[b, c] = data_gpu.get()
-        return img_d
-
-    def _gram_op_calibless_device(self, data, img_d):
-        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
-        image_data = cp.asarray(data).reshape((B, C, *XYZ))
-
-        if img_d is None:
-            img_d = cp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
-        else:
-            img_d = img_d.reshape((B, C, *XYZ))
-            img_d.fill(0)
-
-        padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
-        for b in range(B):
-            for c in range(C):
-                self._gram_op_raw_device(image_data[b, c], img_d[b, c], padded_array)
-        return img_d
-
-    def _gram_op_raw_device(self, in_d, out_d, padded_array=None):
-        """Apply the toeplitz Gram operator on device on a single image."""
-        from mrinufft.operators.toeplitz import apply_toeplitz_kernel
-
-        # The toeplitz kernel is always computed on host for gpuNUFFT (samples
-        # and adj_op live on host memory), so keep a GPU copy around for reuse.
         if getattr(self, "_toeplitz_kernel_gpu_src", None) is not self._toeplitz_kernel:
             self._toeplitz_kernel_gpu = cp.asarray(self._toeplitz_kernel)
             self._toeplitz_kernel_gpu_src = self._toeplitz_kernel
-
-        cp.copyto(
-            out_d,
-            apply_toeplitz_kernel(in_d, self._toeplitz_kernel_gpu, padded_array),
-        )
-        return out_d
+        return self._toeplitz_kernel_gpu

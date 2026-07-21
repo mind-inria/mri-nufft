@@ -200,6 +200,7 @@ class FourierOperatorBase(ABC):
         self._toeplitz_kernel = None
         self._n_coils = 1
         self._n_batchs = 1
+        self.n_trans = 1
         self.squeeze_dims = False
 
         self._density_method = None

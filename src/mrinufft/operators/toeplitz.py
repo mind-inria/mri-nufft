@@ -4,10 +4,20 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import with_numpy_cupy, get_array_module
+from mrinufft._array_compat import (
+    with_numpy_cupy,
+    get_array_module,
+    is_cuda_array,
+    is_host_array,
+    CUPY_AVAILABLE,
+)
 from mrinufft._utils import proper_trajectory
 
 from mrinufft.operators.base import FourierOperatorBase
+from mrinufft.operators.gpu_utils import _coil_combine_kernel
+
+if CUPY_AVAILABLE:
+    import cupy as cp
 
 
 def _get_fftn(xp):
@@ -224,3 +234,198 @@ def apply_toeplitz_kernel(
     result = ifftn(tmp, overwrite_x=True, axes=axis)
 
     return result[tl_corner].reshape(img_shape)
+
+
+class _GramOpGpuMixin(FourierOperatorBase):
+    """Batched (``n_trans``-chunked) Toeplitz Gram operator for GPU backends.
+
+    Chunks the ``(batch, coil)`` loop by ``n_trans`` (``T``) instead of
+    processing one image/coil at a time, so the smaps transfer and the Toeplitz
+    FFT apply both run as fewer, larger batched calls instead of many small
+    ones. ``n_trans`` must divide ``n_coils`` (validated in the host class'
+    ``__init__``), so a chunk's ``T`` coils never straddle a batch boundary.
+
+    Host classes must provide: ``n_trans``, ``n_batchs``, ``n_coils``,
+    ``shape``, ``cpx_dtype``, ``uses_sense``, ``smaps``, ``smaps_cached``,
+    ``_toeplitz_kernel``/``compute_toeplitz_kernel``, ``check_shape``,
+    ``_safe_squeeze``.
+    """
+
+    def _coil_slice(self, i):
+        """Return the coil ``slice`` for chunk ``i`` of the ``(B*C)//T`` loop.
+
+        ``n_trans`` (``T``) is required to divide ``n_coils`` (``C``), so a
+        chunk's ``T`` coils are always a contiguous, non-wrapping range
+        within a single batch: a plain slice into ``self.smaps`` is a
+        zero-copy view (unlike fancy/advanced indexing with an int array,
+        which always allocates and copies).
+        """
+        start = (i * self.n_trans) % self.n_coils
+        return slice(start, start + self.n_trans)
+
+    def _accumulate_coil_combine(
+        self,
+        img_d: NDArray,
+        i: int,
+        data_batched: NDArray,
+        smaps_batched: NDArray,
+    ):
+        """``img_d[b] += sum_t data_batched[t] * conj(smaps_batched[t])``.
+
+        A single custom kernel: conj, multiply and the reduction over the
+        ``T`` coils all happen in one pass over memory, with no
+        intermediate arrays and no extra kernel launches.
+
+        Since ``n_trans`` is required to divide ``n_coils``, a chunk never
+        straddles a batch boundary: the batch index for every one of the
+        ``T`` coils in chunk ``i`` is the same single value
+        ``(i*T)//n_coils``, computed on the host as a plain Python int (no
+        device array/upload needed at all).
+        """
+        T = data_batched.shape[0]
+        vol = data_batched[0].size
+        b = (i * T) // self.n_coils
+        _coil_combine_kernel(data_batched, smaps_batched, b, T, vol, img_d, size=vol)
+
+    def _gram_op_raw_device(self, in_d, out_d, padded_array=None):
+        """Apply the Toeplitz Gram operator on device to a (batched) image."""
+        from mrinufft.operators.toeplitz import apply_toeplitz_kernel
+
+        cp.copyto(
+            out_d,
+            apply_toeplitz_kernel(in_d, self._toeplitz_kernel, padded_array),
+        )
+        return out_d
+
+    @with_numpy_cupy
+    def gram_op(self, data, img_d=None, toeplitz=True):
+        """Compute the Gram operator of the NUFFT.
+
+        Parameters
+        ----------
+        data: array
+            Input data array.
+        img_d: array, optional
+            Preallocated output array.
+        toeplitz: bool, default True
+            If True, use the Toeplitz method to compute the Gram operator.
+            If False, use the direct method.
+
+        Returns
+        -------
+        NDArray
+            Array with the Gram operator applied.
+        """
+        self.check_shape(image=data)
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+        if self._toeplitz_kernel is None:
+            self.compute_toeplitz_kernel()
+            if is_host_array(self._toeplitz_kernel):
+                self._toeplitz_kernel = cp.asarray(self._toeplitz_kernel)
+        if self.uses_sense and is_cuda_array(data):
+            gram_func = self._gram_op_sense_device
+        elif self.uses_sense:
+            gram_func = self._gram_op_sense_host
+        elif is_cuda_array(data):
+            gram_func = self._gram_op_calibless_device
+        else:
+            gram_func = self._gram_op_calibless_host
+        ret = gram_func(data, img_d)
+        return self._safe_squeeze(ret)
+
+    def _gram_op_sense_host(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+        image_dataf = np.reshape(data, (B, *XYZ))
+
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        # A chunk's T coils share a single batch (see `_coil_slice`), so
+        # only one copy of that image needs to cross PCIe; broadcasting it
+        # against the T smaps directly with `cp.multiply(..., out=...)` (a
+        # single fused kernel) is much cheaper than gathering T redundant
+        # host-side copies of the same image and multiplying separately.
+        data_single_d = cp.empty((1, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
+
+        img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = self._coil_slice(i)
+            data_single_d[0].set(image_dataf[(i * T) // C])
+
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
+            else:
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            cp.multiply(data_single_d, smaps_batched, out=data_batched)
+
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
+            self._accumulate_coil_combine(img_d, i, data_batched, smaps_batched)
+        img = img_d.get().reshape((B, 1, *XYZ))
+        return img
+
+    def _gram_op_sense_device(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+
+        image_data = cp.asarray(data)
+        image_dataf = cp.reshape(image_data, (B, *XYZ))
+        img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            idx_coils = self._coil_slice(i)
+            if not self.smaps_cached:
+                smaps_batched.set(self.smaps[idx_coils].reshape((T, *XYZ)))
+            else:
+                smaps_batched = self.smaps[idx_coils].reshape((T, *XYZ))
+            # A chunk's T coils share a single batch (see `_coil_slice`):
+            # a single fused broadcast-multiply kernel straight from the
+            # caller's image view, instead of gathering (and copying) a
+            # redundant T-way repeat of it via fancy indexing.
+            cp.multiply(image_dataf[(i * T) // C], smaps_batched, out=data_batched)
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
+
+            self._accumulate_coil_combine(img_d, i, data_batched, smaps_batched)
+        img_d = img_d.reshape((B, 1, *XYZ))
+        return img_d
+
+    def _gram_op_calibless_host(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+        image_dataf = np.reshape(data, (B * C, *XYZ))
+        if img_d is None:
+            img_d = np.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        else:
+            img_d = img_d.reshape((B * C, *XYZ))
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
+        for i in range(B * C // T):
+            data_batched.set(image_dataf[i * T : (i + 1) * T])
+            self._gram_op_raw_device(data_batched, data_batched, padded_array)
+            img_d[i * T : (i + 1) * T] = data_batched.get()
+        img_d = img_d.reshape((B, C, *XYZ))
+        return img_d
+
+    def _gram_op_calibless_device(self, data, img_d):
+        T, B, C = self.n_trans, self.n_batchs, self.n_coils
+        XYZ = self.shape
+
+        image_data = cp.asarray(data).reshape(B * C, *XYZ)
+        padded_array = cp.empty((T, *(s * 2 for s in XYZ)), dtype=self.cpx_dtype)
+
+        if img_d is None:
+            img_d = cp.empty((B * C, *XYZ), dtype=self.cpx_dtype)
+        else:
+            img_d = img_d.reshape((B * C, *XYZ))
+
+        for i in range(B * C // T):
+            self._gram_op_raw_device(
+                image_data[i * T : (i + 1) * T],
+                img_d[i * T : (i + 1) * T],
+                padded_array,
+            )
+        img_d = img_d.reshape((B, C, *XYZ))
+        return img_d
