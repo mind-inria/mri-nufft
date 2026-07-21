@@ -155,13 +155,13 @@ class MRITorchKbNufft(FourierOperatorBase):
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         data = data.to(self.device, copy=False)
 
-        if self.smaps is not None:
+        if self.smaps is not None and self.smaps.dtype != data.dtype:
             self.smaps = self.smaps.to(data.dtype, copy=False)
 
         kdata = self._tkb_op.forward(
             image=data, omega=self.samples.t(), smaps=self.smaps
         )
-        kdata /= self.norm_factor
+        kdata *= self.inv_norm_factor
         return self._safe_squeeze(kdata)
 
     @with_torch
@@ -191,7 +191,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         coeffs = coeffs.reshape((B, C, K))
         coeffs = coeffs.to(self.device, copy=False)
 
-        if self.smaps is not None:
+        if self.smaps is not None and self.smaps.dtype != coeffs.dtype:
             self.smaps = self.smaps.to(coeffs.dtype, copy=False)
         if self.density:
             coeffs = coeffs * self.density
@@ -200,7 +200,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             data=coeffs, omega=self.samples.t(), smaps=self.smaps
         )
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
-        img /= self.norm_factor
+        img *= self.inv_norm_factor
         return self._safe_squeeze(img)
 
     @with_torch

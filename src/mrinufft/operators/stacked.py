@@ -234,7 +234,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
             tmp = xp.moveaxis(tmp, -1, 1)
             tmp = tmp.reshape(C * NZ, *XYZ[:2])
             ksp[b, ...] = self.operator.op(xp.ascontiguousarray(tmp))
-        ksp = ksp.reshape((B, C, NZ, NS))
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
 
@@ -283,7 +282,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
         xp = get_array_module(coeffs)
         imgz = xp.zeros((B, C, *XYZ), dtype=self.cpx_dtype)
-        coeffs_ = coeffs.reshape((B, C, NZ, NS))
         coeffs_ = coeffs.reshape((B, C * NZ, NS))
         for b in range(B):
             t = xp.ascontiguousarray(coeffs_[b, ...])
@@ -746,9 +744,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     def _adj_op_calibless_host(self, coeffs, img=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
-        coeffs_f = coeffs.reshape(B, C, NZ * NS)
-        coeffs_f = coeffs_f.reshape(B * C, NZ, NS)
-        coeffs_f = coeffs_f.reshape(B * C * NZ, NS)
+        coeffs_f = coeffs.reshape(B * C * NZ, NS)
         # Allocate Memory
         ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
         if img is None:
@@ -758,7 +754,6 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         for i in range((B * C * NZ) // TZ):
             ksp_batched = ksp_batched.reshape(TZ, NS)
             ksp_batched.set(coeffs_f[i * TZ : (i + 1) * TZ])
-            ksp_batched = ksp_batched.reshape(TZ, NS)
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
             tmp_adj /= self.norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
@@ -774,9 +769,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs = cp.asarray(coeffs)
-        coeffs_f = coeffs.reshape(B, C, NZ * NS)
-        coeffs_f = coeffs_f.reshape(B * C, NZ, NS)
-        coeffs_f = coeffs_f.reshape(B * C * NZ, NS)
+        coeffs_f = coeffs.reshape(B * C * NZ, NS)
         # Allocate Memory
         if img is None:
             img = cp.zeros((B * C, *XYZ), dtype=self.cpx_dtype)

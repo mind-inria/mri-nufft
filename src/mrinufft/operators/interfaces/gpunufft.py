@@ -465,8 +465,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        xp = get_array_module(data)
 
         op_func = self.raw_op.op
+
         if is_cuda_array(data):
             op_func = self.raw_op.op_direct
             if not self.raw_op.use_gpu_direct:
@@ -484,7 +486,9 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             else:
                 op_func(data_[i], coeffs[i])
         if coeffs is None:
-            coeffs = get_array_module(data).stack(result)
+            # if B == 1 (most of the time) we can just add a dummy axis,
+            # and avoid the copy of stack
+            coeffs = result[0][None] if B == 1 else xp.stack(result)
         return self._safe_squeeze(coeffs)
 
     @with_numpy_cupy
@@ -505,8 +509,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        xp = get_array_module(coeffs)
 
         adj_op_func = self.raw_op.adj_op
+
         if is_cuda_array(coeffs):
             adj_op_func = self.raw_op.adj_op_direct
             if not self.raw_op.use_gpu_direct:
@@ -524,7 +530,9 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             else:
                 adj_op_func(coeffs_[i], data[i])
         if data is None:
-            data = get_array_module(coeffs).stack(result)
+            # if B == 1 (most of the time) we can just add a dummy axis,
+            # and avoid the copy of stack
+            data = result[0][None] if B == 1 else xp.stack(result)
         return self._safe_squeeze(data)
 
     def _get_single_raw_op(self):

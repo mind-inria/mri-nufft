@@ -100,8 +100,12 @@ class MRISubspace(FourierOperatorBase):
             # actual transform
             _y = self._fourier_op.op(data_d[idx], *args)
             _y = _y.reshape(*_y.shape[:-1], self.n_frames, -1)
-            # back-project on time domain
-            y += basis_element.conj() * _y.swapaxes(-2, -1)
+            # back-project on time domain: op() returns a fresh array, so weight
+            # its (transposed) view in place instead of allocating a separate
+            # product per basis element before accumulating.
+            contrib = _y.swapaxes(-2, -1)
+            contrib *= basis_element.conj()
+            y += contrib
 
         y = y[None, ...].swapaxes(0, -1)[..., 0]
 

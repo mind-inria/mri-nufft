@@ -9,7 +9,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from functools import partial
+from functools import partial, cached_property
 from contextlib import contextmanager
 from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
@@ -833,10 +833,20 @@ class FourierOperatorBase(ABC):
         """Return the number of samples used by the operator."""
         return self._samples.shape[0]
 
-    @property
+    @cached_property
     def norm_factor(self) -> np.floating:
         """Normalization factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+
+    @cached_property
+    def inv_norm_factor(self) -> np.floating:
+        """Reciprocal of :attr:`norm_factor`, cached for the operator lifetime.
+
+        ``shape`` is fixed at construction, so the normalization is constant;
+        caching turns the per-call ``1 / norm_factor`` (a property recompute
+        plus a division) into a single stored reciprocal-multiply.
+        """
+        return 1.0 / self.norm_factor
 
     def __repr__(self):
         """Return info about the Fourier operator."""
@@ -949,7 +959,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
-        ret *= 1 / self.norm_factor
+        ret *= self.inv_norm_factor
 
         ret = self._safe_squeeze(ret)
         return ret
@@ -961,9 +971,10 @@ class FourierOperatorSimple(FourierOperatorBase):
         if ksp is None:
             xp = get_array_module(data)
             ksp = xp.empty((B * C, K), dtype=self.cpx_dtype)
+        chunks = np.arange(B * C).reshape(-1, T)
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
             coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, ksp[i * T : (i + 1) * T])
@@ -1006,7 +1017,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        ret *= 1 / self.norm_factor
+        ret *= self.inv_norm_factor
         return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
@@ -1017,9 +1028,10 @@ class FourierOperatorSimple(FourierOperatorBase):
             img = xp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
         img_batched = xp.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        chunks = np.arange(B * C).reshape(-1, T)
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
             self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
             img_batched *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):
@@ -1042,12 +1054,10 @@ class FourierOperatorSimple(FourierOperatorBase):
 
     def _adj_op(self, coeffs, image):
         if self.density is not None:
-            coeffs2 = coeffs.copy()
-            for i in range(self.n_trans):
-                coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
+            coeffs_ = coeffs * self.density
         else:
-            coeffs2 = coeffs
-        self.raw_op.adj_op(coeffs2, image)
+            coeffs_ = coeffs
+        self.raw_op.adj_op(coeffs_, image)
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.

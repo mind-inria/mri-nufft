@@ -259,8 +259,11 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         data_d = xp.asarray(data)
         for ll in range(self.n_interpolators):
+            # op() returns a fresh array; weight it in place instead of
+            # allocating a second (B * ytmp) temp before accumulating.
             ytmp = self._fourier_op.op(self.C[ll] * data_d, *args).reshape(B, C, NS, NK)
-            y += (self.B[:, ll] * ytmp).reshape(B, C, K)
+            ytmp *= self.B[:, ll]
+            y += ytmp.reshape(B, C, K)
 
         # Return on the same device as the input; only transfer on a genuine
         # device mismatch (no-op wrapper when y is already on the right device).
@@ -306,7 +309,9 @@ class MRIFourierCorrected(FourierOperatorBase):
             Bconj = self.B[:, ll].conj()
             Cconj = self.C[ll].conj()
             ytmp = (Bconj * coeffs).reshape(B, C, K)
-            img += Cconj * self._fourier_op.adj_op(ytmp)
+            tmp = self._fourier_op.adj_op(ytmp)
+            tmp *= Cconj
+            img += tmp
 
         # Return on the same device as the input; only transfer on a genuine
         # device mismatch (no-op wrapper when img is already on the right device).
