@@ -31,20 +31,6 @@ try:
     from cufinufft import Plan
     from cufinufft._compat import get_array_ptr
 
-    _coil_combine_kernel = cp.ElementwiseKernel(
-        "raw T data, raw T smaps, int64 b, int32 n_t, int64 vol",
-        "raw T img",
-        """
-        long long off = b * vol + i;
-        for (int t = 0; t < n_t; t++) {
-            T d = data[t * vol + i];
-            T s = smaps[t * vol + i];
-            img[off] += d * T(s.real(), -s.imag());
-        }
-        """,
-        "coil_combine_kernel",
-    )
-
 except ImportError:
     CUFINUFFT_AVAILABLE = False
 
