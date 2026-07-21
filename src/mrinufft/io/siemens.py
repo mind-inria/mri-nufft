@@ -8,6 +8,11 @@ from scipy.spatial.transform import Rotation
 
 
 def _parse_twix_header(twixObj):
+    noise = None
+    if isinstance(twixObj, list):
+        if 'noise' in twixObj[0].keys():
+            noise = twixObj[0]['noise'][""]
+        twixObj = twixObj[-1]
     """Parse the header of a Siemens Twix object."""
     hdr = {
         "n_coils": int(twixObj.image.NCha),
@@ -21,6 +26,7 @@ def _parse_twix_header(twixObj):
         "affine": twix2nifti_affine(twixObj),
         "shifts": twixObj.image.slicePos[0][:3][::-1],
         "acs": None,
+        "noise": noise,
     }
 
     for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
@@ -108,10 +114,11 @@ def read_siemens_rawdat(
             "or using `pip install pymapVBVD`."
         ) from err
     twixObj = mapVBVD(filename)
-    if isinstance(twixObj, list):
-        twixObj = twixObj[-1]
-    twixObj.image.flagRemoveOS = removeOS
-    twixObj.image.flagDoAverage = doAverage
+    if not isinstance(twixObj, list):
+        twixObj = [twixObj]
+    for tObj in twixObj:
+        tObj.image.flagRemoveOS = removeOS
+    twixObj[-1].image.flagDoAverage = doAverage
     hdr = _parse_twix_header(twixObj)
     # Add sequence information
     if slice_num is not None and hdr["n_slices"] < slice_num:
