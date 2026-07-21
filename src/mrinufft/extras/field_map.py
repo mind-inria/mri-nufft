@@ -341,7 +341,8 @@ def _full_C(
 
     dr = (maxr - minr) / n_bins[0]
     di = (maxi - mini) / n_bins[1]
-    idxr, idxi = 0, 0
+    idxr = xp.zeros(fr.shape, dtype=int)
+    idxi = xp.zeros(fi.shape, dtype=int)
     if dr != 0:
         idxr = (xp.around((fr - minr) / dr)).astype(int)
         idxr = xp.clip(idxr, 0, n_bins[0] - 1)

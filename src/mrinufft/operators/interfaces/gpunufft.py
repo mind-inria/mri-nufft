@@ -828,23 +828,37 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         ret = gram_func(data, img_d)
         return self._safe_squeeze(ret)
 
-    def _get_coil_smap_gpu(self, coil_idx, smap_buffer, stream):
-        """Fetch a single coil's sensitivity map onto the GPU.
+    def _make_smap_prefetcher(self, smap_buffers, stream):
+        """Build a double-buffered, event-synchronized smap prefetch closure.
 
-        The smaps are only available pinned on host (`self.raw_op.pinned_smaps`),
-        so we copy a single coil at a time asynchronously using a cupy stream,
-        instead of transferring the whole smaps array to the GPU.
-
+        Two alternating GPU buffers let the H2D transfer of coil ``c + 1``'s
+        smap run on ``stream`` while the default stream is still computing
+        with coil ``c``'s smap. Ordering is enforced purely with GPU-side
+        events (``Stream.wait_event``) rather than a host-blocking
+        ``stream.synchronize()``, so the transfer and compute genuinely
+        overlap instead of being serialized.
         """
-        # FIXME: Use true asynchronous copy for gram
-        # ``smap_buffer`` is reused across coils, so the default stream (which
-        # reads the previous coil's data out of it) must finish before this
-        # overwrite is queued on ``stream`` -- otherwise the two streams race
-        # and the multiply/accumulate below can read a partially-overwritten
-        # or wrong-coil buffer.
-        cp.cuda.get_current_stream().synchronize()
-        smap_buffer.set(self.raw_op.pinned_smaps[:, coil_idx], stream=stream)
-        return smap_buffer.reshape(self.shape, order="F")
+        compute_stream = cp.cuda.get_current_stream()
+        transfer_done = [cp.cuda.Event() for _ in smap_buffers]
+        read_done = [cp.cuda.Event() for _ in smap_buffers]
+        for event in read_done:
+            event.record(compute_stream)
+
+        def prefetch(idx, coil_idx):
+            # wait for the previous compute using this buffer to finish
+            # before overwriting it.
+            stream.wait_event(read_done[idx])
+            smap_buffers[idx].set(self.raw_op.pinned_smaps[:, coil_idx], stream=stream)
+            transfer_done[idx].record(stream)
+
+        def wait_ready(idx):
+            compute_stream.wait_event(transfer_done[idx])
+            return smap_buffers[idx].reshape(self.shape, order="F")
+
+        def mark_read(idx):
+            read_done[idx].record(compute_stream)
+
+        return prefetch, wait_ready, mark_read
 
     def _gram_op_sense_host(self, data, img_d):
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
@@ -857,18 +871,27 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             img_d.fill(0)
 
         data_gpu = cp.empty(XYZ, dtype=self.cpx_dtype)
-        smap_buffer = cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype)
+        smap_buffers = [
+            cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype) for _ in range(2)
+        ]
         padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
         stream = cp.cuda.Stream(non_blocking=True)
+        prefetch, wait_ready, mark_read = self._make_smap_prefetcher(
+            smap_buffers, stream
+        )
 
         for b in range(B):
             data_gpu.set(image_dataf[b])
+            prefetch(0, 0)
             for c in range(C):
-                smap_gpu = self._get_coil_smap_gpu(c, smap_buffer, stream)
-                stream.synchronize()
+                idx = c % 2
+                smap_gpu = wait_ready(idx)
+                if c + 1 < C:
+                    prefetch((c + 1) % 2, c + 1)
                 coil_img = data_gpu * smap_gpu
                 self._gram_op_raw_device(coil_img, coil_img, padded_array)
                 img_d[b] += (coil_img * smap_gpu.conj()).get()
+                mark_read(idx)
         return img_d.reshape((B, 1, *XYZ))
 
     def _gram_op_sense_device(self, data, img_d):
@@ -876,17 +899,26 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         image_dataf = cp.asarray(data).reshape((B, *XYZ))
 
         img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
-        smap_buffer = cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype)
+        smap_buffers = [
+            cp.empty(int(np.prod(XYZ)), dtype=self.cpx_dtype) for _ in range(2)
+        ]
         padded_array = cp.empty(tuple(s * 2 for s in XYZ), dtype=self.cpx_dtype)
         stream = cp.cuda.Stream(non_blocking=True)
+        prefetch, wait_ready, mark_read = self._make_smap_prefetcher(
+            smap_buffers, stream
+        )
 
         for b in range(B):
+            prefetch(0, 0)
             for c in range(C):
-                smap_gpu = self._get_coil_smap_gpu(c, smap_buffer, stream)
-                stream.synchronize()
+                idx = c % 2
+                smap_gpu = wait_ready(idx)
+                if c + 1 < C:
+                    prefetch((c + 1) % 2, c + 1)
                 coil_img = image_dataf[b] * smap_gpu
                 self._gram_op_raw_device(coil_img, coil_img, padded_array)
                 img_d[b] += coil_img * smap_gpu.conj()
+                mark_read(idx)
         return img_d.reshape((B, 1, *XYZ))
 
     def _gram_op_calibless_host(self, data, img_d):

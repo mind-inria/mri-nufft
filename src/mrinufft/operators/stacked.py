@@ -1,5 +1,7 @@
 """Stacked Operator for NUFFT."""
 
+from functools import cached_property
+
 from mrinufft.operators.interfaces.cufinufft import MRICufiNUFFT
 
 import numpy as np
@@ -475,6 +477,16 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         """Norm factor of the operator."""
         return self.operator.norm_factor * np.sqrt(2)
 
+    @cached_property
+    def _bc_chunks(self):
+        """Precomputed ``(batch, coil)`` index chunks, one row per ``n_trans`` slice.
+
+        ``n_batchs``/``n_coils``/``n_trans`` are fixed for the operator's
+        lifetime, so this is computed once instead of on every loop iteration.
+        """
+        B, C, T = self.n_batchs, self.n_coils, self.n_trans
+        return np.arange(B * C).reshape(-1, T)
+
     @staticmethod
     def _fftz(data):
         """Apply FFT on z-axis."""
@@ -534,8 +546,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = self._bc_chunks[i] % C
+            idx_batch = self._bc_chunks[i] // C
             # Send the n_trans coils to gpu
             data_batched.set(dataf[idx_batch].reshape((T, *XYZ)))
             # Apply Smaps
@@ -552,7 +564,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp = tmp.reshape(T * NZ, *XYZ[:2])
             # After reordering, apply 2D NUFFT
             ksp_batched = self.operator._op_calibless_device(cp.ascontiguousarray(tmp))
-            ksp_batched /= self.norm_factor
+            ksp_batched *= self.inv_norm_factor
             ksp_batched = ksp_batched.reshape(T, NZ, NS)
             ksp_batched = ksp_batched.reshape(T, NZ * NS)
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
@@ -571,8 +583,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
         ksp = ksp.reshape((B * C, NZ * NS))
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = self._bc_chunks[i] % C
+            idx_batch = self._bc_chunks[i] // C
 
             data_batched = dataf[idx_batch].reshape((T, *XYZ))
             # Apply Smaps
@@ -589,7 +601,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp = tmp.reshape(T * NZ, *XYZ[:2])
             # After reordering, apply 2D NUFFT
             ksp_batched = self.operator._op_calibless_device(cp.ascontiguousarray(tmp))
-            ksp_batched /= self.norm_factor
+            ksp_batched *= self.inv_norm_factor
             ksp_batched = ksp_batched.reshape(T, NZ, NS)
             ksp_batched = ksp_batched.reshape(T, NZ * NS)
             ksp[i * T : (i + 1) * T] = ksp_batched
@@ -616,7 +628,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp = tmp.reshape(T * NZ, *XYZ[:2])
             # After reordering, apply 2D NUFFT
             ksp_batched = self.operator._op_calibless_device(cp.ascontiguousarray(tmp))
-            ksp_batched /= self.norm_factor
+            ksp_batched *= self.inv_norm_factor
             ksp_batched = ksp_batched.reshape(T, NZ, NS)
             ksp_batched = ksp_batched.reshape(T, NZ * NS)
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
@@ -644,7 +656,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             tmp = tmp.reshape(T * NZ, *XYZ[:2])
             # After reordering, apply 2D NUFFT
             ksp_batched = self.operator._op_calibless_device(cp.ascontiguousarray(tmp))
-            ksp_batched /= self.norm_factor
+            ksp_batched *= self.inv_norm_factor
             ksp_batched = ksp_batched.reshape(T, NZ, NS)
             ksp_batched = ksp_batched.reshape(T, NZ * NS)
             ksp[i * T : (i + 1) * T] = ksp_batched
@@ -686,8 +698,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         ksp_batched = cp.empty((T, NS * NZ), dtype=self.cpx_dtype)
 
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = self._bc_chunks[i] % C
+            idx_batch = self._bc_chunks[i] // C
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils])
             else:
@@ -695,7 +707,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp_batched.set(coeffs_f[i * T : (i + 1) * T])
 
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
-            tmp_adj /= self.norm_factor
+            tmp_adj *= self.inv_norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
             coil_img_d[:] = 0j
@@ -720,8 +732,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
 
         for i in range((B * C) // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = self._bc_chunks[i] % C
+            idx_batch = self._bc_chunks[i] // C
             if not self.smaps_cached:
                 smaps_batched.set(self.smaps[idx_coils])
             else:
@@ -729,7 +741,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp_batched = coeffs_f[i * T : (i + 1) * T]
 
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
-            tmp_adj /= self.norm_factor
+            tmp_adj *= self.inv_norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
             coil_img_d[:] = 0j
@@ -755,7 +767,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp_batched = ksp_batched.reshape(TZ, NS)
             ksp_batched.set(coeffs_f[i * TZ : (i + 1) * TZ])
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
-            tmp_adj /= self.norm_factor
+            tmp_adj *= self.inv_norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
             coil_img_d[:] = 0j
@@ -779,7 +791,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp_batched = coeffs_f[i * TZ : (i + 1) * TZ]
             ksp_batched = ksp_batched.reshape(TZ, NS)
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
-            tmp_adj /= self.norm_factor
+            tmp_adj *= self.inv_norm_factor
             tmp_adj = tmp_adj.reshape((T, NZ, *XYZ[:2]))
             tmp_adj = cp.moveaxis(tmp_adj, 1, -1)
             coil_img_d[:] = 0j

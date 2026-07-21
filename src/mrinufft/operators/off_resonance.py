@@ -176,7 +176,10 @@ class MRIFourierCorrected(FourierOperatorBase):
                         "Time interpolator should divide or equal size of the samples."
                     )
                 self.n_shots = n_shot
-            self.B, self.C = B, C
+            # Cast once here rather than relying on implicit dtype promotion
+            # on every op/adj_op call.
+            self.B = B.astype(self.cpx_dtype, copy=False)
+            self.C = C.astype(self.cpx_dtype, copy=False)
             return
 
         kwargs = {}
@@ -258,10 +261,14 @@ class MRIFourierCorrected(FourierOperatorBase):
         )
 
         data_d = xp.asarray(data)
+        # Reused across interpolators instead of allocating a fresh
+        # (C[ll] * data_d) temporary on every iteration.
+        cdata = xp.empty_like(data_d)
         for ll in range(self.n_interpolators):
+            xp.multiply(self.C[ll], data_d, out=cdata)
             # op() returns a fresh array; weight it in place instead of
             # allocating a second (B * ytmp) temp before accumulating.
-            ytmp = self._fourier_op.op(self.C[ll] * data_d, *args).reshape(B, C, NS, NK)
+            ytmp = self._fourier_op.op(cdata, *args).reshape(B, C, NS, NK)
             ytmp *= self.B[:, ll]
             y += ytmp.reshape(B, C, K)
 
@@ -305,11 +312,14 @@ class MRIFourierCorrected(FourierOperatorBase):
         else:
             img = xp.zeros((B, 1, *XYZ), dtype=self.cpx_dtype)
         coeffs = coeffs.reshape(B, C, NS, NK)
+        # Reused across interpolators instead of allocating a fresh
+        # (Bconj * coeffs) temporary on every iteration.
+        ytmp = xp.empty_like(coeffs)
         for ll in range(self.n_interpolators):
             Bconj = self.B[:, ll].conj()
             Cconj = self.C[ll].conj()
-            ytmp = (Bconj * coeffs).reshape(B, C, K)
-            tmp = self._fourier_op.adj_op(ytmp)
+            xp.multiply(Bconj, coeffs, out=ytmp)
+            tmp = self._fourier_op.adj_op(ytmp.reshape(B, C, K))
             tmp *= Cconj
             img += tmp
 

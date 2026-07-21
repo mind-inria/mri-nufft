@@ -900,6 +900,18 @@ class FourierOperatorSimple(FourierOperatorBase):
         single type 1 /type 2 NUFFT.
     """
 
+    @cached_property
+    def _bc_chunks(self) -> np.ndarray:
+        """Precomputed ``(batch, coil)`` index chunks, one row per ``n_trans`` slice.
+
+        ``n_batchs``/``n_coils``/``n_trans`` are fixed for the operator's
+        lifetime, so the ``arange(B*C).reshape(-1, T)`` used to derive the
+        per-chunk coil/batch indices in the sense loops is computed once
+        instead of on every call.
+        """
+        B, C, T = self.n_batchs, self.n_coils, self.n_trans
+        return np.arange(B * C).reshape(-1, T)
+
     def __init__(
         self,
         samples,
@@ -971,7 +983,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         if ksp is None:
             xp = get_array_module(data)
             ksp = xp.empty((B * C, K), dtype=self.cpx_dtype)
-        chunks = np.arange(B * C).reshape(-1, T)
+        chunks = self._bc_chunks
         for i in range(B * C // T):
             idx_coils = chunks[i] % C
             idx_batch = chunks[i] // C
@@ -1028,7 +1040,7 @@ class FourierOperatorSimple(FourierOperatorBase):
             img = xp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
         img_batched = xp.zeros((T, *XYZ), dtype=self.cpx_dtype)
-        chunks = np.arange(B * C).reshape(-1, T)
+        chunks = self._bc_chunks
         for i in range(B * C // T):
             idx_coils = chunks[i] % C
             idx_batch = chunks[i] // C
@@ -1087,12 +1099,12 @@ class FourierOperatorSimple(FourierOperatorBase):
         obs_dataf = obs_data.reshape((B * C, K))
         grad = xp.zeros_like(dataf)
 
-        coil_img = xp.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = xp.empty((T, K), dtype=self.cpx_dtype)
-        inv_norm = 1 / self.norm_factor
+        inv_norm = self.inv_norm_factor
+        chunks = self._bc_chunks
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
             coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, coil_ksp)
@@ -1114,13 +1126,13 @@ class FourierOperatorSimple(FourierOperatorBase):
         obs_dataf = obs_data.reshape((B * C, K))
         grad = xp.empty_like(dataf)
         ksp = xp.empty((T, K), dtype=self.cpx_dtype)
-        inv_norm = 1 / self.norm_factor
+        inv_norm = self.inv_norm_factor
         for i in range(B * C // T):
             self._op(dataf[i * T : (i + 1) * T], ksp)
             ksp *= inv_norm
             ksp -= obs_dataf[i * T : (i + 1) * T]
-            if self.uses_density:
-                ksp *= self.density
+            # density compensation is already applied inside _adj_op; applying
+            # it again here would square it (see FourierOperatorSimple._adj_op).
             self._adj_op(ksp, grad[i * T : (i + 1) * T])
         grad *= inv_norm
         return grad.reshape(B, C, *XYZ)

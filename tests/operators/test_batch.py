@@ -210,6 +210,32 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
     npt.assert_equal(image_tmp, image_data)
 
 
+def test_data_consistency_density_single_application():
+    """Regression test: density compensation applied exactly once.
+
+    ``_grad_calibless`` used to pre-apply density before calling
+    ``_adj_op`` (which folds density in itself), squaring the
+    compensation. ``data_consistency`` and the equivalent manual
+    ``adj_op(op(x) - y)`` call must therefore match, since both only go
+    through the density-aware ``adj_op``.
+    """
+    shape = (64, 64)
+    n_samples = 1024
+    rng = np.random.default_rng(0)
+    samples = (rng.random((n_samples, 2)) - 0.5).astype(np.float32)
+    operator = get_operator("finufft")(samples, shape, n_coils=2, density=True)
+    img = (rng.random((2, *shape)) + 1j * rng.random((2, *shape))).astype(
+        operator.cpx_dtype
+    )
+    ksp = (rng.random((2, n_samples)) + 1j * rng.random((2, n_samples))).astype(
+        operator.cpx_dtype
+    )
+
+    res = operator.data_consistency(img, ksp)
+    res_manual = operator.adj_op(operator.op(img) - ksp)
+    npt.assert_allclose(res, res_manual, atol=1e-4, rtol=1e-3)
+
+
 def test_gradient_lipschitz(operator, image_data, kspace_data):
     """Test the gradient lipschitz constant converges."""
     C = 1 if operator.uses_sense else operator.n_coils

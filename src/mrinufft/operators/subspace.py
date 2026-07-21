@@ -59,6 +59,23 @@ class MRISubspace(FourierOperatorBase):
 
         self.subspace_basis = subspace_basis
         self.n_coeffs, self.n_frames = self.subspace_basis.shape
+        self._basis_cache = {}
+
+    def _get_basis(self, xp, device):
+        """Return ``subspace_basis`` converted to ``(xp, device)``, cached.
+
+        The basis is static for the operator's lifetime, so repeated
+        ``_to_interface`` conversions on every ``op``/``adj_op`` call are
+        avoided.
+        """
+        # cupy's Device objects aren't hashable, so key on its integer id
+        # (or the device itself, e.g. torch.device / the "cpu" string).
+        key = (xp.__name__, getattr(device, "id", device))
+        cached = self._basis_cache.get(key)
+        if cached is None:
+            cached = _to_interface(self.subspace_basis, xp, device)
+            self._basis_cache[key] = cached
+        return cached
 
     def op(self, data, *args):
         """
@@ -77,7 +94,7 @@ class MRISubspace(FourierOperatorBase):
         """
         xp = get_array_module(data)
         device = _get_device(data)
-        subspace_basis = _to_interface(self.subspace_basis, xp, device)
+        subspace_basis = self._get_basis(xp, device)
 
         # if required, move subspace index axis to leftmost position
         if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
@@ -132,7 +149,7 @@ class MRISubspace(FourierOperatorBase):
         """
         xp = get_array_module(coeffs)
         device = _get_device(coeffs)
-        subspace_basis = _to_interface(self.subspace_basis, xp, device)
+        subspace_basis = self._get_basis(xp, device)
 
         # if required, move time/contrast axis to leftmost position
         if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
