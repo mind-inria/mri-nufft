@@ -11,7 +11,7 @@ def _parse_twix_header(twixObj):
     noise = None
     if isinstance(twixObj, list):
         if 'noise' in twixObj[0].keys():
-            noise = twixObj[0]['noise'][""]
+            noise = twixObj[0]['noise'][""].squeeze()
         twixObj = twixObj[-1]
     """Parse the header of a Siemens Twix object."""
     hdr = {
