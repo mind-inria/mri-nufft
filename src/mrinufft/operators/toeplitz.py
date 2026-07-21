@@ -20,15 +20,16 @@ if CUPY_AVAILABLE:
     import cupy as cp
 
 
-def _get_fftn(xp):
+def _get_fftns(xp):
     if xp.__name__ == "numpy":
-        from scipy.fft import fftn, ifftn
+        from scipy.fft import fftn, ifftn, irfftn
     elif xp.__name__ == "cupy":
-        from cupyx.scipy.fft import fftn, ifftn
+        from cupyx.scipy.fft import fftn, ifftn, irfftn
     else:  # fallback for torch and others
         fftn = xp.fft.fftn
         ifftn = xp.fft.ifftn
-    return fftn, ifftn
+        irfftn = xp.fft.irfftn
+    return fftn, ifftn, irfftn
 
 
 def compute_toeplitz_kernel(
@@ -56,7 +57,7 @@ def compute_toeplitz_kernel(
     apply_toeplitz_kernel: Apply the Toeplitz kernel to an image.
     """
     xp = get_array_module(nufft.samples)
-    fftn, _ = _get_fftn(xp)
+    _, _, irfftn = _get_fftns(xp)
     backup_density = None
     if nufft.density is not None:
         backup_density = nufft.density.copy()
@@ -84,11 +85,14 @@ def compute_toeplitz_kernel(
         nufft.density = backup_density
         nufft._density_method = backup_density_method
     scale = 1 / nufft.norm_factor
+
     # T = A^H W A is Hermitian for real weights, so its circulant spectrum (the
-    # frequency-domain kernel) is real. Keeping only the real part halves the
-    # kernel memory (dominant in 3D, where it is 2**d the image size) and is
-    # equivalent to enforcing exact Hermitian symmetry of the image-domain kernel.
-    return fftn(kernel * scale, overwrite_x=True, norm="ortho").real
+    # frequency-domain kernel) is real. `kernel` only holds the non-redundant
+    # half of the last axis (see `_compute_toep_2d`/`_compute_toep_3d`);
+    # irfftn reconstructs the full real spectrum from it directly, giving a
+    # contiguous real array.
+    full_shape = tuple(2 * s for s in nufft.shape)
+    return irfftn(xp.conj(kernel) * scale, s=full_shape, norm="ortho")
 
 
 def _modulated_weights(
@@ -115,55 +119,84 @@ def _check_even_shape(shape: tuple[int, ...]) -> None:
 
 
 def _compute_toep_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+    """Compute the (2N0, N1+1) half-kernel (last axis truncated for irfftn).
+
+    Only the y in [0, N1] half of the kernel's last axis is kept:
+    `compute_toeplitz_kernel` feeds it to `irfftn`, which reconstructs the
+    redundant other half itself.
+    The outer-lag adjoint (-h1 shift) is still required in full -- it feeds the
+    Hermitian-symmetry reconstruction of the negative-x half below -- but its
+    result is never stored past this function, so the full (2N0, 2N1) array is
+    never materialized.
+    """
     xp = get_array_module(nufft.samples)
     _check_even_shape(nufft.shape)
     N0, N1 = nufft.shape
     h0, h1 = N0 // 2, N1 // 2
     omega = proper_trajectory(nufft.samples, normalize="pi")
 
-    kernel = xp.zeros((2 * N0, 2 * N1), dtype=nufft.cpx_dtype)
+    kernel = xp.zeros((2 * N0, N1 + 1), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
 
-    # Two adjoints cover the positive-x half of the kernel: the y-window is shifted
-    # by +h1 (inner lags) then -h1 (outer lags). Column/row index N is the circulant
+    # inner y-lags: stored directly, row/col index N is the circulant
     # "don't-care" slot (never touched by the zero-padded apply), so we skip it.
     nufft._adj_op(_modulated_weights(weights, omega, (h0, h1), nufft.cpx_dtype), tmp)
     kernel[:N0, :N1] = tmp
-    nufft._adj_op(_modulated_weights(weights, omega, (h0, -h1), nufft.cpx_dtype), tmp)
-    kernel[:N0, N1 + 1 :] = tmp[:, 1:]
+    A = kernel[:N0, :N1]
 
-    # negative-x half by Hermitian symmetry (c[-d] = conj(c[d]) for real weights)
-    ksym = xp.roll(xp.roll(kernel[::-1, ::-1], 1, axis=0), 1, axis=1).conj()
-    kernel[N0 + 1 :, :] = ksym[N0 + 1 :, :]
+    # outer y-lags: only used below (via Hermitian symmetry) to fill the
+    # negative-x half of the kept columns, so it never gets written to `kernel`.
+    nufft._adj_op(_modulated_weights(weights, omega, (h0, -h1), nufft.cpx_dtype), tmp)
+    B = tmp
+
+    # negative-x half by Hermitian symmetry (c[-i,-j] = conj(c[i,j]) for real
+    # weights), restricted to the y in [0, N1] columns kept here.
+    r = slice(N0 - 1, 0, -1)
+    kernel[N0 + 1 :, 0] = xp.conj(A[r, 0])
+    kernel[N0 + 1 :, 1:N1] = xp.conj(B[r, N1 - 1 : 0 : -1])
     return kernel
 
 
 def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
+    """Compute the (2N0, 2N1, N2+1) half-kernel (last axis truncated for irfftn).
+
+    Only the z in [0, N2] half of the kernel's last axis is kept: see
+    `_compute_toep_2d` for why, and for the general shape of the argument.
+    The two "-h2" adjoints are still required in full -- they feed the
+    Hermitian-symmetry reconstruction of the negative-x half below -- but their
+    results are never stored past this function, so the full (2N0, 2N1, 2N2)
+    array is never materialized.
+    """
     xp = get_array_module(nufft.samples)
     _check_even_shape(nufft.shape)
     N0, N1, N2 = nufft.shape
     h0, h1, h2 = N0 // 2, N1 // 2, N2 // 2
     omega = proper_trajectory(nufft.samples, normalize="pi")
 
-    kernel = xp.zeros((2 * N0, 2 * N1, 2 * N2), dtype=nufft.cpx_dtype)
+    kernel = xp.zeros((2 * N0, 2 * N1, N2 + 1), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
 
-    # Four adjoints cover the positive-x half; the four sign combinations of the
-    # (y, z) shift recover the inner/outer lags along each axis.
     def adj(shifts):
         nufft._adj_op(_modulated_weights(weights, omega, shifts, nufft.cpx_dtype), tmp)
-        return tmp
+        return tmp.copy()
 
-    kernel[:N0, :N1, :N2] = adj((h0, h1, h2))
-    kernel[:N0, :N1, N2 + 1 :] = adj((h0, h1, -h2))[:, :, 1:]
-    kernel[:N0, N1 + 1 :, :N2] = adj((h0, -h1, h2))[:, 1:, :]
-    kernel[:N0, N1 + 1 :, N2 + 1 :] = adj((h0, -h1, -h2))[:, 1:, 1:]
+    A = adj((h0, h1, h2))
+    kernel[:N0, :N1, :N2] = A
+    C = adj((h0, -h1, h2))
+    kernel[:N0, N1 + 1 :, :N2] = C[:, 1:, :]
+    # outer z-lags: only used below (via Hermitian symmetry), never stored in `kernel`.
+    B = adj((h0, h1, -h2))
+    D = adj((h0, -h1, -h2))
 
-    # negative-x half by Hermitian symmetry (c[-d] = conj(c[d]) for real weights)
-    ksym = xp.roll(
-        xp.roll(xp.roll(kernel[::-1, ::-1, ::-1], 1, axis=0), 1, axis=1), 1, axis=2
-    ).conj()
-    kernel[N0 + 1 :] = ksym[N0 + 1 :]
+    # negative-x half by Hermitian symmetry (c[-i,-j,-k] = conj(c[i,j,k]) for
+    # real weights), restricted to the z in [0, N2] columns kept here.
+    r = slice(N0 - 1, 0, -1)
+    kernel[N0 + 1 :, 0, 0] = xp.conj(A[r, 0, 0])
+    kernel[N0 + 1 :, 0, 1:N2] = xp.conj(B[r, 0, N2 - 1 : 0 : -1])
+    kernel[N0 + 1 :, 1:N1, 0] = xp.conj(C[r, N1 - 1 : 0 : -1, 0])
+    kernel[N0 + 1 :, 1:N1, 1:N2] = xp.conj(D[r, N1 - 1 : 0 : -1, N2 - 1 : 0 : -1])
+    kernel[N0 + 1 :, N1 + 1 :, 0] = xp.conj(A[r, N1 - 1 : 0 : -1, 0])
+    kernel[N0 + 1 :, N1 + 1 :, 1:N2] = xp.conj(B[r, N1 - 1 : 0 : -1, N2 - 1 : 0 : -1])
     return kernel
 
 
@@ -198,7 +231,7 @@ def apply_toeplitz_kernel(
     compute_toeplitz_kernel : Compute Toeplitz kernel to be used with this function.
     """
     xp = get_array_module(image)
-    fftn, ifftn = _get_fftn(xp)
+    fftn, ifftn, _ = _get_fftns(xp)
     img_shape = image.shape
     if image.ndim == toeplitz_kernel.ndim:
         # add extra batch dimension
@@ -291,6 +324,10 @@ class _GramOpGpuMixin(FourierOperatorBase):
         """Apply the Toeplitz Gram operator on device to a (batched) image."""
         from mrinufft.operators.toeplitz import apply_toeplitz_kernel
 
+        if self._toeplitz_kernel is None:
+            raise ValueError(
+                "Toeplitz Kernel not available. Use ``.compute_toeplitz_kernel``"
+            )
         cp.copyto(
             out_d,
             apply_toeplitz_kernel(in_d, self._toeplitz_kernel, padded_array),
