@@ -159,7 +159,7 @@ class MRISubspace(FourierOperatorBase):
 
         coeffs_d = coeffs_d[..., None].swapaxes(0, -1)[0, ...]
 
-        y = xp.empty((self.n_coeffs, *self.img_full_shape), dtype=coeffs_d.dtype)
+        y = None
         for idx in range(self.n_coeffs):
             # select basis element
             basis_element = subspace_basis[idx]
@@ -175,10 +175,16 @@ class MRISubspace(FourierOperatorBase):
                 _coeffs_d = xp.ascontiguousarray(_coeffs_d)
 
             # actual transform
-            y[idx] = self._fourier_op.adj_op(_coeffs_d, *args)
+            res = self._fourier_op.adj_op(_coeffs_d, *args)
+            if y is None:
+                # shape of res depends on the wrapped operator's squeezing,
+                # so it is only known once the first transform has run.
+                y = xp.empty((self.n_coeffs, *res.shape), dtype=res.dtype)
+            y[idx] = res
 
         # bring back subspace index to original position (B, S, ...)
-        y = y.swapaxes(0, 1)
+        if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
+            y = y.swapaxes(0, 1)
 
         return y
 

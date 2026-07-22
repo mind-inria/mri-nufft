@@ -14,10 +14,10 @@ from mrinufft._array_compat import (
 from mrinufft._utils import proper_trajectory
 
 from mrinufft.operators.base import FourierOperatorBase
-from mrinufft.operators.gpu_utils import _coil_combine_kernel
 
 if CUPY_AVAILABLE:
     import cupy as cp
+    from mrinufft.operators.gpu_utils import _coil_combine_kernel
 
 
 def _get_fftns(xp):

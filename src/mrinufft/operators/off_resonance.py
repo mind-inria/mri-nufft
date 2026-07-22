@@ -263,7 +263,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         data_d = xp.asarray(data)
         # Reused across interpolators instead of allocating a fresh
         # (C[ll] * data_d) temporary on every iteration.
-        cdata = xp.empty_like(data_d)
+        cdata = xp.empty(data_d.shape, dtype=self.cpx_dtype)
         for ll in range(self.n_interpolators):
             xp.multiply(self.C[ll], data_d, out=cdata)
             # op() returns a fresh array; weight it in place instead of
