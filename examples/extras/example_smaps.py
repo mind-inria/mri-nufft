@@ -6,8 +6,8 @@ This example demonstrates how to estimate coil sensitivity maps from
 non-Cartesian k-space data using different methods provided in the
 :py:mod:`mrinufft.extras` module.
 We will simulate k-space data from a known MRI image and coil sensitivity
-maps, and then estimate the sensitivity maps using the ESPIRiT method [espirit]_ and
-a low-frequency calibration method [sense]_.
+maps, and then estimate the sensitivity maps using the ESPIRiT method [espirit]_,
+the PISCO method [pisco]_, and a low-frequency calibration method [sense]_.
 We will visualize the estimated sensitivity maps and compare them to the
 actual sensitivity maps used in the simulation.
 """
@@ -95,6 +95,19 @@ if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
 show_maps(Smaps)
 
 # %%
+# Estimate sensitivity maps using PISCO
+Smaps = get_smaps("pisco")(
+    samples_loc,
+    mri.shape,
+    kspace_data=kspace_data,
+    density=forward_op.density,
+    backend=BACKEND,
+)
+if str.lower(BACKEND) in ["gpunufft", "cufinufft"]:
+    Smaps = Smaps.get()
+show_maps(Smaps)
+
+# %%
 # Estimate the sensitivity map using low-frequency calibration
 Smaps = get_smaps("low_frequency")(
     samples_loc,
@@ -120,3 +133,7 @@ show_maps(Smaps)
 #               Lustig M. ESPIRiT--an eigenvalue approach to autocalibrating parallel
 #               MRI: where SENSE meets GRAPPA. Magn Reson Med. 2014 Mar;71(3):990-1001.
 #               doi: 10.1002/mrm.24751. PMID: 23649942; PMCID: PMC4142121.
+# .. [pisco] R. A. Lobos, C.-C. Chan, J. P. Haldar. New Theory and Faster
+#               Computations for Subspace-Based Sensitivity Map Estimation in
+#               Multichannel MRI. IEEE Transactions on Medical Imaging
+#               43:286-296, 2024. doi: 10.1109/TMI.2023.3299599.
