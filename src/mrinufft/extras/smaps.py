@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import gc
+import logging
 from collections.abc import Callable
 
 import numpy as np
@@ -17,6 +18,8 @@ from mrinufft._utils import MethodRegister, _fill_doc
 from mrinufft.density.utils import flat_traj
 
 from .cartesian import fft, ifft
+
+logger = logging.getLogger(__name__)
 
 ########################################################
 # Estimation of Off-Resonance-Correction Interpolators #
@@ -321,20 +324,33 @@ def low_frequency(
         density=density,
         window_fun=window_fun,
     )
+    logger.debug(
+        "low_frequency: extracted %d/%d k-space center samples (threshold=%s)",
+        samples.shape[0],
+        traj.shape[0],
+        threshold,
+    )
     Smaps = get_operator(backend)(
         samples,
         shape,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     ).pinv_solver(k_space, max_iter=max_iter)
+    logger.debug(
+        "low_frequency: pinv_solver reconstruction done, shape=%s", Smaps.shape
+    )
     SOS = np.linalg.norm(Smaps, axis=0)
     if isinstance(mask, np.ndarray):
         Smaps = Smaps * mask
+        logger.debug("low_frequency: applied user-provided mask")
     elif isinstance(mask, bool) and mask:
         thresh = threshold_otsu(SOS)
         # Create convex hull from mask
         convex_hull = convex_hull_image(SOS > thresh)
         Smaps = Smaps * convex_hull
+        logger.debug(
+            "low_frequency: applied convex-hull mask (otsu threshold=%.4g)", thresh
+        )
     # Smooth out the sensitivity maps
     if np.sum(blurr_factor) > 0:
         if isinstance(blurr_factor, float | int):
@@ -342,11 +358,15 @@ def low_frequency(
         Smaps = gaussian(np.abs(Smaps), sigma=(0,) + blurr_factor) * np.exp(
             1j * np.angle(Smaps)
         )
+        logger.debug(
+            "low_frequency: applied gaussian smoothing, sigma=%s", blurr_factor
+        )
     # Re-normalize the sensitivity maps
     if np.any(mask) or np.sum(blurr_factor) > 0:
         # ReCalculate SOS with a minor eps to ensure divide by 0 is ok
         SOS = np.linalg.norm(Smaps, axis=0) + 1e-10
     Smaps = Smaps / SOS
+    logger.debug("low_frequency: normalized by sum-of-squares")
     return Smaps
 
 
@@ -398,12 +418,21 @@ def _nufft_calibration_kspace(
         density=density,
         window_fun="rect",
     )
+    logger.debug(
+        "calibration: extracted %d/%d samples for calib_width=%s",
+        samples.shape[0],
+        traj.shape[0],
+        calib_width,
+    )
     central_kspace_img = get_operator(backend)(
         samples,
         shape,
         n_coils=k_space.shape[-2],
         squeeze_dims=True,
     ).pinv_solver(k_space, max_iter=max_iter)
+    logger.debug(
+        "calibration: reconstructed low-res image, shape=%s", central_kspace_img.shape
+    )
 
     return fft(central_kspace_img, dims=len(shape))
 
@@ -920,22 +949,40 @@ def _subspace_gram_eig(
     """
     xp = get_array_module(kspace)
     calib = _crop_or_pad(kspace, (n_coils, *calib_width))
+    logger.debug("subspace_gram_eig: calibration block shape=%s", calib.shape)
 
     ChC, patch_size = _chc_via_fft(calib, kernel_size, mask)
+    logger.debug(
+        "subspace_gram_eig: C^H C shape=%s (patch_size=%d)", ChC.shape, patch_size
+    )
     eigval, eigvec = xp.linalg.eigh(ChC)
     eigval = xp.sqrt(xp.clip(eigval, 0, None))
     eigval /= eigval[-1]
     U = eigvec[:, eigval > thresh] if mode == "max" else eigvec[:, eigval < thresh]
+    logger.debug(
+        "subspace_gram_eig: mode=%s thresh=%.4g -> subspace dim R=%d/%d",
+        mode,
+        thresh,
+        U.shape[-1],
+        eigvec.shape[-1],
+    )
 
     G = _gram_via_projector(
         U, kernel_size, mask, (n_coils, *target_shape), kspace.dtype
     )
     G *= np.prod(target_shape) / patch_size
+    logger.debug("subspace_gram_eig: local Gram matrices computed, shape=%s", G.shape)
 
     eig, Smaps = _batched_power_iteration(G, n_iter=power_iter, mode=mode)
     Smaps = Smaps.T
     eig = eig.T
     Smaps = Smaps * xp.conj(Smaps[0] / xp.abs(Smaps[0]))
+    logger.debug(
+        "subspace_gram_eig: power iteration done (n_iter=%d), eig range=[%.4g, %.4g]",
+        power_iter,
+        float(xp.min(eig)),
+        float(xp.max(eig)),
+    )
     return Smaps, eig, calib
 
 
@@ -982,7 +1029,21 @@ def _decim_and_interpolate(xp, shape, decim, calib_width, compute_fn, kspace, n_
     decim_shape = shape
     if decim > 1:
         decim_shape = tuple(max(sh // decim, cw) for sh, cw in zip(shape, calib_width))
+        # Keep `sh - ds` even (same parity) so the centered crop/pad in
+        # `_crop_or_pad`/`_fft_interpolate` is exactly symmetric: an odd/even
+        # mismatch shifts the crop window by half a sample, breaking the
+        # Hermitian symmetry of the zero-padded spectrum on interpolation
+        # back to `shape` and causing a hole around the axis center.
+        decim_shape = tuple(
+            ds + 1 if (sh - ds) % 2 else ds for sh, ds in zip(shape, decim_shape)
+        )
         kspace = _crop_or_pad(kspace, (n_coils,) + decim_shape)
+        logger.debug(
+            "decim_and_interpolate: decim=%d, decimated grid %s -> %s",
+            decim,
+            shape,
+            decim_shape,
+        )
 
     Smaps, eig, calib = compute_fn(kspace, decim_shape)
 
@@ -995,6 +1056,9 @@ def _decim_and_interpolate(xp, shape, decim, calib_width, compute_fn, kspace, n_
 
         Smaps = _fft_interpolate(Smaps, shape, xp, window=True, complex_output=True)
         eig = _fft_interpolate(eig, shape, xp, window=True)
+        logger.debug(
+            "decim_and_interpolate: phase-referenced and interpolated back to %s", shape
+        )
     return Smaps, eig
 
 
@@ -1102,7 +1166,14 @@ def cartesian_espirit(
     # `crop` measures the gap to the *ideal* extreme eigenvalue
     # so that the two functions share the same default:
     # x is outside the image support when that gap exceeds `crop`.
-    Smaps = Smaps * (1 - max_eig < crop)
+    support = 1 - max_eig < crop
+    Smaps = Smaps * support
+    logger.debug(
+        "cartesian_espirit: crop=%.4g -> support covers %d/%d voxels",
+        crop,
+        int(xp.sum(support)),
+        support.size,
+    )
     _cleanup_gpu(xp)
     return Smaps
 
@@ -1222,7 +1293,14 @@ def cartesian_pisco(
     Smaps, min_eig = _decim_and_interpolate(
         xp, shape, decim, calib_width, compute, kspace, n_coils
     )
-    Smaps = Smaps * (min_eig < crop)
+    support = min_eig < crop
+    Smaps = Smaps * support
+    logger.debug(
+        "cartesian_pisco: crop=%.4g -> support covers %d/%d voxels",
+        crop,
+        int(xp.sum(support)),
+        support.size,
+    )
     _cleanup_gpu(xp)
     return Smaps
 
@@ -1264,6 +1342,12 @@ def coil_compression(
     if krad_thresh is not None and traj is not None:
         traj_rad = xp.sqrt(xp.sum(traj**2, axis=-1))
         center_data = kspace_data[:, traj_rad < krad_thresh * xp.max(traj)]
+        logger.debug(
+            "coil_compression: using %d/%d samples within krad_thresh=%.4g",
+            center_data.shape[-1],
+            kspace_data.shape[-1],
+            krad_thresh,
+        )
     elif krad_thresh is None:
         center_data = kspace_data
     else:
@@ -1282,6 +1366,8 @@ def coil_compression(
         total_energy = xp.sum(w_sorted)
         K = int(xp.searchsorted(w_cumsum / total_energy, K, side="left") + 1)
         K = min(K, w_sorted.size)
+        logger.debug("coil_compression: energy threshold -> K=%d virtual coils", K)
     V = v_sorted[:K]  # use top K component
     compress_data = V @ kspace_data
+    logger.debug("coil_compression: compressed %d -> %d coils", kspace_data.shape[0], K)
     return compress_data, V
