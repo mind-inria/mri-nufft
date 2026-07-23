@@ -136,7 +136,10 @@ Then proceed to implement your changes and if possible, add tests and/or example
 
 The documentation of MRI-NUFFT can be found at [https://mind-inria.github.io/mri-nufft/](https://mind-inria.github.io/mri-nufft/). If you want to help improve the documentation, you can do so by: 
 - Adding new examples script to the documentation (in the `examples` folder).
+- Adding new tutorials to the documentation (in the `tutorials` folder).
 - Improving the existing documentation (in the `docs` folder)
+
+Both `examples` and `tutorials` are built with [sphinx-gallery](https://sphinx-gallery.github.io/) from plain Python scripts (NumPy-style docstring header, `# %%` cell markers). The two galleries serve different purposes: `examples/` are how-to snippets for a specific feature (name files `example_<topic>.py`), while `tutorials/` walk a newcomer step-by-step through a concept, motivating every tool with the "why" before the "how" (name files `tutorial_<NN>_<topic>.py`, numbered since they build on each other in order).
 
 The documentation is written in the [ReStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html) format and built using Sphinx. 
 To build the documentation locally, you can run the following commands :

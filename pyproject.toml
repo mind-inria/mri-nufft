@@ -73,7 +73,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 #linting using ruff
 [tool.ruff]
-extend-exclude = [ "example_*.py" , "*_version.py"]
+extend-exclude = [ "example_*.py" , "tutorial_*.py", "*_version.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "Q", "UP", "D"]
@@ -85,6 +85,7 @@ ignore = [
 ]
 [tool.ruff.lint.per-file-ignores]
 "examples/**" = ["D", "E731"]
+"tutorials/**" = ["D", "E731"]
 "__init__.py" = ["E402"] # ignore module order
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
