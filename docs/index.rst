@@ -12,6 +12,7 @@
    :hidden:
 
    Getting Started <getting_started>
+   Tutorials <generated/autotutorials/index>
    Examples <generated/autoexamples/index>
    API <api>
    Explanations <explanations/index>
