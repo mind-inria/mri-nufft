@@ -4,7 +4,7 @@ description = "MRI Non-Cartesian Fourier Operators with multiple computation bac
 authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
 
 readme = "README.rst"
-dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm"]
+dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "typing_extensions"]
 requires-python = ">=3.10"
 
 dynamic = ["version"]

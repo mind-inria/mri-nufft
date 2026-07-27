@@ -102,11 +102,10 @@ def proper_trajectory(trajectory, normalize="pi"):
 
 _SEE_ALSO_REGISTRY = """
 
-
 .. seealso::
 
-    - This function is part of the `{registry}` registry.
-      You can find other registered functions in this registry below:
+    This function is part of the `{registry}` registry, :py:func:`.get_{registry}`.
+    You can find other registered functions in this registry below:
 
     .. autoregistry:: {registry}
 """

@@ -155,14 +155,24 @@ class MRITorchKbNufft(FourierOperatorBase):
         data = data.reshape((B, 1 if self.uses_sense else C, *XYZ))
         data = data.to(self.device, copy=False)
 
-        if self.smaps is not None:
+        if self.smaps is not None and self.smaps.dtype != data.dtype:
             self.smaps = self.smaps.to(data.dtype, copy=False)
 
         kdata = self._tkb_op.forward(
             image=data, omega=self.samples.t(), smaps=self.smaps
         )
-        kdata /= self.norm_factor
+        kdata *= self.inv_norm_factor
         return self._safe_squeeze(kdata)
+
+    @with_torch
+    def _op(self, data, out):
+        self._tkb_op.forward(data, omega=self.samples.t())
+        return out
+
+    @with_torch
+    def _adj_op(self, coeffs, out):
+        self._tkb_adj_op.forward(data=coeffs, omega=self.samples.t())
+        return out
 
     @with_torch
     def adj_op(self, coeffs, out=None):
@@ -181,7 +191,7 @@ class MRITorchKbNufft(FourierOperatorBase):
         coeffs = coeffs.reshape((B, C, K))
         coeffs = coeffs.to(self.device, copy=False)
 
-        if self.smaps is not None:
+        if self.smaps is not None and self.smaps.dtype != coeffs.dtype:
             self.smaps = self.smaps.to(coeffs.dtype, copy=False)
         if self.density:
             coeffs = coeffs * self.density
@@ -190,7 +200,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             data=coeffs, omega=self.samples.t(), smaps=self.smaps
         )
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
-        img /= self.norm_factor
+        img *= self.inv_norm_factor
         return self._safe_squeeze(img)
 
     @with_torch
@@ -212,6 +222,35 @@ class MRITorchKbNufft(FourierOperatorBase):
         obs_data = obs_data.to(self.device, copy=False)
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
+
+    @with_torch
+    def gram_op(self, data, toeplitz=True):
+        """Compute the Gram operator."""
+        import torchkbnufft as tkbn
+
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+        if not hasattr(self, "_gram_op"):
+            # initialize the toeplitz approximation for the gram operator.
+            self._gram_op = tkbn.ToepNufft()
+            self._gram_op_kernel = tkbn.calc_toeplitz_kernel(
+                self.samples.t(), self.shape
+            )
+
+        data = data.to(dtype=self._gram_op_kernel.dtype, copy=False)
+        smaps = self.smaps
+        if smaps is not None:
+            smaps = smaps.to(data.dtype, copy=False)
+            # ToepNufft expects one smaps set per batch element.
+            smaps = smaps.unsqueeze(0).expand(data.shape[0], *smaps.shape)
+
+        img = self._gram_op(
+            data,
+            self._gram_op_kernel,
+            smaps=smaps,
+            norm="ortho",
+        ).reshape(data.shape)
+        return self._safe_squeeze(img)
 
     @classmethod
     @with_torch

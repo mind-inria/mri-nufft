@@ -29,19 +29,15 @@ def _backward_op_samples(
         factor *= np.pi * 2
     r = [torch.linspace(-s / 2, s / 2 - 1, s) * factor for s in nufft.shape]
     grid_r = torch.meshgrid(*r, indexing="ij")
-    grid_r = torch.stack(grid_r, dim=0).type_as(x)[:, None, None]
-    grid_x = x * grid_r  # Element-wise multiplication: x * r
-    # compute each kspace axis dimension separately
-    nufft_dx_dom = torch.cat(
-        [nufft.op(grid_x[i, ...])[None, :] for i in range(grid_x.size(0))],
-        dim=0,
-    )
-    grad_traj = -1j * torch.conj(dy) * nufft_dx_dom
-    grad_traj = torch.transpose(
-        torch.sum(grad_traj, dim=(1, 2)),
-        0,
-        1,
-    ).to(NP2TORCH[nufft.dtype])
+    grid_r = torch.stack(grid_r, dim=0).type_as(x)
+    # Accumulate one k-space axis at a time instead of cat-ing all ndim
+    # transforms and summing: this keeps a single (B, C, K) transform live
+    # rather than ndim of them, and a single image-domain temporary x*grid_r[i].
+    rows = [
+        torch.sum(-1j * torch.conj(dy) * nufft.op(x * grid_r[i]), dim=(0, 1))
+        for i in range(grid_r.size(0))
+    ]
+    grad_traj = torch.stack(rows, dim=0).transpose(0, 1).to(NP2TORCH[nufft.dtype])
     return grad_traj
 
 
@@ -78,18 +74,15 @@ def _backward_adj_samples(nufft, y: Tensor, dx: Tensor) -> None | Tensor:
         factor = 2 * np.pi if nufft.backend == "gpunufft" else 1
         r = [torch.linspace(-s / 2, s / 2 - 1, s) * factor for s in nufft.shape]
         grid_r = torch.meshgrid(*r, indexing="ij")
-        grid_r = torch.stack(grid_r, dim=0).type_as(dx)[:, None, None]
-        grid_dx = torch.conj(dx) * grid_r
-        # compute each kspace axis dimension separately
-        inufft_dx_dom = torch.cat(
-            [nufft.op(grid_dx[i, ...])[None, :] for i in range(grid_dx.size(0))],
-            dim=0,
-        )
-        grad_traj = 1j * y * inufft_dx_dom
-        # sum over n_coil and n_batchs dimensions
-        grad_traj = torch.transpose(torch.sum(grad_traj, dim=(1, 2)), 0, 1).to(
-            NP2TORCH[nufft.dtype]
-        )
+        grid_r = torch.stack(grid_r, dim=0).type_as(dx)
+        # Accumulate one k-space axis at a time (sum over n_coil and n_batchs
+        # dimensions) rather than cat-ing all ndim transforms: keeps a single
+        # (B, C, K) transform and image-domain temporary live at once.
+        rows = [
+            torch.sum(1j * y * nufft.op(torch.conj(dx) * grid_r[i]), dim=(0, 1))
+            for i in range(grid_r.size(0))
+        ]
+        grad_traj = torch.stack(rows, dim=0).transpose(0, 1).to(NP2TORCH[nufft.dtype])
     return grad_traj
 
 

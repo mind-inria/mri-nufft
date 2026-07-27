@@ -5,6 +5,7 @@ import warnings
 from numpy.typing import NDArray
 
 from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
+from mrinufft.operators.toeplitz import _GramOpGpuMixin
 from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
     get_array_module,
@@ -373,7 +374,7 @@ class RawGpuNUFFT:
         return self._reshape_image(image, "adjoint")
 
 
-class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
+class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
     """Interface for the gpuNUFFT backend.
 
     Parameters
@@ -396,7 +397,9 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     smaps: np.ndarray default None
         Holds the sensitivity maps for SENSE reconstruction.
     n_trans: int, default =1
-        This has no effect for now.
+        Has no effect on ``op``/``adj_op`` (gpuNUFFT's C++ backend already
+        batches over all coils in a single call). Used to chunk the
+        ``gram_op`` (Toeplitz) loop instead: must divide ``n_coils``.
     kwargs: extra keyword args
         these arguments are passed to gpuNUFFT operator. This is used
         only in gpuNUFFT
@@ -434,6 +437,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
         self.n_batchs = n_batchs
+        if n_coils % n_trans != 0:
+            raise ValueError(f"n_trans={n_trans} must divide n_coils={n_coils}")
+        self.n_trans = n_trans
+        self.smaps_cached = False
         self.squeeze_dims = squeeze_dims
         self.compute_density(density)
         self.compute_smaps(smaps)
@@ -465,8 +472,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        xp = get_array_module(data)
 
         op_func = self.raw_op.op
+
         if is_cuda_array(data):
             op_func = self.raw_op.op_direct
             if not self.raw_op.use_gpu_direct:
@@ -484,7 +493,9 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             else:
                 op_func(data_[i], coeffs[i])
         if coeffs is None:
-            coeffs = get_array_module(data).stack(result)
+            # if B == 1 (most of the time) we can just add a dummy axis,
+            # and avoid the copy of stack
+            coeffs = result[0][None] if B == 1 else xp.stack(result)
         return self._safe_squeeze(coeffs)
 
     @with_numpy_cupy
@@ -505,8 +516,10 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
         """
         self.check_shape(image=data, ksp=coeffs)
         B, C, XYZ, K = self.n_batchs, self.n_coils, self.shape, self.n_samples
+        xp = get_array_module(coeffs)
 
         adj_op_func = self.raw_op.adj_op
+
         if is_cuda_array(coeffs):
             adj_op_func = self.raw_op.adj_op_direct
             if not self.raw_op.use_gpu_direct:
@@ -524,8 +537,42 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             else:
                 adj_op_func(coeffs_[i], data[i])
         if data is None:
-            data = get_array_module(coeffs).stack(result)
+            # if B == 1 (most of the time) we can just add a dummy axis,
+            # and avoid the copy of stack
+            data = result[0][None] if B == 1 else xp.stack(result)
         return self._safe_squeeze(data)
+
+    def _get_single_raw_op(self):
+        """Return a coil-agnostic single-image/single-kspace raw operator.
+
+        Unlike ``raw_op`` (which bakes in ``n_coils`` and SENSE combination in
+        the underlying gpuNUFFT C++ operator), this is used for elementary
+        transforms that must be independent of coils/batches/smaps, such as
+        the Toeplitz kernel computation.
+        """
+        if getattr(self, "_raw_op_single", None) is None:
+            self._raw_op_single = RawGpuNUFFT(
+                samples=self.samples,
+                shape=self.shape,
+                n_coils=1,
+                density_comp=self.density,
+            )
+        return self._raw_op_single
+
+    def _adj_op(self, coeffs, image):
+        """Compute adjoint Non Uniform Fourier Transform in place."""
+        result = self._get_single_raw_op().adj_op(coeffs)
+        # results is F-ordered, we need to reshape it to C-order for the user
+
+        image[...] = result.reshape(image.shape)
+        return image
+
+    def _op(self, image, coeffs):
+        """Compute Non Uniform Fourier Transform in place."""
+        result = self._get_single_raw_op().op(image)
+        # results is F-ordered, we need to reshape it to C-order for the user
+        coeffs[...] = result.reshape(coeffs.shape)
+        return coeffs
 
     @property
     def uses_sense(self):
@@ -581,6 +628,11 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
             self._samples,
             density=self.density,
         )
+        if getattr(self, "_raw_op_single", None) is not None:
+            self._raw_op_single.set_pts(
+                self._samples,
+                density=self.density,
+            )
 
     @FourierOperatorBase.density.setter
     def density(self, new_density):
@@ -597,6 +649,13 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
                 self._samples,
                 density=new_density,
             )
+
+    @property
+    def norm_factor(self):
+        """Return the normalization factor for the operator."""
+        # gpuNUFFT is already normalized at the C++ level,
+        # so we don't need to normalize it again.
+        return 1
 
     @classmethod
     def pipe(
@@ -740,3 +799,15 @@ class MRIGpuNUFFT(FourierOperatorBase, _ToggleGradPlanMixin):
     # data_consistency N / adj_op coil n
     #
     # This should bring some performance improvements, due to the asynchronous stuff.
+
+    def _get_toeplitz_kernel_gpu(self):
+        """Return a cached GPU copy of the (host-computed) Toeplitz kernel.
+
+        gpuNUFFT's samples/adj_op live on host memory, so the kernel from
+        `compute_toeplitz_kernel` is a host array; upload and cache a GPU
+        copy once instead of re-uploading it on every `gram_op` call.
+        """
+        if getattr(self, "_toeplitz_kernel_gpu_src", None) is not self._toeplitz_kernel:
+            self._toeplitz_kernel_gpu = cp.asarray(self._toeplitz_kernel)
+            self._toeplitz_kernel_gpu_src = self._toeplitz_kernel
+        return self._toeplitz_kernel_gpu

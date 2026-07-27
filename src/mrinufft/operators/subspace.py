@@ -1,5 +1,6 @@
 """Subspace NUFFT Operator wrapper."""
 
+from numpy.typing import NDArray
 from mrinufft._array_compat import (
     _get_device,
     _to_interface,
@@ -46,11 +47,35 @@ class MRISubspace(FourierOperatorBase):
 
     """
 
-    def __init__(self, fourier_op, subspace_basis, use_gpu=False):
+    available = True
+
+    def __init__(
+        self,
+        fourier_op: FourierOperatorBase,
+        subspace_basis: NDArray,
+        use_gpu: bool = False,
+    ):
         self._fourier_op = fourier_op
 
         self.subspace_basis = subspace_basis
         self.n_coeffs, self.n_frames = self.subspace_basis.shape
+        self._basis_cache = {}
+
+    def _get_basis(self, xp, device):
+        """Return ``subspace_basis`` converted to ``(xp, device)``, cached.
+
+        The basis is static for the operator's lifetime, so repeated
+        ``_to_interface`` conversions on every ``op``/``adj_op`` call are
+        avoided.
+        """
+        # cupy's Device objects aren't hashable, so key on its integer id
+        # (or the device itself, e.g. torch.device / the "cpu" string).
+        key = (xp.__name__, getattr(device, "id", device))
+        cached = self._basis_cache.get(key)
+        if cached is None:
+            cached = _to_interface(self.subspace_basis, xp, device)
+            self._basis_cache[key] = cached
+        return cached
 
     def op(self, data, *args):
         """
@@ -69,7 +94,7 @@ class MRISubspace(FourierOperatorBase):
         """
         xp = get_array_module(data)
         device = _get_device(data)
-        subspace_basis = _to_interface(self.subspace_basis, xp, device)
+        subspace_basis = self._get_basis(xp, device)
 
         # if required, move subspace index axis to leftmost position
         if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
@@ -92,9 +117,12 @@ class MRISubspace(FourierOperatorBase):
             # actual transform
             _y = self._fourier_op.op(data_d[idx], *args)
             _y = _y.reshape(*_y.shape[:-1], self.n_frames, -1)
-
-            # back-project on time domain
-            y += basis_element.conj() * _y.swapaxes(-2, -1)
+            # back-project on time domain: op() returns a fresh array, so weight
+            # its (transposed) view in place instead of allocating a separate
+            # product per basis element before accumulating.
+            contrib = _y.swapaxes(-2, -1)
+            contrib *= basis_element.conj()
+            y += contrib
 
         y = y[None, ...].swapaxes(0, -1)[..., 0]
 
@@ -121,7 +149,7 @@ class MRISubspace(FourierOperatorBase):
         """
         xp = get_array_module(coeffs)
         device = _get_device(coeffs)
-        subspace_basis = _to_interface(self.subspace_basis, xp, device)
+        subspace_basis = self._get_basis(xp, device)
 
         # if required, move time/contrast axis to leftmost position
         if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
@@ -131,8 +159,7 @@ class MRISubspace(FourierOperatorBase):
 
         coeffs_d = coeffs_d[..., None].swapaxes(0, -1)[0, ...]
 
-        # perform computation
-        y = []
+        y = None
         for idx in range(self.n_coeffs):
             # select basis element
             basis_element = subspace_basis[idx]
@@ -148,16 +175,24 @@ class MRISubspace(FourierOperatorBase):
                 _coeffs_d = xp.ascontiguousarray(_coeffs_d)
 
             # actual transform
-            y.append(self._fourier_op.adj_op(_coeffs_d, *args))
-
-        # stack coefficients
-        y = xp.stack(y, axis=0)
+            res = self._fourier_op.adj_op(_coeffs_d, *args)
+            if y is None:
+                # shape of res depends on the wrapped operator's squeezing,
+                # so it is only known once the first transform has run.
+                y = xp.empty((self.n_coeffs, *res.shape), dtype=res.dtype)
+            y[idx] = res
 
         # bring back subspace index to original position (B, S, ...)
-        if self.n_batchs != 1 or coeffs.shape[0] == 1:
+        if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
             y = y.swapaxes(0, 1)
 
         return y
+
+    def _op(self, image, coeffs):
+        return self._fourier_op._op(image, coeffs)
+
+    def _adj_op(self, coeffs, image):
+        return self._fourier_op._adj_op(coeffs, image)
 
     def __getattr__(self, name):
         """Delegate attribute access to the underlying fourier operator."""

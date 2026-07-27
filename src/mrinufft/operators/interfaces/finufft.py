@@ -12,6 +12,7 @@ from mrinufft._array_compat import _array_to_numpy
 
 FINUFFT_AVAILABLE = True
 try:
+    import finufft
     from finufft._interfaces import Plan
 except ImportError:
     FINUFFT_AVAILABLE = False
@@ -35,8 +36,9 @@ class RawFinufftPlan:
         self.eps = float(eps)
         self.n_trans = n_trans
         self.n_samples = len(samples)
-        # the first element is dummy to index type 1 with 1
-        # and type 2 with 2.
+
+        if finufft.__version__ >= "2.6.0":
+            kwargs["allow_eps_too_small"] = 1
 
         self.plan = Plan(
             2,

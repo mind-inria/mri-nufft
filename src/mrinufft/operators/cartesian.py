@@ -26,19 +26,43 @@ class RawMRICartesianOperator:
     def __init__(self, mask: NDArray, shape: tuple[int, ...]):
         self.mask = mask
         self.shape = shape
+        self._mask_cache = {}
+        self._y_scratch = None
+
+    def _get_mask(self, xp):
+        """Return the mask converted to ``xp``, cached per array module.
+
+        The mask is static for the operator's lifetime, so repeated
+        ``_to_interface`` conversions (and their host/device transfers) are
+        avoided on every ``op``/``adj_op`` call.
+        """
+        cached = self._mask_cache.get(xp.__name__)
+        if cached is None:
+            cached = _to_interface(self.mask, xp)
+            self._mask_cache[xp.__name__] = cached
+        return cached
 
     def op(self, ret, x):
         """Forward operation for Cartesian MRI reconstruction."""
         xp = get_array_module(ret)
-        mask = _to_interface(self.mask, xp)
+        mask = self._get_mask(xp)
         xp.copyto(ret, fft(x, dims=len(self.shape))[:, mask])
         return ret
 
     def adj_op(self, y, ret):
         """Adjoint operation for Cartesian MRI reconstruction."""
         xp = get_array_module(ret)
-        mask = _to_interface(self.mask, xp)
-        y_ = xp.zeros((y.shape[0], *mask.shape), dtype=y.dtype)
+        mask = self._get_mask(xp)
+        if (
+            self._y_scratch is None
+            or self._y_scratch.shape != (y.shape[0], *mask.shape)
+            or self._y_scratch.dtype != y.dtype
+            or get_array_module(self._y_scratch) is not xp
+        ):
+            self._y_scratch = xp.zeros((y.shape[0], *mask.shape), dtype=y.dtype)
+        else:
+            self._y_scratch[...] = 0
+        y_ = self._y_scratch
         y_[:, mask] = y
         xp.copyto(ret, ifft(y_, dims=len(self.shape)))
 

@@ -30,6 +30,7 @@ from .off_resonance import MRIFourierCorrected
 from .stacked import MRIStackedNUFFT
 from .subspace import MRISubspace
 from .cartesian import MRICartesianOperator
+from .toeplitz import compute_toeplitz_kernel, apply_toeplitz_kernel
 
 __all__ = [
     "FourierOperatorBase",
@@ -40,6 +41,8 @@ __all__ = [
     "check_backend",
     "get_operator",
     "list_backends",
+    "compute_toeplitz_kernel",
+    "apply_toeplitz_kernel",
 ]
 #
 # load all the interfaces modules

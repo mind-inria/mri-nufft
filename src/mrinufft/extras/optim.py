@@ -22,13 +22,13 @@ _optim_docs = dict(
 nufft: FourierOperatorBase
     The NUFFT operator representing the forward model.
 kspace_data: NDArray
-    The right-hand side vector (`kspace` data). Shape is typically (n_batchs,
-    n_coils, n_samples).
+    The right-hand side vector. Shape is typically ``(n_batchs,
+    n_coils, n_samples)``.
 damp: float, optional
     Damping (regularization) parameter. Default is 0.0 (no regularization).
 x0: NDArray or None, optional
-    Damping vector. If None, uses zero. Shape is typically (n_batchs, n_coils or 1,
-    *nufft.shape).
+    Damping vector. If None, uses zero. Shape is typically ``(n_batchs, n_coils or 1,
+    *nufft.shape)``.
 x_init: NDArray or None, optional
     Initial guess vector. If ommitted, default to x0. Must have same shape as x0.
 callback: Callable, optional
@@ -44,7 +44,7 @@ progressbar: bool, optional
 Returns
 -------
 NDArray:
-    Solution vector with shape (n_batchs, n_coils or 1, *nufft.shape), dtype and
+    Solution vector with shape ``(n_batchs, n_coils or 1, *nufft.shape)``, dtype and
     device matching input.
 """,
 )
@@ -275,14 +275,14 @@ def lsqr(
 
     Stop iterating if:
 
-    - numerical convergence is reached: :math:`\|Ax-b\| <= atol \|A\| * \|x\|
-      + btol * \|b\|`
+    - numerical convergence is reached:
+      :math:`\|Ax-b\| \leq atol \|A\| * \|x\| + btol * \|b\|`
     - estimation of the conditioning of the problem diverge: ``cond(A)>=conlim``
     - Maximum number of iteration reached.
 
     Parameters
     ----------
-    $base_params
+    ${base_params}
 
     atol : float, optional
         Stopping tolerance on the absolute error. Default is 1e-6.
@@ -292,17 +292,19 @@ def lsqr(
         Limit on condition number. Iteration stops if condition exceeds this
         value. Default is 1e8.
 
-    $returns
+    ${returns}
 
     References
     ----------
-    .. [1] Paige, C. C., & Saunders, M. A. (1982). LSQR: An algorithm for sparse
-           linear equations and sparse least squares. ACM Transactions on Mathematical
-           Software, 8(1), 43-71.
-    .. [2] S.-C. Choi, "Iterative Methods for Singular Linear Equations and
-           Least-Squares Problems", Dissertation,
-           http://www.stanford.edu/group/SOL/dissertations/sou-cheng-choi-thesis.pdf
-    .. [3] https://github.com/scipy/scipy/blob/v1.16.2/scipy/sparse/linalg/_isolve/lsqr.py
+    Paige, C. C., & Saunders, M. A. (1982). LSQR: An algorithm for sparse
+    linear equations and sparse least squares. ACM Transactions on Mathematical
+    Software, 8(1), 43-71.
+
+    S.-C. Choi, "Iterative Methods for Singular Linear Equations and
+    Least-Squares Problems", Dissertation,
+    http://www.stanford.edu/group/SOL/dissertations/sou-cheng-choi-thesis.pdf
+
+    https://github.com/scipy/scipy/blob/v1.16.2/scipy/sparse/linalg/_isolve/lsqr.py
     """
     xp = get_array_module(kspace_data)
     old_density = None
@@ -514,20 +516,21 @@ def lsmr(
     See the reference LSMR software [2]_ for further details.
 
     Solves problems of the form
+
     .. math::
 
         \arg\min \|A x - b\|_2^2 + \gamma^2 \|x - x0\|_2^2
 
     Stop iterating if:
 
-    - numerical convergence is reached: :math:`\|Ax-b\| <= atol \|A\| * \|x\|
-      + btol * \|b\|`
+    - numerical convergence is reached:
+      :math:`\|Ax-b\| \leq  atol \|A\| * \|x\| + btol * \|b\|`
     - estimation of the conditioning of the problem diverge: ``cond(A)>=conlim``
     - Maximum number of iteration reached.
 
     Parameters
     ----------
-    $base_params
+    ${base_params}
 
     atol : float, optional
         Stopping tolerance on the absolute error. Default is 1e-6.
@@ -537,14 +540,7 @@ def lsmr(
         Limit on condition number. Iteration stops if condition exceeds this
         value. Default is 1e8.
 
-    $returns
-
-    References
-    ----------
-    .. [1] D. C.-L. Fong and M. A. Saunders,
-           "LSMR: An iterative algorithm for sparse least-squares problems",
-           SIAM J. Sci. Comput., vol. 33, pp. 2950-2971, 2011.
-    .. [2] LSMR Software, https://web.stanford.edu/group/SOL/software/lsmr/
+    ${returns}
 
     Notes
     -----
@@ -552,6 +548,15 @@ def lsmr(
       norm :math:`\|A^H(Ax-b)\|`, and is similar to the MINRES algorithm for
       least squares problems.
     - It usually converges faster than LSQR and can stop in fewer iterations.
+
+    References
+    ----------
+    D. C.-L. Fong and M. A. Saunders,
+    "LSMR: An iterative algorithm for sparse least-squares problems",
+    SIAM J. Sci. Comput., vol. 33, pp. 2950-2971, 2011.
+
+    LSMR Software, https://web.stanford.edu/group/SOL/software/lsmr/
+
     """
     xp = get_array_module(kspace_data)
     old_density = None
@@ -814,12 +819,12 @@ def cg(
 
     Parameters
     ----------
-    $base_params
+    ${base_params}
 
     tol: float
         Tolerance for converge check.
 
-    $returns
+    ${returns}
 
     References
     ----------

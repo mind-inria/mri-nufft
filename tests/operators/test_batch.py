@@ -59,6 +59,7 @@ def operator(
         smaps += np.random.rand(n_coils, *shape)
         smaps = smaps.astype(np.complex64)
         smaps /= np.linalg.norm(smaps, axis=0)
+        smaps = smaps.astype(np.complex64)
     else:
         smaps = None
     kspace_locs = kspace_locs.astype(np.float32)
@@ -209,6 +210,32 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
     npt.assert_equal(image_tmp, image_data)
 
 
+def test_data_consistency_density_single_application():
+    """Regression test: density compensation applied exactly once.
+
+    ``_grad_calibless`` used to pre-apply density before calling
+    ``_adj_op`` (which folds density in itself), squaring the
+    compensation. ``data_consistency`` and the equivalent manual
+    ``adj_op(op(x) - y)`` call must therefore match, since both only go
+    through the density-aware ``adj_op``.
+    """
+    shape = (64, 64)
+    n_samples = 1024
+    rng = np.random.default_rng(0)
+    samples = (rng.random((n_samples, 2)) - 0.5).astype(np.float32)
+    operator = get_operator("finufft")(samples, shape, n_coils=2, density=True)
+    img = (rng.random((2, *shape)) + 1j * rng.random((2, *shape))).astype(
+        operator.cpx_dtype
+    )
+    ksp = (rng.random((2, n_samples)) + 1j * rng.random((2, n_samples))).astype(
+        operator.cpx_dtype
+    )
+
+    res = operator.data_consistency(img, ksp)
+    res_manual = operator.adj_op(operator.op(img) - ksp)
+    npt.assert_allclose(res, res_manual, atol=1e-4, rtol=1e-3)
+
+
 def test_gradient_lipschitz(operator, image_data, kspace_data):
     """Test the gradient lipschitz constant converges."""
     C = 1 if operator.uses_sense else operator.n_coils
@@ -243,3 +270,24 @@ def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
         assert len(res[0]) == operator.n_batchs
     else:
         assert res[0].ndim == 0
+
+
+@param_array_interface
+def test_interface_gram(operator, array_interface, image_data):
+    """Test the Gram (toeplitz) interface of the operator."""
+    if getattr(operator, "n_trans", 1) >= 2:
+        pytest.skip("Gram operator not implemented for n_trans >= 2")
+
+    image_data_ = to_interface(image_data.copy(), array_interface)
+
+    AHA_img = operator.adj_op(operator.op(image_data_))
+    G_img = operator.gram_op(image_data_)
+    assert G_img.shape == AHA_img.shape
+
+    AHA_img = from_interface(AHA_img, array_interface)
+    G_img = from_interface(G_img, array_interface)
+
+    # gpunufft is less accurate than the other backends, so we relax the tolerance for it
+    npt.assert_allclose(
+        AHA_img, G_img, rtol=2e-3 if operator.backend == "gpunufft" else 2e-4, atol=1e-4
+    )

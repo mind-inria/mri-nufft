@@ -176,7 +176,10 @@ class MRIFourierCorrected(FourierOperatorBase):
                         "Time interpolator should divide or equal size of the samples."
                     )
                 self.n_shots = n_shot
-            self.B, self.C = B, C
+            # Cast once here rather than relying on implicit dtype promotion
+            # on every op/adj_op call.
+            self.B = B.astype(self.cpx_dtype, copy=False)
+            self.C = C.astype(self.cpx_dtype, copy=False)
             return
 
         kwargs = {}
@@ -258,13 +261,22 @@ class MRIFourierCorrected(FourierOperatorBase):
         )
 
         data_d = xp.asarray(data)
+        # Reused across interpolators instead of allocating a fresh
+        # (C[ll] * data_d) temporary on every iteration.
+        cdata = xp.empty(data_d.shape, dtype=self.cpx_dtype)
         for ll in range(self.n_interpolators):
-            ytmp = self._fourier_op.op(self.C[ll] * data_d, *args).reshape(B, C, NS, NK)
-            y += (self.B[:, ll] * ytmp).reshape(B, C, K)
+            xp.multiply(self.C[ll], data_d, out=cdata)
+            # op() returns a fresh array; weight it in place instead of
+            # allocating a second (B * ytmp) temp before accumulating.
+            ytmp = self._fourier_op.op(cdata, *args).reshape(B, C, NS, NK)
+            ytmp *= self.B[:, ll]
+            y += ytmp.reshape(B, C, K)
 
-        if on_gpu:
-            y = cp.array(y, copy=None)
-        elif is_cuda_array(y):
+        # Return on the same device as the input; only transfer on a genuine
+        # device mismatch (no-op wrapper when y is already on the right device).
+        if on_gpu and is_host_array(y):
+            y = cp.asarray(y)
+        elif not on_gpu and is_cuda_array(y):
             y = y.get()
         return self._safe_squeeze(y)
 
@@ -289,7 +301,6 @@ class MRIFourierCorrected(FourierOperatorBase):
         B, C = self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         NS, NK = self.n_shots, self.n_samples_per_shot
-        ytmp = xp.zeros((B, C, K), dtype=self.cpx_dtype)
         on_gpu = is_cuda_array(coeffs)
         if is_host_array(self.B) and on_gpu:
             coeffs = coeffs.get()
@@ -301,17 +312,30 @@ class MRIFourierCorrected(FourierOperatorBase):
         else:
             img = xp.zeros((B, 1, *XYZ), dtype=self.cpx_dtype)
         coeffs = coeffs.reshape(B, C, NS, NK)
+        # Reused across interpolators instead of allocating a fresh
+        # (Bconj * coeffs) temporary on every iteration.
+        ytmp = xp.empty_like(coeffs)
         for ll in range(self.n_interpolators):
             Bconj = self.B[:, ll].conj()
             Cconj = self.C[ll].conj()
-            ytmp = (Bconj * coeffs).reshape(B, C, K)
-            img += Cconj * self._fourier_op.adj_op(ytmp)
+            xp.multiply(Bconj, coeffs, out=ytmp)
+            tmp = self._fourier_op.adj_op(ytmp.reshape(B, C, K))
+            tmp *= Cconj
+            img += tmp
 
-        if on_gpu:
-            img = cp.array(img, copy=None)
-        elif is_cuda_array(img):
+        # Return on the same device as the input; only transfer on a genuine
+        # device mismatch (no-op wrapper when img is already on the right device).
+        if on_gpu and is_host_array(img):
+            img = cp.asarray(img)
+        elif not on_gpu and is_cuda_array(img):
             img = img.get()
         return self._safe_squeeze(img)
+
+    def _op(self, image, coeffs):
+        return self._fourier_op._op(image, coeffs)
+
+    def _adj_op(self, coeffs, image):
+        return self._fourier_op._adj_op(coeffs, image)
 
     def get_lipschitz_cst(self, max_iter=10, **kwargs):
         """Return the Lipschitz constant of the operator.

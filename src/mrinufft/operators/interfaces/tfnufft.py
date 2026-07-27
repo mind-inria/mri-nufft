@@ -93,7 +93,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             fft_direction="forward",
             tol=self.eps,
         )
-        coeff /= self.norm_factor
+        coeff *= self.inv_norm_factor
         return coeff
 
     @with_tensorflow
@@ -122,7 +122,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
             fft_direction="backward",
             tol=self.eps,
         )
-        img /= self.norm_factor
+        img *= self.inv_norm_factor
         if self.uses_sense:
             return tf.math.reduce_sum(img * tf.math.conj(self.smaps), axis=0)
         else:

@@ -9,7 +9,7 @@ from https://github.com/CEA-COSMIC/pysap-mri
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from functools import partial
+from functools import partial, cached_property
 from contextlib import contextmanager
 from typing import ClassVar, Literal, overload, Any, TYPE_CHECKING
 from collections.abc import Callable
@@ -28,6 +28,7 @@ from mrinufft._array_compat import (
     is_cuda_array,
     is_host_array,
     auto_cast,
+    _to_numpy_cupy,
 )
 from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
@@ -196,8 +197,10 @@ class FourierOperatorBase(ABC):
             raise RuntimeError(f"'{self.backend}' backend is not available.")
         self._smaps = None
         self._density = None
+        self._toeplitz_kernel = None
         self._n_coils = 1
         self._n_batchs = 1
+        self.n_trans = 1
         self.squeeze_dims = False
 
         self._density_method = None
@@ -301,6 +304,76 @@ class FourierOperatorBase(ABC):
         """
         pass
 
+    @abstractmethod
+    def _op(self, image: NDArray, coeffs: NDArray) -> NDArray:
+        """Low level operator implementation."""
+
+    @abstractmethod
+    def _adj_op(self, coeffs: NDArray, image: NDArray) -> NDArray:
+        """Low level adjoint operator implementation."""
+
+    @with_numpy_cupy
+    def gram_op(self, data: NDArray, toeplitz: bool = True) -> NDArray:
+        """Compute the Gram operator of the NUFFT.
+
+        Parameters
+        ----------
+        data: NDArray
+            Input data array.
+
+        toeplitz: bool, default True
+            If True, use the Toeplitz method to compute the Gram operator.
+            If False, compute it using the direct method.
+
+        Returns
+        -------
+        NDArray
+            Result of the Gram operator.
+        """
+        self.check_shape(image=data)
+        data = auto_cast(data, self.cpx_dtype)
+        if not toeplitz:
+            return self.adj_op(self.op(data))
+
+        if self.uses_sense:
+            ret = self._gram_op_sense(data)
+        else:
+            ret = self._gram_op_calibless(data)
+        return self._safe_squeeze(ret)
+
+    def _gram_op_sense(self, data):
+        """Compute the Gram operator with sensitivity maps."""
+        xp = get_array_module(data)
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+        data = data.reshape(B, *XYZ)
+        gram_img = xp.zeros((B, 1, *XYZ), dtype=self.cpx_dtype)
+        for b in range(B):
+            for c in range(C):
+                coil_smap = self.smaps[c].reshape(*XYZ)
+                img_coil = data[b] * coil_smap
+                gram_img_coil = self._gram_op_toeplitz_raw(img_coil)
+                gram_img[b] += coil_smap.conj() * gram_img_coil.reshape(*XYZ)
+        return gram_img
+
+    def _gram_op_calibless(self, data):
+        """Compute the Gram operator without sensitivity maps."""
+        ...
+        xp = get_array_module(data)
+        B, C, XYZ = self.n_batchs, self.n_coils, self.shape
+
+        dataf = data.reshape(B * C, *XYZ)
+        ret = xp.empty_like(dataf)  # every element is overwritten in the loop
+        for i in range(B * C):
+            ret[i] = self._gram_op_toeplitz_raw(dataf[i].reshape(*XYZ))
+        return ret.reshape(B, C, *XYZ)
+
+    def _gram_op_toeplitz_raw(self, data) -> NDArray:
+        from .toeplitz import apply_toeplitz_kernel
+
+        if self._toeplitz_kernel is None:
+            self.compute_toeplitz_kernel()
+        return apply_toeplitz_kernel(data, self._toeplitz_kernel)  # type: ignore
+
     def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
         """Compute the gradient data consistency.
 
@@ -323,6 +396,13 @@ class FourierOperatorBase(ABC):
         return MRIFourierCorrected(
             self, b0_map, readout_time, r2star_map, mask, interpolator
         )
+
+    def compute_toeplitz_kernel(self) -> NDArray:
+        """Compute the Toeplitz kernel and set it."""
+        from .toeplitz import compute_toeplitz_kernel
+
+        self._toeplitz_kernel = compute_toeplitz_kernel(self, self.density)
+        return self._toeplitz_kernel
 
     def compute_smaps(
         self,
@@ -347,6 +427,7 @@ class FourierOperatorBase(ABC):
                 self.smaps = None
                 return
             case arr if is_host_array(arr) or (CUPY_AVAILABLE and is_cuda_array(arr)):
+                arr = _to_numpy_cupy([arr])[0][0]
                 self.smaps = arr.reshape(self.n_coils, *self.shape)
                 return
             case {"name": str(name), **kwargs}:
@@ -406,6 +487,7 @@ class FourierOperatorBase(ABC):
             dtype=self.cpx_dtype,
         )
         linop._nufft = self  # type: ignore
+        return linop
 
     def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
         """Make a new DeepInv Physics with NUFFT operator.
@@ -752,10 +834,20 @@ class FourierOperatorBase(ABC):
         """Return the number of samples used by the operator."""
         return self._samples.shape[0]
 
-    @property
+    @cached_property
     def norm_factor(self) -> np.floating:
         """Normalization factor of the operator."""
         return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+
+    @cached_property
+    def inv_norm_factor(self) -> np.floating:
+        """Reciprocal of :attr:`norm_factor`, cached for the operator lifetime.
+
+        ``shape`` is fixed at construction, so the normalization is constant;
+        caching turns the per-call ``1 / norm_factor`` (a property recompute
+        plus a division) into a single stored reciprocal-multiply.
+        """
+        return 1.0 / self.norm_factor
 
     def __repr__(self):
         """Return info about the Fourier operator."""
@@ -808,6 +900,18 @@ class FourierOperatorSimple(FourierOperatorBase):
         An object implementing the NUFFT API. Ut should be responsible to compute a
         single type 1 /type 2 NUFFT.
     """
+
+    @cached_property
+    def _bc_chunks(self) -> np.ndarray:
+        """Precomputed ``(batch, coil)`` index chunks, one row per ``n_trans`` slice.
+
+        ``n_batchs``/``n_coils``/``n_trans`` are fixed for the operator's
+        lifetime, so the ``arange(B*C).reshape(-1, T)`` used to derive the
+        per-chunk coil/batch indices in the sense loops is computed once
+        instead of on every call.
+        """
+        B, C, T = self.n_batchs, self.n_coils, self.n_trans
+        return np.arange(B * C).reshape(-1, T)
 
     def __init__(
         self,
@@ -868,7 +972,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._op_calibless(data, ksp)
-        ret /= self.norm_factor
+        ret *= self.inv_norm_factor
 
         ret = self._safe_squeeze(ret)
         return ret
@@ -880,10 +984,11 @@ class FourierOperatorSimple(FourierOperatorBase):
         if ksp is None:
             xp = get_array_module(data)
             ksp = xp.empty((B * C, K), dtype=self.cpx_dtype)
+        chunks = self._bc_chunks
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
+            coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, ksp[i * T : (i + 1) * T])
         ksp = ksp.reshape((B, C, K))
@@ -925,7 +1030,7 @@ class FourierOperatorSimple(FourierOperatorBase):
         # calibrationless or monocoil.
         else:
             ret = self._adj_op_calibless(coeffs, img)
-        ret /= self.norm_factor
+        ret *= self.inv_norm_factor
         return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
@@ -936,9 +1041,10 @@ class FourierOperatorSimple(FourierOperatorBase):
             img = xp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         coeffs_flat = coeffs.reshape((B * C, K))
         img_batched = xp.zeros((T, *XYZ), dtype=self.cpx_dtype)
+        chunks = self._bc_chunks
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
             self._adj_op(coeffs_flat[i * T : (i + 1) * T], img_batched)
             img_batched *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):
@@ -961,12 +1067,10 @@ class FourierOperatorSimple(FourierOperatorBase):
 
     def _adj_op(self, coeffs, image):
         if self.density is not None:
-            coeffs2 = coeffs.copy()
-            for i in range(self.n_trans):
-                coeffs2[i * self.n_samples : (i + 1) * self.n_samples] *= self.density
+            coeffs_ = coeffs * self.density
         else:
-            coeffs2 = coeffs
-        self.raw_op.adj_op(coeffs2, image)
+            coeffs_ = coeffs
+        self.raw_op.adj_op(coeffs_, image)
 
     def data_consistency(self, image_data, obs_data):
         """Compute the gradient data consistency.
@@ -996,21 +1100,22 @@ class FourierOperatorSimple(FourierOperatorBase):
         obs_dataf = obs_data.reshape((B * C, K))
         grad = xp.zeros_like(dataf)
 
-        coil_img = xp.empty((T, *XYZ), dtype=self.cpx_dtype)
         coil_ksp = xp.empty((T, K), dtype=self.cpx_dtype)
+        inv_norm = self.inv_norm_factor
+        chunks = self._bc_chunks
         for i in range(B * C // T):
-            idx_coils = np.arange(i * T, (i + 1) * T) % C
-            idx_batch = np.arange(i * T, (i + 1) * T) // C
-            coil_img = self.smaps[idx_coils].copy().reshape((T, *XYZ))
+            idx_coils = chunks[i] % C
+            idx_batch = chunks[i] // C
+            coil_img = self.smaps[idx_coils].reshape((T, *XYZ))
             coil_img *= dataf[idx_batch]
             self._op(coil_img, coil_ksp)
-            coil_ksp /= self.norm_factor
+            coil_ksp *= inv_norm
             coil_ksp -= obs_dataf[i * T : (i + 1) * T]
             self._adj_op(coil_ksp, coil_img)
             coil_img *= self.smaps[idx_coils].conj()
             for t, b in enumerate(idx_batch):
                 grad[b] += coil_img[t]
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad.reshape(B, 1, *XYZ)
 
     def _grad_calibless(self, image_data, obs_data):
@@ -1022,14 +1127,15 @@ class FourierOperatorSimple(FourierOperatorBase):
         obs_dataf = obs_data.reshape((B * C, K))
         grad = xp.empty_like(dataf)
         ksp = xp.empty((T, K), dtype=self.cpx_dtype)
+        inv_norm = self.inv_norm_factor
         for i in range(B * C // T):
             self._op(dataf[i * T : (i + 1) * T], ksp)
-            ksp /= self.norm_factor
+            ksp *= inv_norm
             ksp -= obs_dataf[i * T : (i + 1) * T]
-            if self.uses_density:
-                ksp *= self.density
+            # density compensation is already applied inside _adj_op; applying
+            # it again here would square it (see FourierOperatorSimple._adj_op).
             self._adj_op(ksp, grad[i * T : (i + 1) * T])
-        grad /= self.norm_factor
+        grad *= inv_norm
         return grad.reshape(B, C, *XYZ)
 
 
@@ -1078,7 +1184,7 @@ def power_method(
     def AHA(x):
         if isinstance(operator, Callable):
             return operator(x)
-        return operator.adj_op(operator.op(x))
+        return operator.gram_op(x, toeplitz=False)
 
     if norm_func is None:
         norm_func = np.linalg.norm

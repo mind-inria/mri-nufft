@@ -336,12 +336,13 @@ def _full_C(
     xp = get_array_module(field_map)
     fr = field_map.real.ravel()
     fi = field_map.imag.ravel()
-    minr, maxr = xp.min(fr), xp.max(fi)
+    minr, maxr = xp.min(fr), xp.max(fr)
     mini, maxi = xp.min(fi), xp.max(fi)
 
     dr = (maxr - minr) / n_bins[0]
     di = (maxi - mini) / n_bins[1]
-    idxr, idxi = 0, 0
+    idxr = xp.zeros(fr.shape, dtype=int)
+    idxi = xp.zeros(fi.shape, dtype=int)
     if dr != 0:
         idxr = (xp.around((fr - minr) / dr)).astype(int)
         idxr = xp.clip(idxr, 0, n_bins[0] - 1)
