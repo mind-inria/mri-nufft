@@ -65,3 +65,34 @@ def remove_extra_kspace_samples(kspace_data: NDArray, num_samples_per_shot: int)
     if n_extra_samples > 0:
         kspace_data = kspace_data[..., :-n_extra_samples]
     return kspace_data
+
+
+def discard_frequency_outliers(
+    kspace_data: NDArray | None, kspace_loc: NDArray, k_max=0.5
+):
+    """
+    Remove samples in kspace_data and kspace_loc if outside [-k_max; k_max[.
+
+    Parameters
+    ----------
+    kspace_data: numpy.ndarray
+        The samples corresponding to kspace_loc defined above.
+    kspace_loc: numpy.ndarray
+        The sample locations previously normalized around [-k_max; k_max[.
+    k_max: float
+        The maximum k-space value to keep.
+
+    Returns
+    -------
+    reduced_kspace_loc: numpy.ndarray
+        The sample locations reduced strictly to [-0.5; 0.5[ by discarding
+        outliers.
+    reduced_kspace_data: numpy.ndarray
+        The samples corresponding to reduced_kspace_loc defined above.
+    """
+    kspace_mask = np.all((kspace_loc < kmax) & (kspace_loc >= -kmax), axis=-1)
+    kspace_loc = kspace_loc[kspace_mask]
+    if kspace_data is not None:
+        kspace_data = kspace_data[..., kspace_mask]
+        return np.ascontiguousarray(kspace_loc), np.ascontiguousarray(kspace_data)
+    return np.ascontiguousarray(kspace_loc)
