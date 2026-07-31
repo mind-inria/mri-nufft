@@ -672,18 +672,13 @@ def read_arbgrad_rawdat(
         contrast_num=contrast_num,
     )
     if "ARBGRAD_VE11C" in data_type:
+        ph = twixObj.hdr.Phoenix
         hdr["type"] = "ARBGRAD_GRE"
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj.search_header_for_val(
-                "Phoenix", ("sFastImaging", "lTurboFactor")
-            )[0]
+            hdr["turboFactor"] = ph.get(("sFastImaging", "lTurboFactor"))
             hdr["type"] = "ARBGRAD_MP2RAGE"
-        hdr["oversampling_factor"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWiPMemBlock", "alFree", "4")
-        )[0]
-        hdr["trajectory_name"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWipMemBlock", "tFree")
-        )[0][1:-1]
+        hdr["oversampling_factor"] = ph.get(("sWiPMemBlock", "alFree", 4))
+        hdr["trajectory_name"] = ph.get(("sWipMemBlock", "tFree"))
     if pre_skip > 0:
         samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
         if samples_to_skip >= hdr["n_adc_samples"]:
