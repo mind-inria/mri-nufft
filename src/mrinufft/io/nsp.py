@@ -5,10 +5,10 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from array import array
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, overload
-
+from typing import TYPE_CHECKING, Literal, overload, Any
 import numpy as np
 from numpy.typing import NDArray
 
@@ -28,6 +28,11 @@ from mrinufft.trajectories.utils import (
 )
 
 from .siemens import TwixHeaderDict, read_siemens_rawdat
+from .utils import (
+    add_phase_to_kspace_with_shifts,
+    remove_extra_kspace_samples,
+    discard_frequency_outliers,
+)
 
 if TYPE_CHECKING:
     from mrinufft.io.siemens import TwixObj
@@ -690,3 +695,108 @@ def read_arbgrad_rawdat(
     if return_twix:
         return data, hdr, twixObj
     return data, hdr
+
+
+def _find_trajectory(traj_name: str, search_dir: list[Path] | Path) -> Path:
+    """Read trajectory filename from the Twix header and locate it."""
+    if isinstance(search_dir, Path):
+        if not search_dir.is_dir():
+            search_dir = [search_dir.parent, search_dir.parent.parent]
+        elif isinstance(search_dir, Path):
+            search_dir = [search_dir]
+
+    # Search sibling directories of the data file for the trajectory binary
+    for root in search_dir:
+        for candidate in root.rglob(traj_name):
+            logger.info("Auto-discovered trajectory: %s", candidate)
+            return candidate
+
+    raise FileNotFoundError(
+        f"Trajectory file {traj_name!r} not found in {search_dir}. "
+        "Pass -t/--trajectory explicitly."
+    )
+
+
+def read_nsp_pair(
+    ksp_file: Path | str,
+    traj_file: Path | str | None,
+    apply_shifts: bool = True,
+    discard_outlier: bool = True,
+    n_shots_per_volume: int | None = None,
+) -> tuple[NDArray, NDArray, dict[str, Any]]:
+    """Read k-space and trajectory from NeuroSpin files.
+
+    Parameters
+    ----------
+    ksp_file : str | Path
+        Path to the k-space file.
+    traj_file : str | Path | None
+        Path to the trajectory file, it can also be a directory where the
+        trajectory file is located. In that case, the trajectory file will be
+        searched for in the directory and its subdirectories, matching the name
+        of the trajectory file in the k-space header.
+
+    apply_shifts : bool, optional
+        Whether to apply shifts to the trajectory, by default True.
+    discard_outlier : bool, optional
+        Whether to discard outlier samples in the trajectory, by default True.
+
+    Returns
+    -------
+    kspace : np.ndarray
+        The k-space data.
+    trajectory : np.ndarray
+        The trajectory data.
+    metadata : dict
+        Metadata extracted from the files.
+    """
+    # Read k-space data and metadata from the k-space file
+    ksp_file = Path(ksp_file)
+    ksp_data, ksp_hdr = read_arbgrad_rawdat(
+        ksp_file, return_twix=False, removeOS=False, doAverage=True, squeeze=True
+    )
+    ksp_data = ksp_data.squeeze()  # Remove singleton dimensions
+    traj_file = Path(traj_file) if traj_file is not None else None
+    if traj_file is None:
+        traj_file = ksp_file.parent.parent
+    if traj_file.is_dir():
+        traj_file = _find_trajectory(ksp_hdr["trajectory_name"], search_dir=traj_file)
+    traj, traj_params = read_trajectory(
+        traj_file,
+        num_adc_samples=ksp_hdr["n_adc_samples"],
+        raster_time=ksp_hdr["dwell_time"]
+        * ksp_hdr.get("oversampling_factor", 1)
+        * 1e3,  # us -> ms
+        dwell_time=ksp_hdr["dwell_time"] * 1e3,  # us -> ms
+    )
+
+    if n_shots_per_volume is None:
+        n_shots_per_volume = traj_params["num_shots"]
+
+    readout_dim = list(ksp_data.shape).index(traj_params["num_adc_samples"])
+    ksp_data = ksp_data.reshape(
+        ksp_data.shape[: readout_dim + 1] + (-1,)
+    )  # fold any extra dimensions into the last dimension
+    ksp_data = np.moveaxis(ksp_data, -1, 0)  # move the repeat dimension to the front
+
+    ksp_data = ksp_data.reshape(
+        -1, ksp_hdr["n_coils"], ksp_hdr["n_adc_samples"] * n_shots_per_volume
+    )
+    # Reshape trajectory to have shape (num_shots * num_adc_samples, dimension)
+    traj = traj.reshape((-1, traj.shape[-1]))
+
+    if apply_shifts:
+        normalized_shifts = (
+            ksp_hdr["shifts"]
+            / np.array(traj_params["FOV"])
+            * np.array(traj_params["img_size"])
+            / 1000
+        )  # convert mm to m
+        ksp_data = add_phase_to_kspace_with_shifts(
+            ksp_data, traj, normalized_shifts=normalized_shifts
+        )
+
+    if discard_outlier:
+        traj, ksp_data = discard_frequency_outliers(traj, ksp_data, kmax=0.5)
+
+    return ksp_data, traj, ksp_hdr | traj_params

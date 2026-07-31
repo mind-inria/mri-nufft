@@ -36,10 +36,11 @@ def add_phase_to_kspace_with_shifts(
             "Dimension mismatch between shift and kspace locations! "
             "Ensure that shifts are right"
         )
-    # fold the kspace data to match the number of dimension in kspace_loc
-    # This is useful when the kspace_loc has a shot dimension and the kspace_data does not.
-    # for instance kspace_data has shape (NCha, NSamples) and kspace_loc has shape (NShot, NSamples//Nshot, 2)
-    # In this case, we need to fold the kspace_data to shape (NCha, NShot, NSamples//Nshot) to match the kspace_loc shape.
+    # Fold the kspace data to match the number of dimension in kspace_loc
+    # This is useful when the kspace_loc has a shot dimension and the kspace_data
+    # does not. For instance kspace_data has shape (NCha, NSamples) and kspace_loc
+    # has shape (NShot, NSamples//Nshot, 2). In this case, we need to fold the
+    # kspace_data to shape (NCha, NShot, NSamples//Nshot) to match the kspace_loc shape.
     if kspace_data.shape[-1] != kspace_loc.shape[-2]:
         kspace_data_ = kspace_data.reshape(
             *kspace_data.shape[:-1], -1, *kspace_loc.shape[:-1]
@@ -83,7 +84,7 @@ def remove_extra_kspace_samples(kspace_data: NDArray, num_samples_per_shot: int)
 
 
 def discard_frequency_outliers(
-    kspace_data: NDArray | None, kspace_loc: NDArray, k_max=0.5
+    kspace_data: NDArray | None, kspace_loc: NDArray, kmax=0.5
 ):
     """
     Remove samples in kspace_data and kspace_loc if outside [-k_max; k_max[.
