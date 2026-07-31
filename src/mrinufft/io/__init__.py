@@ -21,11 +21,13 @@ from mrinufft.io.siemens import (
 from mrinufft.io.utils import (
     add_phase_to_kspace_with_shifts,
     remove_extra_kspace_samples,
+    discard_frequency_outliers,
 )
 
 __all__ = [
     "add_phase_to_kspace_with_shifts",
     "cfl2traj",
+    "discard_frequency_outliers",
     "nifti_affine",
     "pulseq_gre",
     "read_arbgrad_rawdat",
