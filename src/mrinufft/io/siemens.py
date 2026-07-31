@@ -45,7 +45,7 @@ def _slice_position_shifts(twixObj) -> tuple[float, float, float]:
         "dSag": ("sSliceArray", "asSlice", "0", "sPosition", "dSag"),
         "dCor": ("sSliceArray", "asSlice", "0", "sPosition", "dCor"),
     }
-    return tuple(my.get(keys[ax], 0.0) for ax in ("dTra", "dCor", "dSag"))
+    return tuple(my.get(keys[ax], 0.0) for ax in ("dSag", "dCor", "dTra"))
 
 
 def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
