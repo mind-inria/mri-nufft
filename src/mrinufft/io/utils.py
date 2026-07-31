@@ -18,6 +18,7 @@ def add_phase_to_kspace_with_shifts(
         The k-space locations.
     normalized_shifts : tuple
         The normalized shifts to apply to each dimension of k-space.
+        They are expressed as a number of pixels to shifts.
 
     Returns
     -------
@@ -30,14 +31,28 @@ def add_phase_to_kspace_with_shifts(
         If the dimension of normalized_shifts does not match the number of
         dimensions in kspace_loc.
     """
-    if len(normalized_shifts) != kspace_loc.shape[1]:
+    if len(normalized_shifts) != kspace_loc.shape[-1]:
         raise ValueError(
             "Dimension mismatch between shift and kspace locations! "
             "Ensure that shifts are right"
         )
+    # fold the kspace data to match the number of dimension in kspace_loc
+    # This is useful when the kspace_loc has a shot dimension and the kspace_data does not.
+    # for instance kspace_data has shape (NCha, NSamples) and kspace_loc has shape (NShot, NSamples//Nshot, 2)
+    # In this case, we need to fold the kspace_data to shape (NCha, NShot, NSamples//Nshot) to match the kspace_loc shape.
+    if kspace_data.shape[-1] != kspace_loc.shape[-2]:
+        kspace_data_ = kspace_data.reshape(
+            *kspace_data.shape[:-1], -1, *kspace_loc.shape[:-1]
+        )
+    else:
+        kspace_data_ = kspace_data
+
     phi = np.sum(kspace_loc * normalized_shifts, axis=-1)
     phase = np.exp(-2 * np.pi * 1j * phi)
-    return kspace_data * phase
+    new_kspace_data = kspace_data_ * phase
+
+    # Return the new kspace data with the same shape as the input kspace data
+    return new_kspace_data.reshape(kspace_data.shape)
 
 
 def remove_extra_kspace_samples(kspace_data: NDArray, num_samples_per_shot: int):
