@@ -48,8 +48,9 @@ def add_phase_to_kspace_with_shifts(
     else:
         kspace_data_ = kspace_data
 
+    normalized_shifts = np.asarray(normalized_shifts).astype(kspace_loc.dtype)
     phi = np.sum(kspace_loc * normalized_shifts, axis=-1)
-    phase = np.exp(-2 * np.pi * 1j * phi)
+    phase = np.exp(-2j * kspace_loc.dtype.type(np.pi) * phi)
     new_kspace_data = kspace_data_ * phase
 
     # Return the new kspace data with the same shape as the input kspace data
