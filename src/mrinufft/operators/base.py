@@ -832,7 +832,7 @@ class FourierOperatorBase(ABC):
     @property
     def n_samples(self) -> int:
         """Return the number of samples used by the operator."""
-        return self._samples.shape[0]
+        return np.prod(self.samples.shape[:-1])
 
     @cached_property
     def norm_factor(self) -> np.floating:
