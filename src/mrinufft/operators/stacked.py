@@ -350,11 +350,20 @@ class MRIStackedNUFFT(FourierOperatorBase):
             )
         return samples
 
+    @property
+    def n_samples(self):
+        """Return total number of samples."""
+        return len(self._samples2d) * len(self.z_index)
+
     @samples.setter
     def samples(self, samples):
         """Set samples."""
         self._samples2d, self.z_index = self._init_samples(samples, "auto", self.shape)
         self.operator.samples = self._samples2d
+
+    def __getattr__(self, name: str):
+        """Delegate to backend operator."""
+        return getattr(self.operator, name)
 
 
 class MRIStackedNUFFTGPU(MRIStackedNUFFT):
