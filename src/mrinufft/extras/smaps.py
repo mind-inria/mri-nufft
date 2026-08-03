@@ -616,8 +616,7 @@ def _gram_via_projector(U, kernel_width, mask, target_shape, dtype):
     Returns
     -------
     NDArray
-        The local Gram matrices, shape
-        ``(*spatial_shape[::-1], n_coils, n_coils)``.
+        The local Gram matrices, shape ``(n_coils, n_coils, *spatial_shape)``.
     """
     xp = get_array_module(U)
     n_coils = target_shape[0]
@@ -644,11 +643,12 @@ def _gram_via_projector(U, kernel_width, mask, target_shape, dtype):
     full = _scatter_add(xp, W, pos, spatial)
 
     img = ifft(full, dims=ndim) / xp.sqrt(float(np.prod(spatial)))
-    # G[..., q, p] = ifft(full)[q, p, ...]: move spatial axes first (in
-    # reversed order, matching this module's other `.T`-based conventions)
-    # then (q, p).
-    axes_order = tuple(range(ndim + 1, 1, -1)) + (0, 1)
-    return img.transpose(*axes_order).astype(dtype)
+    # Cast to `dtype` with an explicit C order: `img` (from ifft) already
+    # isn't contiguous in a way that matches its declared (n_coils, n_coils,
+    # *spatial) shape, and this astype copies regardless, so forcing the
+    # order here is free and keeps `G` -- and everything downstream that is
+    # built from it via elementwise/matmul ops -- genuinely C-contiguous.
+    return img.astype(dtype, order="C")
 
 
 def _hamming_window(n, xp):
@@ -838,7 +838,7 @@ def _batched_power_iteration(
     ----------
     G : NDArray
         Stack of Hermitian PSD matrices, e.g. local coil-covariance
-        matrices, shape ``(..., n_coils, n_coils)``.
+        matrices, shape ``(n_coils, n_coils, ...)``.
     n_iter : int, optional
         Number of power iterations. By default 30.
     mode : {"max", "min"}, optional
@@ -851,11 +851,12 @@ def _batched_power_iteration(
     eigval : NDArray
         The extracted eigenvalue at each batch location, shape ``(...,)``.
     eigvec : NDArray
-        The associated unit-norm eigenvector, shape ``(..., n_coils)``.
+        The associated unit-norm eigenvector, shape ``(n_coils, ...)``.
     """
     xp = get_array_module(G)
-    n_coils = G.shape[-1]
-    batch_shape = G.shape[:-2]
+    n_coils = G.shape[0]
+    batch_shape = G.shape[2:]
+    batch_ones = (1,) * len(batch_shape)
 
     if mode == "min":
         # Shift by a power-iteration estimate of the largest eigenvalue, so
@@ -877,14 +878,21 @@ def _batched_power_iteration(
     rng = np.random.default_rng(seed)
     v0 = rng.standard_normal(n_coils) + 1j * rng.standard_normal(n_coils)
     v0 = (v0 / np.linalg.norm(v0)).astype(G.dtype)
-    v = xp.broadcast_to(xp.asarray(v0), (*batch_shape, n_coils)).copy()[..., None]
+    # Coil axis kept leading (rather than trailing, as a plain batched
+    # matmul convention would have it) so that the eigenvector this
+    # function returns already has the same axis order as the `Smaps`
+    # array callers ultimately return -- no reordering, and hence no
+    # C/F-contiguity-breaking transpose, needed afterwards.
+    v = xp.broadcast_to(
+        xp.asarray(v0).reshape(n_coils, *batch_ones), (n_coils, *batch_shape)
+    ).copy()
 
     for _ in range(n_iter):
-        v = op @ v
-        norm = xp.linalg.norm(v, axis=-2, keepdims=True)
+        v = xp.einsum("ij...,j...->i...", op, v)
+        norm = xp.linalg.norm(v, axis=0, keepdims=True)
         v = v / xp.where(norm == 0, 1, norm)
 
-    eigval = xp.real(xp.conj(v.swapaxes(-1, -2)) @ (op @ v))[..., 0, 0]
+    eigval = xp.real(xp.sum(xp.conj(v) * xp.einsum("ij...,j...->i...", op, v), axis=0))
     if mode == "min":  # remove the shift introduced.
         eigval = shift[..., 0, 0] - eigval
     return eigval, v[..., 0]
@@ -982,8 +990,6 @@ def _subspace_gram_eig(
     logger.debug("subspace_gram_eig: local Gram matrices computed, shape=%s", G.shape)
 
     eig, Smaps = _batched_power_iteration(G, n_iter=power_iter, mode=mode)
-    Smaps = Smaps.T
-    eig = eig.T
     Smaps = Smaps * xp.conj(Smaps[0] / xp.abs(Smaps[0]))
     logger.debug(
         "subspace_gram_eig: power iteration done (n_iter=%d), eig range=[%.4g, %.4g]",
