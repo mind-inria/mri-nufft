@@ -20,7 +20,17 @@ def flat_traj(normalize="unit"):
         @wraps(func)
         def wrapper(*args, **kwargs):
             args = list(args)
-            args[0] = proper_trajectory(args[0], normalize=normalize)
+            if len(args) == 0:
+                # use the first kwargs instead
+                first_key = list(kwargs.keys())[0]
+                first_arg = kwargs[first_key]
+            else:
+                first_arg = args[0]
+            first_arg = proper_trajectory(first_arg, normalize=normalize)
+            if len(args) == 0:
+                kwargs[first_key] = first_arg
+            else:
+                args[0] = first_arg
             return func(*args, **kwargs)
 
         return wrapper
