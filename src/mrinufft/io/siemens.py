@@ -27,6 +27,7 @@ class TwixHeaderDict(TypedDict, total=False):
     affine: NDArray
     shifts: tuple[float, ...]
     acs: NDArray | None
+    noise: NDArray | None
     type: NotRequired[str]
     oversampling_factor: NotRequired[int]
     trajectory_name: NotRequired[str]
@@ -77,6 +78,7 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
         "affine": twix2nifti_affine(twixObj),
         "shifts": _slice_position_shifts(twixObj),
         "acs": None,
+        "noise": None,
         "dwell_time": float(ph.get(("sRXSPEC", "alDwellTime", 0), 0))
         * 1e-9,  # convert from ns to s
     }
@@ -93,7 +95,10 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
 
     refscan = twixObj.lines.refscan
     if len(refscan) > 0:
-        hdr["acs"] = twixObj.read(refscan).astype(np.complex64)
+        hdr["acs"] = refscan.read()
+    noise = twixObj.lines.noise
+    if len(noise) > 0:
+        hdr["noise"] = noise.read()
 
     return hdr
 
