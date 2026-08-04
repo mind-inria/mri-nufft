@@ -129,7 +129,7 @@ class MRIFourierCorrected(FourierOperatorBase):
                     " for space and time interpolators"
                 ) from e
 
-            if B.size != self.n_samples:
+            if B.shape[0] != self.n_samples:
                 n_shot, r = divmod(self.n_samples, B.shape[0])
                 if r != 0:
                     raise ValueError(
@@ -219,7 +219,7 @@ class MRIFourierCorrected(FourierOperatorBase):
     def full_readout_time(self) -> NDArray:
         """Get the full readout time for all samples."""
         xp = get_array_module(self.readout_time)
-        return xp.repeat(self.readout_time, self.n_shots)
+        return xp.tile(self.readout_time, self.n_shots)
 
     def autograd_available(self) -> bool:
         """Whether the operator supports autograd differentiation."""
@@ -231,6 +231,15 @@ class MRIFourierCorrected(FourierOperatorBase):
         # Force offload to the underlying operator
         # Otherwise, the stacked-interface cannot be used with orc.
         return self._fourier_op.n_samples
+
+    @property
+    def density(self) -> NDArray | None:
+        """Density compensation of the underlying operator."""
+        return self._fourier_op.density
+
+    @density.setter
+    def density(self, value: NDArray | None):
+        self._fourier_op.density = value
 
     def __getattr__(self, name):
         """Delegate attribute to internal operator."""
