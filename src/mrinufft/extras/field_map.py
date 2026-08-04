@@ -141,12 +141,16 @@ field_map : NDArray
 readout_time : NDArray
     The vector of time points (in seconds) at which to compute phase evolution.
 mask : NDArray
-    Binary mask indicating object region for field map/statistics.
+    Binary mask indicating object region for field map/statistics. Only those
+    voxels are used to build the histogram, so field-map values outside it are
+    clamped to the range spanned by the object.
 L : int, optional
     Number of virtual centers or basis functions retained (default is -1,
-    automatically estimated).
+    automatically estimated from the time-bandwidth product of the readout).
+    Too small an ``L`` leaves a large residual phase error, which appears as
+    artefacts in the corrected image; a warning is logged when that happens.
 n_bins : int, optional
-    Number of histogram bins for off-resonance value clustering (default is 1000).
+    Number of histogram bins for off-resonance value clustering (default is 1024).
 lazy: bool, default False
     If True, use a lazy evaluation scheme for the space interpolator C, saving memory.
 """,
@@ -214,18 +218,34 @@ def get_complex_fieldmap_rad(
 def _create_histogram(
     field_map: NDArray[np.complex64],
     mask: NDArray | None,
-    n_bins: int | tuple[int, int] = 1000,
-) -> tuple[NDArray, NDArray]:
+    n_bins: int | tuple[int, int] = 1024,
+) -> tuple[NDArray, NDArray, list[NDArray]]:
     """
     Quantize the field map in n_bins values.
 
     Parameters
     ----------
     field_map : NDArray
+        Complex-valued field map, in rad/s.
+    mask : NDArray or None
+        Restrict the histogram to those voxels. ``None`` uses the whole map.
+    n_bins : int or tuple[int, int]
+        Number of bins for the real (R2*) and imaginary (B0) axes.
 
+    Returns
+    -------
+    h_counts: NDArray
+        Bin populations, of shape ``n_bins``.
+    h_centers_cpx: NDArray
+        Complex value at the center of each bin, of shape ``n_bins``.
+    h_edges: list[NDArray]
+        Bin edges of both axes. Returned so that `_full_C` can map voxels onto
+        *these* bins: the edges are derived from the masked field map, so
+        recomputing them from the full map would assign every voxel to the
+        wrong bin.
     """
     xp = get_array_module(field_map)
-    masked_field_map = field_map[mask]
+    masked_field_map = field_map.ravel() if mask is None else field_map[mask].ravel()
     if isinstance(n_bins, int):
         deltaR = xp.max(masked_field_map.real) - xp.min(masked_field_map.real)
         deltaI = xp.max(masked_field_map.imag) - xp.min(masked_field_map.imag)
@@ -238,7 +258,7 @@ def _create_histogram(
             n_bins_i = np.around(n_bins / n_bins_r)
             n_bins = (int(n_bins_r), int(n_bins_i))
 
-    z = field_map[mask].view(xp.float32).reshape(-1, 2)
+    z = masked_field_map.view(xp.float32).reshape(-1, 2)
     # create histograms
     h_counts, h_edges = xp.histogramdd(z, bins=n_bins)
     # get center of bins for real and imaginary part
@@ -251,7 +271,25 @@ def _create_histogram(
     else:
         h_centers_cpx = np.complex64(1j) * h_centers[0]
 
-    return h_counts, h_centers_cpx
+    return h_counts, h_centers_cpx, h_edges
+
+
+def _bin_index(values: NDArray, edges: NDArray) -> NDArray:
+    """Index of the (uniform) histogram bin each value falls into.
+
+    ``np.histogramdd`` puts a value in bin ``k`` when it lies in
+    ``[edges[k], edges[k+1])``, so the index is a floor -- rounding instead
+    would offset every voxel by half a bin. Values outside ``edges`` (e.g.
+    background voxels when the histogram was masked) are clipped to the
+    closest edge bin.
+    """
+    xp = get_array_module(values)
+    n = len(edges) - 1
+    width = (edges[-1] - edges[0]) / n
+    if width == 0:
+        return xp.zeros(values.shape, dtype=int)
+    idx = xp.floor((values - edges[0]) / width).astype(int)
+    return xp.clip(idx, 0, n - 1)
 
 
 class _C_lazy:
@@ -307,7 +345,7 @@ class _C_lazy:
 def _full_C(
     field_map: NDArray[np.complex64],
     C_small: NDArray,
-    n_bins: tuple[int, int],
+    h_edges: list[NDArray],
     lazy: bool = False,
 ):
     """
@@ -322,8 +360,9 @@ def _full_C(
         Complex-valued field-map in rad/s.
     C_small: NDArray
         Small C matrix computed at histogram centers.
-    n_bins: tuple[int, int]
-        Number of bins for the real and imaginary part
+    h_edges: list[NDArray]
+        Bin edges of the histogram ``C_small`` was computed on, as returned by
+        `_create_histogram`. Voxels *must* be mapped onto those same bins.
     lazy: bool, default False
         If True, returns a lazy version of the C matrix.
 
@@ -334,21 +373,9 @@ def _full_C(
     C_Lazy if lazy = True
     """
     xp = get_array_module(field_map)
-    fr = field_map.real.ravel()
-    fi = field_map.imag.ravel()
-    minr, maxr = xp.min(fr), xp.max(fr)
-    mini, maxi = xp.min(fi), xp.max(fi)
-
-    dr = (maxr - minr) / n_bins[0]
-    di = (maxi - mini) / n_bins[1]
-    idxr = xp.zeros(fr.shape, dtype=int)
-    idxi = xp.zeros(fi.shape, dtype=int)
-    if dr != 0:
-        idxr = (xp.around((fr - minr) / dr)).astype(int)
-        idxr = xp.clip(idxr, 0, n_bins[0] - 1)
-    if di != 0:
-        idxi = (xp.around((fi - mini) / di)).astype(int)
-        idxi = xp.clip(idxi, 0, n_bins[1] - 1)
+    n_bins = tuple(len(e) - 1 for e in h_edges)
+    idxr = _bin_index(field_map.real.ravel(), h_edges[0])
+    idxi = _bin_index(field_map.imag.ravel(), h_edges[1])
 
     C_sr = C_small.reshape(-1, *n_bins)
 
@@ -416,8 +443,7 @@ def compute_svd_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
 
     w_k = w_k.ravel()
     h_k = h_k.ravel()
@@ -435,7 +461,7 @@ def compute_svd_coefficients(
     # (Redundant with C=DV from E=BSD using L singular values
     # but more robust to histogram with 0 weights.
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
-    C = _full_C(field_map, C, hist_shape, lazy)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
 
 
@@ -468,8 +494,7 @@ def compute_mti_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
@@ -491,7 +516,7 @@ def compute_mti_coefficients(
     # Compute B with a Least Square interpolation
     B, _, _, _ = xp.linalg.lstsq(Ch.T, Eh.T, rcond=None)
 
-    C = _full_C(field_map, C, hist_shape, lazy)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B.T, C, E
 
 
@@ -544,8 +569,7 @@ def compute_mfi_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
@@ -562,5 +586,5 @@ def compute_mfi_coefficients(
 
     # Compute C with a Least Square interpolation
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
-    C = _full_C(field_map, C, hist_shape, lazy)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
