@@ -10,6 +10,8 @@ explanation).
 
 """
 
+import logging
+
 import numpy as np
 from collections.abc import Callable
 
@@ -21,6 +23,13 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
 )
 from mrinufft._utils import MethodRegister
+
+logger = logging.getLogger(__name__)
+
+#: Extra interpolators kept past the time-bandwidth product when ``L=-1``.
+_SVD_MARGIN = 2
+#: Relative error of the ``E ~ B @ C`` factorization above which we warn.
+_ACCURACY_WARN = 0.05
 
 #######################
 # Generate Dummy Data #
@@ -383,9 +392,55 @@ def _full_C(
         C_big = _C_lazy(C_sr, idxr, idxi, field_map.shape)
         return C_big
     else:
-
         C_big = C_sr[:, idxr, idxi]
         return xp.ascontiguousarray(C_big.reshape(-1, *field_map.shape))
+
+
+def _time_bandwidth(w_k: NDArray, readout_time: NDArray) -> float:
+    r"""Time-bandwidth product of the off-resonance phase term over the readout.
+
+    :math:`\Delta\omega \Delta t / 2\pi` is the number of full phase cycles that
+    the most and least off-resonant voxels drift apart during the readout, and
+    hence sets how many interpolators are needed to represent
+    :math:`e^{\omega t}`.
+
+    ``readout_time`` is usually referenced to the echo, so it spans negative
+    *and* positive values: only its extent matters here, never its maximum.
+    """
+    xp = get_array_module(readout_time)
+    dw = float(abs(w_k[-1] - w_k[0]))
+    dt = float(xp.max(readout_time) - xp.min(readout_time))
+    return dw * dt / (2 * np.pi)
+
+
+def _check_accuracy(
+    name: str, B: NDArray, C_small: NDArray, E: NDArray, h_k: NDArray, suggested_L: int
+) -> float:
+    """Log the achieved accuracy of the ``E ~ B @ C`` factorization."""
+    xp = get_array_module(E)
+    weights = xp.sqrt(h_k)
+    ref = float(xp.linalg.norm(weights * E))
+    if ref == 0:
+        return 0.0
+    err = float(xp.linalg.norm(weights * (E - B @ C_small))) / ref
+    L = B.shape[1]
+    if err > _ACCURACY_WARN:
+        logger.warning(
+            "off-resonance '%s': L=%d -> %.1f%% approx error, Recommended value: L>=%d"
+            "readout time.",
+            name,
+            L,
+            100 * err,
+            max(suggested_L, L + 1),
+        )
+    else:
+        logger.debug(
+            "off-resonance '%s': L=%d, phase approximated to %.2f%%",
+            name,
+            L,
+            100 * err,
+        )
+    return err
 
 
 def _get_svds(
@@ -451,16 +506,18 @@ def compute_svd_coefficients(
     E = xp.exp(xp.outer(readout_time, w_k))
     Ew = xp.sqrt(h_k) * E
     svds = _get_svds(xp, partial_svd)
+    # The number of significant singular values of E is its time-bandwidth
+    # product; the margin covers the slow decay past that knee.
+    auto_L = max(1, int(np.ceil(_time_bandwidth(w_k, readout_time))) + _SVD_MARGIN)
     if L == -1:
-        # Empirically: maximum frequency in the E matrix.
-        L = max(
-            1, int(xp.ceil(abs(w_k[-1] - w_k[0]) * xp.max(readout_time) / 2 * (xp.pi)))
-        )
+        L = auto_L
+    L = min(L, min(Ew.shape) - 1 if partial_svd else min(Ew.shape))
     B, S, D = svds(Ew, L)
     # Compute C with a Least Square interpolation
     # (Redundant with C=DV from E=BSD using L singular values
     # but more robust to histogram with 0 weights.
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
+    _check_accuracy("svd", B, C, E, h_k, auto_L)
     C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
 
@@ -498,12 +555,11 @@ def compute_mti_coefficients(
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
+    # from Douglas Noll PhD Thesis: the time segments must be spaced finely
+    # enough compared to the fastest phase evolution over the readout.
+    auto_L = max(1, int(np.ceil(4 * _time_bandwidth(w_k, readout_time))))
     if L == -1:
-        # from Douglas Noll PhD Thesis
-        # and XXX
-        L = max(
-            1, int(xp.ceil(2 * abs(w_k[-1] - w_k[0]) * xp.max(readout_time) / (xp.pi)))
-        )
+        L = auto_L
 
     t_l = xp.linspace(xp.min(readout_time), xp.max(readout_time), L, dtype=xp.float32)
 
@@ -516,6 +572,7 @@ def compute_mti_coefficients(
     # Compute B with a Least Square interpolation
     B, _, _, _ = xp.linalg.lstsq(Ch.T, Eh.T, rcond=None)
 
+    _check_accuracy("mti", B.T, C, E, h_k, auto_L)
     C = _full_C(field_map, C, h_edges, lazy)
     return B.T, C, E
 
@@ -573,11 +630,10 @@ def compute_mfi_coefficients(
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
+    # From Doug Noll PhD Thesis
+    auto_L = max(1, int(np.ceil(8 * _time_bandwidth(w_k, readout_time))))
     if L == -1:
-        # From Doug Noll PhD Thesis
-        L = max(
-            1, int(xp.ceil(4 * abs(w_k[-1] - w_k[0])) * xp.max(readout_time) / (xp.pi))
-        )
+        L = auto_L
     w_l = _get_cluster_centers(w_k, h_k, L)
     # Compute B as a phase shift
 
@@ -586,5 +642,6 @@ def compute_mfi_coefficients(
 
     # Compute C with a Least Square interpolation
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
+    _check_accuracy("mfi", B, C, E, h_k, auto_L)
     C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
