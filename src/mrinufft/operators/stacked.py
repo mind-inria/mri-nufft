@@ -387,6 +387,11 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         Number of coils.
     n_batchs: int
         Number of batchs.
+    async_transfer: bool, default False
+        If True, pipeline host<->device transfers with compute (double
+        buffering) in the host-input code paths, using the underlying
+        2D cufinufft operator's dedicated non-blocking CUDA streams.
+        See :class:`~mrinufft.operators.interfaces.cufinufft.MRICufiNUFFT`.
     **kwargs: dict
         Additional arguments to pass to the backend.
     """
@@ -407,6 +412,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         smaps_cached=False,
         density=False,
         backend="cufinufft",
+        async_transfer=False,
         **kwargs,
     ):
         if not (CUPY_AVAILABLE and check_backend("cufinufft")):
@@ -420,6 +426,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_batchs = n_batchs
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
+        self.async_transfer = async_transfer
 
         if isinstance(backend, str):
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
@@ -547,14 +554,20 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
-        dataf = data.reshape((B, *XYZ))
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-
         if ksp is None:
             ksp = np.empty((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
-        for i in range((B * C) // T):
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._op_sense_host_async(data, ksp)
+            if ret is not None:
+                return ret
+
+        dataf = data.reshape((B, *XYZ))
+        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        data_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
+        for i in range(n_call):
             idx_coils = self._bc_chunks[i] % C
             idx_batch = self._bc_chunks[i] // C
             # Send the n_trans coils to gpu
@@ -579,6 +592,85 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             ksp[i * T : (i + 1) * T] = ksp_batched.get()
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
+
+    def _fft_gather_op(self, coil_img, tmp_buf, ksp_buf):
+        """FFT along Z, gather the sampled z-planes, and apply the 2D NUFFT.
+
+        Shared compute-stream step of the SENSE and calibrationless async
+        forward pipelines: ``coil_img`` already holds the (optionally
+        SENSE-weighted) per-chunk image; ``tmp_buf``/``ksp_buf`` are the
+        pipeline's preallocated scratch/output buffers for this
+        double-buffer slot, reused every chunk instead of being
+        reallocated.
+        """
+        T, XYZ = self.n_trans, self.shape
+        NZ, NS = len(self.z_index), len(self._samples2d)
+        fft_out = self._fftz(coil_img).reshape((T, *XYZ))
+        tmp = cp.moveaxis(fft_out[..., self.z_index], -1, 1).reshape(T * NZ, *XYZ[:2])
+        cp.copyto(tmp_buf, tmp)
+        ksp_out = self.operator._op_calibless_device(tmp_buf, ksp_buf)
+        ksp_out *= self.inv_norm_factor
+        return ksp_out.reshape(T, NZ * NS)
+
+    def _op_sense_host_async(self, data, ksp):
+        """Pipelined (double-buffered) forward SENSE op for host data.
+
+        Mirrors ``MRICufiNUFFT._op_sense_host_async``: registers ``data``/
+        ``ksp`` in place and overlaps H2D/compute/D2H via the underlying
+        2D operator's dedicated streams. Compute per chunk additionally
+        includes the Z-FFT and z-plane gather, which stay on the default
+        (compute) stream. Returns None (caller falls back to the
+        synchronous loop) if the arrays cannot be page-locked.
+        """
+        B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
+        NS, NZ = len(self._samples2d), len(self.z_index)
+        n_call = (B * C) // T
+
+        dataf = self.operator._register_contiguous(data, shape=(B, *XYZ))
+        if dataf is None:
+            return None
+        if not self.operator._host_register(ksp):
+            return None
+
+        h2d_stream, d2h_stream = self.operator._get_async_streams()
+        data_batched_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        tmp_d = [cp.empty((T * NZ, *XYZ[:2]), dtype=self.cpx_dtype) for _ in range(2)]
+        ksp_buf_d = [cp.empty((T * NZ, NS), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                h2d_stream.wait_event(compute_done[b])
+            idx_coils = self._bc_chunks[i] % C
+            idx_batch = self._bc_chunks[i] // C
+            with h2d_stream:
+                data_batched_d[b].set(dataf[idx_batch].reshape((T, *XYZ)))
+                if not self.smaps_cached:
+                    coil_img_d[b].set(self.smaps[idx_coils].reshape((T, *XYZ)))
+                else:
+                    cp.copyto(coil_img_d[b], self.smaps[idx_coils])
+                # Multiply here (on h2d_stream) rather than at the top of
+                # the compute loop below: it then overlaps with the
+                # *previous* iteration's compute on the default stream
+                # instead of adding to this iteration's critical path.
+                coil_img_d[b] *= data_batched_d[b]
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            ksp_out = self._fft_gather_op(coil_img_d[b], tmp_d[b], ksp_buf_d[b])
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            ksp_out.get(out=ksp[i * T : (i + 1) * T], stream=d2h_stream, blocking=False)
+        d2h_stream.synchronize()
+        return ksp.reshape((B, C, NZ * NS))
 
     def _op_sense_device(self, data, ksp):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
@@ -621,14 +713,20 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
-        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         if ksp is None:
             ksp = np.zeros((B, C, NZ, NS), dtype=self.cpx_dtype)
         ksp = ksp.reshape((B * C, NZ * NS))
+        n_call = (B * C) // T
 
+        if self.async_transfer and n_call > 1:
+            ret = self._op_calibless_host_async(data, ksp)
+            if ret is not None:
+                return ret
+
+        coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         dataf = data.reshape(B * C, *XYZ)
 
-        for i in range((B * C) // T):
+        for i in range(n_call):
             coil_img_d.set(dataf[i * T : (i + 1) * T])
             coil_img_d = self._fftz(coil_img_d)
             coil_img_d = coil_img_d.reshape((T, *XYZ))
@@ -644,6 +742,48 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
         ksp = ksp.reshape((B, C, NZ * NS))
         return ksp
+
+    def _op_calibless_host_async(self, data, ksp):
+        """Pipelined (double-buffered) forward calibrationless op for host data.
+
+        See :meth:`_op_sense_host_async`.
+        """
+        B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
+        NS, NZ = len(self._samples2d), len(self.z_index)
+        n_call = (B * C) // T
+
+        dataf = self.operator._register_contiguous(data, shape=(B * C, *XYZ))
+        if dataf is None:
+            return None
+        if not self.operator._host_register(ksp):
+            return None
+
+        h2d_stream, d2h_stream = self.operator._get_async_streams()
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        tmp_d = [cp.empty((T * NZ, *XYZ[:2]), dtype=self.cpx_dtype) for _ in range(2)]
+        ksp_buf_d = [cp.empty((T * NZ, NS), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                h2d_stream.wait_event(compute_done[b])
+            coil_img_d[b].set(dataf[i * T : (i + 1) * T], stream=h2d_stream)
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            ksp_out = self._fft_gather_op(coil_img_d[b], tmp_d[b], ksp_buf_d[b])
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            ksp_out.get(out=ksp[i * T : (i + 1) * T], stream=d2h_stream, blocking=False)
+        d2h_stream.synchronize()
+        return ksp.reshape((B, C, NZ * NS))
 
     def _op_calibless_device(self, data, ksp=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
@@ -698,15 +838,22 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
+        if img_d is None:
+            img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._adj_op_sense_host_async(coeffs, img_d)
+            if ret is not None:
+                return ret
+
         coeffs_f = coeffs.reshape(B * C, NZ * NS)
         # Allocate Memory
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
-        if img_d is None:
-            img_d = cp.zeros((B, *XYZ), dtype=self.cpx_dtype)
         smaps_batched = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         ksp_batched = cp.empty((T, NS * NZ), dtype=self.cpx_dtype)
 
-        for i in range((B * C) // T):
+        for i in range(n_call):
             idx_coils = self._bc_chunks[i] % C
             idx_batch = self._bc_chunks[i] // C
             if not self.smaps_cached:
@@ -725,6 +872,80 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
 
             for t, b in enumerate(idx_batch):
                 img_d[b, :] += coil_img_d[t] * smaps_batched[t].conj()
+        img = img_d.get()
+        img = img.reshape((B, 1, *XYZ))
+        return img
+
+    def _adj_gather_ifftz(self, ksp_in, tmp_buf, coil_img):
+        """Apply the 2D adjoint NUFFT, scatter z-planes, and IFFT along Z.
+
+        Shared compute-stream step of the SENSE and calibrationless async
+        adjoint pipelines. ``tmp_buf`` is the pipeline's preallocated
+        scratch buffer for the raw adjoint-NUFFT output (reused every
+        chunk instead of being reallocated); ``coil_img`` is
+        zero-filled, scattered into and IFFT'd in place, then returned.
+        """
+        T, XYZ = self.n_trans, self.shape
+        NZ = len(self.z_index)
+        tmp_adj = self.operator._adj_op_calibless_device(ksp_in, tmp_buf)
+        tmp_adj *= self.inv_norm_factor
+        tmp_adj = cp.moveaxis(tmp_adj.reshape((T, NZ, *XYZ[:2])), 1, -1)
+        coil_img[:] = 0j
+        coil_img[..., self.z_index] = tmp_adj
+        return self._ifftz(coil_img)
+
+    def _adj_op_sense_host_async(self, coeffs, img_d):
+        """Pipelined (double-buffered) adjoint SENSE op for host data.
+
+        Only the input (ksp + smaps) side is pipelined: the output
+        accumulates in-place into the shared ``img_d`` across every coil,
+        so a single readback after the loop is used instead of a
+        per-batch D2H copy (mirrors
+        ``MRICufiNUFFT._adj_op_sense_host_async``). Returns None (caller
+        falls back to the synchronous loop) if it cannot be page-locked.
+        """
+        B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
+        NS, NZ = len(self._samples2d), len(self.z_index)
+        n_call = (B * C) // T
+
+        coeffs_reg = self.operator._register_contiguous(coeffs, shape=(B * C, NZ * NS))
+        if coeffs_reg is None:
+            return None
+
+        h2d_stream, _ = self.operator._get_async_streams()
+        ksp_batched_d = [cp.empty((T, NZ * NS), dtype=self.cpx_dtype) for _ in range(2)]
+        smaps_batched_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        tmp_d = [cp.empty((T * NZ, *XYZ[:2]), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                h2d_stream.wait_event(compute_done[b])
+            idx_coils = self._bc_chunks[i] % C
+            with h2d_stream:
+                ksp_batched_d[b].set(coeffs_reg[i * T : (i + 1) * T])
+                if not self.smaps_cached:
+                    smaps_batched_d[b].set(self.smaps[idx_coils])
+                else:
+                    cp.copyto(smaps_batched_d[b], self.smaps[idx_coils])
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            idx_batch = self._bc_chunks[i] // C
+            coil_img_d[b] = self._adj_gather_ifftz(
+                ksp_batched_d[b], tmp_d[b], coil_img_d[b]
+            )
+            for t, bb in enumerate(idx_batch):
+                img_d[bb, :] += coil_img_d[b][t] * smaps_batched_d[b][t].conj()
+            compute_done[b].record()
         img = img_d.get()
         img = img.reshape((B, 1, *XYZ))
         return img
@@ -765,14 +986,21 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
     def _adj_op_calibless_host(self, coeffs, img=None):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
+        if img is None:
+            img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
+        n_call = (B * C) // T
+
+        if self.async_transfer and n_call > 1:
+            ret = self._adj_op_calibless_host_async(coeffs, img)
+            if ret is not None:
+                return ret
+
         coeffs_f = coeffs.reshape(B * C * NZ, NS)
         # Allocate Memory
         ksp_batched = cp.empty((T, NZ * NS), dtype=self.cpx_dtype)
-        if img is None:
-            img = np.zeros((B * C, *XYZ), dtype=self.cpx_dtype)
         coil_img_d = cp.empty((T, *XYZ), dtype=self.cpx_dtype)
         TZ = T * NZ
-        for i in range((B * C * NZ) // TZ):
+        for i in range(n_call):
             ksp_batched = ksp_batched.reshape(TZ, NS)
             ksp_batched.set(coeffs_f[i * TZ : (i + 1) * TZ])
             tmp_adj = self.operator._adj_op_calibless_device(ksp_batched)
@@ -785,6 +1013,53 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             img[i * T : (i + 1) * T, ...] = coil_img_d.get()
         img = img.reshape(B, C, *XYZ)
         return img
+
+    def _adj_op_calibless_host_async(self, coeffs, img):
+        """Pipelined (double-buffered) adjoint calibrationless op for host data.
+
+        See :meth:`_op_sense_host_async`.
+        """
+        B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
+        NS, NZ = len(self._samples2d), len(self.z_index)
+        n_call = (B * C) // T
+        TZ = T * NZ
+
+        coeffs_ = self.operator._register_contiguous(coeffs, shape=(B * C * NZ, NS))
+        if coeffs_ is None:
+            return None
+        if not self.operator._host_register(img):
+            return None
+
+        h2d_stream, d2h_stream = self.operator._get_async_streams()
+        ksp_batched_d = [cp.empty((TZ, NS), dtype=self.cpx_dtype) for _ in range(2)]
+        coil_img_d = [cp.empty((T, *XYZ), dtype=self.cpx_dtype) for _ in range(2)]
+        tmp_d = [cp.empty((TZ, *XYZ[:2]), dtype=self.cpx_dtype) for _ in range(2)]
+        h2d_done = [cp.cuda.Event() for _ in range(2)]
+        compute_done = [cp.cuda.Event() for _ in range(2)]
+
+        def prefetch(i):
+            b = i % 2
+            if i >= 2:
+                h2d_stream.wait_event(compute_done[b])
+            ksp_batched_d[b].set(coeffs_[i * TZ : (i + 1) * TZ], stream=h2d_stream)
+            h2d_done[b].record(h2d_stream)
+
+        prefetch(0)
+        for i in range(n_call):
+            b = i % 2
+            cp.cuda.get_current_stream().wait_event(h2d_done[b])
+            if i + 1 < n_call:
+                prefetch(i + 1)
+            coil_img_d[b] = self._adj_gather_ifftz(
+                ksp_batched_d[b], tmp_d[b], coil_img_d[b]
+            )
+            compute_done[b].record()
+            d2h_stream.wait_event(compute_done[b])
+            coil_img_d[b].get(
+                out=img[i * T : (i + 1) * T], stream=d2h_stream, blocking=False
+            )
+        d2h_stream.synchronize()
+        return img.reshape(B, C, *XYZ)
 
     def _adj_op_calibless_device(self, coeffs, img):
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
