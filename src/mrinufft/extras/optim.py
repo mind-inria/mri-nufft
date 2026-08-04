@@ -327,6 +327,7 @@ def lsqr(
     u = kspace_data.copy()
     bnorm = norm_batched(u)
 
+    warm_start = x_init is not None or x0 is not None
     if x_init is None:
         if x0 is None:
             x_init = xp.zeros(operator.img_full_shape, dtype=operator.cpx_dtype)
@@ -339,8 +340,10 @@ def lsqr(
 
     beta = bnorm.copy()
 
-    if x0 is not None:
-        u -= operator.op(x0).reshape(operator.ksp_full_shape)
+    if warm_start:
+        # The iterations below accumulate on top of ``x_init``, so they must be
+        # driven by the residual of the warm start rather than by ``b``.
+        u -= operator.op(x).reshape(operator.ksp_full_shape)
         beta = norm_batched(u)
 
     if xp.all(beta) > 0:
@@ -352,6 +355,8 @@ def lsqr(
         alpha = xp.zeros(v.shape[0])
 
     if xp.any((alpha * beta) == 0):
+        if old_density is not None:
+            operator.density = old_density
         return x
 
     if xp.all(alpha) > 0:
@@ -488,10 +493,10 @@ def lsqr(
         progressbar.update()
     if operator.squeeze_dims:
         x = operator._safe_squeeze(x)
-    if callback_returns:
-        return x, callback_returns
     if old_density is not None:
         operator.density = old_density
+    if callback_returns:
+        return x, callback_returns
     return x
 
 
@@ -595,6 +600,7 @@ def lsmr(
 
     normb = norm_batched(u)
 
+    warm_start = x_init is not None or x0 is not None
     if x_init is None:
         if x0 is None:
             x_init = xp.zeros(operator.img_full_shape, dtype=operator.cpx_dtype)
@@ -607,7 +613,9 @@ def lsmr(
 
     beta = normb.copy()
 
-    if x0 is not None:
+    if warm_start:
+        # The iterations below accumulate on top of ``x_init``, so they must be
+        # driven by the residual of the warm start rather than by ``b``.
         u -= A(x)
         beta = norm_batched(u)
 
@@ -620,6 +628,8 @@ def lsmr(
         alpha = xp.zeros(v.shape[0])
 
     if xp.any((alpha * beta) == 0):
+        if old_density is not None:
+            operator.density = old_density
         return x
 
     if xp.all(alpha) > 0:
@@ -665,7 +675,6 @@ def lsmr(
     callback_returns = []
     progressbar = _progressbar(progressbar, max_iter)
     for _ in range(max_iter):
-
         u *= -_bc_left(alpha, u)
         u += A(v)
         beta = norm_batched(u)
@@ -791,10 +800,10 @@ def lsmr(
 
     if operator.squeeze_dims:
         x = operator._safe_squeeze(x)
-    if callback_returns:
-        return x, callback_returns
     if old_density is not None:
         operator.density = old_density
+    if callback_returns:
+        return x, callback_returns
     return x
 
 
