@@ -202,7 +202,7 @@ def get_complex_fieldmap_rad(
     Returns
     -------
     NDArray
-        The complex valued field-map in radian, :math:`-\Delta=R_2^* + 2j\pi\Delta f`,
+        The complex valued field-map in radian, :math:`\Delta=-R_2^* + 2j\pi\Delta f`,
         in [rad/s]. This is used in the inhomogeneity term
         :math:`\exp(\Delta(\boldsymbol{r})t)\exp(2j\pi\boldsymbol{r}\boldsymbol{k}(t))`
 
@@ -218,8 +218,12 @@ def get_complex_fieldmap_rad(
     field_map = xp.complex64(2j * xp.pi) * b0_map.astype(xp.float32, copy=False)
 
     if r2star_map is not None:
+        # Subtracted, not added: the result is used as ``Delta`` in ``exp(Delta t)``,
+        # so a positive (physical) R2* has to give decay. Adding it amplifies the
+        # signal along the readout instead, which is worst exactly where T2* is
+        # shortest.
         r2star_map = xp.asarray(r2star_map, dtype=xp.float32)
-        field_map += r2star_map
+        field_map -= r2star_map
 
     return field_map
 
