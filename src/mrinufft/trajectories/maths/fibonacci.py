@@ -2,7 +2,11 @@
 
 import numpy as np
 
-EIGENVECTOR_2D_FIBONACCI = (0.4656, 0.6823, 1)
+# Keep the multidimensional golden means at double precision. These are the
+# inverse-square and inverse powers of the supergolden ratio. The rounded
+# four-decimal values form a rational sequence with an artificial 10,000-shot
+# period when the phases are accumulated modulo one.
+EIGENVECTOR_2D_FIBONACCI = (0.465571231876768, 0.682327803828019, 1)
 
 
 def is_from_fibonacci_sequence(n: int) -> bool:
