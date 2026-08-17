@@ -3,9 +3,7 @@
 import numpy as np
 
 # Keep the multidimensional golden means at double precision. These are the
-# inverse-square and inverse powers of the supergolden ratio. The rounded
-# four-decimal values form a rational sequence with an artificial 10,000-shot
-# period when the phases are accumulated modulo one.
+# inverse-square and inverse powers of the supergolden ratio (psi=1.465571231).
 EIGENVECTOR_2D_FIBONACCI = (0.465571231876768, 0.682327803828019, 1)
 
 
