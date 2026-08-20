@@ -2,7 +2,9 @@
 
 import numpy as np
 
-EIGENVECTOR_2D_FIBONACCI = (0.4656, 0.6823, 1)
+# Keep the multidimensional golden means at double precision. These are the
+# inverse-square and inverse powers of the supergolden ratio (psi=1.465571231).
+EIGENVECTOR_2D_FIBONACCI = (0.465571231876768, 0.682327803828019, 1)
 
 
 def is_from_fibonacci_sequence(n: int) -> bool:
