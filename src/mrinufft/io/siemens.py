@@ -31,6 +31,11 @@ class TwixHeaderDict(TypedDict, total=False):
     type: NotRequired[str]
     oversampling_factor: NotRequired[int]
     trajectory_name: NotRequired[str]
+    TE: NotRequired[list[float]]
+    TR: NotRequired[list[float]]
+    TD: NotRequired[list[float]]
+    TI: NotRequired[list[float]]
+    FlipAngleDegree: NotRequired[list[float]]
 
 
 def _remove_oversampling(data: NDArray, axis: int) -> NDArray:
