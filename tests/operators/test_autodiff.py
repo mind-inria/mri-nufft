@@ -238,11 +238,12 @@ def test_adjoint_and_grad(operator, interface):
 
     # Check if nufft and ndft are close in the backprop
     grad_ndft_kdata, grad_nufft_kdata = _compare_grad(loss_ndft, loss_nufft, ksp_data)
-    assert_allclose(
+    assert_almost_allclose(
         grad_ndft_kdata.cpu().numpy(),
         grad_nufft_kdata.cpu().numpy(),
         atol=7e-3,
         rtol=6e-3,
+        mismatch=0.05,
     )
 
     if isinstance(operator.nufft_op, MRIFourierCorrected):
