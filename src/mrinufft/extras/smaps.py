@@ -1364,10 +1364,11 @@ def coil_compression(
     # Compute the covar matrix of selected data
     cov = center_data @ center_data.T.conj()
     w, v = xp.linalg.eigh(cov)
-    # sort eigenvalues largest to smallest
+    # `eigh` returns eigenvectors as columns of `v` (`v[:, i]` <-> `w[i]`), so
+    # sorting/truncating must index columns, not rows.
     si = xp.argsort(w)[::-1]
     w_sorted = w[si]
-    v_sorted = v[si]
+    v_sorted = v[:, si]
     if isinstance(K, float):
         # retain enough components to reach energy K
         w_cumsum = xp.cumsum(w_sorted)  # from largest to smallest
@@ -1375,7 +1376,9 @@ def coil_compression(
         K = int(xp.searchsorted(w_cumsum / total_energy, K, side="left") + 1)
         K = min(K, w_sorted.size)
         logger.debug("coil_compression: energy threshold -> K=%d virtual coils", K)
-    V = v_sorted[:K]  # use top K component
+    # Rows of V are the top-K eigenvectors (Hermitian transpose of the
+    # column-eigenvector matrix), so `V @ kspace_data` projects onto them.
+    V = v_sorted[:, :K].conj().T  # use top K components
     compress_data = V @ kspace_data
     logger.debug("coil_compression: compressed %d -> %d coils", kspace_data.shape[0], K)
     return compress_data, V
