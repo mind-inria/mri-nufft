@@ -3,14 +3,17 @@
 from mrinufft._array_compat import get_array_module
 
 
-def fft(image, dims=3, shape=None):
+def fft(image, dims, shape=None):
     """Compute n-dimensional FFT along the last ``dims`` axes.
 
     Parameters
     ----------
     image: NDArray
-    dims: int, default 3
-        Number of dimensions on which the fft is performed, starting from last.
+    dims: int
+        Number of dimensions on which the fft is performed, starting from
+        last. Required (no default): for an array with a leading
+        non-spatial axis (e.g. coils), guessing the wrong `dims` silently
+        transforms that axis too.
     shape: tuple[int, ...], optional
         Output shape, by default same as output.
 
@@ -32,14 +35,17 @@ def fft(image, dims=3, shape=None):
     )
 
 
-def ifft(kspace, dims=3, shape=None):
+def ifft(kspace, dims, shape=None):
     """Compute n-dimensional IFFT along the last ``dims`` axes.
 
     Parameters
     ----------
     image: NDArray
-    dims: int, default 3
-        Number of dimensions on which the ifft is performed, starting from last.
+    dims: int
+        Number of dimensions on which the ifft is performed, starting from
+        last. Required (no default): for an array with a leading
+        non-spatial axis (e.g. coils), guessing the wrong `dims` silently
+        transforms that axis too.
     shape: tuple[int, ...], optional
         Output shape, by default same as output.
 

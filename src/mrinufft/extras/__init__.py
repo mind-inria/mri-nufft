@@ -81,15 +81,18 @@ from .optim import (
 )
 from .smaps import (
     cartesian_espirit,
+    cartesian_pisco,
     coil_compression,
     espirit,
     get_smaps,
     low_frequency,
+    pisco,
     register_smaps,
 )
 
 __all__ = [
     "cartesian_espirit",
+    "cartesian_pisco",
     "cg",
     "coil_compression",
     "compute_mfi_coefficients",
@@ -111,6 +114,7 @@ __all__ = [
     "lsqr",
     "make_b0map",
     "make_t2smap",
+    "pisco",
     "register_optim",
     "register_orc",
     "register_smaps",
