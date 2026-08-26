@@ -170,11 +170,6 @@ class MRIStackedNUFFT(FourierOperatorBase):
     def dtype(self, dtype):
         self.operator.dtype = dtype
 
-    @property
-    def n_samples(self):
-        """Return number of samples."""
-        return len(self._samples2d) * len(self.z_index)
-
     @staticmethod
     def _fftz(data):
         """Apply FFT on z-axis."""
