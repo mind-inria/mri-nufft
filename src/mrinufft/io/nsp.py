@@ -575,6 +575,8 @@ def read_trajectory(
             skip_samples = pre_skip * int(oversample_factor)
             kspace_loc = kspace_loc[:, skip_samples:]
             params["num_adc_samples"] = num_adc_samples - skip_samples
+        else:
+            params["num_adc_samples"] = num_adc_samples
         return kspace_loc, params
 
 
@@ -672,18 +674,13 @@ def read_arbgrad_rawdat(
         contrast_num=contrast_num,
     )
     if "ARBGRAD_VE11C" in data_type:
+        ph = twixObj.hdr.Phoenix
         hdr["type"] = "ARBGRAD_GRE"
         if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = twixObj.search_header_for_val(
-                "Phoenix", ("sFastImaging", "lTurboFactor")
-            )[0]
+            hdr["turboFactor"] = ph[("sFastImaging", "lTurboFactor")]
             hdr["type"] = "ARBGRAD_MP2RAGE"
-        hdr["oversampling_factor"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWiPMemBlock", "alFree", "4")
-        )[0]
-        hdr["trajectory_name"] = twixObj.search_header_for_val(
-            "Phoenix", ("sWipMemBlock", "tFree")
-        )[0][1:-1]
+        hdr["oversampling_factor"] = ph[("sWipMemBlock", "alFree", 4)]
+        hdr["trajectory_name"] = ph[("sWipMemBlock", "tFree")]
     if pre_skip > 0:
         samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
         if samples_to_skip >= hdr["n_adc_samples"]:
@@ -735,11 +732,13 @@ def read_nsp_pair(
         trajectory file is located. In that case, the trajectory file will be
         searched for in the directory and its subdirectories, matching the name
         of the trajectory file in the k-space header.
-
     apply_shifts : bool, optional
         Whether to apply shifts to the trajectory, by default True.
     discard_outlier : bool, optional
         Whether to discard outlier samples in the trajectory, by default True.
+    n_shots_per_volume : int | None, optional
+        Number of shots per volume, by default None. If None, it will be inferred
+        from the trajectory parameters.
 
     Returns
     -------
