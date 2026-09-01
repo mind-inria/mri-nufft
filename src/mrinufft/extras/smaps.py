@@ -895,7 +895,7 @@ def _batched_power_iteration(
     eigval = xp.real(xp.sum(xp.conj(v) * xp.einsum("ij...,j...->i...", op, v), axis=0))
     if mode == "min":  # remove the shift introduced.
         eigval = shift[..., 0, 0] - eigval
-    return eigval, v[..., 0]
+    return eigval, v
 
 
 def _subspace_gram_eig(
