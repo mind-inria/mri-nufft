@@ -10,6 +10,8 @@ explanation).
 
 """
 
+import logging
+
 import numpy as np
 from collections.abc import Callable
 
@@ -21,6 +23,13 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
 )
 from mrinufft._utils import MethodRegister
+
+logger = logging.getLogger(__name__)
+
+#: Extra interpolators kept past the time-bandwidth product when ``L=-1``.
+_SVD_MARGIN = 2
+#: Relative error of the ``E ~ B @ C`` factorization above which we warn.
+_ACCURACY_WARN = 0.05
 
 #######################
 # Generate Dummy Data #
@@ -141,12 +150,16 @@ field_map : NDArray
 readout_time : NDArray
     The vector of time points (in seconds) at which to compute phase evolution.
 mask : NDArray
-    Binary mask indicating object region for field map/statistics.
+    Binary mask indicating object region for field map/statistics. Only those
+    voxels are used to build the histogram, so field-map values outside it are
+    clamped to the range spanned by the object.
 L : int, optional
     Number of virtual centers or basis functions retained (default is -1,
-    automatically estimated).
+    automatically estimated from the time-bandwidth product of the readout).
+    Too small an ``L`` leaves a large residual phase error, which appears as
+    artefacts in the corrected image; a warning is logged when that happens.
 n_bins : int, optional
-    Number of histogram bins for off-resonance value clustering (default is 1000).
+    Number of histogram bins for off-resonance value clustering (default is 1024).
 lazy: bool, default False
     If True, use a lazy evaluation scheme for the space interpolator C, saving memory.
 """,
@@ -189,7 +202,7 @@ def get_complex_fieldmap_rad(
     Returns
     -------
     NDArray
-        The complex valued field-map in radian, :math:`-\Delta=R_2^* + 2j\pi\Delta f`,
+        The complex valued field-map in radian, :math:`\Delta=-R_2^* + 2j\pi\Delta f`,
         in [rad/s]. This is used in the inhomogeneity term
         :math:`\exp(\Delta(\boldsymbol{r})t)\exp(2j\pi\boldsymbol{r}\boldsymbol{k}(t))`
 
@@ -205,8 +218,12 @@ def get_complex_fieldmap_rad(
     field_map = xp.complex64(2j * xp.pi) * b0_map.astype(xp.float32, copy=False)
 
     if r2star_map is not None:
+        # Subtracted, not added: the result is used as ``Delta`` in ``exp(Delta t)``,
+        # so a positive (physical) R2* has to give decay. Adding it amplifies the
+        # signal along the readout instead, which is worst exactly where T2* is
+        # shortest.
         r2star_map = xp.asarray(r2star_map, dtype=xp.float32)
-        field_map += r2star_map
+        field_map -= r2star_map
 
     return field_map
 
@@ -214,18 +231,34 @@ def get_complex_fieldmap_rad(
 def _create_histogram(
     field_map: NDArray[np.complex64],
     mask: NDArray | None,
-    n_bins: int | tuple[int, int] = 1000,
-) -> tuple[NDArray, NDArray]:
+    n_bins: int | tuple[int, int] = 1024,
+) -> tuple[NDArray, NDArray, list[NDArray]]:
     """
     Quantize the field map in n_bins values.
 
     Parameters
     ----------
     field_map : NDArray
+        Complex-valued field map, in rad/s.
+    mask : NDArray or None
+        Restrict the histogram to those voxels. ``None`` uses the whole map.
+    n_bins : int or tuple[int, int]
+        Number of bins for the real (R2*) and imaginary (B0) axes.
 
+    Returns
+    -------
+    h_counts: NDArray
+        Bin populations, of shape ``n_bins``.
+    h_centers_cpx: NDArray
+        Complex value at the center of each bin, of shape ``n_bins``.
+    h_edges: list[NDArray]
+        Bin edges of both axes. Returned so that `_full_C` can map voxels onto
+        *these* bins: the edges are derived from the masked field map, so
+        recomputing them from the full map would assign every voxel to the
+        wrong bin.
     """
     xp = get_array_module(field_map)
-    masked_field_map = field_map[mask]
+    masked_field_map = field_map.ravel() if mask is None else field_map[mask].ravel()
     if isinstance(n_bins, int):
         deltaR = xp.max(masked_field_map.real) - xp.min(masked_field_map.real)
         deltaI = xp.max(masked_field_map.imag) - xp.min(masked_field_map.imag)
@@ -238,7 +271,7 @@ def _create_histogram(
             n_bins_i = np.around(n_bins / n_bins_r)
             n_bins = (int(n_bins_r), int(n_bins_i))
 
-    z = field_map[mask].view(xp.float32).reshape(-1, 2)
+    z = masked_field_map.view(xp.float32).reshape(-1, 2)
     # create histograms
     h_counts, h_edges = xp.histogramdd(z, bins=n_bins)
     # get center of bins for real and imaginary part
@@ -251,7 +284,25 @@ def _create_histogram(
     else:
         h_centers_cpx = np.complex64(1j) * h_centers[0]
 
-    return h_counts, h_centers_cpx
+    return h_counts, h_centers_cpx, h_edges
+
+
+def _bin_index(values: NDArray, edges: NDArray) -> NDArray:
+    """Index of the (uniform) histogram bin each value falls into.
+
+    ``np.histogramdd`` puts a value in bin ``k`` when it lies in
+    ``[edges[k], edges[k+1])``, so the index is a floor -- rounding instead
+    would offset every voxel by half a bin. Values outside ``edges`` (e.g.
+    background voxels when the histogram was masked) are clipped to the
+    closest edge bin.
+    """
+    xp = get_array_module(values)
+    n = len(edges) - 1
+    width = (edges[-1] - edges[0]) / n
+    if width == 0:
+        return xp.zeros(values.shape, dtype=int)
+    idx = xp.floor((values - edges[0]) / width).astype(int)
+    return xp.clip(idx, 0, n - 1)
 
 
 class _C_lazy:
@@ -307,7 +358,7 @@ class _C_lazy:
 def _full_C(
     field_map: NDArray[np.complex64],
     C_small: NDArray,
-    n_bins: tuple[int, int],
+    h_edges: list[NDArray],
     lazy: bool = False,
 ):
     """
@@ -322,8 +373,9 @@ def _full_C(
         Complex-valued field-map in rad/s.
     C_small: NDArray
         Small C matrix computed at histogram centers.
-    n_bins: tuple[int, int]
-        Number of bins for the real and imaginary part
+    h_edges: list[NDArray]
+        Bin edges of the histogram ``C_small`` was computed on, as returned by
+        `_create_histogram`. Voxels *must* be mapped onto those same bins.
     lazy: bool, default False
         If True, returns a lazy version of the C matrix.
 
@@ -334,21 +386,9 @@ def _full_C(
     C_Lazy if lazy = True
     """
     xp = get_array_module(field_map)
-    fr = field_map.real.ravel()
-    fi = field_map.imag.ravel()
-    minr, maxr = xp.min(fr), xp.max(fr)
-    mini, maxi = xp.min(fi), xp.max(fi)
-
-    dr = (maxr - minr) / n_bins[0]
-    di = (maxi - mini) / n_bins[1]
-    idxr = xp.zeros(fr.shape, dtype=int)
-    idxi = xp.zeros(fi.shape, dtype=int)
-    if dr != 0:
-        idxr = (xp.around((fr - minr) / dr)).astype(int)
-        idxr = xp.clip(idxr, 0, n_bins[0] - 1)
-    if di != 0:
-        idxi = (xp.around((fi - mini) / di)).astype(int)
-        idxi = xp.clip(idxi, 0, n_bins[1] - 1)
+    n_bins = tuple(len(e) - 1 for e in h_edges)
+    idxr = _bin_index(field_map.real.ravel(), h_edges[0])
+    idxi = _bin_index(field_map.imag.ravel(), h_edges[1])
 
     C_sr = C_small.reshape(-1, *n_bins)
 
@@ -356,9 +396,55 @@ def _full_C(
         C_big = _C_lazy(C_sr, idxr, idxi, field_map.shape)
         return C_big
     else:
-
         C_big = C_sr[:, idxr, idxi]
         return xp.ascontiguousarray(C_big.reshape(-1, *field_map.shape))
+
+
+def _time_bandwidth(w_k: NDArray, readout_time: NDArray) -> float:
+    r"""Time-bandwidth product of the off-resonance phase term over the readout.
+
+    :math:`\Delta\omega \Delta t / 2\pi` is the number of full phase cycles that
+    the most and least off-resonant voxels drift apart during the readout, and
+    hence sets how many interpolators are needed to represent
+    :math:`e^{\omega t}`.
+
+    ``readout_time`` is usually referenced to the echo, so it spans negative
+    *and* positive values: only its extent matters here, never its maximum.
+    """
+    xp = get_array_module(readout_time)
+    dw = float(abs(w_k[-1] - w_k[0]))
+    dt = float(xp.max(readout_time) - xp.min(readout_time))
+    return dw * dt / (2 * np.pi)
+
+
+def _check_accuracy(
+    name: str, B: NDArray, C_small: NDArray, E: NDArray, h_k: NDArray, suggested_L: int
+) -> float:
+    """Log the achieved accuracy of the ``E ~ B @ C`` factorization."""
+    xp = get_array_module(E)
+    weights = xp.sqrt(h_k)
+    ref = float(xp.linalg.norm(weights * E))
+    if ref == 0:
+        return 0.0
+    err = float(xp.linalg.norm(weights * (E - B @ C_small))) / ref
+    L = B.shape[1]
+    if err > _ACCURACY_WARN:
+        logger.warning(
+            "off-resonance '%s': L=%d -> %.1f%% approx error, Recommended value: L>=%d"
+            "readout time.",
+            name,
+            L,
+            100 * err,
+            max(suggested_L, L + 1),
+        )
+    else:
+        logger.debug(
+            "off-resonance '%s': L=%d, phase approximated to %.2f%%",
+            name,
+            L,
+            100 * err,
+        )
+    return err
 
 
 def _get_svds(
@@ -416,8 +502,7 @@ def compute_svd_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
 
     w_k = w_k.ravel()
     h_k = h_k.ravel()
@@ -425,17 +510,19 @@ def compute_svd_coefficients(
     E = xp.exp(xp.outer(readout_time, w_k))
     Ew = xp.sqrt(h_k) * E
     svds = _get_svds(xp, partial_svd)
+    # The number of significant singular values of E is its time-bandwidth
+    # product; the margin covers the slow decay past that knee.
+    auto_L = max(1, int(np.ceil(_time_bandwidth(w_k, readout_time))) + _SVD_MARGIN)
     if L == -1:
-        # Empirically: maximum frequency in the E matrix.
-        L = max(
-            1, int(xp.ceil(abs(w_k[-1] - w_k[0]) * xp.max(readout_time) / 2 * (xp.pi)))
-        )
+        L = auto_L
+    L = min(L, min(Ew.shape) - 1 if partial_svd else min(Ew.shape))
     B, S, D = svds(Ew, L)
     # Compute C with a Least Square interpolation
     # (Redundant with C=DV from E=BSD using L singular values
     # but more robust to histogram with 0 weights.
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
-    C = _full_C(field_map, C, hist_shape, lazy)
+    _check_accuracy("svd", B, C, E, h_k, auto_L)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
 
 
@@ -468,17 +555,15 @@ def compute_mti_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
+    # from Douglas Noll PhD Thesis: the time segments must be spaced finely
+    # enough compared to the fastest phase evolution over the readout.
+    auto_L = max(1, int(np.ceil(4 * _time_bandwidth(w_k, readout_time))))
     if L == -1:
-        # from Douglas Noll PhD Thesis
-        # and XXX
-        L = max(
-            1, int(xp.ceil(2 * abs(w_k[-1] - w_k[0]) * xp.max(readout_time) / (xp.pi)))
-        )
+        L = auto_L
 
     t_l = xp.linspace(xp.min(readout_time), xp.max(readout_time), L, dtype=xp.float32)
 
@@ -491,7 +576,8 @@ def compute_mti_coefficients(
     # Compute B with a Least Square interpolation
     B, _, _, _ = xp.linalg.lstsq(Ch.T, Eh.T, rcond=None)
 
-    C = _full_C(field_map, C, hist_shape, lazy)
+    _check_accuracy("mti", B.T, C, E, h_k, auto_L)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B.T, C, E
 
 
@@ -544,16 +630,14 @@ def compute_mfi_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k = _create_histogram(field_map, mask, n_bins)
-    hist_shape = h_k.shape
+    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
     h_k = h_k.ravel()
     w_k = w_k.ravel()
 
+    # From Doug Noll PhD Thesis
+    auto_L = max(1, int(np.ceil(8 * _time_bandwidth(w_k, readout_time))))
     if L == -1:
-        # From Doug Noll PhD Thesis
-        L = max(
-            1, int(xp.ceil(4 * abs(w_k[-1] - w_k[0])) * xp.max(readout_time) / (xp.pi))
-        )
+        L = auto_L
     w_l = _get_cluster_centers(w_k, h_k, L)
     # Compute B as a phase shift
 
@@ -562,5 +646,6 @@ def compute_mfi_coefficients(
 
     # Compute C with a Least Square interpolation
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
-    C = _full_C(field_map, C, hist_shape, lazy)
+    _check_accuracy("mfi", B, C, E, h_k, auto_L)
+    C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E

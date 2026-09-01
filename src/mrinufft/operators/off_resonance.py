@@ -110,7 +110,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         self,
         interpolators: str | dict | tuple[NDArray, NDArray],
         field_map: NDArray,
-        readout_time: NDArray | None,
+        readout_time: NDArray,
         mask: NDArray | None,
     ):
         """Decompose the field-map in space and time-wise interpolators.
@@ -118,6 +118,29 @@ class MRIFourierCorrected(FourierOperatorBase):
         Sets the B and C attributes.
         """
         xp = get_array_module(field_map)
+
+        if isinstance(interpolators, tuple):
+            B, C = interpolators
+            try:
+                _ = get_array_module(B)
+            except ValueError as e:
+                raise ValueError(
+                    "Provide a tuple of 2 array_like data"
+                    " for space and time interpolators"
+                ) from e
+
+            if B.shape[0] != self.n_samples:
+                n_shot, r = divmod(self.n_samples, B.shape[0])
+                if r != 0:
+                    raise ValueError(
+                        "Time interpolator should divide or equal size of the samples."
+                    )
+                self.n_shots = n_shot
+            # Cast once here rather than relying on implicit dtype promotion
+            # on every op/adj_op call.
+            self.B = B.astype(self.cpx_dtype, copy=False)
+            self.C = C.astype(self.cpx_dtype, copy=False)
+            return
 
         # Resize to match fourier shape
         if field_map.shape != self._fourier_op.shape:
@@ -159,29 +182,6 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.C = xp.ones((1, *self.shape), dtype=self.cpx_dtype)
             return
 
-        if isinstance(interpolators, tuple):
-            B, C = interpolators
-            try:
-                _ = get_array_module(B)
-            except ValueError as e:
-                raise ValueError(
-                    "Provide a tuple of 2 array_like data"
-                    " for space and time interpolators"
-                ) from e
-
-            if B.size != self.n_samples:
-                n_shot, r = divmod(self.n_samples, B.shape[0])
-                if r != 0:
-                    raise ValueError(
-                        "Time interpolator should divide or equal size of the samples."
-                    )
-                self.n_shots = n_shot
-            # Cast once here rather than relying on implicit dtype promotion
-            # on every op/adj_op call.
-            self.B = B.astype(self.cpx_dtype, copy=False)
-            self.C = C.astype(self.cpx_dtype, copy=False)
-            return
-
         kwargs = {}
         if isinstance(interpolators, dict):
             kwargs = interpolators.copy()
@@ -219,11 +219,27 @@ class MRIFourierCorrected(FourierOperatorBase):
     def full_readout_time(self) -> NDArray:
         """Get the full readout time for all samples."""
         xp = get_array_module(self.readout_time)
-        return xp.repeat(self.readout_time, self.n_shots)
+        return xp.tile(self.readout_time, self.n_shots)
 
     def autograd_available(self) -> bool:
         """Whether the operator supports autograd differentiation."""
         return self._fourier_op.autograd_available
+
+    @property
+    def n_samples(self) -> int:
+        """Number of samples in the k-space."""
+        # Force offload to the underlying operator
+        # Otherwise, the stacked-interface cannot be used with orc.
+        return self._fourier_op.n_samples
+
+    @property
+    def density(self) -> NDArray | None:
+        """Density compensation of the underlying operator."""
+        return self._fourier_op.density
+
+    @density.setter
+    def density(self, value: NDArray | None):
+        self._fourier_op.density = value
 
     def __getattr__(self, name):
         """Delegate attribute to internal operator."""
