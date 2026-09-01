@@ -868,8 +868,10 @@ def _batched_power_iteration(
         # `max_eigval` is itself a power-iteration estimate and can
         # undershoot the true largest eigenvalue: Add a small safety margin to ensure
         # the shifted operator is PSD.
-        shift = max_eigval[..., None, None] * 1.01 + 1e-6
-        op = shift * xp.eye(n_coils, dtype=G.dtype) - G
+        shift = max_eigval[None, None, ...] * 1.01 + 1e-6
+        op = shift * xp.eye(n_coils, dtype=G.dtype).reshape(
+            n_coils, n_coils, *batch_ones
+        ) - G
     elif mode == "max":
         op = G
     else:
@@ -894,7 +896,7 @@ def _batched_power_iteration(
 
     eigval = xp.real(xp.sum(xp.conj(v) * xp.einsum("ij...,j...->i...", op, v), axis=0))
     if mode == "min":  # remove the shift introduced.
-        eigval = shift[..., 0, 0] - eigval
+        eigval = shift[0, 0] - eigval
     return eigval, v
 
 
