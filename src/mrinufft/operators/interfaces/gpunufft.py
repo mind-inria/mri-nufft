@@ -432,7 +432,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         self.shape = shape
 
         self._samples = proper_trajectory(
-            samples.astype(np.float32, copy=False), normalize="unit"
+            _array_to_numpy(samples).astype(np.float32, copy=False), normalize="unit"
         )
         self.dtype = self.samples.dtype
         self.n_coils = n_coils
