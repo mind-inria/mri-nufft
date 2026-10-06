@@ -430,8 +430,8 @@ def _check_accuracy(
     L = B.shape[1]
     if err > _ACCURACY_WARN:
         logger.warning(
-            "off-resonance '%s': L=%d -> %.1f%% approx error, Recommended value: L>=%d"
-            "readout time.",
+            "off-resonance '%s': L=%d -> %.1f%% approx error, "
+            "Recommended value: L>=%d readout time.",
             name,
             L,
             100 * err,
