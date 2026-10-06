@@ -119,6 +119,9 @@ class MRIFourierCorrected(FourierOperatorBase):
         """
         xp = get_array_module(field_map)
 
+        self.readout_time = readout_time
+        self.n_shots = 1
+
         if isinstance(interpolators, tuple):
             B, C = interpolators
             try:
@@ -164,10 +167,8 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         self._field_map = field_map
         self.mask = mask
-        self.readout_time = readout_time
 
         readout_time = readout_time.ravel()
-        self.n_shots = 1
         if readout_time.size != self.n_samples:
             n_shot, r = divmod(self.n_samples, readout_time.size)
             if r != 0:
