@@ -1,5 +1,6 @@
 """Utilities for density compensation."""
 
+import inspect
 from functools import wraps
 from collections.abc import Callable
 
@@ -17,12 +18,14 @@ def flat_traj(normalize="unit"):
     """Decorate function to ensure that the trajectory is flatten before calling."""
 
     def decorator(func):
+        first_param = next(iter(inspect.signature(func).parameters))
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             args = list(args)
             if len(args) == 0:
-                # use the first kwargs instead
-                first_key = list(kwargs.keys())[0]
+                # use the trajectory kwarg instead
+                first_key = first_param
                 first_arg = kwargs[first_key]
             else:
                 first_arg = args[0]
