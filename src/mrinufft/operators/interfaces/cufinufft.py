@@ -22,6 +22,7 @@ from mrinufft._array_compat import (
     get_array_module,
     auto_cast,
     _array_to_cupy,
+    _array_to_numpy,
 )
 from mrinufft.operators.gpu_utils import nvtx_mark
 from mrinufft.operators.toeplitz import _GramOpGpuMixin
@@ -303,6 +304,7 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
                     new_smaps, order="C", copy=None, dtype=self.cpx_dtype
                 )
             else:
+                new_smaps = _array_to_numpy(new_smaps)
                 if self._smaps is None:
                     self._smaps = pin_memory(
                         new_smaps.astype(self.cpx_dtype, copy=False)

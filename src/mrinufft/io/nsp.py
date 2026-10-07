@@ -768,7 +768,8 @@ def read_nsp_pair(
         * 1e3,  # us -> ms
         dwell_time=ksp_hdr["dwell_time"] * 1e3,  # us -> ms
     )
-
+    # cast trajectory to the same precision as k-space data
+    traj = traj.astype(ksp_data.real.dtype)
     if n_shots_per_volume is None:
         n_shots_per_volume = traj_params["num_shots"]
 

@@ -31,6 +31,11 @@ class TwixHeaderDict(TypedDict, total=False):
     type: NotRequired[str]
     oversampling_factor: NotRequired[int]
     trajectory_name: NotRequired[str]
+    TE: NotRequired[list[float]]
+    TR: NotRequired[list[float]]
+    TD: NotRequired[list[float]]
+    TI: NotRequired[list[float]]
+    FlipAngleDegree: NotRequired[list[float]]
 
 
 def _remove_oversampling(data: NDArray, axis: int) -> NDArray:
@@ -59,11 +64,16 @@ def _slice_position_shifts(twixObj: TwixObj) -> tuple[float, float, float]:
     )
 
 
+def _first_slice_data(twixObj: TwixObj) -> dict:
+    """Get the SliceData header of the first image line."""
+    image_lines = twixObj.lines.image
+    return image_lines[0:1].headers()[0]["SliceData"]
+
+
 def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
     """Parse the header of a Siemens Twix measurement."""
     image_lines = twixObj.lines.image
-    slice_data = image_lines[0:1].headers()[0]["SliceData"]
-    quat = np.asarray(slice_data["Quaternion"])
+    quat = np.asarray(_first_slice_data(twixObj)["Quaternion"])
     ph = twixObj.hdr.Phoenix
 
     hdr: TwixHeaderDict = {
@@ -95,10 +105,10 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
 
     refscan = twixObj.lines.refscan
     if len(refscan) > 0:
-        hdr["acs"] = refscan.read()
+        hdr["acs"] = refscan.read(dims="minimal")
     noise = twixObj.lines.noise
     if len(noise) > 0:
-        hdr["noise"] = noise.read()
+        hdr["noise"] = noise.read(dims="minimal")
 
     return hdr
 
@@ -317,8 +327,7 @@ def twix2nifti_affine(twixObj: TwixObj) -> NDArray:
         "ucdim": ("sKSpace", "ucDimension"),
     }
     sos = ("sKSpace", "dSliceOversamplingForDialog")
-    image_lines = twixObj.lines.image
-    slice_data = image_lines[0:1].headers()[0]["SliceData"]
+    slice_data = _first_slice_data(twixObj)
     quat = np.asarray(slice_data["Quaternion"])
     rot, det = _siemens_quat_to_rot_mat(quat, True)
     my = twixObj.hdr.MeasYaps
