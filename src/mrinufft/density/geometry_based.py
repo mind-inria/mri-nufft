@@ -1,5 +1,6 @@
 """Compute density compensation weights using geometry-based methods."""
 
+import itertools
 import logging
 
 import numpy as np
@@ -10,45 +11,47 @@ from .utils import flat_traj, _normalize_weights, register_density
 logger = logging.getLogger(__name__)
 
 
-def _vol3d(points):
-    """Compute the volume of a convex 3D polygon.
+def _ridge_measures(vertices, ridge_vertices, radius):
+    """Compute the length (2D) or area (3D) of Voronoi ridges.
 
     Parameters
     ----------
-    points: array_like
-        array of shape (N, 3) containing the coordinates of the points.
+    vertices: array_like
+        array of shape (V, d) containing the Voronoi vertices.
+    ridge_vertices: list of list of int
+        Vertices of each ridge, cyclically ordered in 3D. -1 denotes a vertex at
+        infinity.
+    radius: float
+        Ridges with a vertex further than this from the origin are flagged.
 
     Returns
     -------
-    volume: float
+    measure: array_like
+        array of shape (R,) with the ridge measures, inf for unbounded ridges or
+        ridges reaching beyond ``radius``.
     """
-    base_point = points[0]
-    A = points[:-2] - base_point
-    B = points[1:-1] - base_point
-    C = points[2:] - base_point
-    return np.sum(np.abs(np.dot(np.cross(B, C), A.T))) / 6.0
+    lengths = np.fromiter(map(len, ridge_vertices), int, len(ridge_vertices))
+    flat = np.fromiter(itertools.chain.from_iterable(ridge_vertices), int, sum(lengths))
+    starts = np.concatenate([[0], np.cumsum(lengths)[:-1]])
+    pts = vertices[flat]  # -1 entries are garbage, flagged below.
+    bad = (flat == -1) | (np.sum(pts**2, axis=1) > radius**2)
+    bad = np.logical_or.reduceat(bad, starts)
 
-
-def _vol2d(points):
-    """Compute the area of a convex 2D polygon.
-
-    Parameters
-    ----------
-    points: array_like
-        array of shape (N, 2) containing the coordinates of the points.
-
-    Returns
-    -------
-    area: float
-    """
-    # https://stackoverflow.com/questions/451426/how-do-i-calculate-the-area-of-a-2d-polygon
-    area = 0
-    for i in range(1, len(points) - 1):
-        area += points[i, 0] * (points[i + 1, 1] - points[i - 1, 1])
-    area += points[-1, 0] * (points[0, 1] - points[-2, 1])
-    # we actually don't provide the last point, so we have to do another edge case.
-    area += points[0, 0] * (points[1, 1] - points[-1, 1])
-    return abs(area) / 2.0
+    if vertices.shape[1] == 2:
+        measure = np.linalg.norm(pts[starts + 1] - pts[starts], axis=1)
+    else:
+        # Fan triangulation from the first vertex of each (convex, planar) ridge.
+        ridge_id = np.repeat(np.arange(len(lengths)), lengths)
+        pos = np.arange(len(flat)) - starts[ridge_id]
+        tri = np.flatnonzero((pos >= 1) & (pos <= lengths[ridge_id] - 2))
+        origin = pts[starts[ridge_id[tri]]]
+        cross = np.cross(pts[tri] - origin, pts[tri + 1] - origin)
+        cross = np.stack(
+            [np.bincount(ridge_id[tri], c, len(lengths)) for c in cross.T], axis=1
+        )
+        measure = 0.5 * np.linalg.norm(cross, axis=1)
+    measure[bad] = np.inf
+    return measure
 
 
 def _voronoi_unique(traj, *args, **kwargs):
@@ -68,33 +71,28 @@ def _voronoi_unique(traj, *args, **kwargs):
     wi: array_like
         array of shape (M,) containing the density compensation weights.
     """
-    M = traj.shape[0]
-    if traj.shape[1] == 2:
-        vol = _vol2d
-    else:
-        vol = _vol3d
-    wi = np.zeros(M)
-    v = Voronoi(traj)
-    for mm in range(M):
-        idx_vertices = v.regions[v.point_region[mm]]
-        if np.all([i != -1 for i in idx_vertices]):
-            wi[mm] = vol(v.vertices[idx_vertices])
-        else:
-            wi[mm] = np.inf
-    # some voronoi cell are considered closed, but have a too big area.
-    # (They are closing near infinity).
-    # we classify them as open cells as well.
-    outlier_thresh = np.percentile(wi, 95)
-    wi[wi > outlier_thresh] = np.inf
-
-    # For edge point (infinite voronoi cells) we extrapolate from neighbours
-    # Initial implementation in Jeff Fessler's MIRT
+    M, d = traj.shape
     rho = np.sum(traj**2, axis=1)
-    igood = (rho > 0.6 * np.max(rho)) & ~np.isinf(wi)
-    if len(igood) < 10:
-        logger.info("dubious extrapolation with %d points", len(igood))
+    v = Voronoi(traj)
+    rp = v.ridge_points
+    # Cells that are open, or closing beyond the sampled k-space, are meaningless.
+    measure = _ridge_measures(v.vertices, v.ridge_vertices, np.sqrt(np.max(rho)))
+    is_open = np.zeros(M, dtype=bool)
+    is_open[rp[np.isinf(measure)].ravel()] = True
+
+    # A cell is the union of pyramids with a ridge as base and its generator as
+    # apex, the height being half the distance to the neighbouring generator.
+    height = 0.5 * np.linalg.norm(traj[rp[:, 0]] - traj[rp[:, 1]], axis=1)
+    pyramid = np.where(np.isinf(measure), 0, measure * height / d)
+    wi = np.bincount(rp[:, 0], pyramid, M) + np.bincount(rp[:, 1], pyramid, M)
+
+    # For edge point (open voronoi cells) we extrapolate from neighbours
+    # Initial implementation in Jeff Fessler's MIRT
+    igood = (rho > 0.6 * np.max(rho)) & ~is_open
+    if np.sum(igood) < 10:
+        logger.info("dubious extrapolation with %d points", np.sum(igood))
     poly = np.polynomial.Polynomial.fit(rho[igood], wi[igood], 3)
-    wi[np.isinf(wi)] = poly(rho[np.isinf(wi)])
+    wi[is_open] = poly(rho[is_open])
     return wi
 
 
@@ -103,7 +101,8 @@ def _voronoi_unique(traj, *args, **kwargs):
 def voronoi(traj, *args, **kwargs):
     """Estimate  density compensation weight using voronoi parcellation.
 
-    In case of multiple point in the center of kspace, the weight is split evenly.
+    In case of duplicated points (e.g. the k-space center), the weight is split
+    evenly.
 
     Parameters
     ----------
@@ -117,19 +116,65 @@ def voronoi(traj, *args, **kwargs):
     ----------
     Based on the MATLAB implementation in MIRT: https://github.com/JeffFessler/mirt/blob/main/mri/ir_mri_density_comp.m
     """
-    # deduplication only works for the 0,0 coordinate !!
-    i0 = np.sum(np.abs(traj), axis=1) == 0
-    if np.any(i0):
-        i0f = np.where(i0)
-        i0f = i0f[0]
-        i0[i0f] = False
-        wi = np.zeros(len(traj))
-        wi[~i0] = _voronoi_unique(traj[~i0])
-        i0[i0f] = True
-        wi[i0] = wi[i0f] / np.sum(i0)
-    else:
-        wi = _voronoi_unique(traj)
+    # Rounding catches near-duplicates that qhull would silently drop.
+    _, first, inverse, counts = np.unique(
+        np.round(traj, 12),
+        axis=0,
+        return_index=True,
+        return_inverse=True,
+        return_counts=True,
+    )
+    wi = _voronoi_unique(traj[first])
+    wi = (wi / counts)[inverse.ravel()]
     return 1 / _normalize_weights(wi)
+
+
+@register_density
+@flat_traj
+def radial(traj, *args, tol=1e-6, **kwargs):
+    """Compute density compensation weights for isotropic radial trajectories.
+
+    Samples are grouped by their distance to the k-space center. Each group of
+    samples shares the volume of the spherical shell (annulus in 2D) bounded by the
+    midpoints to the neighboring radii. This yields weights proportional to
+    :math:`|k|^{d-1}`, and works for both center-out and in-out trajectories.
+
+    Parameters
+    ----------
+    traj: array_like
+        array of shape (M, 2) or (M, 3) containing the coordinates of the points.
+    tol: float
+        Relative tolerance (w.r.t. the largest radius) under which two radii are
+        considered equal. default 1e-6
+    *args, **kwargs:
+        Dummy arguments to be compatible with other methods.
+
+    Returns
+    -------
+    weights: array_like
+        array of shape (M,) containing the density compensation weights.
+    """
+    dim = traj.shape[-1]
+    r = np.linalg.norm(traj, axis=-1)
+    order = np.argsort(r)
+    r_sorted = r[order]
+
+    new_group = np.diff(r_sorted) > tol * r_sorted[-1]
+    group_id = np.concatenate([[0], np.cumsum(new_group)])
+    counts = np.bincount(group_id)
+    radii = r_sorted[np.concatenate([[0], np.flatnonzero(new_group) + 1])]
+
+    if len(radii) == 1:
+        return np.full(len(traj), 1 / len(traj))
+
+    mid = (radii[1:] + radii[:-1]) / 2
+    inner = np.concatenate([[0], mid])
+    outer = np.concatenate([mid, [radii[-1] + (radii[-1] - radii[-2]) / 2]])
+    shell = (outer**dim - inner**dim) / counts
+
+    weights = np.empty(len(traj))
+    weights[order] = shell[group_id]
+    return weights / np.sum(weights)
 
 
 @register_density
