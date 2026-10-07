@@ -6,9 +6,13 @@ from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
-from mrinufft.density import cell_count, voronoi
+from mrinufft.density import cell_count, radial, voronoi
 from mrinufft.density.utils import _normalize_weights
 from mrinufft._utils import proper_trajectory
+from mrinufft.trajectories import (
+    initialize_2D_radial,
+    initialize_3D_phyllotaxis_radial,
+)
 
 
 def slow_cell_count2D(traj, shape, osf):
@@ -61,3 +65,45 @@ def test_voronoi(traj, shape):
     result = result / np.mean(result)
     distance = distance / np.mean(distance)
     assert_correlate(result, distance, slope=1)
+
+
+@parametrize("in_out", [False, True])
+@parametrize("Ns", [256, 257])
+@parametrize(
+    "init, dim",
+    [(initialize_2D_radial, 2), (initialize_3D_phyllotaxis_radial, 3)],
+)
+def test_radial(init, dim, in_out, Ns):
+    """Test that radial weights follow the |k|^(d-1) isotropic profile."""
+    traj = init(64, Ns, in_out=in_out)
+    weights = radial(traj)
+    r = np.linalg.norm(proper_trajectory(traj, normalize="unit"), axis=-1)
+
+    assert weights.shape == (traj.shape[0] * traj.shape[1],)
+    assert np.all(weights > 0)
+    npt.assert_allclose(np.sum(weights), 1)
+    # Away from the center, the shell volume is proportional to r^(d-1).
+    far = r > 0.05
+    ratio = weights[far] / r[far] ** (dim - 1)
+    npt.assert_allclose(ratio, np.mean(ratio), rtol=1e-3)
+
+
+def test_radial_in_out_center_out():
+    """Test that in-out and center-out sampling of the same points agree."""
+    Nc, Ns = 32, 128
+    w_co = radial(initialize_2D_radial(2 * Nc, Ns, in_out=False))
+    w_io = radial(initialize_2D_radial(Nc, 2 * Ns - 1, in_out=True))
+    # Same non-center samples, the center weight is split among Nc or 2Nc samples.
+    w_co, w_io = np.sort(w_co)[2 * Nc :], np.sort(w_io)[Nc:]
+    npt.assert_allclose(w_co, w_io, rtol=1e-6)
+
+
+def test_voronoi_radial3D_dense():
+    """Test that voronoi matches the radial weights on a dense 3D radial."""
+    traj = initialize_3D_phyllotaxis_radial(1024, 1024)
+    w_vor = voronoi(traj)
+    w_rad = radial(traj)
+    rel = (w_vor / np.sum(w_vor)) / w_rad - 1
+    assert np.all(w_vor > 0)
+    assert abs(np.median(rel)) < 5e-3
+    assert np.percentile(np.abs(rel), 95) < 3e-2
