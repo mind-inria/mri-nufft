@@ -89,9 +89,9 @@ def rescale(image, reference):
 # of the local sampling density, before the adjoint is applied, so that
 # over-sampled regions stop dominating the reconstruction.
 #
-# For a radial trajectory, the density is analytically known: it grows
-# linearly with distance to the k-space center, so we can compute the
-# weights directly.
+# For a 2D radial trajectory with uniform radial and angular spacing,
+# sampling density is proportional to 1/r away from the center. Its inverse,
+# the compensation weight, grows linearly with distance to the center.
 
 flat_samples = samples.reshape(-1, 2)
 radial_weights = np.sqrt(np.sum(flat_samples**2, axis=1))
@@ -105,8 +105,8 @@ adjoint_radial = nufft_radial.adj_op(kspace_data)
 # :func:`~mrinufft.density.get_density`, that work for arbitrary
 # trajectories, not just radial ones:
 #
-# - ``"voronoi"``: weight inversely proportional to the area of each
-#   sample's Voronoi cell -- geometrically exact, but slow, especially in 3D.
+# - ``"voronoi"``: weight proportional to the area of each sample's Voronoi
+#   cell -- a geometric estimate, but slow, especially in 3D.
 # - ``"pipe"``: an iterative estimate computed directly from the
 #   interpolation/spreading kernels of the NUFFT operator.
 
@@ -154,13 +154,13 @@ print(
 # inverse problem, and it does not account for noise or for prior knowledge
 # about the image.
 #
-# It is also **not appropriate inside an iterative / compressed-sensing
-# reconstruction**: iterative solvers already minimize a data-fidelity term
-# built directly from the forward operator :math:`A` (e.g.
-# :math:`\|Ax - y\|_2^2`). Inserting a density-compensated adjoint there
-# would apply the weighting twice -- once implicitly through the solver's own
-# handling of :math:`A^H A`, and once explicitly through the compensation --
-# distorting the data-fidelity term and biasing the solution.
+# For the unweighted data-fidelity term :math:`\frac{1}{2}\|Ax-y\|_2^2`,
+# iterative solvers need the true adjoint: the gradient is
+# :math:`A^H(Ax-y)`. Replacing it with a density-compensated adjoint gives
+# :math:`A^H D(Ax-y)`, the gradient of a different, weighted least-squares
+# objective. Density weighting can be used in iterative reconstruction,
+# but the objective and solver must be formulated consistently; it is not
+# needed for the unweighted problem used in the next tutorial.
 #
 # :ref:`tutorial_compressed_sensing_recon` shows how to instead solve the
 # inverse problem directly, without relying on density compensation at all.

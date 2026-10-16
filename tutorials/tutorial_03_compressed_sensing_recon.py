@@ -105,7 +105,7 @@ y += noise_level * (torch.randn_like(y) + 1j * torch.randn_like(y))
 physics = fourier_op.make_deepinv_phy(viewed_as_real=True)
 y_real = kspace_as_real(y).float()
 
-x_adjoint = physics.A_dagger(y_real)  # density-compensated adjoint (pipe)
+x_adjoint = physics.A_adjoint(y_real)  # density-compensated adjoint (pipe)
 
 # %%
 # Solving it with FISTA, and why lambda matters
@@ -125,6 +125,7 @@ x_adjoint = physics.A_dagger(y_real)  # density-compensated adjoint (pipe)
 
 wavelet = WaveletPrior(wv="sym8", wvdim=2, level=3, is_complex=False)
 data_fidelity = L2()
+fourier_op.density = None
 stepsize = 0.8 / float(fourier_op.get_lipschitz_cst())
 
 x_ref = torch.abs(mri_2D).unsqueeze(0).unsqueeze(0)
