@@ -607,6 +607,35 @@ def read_arbgrad_rawdat(
     return_twix: Literal[False] = False,
 ) -> tuple[NDArray, TwixHeaderDict]: ...
 
+def _append_arbgrad_header(
+    hdr: TwixHeaderDict, twixObj: TwixObj, data_type: str
+) -> TwixHeaderDict:
+    """Append ARBGRAD-specific fields to a Siemens MRI header.
+
+    Parameters
+    ----------
+    hdr : TwixHeaderDict
+        Header information already parsed from the Twix object. Updated in place.
+    twixObj : TwixObj
+        The mapVBVD object containing the raw data and header information.
+    data_type : str
+        The type of data to read.
+
+    Returns
+    -------
+    hdr : TwixHeaderDict
+        The updated header information.
+    """
+    if "ARBGRAD_VE11C" in data_type:
+        ph = twixObj.hdr.Phoenix
+        hdr["type"] = "ARBGRAD_GRE"
+        if hdr["n_contrasts"] > 1:
+            hdr["turboFactor"] = ph[("sFastImaging", "lTurboFactor")]
+            hdr["type"] = "ARBGRAD_MP2RAGE"
+        hdr["oversampling_factor"] = ph[("sWipMemBlock", "alFree", 4)]
+        hdr["trajectory_name"] = ph[("sWipMemBlock", "tFree")]
+    return hdr
+
 
 def read_arbgrad_rawdat(
     filename: str,
@@ -673,14 +702,7 @@ def read_arbgrad_rawdat(
         slice_num=slice_num,
         contrast_num=contrast_num,
     )
-    if "ARBGRAD_VE11C" in data_type:
-        ph = twixObj.hdr.Phoenix
-        hdr["type"] = "ARBGRAD_GRE"
-        if hdr["n_contrasts"] > 1:
-            hdr["turboFactor"] = ph[("sFastImaging", "lTurboFactor")]
-            hdr["type"] = "ARBGRAD_MP2RAGE"
-        hdr["oversampling_factor"] = ph[("sWipMemBlock", "alFree", 4)]
-        hdr["trajectory_name"] = ph[("sWipMemBlock", "tFree")]
+    hdr = _append_arbgrad_header(hdr, twixObj, data_type)
     if pre_skip > 0:
         samples_to_skip = int(hdr["oversampling_factor"] * pre_skip)
         if samples_to_skip >= hdr["n_adc_samples"]:
