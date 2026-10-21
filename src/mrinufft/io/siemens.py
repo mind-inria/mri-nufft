@@ -1,4 +1,4 @@
-"""Siemens specific rawdat reader, wrapper over pymapVBVD."""
+"""Siemens specific rawdat reader, wrapper over turbotwix."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from typing import TypedDict, overload, TYPE_CHECKING, Literal
 from typing_extensions import NotRequired  # backport for Python < 3.11
 
 if TYPE_CHECKING:
-    from mapvbvd.mapVBVD import AttrDict as TwixObj
+    from turbotwix import Measurement as TwixObj
 
 
 class TwixHeaderDict(TypedDict, total=False):
@@ -27,62 +27,78 @@ class TwixHeaderDict(TypedDict, total=False):
     affine: NDArray
     shifts: tuple[float, ...]
     acs: NDArray | None
+    noise: NDArray | None
     type: NotRequired[str]
     oversampling_factor: NotRequired[int]
     trajectory_name: NotRequired[str]
 
 
-def _slice_position_shifts(twixObj) -> tuple[float, float, float]:
+def _remove_oversampling(data: NDArray, axis: int) -> NDArray:
+    """Remove the standard 2x readout oversampling along `axis`.
+
+    Matches the convention used by mapVBVD/twixtools: an ifft to image space along the
+    readout, keep the central half of the field of view, fft back to k-space.
+    """
+    ncol = data.shape[axis]
+    keep = np.concatenate([np.arange(ncol // 4), np.arange(ncol * 3 // 4, ncol)])
+    image = np.fft.ifft(data, axis=axis)
+    image = np.take(image, keep, axis=axis)
+    return np.fft.fft(image, axis=axis)
+
+
+def _slice_position_shifts(twixObj: TwixObj) -> tuple[float, float, float]:
     """Get the slice/volume position offset from ``sSliceArray``.
 
     ``sSliceArray`` is the standard MrProt field for slice/volume position
     and is populated identically across sequences, unlike the raw
     ``slicePos`` mdh field which can be sequence-dependent.
     """
-    my = twixObj.hdr.Phoenix
-    keys = {
-        "dTra": ("sSliceArray", "asSlice", "0", "sPosition", "dTra"),
-        "dSag": ("sSliceArray", "asSlice", "0", "sPosition", "dSag"),
-        "dCor": ("sSliceArray", "asSlice", "0", "sPosition", "dCor"),
-    }
-    return tuple(my.get(keys[ax], 0.0) for ax in ("dSag", "dCor", "dTra"))
+    return tuple(
+        twixObj.hdr.Phoenix.get(("sSliceArray", "asSlice", 0, "sPosition", ax), 0.0)
+        for ax in ("dSag", "dCor", "dTra")
+    )
 
 
 def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
-    """Parse the header of a Siemens Twix object."""
+    """Parse the header of a Siemens Twix measurement."""
+    image_lines = twixObj.lines.image
+    slice_data = image_lines[0:1].headers()[0]["SliceData"]
+    quat = np.asarray(slice_data["Quaternion"])
+    ph = twixObj.hdr.Phoenix
+
     hdr: TwixHeaderDict = {
-        "n_coils": int(twixObj.image.NCha),
-        "n_shots": int(twixObj.image.NLin) * int(twixObj.image.NPar),
-        "n_contrasts": int(twixObj.image.NSet),
-        "n_adc_samples": int(twixObj.image.NCol),
-        "n_slices": int(twixObj.image.NSli),
-        "n_average": int(twixObj.image.NAve),
-        "n_reps": int(twixObj.image.NRep),
-        "orientation": _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], False),
+        "n_coils": image_lines.NCha,
+        "n_shots": image_lines.NLin * image_lines.NPar,
+        "n_contrasts": image_lines.NSet,
+        "n_adc_samples": image_lines.NCol,
+        "n_slices": image_lines.NSli,
+        "n_average": image_lines.NAve,
+        "n_reps": image_lines.NRep,
+        "orientation": _siemens_quat_to_rot_mat(quat, False),
         "affine": twix2nifti_affine(twixObj),
         "shifts": _slice_position_shifts(twixObj),
         "acs": None,
-        "dwell_time": float(twixObj.hdr["Phoenix"][("sRXSPEC", "alDwellTime", "0")])
+        "noise": None,
+        "dwell_time": float(ph.get(("sRXSPEC", "alDwellTime", 0), 0))
         * 1e-9,  # convert from ns to s
     }
 
     for key in ["alTR", "alTE", "alTD", "alTI", "adFlipAngleDegree"]:
-        # get a list of all sequences times in the sequence
-        vals = twixObj.search_header_for_val("Phoenix", (f"{key}",))
-        nice_key = key[2:]  # strip prefix "al /ad"
-        if len(vals) == 1:
-            hdr[nice_key] = vals[0]  # type: ignore
-        elif len(vals) > 0:
-            # the first element found is the length of the list, we dicard it.
-            if vals[0] == len(vals[1:]):
-                vals = vals[1:]
-            hdr[nice_key] = vals  # type: ignore
-        # don't populate if not found.
+        # get a list of all sequence times in the sequence
+        vals = ph.get(key)
+        if vals is None:
+            continue  # don't populate if not found.
+        nice_key = key[2:]  # strip prefix "al" / "ad"
+        if not isinstance(vals, list):
+            vals = [vals]
+        hdr[nice_key] = vals[0] if len(vals) == 1 else vals  # type: ignore
 
-    if "refscan" in twixObj.keys():
-        twixObj.refscan.squeeze = True
-        acs = twixObj.refscan[""].astype(np.complex64)
-        hdr["acs"] = acs.swapaxes(0, 1)
+    refscan = twixObj.lines.refscan
+    if len(refscan) > 0:
+        hdr["acs"] = refscan.read()
+    noise = twixObj.lines.noise
+    if len(noise) > 0:
+        hdr["noise"] = noise.read()
 
     return hdr
 
@@ -142,7 +158,7 @@ def read_siemens_rawdat(
     data_type : str, optional
         The type of data to read, by default 'ARBGRAD_VE11C'.
     return_twix : bool, optional
-        Whether to return the twix object, by default False.
+        Whether to return the twix measurement, by default False.
     slice_num : int, optional
         The slice to read, by default None. This applies for 2D data.
     contrast_num: int, optional
@@ -159,62 +175,57 @@ def read_siemens_rawdat(
     Raises
     ------
     ImportError
-        If the mapVBVD module is not available.
+        If the turbotwix module is not available.
 
     Notes
     -----
-    This function requires the mapVBVD module to be installed.
-    You can install it using the following command::
-
-        pip install pymapVBVD
+    This function requires the turbotwix module to be installed.
     """
     try:
-        from mapvbvd import mapVBVD
+        import turbotwix as tw
     except ImportError as err:
         raise ImportError(
-            "The mapVBVD module is not available. Please install "
-            "it along with the [extra] dependencies "
-            "or using `pip install pymapVBVD`."
+            "The turbotwix module is not available. Please install "
+            "it along with the [extra] dependencies."
         ) from err
-    twixObj = mapVBVD(filename)
-    if isinstance(twixObj, list):
-        twixObj = twixObj[-1]
-    twixObj.image.flagRemoveOS = removeOS
-    twixObj.image.flagDoAverage = doAverage
+    twixObj = tw.open_twix(filename).scan
     hdr = _parse_twix_header(twixObj)
-    # Add sequence information
     if slice_num is not None and hdr["n_slices"] < slice_num:
         raise ValueError("The slice number is out of bounds.")
     if contrast_num is not None and hdr["n_contrasts"] < contrast_num:
         raise ValueError("The contrast number is out of bounds.")
-    # Shape : NCol X NCha X NLin X NAve X NSli X NPar X ..., NSet
-    if slice_num is not None and contrast_num is not None:
-        raw_kspace = twixObj.image[
-            (slice(None),) * 4 + (slice_num,) + (slice(None),) * 4 + (contrast_num,)
-        ]
-    elif slice_num is not None:
-        raw_kspace = twixObj.image[(slice(None),) * 4 + (slice_num,)]
-    elif contrast_num is not None:
-        raw_kspace = twixObj.image[(slice(None),) * 9 + (contrast_num,)]
-    else:
-        raw_kspace = twixObj.image[""]
-    if squeeze:
-        raw_kspace = np.squeeze(raw_kspace)
+
+    lines = twixObj.lines.image
+    if slice_num is not None:
+        lines = lines[lines.counter("Sli") == slice_num]
+    if contrast_num is not None:
+        lines = lines[lines.counter("Set") == contrast_num]
+
     if reshape:
-        # Format as coils x shots x samples x slices x contrasts x averages
-        data = np.moveaxis(raw_kspace, 0, 2)
-        data = data.reshape(
-            hdr["n_coils"],
-            hdr["n_shots"],
-            hdr["n_adc_samples"],
-            hdr["n_slices"] if slice_num is None else 1,
-            hdr["n_reps"],
-            hdr["n_contrasts"] if contrast_num is None else 1,
-            hdr["n_average"] if hdr["n_average"] > 1 and not doAverage else 1,
-        )
+        # Fold onto (Cha, Lin, Par, Sli, Rep, Set, Ave, Col), then merge the
+        # adjacent Lin/Par axes into a single shots axis.
+        dims = ("Lin", "Par", "Sli", "Rep", "Set", "Ave")
+        raw = twixObj.read(lines, dims=dims)
+        if removeOS:
+            raw = _remove_oversampling(raw, axis=-1)
+        raw = np.moveaxis(raw, -1, 3)  # (Cha, Lin, Par, Col, Sli, Rep, Set, Ave)
+        ncha, nlin, npar, ncol, nsli, nrep, nset, nave = raw.shape
+        data = raw.reshape(ncha, nlin * npar, ncol, nsli, nrep, nset, nave)
+        if doAverage:
+            data = data.mean(axis=-1, keepdims=True)
+        if squeeze:
+            data = np.squeeze(data)
     else:
+        dims = ("Lin", "Par", "Sli", "Ave", "Eco", "Phs", "Rep", "Set")
+        raw = twixObj.read(lines, dims=dims)
+        if removeOS:
+            raw = _remove_oversampling(raw, axis=-1)
+        if doAverage:
+            raw = raw.mean(axis=dims.index("Ave") + 1, keepdims=True)
+        if squeeze:
+            raw = np.squeeze(raw)
         # Cartesian data, format as coils x readout_samples x paritions_y x partitions_z
-        data = np.moveaxis(raw_kspace, 1, 0)
+        data = np.moveaxis(raw, -1, 1)
     if return_twix:
         return data, hdr, twixObj
     return data, hdr
@@ -272,12 +283,12 @@ def _siemens_quat_to_rot_mat(
 
 def twix2nifti_affine(twixObj: TwixObj) -> NDArray:
     """
-    Calculate the affine transformation matrix from Siemens Twix object.
+    Calculate the affine transformation matrix from Siemens Twix measurement.
 
     Parameters
     ----------
-    twixObj : twixObj
-        The twix object returned by mapVBVD.
+    twixObj : TwixObj
+        The turbotwix measurement.
 
     Returns
     -------
@@ -291,51 +302,57 @@ def twix2nifti_affine(twixObj: TwixObj) -> NDArray:
         Calculate the rotation matrix from Siemens Twix quaternion.
     read_siemens_rawdat
         Read raw data from a Siemens MRI file,
-        use return_twix=True to get the twix object.
+        use return_twix=True to get the twix measurement.
     read_arbgrad_rawdat
         Read raw data from a Siemens MRI file from neurospin,
-        use return_twix=True to get the twix object.
+        use return_twix=True to get the twix measurement.
     """
     # required keys
     keys = {
-        "dthick": ("sSliceArray", "asSlice", "0", "dThickness"),
-        "dread": ("sSliceArray", "asSlice", "0", "dReadoutFOV"),
-        "dphase": ("sSliceArray", "asSlice", "0", "dPhaseFOV"),
+        "dthick": ("sSliceArray", "asSlice", 0, "dThickness"),
+        "dread": ("sSliceArray", "asSlice", 0, "dReadoutFOV"),
+        "dphase": ("sSliceArray", "asSlice", 0, "dPhaseFOV"),
         "lbase": ("sKSpace", "lBaseResolution"),
         "lphase": ("sKSpace", "lPhaseEncodingLines"),
         "ucdim": ("sKSpace", "ucDimension"),
     }
     sos = ("sKSpace", "dSliceOversamplingForDialog")
-    rot, det = _siemens_quat_to_rot_mat(twixObj.image.slicePos[0][-4:], True)
+    image_lines = twixObj.lines.image
+    slice_data = image_lines[0:1].headers()[0]["SliceData"]
+    quat = np.asarray(slice_data["Quaternion"])
+    rot, det = _siemens_quat_to_rot_mat(quat, True)
     my = twixObj.hdr.MeasYaps
 
-    for k in keys.keys():
-        if keys[k] not in my:
-            return rot
+    values = {k: my.get(path) for k, path in keys.items()}
+    if any(v is None for v in values.values()):
+        return rot
 
-    dthick = my[keys["dthick"]]
+    dthick = values["dthick"]
+    sos_val = my.get(sos)
     fov = np.array(
         [
-            my[keys["dread"]],
-            my[keys["dphase"]],
-            dthick * (1 + my[sos] if sos in my else 1),
+            values["dread"],
+            values["dphase"],
+            dthick * (1 + sos_val if sos_val is not None else 1),
         ]
     )
 
     lpart = ("sKSpace", "lPartitions")
+    lpart_val = my.get(lpart)
     res = np.array(
         [
-            my[keys["lbase"]],
-            my[keys["lphase"]],
-            my[lpart] if my[keys["ucdim"]] == 4 and lpart in my else 1,
+            values["lbase"],
+            values["lphase"],
+            lpart_val if values["ucdim"] == 4 and lpart_val is not None else 1,
         ]
     )
 
     scale = np.diag([*(fov / res), 1])
 
-    offset = twixObj.image.slicePos[0][:3]
+    slice_pos = slice_data["SlicePos"]
+    offset = np.array([slice_pos[ax] for ax in ("Sag", "Cor", "Tra")])
 
-    fovz = fov[2] - (my[sos] * dthick if sos in my else 0)
+    fovz = fov[2] - (sos_val * dthick if sos_val is not None else 0)
     center = [-fov[0] / 2, -fov[1] / 2, -fovz / 2, 1]
 
     t = (rot @ center)[:3] - offset
