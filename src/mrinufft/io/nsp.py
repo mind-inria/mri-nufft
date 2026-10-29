@@ -607,6 +607,7 @@ def read_arbgrad_rawdat(
     return_twix: Literal[False] = False,
 ) -> tuple[NDArray, TwixHeaderDict]: ...
 
+
 def _append_arbgrad_header(
     hdr: TwixHeaderDict, twixObj: TwixObj, data_type: str
 ) -> TwixHeaderDict:

@@ -105,7 +105,7 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
 
     refscan = twixObj.lines.refscan
     if len(refscan) > 0:
-        # We move the axis of the ACS data to to have convention 
+        # We move the axis of the ACS data to to have convention
         # (n_coils, readout, partitions_y, partitions_z)
         hdr["acs"] = np.moveaxis(refscan.read(dims="minimal"), -1, 1)
     noise = twixObj.lines.noise

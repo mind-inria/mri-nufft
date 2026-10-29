@@ -869,9 +869,11 @@ def _batched_power_iteration(
         # undershoot the true largest eigenvalue: Add a small safety margin to ensure
         # the shifted operator is PSD.
         shift = max_eigval[None, None, ...] * 1.01 + 1e-6
-        op = shift * xp.eye(n_coils, dtype=G.dtype).reshape(
-            n_coils, n_coils, *batch_ones
-        ) - G
+        op = (
+            shift
+            * xp.eye(n_coils, dtype=G.dtype).reshape(n_coils, n_coils, *batch_ones)
+            - G
+        )
     elif mode == "max":
         op = G
     else:
