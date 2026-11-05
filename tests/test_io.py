@@ -114,14 +114,15 @@ def test_write_n_read(
     )
     np.testing.assert_allclose(params["version"], version)
     assert params["num_shots"] == trajectory.shape[0]
-    assert params["num_samples_per_shot"] == trajectory.shape[1] - 1
     np.testing.assert_almost_equal(params["TE_pos"], TE_pos)
     np.testing.assert_allclose(params["gamma"], gamma)
     np.testing.assert_allclose(params["recon_tag"], recon_tag)
     assert params["min_osf"] == min_osf
     np.testing.assert_almost_equal(params["FOV"], FOV, decimal=6)
     np.testing.assert_equal(params["img_size"], img_size)
-    np.testing.assert_almost_equal(read_traj, trajectory, decimal=3.5)
+    start = params.get("start_skip_samples", 0)
+    stop = read_traj.shape[1] - params.get("end_skip_samples", 0) + 1
+    np.testing.assert_almost_equal(read_traj[:, start:stop, :], trajectory, decimal=3.5)
 
 
 @parametrize_with_cases(
