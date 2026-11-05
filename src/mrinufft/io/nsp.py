@@ -489,6 +489,17 @@ def read_trajectory(
         gradients = np.reshape(
             grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
         )
+        if read_shots:
+            osf = raster_time / dwell_time
+            if not np.isclose(osf, np.round(osf)) or (
+                num_adc_samples is not None
+                and num_adc_samples % num_samples_per_shot != 0
+            ):
+                logger.warning(
+                    "Fractional OSF or num_adc_samples not a multiple of "
+                    "num_samples_per_shot with read_shots=True can lead to "
+                    "unexpected results."
+                )
         # Handle skipped samples
         if start_skip_samples > 0:
             if not read_shots:
