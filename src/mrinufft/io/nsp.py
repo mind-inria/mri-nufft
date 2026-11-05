@@ -509,7 +509,7 @@ def read_trajectory(
         if num_adc_samples is None:
             if read_shots:
                 # Acquire one extra sample at the end of each shot in read_shots mode
-                num_adc_samples = num_samples_per_shot + int(raster_time / dwell_time)
+                num_adc_samples = (num_samples_per_shot + 1) * int(raster_time / dwell_time)
                 end_skip_samples += int(raster_time / dwell_time)
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
