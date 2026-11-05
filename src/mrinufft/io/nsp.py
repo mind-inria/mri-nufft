@@ -414,8 +414,11 @@ def read_trajectory(
     gradient_raster_time : float, optional
         Gradient raster time in ms, by default 0.01
     read_shots : bool, optional
-        Whether in read shots configuration which accepts an extra
-        point at end, by default False
+        Whether in read shots configuration which accepts all the 
+        an extra samples, including prephasors and spoilers, if it exists
+        and an extra point at end, by default False
+        If True, the returned `trajectory_params` will contain pre-skip
+        and post-skip samples, which can be used to remove the extra samples.
     normalize_factor : float, optional
         Whether to normalize the k-space locations, by default 0.5
         When None, normalization is not done.
@@ -428,6 +431,8 @@ def read_trajectory(
     -------
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
+    trajectory_params : dict
+        Dictionary containing trajectory parameters.
     """
     with open(grad_filename, "rb") as binfile:
         data = np.fromfile(binfile, dtype=np.float32)
@@ -486,19 +491,26 @@ def read_trajectory(
         )
         # Handle skipped samples
         if start_skip_samples > 0:
-            start_location_updates = (
-                np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
-            )
-            initial_positions += start_location_updates
-            gradients = gradients[:, start_skip_samples:, :]
-            num_samples_per_shot -= start_skip_samples
+            if not read_shots:
+                start_location_updates = (
+                    np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+                )
+                initial_positions += start_location_updates
+                gradients = gradients[:, start_skip_samples:, :]
+                num_samples_per_shot -= start_skip_samples
+            else:
+                start_skip_samples = start_skip_samples*int(raster_time / dwell_time)
         if end_skip_samples > 0:
-            gradients = gradients[:, :-end_skip_samples, :]
-            num_samples_per_shot -= end_skip_samples
+            if not read_shots:
+                gradients = gradients[:, :-end_skip_samples, :]
+                num_samples_per_shot -= end_skip_samples
+            else:
+                end_skip_samples = end_skip_samples*int(raster_time / dwell_time)
         if num_adc_samples is None:
             if read_shots:
                 # Acquire one extra sample at the end of each shot in read_shots mode
-                num_adc_samples = num_samples_per_shot + 1
+                num_adc_samples = num_samples_per_shot + int(raster_time / dwell_time)
+                end_skip_samples += int(raster_time / dwell_time)
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
         kspace_loc = np.zeros((num_shots, num_adc_samples, dimension), dtype=np.float32)
@@ -557,6 +569,9 @@ def read_trajectory(
             params["TE_pos"] = TE_pos
             if version >= 42:
                 params["timestamp"] = timestamp
+            if version >= 51:
+                params["start_skip_samples"] = start_skip_samples
+                params["end_skip_samples"] = end_skip_samples
         if normalize_factor is not None:
             Kmax = img_size / 2 / fov
             kspace_loc = kspace_loc / Kmax * normalize_factor
