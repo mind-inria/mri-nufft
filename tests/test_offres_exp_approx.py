@@ -139,3 +139,22 @@ def test_b0_map_upsampling_warns_and_matches_shape(caplog):
     # check that no exception is raised and internal shape matches
     assert op.B.shape[0] == len(readout_time)
     assert op.shape == shape_target
+
+
+@parametrize("container", [tuple, list])
+def test_explicit_interpolators(container):
+    """Interpolators (B, C) are used as given, without any field map."""
+    from mrinufft.trajectories import initialize_2D_spiral
+
+    samples = initialize_2D_spiral(4, 256).astype(np.float32)
+    shape = (32, 32)
+    nufft = get_operator("finufft")(samples, shape)
+    rng = np.random.default_rng(0)
+    B = rng.normal(size=(samples.shape[0] * samples.shape[1], 3)) + 0j
+    C = rng.normal(size=(3, *shape)) + 0j
+    image = rng.normal(size=shape) + 1j * rng.normal(size=shape)
+    operator = MRIFourierCorrected(nufft, interpolator=container((B, C)))
+    expected = sum(B[:, ell] * nufft.op(C[ell] * image) for ell in range(3))
+    npt.assert_allclose(
+        np.ravel(operator.op(image)), np.ravel(expected), rtol=1e-4, atol=1e-4
+    )
