@@ -92,16 +92,14 @@ class MRIFourierCorrected(FourierOperatorBase):
         self.squeeze_dims = self._fourier_op.squeeze_dims
         self._fourier_op.squeeze_dims = False  # we will manage shapes here.
 
-        if (
-            b0_map is None
-            and readout_time is None
-            and not isinstance(interpolator, tuple)
-        ):
+        if isinstance(interpolator, tuple | list):
+            complex_field_map = None
+        elif b0_map is None or readout_time is None:
             raise ValueError(
                 "b0_map  and readout_time required for off-resonance correction."
             )
-
-        complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
+        else:
+            complex_field_map = get_complex_fieldmap_rad(b0_map, r2star_map)
 
         self.compute_interpolator(interpolator, complex_field_map, readout_time, mask)
 
@@ -117,12 +115,11 @@ class MRIFourierCorrected(FourierOperatorBase):
 
         Sets the B and C attributes.
         """
-        xp = get_array_module(field_map)
-
         self.readout_time = readout_time
         self.n_shots = 1
 
-        if isinstance(interpolators, tuple):
+        # with_numpy_cupy passes tuples of arrays on as lists.
+        if isinstance(interpolators, tuple | list):
             B, C = interpolators
             try:
                 _ = get_array_module(B)
@@ -145,6 +142,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.C = C.astype(self.cpx_dtype, copy=False)
             return
 
+        xp = get_array_module(field_map)
         # Resize to match fourier shape
         if field_map.shape != self._fourier_op.shape:
             self.log.warning(
