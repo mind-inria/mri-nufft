@@ -8,3 +8,4 @@ Explanations
    nufft
    mrinufft_convention
    trajectory_gradspec
+   girf
