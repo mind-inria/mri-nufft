@@ -414,7 +414,7 @@ def read_trajectory(
     gradient_raster_time : float, optional
         Gradient raster time in ms, by default 0.01
     read_shots : bool, optional
-        Whether in read shots configuration which accepts all the 
+        Whether in read shots configuration which accepts all the
         an extra samples, including prephasors and spoilers, if it exists
         and an extra point at end, by default False
         If True, the returned `trajectory_params` will contain pre-skip
@@ -504,23 +504,27 @@ def read_trajectory(
         if start_skip_samples > 0:
             if not read_shots:
                 start_location_updates = (
-                    np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+                    np.sum(gradients[:, :start_skip_samples], axis=1)
+                    * raster_time
+                    * gamma
                 )
                 initial_positions += start_location_updates
                 gradients = gradients[:, start_skip_samples:, :]
                 num_samples_per_shot -= start_skip_samples
             else:
-                start_skip_samples = start_skip_samples*int(raster_time / dwell_time)
+                start_skip_samples = start_skip_samples * int(raster_time / dwell_time)
         if end_skip_samples > 0:
             if not read_shots:
                 gradients = gradients[:, :-end_skip_samples, :]
                 num_samples_per_shot -= end_skip_samples
             else:
-                end_skip_samples = end_skip_samples*int(raster_time / dwell_time)
+                end_skip_samples = end_skip_samples * int(raster_time / dwell_time)
         if num_adc_samples is None:
             if read_shots:
                 # Acquire one extra sample at the end of each shot in read_shots mode
-                num_adc_samples = (num_samples_per_shot + 1) * int(raster_time / dwell_time)
+                num_adc_samples = (num_samples_per_shot + 1) * int(
+                    raster_time / dwell_time
+                )
                 end_skip_samples += int(raster_time / dwell_time)
             else:
                 num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
