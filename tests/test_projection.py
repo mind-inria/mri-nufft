@@ -30,9 +30,7 @@ def test_project_trajectory_is_idempotent(trajectory, _):
 @parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
 def test_project_trajectory_satisfies_constraints(trajectory, _):
     acq = Acquisition.default
-    projected = project_trajectory(
-        trajectory, acq, max_iter=3000, TE_pos=0, verbose=0
-    )
+    projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
 
     gradients, slew_rates = compute_gradients_and_slew_rates(projected, acq)
     np.testing.assert_array_equal(projected[:, 0], 0)
