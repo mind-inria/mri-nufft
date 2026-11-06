@@ -719,6 +719,7 @@ def compute_girf_interpolators(
     mask: NDArray | None = None,
     interpolators: tuple[NDArray, NDArray] | None = None,
     n_fit: int = 20000,
+    skip: int = 0,
 ) -> tuple[NDArray, NDArray]:
     r"""Factorize the higher-order terms of a GIRF prediction.
 
@@ -732,8 +733,8 @@ def compute_girf_interpolators(
         \quad \text{with} \quad
         \phi_j(t) = 2\pi\gamma \int_0^t b_j(\tau)\, d\tau
 
-    the phases accrued by the fields :math:`b_j` since the first sample, to be
-    used as interpolators of
+    the phases accrued by the fields :math:`b_j` since the start of the
+    waveforms, to be used as interpolators of
     :class:`~mrinufft.operators.off_resonance.MRIFourierCorrected`. The
     exponential is expanded in Taylor series, whose terms are products of
     spherical harmonics in closed form, then compressed to rank ``L``. See
@@ -765,24 +766,39 @@ def compute_girf_interpolators(
     interpolators : tuple[NDArray, NDArray], optional
         Factorization ``(B, C)`` to multiply with, e.g. that of the static
         off-resonance from :func:`get_orc_factorization`. ``B`` has a shape
-        ``(n_samples, L0)`` or ``(n_shots * n_samples, L0)``, and ``C`` a shape
-        ``(L0, *acq.img_size)``.
+        ``(n_samples - skip, L0)`` or ``(n_shots * (n_samples - skip), L0)``,
+        and ``C`` a shape ``(L0, *acq.img_size)``.
     n_fit : int, optional
         Number of samples and of voxels drawn to fit the compression. The
         default is 20000.
+    skip : int, optional
+        Number of samples of the trajectory before the ADC, e.g. during the
+        pre-phasers (``start_skip_samples`` of :func:`mrinufft.io.read_gradients`).
+        The phases are accrued from the start of ``fields``, and ``B`` covers
+        the samples from ``skip`` on. The default is 0.
 
     Returns
     -------
     B : NDArray
-        Temporal interpolators, with shape ``(n_shots * n_samples, L)``.
+        Temporal interpolators, with shape ``(n_shots * (n_samples - skip), L)``.
     C : NDArray
         Spatial interpolators, with shape ``(L, *acq.img_size)``.
+
+    Raises
+    ------
+    ValueError
+        If ``skip`` is out of range, or if ``interpolators`` does not match the
+        samples.
     """
     fields = np.asarray(fields, dtype=float)
-    n_shots, n_samples, n_terms = fields.shape[0], fields.shape[1] + 1, fields.shape[2]
+    n_shots, n_terms = fields.shape[0], fields.shape[2]
+    if not 0 <= skip <= fields.shape[1]:
+        raise ValueError("`skip` must be in [0, n_samples).")
+    n_samples = fields.shape[1] + 1 - skip
     n_total = n_shots * n_samples
     phase = 2 * np.pi * acq.gamma * acq.raster_time * np.cumsum(fields[..., 4:], axis=1)
-    coefs = np.pad(phase, ((0, 0), (1, 0), (0, 0))).reshape(n_total, -1)
+    phase = np.pad(phase, ((0, 0), (1, 0), (0, 0)))[:, skip:]
+    coefs = phase.reshape(n_total, -1)
     shape = tuple(int(n) for n in acq.img_size)
     grid = np.indices(shape).reshape(len(shape), -1).T
     positions = (grid - np.asarray(shape) // 2) * np.asarray(acq.res)
@@ -804,7 +820,10 @@ def compute_girf_interpolators(
         prior = [np.asarray(x) for x in interpolators]
         prior[1] = prior[1].reshape(len(prior[1]), -1)
         if len(prior[0]) not in (n_samples, n_total):
-            raise ValueError("`interpolators` B must have n_samples or all rows.")
+            raise ValueError(
+                "`interpolators` B must have a row per sample from `skip` on, "
+                "for one shot or for all of them."
+            )
 
     def series_time(index):
         return _taylor_time(coefs[index], terms)

@@ -364,9 +364,13 @@ Practical aspects
 
 Pre-phasers
     The responses to the pre-phasers, and to anything played before the ADC,
-    leak into the readout. They should be included in the input, and cropped
-    from the output. :func:`mrinufft.io.read_gradients` returns the full
-    waveforms, with the number of samples before the ADC.
+    leak into the readout, and the phases accrued during them differ between
+    shots. They should be included in the input, and cropped from the output
+    after integrating the fields: the trajectory and the phases are cropped
+    directly, and :func:`~mrinufft.extras.compute_girf_interpolators` takes
+    the full fields with the number of samples to skip, ``skip``.
+    :func:`mrinufft.io.read_gradients` returns the full waveforms, with the
+    number of samples before the ADC.
 
 Noise
     Above the bandwidth of the measurement, the GIRF is only noise, which makes
@@ -383,6 +387,7 @@ Example
 
     import numpy as np
 
+    from mrinufft.extras import compute_girf_interpolators
     from mrinufft.io import read_girf, read_gradients
     from mrinufft.trajectories import (
         Acquisition,
@@ -415,6 +420,12 @@ Example
     # Compensate the zeroth order, with kspace_data of shape (n_coils, n_samples)
     # sampled at the same times as the trajectory.
     kspace_data = kspace_data * np.exp(1j * phase_0.ravel())
+
+    # Higher orders, from the full fields, with b0_factors the factorization of
+    # the static off-resonance at the samples of the ADC (get_orc_factorization).
+    B, C = compute_girf_interpolators(
+        fields, acq, skip=skip, interpolators=b0_factors
+    )
 
 See :ref:`sphx_glr_generated_autoexamples_operators_example_girf.py` for the
 higher orders and the static off-resonance.
