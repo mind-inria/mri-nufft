@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Literal, overload, Any
 import numpy as np
 from numpy.typing import NDArray
+from scipy.io import loadmat
 
 from mrinufft.trajectories.gradients import connect_gradient
 from mrinufft.trajectories.utils import (
@@ -616,6 +617,56 @@ def read_trajectory(
     return kspace_loc, params
 
 
+def read_girf(
+    filename: str | Path, fmax: float | None = None
+) -> tuple[NDArray, NDArray]:
+    """Read a gradient impulse response function (GIRF) exported at NeuroSpin.
+
+    The file is a MATLAB file holding ``f``, the frequencies in kHz, and
+    ``girf``, the transfer functions with shape ``(3, n_terms, n_freqs)``: for
+    each gradient axis of the scanner, the response of the spherical harmonic
+    terms measured by the field camera, ordered as ``(B0, x, y, z, ...)``. See
+    :ref:`girf` for the terms and their units.
+
+    Parameters
+    ----------
+    filename : str | Path
+        Path to the MATLAB file.
+    fmax : float, optional
+        Frequency in Hz above which the response is set to zero, e.g. where the
+        measurement is only noise. By default, the whole response is kept.
+
+    Returns
+    -------
+    freqs : NDArray
+        Frequencies in Hz, from 0. Shape ``(n_freqs,)``.
+    girf : NDArray
+        One-sided transfer functions, averaged between positive and negative
+        frequencies so that the impulse response is real.
+        Shape ``(3, n_terms, n_freqs)``.
+
+    See Also
+    --------
+    mrinufft.trajectories.apply_girf
+    """
+    content = loadmat(filename, squeeze_me=True, variable_names=("f", "girf"))
+    freqs = np.ravel(content["f"]).astype(float) * 1e3
+    girf = np.asarray(content["girf"], dtype=complex)
+    order = np.argsort(freqs)
+    freqs, girf = freqs[order], girf[..., order]
+
+    positive = freqs[np.argmin(np.abs(freqs)) :].copy()
+    positive[0] = 0.0  # the exported zero frequency carries rounding noise
+
+    def interp(x):
+        return np.apply_along_axis(lambda v: np.interp(x, freqs, v), -1, girf)
+
+    # enforce hermitian symmetry
+    girf = 0.5 * (interp(positive) + np.conj(interp(-positive)))
+    girf[..., 0] = girf[..., 0].real
+    if fmax is not None:
+        girf[..., positive > fmax] = 0
+    return positive, girf
 
 
 @overload

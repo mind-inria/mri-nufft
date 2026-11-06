@@ -6,6 +6,8 @@ from mrinufft.io.cfl import (
 )
 from mrinufft.io.nsp import (
     read_arbgrad_rawdat,
+    read_girf,
+    read_gradients,
     read_trajectory,
     write_gradients,
     write_trajectory,
@@ -31,6 +33,8 @@ __all__ = [
     "nifti_affine",
     "pulseq_gre",
     "read_arbgrad_rawdat",
+    "read_girf",
+    "read_gradients",
     "read_pulseq_traj",
     "read_siemens_rawdat",
     "read_trajectory",
