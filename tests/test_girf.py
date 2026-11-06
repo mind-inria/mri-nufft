@@ -331,6 +331,21 @@ def test_girf_interpolators(higher_order, order):
     assert error < 2e-4
 
 
+def test_girf_interpolators_skip(higher_order):
+    """Phases accrue from the start of the fields, B starts after ``skip``."""
+    fields, acq, exact = higher_order
+    skip = 30
+    B, C = compute_girf_interpolators(fields, acq, tol=1e-4, skip=skip)
+    expected = exact.reshape(len(fields), -1, exact.shape[1])[:, skip:]
+    expected = expected.reshape(-1, exact.shape[1])
+    error = np.linalg.norm(expected - B @ C.reshape(len(C), -1))
+    assert error < 2e-4 * np.linalg.norm(expected)
+    with pytest.raises(ValueError, match="skip"):
+        compute_girf_interpolators(fields, acq, skip=fields.shape[1] + 1)
+    with pytest.raises(ValueError, match="row per sample"):
+        compute_girf_interpolators(fields, acq, skip=skip, interpolators=(B[:5], C))
+
+
 def test_girf_interpolators_product(higher_order):
     """A prior factorization, e.g. of the static off-resonance, is multiplied."""
     fields, acq, exact = higher_order
