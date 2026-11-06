@@ -82,6 +82,28 @@ jobs:
           name: coverage_${{ matrix.backend }}
           path: coverage_${{ matrix.backend }}
 
+  test-mlx-nufft:
+    runs-on: macos-15
+    needs: get-commit-message
+    permissions:
+      contents: read
+    if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: uv sync --extra test --extra finufft --extra mlx-nufft
+
+      - name: Verify MLX NUFFT availability
+        run: uv run python -c "from mrinufft.operators import check_backend; assert check_backend('mlx-nufft')"
+
+      - name: Run MLX NUFFT tests
+        run: uv run pytest -k='operators' --backend mlx-nufft --ref finufft --disable-pytest-warnings
+
   test-gpu:
     runs-on: gpu
     needs: get-commit-message
@@ -237,4 +259,3 @@ jobs:
         with:
           name: coverage_badge
           path: coverage_badge.svg
-
