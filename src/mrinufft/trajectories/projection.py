@@ -260,6 +260,13 @@ class GradientLinearProjection:
         """Compute the primal variables z = c - M^H q."""
         return self.c - (self.M.H * q)
 
+    def __call__(self, q: NDArray) -> float:
+        """Evaluate the objective function."""
+        z = self.get_primal_variables(q)
+        s_star = self.linear_projector(z) if self.linear_projector is not None else z
+        xp = get_array_module(s_star)
+        return 0.5 * xp.linalg.norm(s_star) ** 2
+
     def grad(self, q: NDArray) -> NDArray:
         """
         Compute the gradient of the objective function w.r.t q.
