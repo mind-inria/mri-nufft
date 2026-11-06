@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
+from pytest_cases import parametrize_with_cases
 
+from case_trajectories import CasesTrajectories
 from mrinufft.trajectories.projection import project_trajectory
 from mrinufft.trajectories.utils import (
     Acquisition,
@@ -13,16 +15,9 @@ def require_pyproximal():
     pytest.importorskip("pyproximal")
 
 
-def _trajectory():
-    trajectory = np.zeros((1, 12, 2))
-    trajectory[0, :, 0] = np.linspace(-0.1, 0.1, 12)
-    trajectory[0, :, 1] = 0.02 * np.sin(np.linspace(0, 2 * np.pi, 12))
-    return trajectory
-
-
-def test_project_trajectory_is_idempotent():
+@parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
+def test_project_trajectory_is_idempotent(trajectory, _):
     acq = Acquisition.default
-    trajectory = _trajectory()
 
     projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
     projected_twice = project_trajectory(
@@ -32,10 +27,11 @@ def test_project_trajectory_is_idempotent():
     np.testing.assert_allclose(projected_twice, projected, atol=1e-4, rtol=1e-3)
 
 
-def test_project_trajectory_satisfies_constraints():
+@parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
+def test_project_trajectory_satisfies_constraints(trajectory, _):
     acq = Acquisition.default
     projected = project_trajectory(
-        _trajectory(), acq, max_iter=3000, TE_pos=0, verbose=0
+        trajectory, acq, max_iter=3000, TE_pos=0, verbose=0
     )
 
     gradients, slew_rates = compute_gradients_and_slew_rates(projected, acq)
