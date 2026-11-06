@@ -133,6 +133,7 @@ __all__ += [
 ]
 
 
+from .girf import apply_girf, spherical_harmonics
 from .gradients import (
     connect_gradient,
     get_prephasors_and_spoilers,
@@ -195,6 +196,8 @@ __all__ += [
     "Tilts",
     "VDSorder",
     "VDSpdf",
+    "apply_girf",
+    "spherical_harmonics",
     "check_hardware_constraints",
     "compute_gradients_and_slew_rates",
     "connect_gradient",
