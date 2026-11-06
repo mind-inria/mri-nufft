@@ -30,6 +30,7 @@ from helpers import (
         "pynfft",
         "pynufft-cpu",
         "finufft",
+        "mlx-nufft",
         "cufinufft",
         "ducc0",
         "gpunufft",
