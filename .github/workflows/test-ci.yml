@@ -85,6 +85,8 @@ jobs:
   test-mlx-nufft:
     runs-on: macos-15
     needs: get-commit-message
+    permissions:
+      contents: read
     if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v4
