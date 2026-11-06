@@ -24,9 +24,7 @@ def test_project_trajectory_is_idempotent():
     acq = Acquisition.default
     trajectory = _trajectory()
 
-    projected = project_trajectory(
-        trajectory, acq, max_iter=3000, TE_pos=0, verbose=0
-    )
+    projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
     projected_twice = project_trajectory(
         projected, acq, max_iter=3000, TE_pos=0, verbose=0
     )
