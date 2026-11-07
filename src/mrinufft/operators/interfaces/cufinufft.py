@@ -311,7 +311,10 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
                     )
                     self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
                 else:
-                    # copy the array to pinned memory
+                    # The device-data paths H2D-copy straight from this pinned
+                    # buffer (async, as it is pinned) and return without
+                    # syncing: let pending copies finish before overwriting it.
+                    cp.cuda.get_current_stream().synchronize()
                     np.copyto(self._smaps, new_smaps.astype(self.cpx_dtype, copy=False))
         else:
             self._smaps = new_smaps
