@@ -287,6 +287,11 @@ class Acquisition:
         Time resolution for the ADC, in seconds. default to 5us.
     norm_factor : float, optional
         Normalization factor for the trajectory. Defaults to 0.5.
+    affine : NDArray, optional
+        Affine ``(4, 4)`` from the voxel indices of the image to physical
+        coordinates in m (NIfTI affines are in mm), giving the position and
+        orientation of the image. If `None`, the image axes are the physical
+        ones, and the voxel ``img_size // 2`` is at the origin.
 
     Attributes
     ----------
@@ -315,6 +320,7 @@ class Acquisition:
     gamma: Gammas = Gammas.HYDROGEN  # Hz/T
     adc_dwell_time: float = 5 * SI.micro  # us
     norm_factor: float = 0.5
+    affine: NDArray | None = field(default=None, compare=False)
 
     default: ClassVar[Acquisition]
     _old_default: Acquisition | None = field(default=None, init=False)

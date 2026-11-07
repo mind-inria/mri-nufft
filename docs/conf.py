@@ -38,6 +38,7 @@ GITHUB_VERSION = "master"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_design",
     "sphinx_copybutton",
     "sphinx.ext.duration",
     "sphinx.ext.autodoc",

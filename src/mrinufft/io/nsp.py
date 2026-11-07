@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Literal, overload, Any
 import numpy as np
 from numpy.typing import NDArray
+from scipy.io import loadmat
 
 from mrinufft.trajectories.gradients import connect_gradient
 from mrinufft.trajectories.utils import (
@@ -386,6 +387,99 @@ def write_trajectory(
     )
 
 
+def read_gradients(
+    grad_filename: str | Path,
+    gamma: Gammas | float = Gammas.HYDROGEN,
+) -> tuple[NDArray, NDArray, dict[str, Any]]:
+    """Read the gradient waveforms stored in a gradient file.
+
+    Unlike :func:`read_trajectory`, the waveforms are returned as stored, on the
+    gradient raster, including the samples played outside of the ADC window
+    (pre-phasors and spoilers, for version >= 5.1).
+
+    Parameters
+    ----------
+    grad_filename : str | Path
+        Gradient filename.
+    gamma : float, optional
+        Gyromagnetic ratio in kHz/T, only used for versions < 4.1 which do not
+        store it.
+
+    Returns
+    -------
+    gradients : NDArray
+        Gradients in T/m. Shape (num_shots, num_samples_per_shot, dimension).
+    initial_positions : NDArray
+        K-space positions at the start of the waveforms, in 1/m.
+        Shape (num_shots, dimension).
+    params : dict
+        Header of the file. ``gamma`` is in kHz/T, ``num_samples_per_shot``
+        counts all the stored samples, of which ``start_skip_samples`` and
+        ``end_skip_samples`` are played outside of the ADC window.
+    """
+    data = np.fromfile(grad_filename, dtype=np.float32)
+    if float(data[0]) > 4:
+        version, data = _pop_elements(data)
+        version = int(np.around(version * 10))
+    else:
+        version = 10
+    dimension, data = _pop_elements(data, type="int")
+    if version >= 41:
+        fov, data = _pop_elements(data, dimension)
+        img_size, data = _pop_elements(data, dimension, type="int")
+        min_osf, data = _pop_elements(data, type="int")
+        gamma, data = _pop_elements(data)
+        gamma = gamma / 1000
+    (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
+    start_skip_samples = end_skip_samples = 0
+    if version > 40:
+        TE_pos, data = _pop_elements(data)
+        grad_max, data = _pop_elements(data)
+        recon_tag, data = _pop_elements(data)
+        recon_tag = np.around(recon_tag, 2)
+        left_over = 10
+        if version > 41:
+            timestamp, data = _pop_elements(data)
+            timestamp = datetime.fromtimestamp(float(timestamp))
+            left_over -= 1
+        if version > 50:
+            packed_skips, data = _pop_elements(data, num_elements=2, type="int")
+            start_skip_samples, end_skip_samples = packed_skips
+            left_over -= 2
+        _, data = _pop_elements(data, left_over)
+    initial_positions, data = _pop_elements(data, dimension * num_shots)
+    initial_positions = np.reshape(initial_positions, (num_shots, dimension))
+    if version > 45:
+        # Final positions are present in the file,
+        # but we don't need them for k-space calculation
+        _, data = _pop_elements(data, dimension * num_shots)
+    if version < 41:
+        grad_max, data = _pop_elements(data)
+    gradients, _ = _pop_elements(data, dimension * num_samples_per_shot * num_shots)
+    # Convert gradients to T/m
+    gradients = np.reshape(
+        grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
+    )
+    params = {
+        "version": version / 10,
+        "dimension": dimension,
+        "num_shots": num_shots,
+        "num_samples_per_shot": num_samples_per_shot,
+        "gamma": gamma,
+        "start_skip_samples": start_skip_samples,
+        "end_skip_samples": end_skip_samples,
+    }
+    if version >= 41:
+        params["FOV"] = fov
+        params["img_size"] = img_size
+        params["min_osf"] = min_osf
+        params["recon_tag"] = recon_tag
+        params["TE_pos"] = TE_pos
+        if version >= 42:
+            params["timestamp"] = timestamp
+    return gradients, initial_positions, params
+
+
 def read_trajectory(
     grad_filename: str,
     dwell_time: float | str = DEFAULT_RASTER_TIME,
@@ -428,156 +522,151 @@ def read_trajectory(
     -------
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
+
+    See Also
+    --------
+    read_gradients
+        Read the gradient waveforms, including those outside of the ADC window.
     """
-    with open(grad_filename, "rb") as binfile:
-        data = np.fromfile(binfile, dtype=np.float32)
-        if float(data[0]) > 4:
-            version, data = _pop_elements(data)
-            version = int(np.around(version * 10))
+    gradients, initial_positions, params = read_gradients(grad_filename, gamma)
+    gamma = params["gamma"]
+    num_shots = params["num_shots"]
+    num_samples_per_shot = params["num_samples_per_shot"]
+    dimension = params["dimension"]
+    start_skip_samples = params["start_skip_samples"]
+    end_skip_samples = params["end_skip_samples"]
+    if dwell_time == "min_osf":
+        dwell_time = raster_time / params["min_osf"]
+    dwell_time_ns = dwell_time * 1e6
+    gradient_raster_time_ns = raster_time * 1e6
+    # Handle skipped samples
+    if start_skip_samples > 0:
+        start_location_updates = (
+            np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+        )
+        initial_positions += start_location_updates
+        gradients = gradients[:, start_skip_samples:, :]
+        num_samples_per_shot -= start_skip_samples
+    if end_skip_samples > 0:
+        gradients = gradients[:, :-end_skip_samples, :]
+        num_samples_per_shot -= end_skip_samples
+    if num_adc_samples is None:
+        if read_shots:
+            # Acquire one extra sample at the end of each shot in read_shots mode
+            num_adc_samples = num_samples_per_shot + 1
         else:
-            version = 10
-        dimension, data = _pop_elements(data, type="int")
-        if version >= 41:
-            fov, data = _pop_elements(data, dimension)
-            img_size, data = _pop_elements(data, dimension, type="int")
-            min_osf, data = _pop_elements(data, type="int")
-            gamma, data = _pop_elements(data)
-            gamma = gamma / 1000
-            if dwell_time == "min_osf":
-                dwell_time = raster_time / min_osf
-        (num_shots, num_samples_per_shot), data = _pop_elements(data, 2, type="int")
-        if version > 40:
-            TE_pos, data = _pop_elements(data)
-            grad_max, data = _pop_elements(data)
-            recon_tag, data = _pop_elements(data)
-            recon_tag = np.around(recon_tag, 2)
-            left_over = 10
-            if version > 41:
-                timestamp, data = _pop_elements(data)
-                timestamp = datetime.fromtimestamp(float(timestamp))
-                left_over -= 1
-            if version > 50:
-                packed_skips, data = _pop_elements(data, num_elements=2, type="int")
-                start_skip_samples, end_skip_samples = packed_skips
-                left_over -= 2
-            else:
-                start_skip_samples = 0
-                end_skip_samples = 0
-            _, data = _pop_elements(data, left_over)
-        initial_positions, data = _pop_elements(data, dimension * num_shots)
-        initial_positions = np.reshape(initial_positions, (num_shots, dimension))
-        if version > 45:
-            # Final positions are present in the file,
-            # but we don't need them for k-space calculation
-            _, data = _pop_elements(data, dimension * num_shots)
-        dwell_time_ns = dwell_time * 1e6
-        gradient_raster_time_ns = raster_time * 1e6
-        if version < 41:
-            grad_max, data = _pop_elements(data)
-        # Pop gradients from data
-        # we are done doing the parsing !
-        gradients, _ = _pop_elements(
-            data,
-            dimension * num_samples_per_shot * num_shots,
-        )
-        # Convert gradients to T/m
-        gradients = np.reshape(
-            grad_max * gradients * 1e-3, (num_shots, num_samples_per_shot, dimension)
-        )
-        # Handle skipped samples
-        if start_skip_samples > 0:
-            start_location_updates = (
-                np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+            num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
+    kspace_loc = np.zeros((num_shots, num_adc_samples, dimension), dtype=np.float32)
+    kspace_loc[:, 0, :] = initial_positions
+    adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
+    Q, R = divmod(adc_times, gradient_raster_time_ns)
+    Q = Q.astype("int")
+    if not np.all(
+        np.logical_or(Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0))
+    ):
+        logger.warning("Binary file doesn't seem right! Proceeding anyway")
+    grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
+    for i, (q, r) in enumerate(zip(Q, R)):
+        if q >= gradients.shape[1]:
+            if q > gradients.shape[1]:
+                logger.warning(
+                    "Number of samples is more than what was "
+                    "obtained in binary file!\n"
+                    "Data will be extended"
+                )
+            kspace_loc[:, i + 1, :] = (
+                initial_positions
+                + (
+                    grad_accumulated[:, gradients.shape[1] - 1, :]
+                    + gradients[:, gradients.shape[1] - 1, :] * r
+                )
+                * gamma
+                * 1e-6
             )
-            initial_positions += start_location_updates
-            gradients = gradients[:, start_skip_samples:, :]
-            num_samples_per_shot -= start_skip_samples
-        if end_skip_samples > 0:
-            gradients = gradients[:, :-end_skip_samples, :]
-            num_samples_per_shot -= end_skip_samples
-        if num_adc_samples is None:
-            if read_shots:
-                # Acquire one extra sample at the end of each shot in read_shots mode
-                num_adc_samples = num_samples_per_shot + 1
+        else:
+            if q == 0:
+                kspace_loc[:, i + 1, :] = (
+                    initial_positions + gradients[:, q, :] * r * gamma * 1e-6
+                )
             else:
-                num_adc_samples = int(num_samples_per_shot * (raster_time / dwell_time))
-        kspace_loc = np.zeros((num_shots, num_adc_samples, dimension), dtype=np.float32)
-        kspace_loc[:, 0, :] = initial_positions
-        adc_times = dwell_time_ns * np.arange(1, num_adc_samples)
-        Q, R = divmod(adc_times, gradient_raster_time_ns)
-        Q = Q.astype("int")
-        if not np.all(
-            np.logical_or(
-                Q < num_adc_samples, np.logical_and(Q == num_adc_samples, R == 0)
-            )
-        ):
-            logger.warning("Binary file doesn't seem right! Proceeding anyway")
-        grad_accumulated = np.cumsum(gradients, axis=1) * gradient_raster_time_ns
-        for i, (q, r) in enumerate(zip(Q, R)):
-            if q >= gradients.shape[1]:
-                if q > gradients.shape[1]:
-                    logger.warning(
-                        "Number of samples is more than what was "
-                        "obtained in binary file!\n"
-                        "Data will be extended"
-                    )
                 kspace_loc[:, i + 1, :] = (
                     initial_positions
-                    + (
-                        grad_accumulated[:, gradients.shape[1] - 1, :]
-                        + gradients[:, gradients.shape[1] - 1, :] * r
-                    )
+                    + (grad_accumulated[:, q - 1, :] + gradients[:, q, :] * r)
                     * gamma
                     * 1e-6
                 )
-            else:
-                if q == 0:
-                    kspace_loc[:, i + 1, :] = (
-                        initial_positions + gradients[:, q, :] * r * gamma * 1e-6
-                    )
-                else:
-                    kspace_loc[:, i + 1, :] = (
-                        initial_positions
-                        + (grad_accumulated[:, q - 1, :] + gradients[:, q, :] * r)
-                        * gamma
-                        * 1e-6
-                    )
-        params = {
-            "version": version / 10,
-            "dimension": dimension,
-            "num_shots": num_shots,
-            "num_samples_per_shot": num_samples_per_shot,
-        }
-        if version >= 41:
-            params["FOV"] = fov
-            params["img_size"] = img_size
-            params["min_osf"] = min_osf
-            params["gamma"] = gamma
-            params["recon_tag"] = recon_tag
-            params["TE_pos"] = TE_pos
-            if version >= 42:
-                params["timestamp"] = timestamp
-        if normalize_factor is not None:
-            Kmax = img_size / 2 / fov
-            kspace_loc = kspace_loc / Kmax * normalize_factor
-            if np.abs(kspace_loc).max() > normalize_factor:
-                logger.warning(
-                    "K-space locations exceed the normalization factor after "
-                    "normalization! Clipping the values."
-                )
-                kspace_loc = np.clip(kspace_loc, -normalize_factor, normalize_factor)
-        if pre_skip > 0:
-            if pre_skip >= num_samples_per_shot:
-                raise ValueError(
-                    "skip_first_Nsamples should be less than num_adc_samples"
-                )
-            oversample_factor = num_adc_samples / num_samples_per_shot
-            skip_samples = pre_skip * int(oversample_factor)
-            kspace_loc = kspace_loc[:, skip_samples:]
-            params["num_adc_samples"] = num_adc_samples - skip_samples
-        else:
-            params["num_adc_samples"] = num_adc_samples
-        return kspace_loc, params
+    params["num_samples_per_shot"] = num_samples_per_shot
+    if normalize_factor is not None:
+        Kmax = params["img_size"] / 2 / params["FOV"]
+        kspace_loc = kspace_loc / Kmax * normalize_factor
+        if np.abs(kspace_loc).max() > normalize_factor:
+            logger.warning(
+                "K-space locations exceed the normalization factor after "
+                "normalization! Clipping the values."
+            )
+            kspace_loc = np.clip(kspace_loc, -normalize_factor, normalize_factor)
+    if pre_skip > 0:
+        if pre_skip >= num_samples_per_shot:
+            raise ValueError("skip_first_Nsamples should be less than num_adc_samples")
+        oversample_factor = num_adc_samples / num_samples_per_shot
+        skip_samples = pre_skip * int(oversample_factor)
+        kspace_loc = kspace_loc[:, skip_samples:]
+        params["num_adc_samples"] = num_adc_samples - skip_samples
+    else:
+        params["num_adc_samples"] = num_adc_samples
+    return kspace_loc, params
+
+
+def read_girf(
+    filename: str | Path, fmax: float | None = None
+) -> tuple[NDArray, NDArray]:
+    """Read a gradient impulse response function (GIRF) exported at NeuroSpin.
+
+    The file is a MATLAB file holding ``f``, the frequencies in kHz, and
+    ``girf``, the transfer functions with shape ``(3, n_terms, n_freqs)``: for
+    each gradient axis of the scanner, the response of the spherical harmonic
+    terms measured by the field camera, ordered as ``(B0, x, y, z, ...)``. See
+    :ref:`girf` for the terms and their units.
+
+    Parameters
+    ----------
+    filename : str | Path
+        Path to the MATLAB file.
+    fmax : float, optional
+        Frequency in Hz above which the response is set to zero, e.g. where the
+        measurement is only noise. By default, the whole response is kept.
+
+    Returns
+    -------
+    freqs : NDArray
+        Frequencies in Hz, from 0. Shape ``(n_freqs,)``.
+    girf : NDArray
+        One-sided transfer functions, averaged between positive and negative
+        frequencies so that the impulse response is real.
+        Shape ``(3, n_terms, n_freqs)``.
+
+    See Also
+    --------
+    mrinufft.trajectories.apply_girf
+    """
+    content = loadmat(filename, squeeze_me=True, variable_names=("f", "girf"))
+    freqs = np.ravel(content["f"]).astype(float) * 1e3
+    girf = np.asarray(content["girf"], dtype=complex)
+    order = np.argsort(freqs)
+    freqs, girf = freqs[order], girf[..., order]
+
+    positive = freqs[np.argmin(np.abs(freqs)) :].copy()
+    positive[0] = 0.0  # the exported zero frequency carries rounding noise
+
+    def interp(x):
+        return np.apply_along_axis(lambda v: np.interp(x, freqs, v), -1, girf)
+
+    # enforce hermitian symmetry
+    girf = 0.5 * (interp(positive) + np.conj(interp(-positive)))
+    girf[..., 0] = girf[..., 0].real
+    if fmax is not None:
+        girf[..., positive > fmax] = 0
+    return positive, girf
 
 
 @overload
