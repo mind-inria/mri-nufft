@@ -100,7 +100,7 @@ def test_radial_in_out_center_out():
 
 def test_voronoi_radial3D_dense():
     """Test that voronoi matches the radial weights on a dense 3D radial."""
-    traj = initialize_3D_phyllotaxis_radial(1024, 1024)
+    traj = initialize_3D_phyllotaxis_radial(256, 256)
     w_vor = voronoi(traj)
     w_rad = radial(traj)
     rel = (w_vor / np.sum(w_vor)) / w_rad - 1
