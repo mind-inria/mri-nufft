@@ -34,7 +34,7 @@ jobs:
             echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
   test-cpu:
-    runs-on: [cpu-tests, cpu-examples]
+    runs-on: [cpu-tests, cpu-examples, cpu]
     needs: get-commit-message
     if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     strategy:
