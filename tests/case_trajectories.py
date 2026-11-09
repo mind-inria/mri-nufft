@@ -61,6 +61,13 @@ class CasesTrajectories:
         trajectory = rotate(trajectory, nb_rotations=Nr)
         return trajectory, (N, N, N)
 
+    def case_projection2D(self):
+        """Create a small 2D trajectory for projection tests."""
+        trajectory = np.zeros((1, 12, 2))
+        trajectory[0, :, 0] = np.linspace(-0.1, 0.1, 12)
+        trajectory[0, :, 1] = 0.02 * np.sin(np.linspace(0, 2 * np.pi, 12))
+        return trajectory, (64, 64)
+
     def case_grid2D(self, N=16):
         """Create a 2D cartesian grid of frequencies locations."""
         freq_1d = sp.fft.fftfreq(N)
