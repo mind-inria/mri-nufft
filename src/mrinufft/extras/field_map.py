@@ -514,9 +514,11 @@ def compute_svd_coefficients(
     E = xp.exp(xp.outer(readout_time, w_k))
     Ew = xp.sqrt(h_k) * E
     svds = _get_svds(xp, partial_svd)
-    # The number of significant singular values of E is its time-bandwidth
-    # product; the margin covers the slow decay past that knee.
-    auto_L = max(1, int(np.ceil(_time_bandwidth(w_k, readout_time))) + _SVD_MARGIN)
+    # Keep enough components beyond the time-bandwidth knee for accurate
+    # pointwise reconstruction of the exponential matrix.
+    auto_L = max(
+        1, int(np.ceil(_time_bandwidth(w_k, readout_time) * np.pi**2)) + _SVD_MARGIN
+    )
     if L == -1:
         L = auto_L
     L = min(L, min(Ew.shape) - 1 if partial_svd else min(Ew.shape))
