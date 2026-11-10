@@ -4,7 +4,7 @@
 Gradient Impulse Response Function (GIRF)
 =========================================
 
-In MR System, the gradient system has imperfections, that can make the effective k-space trajectories different from the one that were prescribed.
+In MR systems, the gradient system has imperfections that can make the effective k-space trajectories differ from the prescribed ones.
 
 The fields played by the gradient chain differ from the nominal gradients: the
 amplifiers and coils have a limited bandwidth, eddy currents oppose fast
@@ -12,18 +12,18 @@ changes, and each gradient coil also produces B0 and higher-order spatial terms.
 For non-Cartesian trajectories, reconstructing with the nominal k-space
 positions then causes blurring, shading or ghosting.
 
-These imperfection are typically modeled as Linear Time Invariant (LTI) system, and we 
-model them using the gradient impulse
-response function (GIRF) [Van13]_ [Add12]_.
+These imperfections are typically modeled as a linear time-invariant (LTI)
+system, characterized by the gradient impulse response function (GIRF)
+[Van13]_ [Add12]_.
 
 .. note::
 
-   In mri-nufft, the GIRF can be read and apply with the following functions:
+   In mri-nufft, the GIRF can be read and applied with the following functions:
 
-   - :func:`mrinufft.trajectories.apply_girf` to correct for these imperfections.
-   - :func:`mrinufft.io.read_girf` reads the GIRF (tailored to the Skope system in used at Neurospin)
+   - :func:`mrinufft.trajectories.apply_girf` corrects the trajectory for these imperfections.
+   - :func:`mrinufft.io.read_girf` reads the GIRF (tailored to the Skope system in use at NeuroSpin).
    - :func:`mrinufft.extras.compute_girf_interpolators` includes the higher-order
-       terms, and the static off-resonance, in :class:`~mrinufft.operators.off_resonance.MRIFourierCorrected`.
+     terms, and the static off-resonance, in :class:`~mrinufft.operators.off_resonance.MRIFourierCorrected`.
 
 .. tip::
 
@@ -74,7 +74,7 @@ cameras (:func:`~mrinufft.trajectories.spherical_harmonics`), with
 |         |       | :math:`5xz^2 - xr^2,\ zx^2 - zy^2,\ x^3 - 3xy^2`                  |                      |
 +---------+-------+-------------------------------------------------------------------+----------------------+
 
-These polynomials are harmonic, and those up to an order span all the harmonic polynomials up to that degree.
+These polynomials are harmonic, and the terms up to a given order span all the harmonic polynomials up to that degree.
 :func:`~mrinufft.trajectories.apply_girf` handles complete orders: 4, 9 or 16
 terms.
 
@@ -98,14 +98,14 @@ responses are real, ``girf`` is stored for positive frequencies only.
 Frames and affines
 ==================
 
-GIRF coefficients are expressed in the Scanner gradient axis. However, the reconstruction may have a different position and orientation.  The change of coordinates between the two frames is handled by the affine transform matrix. In MRI-NUFFT, this is handled in the :class:`~mrinufft.trajectories.Acquisition` class:
-``acq.affine`` (:class:`~mrinufft.trajectories.Acquisition`) maps the voxel indices to physical coordinates as given by the raw data or a NIfTI header,  ``acq.fov / acq.img_size``, holds the size and resolution of the image.
+GIRF coefficients are expressed in the axes of the scanner gradients. However, the reconstructed image may have a different position and orientation. The change of coordinates between the two frames is handled by the affine transform matrix. In MRI-NUFFT, this is handled in the :class:`~mrinufft.trajectories.Acquisition` class:
+``acq.affine`` maps the voxel indices to physical coordinates, as given by the raw data or a NIfTI header, and ``acq.fov`` / ``acq.img_size`` hold the size and resolution of the image.
 
-For applying the GIRF this is taken into account with the argument ``girf_affine`` in :func:`mrinufft.trajectories.apply_girf`.
+When applying the GIRF, this is taken into account through the ``girf_affine`` argument of :func:`mrinufft.trajectories.apply_girf`.
 
 .. note::
 
-    The change of coordinate is a rigid transform: :math:`\boldsymbol{r} = R\boldsymbol{u} + \boldsymbol{r}_0`, with :math:`\boldsymbol{r}_0` the centre of the image in the frame of the GIRF.
+    The change of coordinates is a rigid transform: :math:`\boldsymbol{r} = R\boldsymbol{u} + \boldsymbol{r}_0`, with :math:`\boldsymbol{r}_0` the centre of the image in the frame of the GIRF.
 
     The nominal gradients, given on the image axes, are rotated by :math:`R` to predict the fields, which are then expanded again in the frame of the image,
 
@@ -160,8 +160,8 @@ For applying the GIRF this is taken into account with the argument ``girf_affine
         \qquad
         Q' = R^\top Q R.
 
-    The rotation keeps the orders, and the translation moves each order to the lower ones, with a factor :math:`r_0^{l - k}`. 
-    For instance, the :math:`xz` term of a slice at :math:`z_0` adds :math:`z_0 x` to the gradient along :math:`x`, and :math:`3z^2 - r^2` a phase in :math:`z_0^2`. 
+    The rotation keeps the orders, and the translation moves each order to the lower ones, with a factor :math:`r_0^{l - k}`.
+    For instance, the :math:`xz` term of a slice at :math:`z_0` adds :math:`z_0 x` to the gradient along :math:`x`, and :math:`3z^2 - r^2` a phase in :math:`z_0^2`.
     This holds for reflections too.
 
     In homogeneous coordinates, :math:`R\boldsymbol{u} + \boldsymbol{r}_0 =
@@ -170,7 +170,7 @@ For applying the GIRF this is taken into account with the argument ``girf_affine
     All the degrees then follow from :math:`\tilde{T}_j = T_j[A, \dots, A]`, which is symmetric: the part of degree :math:`k` is :math:`\binom{l}{k}` times its entries whose first :math:`l - k`
     indices are the homogeneous one.
 
-.. dropdown:: Computing :math:`b_j'` with the linear regression
+.. dropdown:: Computing :math:`b_j'` by linear regression
 
     The relation holds for all :math:`\boldsymbol{u}`. Evaluating the terms at
     :math:`N \geq n_\mathrm{terms}` random points :math:`\boldsymbol{u}_n` gives
@@ -187,11 +187,11 @@ For applying the GIRF this is taken into account with the argument ``girf_affine
     use it to check the closed form.
 
 
-In MRI-NUFFT we use the closed form expression, in homogeneous coordinates
+In MRI-NUFFT we use the closed-form expression, in homogeneous coordinates
 (``_reexpansion`` in ``mrinufft/trajectories/girf.py``, used by
 :func:`~mrinufft.trajectories.apply_girf`).
 
-    
+
 Deviations from the nominal encoding
 ------------------------------------
 
@@ -286,7 +286,7 @@ Higher orders and static off-resonance: an extended model
 Factorization of the higher orders
 ----------------------------------
 
-The higher-order terms are polynomials of the position, so that
+The higher-order terms are polynomials in the position, so that
 :math:`e^{-\imath\psi}` has a Taylor series in closed form:
 
 .. math::
@@ -302,7 +302,7 @@ whose space factors are products of spherical harmonics. Truncated to an order
 as the expansion in the frame of the image leaves only the phase that is
 neither constant nor linear. Its rank, the number of products, is then reduced
 to :math:`L` by an SVD of the small matrices relating the two sets of factors,
-which gives the best rank :math:`L` approximation of the series, without ever
+which gives the best rank-:math:`L` approximation of the series, without ever
 forming the :math:`M \times N` matrix of the exponential. A factorization of the
 static off-resonance is included by taking the products of its factors with
 those of the compressed series, and compressing these products in the same way.
@@ -330,7 +330,7 @@ Time window and causality
 
 A GIRF sampled with a frequency step :math:`\delta f` only determines the
 impulse responses modulo a period of :math:`1/\delta f`. They are therefore
-taken as zero outside of :math:`[t_\mathrm{start}, t_\mathrm{start} + 1/\delta f)`,
+taken as zero outside :math:`[t_\mathrm{start}, t_\mathrm{start} + 1/\delta f)`,
 with :math:`t_\mathrm{start}` = ``t_start``.
 
 The gradient chain is causal, but the measured responses start slightly before
@@ -345,7 +345,7 @@ GIRF toolbox [GIRFtb]_.
   response slower than the window precedes its cause.
 
 Responses slower than :math:`1/\delta f` cannot be represented. In particular, a
-gain at 0 Hz that departs from those of the neighbouring frequencies, e.g.
+gain at 0 Hz that departs from that of the neighbouring frequencies, e.g.
 because of how drifts were removed during the measurement, is spread as a
 constant over the whole window: it adds a ramp lasting :math:`1/\delta f` after
 each change of the gradients. The low frequencies of a GIRF are worth checking
