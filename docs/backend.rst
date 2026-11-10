@@ -23,6 +23,7 @@ pynfft_              CPU          ✘                   single/double    numpy
 bart_                CPU/GPU      ✔                   single           numpy
 sigpy_               CPU          ✔                   single           numpy
 ducc0_               CPU          ✘                   single/double    numpy
+mlx-nufft_           GPU (Metal)  ✔                   single*          numpy/torch
 stacked (*)          CPU/GPU      ✔                   single/double    numpy
 ==================== ============ =================== ===============  =================
 
@@ -36,6 +37,10 @@ stacked (*)          CPU/GPU      ✔                   single/double    numpy
 .. _bart: https://github.com/mrirecon/bart
 .. _sigpy: https://github.com/sigpy/sigpy
 .. _ducc0: https://github.com/mreineck/ducc
+.. _mlx-nufft: https://github.com/martinlachaine/mlx-nufft
+
+* mlx-nufft accepts double-precision inputs but computes at single-precision
+  accuracy.
 
 - (*) stacked-nufft allows one to use any supported backend to perform a stack of 2D NUFFT and adds a z-axis FFT (using scipy or cupy)
 
@@ -60,6 +65,13 @@ Those are developed by the `flatiron-institute <https://github.com/flatironinsti
 .. warning::
 
     for cufinufft, a working installation of CUDA and cupy is required.
+
+mlx-nufft
+~~~~~~~~~
+
+mlx-nufft requires an Apple-silicon Mac. Install the optional backend with
+``pip install "mri-nufft[mlx-nufft]"`` and select it with
+``get_operator("mlx-nufft")``.
 
 gpuNUFFT
 ~~~~~~~~

@@ -112,6 +112,7 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
     backend = "finufft"
     available = FINUFFT_AVAILABLE
     autograd_available = True
+    raw_plan_class = RawFinufftPlan
 
     def __init__(
         self,
@@ -127,7 +128,7 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
     ):
         samples = _array_to_numpy(proper_trajectory(samples, normalize="pi"))
         samples = np.asarray(samples, order="F")
-        raw_op = RawFinufftPlan(
+        raw_op = self.raw_plan_class(
             samples,
             shape,
             n_trans=n_trans,
@@ -218,11 +219,12 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
             Whether to normalize the density compensation.
             We normalize such that the energy of PSF = 1
         """
-        if FINUFFT_AVAILABLE is False:
+        if not cls.available:
             raise ValueError(
-                "finufft is not available, cannot estimate the density compensation"
+                f"{cls.backend} is not available, cannot estimate the "
+                "density compensation"
             )
-        grid_op = MRIfinufft(
+        grid_op = cls(
             samples=kspace_loc,
             shape=volume_shape,
             upsampfac=osf,
@@ -238,7 +240,7 @@ class MRIfinufft(FourierOperatorCPU, _ToggleGradPlanMixin):
                 ).squeeze()
             )
         if normalize:
-            test_op = MRIfinufft(samples=kspace_loc, shape=volume_shape, **kwargs)
+            test_op = cls(samples=kspace_loc, shape=volume_shape, **kwargs)
             test_im = np.ones(volume_shape, dtype=test_op.cpx_dtype)
             test_im_recon = test_op.adj_op(density_comp * test_op.op(test_im))
             density_comp /= np.mean(np.abs(test_im_recon))
