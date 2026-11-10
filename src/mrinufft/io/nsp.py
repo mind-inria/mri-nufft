@@ -486,6 +486,7 @@ def read_trajectory(
     num_adc_samples: int | None = None,
     gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
+    read_pre_post_grad: bool = False,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
     pre_skip: int = 0,
@@ -505,8 +506,11 @@ def read_trajectory(
         Number of ADC samples, by default None
     gamma : float, optional
         Gyromagnetic ratio in kHz/T, by default 42.576e3
-    gradient_raster_time : float, optional
+    raster_time : float, optional
         Gradient raster time in ms, by default 0.01
+    read_pre_post_grad : bool, optional
+        Whether to read pre/post gradients, by default False
+        This is useful for reading the gradients before and after the ADC window.
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
@@ -540,16 +544,22 @@ def read_trajectory(
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = raster_time * 1e6
     # Handle skipped samples
-    if start_skip_samples > 0:
-        start_location_updates = (
-            np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+    if not read_pre_post_grad:
+        if start_skip_samples > 0:
+            start_location_updates = (
+                np.sum(gradients[:, :start_skip_samples], axis=1) * raster_time * gamma
+            )
+            initial_positions += start_location_updates
+            gradients = gradients[:, start_skip_samples:, :]
+            num_samples_per_shot -= start_skip_samples
+        if end_skip_samples > 0:
+            gradients = gradients[:, :-end_skip_samples, :]
+            num_samples_per_shot -= end_skip_samples
+    else:
+        params["start_skip_samples"] = start_skip_samples * int(
+            raster_time / dwell_time
         )
-        initial_positions += start_location_updates
-        gradients = gradients[:, start_skip_samples:, :]
-        num_samples_per_shot -= start_skip_samples
-    if end_skip_samples > 0:
-        gradients = gradients[:, :-end_skip_samples, :]
-        num_samples_per_shot -= end_skip_samples
+        params["end_skip_samples"] = end_skip_samples * int(raster_time / dwell_time)
     if num_adc_samples is None:
         if read_shots:
             # Acquire one extra sample at the end of each shot in read_shots mode
