@@ -24,6 +24,7 @@ finufft = ["finufft>=2.5.0"]
 sigpy = ["sigpy", "numba>=0.65"]
 pynfft = ["pynfft3"]
 ducc0 = ["ducc0>=0.40.0"]
+mlx-nufft = ["mlx-nufft==0.3.3; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version >= '3.11'"]
 
 pynufft = ["pynufft"]
 # for easier test deployment
@@ -109,4 +110,3 @@ reportPossiblyUnboundVariable = false
 typeCheckingMode = "basic"
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
-

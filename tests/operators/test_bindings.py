@@ -8,6 +8,7 @@ import pytest
     "backend,name",
     [
         ("finufft", "MRIfinufft"),
+        ("mlx-nufft", "MRIMlxNUFFT"),
         ("cufinufft", "MRICufiNUFFT"),
         ("ducc0", "MRIDUCC0"),
         ("tensorflow", "MRITensorflowNUFFT"),
