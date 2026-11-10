@@ -146,9 +146,10 @@ def _reexpansion(rotation: NDArray, origin: NDArray, n_terms: int) -> NDArray:
         for degree in range(order + 1):
             index = (slice(None), *(3,) * (order - degree), *(slice(3),) * degree)
             axes = "abc"[:degree]
-            expansion[degree**2 : (degree + 1) ** 2, order**2 : (order + 1) ** 2] = (
-                comb(order, degree)
-                * np.einsum(f"i{axes},j{axes}->ij", _TENSORS[degree][1], tensors[index])
+            expansion[
+                degree**2 : (degree + 1) ** 2, order**2 : (order + 1) ** 2
+            ] = comb(order, degree) * np.einsum(
+                f"i{axes},j{axes}->ij", _TENSORS[degree][1], tensors[index]
             )
     return expansion
 
