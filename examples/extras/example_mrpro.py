@@ -40,9 +40,9 @@ loss.backward()
 print(f"Initial loss: {loss.item():.3f}, gradient norm: {estimate.grad.norm():.3f}")
 
 fig, axes = plt.subplots(1, 2)
-axes[0].imshow(image[0, 0].abs(), cmap="gray")
+axes[0].imshow(image[0, 0].abs().numpy(), cmap="gray")
 axes[0].set_title("Reference")
-axes[1].imshow(adjoint[0, 0].abs(), cmap="gray")
+axes[1].imshow(adjoint[0, 0].abs().numpy(), cmap="gray")
 axes[1].set_title("MRPro adjoint")
 for ax in axes:
     ax.axis("off")
