@@ -533,6 +533,36 @@ class FourierOperatorBase(ABC):
         autograd_nufft = self.make_autograd(*args, **kwargs)
         return DeepInvPhyNufft(autograd_nufft, viewed_as_real=viewed_as_real)
 
+    def make_mrpro(self):
+        """Wrap this operator as an MRPro linear operator.
+
+        The operator accepts complex Torch tensors with image shape
+        ``(n_batchs, 1 if uses_sense else n_coils, *shape)`` and k-space
+        shape ``(n_batchs, n_coils, n_samples)``, even when ``squeeze_dims``
+        is enabled. MRPro supplies gradients with respect to the input data
+        using the adjoint; trajectory and sensitivity-map gradients are not
+        supported.
+
+        Density compensation must be disabled because a weighted adjoint is
+        not the mathematical adjoint of the forward operator. Moving the MRPro
+        wrapper to another device does not move the underlying NUFFT plan.
+
+        Returns
+        -------
+        mrpro.operators.LinearOperator
+            An MRPro operator exposing forward, adjoint, and composition.
+
+        Raises
+        ------
+        ImportError
+            If MRPro is not installed.
+        ValueError
+            If density compensation is enabled.
+        """
+        from mrinufft.operators.mrpro import MRProNUFFT
+
+        return MRProNUFFT(self)
+
     def make_autograd(
         self,
         *,
