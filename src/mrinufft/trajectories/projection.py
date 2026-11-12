@@ -242,6 +242,8 @@ class GradientLinearProjection:
         An instance of the LinearProjection class to perform the projection
         onto the constraint set. If not provided, the projection will be
         performed without any constraints (i.e., :math:`s^* = z`).
+    offset: NDArray, optional
+        Constant offset of the affine kinetic operator.
 
     ${proj_ref}
     """
@@ -251,10 +253,12 @@ class GradientLinearProjection:
         initial_trajectory: NDArray,
         kinetic_op: LinearOperator,
         linear_projector: Callable | None = None,
+        offset: NDArray | None = None,
     ):
         self.M = kinetic_op
         self.c = initial_trajectory
         self.linear_projector = linear_projector
+        self.offset = offset
 
     def get_primal_variables(self, q: NDArray) -> NDArray:
         """Compute the primal variables z = c - M^H q."""
@@ -265,7 +269,8 @@ class GradientLinearProjection:
         z = self.get_primal_variables(q)
         s_star = self.linear_projector(z) if self.linear_projector is not None else z
         xp = get_array_module(s_star)
-        return 0.5 * xp.linalg.norm(s_star) ** 2
+        value = 0.5 * xp.linalg.norm(s_star) ** 2
+        return value - xp.dot(self.offset, q) if self.offset is not None else value
 
     def grad(self, q: NDArray) -> NDArray:
         """
@@ -275,7 +280,8 @@ class GradientLinearProjection:
         """
         z = self.get_primal_variables(q)
         s_star = self.linear_projector(z) if self.linear_projector is not None else z
-        return -(self.M * s_star).flatten()
+        grad = -(self.M * s_star).flatten()
+        return grad - self.offset if self.offset is not None else grad
 
 
 @_fill_doc(_proj_docs)
@@ -288,6 +294,8 @@ def project_trajectory(
     TE_pos: float | None = -1,
     linear_projector: Callable | None = None,
     verbose: int = 1,
+    start_grad: NDArray | float = 0,
+    end_grad: NDArray | float = 0,
 ) -> NDArray:
     """
     Projects the trajectory onto hardware constraint set.
@@ -306,6 +314,8 @@ def project_trajectory(
         limits. Defaults to 0.99 (i.e., 1% margin).
     max_iter: int
         The maximum number of iterations for the projection algorithm. Defaults to 1000.
+        The result is approximate; difficult trajectories may require more iterations
+        to satisfy the hardware limits.
     TE_pos: float | None | -1
         Specifies the constrained position of the k-space center in the
         trajectory. If a float is provided, it should be in the range [0, 1] and
@@ -321,6 +331,10 @@ def project_trajectory(
     verbose: int, optional
         The verbosity level. If 0, no progress bar is shown. If 1, a progress bar is
         displayed. If 2 we show the iteration level cost function.
+    start_grad, end_grad: NDArray or float, optional
+        Gradients immediately before and after each shot, in T/m. A vector of shape
+        (Nd,) is shared by all shots; an array of shape (Nc, Nd) specifies each shot.
+        Both default to zero. The transitions to these gradients obey the slew limit.
 
     Returns
     -------
@@ -338,7 +352,13 @@ def project_trajectory(
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
     Nc, Ns, Nd = trajectory.shape
-    c1 = 1 / 2
+    if Ns < 2:
+        raise ValueError("trajectory must contain at least two samples per shot")
+    start_grad = xp.broadcast_to(
+        xp.asarray(start_grad, dtype=trajectory.dtype), (Nc, Nd)
+    )
+    end_grad = xp.broadcast_to(xp.asarray(end_grad, dtype=trajectory.dtype), (Nc, Nd))
+    c1 = 1 / 8
     c2 = 1 / 4
     D1 = FirstDerivative(
         (Nc, Ns, Nd),
@@ -348,21 +368,36 @@ def project_trajectory(
         edge=True,
         dtype=trajectory.dtype,
     )
-    # Define the weighted first and second derivative operators
-    M = pylops.VStack([c1 * D1, c2 * D1 * D1], dtype=trajectory.dtype)
-    lipchitz_constant = 2  #  (2 * c1) ** 2 + (4 * c2) ** 2
-    maxstep = (
-        safety_factor
-        * acq.gamma
-        * acq.raster_time
-        / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
-        / 2
+    kmax = xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
+    kmax_scale = xp.max(kmax)
+    D1 = D1 * pylops.Diagonal(
+        kmax / kmax_scale, dims=(Nc, Ns, Nd), axis=2, dtype=trajectory.dtype
     )
+    derivative = FirstDerivative(
+        (Nc, Ns, Nd), axis=1, kind="backward", dtype=trajectory.dtype
+    )
+    last = pylops.Restriction((Nc, Ns, Nd), [Ns - 1], axis=1, dtype=trajectory.dtype)
+    D2 = pylops.VStack([derivative * D1, -last * D1], dtype=trajectory.dtype)
+    M = pylops.VStack([c1 * D1, c2 * D2], dtype=trajectory.dtype)
+    lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
+    maxstep = safety_factor * acq.gamma * acq.raster_time * acq.norm_factor / kmax_scale
     prox_grad = GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
     prox_slew = GroupL2SoftThresholding(
-        (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
+        (Nc * (Ns + 1), Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
-    prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
+    prox = pyproximal.VStack(
+        [prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * (Ns + 1) * Nd]
+    )
+    offset_slew = xp.zeros((Nc, Ns, Nd), dtype=trajectory.dtype)
+    grad_scale = acq.gamma * acq.raster_time * acq.norm_factor / kmax_scale
+    offset_slew[:, 1, :] = -start_grad * grad_scale
+    offset = xp.concatenate(
+        (
+            xp.zeros(Nc * Ns * Nd, dtype=trajectory.dtype),
+            c2 * offset_slew.flatten(),
+            c2 * (end_grad * grad_scale).flatten(),
+        )
+    )
 
     if TE_pos == -1:
         # detect the position of the original k-space center and
@@ -381,6 +416,7 @@ def project_trajectory(
         initial_trajectory=trajectory,
         kinetic_op=M,
         linear_projector=linear_projector_,
+        offset=offset,
     )
     progressbar = _progressbar(verbose == 1, max_iter)
     q_star = pyproximal.optimization.primal.ProximalGradient(
