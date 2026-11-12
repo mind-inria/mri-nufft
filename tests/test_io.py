@@ -124,6 +124,46 @@ def test_write_n_read(
     np.testing.assert_almost_equal(read_traj, trajectory, decimal=3.5)
 
 
+@pytest.mark.parametrize(
+    "pad_to_multiple_of_4, expected_samples", [(True, 8), (False, 5)]
+)
+def test_write_trajectory_pad_samples(
+    monkeypatch, caplog, tmp_path, pad_to_multiple_of_4, expected_samples
+):
+    """Pad gradient samples to a multiple of four when requested."""
+    written = {}
+
+    def mock_write_gradients(**kwargs):
+        written.update(kwargs)
+
+    monkeypatch.setattr(
+        "mrinufft.io.nsp.convert_trajectory_to_gradients",
+        lambda *args, **kwargs: (
+            np.ones((1, 5, 2)),
+            np.zeros((1, 2)),
+            np.ones((1, 2)),
+        ),
+    )
+    monkeypatch.setattr("mrinufft.io.nsp.write_gradients", mock_write_gradients)
+
+    write_trajectory(
+        trajectory=np.zeros((1, 6, 2)),
+        FOV=(0.23, 0.23),
+        img_size=(256, 256),
+        grad_filename=str(tmp_path / "trajectory"),
+        check_constraints=False,
+        pad_to_multiple_of_4=pad_to_multiple_of_4,
+    )
+
+    gradients = written["gradients"]
+    assert gradients.shape[1] == expected_samples
+    np.testing.assert_array_equal(gradients[:, :5], np.ones((1, 5, 2)))
+    if pad_to_multiple_of_4:
+        np.testing.assert_array_equal(gradients[:, 5:], np.zeros((1, 3, 2)))
+    else:
+        assert "not a multiple of 4" in caplog.text
+
+
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[CasesTrajectories.case_random2D, CasesTrajectories.case_random3D],

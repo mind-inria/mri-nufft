@@ -236,6 +236,7 @@ def write_trajectory(
     postgrad: str | None = None,
     grad_method: str = "auto",
     version: float = 5,
+    pad_to_multiple_of_4: bool = False,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -281,6 +282,8 @@ def write_trajectory(
         of the k-space.
     version: float, optional
         Trajectory versioning, by default 5
+    pad_to_multiple_of_4 : bool, optional
+        Pad the gradient samples with zeros to a multiple of four, by default False.
     kwargs : dict, optional
         Additional arguments for writing the gradient file.
         These are arguments passed to write_gradients function above.
@@ -344,6 +347,17 @@ def write_trajectory(
             Ns_to_skip_at_end = spoilers.shape[1]
             gradients = np.concatenate((gradients, spoilers), axis=1)
             final_positions = spoiler_loc
+
+    num_samples_per_shot = gradients.shape[1]
+    if num_samples_per_shot % 4:
+        if pad_to_multiple_of_4:
+            padding = 4 - num_samples_per_shot % 4
+            gradients = np.pad(gradients, ((0, 0), (0, padding), (0, 0)))
+        else:
+            logger.warning(
+                "num_samples_per_shot is not a multiple of 4. "
+                "Set pad_to_multiple_of_4=True to pad with zero gradients."
+            )
 
     # Check constraints if requested
     if check_constraints:
