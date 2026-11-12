@@ -56,14 +56,54 @@ def test_project_trajectory_boundary_slew(use_boundary_gradients, anisotropic):
         start = end = np.zeros((2, 2))
 
     projected = project_trajectory(
-        trajectory, acq, TE_pos=0, max_iter=6000, verbose=0, **kwargs
+        trajectory, acq, TE_pos=0, max_iter=24000, verbose=0, **kwargs
     )
     gradients, slew_rates = compute_gradients_and_slew_rates(projected, acq)
-    boundary_slew = np.stack(
-        (gradients[:, 0] - start, end - gradients[:, -1]), axis=1
-    ) / acq.raster_time
+    boundary_slew = (
+        np.stack((gradients[:, 0] - start, end - gradients[:, -1]), axis=1)
+        / acq.raster_time
+    )
 
     np.testing.assert_array_equal(projected[:, 0], 0)
     assert np.max(np.linalg.norm(gradients, axis=-1)) <= acq.gmax
     assert np.max(np.linalg.norm(slew_rates, axis=-1)) <= acq.smax
     assert np.max(np.linalg.norm(boundary_slew, axis=-1)) <= acq.smax
+
+
+@pytest.mark.parametrize("ns", [2, 8])
+def test_project_trajectory_with_shared_boundary_gradients(ns):
+    acq = Acquisition.default
+    gradient = np.array([0.004, -0.003, 0.002])
+    step = gradient * acq.gamma * acq.raster_time * acq.norm_factor / np.array(acq.kmax)
+    trajectory = np.arange(ns)[:, None] * step
+
+    projected = project_trajectory(
+        trajectory,
+        acq,
+        TE_pos=None,
+        start_grad=gradient,
+        end_grad=gradient,
+        max_iter=3000,
+        verbose=0,
+    )
+    np.testing.assert_allclose(projected[0], trajectory, atol=1e-8)
+
+
+def test_project_trajectory_custom_projector():
+    acq = Acquisition.default
+    trajectory = np.zeros((1, 12, 2))
+    trajectory[0, :, 0] = np.linspace(0, 0.05, 12)
+
+    def projector(x):
+        x[:, 0] = [0.01, 0.02]
+        return x
+
+    projected = project_trajectory(
+        trajectory, acq, linear_projector=projector, max_iter=10000, verbose=0
+    )
+    gradients, slew_rates = compute_gradients_and_slew_rates(projected, acq)
+    np.testing.assert_allclose(projected[0, 0], [0.01, 0.02])
+    assert np.max(np.linalg.norm(slew_rates, axis=-1)) <= acq.smax
+    assert np.max(np.linalg.norm(gradients[:, [0, -1]], axis=-1)) <= (
+        acq.smax * acq.raster_time
+    )
