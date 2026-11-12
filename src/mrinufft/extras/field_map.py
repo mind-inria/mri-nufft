@@ -32,6 +32,8 @@ logger = logging.getLogger(__name__)
 
 #: Extra interpolators kept past the time-bandwidth product when ``L=-1``.
 _SVD_MARGIN = 2
+# R2* bins of a complex field map given an integer n_bins (see _create_histogram)
+_MAX_R2S_BINS = 16
 #: Relative error of the ``E ~ B @ C`` factorization above which we warn.
 _ACCURACY_WARN = 0.05
 
@@ -162,8 +164,11 @@ L : int, optional
     automatically estimated from the time-bandwidth product of the readout).
     Too small an ``L`` leaves a large residual phase error, which appears as
     artefacts in the corrected image; a warning is logged when that happens.
-n_bins : int, optional
+n_bins : int or tuple[int, int], optional
     Number of histogram bins for off-resonance value clustering (default is 1024).
+    For a complex field map (with R2*), an integer is the number of bins along the
+    B0 axis; the R2* axis gets bins of the same width, at most 16. Pass a tuple
+    ``(n_r2star, n_b0)`` to set both.
 lazy: bool, default False
     If True, use a lazy evaluation scheme for the space interpolator C, saving memory.
 """,
@@ -247,7 +252,9 @@ def _create_histogram(
     mask : NDArray or None
         Restrict the histogram to those voxels. ``None`` uses the whole map.
     n_bins : int or tuple[int, int]
-        Number of bins for the real (R2*) and imaginary (B0) axes.
+        Number of bins for the real (R2*) and imaginary (B0) axes. An integer is
+        the number of B0 bins; the R2* axis then gets bins of the same width
+        (in rad/s), at most ``_MAX_R2S_BINS``.
 
     Returns
     -------
@@ -271,9 +278,14 @@ def _create_histogram(
         elif deltaR == 0:
             n_bins = (1, n_bins)
         else:
-            n_bins_r = np.maximum(1, int(xp.around(n_bins * deltaR / deltaI)))
-            n_bins_i = np.around(n_bins / n_bins_r)
-            n_bins = (int(n_bins_r), int(n_bins_i))
+            # Keep all the bins on the B0 axis: splitting them between the two axes
+            # (e.g. 21 x 49 for a brain, R2* 10-200 /s and B0 over ~1400 Hz)
+            # quantizes B0 in ~30 Hz steps, i.e. phase errors of ~1 rad at the end
+            # of a 30 ms readout. R2* gets bins of the same width, capped.
+            n_bins_r = int(
+                min(_MAX_R2S_BINS, max(1, np.ceil(float(n_bins * deltaR / deltaI))))
+            )
+            n_bins = (n_bins_r, int(n_bins))
 
     z = masked_field_map.view(xp.float32).reshape(-1, 2)
     # create histograms
