@@ -158,3 +158,37 @@ def test_explicit_interpolators(container):
     npt.assert_allclose(
         np.ravel(operator.op(image)), np.ravel(expected), rtol=1e-4, atol=1e-4
     )
+
+
+def _brain_like_complex_field(shape=(24, 24, 24)):
+    """B0 over ~1400 Hz and R2* in 10-200 /s, in rad/s (Delta = -R2* + 2j pi df)."""
+    g = np.indices(shape).astype(np.float32)
+    b0 = 700 * np.sin(g[0] / 4) * np.cos(g[1] / 6)
+    r2s = 10 + 190 * (g[2] / (shape[2] - 1))
+    return get_complex_fieldmap_rad(b0.astype(np.float32), r2s.astype(np.float32))
+
+
+def test_complex_field_keeps_b0_resolution():
+    """With R2*, an integer n_bins is the number of B0 bins (not split between axes)."""
+    from mrinufft.extras.field_map import _create_histogram
+
+    field = _brain_like_complex_field()
+    counts, _, edges = _create_histogram(field, None, 1024)
+    assert counts.shape[1] == 1024
+    assert 1 <= counts.shape[0] <= 16
+    b0_bin_hz = (edges[1][1] - edges[1][0]) / (2 * np.pi)
+    assert b0_bin_hz < 1.5
+
+
+def test_complex_field_svd_pointwise_accuracy():
+    """B C reproduces exp(Delta t) at each voxel for a brain-like B0 + R2* map."""
+    field = _brain_like_complex_field()
+    t = np.linspace(-14e-3, 14e-3, 300).astype(np.float32)
+    B, C, _ = get_orc_factorization("svd")(field, t, mask=None, L=60, partial_svd=False)
+    C = np.asarray(C).reshape(C.shape[0], -1)
+    idx = np.random.default_rng(0).choice(field.size, 2000, replace=False)
+    approx = np.asarray(B) @ C[:, idx]
+    exact = np.exp(np.outer(t, field.ravel()[idx]))
+    err = np.abs(approx - exact).mean(axis=0) / np.abs(exact).mean(axis=0)
+    # ~3% with the default 16 R2* bins (0.36 when the 1024 bins were split as 21 x 49)
+    assert np.median(err) < 0.05 and np.percentile(err, 99) < 0.1
