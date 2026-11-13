@@ -128,26 +128,13 @@ def test_write_n_read(
     "pad_to_multiple_of_4, expected_samples", [(True, 8), (False, 5)]
 )
 def test_write_trajectory_pad_samples(
-    monkeypatch, caplog, tmp_path, pad_to_multiple_of_4, expected_samples
+    caplog, tmp_path, pad_to_multiple_of_4, expected_samples
 ):
     """Pad gradient samples to a multiple of four when requested."""
-    written = {}
-
-    def mock_write_gradients(**kwargs):
-        written.update(kwargs)
-
-    monkeypatch.setattr(
-        "mrinufft.io.nsp.convert_trajectory_to_gradients",
-        lambda *args, **kwargs: (
-            np.ones((1, 5, 2)),
-            np.zeros((1, 2)),
-            np.ones((1, 2)),
-        ),
-    )
-    monkeypatch.setattr("mrinufft.io.nsp.write_gradients", mock_write_gradients)
-
+    trajectory = np.zeros((1, 6, 2), dtype=np.float32)
+    trajectory[0, :, 0] = np.linspace(-0.2, 0.2, 6)
     write_trajectory(
-        trajectory=np.zeros((1, 6, 2)),
+        trajectory=trajectory,
         FOV=(0.23, 0.23),
         img_size=(256, 256),
         grad_filename=str(tmp_path / "trajectory"),
@@ -155,11 +142,12 @@ def test_write_trajectory_pad_samples(
         pad_to_multiple_of_4=pad_to_multiple_of_4,
     )
 
-    gradients = written["gradients"]
-    assert gradients.shape[1] == expected_samples
-    np.testing.assert_array_equal(gradients[:, :5], np.ones((1, 5, 2)))
+    read_traj, params = read_trajectory(
+        str(tmp_path / "trajectory.bin"), read_shots=True
+    )
+    assert params["num_samples_per_shot"] == expected_samples
     if pad_to_multiple_of_4:
-        np.testing.assert_array_equal(gradients[:, 5:], np.zeros((1, 3, 2)))
+        np.testing.assert_allclose(read_traj[0, -4:], read_traj[0, -4])
     else:
         assert "not a multiple of 4" in caplog.text
 
