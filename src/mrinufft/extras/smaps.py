@@ -1064,63 +1064,7 @@ def _subspace_gram_eig(
     return Smaps, eig, calib
 
 
-def _zoom_interpolate(Smaps, eig, shape, xp):
-    """Interpolate low-resolution maps by cubic zoom of magnitude and phase.
-
-    As in the original `cartesian_espirit`, magnitude and phase are
-    interpolated separately, so the maps never pass through zero where
-    their phase varies quickly (unlike the interpolation of the complex
-    maps). Magnitude, phase and eigenvalue map are zoomed with cubic
-    splines. The phase is interpolated as the unit phasor ``exp(i phase)``
-    (real and imaginary parts, then renormalised) rather than as an
-    unwrapped phase: 3D phase unwrapping of the coarse maps leaves residual
-    2 pi jumps, which nearest-neighbour zoom (the original) turns into
-    blocks of `decim` voxels and higher-order zoom into ringing.
-
-    Parameters
-    ----------
-    Smaps : NDArray
-        Low-resolution sensitivity maps, phase-referenced to coil 0, shape
-        ``(n_coils, *decim_shape)``.
-    eig : NDArray
-        Low-resolution eigenvalue map, shape ``decim_shape``.
-    shape : tuple of int
-        Target (full-resolution) spatial shape.
-    xp : module
-        Array module (``numpy`` or ``cupy``) to compute with.
-
-    Returns
-    -------
-    Smaps : NDArray
-        Interpolated maps, shape ``(n_coils, *shape)``.
-    eig : NDArray
-        Interpolated eigenvalue map, shape `shape`.
-    """
-    if xp is np:
-        from scipy.ndimage import zoom
-    else:
-        from cupyx.scipy.ndimage import zoom
-
-    decim_shape = Smaps.shape[1:]
-    zoom_fac = (1.0,) + tuple(s / ds for s, ds in zip(shape, decim_shape))
-    # cubic splines; "nearest" boundaries keep the spline prefilter from
-    # pulling the edges of the field of view towards zero
-    cubic = dict(order=3, mode="nearest")
-    mag = xp.abs(Smaps)
-    phasor = Smaps / xp.where(mag == 0, 1, mag)
-    abs_maps = xp.clip(zoom(mag, zoom_fac, **cubic), 0, None)
-    phasor = zoom(phasor.real, zoom_fac, **cubic) + 1j * zoom(
-        phasor.imag, zoom_fac, **cubic
-    )
-    phasor_mag = xp.abs(phasor)
-    phasor /= xp.where(phasor_mag == 0, 1, phasor_mag)
-    eig = zoom(eig, zoom_fac[1:], **cubic)
-    return (abs_maps * phasor).astype(Smaps.dtype), eig
-
-
-def _decim_and_interpolate(
-    xp, shape, decim, calib_width, compute_fn, kspace, n_coils, interp="fft"
-):
+def _decim_and_interpolate(xp, shape, decim, calib_width, compute_fn, kspace, n_coils):
     """Shared low-resolution + interpolation driver for PISCO/ESPIRiT (Sec. IV-D).
 
     Since sensitivity maps are spatially smooth, G(x)/A(x)^H A(x) and its
@@ -1151,10 +1095,6 @@ def _decim_and_interpolate(
         Full-resolution k-space data, shape ``(n_coils, *shape)``.
     n_coils : int
         Number of coils.
-    interp : {"fft", "zoom"}, optional
-        Interpolation back to `shape`: "fft" (default) for the
-        phase-referenced periodic sinc interpolation above, "zoom" for the
-        cubic magnitude + phase zoom of `_zoom_interpolate`.
 
     Returns
     -------
@@ -1185,10 +1125,7 @@ def _decim_and_interpolate(
 
     Smaps, eig, calib = compute_fn(kspace, decim_shape)
 
-    if decim > 1 and interp == "zoom":
-        Smaps, eig = _zoom_interpolate(Smaps, eig, shape, xp)
-        logger.debug("decim_and_interpolate: zoomed back to %s", shape)
-    elif decim > 1:
+    if decim > 1:
         low_res_img = _low_res_calib_image(calib, decim_shape, xp)
         num = xp.sum(xp.conj(Smaps) * low_res_img, axis=0)
         den = xp.sum(xp.abs(Smaps) ** 2, axis=0)
@@ -1303,8 +1240,14 @@ def cartesian_espirit(
         )
 
     Smaps, max_eig = _decim_and_interpolate(
-        xp, shape, decim, calib_width, compute, kspace, n_coils, interp="zoom"
+        xp, shape, decim, calib_width, compute, kspace, n_coils
     )
+    if decim > 1:
+        # ESPIRiT maps are unit-norm eigenvectors at every voxel: the
+        # (windowed, periodic) interpolation preserves the relative coil
+        # pattern but not this norm, which would shade the reconstructions.
+        rss = xp.linalg.norm(Smaps, axis=0, keepdims=True)
+        Smaps = Smaps / xp.where(rss == 0, 1, rss)
     # `crop` measures the gap to the *ideal* extreme eigenvalue
     # so that the two functions share the same default:
     # x is outside the image support when that gap exceeds `crop`.
