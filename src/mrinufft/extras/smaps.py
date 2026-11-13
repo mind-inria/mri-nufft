@@ -79,8 +79,8 @@ crop : float, default 0.08
     value of 1 for ESPIRiT, the smallest eigenvalue and its ideal value
     of 0 for PISCO: x is considered outside the support (and masked out)
     when this gap exceeds `crop`.
-power_iter : int, default 30
-    Number of (batched) power iterations used to extract the min or max 
+power_iter : int, default 30 (100 for ESPIRiT)
+    Number of (batched) power iterations used to extract the min or max
     eigenvector of the local coil-covariance matrices.
 """,
     espirit_pisco_ref="""
@@ -531,6 +531,60 @@ def _chc_via_fft(calib, kernel_width, mask):
     return ChC, patch_size
 
 
+def _chc_exact(calib, kernel_width, mask):
+    """Compute C^H C (Eq. 6) exactly, from the valid rows of C only.
+
+    Builds the calibration matrix C explicitly: one row per kernel position
+    fully inside the calibration block (the "P valid rows" of Lobos et al.,
+    Eq. 13), as the original ESPIRiT does. Unlike `_chc_via_fft`, no row
+    overlaps the zero-padded border, whose truncated patches raise the
+    noise floor of the singular values and add spurious vectors to the
+    signal subspace kept above `thresh`.
+
+    Parameters
+    ----------
+    calib : NDArray
+        Calibration k-space block, shape ``(n_coils, *calib_width)``.
+    kernel_width : tuple of int
+        Side length of the kernel support Lambda along each dimension.
+    mask : NDArray of bool, or None
+        Boolean mask of shape `kernel_width` selecting a non-rectangular
+        support, as returned by `_kernel_mask`. ``None`` keeps the full
+        rectangular support.
+
+    Returns
+    -------
+    ChC : NDArray
+        The Hermitian matrix C^H C, shape
+        ``(n_coils * patch_size, n_coils * patch_size)``, with the same
+        coil-major layout (and tap order) as `_chc_via_fft`.
+    patch_size : int
+        Number of kernel entries kept per coil.
+    """
+    xp = get_array_module(calib)
+    n_coils = calib.shape[0]
+    calib_width = calib.shape[1:]
+    valid = tuple(cw - kw + 1 for cw, kw in zip(calib_width, kernel_width))
+    if min(valid) < 1:
+        raise ValueError(
+            f"Calibration region {tuple(calib_width)} is smaller than the "
+            f"kernel {tuple(kernel_width)}."
+        )
+    support = np.ones(kernel_width, dtype=bool)
+    if mask is not None:
+        support = np.asarray(mask.get() if hasattr(mask, "get") else mask)
+    taps = np.argwhere(support)  # C order, as the `idx` of `_gram_via_projector`
+    # A[(coil, tap), row] = calib[coil][row + tap], rows over the valid positions
+    A = xp.stack(
+        [
+            calib[(slice(None),) + tuple(slice(t, t + v) for t, v in zip(tap, valid))]
+            for tap in taps
+        ],
+        axis=1,
+    ).reshape(n_coils * len(taps), -1)
+    return xp.conj(A) @ A.T, len(taps)
+
+
 def _scatter_add(xp, W, pos, spatial):
     """Fold `W` into a full-resolution ``(n_coils, n_coils, *spatial)`` array.
 
@@ -912,6 +966,7 @@ def _subspace_gram_eig(
     thresh,
     power_iter,
     mode,
+    exact_chc=False,
 ):
     """Calibration matrix -> Gram matrix -> extreme eigenpair pipeline.
 
@@ -947,6 +1002,10 @@ def _subspace_gram_eig(
     mode : {"max", "min"}
         Which eigenpair/subspace to extract: "max" for ESPIRiT's signal
         subspace, "min" for PISCO's nullspace.
+    exact_chc : bool, optional
+        If True, compute C^H C exactly from the valid rows of C
+        (`_chc_exact`, as the original ESPIRiT) instead of the FFT-based
+        approximation (`_chc_via_fft`). By default False.
 
     Returns
     -------
@@ -963,7 +1022,8 @@ def _subspace_gram_eig(
     calib = _crop_or_pad(kspace, (n_coils, *calib_width))
     logger.debug("subspace_gram_eig: calibration block shape=%s", calib.shape)
 
-    ChC, patch_size = _chc_via_fft(calib, kernel_size, mask)
+    chc_fn = _chc_exact if exact_chc else _chc_via_fft
+    ChC, patch_size = chc_fn(calib, kernel_size, mask)
     logger.debug(
         "subspace_gram_eig: C^H C shape=%s (patch_size=%d)", ChC.shape, patch_size
     )
@@ -1096,7 +1156,7 @@ def espirit(
     thresh: float = 0.05,
     crop: float = 0.08,
     decim: int = 1,
-    power_iter: int = 30,
+    power_iter: int = 100,
 ) -> NDArray:
     """ESPIRIT algorithm on non-Cartesian data.
 
@@ -1134,7 +1194,7 @@ def cartesian_espirit(
     thresh: float = 0.05,
     crop: float = 0.08,
     decim: int = 1,
-    power_iter: int = 30,
+    power_iter: int = 100,
 ) -> NDArray:
     """ESPIRIT algorithm on Cartesian data.
 
@@ -1176,11 +1236,18 @@ def cartesian_espirit(
             thresh,
             power_iter,
             mode="max",
+            exact_chc=True,
         )
 
     Smaps, max_eig = _decim_and_interpolate(
         xp, shape, decim, calib_width, compute, kspace, n_coils
     )
+    if decim > 1:
+        # ESPIRiT maps are unit-norm eigenvectors at every voxel: the
+        # (windowed, periodic) interpolation preserves the relative coil
+        # pattern but not this norm, which would shade the reconstructions.
+        rss = xp.linalg.norm(Smaps, axis=0, keepdims=True)
+        Smaps = Smaps / xp.where(rss == 0, 1, rss)
     # `crop` measures the gap to the *ideal* extreme eigenvalue
     # so that the two functions share the same default:
     # x is outside the image support when that gap exceeds `crop`.
