@@ -11,9 +11,11 @@ explanation).
 """
 
 import logging
+from collections.abc import Callable
+from itertools import combinations_with_replacement
+from math import factorial
 
 import numpy as np
-from collections.abc import Callable
 
 from numpy.typing import ArrayLike, NDArray
 
@@ -23,6 +25,8 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
 )
 from mrinufft._utils import MethodRegister
+from mrinufft.trajectories.girf import spherical_harmonics
+from mrinufft.trajectories.utils import Acquisition
 
 logger = logging.getLogger(__name__)
 
@@ -651,3 +655,225 @@ def compute_mfi_coefficients(
     _check_accuracy("mfi", B, C, E, h_k, auto_L)
     C = _full_C(field_map, C, h_edges, lazy)
     return B, C, E
+
+
+############################
+# Higher-order GIRF fields #
+############################
+
+
+def _taylor_terms(n_vars: int, order: int) -> list[tuple[int, ...]]:
+    """Multi-indices of the monomials of a Taylor expansion up to ``order``."""
+    return [
+        term
+        for n in range(order + 1)
+        for term in combinations_with_replacement(range(n_vars), n)
+    ]
+
+
+def _taylor_time(coefs: NDArray, terms: list[tuple[int, ...]]) -> NDArray:
+    """Time factors ``(-i)^n c^a / a!`` of the Taylor series of ``exp(-i c.P)``."""
+    columns = []
+    for term in terms:
+        counts = np.bincount(term, minlength=coefs.shape[1])
+        weight = (-1j) ** len(term) / np.prod([factorial(n) for n in counts])
+        columns.append(weight * np.prod(coefs[:, list(term)], axis=1))
+    return np.stack(columns, axis=1)
+
+
+def _taylor_space(basis: NDArray, terms: list[tuple[int, ...]]) -> NDArray:
+    """Space factors ``P^a`` of the Taylor series of ``exp(-i c.P)``."""
+    return np.stack([np.prod(basis[:, list(term)], axis=1) for term in terms])
+
+
+def _compression(
+    time: NDArray, space: NDArray, L: int, tol: float
+) -> tuple[NDArray, NDArray]:
+    """Weights ``(W_t, W_s)`` making ``time @ W_t, W_s @ space`` the best rank L."""
+    # The factors span orders of magnitude: balance them before the SVDs.
+    norm_t, norm_s = np.linalg.norm(time, axis=0), np.linalg.norm(space, axis=1)
+    valid = (norm_t > 0) & (norm_s > 0)
+    scale = np.ones(len(valid))
+    scale[valid] = np.sqrt(norm_s[valid] / norm_t[valid])
+    time = np.where(valid, time * scale, 0)
+    space = np.where(valid[:, None], space / scale[:, None], 0)
+
+    u_t, s_t, vh_t = np.linalg.svd(time, full_matrices=False)
+    u_s, s_s, vh_s = np.linalg.svd(space, full_matrices=False)
+    keep_t, keep_s = s_t > 1e-12 * s_t[0], s_s > 1e-12 * s_s[0]
+    u_s, s_s, vh_t, s_t = u_s[:, keep_s], s_s[keep_s], vh_t[keep_t], s_t[keep_t]
+    u, s, vh = np.linalg.svd((s_t[:, None] * vh_t) @ (u_s * s_s))
+    if L == -1:
+        tail = np.sqrt(np.cumsum((s**2)[::-1])[::-1] / np.sum(s**2))
+        L = max(1, int(np.argmax(np.append(tail, 0.0) <= tol)))
+    L = min(L, len(s))
+    weight_t = scale[:, None] * (vh_t.conj().T / s_t) @ (u[:, :L] * s[:L])
+    weight_s = (vh[:L] @ (u_s.conj().T / s_s[:, None])) / scale
+    return weight_t, weight_s
+
+
+def compute_girf_interpolators(
+    fields: NDArray,
+    acq: Acquisition,
+    L: int = -1,
+    order: int = -1,
+    tol: float = 1e-3,
+    mask: NDArray | None = None,
+    interpolators: tuple[NDArray, NDArray] | None = None,
+    n_fit: int = 20000,
+    skip: int = 0,
+) -> tuple[NDArray, NDArray]:
+    r"""Factorize the higher-order terms of a GIRF prediction.
+
+    Computes ``B`` and ``C`` such that, for the samples :math:`m` and the
+    voxels :math:`n` of the image,
+
+    .. math::
+
+        \sum_\ell B_{m\ell} C_{\ell n} \approx
+        e^{-\imath \sum_{j \geq 4} \phi_j(t_m) P_j(\boldsymbol{u}_n)},
+        \quad \text{with} \quad
+        \phi_j(t) = 2\pi\gamma \int_0^t b_j(\tau)\, d\tau
+
+    the phases accrued by the fields :math:`b_j` since the start of the
+    waveforms, to be used as interpolators of
+    :class:`~mrinufft.operators.off_resonance.MRIFourierCorrected`. The
+    exponential is expanded in Taylor series, whose terms are products of
+    spherical harmonics in closed form, then compressed to rank ``L``. See
+    :ref:`girf-factorization`.
+
+    Parameters
+    ----------
+    fields : NDArray
+        Deviations of the field terms from
+        :func:`mrinufft.trajectories.apply_girf`, in T/m^l, at the gradient
+        raster: shape ``(n_shots, n_samples - 1, n_terms)``, between the
+        ``n_samples`` samples of the trajectory.
+    acq : Acquisition
+        Acquisition configuration, providing the image grid, the gyromagnetic
+        ratio and the raster time.
+    L : int, optional
+        Rank of the factorization. If -1 (default), the smallest reaching
+        ``tol``.
+    order : int, optional
+        Order of the Taylor series, whose error is at most
+        ``max|phi|^(order + 1) / (order + 1)!`` for a phase ``phi``. If -1
+        (default), the smallest for which this bound reaches ``tol``.
+    tol : float, optional
+        Relative error, in Frobenius norm, targeted when ``L = -1``. The default
+        is 1e-3.
+    mask : NDArray, optional
+        Voxels on which the factorization is fitted, with the shape of the
+        image. By default, all of them.
+    interpolators : tuple[NDArray, NDArray], optional
+        Factorization ``(B, C)`` to multiply with, e.g. that of the static
+        off-resonance from :func:`get_orc_factorization`. ``B`` has a shape
+        ``(n_samples - skip, L0)`` or ``(n_shots * (n_samples - skip), L0)``,
+        and ``C`` a shape ``(L0, *acq.img_size)``.
+    n_fit : int, optional
+        Number of samples and of voxels drawn to fit the compression. The
+        default is 20000.
+    skip : int, optional
+        Number of samples of the trajectory before the ADC, e.g. during the
+        pre-phasers (``start_skip_samples`` of :func:`mrinufft.io.read_gradients`).
+        The phases are accrued from the start of ``fields``, and ``B`` covers
+        the samples from ``skip`` on. The default is 0.
+
+    Returns
+    -------
+    B : NDArray
+        Temporal interpolators, with shape ``(n_shots * (n_samples - skip), L)``.
+    C : NDArray
+        Spatial interpolators, with shape ``(L, *acq.img_size)``.
+
+    Raises
+    ------
+    ValueError
+        If ``skip`` is out of range, or if ``interpolators`` does not match the
+        samples.
+    """
+    fields = np.asarray(fields, dtype=float)
+    n_shots, n_terms = fields.shape[0], fields.shape[2]
+    if not 0 <= skip <= fields.shape[1]:
+        raise ValueError("`skip` must be in [0, n_samples).")
+    n_samples = fields.shape[1] + 1 - skip
+    n_total = n_shots * n_samples
+    phase = 2 * np.pi * acq.gamma * acq.raster_time * np.cumsum(fields[..., 4:], axis=1)
+    phase = np.pad(phase, ((0, 0), (1, 0), (0, 0)))[:, skip:]
+    coefs = phase.reshape(n_total, -1)
+    shape = tuple(int(n) for n in acq.img_size)
+    grid = np.indices(shape).reshape(len(shape), -1).T
+    positions = (grid - np.asarray(shape) // 2) * np.asarray(acq.res)
+
+    rng = np.random.default_rng(0)
+    voxels = np.arange(len(positions)) if mask is None else np.flatnonzero(mask)
+    fit_t = np.sort(rng.choice(n_total, min(n_total, n_fit), replace=False))
+    fit_s = np.sort(rng.choice(voxels, min(len(voxels), n_fit), replace=False))
+    if order == -1:
+        basis = spherical_harmonics(positions[fit_s[:2000]], n_terms)[:, 4:]
+        phase_max = 1.2 * np.abs(coefs[fit_t[:2000]] @ basis.T).max(initial=0)
+        order = 1
+        while phase_max ** (order + 1) / factorial(order + 1) > tol and order < 8:
+            order += 1
+    terms = _taylor_terms(coefs.shape[1], order)
+
+    prior = None
+    if interpolators is not None:
+        prior = [np.asarray(x) for x in interpolators]
+        prior[1] = prior[1].reshape(len(prior[1]), -1)
+        if len(prior[0]) not in (n_samples, n_total):
+            raise ValueError(
+                "`interpolators` B must have a row per sample from `skip` on, "
+                "for one shot or for all of them."
+            )
+
+    def series_time(index):
+        return _taylor_time(coefs[index], terms)
+
+    def series_space(index):
+        basis = spherical_harmonics(positions[index], n_terms)[:, 4:]
+        return _taylor_space(basis, terms)
+
+    # The series is compressed alone first, so that its product with a prior
+    # factorization stays small.
+    stage_tol = tol if prior is None else tol / 2
+    series_t, series_s = _compression(
+        series_time(fit_t), series_space(fit_s), -1 if prior else L, stage_tol
+    )
+
+    def time_factors(index):
+        factors = series_time(index) @ series_t
+        if prior is not None:
+            factors = prior[0][index % len(prior[0]), :, None] * factors[:, None]
+        return factors.reshape(len(index), -1)
+
+    def space_factors(index):
+        factors = series_s @ series_space(index)
+        if prior is not None:
+            factors = prior[1][:, None, index] * factors[None]
+        return factors.reshape(-1, len(index))
+
+    if prior is None:
+        weight_t = weight_s = np.eye(series_t.shape[1])
+    else:
+        weight_t, weight_s = _compression(
+            time_factors(fit_t), space_factors(fit_s), L, stage_tol
+        )
+
+    chunk = max(1, 2**22 // max(len(terms), len(weight_t)))
+    B = np.concatenate(
+        [
+            time_factors(index) @ weight_t
+            for index in np.array_split(np.arange(n_total), -(-n_total // chunk))
+        ]
+    )
+    C = np.concatenate(
+        [
+            weight_s @ space_factors(index)
+            for index in np.array_split(
+                np.arange(len(positions)), -(-len(positions) // chunk)
+            )
+        ],
+        axis=1,
+    )
+    return B.astype(np.complex64), C.reshape(-1, *shape).astype(np.complex64)

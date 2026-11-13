@@ -5,7 +5,9 @@ import pytest
 from case_trajectories import CasesTrajectories
 from pytest_cases import fixture, parametrize, parametrize_with_cases
 
-from mrinufft.io import read_trajectory, write_trajectory
+from scipy.io import savemat
+
+from mrinufft.io import read_girf, read_gradients, read_trajectory, write_trajectory
 from mrinufft.io import add_phase_to_kspace_with_shifts
 from mrinufft.trajectories import (
     get_prephasors_and_spoilers,
@@ -227,4 +229,57 @@ def test_spoilers(kspace_loc, shape, acquisition, method):
         0,
         np.sum(spoilers, axis=1) * acq.raster_time - end_points / acq.gamma,
         atol=5e-3 / min(acq.res),
+    )
+
+
+def test_read_girf(tmp_path):
+    """The GIRF is read one-sided, Hermitian, in Hz, and cut above fmax."""
+    df = 0.05  # kHz
+    f = np.arange(-400, 400) * df
+    tau, T = 3e-6, 20e-6
+    hermitian = np.exp(-2j * np.pi * f * 1e3 * tau) / (1 + 2j * np.pi * f * 1e3 * T)
+    girf = np.broadcast_to(hermitian, (3, 16, len(f))) + 0.1j * np.cos(f)
+    order = np.random.default_rng(0).permutation(len(f))
+    savemat(tmp_path / "girf.mat", {"f": f[None, order], "girf": girf[..., order]})
+
+    freqs, read = read_girf(tmp_path / "girf.mat")
+    np.testing.assert_allclose(freqs, np.arange(400) * df * 1e3, atol=1e-6)
+    assert read.shape == (3, 16, 400)
+    np.testing.assert_allclose(read, np.broadcast_to(hermitian[400:], read.shape))
+    assert np.isreal(read[..., 0]).all()
+
+    freqs, read = read_girf(tmp_path / "girf.mat", fmax=10e3)
+    assert np.all(read[..., freqs > 10e3] == 0)
+    assert np.all(read[..., freqs <= 10e3] != 0)
+
+
+def test_read_gradients(tmp_path):
+    """Gradients are read in full, and integrate to the ADC trajectory."""
+    trajectory = initialize_3D_cones(Nc=16, Ns=256, in_out=True).astype(np.float32)
+    write_trajectory(
+        trajectory=trajectory,
+        FOV=(0.23, 0.23, 0.1248),
+        img_size=(64, 64, 32),
+        grad_filename=str(tmp_path / "traj"),
+        version=5.1,
+        pregrad="prephase",
+        postgrad="slowdown_to_center",
+        grad_method="lp",
+    )
+    filename = tmp_path / "traj.bin"
+    gradients, initial_positions, params = read_gradients(filename)
+    start, end = params["start_skip_samples"], params["end_skip_samples"]
+    assert start > 0 and end > 0
+    assert gradients.shape == (16, start + 255 + end, 3)
+    np.testing.assert_allclose(initial_positions, 0)
+
+    raster_time = 10e-6
+    kspace = initial_positions[:, None] + np.cumsum(
+        gradients * params["gamma"] * 1e3 * raster_time, axis=1
+    )
+    adc_kspace, _ = read_trajectory(
+        str(filename), read_shots=True, normalize_factor=None
+    )
+    np.testing.assert_allclose(
+        kspace[:, start - 1 : start + 255], adc_kspace, atol=1e-3 * np.abs(kspace).max()
     )
