@@ -1065,16 +1065,17 @@ def _subspace_gram_eig(
 
 
 def _zoom_interpolate(Smaps, eig, shape, xp):
-    """Interpolate low-resolution maps by unwrapped-phase + magnitude zoom.
+    """Interpolate low-resolution maps by cubic zoom of magnitude and phase.
 
-    As in the original `cartesian_espirit`, the phase of each coil
-    (referenced to coil 0) is unwrapped, and the magnitude, the unwrapped
-    phase and the eigenvalue map are zoomed separately, here with cubic
-    splines (the original zoomed the phase with nearest-neighbour
-    interpolation, which leaves blocks of `decim` voxels in the
-    reconstructed images). Magnitude and phase being interpolated
-    separately, the maps never pass through zero where their phase varies
-    quickly, unlike the interpolation of the complex maps.
+    As in the original `cartesian_espirit`, magnitude and phase are
+    interpolated separately, so the maps never pass through zero where
+    their phase varies quickly (unlike the interpolation of the complex
+    maps). Magnitude, phase and eigenvalue map are zoomed with cubic
+    splines. The phase is interpolated as the unit phasor ``exp(i phase)``
+    (real and imaginary parts, then renormalised) rather than as an
+    unwrapped phase: 3D phase unwrapping of the coarse maps leaves residual
+    2 pi jumps, which nearest-neighbour zoom (the original) turns into
+    blocks of `decim` voxels and higher-order zoom into ringing.
 
     Parameters
     ----------
@@ -1095,33 +1096,26 @@ def _zoom_interpolate(Smaps, eig, shape, xp):
     eig : NDArray
         Interpolated eigenvalue map, shape `shape`.
     """
-    try:
-        from skimage.restoration import unwrap_phase
-    except ImportError as err:
-        raise ImportError(
-            "The scikit-image module is not available. Please install "
-            "it along with the [extra] dependencies "
-            "or using `pip install scikit-image`."
-        ) from err
     if xp is np:
         from scipy.ndimage import zoom
     else:
         from cupyx.scipy.ndimage import zoom
-    from mrinufft._array_compat import with_numpy
 
     decim_shape = Smaps.shape[1:]
-    zoom_fac = tuple(s / ds for s, ds in zip(shape, decim_shape))
-    unwrapped_phase = xp.asarray(
-        np.stack([with_numpy(unwrap_phase)(ph) for ph in xp.angle(Smaps)]),
-        dtype=xp.float32,
-    )
+    zoom_fac = (1.0,) + tuple(s / ds for s, ds in zip(shape, decim_shape))
     # cubic splines; "nearest" boundaries keep the spline prefilter from
     # pulling the edges of the field of view towards zero
     cubic = dict(order=3, mode="nearest")
-    abs_maps = xp.clip(zoom(xp.abs(Smaps), (1.0,) + zoom_fac, **cubic), 0, None)
-    angle_maps = zoom(unwrapped_phase, (1.0,) + zoom_fac, **cubic)
-    eig = zoom(eig, zoom_fac, **cubic)
-    return (abs_maps * xp.exp(1j * angle_maps)).astype(Smaps.dtype), eig
+    mag = xp.abs(Smaps)
+    phasor = Smaps / xp.where(mag == 0, 1, mag)
+    abs_maps = xp.clip(zoom(mag, zoom_fac, **cubic), 0, None)
+    phasor = zoom(phasor.real, zoom_fac, **cubic) + 1j * zoom(
+        phasor.imag, zoom_fac, **cubic
+    )
+    phasor_mag = xp.abs(phasor)
+    phasor /= xp.where(phasor_mag == 0, 1, phasor_mag)
+    eig = zoom(eig, zoom_fac[1:], **cubic)
+    return (abs_maps * phasor).astype(Smaps.dtype), eig
 
 
 def _decim_and_interpolate(
@@ -1160,7 +1154,7 @@ def _decim_and_interpolate(
     interp : {"fft", "zoom"}, optional
         Interpolation back to `shape`: "fft" (default) for the
         phase-referenced periodic sinc interpolation above, "zoom" for the
-        unwrapped-phase + magnitude zoom of `_zoom_interpolate`.
+        cubic magnitude + phase zoom of `_zoom_interpolate`.
 
     Returns
     -------
