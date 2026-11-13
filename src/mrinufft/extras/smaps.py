@@ -1067,12 +1067,14 @@ def _subspace_gram_eig(
 def _zoom_interpolate(Smaps, eig, shape, xp):
     """Interpolate low-resolution maps by unwrapped-phase + magnitude zoom.
 
-    The interpolation of the original `cartesian_espirit`: the magnitude
-    (and the eigenvalue map) is zoomed linearly, and the phase of each coil
-    (referenced to coil 0) is unwrapped and zoomed with nearest-neighbour
-    interpolation. Magnitude and phase being interpolated separately, the
-    maps never pass through zero where their phase varies quickly, unlike
-    the interpolation of the complex maps.
+    As in the original `cartesian_espirit`, the phase of each coil
+    (referenced to coil 0) is unwrapped, and the magnitude, the unwrapped
+    phase and the eigenvalue map are zoomed separately, here with cubic
+    splines (the original zoomed the phase with nearest-neighbour
+    interpolation, which leaves blocks of `decim` voxels in the
+    reconstructed images). Magnitude and phase being interpolated
+    separately, the maps never pass through zero where their phase varies
+    quickly, unlike the interpolation of the complex maps.
 
     Parameters
     ----------
@@ -1113,10 +1115,12 @@ def _zoom_interpolate(Smaps, eig, shape, xp):
         np.stack([with_numpy(unwrap_phase)(ph) for ph in xp.angle(Smaps)]),
         dtype=xp.float32,
     )
-    abs_maps = zoom(xp.abs(Smaps), (1.0,) + zoom_fac, order=1)
-    # Phase zoom with 0 order to prevent residual unwrapping causing artifacts
-    angle_maps = zoom(unwrapped_phase, (1.0,) + zoom_fac, order=0)
-    eig = zoom(eig, zoom_fac, order=1)
+    # cubic splines; "nearest" boundaries keep the spline prefilter from
+    # pulling the edges of the field of view towards zero
+    cubic = dict(order=3, mode="nearest")
+    abs_maps = xp.clip(zoom(xp.abs(Smaps), (1.0,) + zoom_fac, **cubic), 0, None)
+    angle_maps = zoom(unwrapped_phase, (1.0,) + zoom_fac, **cubic)
+    eig = zoom(eig, zoom_fac, **cubic)
     return (abs_maps * xp.exp(1j * angle_maps)).astype(Smaps.dtype), eig
 
 
