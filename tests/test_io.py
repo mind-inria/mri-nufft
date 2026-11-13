@@ -124,6 +124,34 @@ def test_write_n_read(
     np.testing.assert_almost_equal(read_traj, trajectory, decimal=3.5)
 
 
+@pytest.mark.parametrize(
+    "pad_to_multiple_of_4, expected_samples", [(True, 8), (False, 5)]
+)
+def test_write_trajectory_pad_samples(
+    caplog, tmp_path, pad_to_multiple_of_4, expected_samples
+):
+    """Pad gradient samples to a multiple of four when requested."""
+    trajectory = np.zeros((1, 6, 2), dtype=np.float32)
+    trajectory[0, :, 0] = np.linspace(-0.2, 0.2, 6)
+    write_trajectory(
+        trajectory=trajectory,
+        FOV=(0.23, 0.23),
+        img_size=(256, 256),
+        grad_filename=str(tmp_path / "trajectory"),
+        check_constraints=False,
+        pad_to_multiple_of_4=pad_to_multiple_of_4,
+    )
+
+    read_traj, params = read_trajectory(
+        str(tmp_path / "trajectory.bin"), read_shots=True
+    )
+    assert params["num_samples_per_shot"] == expected_samples
+    if pad_to_multiple_of_4:
+        np.testing.assert_allclose(read_traj[0, -4:], read_traj[0, -4])
+    else:
+        assert "not a multiple of 4" in caplog.text
+
+
 @parametrize_with_cases(
     "kspace_loc, shape",
     cases=[CasesTrajectories.case_random2D, CasesTrajectories.case_random3D],
