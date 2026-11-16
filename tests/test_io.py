@@ -147,7 +147,8 @@ def test_write_trajectory_pad_samples(
     )
     assert params["num_samples_per_shot"] == expected_samples
     if pad_to_multiple_of_4:
-        np.testing.assert_allclose(read_traj[0, -4:], read_traj[0, -4])
+        expected_padding = np.broadcast_to(read_traj[0, -1], (4, 2))
+        np.testing.assert_allclose(read_traj[0, -4:], expected_padding)
     else:
         assert "not a multiple of 4" in caplog.text
 
