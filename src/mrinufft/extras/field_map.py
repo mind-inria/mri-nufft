@@ -250,7 +250,7 @@ def _create_histogram(
     n_bins : int or tuple[int, int]
         Number of bins for the real (R2*) and imaginary (B0) axes. An integer is
         the number of B0 bins; the R2* axis then gets bins of the same width
-        (in rad/s), at most ``_MAX_R2S_BINS``.
+        (in rad/s), at most ``_MAX_R2S_BINS`` which is 16.
 
     Returns
     -------
@@ -274,10 +274,11 @@ def _create_histogram(
         elif deltaR == 0:
             n_bins = (1, n_bins)
         else:
-            # Keep all the bins on the B0 axis: splitting them between the two axes
-            # (e.g. 21 x 49 for a brain, R2* 10-200 /s and B0 over ~1400 Hz)
-            # quantizes B0 in ~30 Hz steps, i.e. phase errors of ~1 rad at the end
-            # of a 30 ms readout. R2* gets bins of the same width, capped.
+            # Preserve full resolution along the B0 axis. Splitting a fixed bin
+            # budget across both axes (e.g., 21 x 49 for a brain with ~1400 Hz
+            # B0 range) quantizes B0 into ~30 Hz steps, causing ~1 rad of phase
+            # error by the end of a 30 ms readout. Instead, give B0 all `n_bins`
+            # and scale R2* bins to match the same step width (capped at _MAX_R2S_BINS).
             n_bins_r = int(
                 min(_MAX_R2S_BINS, max(1, np.ceil(float(n_bins * deltaR / deltaI))))
             )
