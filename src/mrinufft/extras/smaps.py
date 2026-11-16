@@ -79,7 +79,7 @@ crop : float, default 0.08
     value of 1 for ESPIRiT, the smallest eigenvalue and its ideal value
     of 0 for PISCO: x is considered outside the support (and masked out)
     when this gap exceeds `crop`.
-power_iter : int, default 30 (100 for ESPIRiT)
+power_iter : int, default 30 (10 for ESPIRiT)
     Number of (batched) power iterations used to extract the min or max
     eigenvector of the local coil-covariance matrices.
 """,
@@ -473,73 +473,14 @@ def _kernel_mask(kernel_width, kernel_shape, xp):
     return sum((g / (k / 2)) ** 2 for g, k in zip(grid, kernel_width)) <= 1
 
 
-def _chc_via_fft(calib, kernel_width, mask):
-    """Compute C^H C (Eq. 6) without ever forming C, via Lobos et al. Sec. IV-A.
-
-    Precomputes zero-padded FFTs of the calibration data for each coil (Q
-    FFTs) and forms every pairwise cross-correlation r_pq[n] via Q^2 inverse
-    FFTs (Eq. 13); entries of C^H C are then read off by gathering, for
-    every pair of kernel-support positions, the correlation value at their
-    spatial difference. This neglects the "extraction of P valid rows"
-    masking step of Eq. 13 (following Ongie & Jacob [28]), which is a minor
-    approximation in the regime P >> |Lambda| that PISCO targets; the
-    O(P (Q|Lambda|)^2) direct computation of C^H C via matrix
-    multiplication is replaced here by O(Q^2 N log N + Q^2 |Lambda|^2).
-
-    Parameters
-    ----------
-    calib : NDArray
-        Calibration k-space block, shape ``(n_coils, *calib_width)``.
-    kernel_width : tuple of int
-        Side length of the kernel support Lambda along each dimension.
-    mask : NDArray of bool, or None
-        Boolean mask of shape `kernel_width` selecting a non-rectangular
-        (e.g. ellipsoidal) support, as returned by `_kernel_mask`. ``None``
-        keeps the full rectangular support.
-
-    Returns
-    -------
-    ChC : NDArray
-        The Hermitian matrix C^H C, shape
-        ``(n_coils * patch_size, n_coils * patch_size)``.
-    patch_size : int
-        Number of kernel entries kept per coil (``prod(kernel_width)`` if
-        `mask` is None, ``mask.sum()`` otherwise).
-    """
-    xp = get_array_module(calib)
-    n_coils = calib.shape[0]
-    calib_width = calib.shape[1:]
-    ndim = len(calib_width)
-
-    pad_shape = tuple(cw + kw - 1 for cw, kw in zip(calib_width, kernel_width))
-    S = xp.fft.fftn(calib, s=pad_shape, axes=range(1, ndim + 1))
-    corr = xp.fft.ifftn(
-        xp.conj(S)[:, None, ...] * S[None, :, ...], axes=range(2, ndim + 2)
-    )  # corr[p, q, n] = sum_k conj(calib_p[k]) calib_q[k + n]
-
-    grid = xp.meshgrid(*[xp.arange(k) for k in kernel_width], indexing="ij")
-    idx = xp.stack(grid, axis=-1)
-    idx = idx[mask] if mask is not None else idx.reshape(-1, ndim)
-    patch_size = idx.shape[0]
-
-    diff = (idx[None, :, :] - idx[:, None, :]) % xp.asarray(pad_shape)
-    gather = tuple(diff[..., d] for d in range(ndim))
-    block = corr[(slice(None), slice(None)) + gather]  # (p, q, s, t)
-    ChC = block.transpose(0, 2, 1, 3).reshape(
-        n_coils * patch_size, n_coils * patch_size
-    )
-    return ChC, patch_size
-
-
 def _chc_exact(calib, kernel_width, mask):
     """Compute C^H C (Eq. 6) exactly, from the valid rows of C only.
 
     Builds the calibration matrix C explicitly: one row per kernel position
     fully inside the calibration block (the "P valid rows" of Lobos et al.,
-    Eq. 13), as the original ESPIRiT does. Unlike `_chc_via_fft`, no row
-    overlaps the zero-padded border, whose truncated patches raise the
-    noise floor of the singular values and add spurious vectors to the
-    signal subspace kept above `thresh`.
+    Eq. 13), as required for both ESPIRiT and PISCO. No row overlaps the
+    zero-padded border, whose truncated patches raise the noise floor of the
+    singular values and add spurious vectors to the selected subspace.
 
     Parameters
     ----------
@@ -557,7 +498,7 @@ def _chc_exact(calib, kernel_width, mask):
     ChC : NDArray
         The Hermitian matrix C^H C, shape
         ``(n_coils * patch_size, n_coils * patch_size)``, with the same
-        coil-major layout (and tap order) as `_chc_via_fft`.
+        coil-major layout and tap order.
     patch_size : int
         Number of kernel entries kept per coil.
     """
@@ -880,6 +821,7 @@ def _batched_power_iteration(
     n_iter: int = 30,
     mode: str = "max",
     seed: int = 0,
+    v0: NDArray | None = None,
 ) -> tuple[NDArray, NDArray]:
     """Batched power iteration for an extreme eigenpair of Hermitian PSD matrices.
 
@@ -899,6 +841,9 @@ def _batched_power_iteration(
         Which eigenpair to extract. By default "max".
     seed : int, optional
         Seed for the (shared, across batch locations) random initial vector.
+    v0 : NDArray, optional
+        Initial vectors, shape ``(n_coils, ...)``. Each vector is normalized;
+        zero vectors fall back to the shared random initial vector.
 
     Returns
     -------
@@ -934,16 +879,17 @@ def _batched_power_iteration(
         raise ValueError(f"Unknown mode: {mode!r}")
 
     rng = np.random.default_rng(seed)
-    v0 = rng.standard_normal(n_coils) + 1j * rng.standard_normal(n_coils)
-    v0 = (v0 / np.linalg.norm(v0)).astype(G.dtype)
-    # Coil axis kept leading (rather than trailing, as a plain batched
-    # matmul convention would have it) so that the eigenvector this
-    # function returns already has the same axis order as the `Smaps`
-    # array callers ultimately return -- no reordering, and hence no
-    # C/F-contiguity-breaking transpose, needed afterwards.
-    v = xp.broadcast_to(
-        xp.asarray(v0).reshape(n_coils, *batch_ones), (n_coils, *batch_shape)
-    ).copy()
+    random_v = rng.standard_normal(n_coils) + 1j * rng.standard_normal(n_coils)
+    random_v = (random_v / np.linalg.norm(random_v)).astype(G.dtype)
+    random_v = xp.broadcast_to(
+        xp.asarray(random_v).reshape(n_coils, *batch_ones), (n_coils, *batch_shape)
+    )
+    if v0 is None:
+        v = random_v.copy()
+    else:
+        v0 = xp.asarray(v0, dtype=G.dtype)
+        norm = xp.linalg.norm(v0, axis=0, keepdims=True)
+        v = xp.where(norm == 0, random_v, v0 / xp.where(norm == 0, 1, norm))
 
     for _ in range(n_iter):
         v = xp.einsum("ij...,j...->i...", op, v)
@@ -966,16 +912,16 @@ def _subspace_gram_eig(
     thresh,
     power_iter,
     mode,
-    exact_chc=False,
+    v0=None,
 ):
-    """Calibration matrix -> Gram matrix -> extreme eigenpair pipeline.
+    """Exact calibration Gram matrix -> extreme eigenpair pipeline.
 
     Shared by ESPIRiT (``mode="max"``, signal subspace) and PISCO
-    (``mode="min"``, nullspace). Builds the calibration matrix's Gram
-    matrix C^H C (Eq. 6, via the FFT-based approximation of Sec. IV-A),
-    selects its `mode`-appropriate subspace at the (normalized) singular
-    value threshold `thresh` (kept above `thresh` for "max"/signal, below
-    for "min"/nullspace), evaluates the local coil-covariance matrix
+    (``mode="min"``, nullspace). Builds the calibration matrix's exact Gram
+    matrix C^H C from valid rows, selects its `mode`-appropriate subspace at
+    the (normalized) singular-value threshold `thresh` (kept above `thresh`
+    for "max"/signal, below for "min"/nullspace), evaluates the local
+    coil-covariance matrix
     G(x)/A(x)^H A(x) at every voxel via PISCO's W-matrix FFT trick
     (Eq. 14-16), and extracts its extreme eigenpair via power iteration
     (Sec. IV-E).
@@ -1002,10 +948,9 @@ def _subspace_gram_eig(
     mode : {"max", "min"}
         Which eigenpair/subspace to extract: "max" for ESPIRiT's signal
         subspace, "min" for PISCO's nullspace.
-    exact_chc : bool, optional
-        If True, compute C^H C exactly from the valid rows of C
-        (`_chc_exact`, as the original ESPIRiT) instead of the FFT-based
-        approximation (`_chc_via_fft`). By default False.
+    v0 : NDArray, optional
+        Initial vectors for ESPIRiT power iteration, typically the
+        low-resolution calibration image.
 
     Returns
     -------
@@ -1022,8 +967,7 @@ def _subspace_gram_eig(
     calib = _crop_or_pad(kspace, (n_coils, *calib_width))
     logger.debug("subspace_gram_eig: calibration block shape=%s", calib.shape)
 
-    chc_fn = _chc_exact if exact_chc else _chc_via_fft
-    ChC, patch_size = chc_fn(calib, kernel_size, mask)
+    ChC, patch_size = _chc_exact(calib, kernel_size, mask)
     logger.debug(
         "subspace_gram_eig: C^H C shape=%s (patch_size=%d)", ChC.shape, patch_size
     )
@@ -1053,7 +997,11 @@ def _subspace_gram_eig(
     G *= np.prod(target_shape) / patch_size
     logger.debug("subspace_gram_eig: local Gram matrices computed, shape=%s", G.shape)
 
-    eig, Smaps = _batched_power_iteration(G, n_iter=power_iter, mode=mode)
+    if mode == "max" and v0 is None:
+        v0 = _low_res_calib_image(calib, target_shape, xp)
+    if mode != "max":
+        v0 = None
+    eig, Smaps = _batched_power_iteration(G, n_iter=power_iter, mode=mode, v0=v0)
     Smaps = Smaps * xp.conj(Smaps[0] / xp.abs(Smaps[0]))
     logger.debug(
         "subspace_gram_eig: power iteration done (n_iter=%d), eig range=[%.4g, %.4g]",
@@ -1088,9 +1036,10 @@ def _decim_and_interpolate(xp, shape, decim, calib_width, compute_fn, kspace, n_
     calib_width : tuple of int
         Calibration region width along each dimension; the decimated grid
         is never made smaller than this.
-    compute_fn : Callable[[NDArray, tuple[int, ...]], tuple[NDArray, NDArray, NDArray]]
+    compute_fn : Callable
         Function estimating `(Smaps, eig, calib)` on a given kspace and its
-        spatial shape, as described above.
+        spatial shape, optionally using the low-resolution calibration image
+        as a warm start.
     kspace : NDArray
         Full-resolution k-space data, shape ``(n_coils, *shape)``.
     n_coils : int
@@ -1123,10 +1072,13 @@ def _decim_and_interpolate(xp, shape, decim, calib_width, compute_fn, kspace, n_
             decim_shape,
         )
 
-    Smaps, eig, calib = compute_fn(kspace, decim_shape)
+    low_res_img = None
+    if decim > 1:
+        calib = _crop_or_pad(kspace, (n_coils, *calib_width))
+        low_res_img = _low_res_calib_image(calib, decim_shape, xp)
+    Smaps, eig, calib = compute_fn(kspace, decim_shape, low_res_img)
 
     if decim > 1:
-        low_res_img = _low_res_calib_image(calib, decim_shape, xp)
         num = xp.sum(xp.conj(Smaps) * low_res_img, axis=0)
         den = xp.sum(xp.abs(Smaps) ** 2, axis=0)
         cim = num / xp.where(den == 0, 1, den)
@@ -1156,7 +1108,7 @@ def espirit(
     thresh: float = 0.05,
     crop: float = 0.08,
     decim: int = 1,
-    power_iter: int = 100,
+    power_iter: int = 10,
 ) -> NDArray:
     """ESPIRIT algorithm on non-Cartesian data.
 
@@ -1194,7 +1146,7 @@ def cartesian_espirit(
     thresh: float = 0.05,
     crop: float = 0.08,
     decim: int = 1,
-    power_iter: int = 100,
+    power_iter: int = 10,
 ) -> NDArray:
     """ESPIRIT algorithm on Cartesian data.
 
@@ -1225,7 +1177,7 @@ def cartesian_espirit(
     # from these signal-space kernels and takes its *largest* eigenvector,
     # shown in Eq. (12) to be algebraically equivalent to the
     # nullspace-based approach.
-    def compute(kspace, target_shape):
+    def compute(kspace, target_shape, low_res_img=None):
         return _subspace_gram_eig(
             kspace,
             target_shape,
@@ -1236,7 +1188,7 @@ def cartesian_espirit(
             thresh,
             power_iter,
             mode="max",
-            exact_chc=True,
+            v0=low_res_img,
         )
 
     Smaps, max_eig = _decim_and_interpolate(
@@ -1358,7 +1310,7 @@ def cartesian_pisco(
     # (Eq. 15-16). Sensitivity map c(x) at each voxel x = approximate
     # nullspace vector of H(x), i.e. eigenvector of the smallest eigenvalue
     # of G(x) (Eq. 9-11).
-    def compute(kspace, target_shape):
+    def compute(kspace, target_shape, low_res_img=None):
         Smaps, min_eig, calib = _subspace_gram_eig(
             kspace,
             target_shape,
