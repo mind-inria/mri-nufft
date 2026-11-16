@@ -125,15 +125,18 @@ def test_cartesian_espirit_recovers_smaps(cartesian_kspace_2d, phantom_2d):
 def _calibration_matrix(calib, kernel_width, mask=None):
     """Explicit ESPIRiT calibration matrix: one row per valid kernel position."""
     n_coils, *calib_width = calib.shape
-    valid = [c - kernel_width + 1 for c in calib_width]
-    taps = np.argwhere(
-        np.ones((kernel_width,) * len(calib_width), bool) if mask is None else mask
+    windows = np.lib.stride_tricks.sliding_window_view(
+        calib, kernel_width, axis=tuple(range(1, calib.ndim))
     )
-    cols = [
-        calib[(slice(None),) + tuple(slice(t, t + v) for t, v in zip(tap, valid))]
-        for tap in taps
-    ]
-    return np.stack(cols, axis=1).reshape(n_coils * len(taps), -1).T
+    windows = np.moveaxis(windows, 0, len(calib_width)).reshape(
+        -1, n_coils, int(np.prod(kernel_width))
+    )
+    taps = (
+        np.ones(kernel_width, bool)
+        if mask is None
+        else np.asarray(mask, dtype=bool)
+    ).ravel()
+    return windows[:, :, taps].reshape(-1, n_coils * taps.sum())
 
 
 def _reference_espirit(kspace, calib_width, kernel_width, thresh):
@@ -163,7 +166,7 @@ def _abs_corr(a, b):
 
 @pytest.mark.parametrize("kernel_shape", ["rect", "ellipsoid"])
 def test_chc_exact_matches_calibration_matrix(kernel_shape):
-    """ESPIRiT's C^H C must come from the valid rows of the calibration matrix only."""
+    """C^H C must come from the valid rows of the calibration matrix only."""
     rng = np.random.default_rng(0)
     calib = rng.standard_normal((3, 10, 9)) + 1j * rng.standard_normal((3, 10, 9))
     mask = _kernel_mask((4, 4), kernel_shape, np)
@@ -173,15 +176,9 @@ def test_chc_exact_matches_calibration_matrix(kernel_shape):
     np.testing.assert_allclose(chc, C.conj().T @ C, rtol=1e-4, atol=1e-3)
 
 
-@pytest.mark.parametrize("snr", [10, 20])
+@pytest.mark.parametrize("snr", [5, 10, 20])
 def test_cartesian_espirit_matches_reference_noisy(snr):
-    """ESPIRiT should match a textbook implementation on noisy calibration data.
-
-    Noise exposes approximations of the calibration matrix: rows overlapping
-    the zero-padded border of the calibration region (an FFT-based C^H C)
-    lift the noise floor of its singular values, so noise-only vectors enter
-    the signal subspace and corrupt the maps (correlation ~0.6-0.75 here).
-    """
+    """ESPIRiT should match a textbook implementation on noisy calibration data."""
     shape, n_coils, calib_width, kernel_width = (32, 32), 8, 20, 5
     smaps_gt = _synthetic_smaps(shape, n_coils)
     image = _phantom(shape)
@@ -204,13 +201,43 @@ def test_cartesian_espirit_matches_reference_noisy(snr):
         crop=1.0,  # keep every pixel, the support is chosen below
     )
     mask = (eig / eig.max() > 0.9) & (np.abs(image) > 0)
-    assert (
-        _abs_corr(_phase_reference(est)[:, mask], _phase_reference(ref)[:, mask])
-        > 0.999
-    )
+    min_corr = 0.99 if snr == 5 else 0.999
+    assert _abs_corr(
+        _phase_reference(est)[:, mask], _phase_reference(ref)[:, mask]
+    ) > min_corr
     assert (
         _abs_corr(_phase_reference(est)[:, mask], _phase_reference(smaps_gt)[:, mask])
         > 0.99
+    )
+
+
+def test_cartesian_pisco_matches_reference_noisy():
+    """PISCO should use the exact calibration Gram matrix on noisy data."""
+    shape, n_coils, calib_width, kernel_width, snr = (32, 32), 8, 20, 5, 5
+    smaps_gt = _synthetic_smaps(shape, n_coils)
+    image = _phantom(shape)
+    kspace = fft(image[None] * smaps_gt, dims=2)
+    rng = np.random.default_rng(0)
+    sigma = np.abs(kspace).max() / snr / 10
+    kspace = kspace + sigma * (
+        rng.standard_normal(kspace.shape) + 1j * rng.standard_normal(kspace.shape)
+    )
+    kspace = kspace.astype(np.complex64)
+
+    ref, eig = _reference_espirit(kspace, calib_width, kernel_width, thresh=0.02)
+    est = cartesian_pisco(
+        kspace,
+        shape,
+        calib_width=calib_width,
+        kernel_size=kernel_width,
+        kernel_shape="rect",
+        thresh=0.02,
+        crop=1.0,
+    )
+    mask = (eig / eig.max() > 0.9) & (np.abs(image) > 0)
+    assert (
+        _abs_corr(_phase_reference(est)[:, mask], _phase_reference(ref)[:, mask])
+        > 0.98
     )
 
 
