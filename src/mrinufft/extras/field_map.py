@@ -28,8 +28,12 @@ logger = logging.getLogger(__name__)
 
 #: Extra interpolators kept past the time-bandwidth product when ``L=-1``.
 _SVD_MARGIN = 2
-# R2* bins of a complex field map given an integer n_bins (see _create_histogram)
-_MAX_R2S_BINS = 16
+#: Largest change of ``exp(Delta t)`` caused by binning the field map with
+#: ``n_bins=-1``.
+_BIN_TOL = 0.05
+#: Elements of the ``(n_times, n_bins)`` matrix ``E`` past which ``n_bins=-1``
+#: uses coarser bins than ``_BIN_TOL`` requires, to bound memory.
+_MAX_E_SIZE = 2**26
 #: Relative error of the ``E ~ B @ C`` factorization above which we warn.
 _ACCURACY_WARN = 0.05
 
@@ -161,10 +165,14 @@ L : int, optional
     Too small an ``L`` leaves a large residual phase error, which appears as
     artefacts in the corrected image; a warning is logged when that happens.
 n_bins : int or tuple[int, int], optional
-    Number of histogram bins for off-resonance value clustering (default is 1024).
-    For a complex field map (with R2*), an integer is the number of bins along the
-    B0 axis; the R2* axis gets bins of the same width, at most 16. Pass a tuple
-    ``(n_r2star, n_b0)`` to set both.
+    Number of bins used to quantize the field map before the factorization.
+    Binning error does not decrease with ``L``: each voxel is represented by its
+    bin centre. The default, -1, sets the bin width from the readout so that
+    binning changes :math:`e^{\Delta t}` by at most 5% (0.05 rad of phase); a
+    warning is logged if memory forces coarser bins.
+    An integer is the number of bins along B0, and the R2* bins have the same
+    width; a tuple ``(n_r2star, n_b0)`` sets both. Only bins holding a voxel are
+    kept, so the cost is bounded by the number of voxels.
 lazy: bool, default False
     If True, use a lazy evaluation scheme for the space interpolator C, saving memory.
 """,
@@ -172,12 +180,11 @@ lazy: bool, default False
 Returns
 -------
 B: NDArray
-    [L, nbins] phase basis matrix in the time domain.
+    [nt, L] phase basis matrix in the time domain; nt = len(readout_time).
 C: NDArray
-    [L, nt] interpolation matrix to transform weighted basis to phase at the
-    time points; nt = len(readout_time).
+    [L, *field_map.shape] spatial interpolators.
 E: NDArray
-    [nbins, nt] exponential off-resonance phase matrix at input histogram bins.
+    [nt, n_bins] exponential off-resonance phase matrix at the occupied bins.
 
 See Also
 --------
@@ -233,97 +240,128 @@ def get_complex_fieldmap_rad(
     return field_map
 
 
+def _resolve_n_bins(
+    n_bins: int | tuple[int, int], span: tuple[float, float], t_max: float
+) -> tuple[int, int]:
+    """Get the number of (R2*, B0) bins covering ``span``, see ``n_bins``."""
+    if n_bins == -1:
+        n_dims = sum(s > 0 for s in span)
+        if n_dims == 0 or t_max == 0:
+            return (1, 1)
+        # |z - z_k| <= sqrt(n_dims) * width / 2, and exp(z t) is then off by
+        # ~|z - z_k| |t| <= _BIN_TOL.
+        width = 2 * _BIN_TOL / (np.sqrt(n_dims) * t_max)
+        return tuple(max(1, int(np.ceil(s / width))) for s in span)
+    if isinstance(n_bins, int):
+        if span[1] == 0:
+            return (n_bins, 1)
+        return (max(1, int(np.ceil(n_bins * span[0] / span[1]))), n_bins)
+    return tuple(int(n) if s > 0 else 1 for n, s in zip(n_bins, span, strict=True))
+
+
+def _bin_index(
+    z: NDArray, lo: tuple[float, float], span: tuple[float, float], n_bins
+) -> NDArray:
+    """Flat index of the bin of each value, on a regular grid over ``lo + span``.
+
+    Values outside the grid (e.g. background voxels when the range comes from a
+    mask) are clamped onto the edge bins.
+    """
+    xp = get_array_module(z)
+    idx = []
+    for v, low, s, n in zip((z.real, z.imag), lo, span, n_bins, strict=True):
+        i = xp.floor((v - low) * (n / s)) if s > 0 else xp.zeros(v.shape)
+        idx.append(xp.clip(i, 0, n - 1).astype(xp.int64))
+    return idx[0] * n_bins[1] + idx[1]
+
+
 def _create_histogram(
     field_map: NDArray[np.complex64],
     mask: NDArray | None,
-    n_bins: int | tuple[int, int] = 1024,
-) -> tuple[NDArray, NDArray, list[NDArray]]:
-    """
-    Quantize the field map in n_bins values.
+    readout_time: NDArray,
+    n_bins: int | tuple[int, int] = -1,
+) -> tuple[NDArray, NDArray, NDArray, float]:
+    r"""
+    Quantize the field map on a regular (R2*, B0) grid, keeping occupied bins.
+
+    A voxel at :math:`z` is represented by the centre :math:`z_k` of its bin,
+    so :math:`e^{zt}` is off by :math:`|e^{(z-z_k)t} - 1| \approx |z-z_k||t|`
+    whatever the factorization: the bin width bounds the pointwise error.
 
     Parameters
     ----------
     field_map : NDArray
         Complex-valued field map, in rad/s.
     mask : NDArray or None
-        Restrict the histogram to those voxels. ``None`` uses the whole map.
+        Voxels setting the grid range and the bin counts. ``None`` uses the
+        whole map.
+    readout_time : NDArray
+        Time points, in s. Its extent and size set the bins when ``n_bins=-1``.
     n_bins : int or tuple[int, int]
-        Number of bins for the real (R2*) and imaginary (B0) axes. An integer is
-        the number of B0 bins; the R2* axis then gets bins of the same width
-        (in rad/s), at most ``_MAX_R2S_BINS`` which is 16.
+        See the ``n_bins`` parameter of the factorizations.
 
     Returns
     -------
-    h_counts: NDArray
-        Bin populations, of shape ``n_bins``.
-    h_centers_cpx: NDArray
-        Complex value at the center of each bin, of shape ``n_bins``.
-    h_edges: list[NDArray]
-        Bin edges of both axes. Returned so that `_full_C` can map voxels onto
-        *these* bins: the edges are derived from the masked field map, so
-        recomputing them from the full map would assign every voxel to the
-        wrong bin.
+    counts: NDArray
+        Number of masked voxels in each occupied bin, of shape ``(K,)``.
+    centers: NDArray
+        Complex value at the centre of each occupied bin, of shape ``(K,)``.
+    inverse: NDArray
+        Index in ``centers`` of the bin of each voxel of the raveled field map.
+        Bins holding only unmasked voxels are kept, with a count of 0.
+    max_err: float
+        Bound on :math:`|e^{(z-z_k)t} - 1|` over the readout for masked voxels.
     """
     xp = get_array_module(field_map)
-    masked_field_map = field_map.ravel() if mask is None else field_map[mask].ravel()
-    if isinstance(n_bins, int):
-        deltaR = xp.max(masked_field_map.real) - xp.min(masked_field_map.real)
-        deltaI = xp.max(masked_field_map.imag) - xp.min(masked_field_map.imag)
-        if deltaI == 0:
-            n_bins = (n_bins, 1)
-        elif deltaR == 0:
-            n_bins = (1, n_bins)
-        else:
-            # Preserve full resolution along the B0 axis. Splitting a fixed bin
-            # budget across both axes (e.g., 21 x 49 for a brain with ~1400 Hz
-            # B0 range) quantizes B0 into ~30 Hz steps, causing ~1 rad of phase
-            # error by the end of a 30 ms readout. Instead, give B0 all `n_bins`
-            # and scale R2* bins to match the same step width (capped at _MAX_R2S_BINS).
-            n_bins_r = int(
-                min(_MAX_R2S_BINS, max(1, np.ceil(float(n_bins * deltaR / deltaI))))
-            )
-            n_bins = (n_bins_r, int(n_bins))
+    z = field_map.ravel()
+    zm = z if mask is None else field_map[mask].ravel()
+    lo = (float(zm.real.min()), float(zm.imag.min()))
+    span = (float(zm.real.max()) - lo[0], float(zm.imag.max()) - lo[1])
+    t_max = float(xp.abs(readout_time).max())
 
-    z = masked_field_map.view(xp.float32).reshape(-1, 2)
-    # create histograms
-    h_counts, h_edges = xp.histogramdd(z, bins=n_bins)
-    # get center of bins for real and imaginary part
-    h_centers = [e[1:] - (e[1] - e[0]) / 2 for e in h_edges]
+    auto = n_bins == -1
+    n_bins = _resolve_n_bins(n_bins, span, t_max)
+    uniq, inverse = xp.unique(_bin_index(z, lo, span, n_bins), return_inverse=True)
+    max_bins = max(1, _MAX_E_SIZE // readout_time.size)
+    while auto and uniq.size > max_bins:
+        # Exact if all bins of the grid are occupied, too little otherwise: loop.
+        scale = (max_bins / uniq.size) ** (1 / sum(n > 1 for n in n_bins))
+        n_bins = tuple(max(1, int(n * scale)) for n in n_bins)
+        uniq, inverse = xp.unique(_bin_index(z, lo, span, n_bins), return_inverse=True)
+    inverse = inverse.ravel()
 
-    if len(h_centers) == 2:
-        h_centers_cpx = np.add.outer(
-            h_centers[0], 1j * h_centers[1], dtype=np.complex64
+    width = [s / n for s, n in zip(span, n_bins, strict=True)]
+    ir, ii = xp.divmod(uniq, n_bins[1])
+    centers = (lo[0] + (ir + 0.5) * width[0]) + 1j * (lo[1] + (ii + 0.5) * width[1])
+    counts = xp.bincount(
+        inverse if mask is None else inverse[mask.ravel().astype(bool)],
+        minlength=uniq.size,
+    )
+    max_err = 0.5 * float(np.hypot(*width)) * t_max
+
+    # The auto bins sit at _BIN_TOL, up to rounding.
+    if max_err > _BIN_TOL + 1e-6:
+        logger.warning(
+            "off-resonance: binning the field map on %d x %d (R2* x B0) bins "
+            "changes exp(Delta t) by up to %.1f%%; pass a larger n_bins to reduce "
+            "it, at the cost of memory.",
+            *n_bins,
+            100 * max_err,
         )
-    else:
-        h_centers_cpx = np.complex64(1j) * h_centers[0]
-
-    return h_counts, h_centers_cpx, h_edges
-
-
-def _bin_index(values: NDArray, edges: NDArray) -> NDArray:
-    """Index of the (uniform) histogram bin each value falls into.
-
-    ``np.histogramdd`` puts a value in bin ``k`` when it lies in
-    ``[edges[k], edges[k+1])``, so the index is a floor -- rounding instead
-    would offset every voxel by half a bin. Values outside ``edges`` (e.g.
-    background voxels when the histogram was masked) are clipped to the
-    closest edge bin.
-    """
-    xp = get_array_module(values)
-    n = len(edges) - 1
-    width = (edges[-1] - edges[0]) / n
-    if width == 0:
-        return xp.zeros(values.shape, dtype=int)
-    idx = xp.floor((values - edges[0]) / width).astype(int)
-    return xp.clip(idx, 0, n - 1)
+    logger.debug(
+        "off-resonance: %d x %d bins, %d occupied, binning error <= %.2f%%",
+        *n_bins,
+        uniq.size,
+        100 * max_err,
+    )
+    return counts, centers.astype(xp.complex64), inverse, max_err
 
 
 class _C_lazy:
     """A lazy version of the C interpolator.
 
-    Instead of storing C as a ``(L, Nx, Ny, Nz)`` array, we store the quantize
-    version of shape L, N_bins, and the indexes mapping each voxel of the
-    complex-valued field-map to the bins values.
+    Instead of storing C as a ``(L, Nx, Ny, Nz)`` array, we store its value on
+    the K occupied bins, of shape ``(L, K)``, and the bin of each voxel.
 
     When accessing the L-th interpolator, the full ``(Nx, Ny, Nz)`` associated array is
     generated.
@@ -331,9 +369,9 @@ class _C_lazy:
 
     Parameters
     ----------
-    C_sr: NDArray of shape (L, Nbinsreal, Nbinsimag)
-    idxr: NDArray mapping field-map real value to real bins
-    idxi: NDArray mapping field-map imag value to imag bins
+    C_small: NDArray of shape (L, K)
+    inverse: NDArray mapping each (raveled) voxel to its bin
+    img_shape: shape of the field map
 
     Methods
     -------
@@ -343,14 +381,12 @@ class _C_lazy:
 
     def __init__(
         self,
-        C_sr: NDArray[np.complex64],
-        idxr: ArrayLike,
-        idxi: ArrayLike,
-        img_shape: tuple[int, int, int],
+        C_small: NDArray[np.complex64],
+        inverse: NDArray,
+        img_shape: tuple[int, ...],
     ):
-        self.C_small = C_sr
-        self.idxr = idxr
-        self.idxi = idxi
+        self.C_small = C_small
+        self.inverse = inverse
         self.img_shape = img_shape
 
     def __len__(self) -> int:
@@ -364,31 +400,29 @@ class _C_lazy:
 
     def __getitem__(self, i: int) -> NDArray:
         """Return the original array, with proper space indexing."""
-        return self.C_small[i][self.idxr, self.idxi].reshape(self.img_shape)
+        return self.C_small[i][self.inverse].reshape(self.img_shape)
 
 
-@with_numpy_cupy
 def _full_C(
-    field_map: NDArray[np.complex64],
     C_small: NDArray,
-    h_edges: list[NDArray],
+    inverse: NDArray,
+    img_shape: tuple[int, ...],
     lazy: bool = False,
 ):
     """
-    Generate a full spatial interpolator C from a quantized version.
+    Generate a full spatial interpolator C from its value on the bins.
 
-    If `lazy=True` uses the an array like structure to generate the
+    If `lazy=True` uses an array like structure (C_lazy) to generate the
     interpolators on the fly.
 
     Parameters
     ----------
-    field_map: NDArray
-        Complex-valued field-map in rad/s.
     C_small: NDArray
-        Small C matrix computed at histogram centers.
-    h_edges: list[NDArray]
-        Bin edges of the histogram ``C_small`` was computed on, as returned by
-        `_create_histogram`. Voxels *must* be mapped onto those same bins.
+        C at the occupied bins, of shape ``(L, K)``.
+    inverse: NDArray
+        Bin of each voxel, as returned by `_create_histogram`.
+    img_shape: tuple[int, ...]
+        Shape of the field map.
     lazy: bool, default False
         If True, returns a lazy version of the C matrix.
 
@@ -398,19 +432,10 @@ def _full_C(
 
     C_Lazy if lazy = True
     """
-    xp = get_array_module(field_map)
-    n_bins = tuple(len(e) - 1 for e in h_edges)
-    idxr = _bin_index(field_map.real.ravel(), h_edges[0])
-    idxi = _bin_index(field_map.imag.ravel(), h_edges[1])
-
-    C_sr = C_small.reshape(-1, *n_bins)
-
     if lazy:
-        C_big = _C_lazy(C_sr, idxr, idxi, field_map.shape)
-        return C_big
-    else:
-        C_big = C_sr[:, idxr, idxi]
-        return xp.ascontiguousarray(C_big.reshape(-1, *field_map.shape))
+        return _C_lazy(C_small, inverse, img_shape)
+    xp = get_array_module(C_small)
+    return xp.ascontiguousarray(C_small[:, inverse].reshape(-1, *img_shape))
 
 
 def _time_bandwidth(w_k: NDArray, readout_time: NDArray) -> float:
@@ -425,7 +450,7 @@ def _time_bandwidth(w_k: NDArray, readout_time: NDArray) -> float:
     *and* positive values: only its extent matters here, never its maximum.
     """
     xp = get_array_module(readout_time)
-    dw = float(abs(w_k[-1] - w_k[0]))
+    dw = float(np.hypot(float(xp.ptp(w_k.real)), float(xp.ptp(w_k.imag))))
     dt = float(xp.max(readout_time) - xp.min(readout_time))
     return dw * dt / (2 * np.pi)
 
@@ -484,7 +509,7 @@ def compute_svd_coefficients(
     readout_time: NDArray,
     mask: NDArray,
     L: int = -1,
-    n_bins: int | tuple[int, int] = 1024,
+    n_bins: int | tuple[int, int] = -1,
     lazy: bool = False,
     partial_svd: bool = True,
 ):
@@ -515,14 +540,10 @@ def compute_svd_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
-
-    w_k = w_k.ravel()
-    h_k = h_k.ravel()
+    h_k, w_k, idx, _ = _create_histogram(field_map, mask, readout_time, n_bins)
     # Compute B with a Singular Value Decomposition
     E = xp.exp(xp.outer(readout_time, w_k))
     Ew = xp.sqrt(h_k) * E
-    svds = _get_svds(xp, partial_svd)
     # Keep enough components beyond the time-bandwidth knee for accurate
     # pointwise reconstruction of the exponential matrix.
     auto_L = max(
@@ -530,14 +551,16 @@ def compute_svd_coefficients(
     )
     if L == -1:
         L = auto_L
-    L = min(L, min(Ew.shape) - 1 if partial_svd else min(Ew.shape))
+    L = min(L, min(Ew.shape))
+    # A partial SVD needs L < min(Ew.shape), which few occupied bins can break.
+    svds = _get_svds(xp, partial_svd and L < min(Ew.shape))
     B, S, D = svds(Ew, L)
     # Compute C with a Least Square interpolation
     # (Redundant with C=DV from E=BSD using L singular values
     # but more robust to histogram with 0 weights.
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
     _check_accuracy("svd", B, C, E, h_k, auto_L)
-    C = _full_C(field_map, C, h_edges, lazy)
+    C = _full_C(C, idx, field_map.shape, lazy)
     return B, C, E
 
 
@@ -548,7 +571,7 @@ def compute_mti_coefficients(
     readout_time: NDArray,
     mask: NDArray,
     L: int = -1,
-    n_bins: int | tuple[int, int] = 1024,
+    n_bins: int | tuple[int, int] = -1,
     lazy: bool = False,
 ):
     """
@@ -570,9 +593,7 @@ def compute_mti_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
-    h_k = h_k.ravel()
-    w_k = w_k.ravel()
+    h_k, w_k, idx, _ = _create_histogram(field_map, mask, readout_time, n_bins)
 
     # from Douglas Noll PhD Thesis: the time segments must be spaced finely
     # enough compared to the fastest phase evolution over the readout.
@@ -592,7 +613,7 @@ def compute_mti_coefficients(
     B, _, _, _ = xp.linalg.lstsq(Ch.T, Eh.T, rcond=None)
 
     _check_accuracy("mti", B.T, C, E, h_k, auto_L)
-    C = _full_C(field_map, C, h_edges, lazy)
+    C = _full_C(C, idx, field_map.shape, lazy)
     return B.T, C, E
 
 
@@ -621,7 +642,7 @@ def compute_mfi_coefficients(
     readout_time: NDArray,
     mask: NDArray,
     L: int = 9,
-    n_bins: int | tuple[int, int] = 1024,
+    n_bins: int | tuple[int, int] = -1,
     lazy: bool = True,
 ):
     """
@@ -645,15 +666,13 @@ def compute_mfi_coefficients(
     field_map = get_complex_fieldmap_rad(field_map)
     xp = get_array_module(field_map)
     # Format the input and apply the weight option
-    h_k, w_k, h_edges = _create_histogram(field_map, mask, n_bins)
-    h_k = h_k.ravel()
-    w_k = w_k.ravel()
+    h_k, w_k, idx, _ = _create_histogram(field_map, mask, readout_time, n_bins)
 
     # From Doug Noll PhD Thesis
     auto_L = max(1, int(np.ceil(8 * _time_bandwidth(w_k, readout_time))))
     if L == -1:
         L = auto_L
-    w_l = _get_cluster_centers(w_k, h_k, L)
+    w_l = _get_cluster_centers(w_k, h_k, min(L, w_k.size))
     # Compute B as a phase shift
 
     B = xp.exp(xp.outer(readout_time, w_l))
@@ -662,5 +681,5 @@ def compute_mfi_coefficients(
     # Compute C with a Least Square interpolation
     C, _, _, _ = xp.linalg.lstsq(B, E, rcond=None)
     _check_accuracy("mfi", B, C, E, h_k, auto_L)
-    C = _full_C(field_map, C, h_edges, lazy)
+    C = _full_C(C, idx, field_map.shape, lazy)
     return B, C, E
