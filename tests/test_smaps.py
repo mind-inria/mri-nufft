@@ -6,7 +6,13 @@ import pytest
 from mrinufft import get_operator
 from mrinufft.extras import cartesian_espirit, cartesian_pisco, low_frequency
 from mrinufft.extras.cartesian import fft, ifft
-from mrinufft.extras.smaps import _chc_exact, _crop_or_pad, _kernel_mask
+from mrinufft._array_compat import CUPY_AVAILABLE
+from mrinufft.extras.smaps import (
+    _chc_exact,
+    _chc_exact_gpu,
+    _crop_or_pad,
+    _kernel_mask,
+)
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
@@ -174,6 +180,60 @@ def test_chc_exact_matches_calibration_matrix(kernel_shape):
     C = _calibration_matrix(calib, 4, mask)
     assert patch_size == (16 if mask is None else mask.sum())
     np.testing.assert_allclose(chc, C.conj().T @ C, rtol=1e-4, atol=1e-3)
+
+
+_array_modules = pytest.mark.parametrize(
+    "xp_name",
+    [
+        "numpy",
+        pytest.param(
+            "cupy",
+            marks=pytest.mark.skipif(not CUPY_AVAILABLE, reason="cupy not available"),
+        ),
+    ],
+)
+
+
+def _array_module(name):
+    if name == "numpy":
+        return np
+    import cupy
+
+    return cupy
+
+
+@_array_modules
+@pytest.mark.parametrize("kernel_shape", ["rect", "ellipsoid"])
+def test_chc_exact_gpu_matches_chc_exact(xp_name, kernel_shape):
+    """The coil-blocked C^H C must match the single-product one."""
+    xp = _array_module(xp_name)
+    rng = np.random.default_rng(0)
+    calib = rng.standard_normal((5, 12, 11)) + 1j * rng.standard_normal((5, 12, 11))
+    calib = calib.astype(np.complex64)
+    mask = _kernel_mask((4, 5), kernel_shape, np)
+    expected, patch_size = _chc_exact(calib, (4, 5), mask)
+    # Budget of two coils per group: groups of 2, 2 and 1 coils.
+    n_rows = (12 - 4 + 1) * (11 - 5 + 1)
+    max_bytes = 2 * patch_size * n_rows * calib.itemsize
+    chc, size = _chc_exact_gpu(xp.asarray(calib), (4, 5), mask, max_bytes=max_bytes)
+    chc = chc.get() if hasattr(chc, "get") else chc
+    assert size == patch_size
+    np.testing.assert_allclose(chc, expected, rtol=1e-5, atol=1e-3)
+
+
+@_array_modules
+@pytest.mark.parametrize("decim", [1, 2])
+@pytest.mark.parametrize(
+    "method", [cartesian_espirit, cartesian_pisco], ids=["espirit", "pisco"]
+)
+def test_cartesian_smaps_keep_single_precision(
+    cartesian_kspace_2d, xp_name, decim, method
+):
+    """complex64 k-space must give complex64 maps, with or without decimation."""
+    xp = _array_module(xp_name)
+    kspace = xp.asarray(cartesian_kspace_2d.astype(np.complex64))
+    est = method(kspace, (N, N), calib_width=16, kernel_size=5, decim=decim)
+    assert est.dtype == np.complex64
 
 
 @pytest.mark.parametrize("snr", [5, 10, 20])
