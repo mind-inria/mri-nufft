@@ -473,6 +473,45 @@ def _kernel_mask(kernel_width, kernel_shape, xp):
     return sum((g / (k / 2)) ** 2 for g, k in zip(grid, kernel_width)) <= 1
 
 
+def _calibration_windows(calib_width, kernel_width, mask):
+    """Calibration-block windows seen by each kernel tap over the valid rows.
+
+    Parameters
+    ----------
+    calib_width : tuple of int
+        Spatial shape of the calibration block.
+    kernel_width : tuple of int
+        Side length of the kernel support Lambda along each dimension.
+    mask : NDArray of bool, or None
+        Kernel support mask, as returned by `_kernel_mask`. ``None`` keeps
+        the full rectangular support.
+
+    Returns
+    -------
+    windows : list of tuple of slice
+        One window per tap of the support, in C order (as the `idx` of
+        `_gram_via_projector`): ``calib[coil][windows[m]]`` holds
+        ``calib[coil][row + tap_m]`` for every valid row of C.
+    n_rows : int
+        Number of valid rows P of C (kernel positions fully inside the
+        calibration block).
+    """
+    valid = tuple(cw - kw + 1 for cw, kw in zip(calib_width, kernel_width))
+    if min(valid) < 1:
+        raise ValueError(
+            f"Calibration region {tuple(calib_width)} is smaller than the "
+            f"kernel {tuple(kernel_width)}."
+        )
+    support = np.ones(kernel_width, dtype=bool)
+    if mask is not None:
+        support = np.asarray(mask.get() if hasattr(mask, "get") else mask)
+    windows = [
+        tuple(slice(t, t + v) for t, v in zip(tap, valid))
+        for tap in np.argwhere(support)
+    ]
+    return windows, int(np.prod(valid))
+
+
 def _chc_exact(calib, kernel_width, mask):
     """Compute C^H C (Eq. 6) exactly, from the valid rows of C only.
 
@@ -503,27 +542,74 @@ def _chc_exact(calib, kernel_width, mask):
         Number of kernel entries kept per coil.
     """
     xp = get_array_module(calib)
+    windows, n_rows = _calibration_windows(calib.shape[1:], kernel_width, mask)
+    # A = C^T: A[(coil, tap), row] = calib[coil][row + tap]
+    A = xp.stack([calib[(slice(None),) + w] for w in windows], axis=1)
+    A = A.reshape(-1, n_rows)
+    return xp.conj(A) @ A.T, len(windows)
+
+
+def _chc_exact_gpu(calib, kernel_width, mask, max_bytes=2**26):
+    """Compute the same C^H C as `_chc_exact`, by blocks of coils.
+
+    `_chc_exact` holds C and its conjugate (2 N P entries, for N =
+    ``n_coils * patch_size`` and P valid rows) on top of the N^2 result.
+    Here C^H C is filled one (coil group i, coil group j >= i) block at a
+    time, and the blocks below the diagonal are mirrored from the ones above
+    (C^H C is Hermitian): only a few coil groups of C are held at once, and
+    the flops are halved. The smaller matrix products pay off on GPU but are
+    slower than a single product on CPU, hence its use for CuPy arrays only.
+
+    Parameters
+    ----------
+    calib : NDArray
+        Calibration k-space block, shape ``(n_coils, *calib_width)``.
+    kernel_width : tuple of int
+        Side length of the kernel support Lambda along each dimension.
+    mask : NDArray of bool, or None
+        Boolean mask of shape `kernel_width` selecting a non-rectangular
+        support, as returned by `_kernel_mask`. ``None`` keeps the full
+        rectangular support.
+    max_bytes : int, optional
+        Memory budget of the rows of C for one coil group, which sets the
+        number of coils per group (at least one). By default 64 MiB.
+
+    Returns
+    -------
+    ChC : NDArray
+        The Hermitian matrix C^H C, shape
+        ``(n_coils * patch_size, n_coils * patch_size)``, with the same
+        layout as `_chc_exact`.
+    patch_size : int
+        Number of kernel entries kept per coil.
+    """
+    xp = get_array_module(calib)
     n_coils = calib.shape[0]
-    calib_width = calib.shape[1:]
-    valid = tuple(cw - kw + 1 for cw, kw in zip(calib_width, kernel_width))
-    if min(valid) < 1:
-        raise ValueError(
-            f"Calibration region {tuple(calib_width)} is smaller than the "
-            f"kernel {tuple(kernel_width)}."
-        )
-    support = np.ones(kernel_width, dtype=bool)
-    if mask is not None:
-        support = np.asarray(mask.get() if hasattr(mask, "get") else mask)
-    taps = np.argwhere(support)  # C order, as the `idx` of `_gram_via_projector`
-    # A[(coil, tap), row] = calib[coil][row + tap], rows over the valid positions
-    A = xp.stack(
-        [
-            calib[(slice(None),) + tuple(slice(t, t + v) for t, v in zip(tap, valid))]
-            for tap in taps
-        ],
-        axis=1,
-    ).reshape(n_coils * len(taps), -1)
-    return xp.conj(A) @ A.T, len(taps)
+    windows, n_rows = _calibration_windows(calib.shape[1:], kernel_width, mask)
+    patch_size = len(windows)
+
+    def coil_rows(c0, c1):
+        """Rows of C^T for coils ``[c0, c1)``, shape ``((c1 - c0) * patch_size, P)``."""
+        A = xp.stack([calib[(slice(c0, c1),) + w] for w in windows], axis=1)
+        return A.reshape(-1, n_rows)
+
+    group = max_bytes // (patch_size * n_rows * calib.itemsize)
+    group = int(min(max(group, 1), n_coils))
+    n = n_coils * patch_size
+    ChC = xp.empty((n, n), dtype=calib.dtype)
+    for i0 in range(0, n_coils, group):
+        i1 = min(i0 + group, n_coils)
+        A_i = coil_rows(i0, i1)
+        A_i_conj = xp.conj(A_i)
+        rows = slice(i0 * patch_size, i1 * patch_size)
+        for j0 in range(i0, n_coils, group):
+            j1 = min(j0 + group, n_coils)
+            cols = slice(j0 * patch_size, j1 * patch_size)
+            block = A_i_conj @ (A_i if j0 == i0 else coil_rows(j0, j1)).T
+            ChC[rows, cols] = block
+            if j0 != i0:
+                ChC[cols, rows] = xp.conj(block.T)
+    return ChC, patch_size
 
 
 def _scatter_add(xp, W, pos, spatial):
@@ -571,14 +657,17 @@ def _scatter_add(xp, W, pos, spatial):
     real = xp.bincount(
         combined, weights=xp.real(flat_W).reshape(-1), minlength=total_bins
     )
-    if xp.iscomplexobj(W):
-        imag = xp.bincount(
-            combined, weights=xp.imag(flat_W).reshape(-1), minlength=total_bins
-        )
-        result = real + 1j * imag
-    else:
-        result = real
-    return result.reshape(n_coils, n_coils, *spatial).astype(W.dtype)
+    if not xp.iscomplexobj(W):
+        return real.reshape(n_coils, n_coils, *spatial).astype(W.dtype)
+    # `bincount` always accumulates in float64: fill a `W.dtype` result one
+    # part at a time instead of forming `real + 1j * imag` in complex128.
+    result = xp.empty(total_bins, dtype=W.dtype)
+    result.real = real
+    del real
+    result.imag = xp.bincount(
+        combined, weights=xp.imag(flat_W).reshape(-1), minlength=total_bins
+    )
+    return result.reshape(n_coils, n_coils, *spatial)
 
 
 def _gram_via_projector(U, kernel_width, mask, target_shape, dtype):
@@ -637,7 +726,9 @@ def _gram_via_projector(U, kernel_width, mask, target_shape, dtype):
 
     full = _scatter_add(xp, W, pos, spatial)
 
-    img = ifft(full, dims=ndim) / xp.sqrt(float(np.prod(spatial)))
+    # A Python float keeps `full`'s precision; a NumPy/CuPy float64 scalar
+    # would promote it to complex128.
+    img = ifft(full, dims=ndim) / float(np.sqrt(np.prod(spatial)))
     # Cast to `dtype` with an explicit C order: `img` (from ifft) already
     # isn't contiguous in a way that matches its declared (n_coils, n_coils,
     # *spatial) shape, and this astype copies regardless, so forcing the
@@ -696,7 +787,7 @@ def _gaussian_window(n, xp, std_frac=0.4):
     return xp.exp(-0.5 * (x / std) ** 2)
 
 
-def _outer_window(window_1d, shape, xp):
+def _outer_window(window_1d, shape, xp, dtype):
     """N-D separable apodization window of the given `shape` from `window_1d`.
 
     Parameters
@@ -707,6 +798,10 @@ def _outer_window(window_1d, shape, xp):
         Shape of the N-D window to build, one length per axis.
     xp : module
         Array module (``numpy`` or ``cupy``) to compute with.
+    dtype : numpy.dtype
+        Real dtype of the returned window, matching the precision of the
+        array it weights (the 1D windows are computed in float64, which
+        would otherwise promote complex64 data to complex128).
 
     Returns
     -------
@@ -717,7 +812,7 @@ def _outer_window(window_1d, shape, xp):
     win = window_1d(shape[0], xp)
     for n in shape[1:]:
         win = xp.multiply.outer(win, window_1d(n, xp))
-    return win
+    return win.astype(dtype, copy=False)
 
 
 def _fft_interpolate(arr, out_shape, xp, window=False, complex_output=False):
@@ -764,7 +859,7 @@ def _fft_interpolate(arr, out_shape, xp, window=False, complex_output=False):
         xp.fft.fftn(arr.astype(complex_dtype), axes=axes, norm="ortho"), axes=axes
     )
     if window:
-        k = k * _outer_window(_hamming_window, in_shape, xp)
+        k = k * _outer_window(_hamming_window, in_shape, xp, k.real.dtype)
     k = _crop_or_pad(k, arr.shape[:-ndim] + out_shape)
     out = xp.fft.ifftn(xp.fft.ifftshift(k, axes=axes), axes=axes, norm="ortho")
     scale = float(np.sqrt(np.prod(out_shape) / np.prod(in_shape)))
@@ -797,7 +892,9 @@ def _low_res_calib_image(calib, target_shape, xp):
         ``(n_coils, *target_shape)``.
     """
     ndim = len(target_shape)
-    windowed = calib * _outer_window(_gaussian_window, calib.shape[-ndim:], xp)
+    windowed = calib * _outer_window(
+        _gaussian_window, calib.shape[-ndim:], xp, calib.real.dtype
+    )
     padded = _crop_or_pad(windowed, calib.shape[:-ndim] + target_shape)
     return ifft(padded, dims=ndim)
 
@@ -967,7 +1064,8 @@ def _subspace_gram_eig(
     calib = _crop_or_pad(kspace, (n_coils, *calib_width))
     logger.debug("subspace_gram_eig: calibration block shape=%s", calib.shape)
 
-    ChC, patch_size = _chc_exact(calib, kernel_size, mask)
+    chc_fn = _chc_exact if xp is np else _chc_exact_gpu
+    ChC, patch_size = chc_fn(calib, kernel_size, mask)
     logger.debug(
         "subspace_gram_eig: C^H C shape=%s (patch_size=%d)", ChC.shape, patch_size
     )
