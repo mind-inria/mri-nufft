@@ -168,27 +168,82 @@ def _brain_like_complex_field(shape=(24, 24, 24)):
     return get_complex_fieldmap_rad(b0.astype(np.float32), r2s.astype(np.float32))
 
 
-def test_complex_field_keeps_b0_resolution():
-    """With R2*, an integer n_bins is the number of B0 bins (not split between axes)."""
-    from mrinufft.extras.field_map import _create_histogram
+def test_resolve_n_bins():
+    """-1 sets the bin width from the readout; an integer is the B0 bin count."""
+    from mrinufft.extras.field_map import _BIN_TOL, _resolve_n_bins
+
+    t_max = 14e-3
+    # B0 only: |z - z_k| <= width / 2
+    assert _resolve_n_bins(-1, (0.0, 8796.0), t_max) == (
+        1,
+        int(np.ceil(8796.0 * t_max / (2 * _BIN_TOL))),
+    )
+    assert _resolve_n_bins(-1, (0.0, 0.0), t_max) == (1, 1)
+    assert _resolve_n_bins(1024, (190.0, 8796.0), t_max) == (23, 1024)
+    assert _resolve_n_bins(1024, (190.0, 0.0), t_max) == (1024, 1)
+    assert _resolve_n_bins((4, 8), (0.0, 1.0), t_max) == (1, 8)
+
+
+def test_histogram_keeps_occupied_bins():
+    """Only occupied bins are kept, and each voxel is within the error bound."""
+    from mrinufft.extras.field_map import _BIN_TOL, _create_histogram
 
     field = _brain_like_complex_field()
-    counts, _, edges = _create_histogram(field, None, 1024)
-    assert counts.shape[1] == 1024
-    assert 1 <= counts.shape[0] <= 16
-    b0_bin_hz = (edges[1][1] - edges[1][0]) / (2 * np.pi)
-    assert b0_bin_hz < 1.5
+    mask = np.zeros(field.shape, dtype=bool)
+    mask[4:-4, 4:-4, 4:-4] = True
+    t = np.linspace(-14e-3, 14e-3, 300, dtype=np.float32)
+    counts, centers, inverse, max_err = _create_histogram(field, mask, t)
+
+    assert centers.size <= field.size
+    assert counts.sum() == mask.sum()
+    assert max_err <= _BIN_TOL + 1e-6
+    dz = np.abs(field[mask] - centers[inverse.reshape(field.shape)[mask]])
+    assert np.all(dz * np.abs(t).max() <= max_err * (1 + 1e-3))
 
 
-def test_complex_field_svd_pointwise_accuracy():
-    """B C reproduces exp(Delta t) at each voxel for a brain-like B0 + R2* map."""
+def test_auto_bins_memory_cap(monkeypatch, caplog):
+    """Past _MAX_E_SIZE, n_bins=-1 uses coarser bins and warns."""
+    import mrinufft.extras.field_map as fm
+
+    max_bins = 500
+    t = np.linspace(-14e-3, 14e-3, 300, dtype=np.float32)
+    monkeypatch.setattr(fm, "_MAX_E_SIZE", t.size * max_bins)
+    with caplog.at_level(logging.WARNING):
+        _, centers, _, max_err = fm._create_histogram(
+            _brain_like_complex_field(), None, t
+        )
+    assert centers.size <= max_bins
+    assert max_err > fm._BIN_TOL
+    assert "binning the field map" in caplog.text
+
+
+@pytest.mark.parametrize("t0", [-14e-3, 0.0])
+@pytest.mark.parametrize("with_r2s", [True, False])
+def test_auto_bins_pointwise_accuracy(t0, with_r2s):
+    """With n_bins=-1, B C matches exp(Delta t) at every voxel to about _BIN_TOL.
+
+    The binning error grows with max|t|, not with the readout extent: starting the
+    readout at 0 doubles it for a fixed number of bins.
+    """
+    from mrinufft.extras.field_map import _BIN_TOL
+
     field = _brain_like_complex_field()
-    t = np.linspace(-14e-3, 14e-3, 300).astype(np.float32)
-    B, C, _ = get_orc_factorization("svd")(field, t, mask=None, L=60, partial_svd=False)
-    C = np.asarray(C).reshape(C.shape[0], -1)
-    idx = np.random.default_rng(0).choice(field.size, 2000, replace=False)
-    approx = np.asarray(B) @ C[:, idx]
-    exact = np.exp(np.outer(t, field.ravel()[idx]))
-    err = np.abs(approx - exact).mean(axis=0) / np.abs(exact).mean(axis=0)
-    # ~3% with the default 16 R2* bins (0.36 when the 1024 bins were split as 21 x 49)
-    assert np.median(err) < 0.05 and np.percentile(err, 99) < 0.1
+    if not with_r2s:
+        field = 1j * field.imag
+    t = np.linspace(t0, t0 + 28e-3, 300, dtype=np.float32)
+    B, C, _ = get_orc_factorization("svd")(field, t, mask=None)
+    approx = np.asarray(B) @ np.asarray(C).reshape(C.shape[0], -1)
+    exact = np.exp(np.outer(t, field.ravel()))
+    err = (np.abs(approx - exact) / np.abs(exact)).max(axis=0)
+    assert err.max() < 1.1 * _BIN_TOL
+
+
+@pytest.mark.parametrize("method", ["svd", "mti", "mfi"])
+def test_constant_field_map(method):
+    """A single occupied bin (fewer than L) does not break the factorizations."""
+    b0 = np.full((8, 8), 50.0, dtype=np.float32)
+    t = np.linspace(0, 5e-3, 64, dtype=np.float32)
+    B, C, _ = get_orc_factorization(method)(b0, t, mask=None)
+    C = np.stack([np.asarray(C[ll]) for ll in range(len(C))]).reshape(len(C), -1)
+    exact = np.exp(np.outer(t, 2j * np.pi * b0.ravel()))
+    npt.assert_allclose(np.asarray(B) @ C, exact, atol=1e-4)
