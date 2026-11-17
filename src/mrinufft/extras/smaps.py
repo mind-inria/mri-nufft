@@ -1046,8 +1046,11 @@ def _subspace_gram_eig(
         Which eigenpair/subspace to extract: "max" for ESPIRiT's signal
         subspace, "min" for PISCO's nullspace.
     v0 : NDArray, optional
-        Initial vectors for ESPIRiT power iteration, typically the
-        low-resolution calibration image.
+        Initial vectors of the power iteration, shape
+        ``(n_coils, *target_shape)``. The low-resolution calibration image
+        by default: both ESPIRiT's largest and PISCO's smallest eigenvector
+        are proportional to the coil sensitivities, which this image
+        approximates.
 
     Returns
     -------
@@ -1095,10 +1098,8 @@ def _subspace_gram_eig(
     G *= np.prod(target_shape) / patch_size
     logger.debug("subspace_gram_eig: local Gram matrices computed, shape=%s", G.shape)
 
-    if mode == "max" and v0 is None:
+    if v0 is None:
         v0 = _low_res_calib_image(calib, target_shape, xp)
-    if mode != "max":
-        v0 = None
     eig, Smaps = _batched_power_iteration(G, n_iter=power_iter, mode=mode, v0=v0)
     Smaps = Smaps * xp.conj(Smaps[0] / xp.abs(Smaps[0]))
     logger.debug(
@@ -1419,6 +1420,7 @@ def cartesian_pisco(
             thresh,
             power_iter,
             mode="min",
+            v0=low_res_img,
         )
         den = xp.sqrt(xp.sum(xp.abs(Smaps) ** 2, axis=0))
         den = xp.where(den == 0, 1, den)
