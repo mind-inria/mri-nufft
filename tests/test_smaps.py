@@ -131,6 +131,8 @@ def test_cartesian_espirit_recovers_smaps(cartesian_kspace_2d, phantom_2d):
 def _calibration_matrix(calib, kernel_width, mask=None):
     """Explicit ESPIRiT calibration matrix: one row per valid kernel position."""
     n_coils, *calib_width = calib.shape
+    if np.isscalar(kernel_width):
+        kernel_width = (kernel_width,) * len(calib_width)
     windows = np.lib.stride_tricks.sliding_window_view(
         calib, kernel_width, axis=tuple(range(1, calib.ndim))
     )
@@ -138,9 +140,7 @@ def _calibration_matrix(calib, kernel_width, mask=None):
         -1, n_coils, int(np.prod(kernel_width))
     )
     taps = (
-        np.ones(kernel_width, bool)
-        if mask is None
-        else np.asarray(mask, dtype=bool)
+        np.ones(kernel_width, bool) if mask is None else np.asarray(mask, dtype=bool)
     ).ravel()
     return windows[:, :, taps].reshape(-1, n_coils * taps.sum())
 
@@ -262,12 +262,16 @@ def test_cartesian_espirit_matches_reference_noisy(snr):
     )
     mask = (eig / eig.max() > 0.9) & (np.abs(image) > 0)
     min_corr = 0.99 if snr == 5 else 0.999
-    assert _abs_corr(
-        _phase_reference(est)[:, mask], _phase_reference(ref)[:, mask]
-    ) > min_corr
+    # At SNR 5 the textbook reference itself only reaches 0.976 against the
+    # ground truth.
+    min_corr_gt = 0.97 if snr == 5 else 0.99
+    assert (
+        _abs_corr(_phase_reference(est)[:, mask], _phase_reference(ref)[:, mask])
+        > min_corr
+    )
     assert (
         _abs_corr(_phase_reference(est)[:, mask], _phase_reference(smaps_gt)[:, mask])
-        > 0.99
+        > min_corr_gt
     )
 
 
@@ -296,8 +300,7 @@ def test_cartesian_pisco_matches_reference_noisy():
     )
     mask = (eig / eig.max() > 0.9) & (np.abs(image) > 0)
     assert (
-        _abs_corr(_phase_reference(est)[:, mask], _phase_reference(ref)[:, mask])
-        > 0.98
+        _abs_corr(_phase_reference(est)[:, mask], _phase_reference(ref)[:, mask]) > 0.98
     )
 
 
