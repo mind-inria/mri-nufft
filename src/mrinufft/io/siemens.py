@@ -363,8 +363,12 @@ def twix2nifti_affine(twixObj: TwixObj) -> NDArray:
     slice_pos = slice_data["SlicePos"]
     offset = np.array([slice_pos[ax] for ax in ("Sag", "Cor", "Tra")])
 
-    fovz = fov[2] - (sos_val * dthick if sos_val is not None else 0)
-    center = [-fov[0] / 2, -fov[1] / 2, -fovz / 2, 1]
+    # The volume holds all lPartitions, i.e. the slab *with* its slice oversampling
+    # (the voxel size above is fov[2] / lPartitions), so its first voxel sits half the
+    # oversampled thickness from the slab centre. Using the nominal thickness here put
+    # the origin sos * dthick / 2 off along the slice axis (4.8 mm for 112 images of
+    # 1.2 mm with 7.1% oversampling).
+    center = [-fov[0] / 2, -fov[1] / 2, -fov[2] / 2, 1]
 
     t = (rot @ center)[:3] - offset
     if det < 0:
