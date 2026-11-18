@@ -10,6 +10,7 @@ torch = pytest.importorskip("torch")
 mrpro = pytest.importorskip("mrpro")
 
 from mrinufft.operators import check_backend, get_operator
+from mrinufft.operators.outerfaces import MRProNUFFT
 
 
 @pytest.mark.skipif(not check_backend("finufft"), reason="finufft is not installed")
@@ -40,6 +41,7 @@ def test_mrpro_operator(shape, n_batchs, n_coils, sense, squeeze_dims, dtype):
         squeeze_dims=squeeze_dims,
     )
     operator = nufft.make_mrpro()
+    assert isinstance(operator, MRProNUFFT)
     assert isinstance(operator, mrpro.operators.LinearOperator)
     torch_dtype = torch.complex64 if dtype == np.float32 else torch.complex128
     x = torch.randn(nufft.img_full_shape, dtype=torch_dtype, requires_grad=True)

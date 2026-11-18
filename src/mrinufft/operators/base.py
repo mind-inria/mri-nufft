@@ -34,7 +34,8 @@ from mrinufft.density import get_density
 from mrinufft.extras import get_smaps
 
 if TYPE_CHECKING:
-    from mrinufft.operators.autodiff import MRINufftAutoGrad, DeepInvPhyNufft
+    from mrinufft.operators.autodiff import MRINufftAutoGrad
+    from mrinufft.operators.deepinv import DeepInvPhyNufft
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
     from mrinufft.operators.off_resonance import MRIFourierCorrected
 
@@ -462,32 +463,9 @@ class FourierOperatorBase(ABC):
         - https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.sparse.linalg.LinearOperator.html
         - https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html
         """
-        if cupy and not CUPY_AVAILABLE:
-            raise ValueError("cupy is not available")
-        elif cupy:
-            from cupyx.scipy.sparse.linalg import LinearOperator
-        else:
-            from scipy.sparse.linalg import LinearOperator
+        from mrinufft.operators.outerfaces import make_scipy_linop
 
-        linop = LinearOperator(
-            shape=(
-                self.n_batchs * self.n_coils * self.n_samples,
-                self.n_batchs
-                * (1 if self.uses_sense else self.n_coils)
-                * np.prod(self.shape),
-            ),
-            matvec=lambda x: self.op(  # type: ignore
-                x.reshape(
-                    self.n_batchs, (1 if self.uses_sense else self.n_coils), *self.shape
-                )
-            ).ravel(),
-            rmatvec=lambda x: self.adj_op(  # type: ignore
-                x.reshape(self.n_batchs, self.n_coils, self.n_samples)
-            ).ravel(),
-            dtype=self.cpx_dtype,
-        )
-        linop._nufft = self  # type: ignore
-        return linop
+        return make_scipy_linop(self, cupy=cupy)
 
     def make_deepinv_phy(self, *args, **kwargs) -> DeepInvPhyNufft:
         """Make a new DeepInv Physics with NUFFT operator.
@@ -526,7 +504,7 @@ class FourierOperatorBase(ABC):
         if not self.autograd_available:
             raise ValueError("Backend does not support auto-differentiation.")
 
-        from mrinufft.operators.autodiff import DeepInvPhyNufft
+        from mrinufft.operators.outerfaces import DeepInvPhyNufft
 
         viewed_as_real = kwargs.pop("viewed_as_real", False)
 
@@ -559,7 +537,7 @@ class FourierOperatorBase(ABC):
         ValueError
             If density compensation is enabled.
         """
-        from mrinufft.operators.mrpro import MRProNUFFT
+        from mrinufft.operators.outerfaces import MRProNUFFT
 
         return MRProNUFFT(self)
 

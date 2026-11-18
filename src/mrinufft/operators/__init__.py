@@ -58,9 +58,7 @@ for v in FourierOperatorBase.interfaces.values():
     __all__.append(v[1].__name__)  # add the interface to the __all__ list
     globals()[v[1].__name__] = v[1]  # add the interface to the module namespace
 
-# Autodiff helpers live in `.autodiff`, which imports torch + deepinv at module
-# scope. Expose them lazily so importing `operators` (e.g. via `get_operator`)
-# does not drag in those heavy deps; they load only on first access.
+# Expose optional Torch and DeepInverse helpers lazily.
 from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
 
 _AUTODIFF_HELPERS = (
@@ -71,8 +69,10 @@ _AUTODIFF_HELPERS = (
     "DeepInvPhyNufft",
 )
 
-if AUTOGRAD_AVAILABLE and DEEPINV_AVAILABLE:
-    __all__ += list(_AUTODIFF_HELPERS)
+if AUTOGRAD_AVAILABLE:
+    __all__ += list(_AUTODIFF_HELPERS[:-1])
+if DEEPINV_AVAILABLE:
+    __all__.append("DeepInvPhyNufft")
 
 
 def __getattr__(name):
