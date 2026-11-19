@@ -132,7 +132,7 @@ jobs:
       - name: Install mri-nufft and finufft
         shell: bash
         run: |
-          uv sync --extra finufft --extra ${{ matrix.backend }} --extra autodiff --extra test 
+          uv sync --extra finufft --extra ${{ matrix.backend }} --extra autodiff --extra mrpro --extra test
 
       - name: Run Tests
         shell: bash
@@ -199,7 +199,7 @@ jobs:
       - name: Install Python deps
         shell: bash
         run: |
-          uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra extra --extra autodiff --extra doc --extra io
+          uv sync --extra test --extra dev --extra finufft --extra cufinufft --extra sigpy --extra gpunufft --extra extra --extra autodiff --extra mrpro --extra doc --extra io
         
       - name: Run examples
         shell: bash

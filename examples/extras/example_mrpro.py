@@ -1,7 +1,7 @@
 # %%
 """
 Using MRI-NUFFT with MRPro
-=========================
+==========================
 
 Wrap an MRI-NUFFT operator as an MRPro linear operator and use its adjoint,
 composition, and PyTorch differentiation. Install ``mrpro`` and ``finufft``

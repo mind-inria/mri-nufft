@@ -54,7 +54,7 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |
-          uv sync --extra doc --extra finufft --extra autodiff --extra gpunufft --extra cufinufft --extra sigpy --extra extra --extra io
+          uv sync --extra doc --extra finufft --extra autodiff --extra mrpro --extra gpunufft --extra cufinufft --extra sigpy --extra extra --extra io
           
       - name: Build API documentation
         run: |

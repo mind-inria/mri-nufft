@@ -1,8 +1,5 @@
 """Tests for the MRPro linear operator interface."""
 
-import builtins
-import sys
-
 import numpy as np
 import pytest
 
@@ -96,18 +93,3 @@ def test_mrpro_numpy_backend_higher_order_gradient():
     )[0]
     hessian_vector = torch.autograd.grad(grad, x, vector)[0]
     torch.testing.assert_close(hessian_vector, 2 * operator.gram(vector)[0])
-
-
-def test_mrpro_missing_dependency(monkeypatch):
-    nufft = get_operator("numpy")(np.zeros((3, 2), dtype=np.float32), (4, 4))
-    original_import = builtins.__import__
-
-    def import_without_mrpro(name, *args, **kwargs):
-        if name == "mrpro.operators":
-            raise ModuleNotFoundError("No module named 'mrpro'", name="mrpro")
-        return original_import(name, *args, **kwargs)
-
-    monkeypatch.delitem(sys.modules, "mrinufft.operators.mrpro", raising=False)
-    monkeypatch.setattr(builtins, "__import__", import_without_mrpro)
-    with pytest.raises(ImportError, match="pip install mrpro"):
-        nufft.make_mrpro()

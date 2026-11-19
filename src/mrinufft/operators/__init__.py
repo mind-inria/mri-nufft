@@ -61,16 +61,10 @@ for v in FourierOperatorBase.interfaces.values():
 # Expose optional Torch and DeepInverse helpers lazily.
 from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
 
-_AUTODIFF_HELPERS = (
-    "kspace_as_real",
-    "kspace_as_cpx",
-    "image_as_real",
-    "image_as_cpx",
-    "DeepInvPhyNufft",
-)
+_AUTODIFF_HELPERS = ("kspace_as_real", "kspace_as_cpx", "image_as_real", "image_as_cpx")
 
 if AUTOGRAD_AVAILABLE:
-    __all__ += list(_AUTODIFF_HELPERS[:-1])
+    __all__ += list(_AUTODIFF_HELPERS)
 if DEEPINV_AVAILABLE:
     __all__.append("DeepInvPhyNufft")
 
@@ -81,4 +75,8 @@ def __getattr__(name):
         from . import autodiff
 
         return getattr(autodiff, name)
+    if name == "DeepInvPhyNufft":
+        from .outerfaces import DeepInvPhyNufft
+
+        return DeepInvPhyNufft
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -26,6 +26,7 @@ TORCH_AVAILABLE = _module_available("torch")
 AUTOGRAD_AVAILABLE = TORCH_AVAILABLE
 TENSORFLOW_AVAILABLE = _module_available("tensorflow")
 DEEPINV_AVAILABLE = TORCH_AVAILABLE and _module_available("deepinv")
+MRPRO_AVAILABLE = TORCH_AVAILABLE and _module_available("mrpro")
 
 _ARRAY_NAMESPACES = ("numpy", "cupy", "torch", "tensorflow")
 

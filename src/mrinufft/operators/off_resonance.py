@@ -15,7 +15,6 @@ from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAI
 
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
-    from mrinufft.operators.deepinv import DeepInvPhyNufft
 
 if CUPY_AVAILABLE:
     import cupy as cp
