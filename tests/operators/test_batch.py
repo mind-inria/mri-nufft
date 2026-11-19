@@ -194,7 +194,7 @@ def test_data_consistency(
     if len(operator.shape) == 2 and operator.uses_sense:
         print("Reduced accuracy for 2D Sense")
         atol = 1e-1
-        atol = 1e-1
+        rtol = 1e-1
     if operator.backend == "finufft":
         print("Reduced accuracy for finufft")
         atol = 1e-3

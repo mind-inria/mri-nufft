@@ -191,7 +191,7 @@ def test_data_consistency(
     if len(subspace_op.shape) == 2 and subspace_op._fourier_op.uses_sense:
         print("Reduced accuracy for 2D Sense")
         atol = 1e-1
-        atol = 1e-1
+        rtol = 1e-1
     if subspace_op.backend == "finufft":
         print("Reduced accuracy for finufft")
         atol = 1e-3
