@@ -649,12 +649,15 @@ class FourierOperatorBase(ABC):
         smaps = self.smaps
         squeeze_dims = self.squeeze_dims
 
+        # Iterate on n_trans independent images: the plans transform n_trans
+        # images per call, and with fewer the batched loops never run.
         self.smaps = None
-        self.n_coils = 1
+        self.n_coils = self.n_trans
         self.n_batchs = 1
         self.squeeze_dims = True
 
-        lipschitz_cst, _ = power_method(max_iter, self)
+        x = np.random.random((self.n_trans, *self.shape)).astype(self.cpx_dtype)
+        lipschitz_cst, _ = power_method(max_iter, self, x=x)
 
         # restore coil setup
         self.n_coils = n_coils
