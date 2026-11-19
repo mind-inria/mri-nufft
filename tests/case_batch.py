@@ -23,6 +23,10 @@ class CasesBatch:
         """One image, several coils, transformed two at a time."""
         return 1, 4, 2, False
 
+    def case_batch_coils(self):
+        """Several images, several coils."""
+        return 3, 2, 1, False
+
     def case_batch_sense(self):
         """Several images, several coils combined with SENSE."""
         return 3, 2, 1, True
