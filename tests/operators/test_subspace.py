@@ -20,8 +20,9 @@ from mrinufft.operators import MRISubspace
 
 @fixture(scope="module")
 @parametrize(
-    "n_coils, n_batchs, sense, use_gpu",
-    list(product([1, 2, 4], [1, 3], [False, True], [False, True])),
+    "n_coils, n_batchs, sense",
+    [(c, b, False) for c, b in product([1, 2, 4], [1, 3])]
+    + [(2, 1, True), (2, 3, True)],
 )
 @parametrize_with_cases("kspace_locs, shape", cases=[case_multicontrast2D])
 @parametrize(
@@ -37,12 +38,10 @@ def operator(
     n_coils=1,
     n_batchs=1,
     sense=None,
-    use_gpu=None,
     backend="finufft",
 ):
     """Generate a subspace operator."""
     if sense:
-        n_coils = 2
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)
         smaps = smaps.astype(np.complex64)
@@ -80,7 +79,7 @@ def operator(
         for n in range(_basis.shape[-1])
     ]
 
-    return MRISubspace(_op, _basis, use_gpu), ref_operator, _basis
+    return MRISubspace(_op, _basis), ref_operator, _basis
 
 
 @fixture(scope="module")
