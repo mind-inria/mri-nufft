@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 from importlib.metadata import version, PackageNotFoundError
 
 try:
-    __version__ = version(__name__)
+    __version__ = version("mri-nufft")
 except PackageNotFoundError:
     # package is not installed
     pass
