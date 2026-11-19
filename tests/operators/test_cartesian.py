@@ -1,11 +1,12 @@
 """Dedicated tests for Cartesian operator."""
 
 import numpy as np
-import pytest
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture
 from mrinufft import get_operator
 
 from helpers import (
+    case_id,
+    cases_of,
     image_from_op,
     to_interface,
     from_interface,
@@ -34,10 +35,10 @@ def kspace_from_op(operator):
     return image_from_op(operator)[:, :, operator.mask]
 
 
-@fixture(scope="module")
-@parametrize_with_cases("mask, shape", cases=CasesCartesian)
-def operator(mask, shape):
+@fixture(scope="module", params=cases_of(CasesCartesian), ids=case_id)
+def operator(request):
     """Generate a Cartesian operator."""
+    mask, shape = request.param()
     return get_operator("cartesian")(mask, shape)
 
 

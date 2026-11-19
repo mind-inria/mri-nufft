@@ -2,15 +2,14 @@
 
 import numpy as np
 import numpy.testing as npt
-import pytest
-from pytest_cases import parametrize
+from pytest import mark
 
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
 
 from helpers.factories import image_from_op, kspace_from_op
 
-pytestmark = pytest.mark.backend("cufinufft")
+pytestmark = mark.backend("cufinufft")
 
 
 def _make_operators(n_batchs, n_coils, n_trans, sense):
@@ -41,7 +40,7 @@ def _make_operators(n_batchs, n_coils, n_trans, sense):
     return ops
 
 
-@parametrize(
+@mark.parametrize(
     "n_batchs, n_coils, n_trans, sense",
     [
         (1, 1, 1, False),  # n_iter == 1, exercises the fallback path.

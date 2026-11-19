@@ -5,7 +5,7 @@ from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 import numpy as np
 import numpy.testing as npt
 
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture
 
 from helpers import image_from_op, kspace_from_op, assert_correlate, param_backends
 
@@ -27,11 +27,11 @@ def get_extended_fourier_matrix(ktraj, shape, cpx_fieldmap, readout_time, cpx_dt
     return base_fourier
 
 
-@fixture(scope="module")
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_random2D)
-@parametrize("backend", param_backends("finufft", "cufinufft", "gpunufft"))
-def operator(kspace_locs, shape, backend):
+@fixture(scope="module", params=param_backends("finufft", "cufinufft", "gpunufft"))
+def operator(request):
     """Create an operator with off resonance mapping support."""
+    backend = request.param
+    kspace_locs, shape = CasesTrajectories().case_random2D()
     return get_operator(backend)(
         kspace_locs, shape, n_coils=1, n_batchs=1, density=False, squeeze_dims=True
     )

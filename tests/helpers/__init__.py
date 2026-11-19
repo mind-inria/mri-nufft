@@ -1,6 +1,7 @@
 """Helper functions for testing the operators."""
 
 from .backends import param_backends
+from .cases import case_id, cases_of
 from .asserts import assert_almost_allclose, assert_correlate, assert_allclose
 from .factories import (
     kspace_from_op,
@@ -26,4 +27,6 @@ __all__ = [
     "param_array_interface",
     "batched_smaps_from_op",
     "param_backends",
+    "case_id",
+    "cases_of",
 ]

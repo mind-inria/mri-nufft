@@ -2,10 +2,10 @@
 
 import numpy as np
 import pytest
-from pytest_cases import parametrize, parametrize_with_cases
+from pytest import mark
 
 from case_trajectories import CasesTrajectories
-from helpers import assert_correlate, param_backends
+from helpers import assert_correlate, case_id, cases_of, param_backends
 from mrinufft.density import pipe
 from mrinufft._utils import proper_trajectory
 
@@ -17,19 +17,18 @@ def radial_distance(traj, shape):
     return weights
 
 
-@parametrize("osf", [1, 1.5, 2])
-@parametrize_with_cases(
-    "traj, shape",
-    cases=[
-        CasesTrajectories.case_nyquist_radial2D,
-        CasesTrajectories.case_nyquist_radial3D,
-    ],
+@mark.parametrize("osf", [1, 1.5, 2])
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "nyquist_radial2D", "nyquist_radial3D"),
+    ids=case_id,
 )
-@parametrize(
+@mark.parametrize(
     "backend", param_backends("gpunufft", "tensorflow", "cufinufft", "finufft")
 )
-def test_pipe(backend, traj, shape, osf):
+def test_pipe(backend, case, osf):
     """Test the pipe method."""
+    traj, shape = case()
     distance = radial_distance(traj, shape)
     if osf != 2 and backend == "tensorflow":
         pytest.skip("OSF < 2 not supported for tensorflow.")

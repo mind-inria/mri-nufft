@@ -9,6 +9,7 @@ the backend parameter with :func:`helpers.param_backends`.
 """
 
 import pytest
+from pytest import fixture, mark
 
 from mrinufft.operators import check_backend, list_backends
 
@@ -54,6 +55,12 @@ def pytest_report_header(config):
     ]
 
 
+@fixture(scope="session")
+def ref_backend(request):
+    """Reference backend, from ``--ref``."""
+    return request.config.getoption("ref")
+
+
 def pytest_collection_modifyitems(config, items):
     """Deselect the tests of other backends, skip those of unavailable ones."""
     requested = set(config.getoption("backend"))
@@ -65,9 +72,7 @@ def pytest_collection_modifyitems(config, items):
             deselected.append(item)
             continue
         if backend is not None and not check_backend(backend):
-            item.add_marker(
-                pytest.mark.skip(reason=f"Backend {backend} not available.")
-            )
+            item.add_marker(mark.skip(reason=f"Backend {backend} not available."))
         selected.append(item)
     if deselected:
         config.hook.pytest_deselected(items=deselected)

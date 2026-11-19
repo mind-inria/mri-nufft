@@ -2,7 +2,7 @@
 
 import numpy as np
 import numpy.testing as npt
-from pytest_cases import parametrize, parametrize_with_cases
+from pytest import mark
 
 from case_trajectories import CasesTrajectories
 from helpers import assert_correlate
@@ -48,18 +48,18 @@ def radial_distance(traj, shape):
     return weights
 
 
-@parametrize("osf", [1, 1.25, 2])
-@parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_radial2D])
-def test_cell_count2D(traj, shape, osf):
+@mark.parametrize("osf", [1, 1.25, 2])
+def test_cell_count2D(osf):
     """Test the cell count method."""
+    traj, shape = CasesTrajectories().case_radial2D()
     count_ref = slow_cell_count2D(traj, shape, osf)
     count_real = cell_count(traj, shape, osf)
     npt.assert_allclose(count_real, count_ref, atol=1e-5)
 
 
-@parametrize_with_cases("traj, shape", cases=[CasesTrajectories.case_radial2D])
-def test_voronoi(traj, shape):
+def test_voronoi():
     """Test the voronoi method."""
+    traj, shape = CasesTrajectories().case_radial2D()
     result = voronoi(traj)
     distance = radial_distance(traj, shape)
     result = result / np.mean(result)
@@ -67,9 +67,9 @@ def test_voronoi(traj, shape):
     assert_correlate(result, distance, slope=1)
 
 
-@parametrize("in_out", [False, True])
-@parametrize("Ns", [256, 257])
-@parametrize(
+@mark.parametrize("in_out", [False, True])
+@mark.parametrize("Ns", [256, 257])
+@mark.parametrize(
     "init, dim",
     [(initialize_2D_radial, 2), (initialize_3D_phyllotaxis_radial, 3)],
 )

@@ -4,8 +4,8 @@ from itertools import product
 
 import numpy as np
 import numpy.testing as npt
+from pytest import fixture
 
-from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import (
     param_array_interface,
     param_backends,
@@ -18,29 +18,33 @@ from mrinufft import get_operator
 from mrinufft.operators import MRISubspace
 
 
-@fixture(scope="module")
-@parametrize(
-    "n_coils, n_batchs, sense",
-    [(c, b, False) for c, b in product([1, 2, 4], [1, 3])]
-    + [(2, 1, True), (2, 3, True)],
-)
-@parametrize_with_cases("kspace_locs, shape", cases=[case_multicontrast2D])
-@parametrize(
-    "backend",
-    param_backends(
+@fixture(
+    scope="module",
+    params=param_backends(
         "finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"
     ),
 )
-def operator(
-    request,
-    kspace_locs,
-    shape,
-    n_coils=1,
-    n_batchs=1,
-    sense=None,
-    backend="finufft",
-):
+def backend(request):
+    """Backend under test."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=[(c, b, False) for c, b in product([1, 2, 4], [1, 3])]
+    + [(2, 1, True), (2, 3, True)],
+    ids=lambda c: "c{}-b{}-sense{}".format(*map(int, c)),
+)
+def config(request):
+    """Number of coils, number of batches and SENSE."""
+    return request.param
+
+
+@fixture(scope="module")
+def operator(backend, config):
     """Generate a subspace operator."""
+    kspace_locs, shape = case_multicontrast2D()
+    n_coils, n_batchs, sense = config
     if sense:
         smaps = 1j * np.random.rand(n_coils, *shape)
         smaps += np.random.rand(n_coils, *shape)

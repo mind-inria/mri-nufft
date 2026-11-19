@@ -2,7 +2,7 @@
 
 import numpy as np
 import scipy as sp
-from pytest_cases import parametrize_with_cases
+from pytest import mark
 
 from mrinufft.operators.interfaces.nudft_numpy import (
     get_fourier_matrix,
@@ -12,20 +12,18 @@ from mrinufft.operators.interfaces.nudft_numpy import (
 )
 
 from case_trajectories import CasesTrajectories, case_grid1D
-from helpers import assert_almost_allclose
+from helpers import assert_almost_allclose, case_id, cases_of
 from mrinufft import get_operator
 
 
-@parametrize_with_cases(
-    "kspace, shape",
-    cases=[
-        CasesTrajectories.case_random2D,
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_grid3D,
-    ],
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "random2D", "grid2D", "grid3D"),
+    ids=case_id,
 )
-def test_ndft_implicit2(kspace, shape):
+def test_ndft_implicit2(case):
     """Test matching of explicit and implicit matrix for ndft."""
+    kspace, shape = case()
     matrix = get_fourier_matrix(kspace, shape)
     random_image = np.random.randn(*shape) + 1j * np.random.randn(*shape)
 
@@ -35,16 +33,14 @@ def test_ndft_implicit2(kspace, shape):
     assert_almost_allclose(linop_coef, matrix_coef, atol=1e-4, rtol=1e-4, mismatch=5)
 
 
-@parametrize_with_cases(
-    "kspace, shape",
-    cases=[
-        CasesTrajectories.case_random2D,
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_grid3D,
-    ],
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "random2D", "grid2D", "grid3D"),
+    ids=case_id,
 )
-def test_ndft_implicit1(kspace, shape):
+def test_ndft_implicit1(case):
     """Test matching of explicit and implicit matrix for ndft."""
+    kspace, shape = case()
     matrix = get_fourier_matrix(kspace, shape)
     random_kspace = 1j * np.random.randn(len(kspace))
     random_kspace += np.random.randn(len(kspace))
@@ -55,16 +51,14 @@ def test_ndft_implicit1(kspace, shape):
     assert_almost_allclose(linop_coef, matrix_coef, atol=1e-4, rtol=1e-4, mismatch=5)
 
 
-@parametrize_with_cases(
-    "kspace_grid, shape",
-    cases=[
-        case_grid1D,
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_grid3D,
-    ],
+@mark.parametrize(
+    "case",
+    [case_grid1D, *cases_of(CasesTrajectories, "grid2D", "grid3D")],
+    ids=case_id,
 )
-def test_ndft_fft(kspace_grid, shape):
+def test_ndft_fft(case):
     """Test the raw ndft implementation."""
+    kspace_grid, shape = case()
     ndft_op = RawNDFT(kspace_grid, shape)
     # Create a random image
     img = (np.random.randn(*shape) + 1j * np.random.randn(*shape)).astype(np.complex64)

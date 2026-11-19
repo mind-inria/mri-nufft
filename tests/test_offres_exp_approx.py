@@ -4,10 +4,9 @@ import logging
 
 import numpy as np
 import numpy.testing as npt
-import pytest
-from helpers import to_interface
-from helpers.factories import _param_array_interface_np_cp, from_interface
-from pytest_cases import parametrize, parametrize_with_cases
+from pytest import mark
+from helpers import case_id, cases_of, from_interface, to_interface
+from helpers.factories import _param_array_interface_np_cp
 
 from mrinufft import get_operator
 from mrinufft.extras import (
@@ -62,13 +61,12 @@ class CasesB0maps:
 
 
 @_param_array_interface_np_cp
-@parametrize_with_cases(
-    "b0_map, r2s_map, mask", cases=[CasesB0maps.case_real2D, CasesB0maps.case_complex2D]
-)
-@parametrize("method", ["svd-full", "mti", "mfi"])
-@parametrize("L, lazy", [(40, True), (-1, True), (40, False)])
-def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
+@mark.parametrize("case", cases_of(CasesB0maps, "real2D", "complex2D"), ids=case_id)
+@mark.parametrize("method", ["svd-full", "mti", "mfi"])
+@mark.parametrize("L, lazy", [(40, True), (-1, True), (40, False)])
+def test_b0map_coeff(case, method, L, lazy, array_interface):
     """Test exponential approximation for B0 field only."""
+    b0_map, r2s_map, mask = case()
     # Generate readout times
     Nt = 400
     tread = np.linspace(0.0, 5e-3, Nt, dtype=np.float32)
@@ -141,7 +139,7 @@ def test_b0_map_upsampling_warns_and_matches_shape(caplog):
     assert op.shape == shape_target
 
 
-@parametrize("container", [tuple, list])
+@mark.parametrize("container", [tuple, list])
 def test_explicit_interpolators(container):
     """Interpolators (B, C) are used as given, without any field map."""
     from mrinufft.trajectories import initialize_2D_spiral
@@ -217,8 +215,8 @@ def test_auto_bins_memory_cap(monkeypatch, caplog):
     assert "binning the field map" in caplog.text
 
 
-@pytest.mark.parametrize("t0", [-14e-3, 0.0])
-@pytest.mark.parametrize("with_r2s", [True, False])
+@mark.parametrize("t0", [-14e-3, 0.0])
+@mark.parametrize("with_r2s", [True, False])
 def test_auto_bins_pointwise_accuracy(t0, with_r2s):
     """With n_bins=-1, B C matches exp(Delta t) at every voxel to about _BIN_TOL.
 
@@ -238,7 +236,7 @@ def test_auto_bins_pointwise_accuracy(t0, with_r2s):
     assert err.max() < 1.1 * _BIN_TOL
 
 
-@pytest.mark.parametrize("method", ["svd", "mti", "mfi"])
+@mark.parametrize("method", ["svd", "mti", "mfi"])
 def test_constant_field_map(method):
     """A single occupied bin (fewer than L) does not break the factorizations."""
     b0 = np.full((8, 8), 50.0, dtype=np.float32)

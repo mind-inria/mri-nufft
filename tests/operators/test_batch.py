@@ -6,8 +6,10 @@ Only finufft, cufinufft and gpunufft support batch computations.
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture, mark
 from helpers import (
+    case_id,
+    cases_of,
     param_array_interface,
     param_backends,
     to_interface,
@@ -17,10 +19,30 @@ from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
 
-@fixture(scope="module")
-@parametrize(
-    "n_batch, n_coils, n_trans, sense",
-    [
+@fixture(
+    scope="module",
+    params=param_backends(
+        "finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"
+    ),
+)
+def backend(request):
+    """Backend under test."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=cases_of(CasesTrajectories, "nyquist_radial2D", "nyquist_radial3D"),
+    ids=case_id,
+)
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
+
+
+@fixture(
+    scope="module",
+    params=[
         (1, 1, 1, False),
         (3, 1, 1, False),
         (1, 4, 1, True),
@@ -32,29 +54,18 @@ from case_trajectories import CasesTrajectories
         (3, 4, 2, True),
         (3, 4, 2, False),
     ],
+    ids=lambda c: "b{}-c{}-t{}-sense{}".format(*map(int, c)),
 )
-@parametrize_with_cases(
-    "kspace_locs, shape",
-    cases=CasesTrajectories,
-    glob="*nyquist_radial*",
-)
-@parametrize(
-    "backend",
-    param_backends(
-        "finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"
-    ),
-)
-def operator(
-    request,
-    kspace_locs,
-    shape,
-    n_coils=1,
-    sense=None,
-    n_batch=1,
-    n_trans=1,
-    backend="finufft",
-):
+def config(request):
+    """Number of batches, coils and transforms, and SENSE."""
+    return request.param
+
+
+@fixture(scope="module")
+def operator(backend, trajectory, config):
     """Generate a batch operator."""
+    kspace_locs, shape = trajectory
+    n_batch, n_coils, n_trans, sense = config
     if n_trans != 1 and backend == "gpunufft":
         pytest.skip("Duplicate case.")
     if sense:
@@ -213,7 +224,7 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
     npt.assert_equal(image_tmp, image_data)
 
 
-@pytest.mark.backend("finufft")
+@mark.backend("finufft")
 def test_data_consistency_density_single_application():
     """Regression test: density compensation applied exactly once.
 
@@ -256,7 +267,7 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
     assert (norm - norm_prev) / norm_prev < 1e-3
 
 
-@parametrize("optim", ["cg", "lsqr", "lsmr"])
+@mark.parametrize("optim", ["cg", "lsqr", "lsmr"])
 @param_array_interface
 def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
     """Test pseudo inverse batch solver."""
