@@ -10,7 +10,7 @@ from pytest import fixture, mark
 from helpers import (
     case_id,
     cases_of,
-    param_array_interface,
+    parametrize_array_interface,
     param_backends,
     to_interface,
     from_interface,
@@ -117,7 +117,7 @@ def kspace_data(operator):
     return kspace
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_batch_op(operator, array_interface, flat_operator, image_data):
     """Test the batch type 2 (forward)."""
     image_data = to_interface(image_data, array_interface)
@@ -143,7 +143,7 @@ def test_batch_op(operator, array_interface, flat_operator, image_data):
     )
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_batch_adj_op(
     operator,
     array_interface,
@@ -177,7 +177,7 @@ def test_batch_adj_op(
     )
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_data_consistency(
     operator,
     array_interface,
@@ -268,7 +268,7 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
 
 
 @mark.parametrize("optim", ["cg", "lsqr", "lsmr"])
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
     """Test pseudo inverse batch solver."""
     image_data = to_interface(image_data, array_interface)
@@ -287,7 +287,7 @@ def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
         assert res[0].ndim == 0
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_interface_gram(operator, array_interface, image_data):
     """Test the Gram (toeplitz) interface of the operator."""
     if getattr(operator, "n_trans", 1) >= 2:

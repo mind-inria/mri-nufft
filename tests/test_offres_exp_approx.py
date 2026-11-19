@@ -5,8 +5,13 @@ import logging
 import numpy as np
 import numpy.testing as npt
 from pytest import mark
-from helpers import case_id, cases_of, from_interface, to_interface
-from helpers.factories import _param_array_interface_np_cp
+from helpers import (
+    case_id,
+    cases_of,
+    from_interface,
+    parametrize_array_interface,
+    to_interface,
+)
 
 from mrinufft import get_operator
 from mrinufft.extras import (
@@ -60,7 +65,7 @@ class CasesB0maps:
         return b0_map, r2s_map, mask
 
 
-@_param_array_interface_np_cp
+@parametrize_array_interface("numpy", "cupy")
 @mark.parametrize("case", cases_of(CasesB0maps, "real2D", "complex2D"), ids=case_id)
 @mark.parametrize("method", ["svd-full", "mti", "mfi"])
 @mark.parametrize("L, lazy", [(40, True), (-1, True), (40, False)])

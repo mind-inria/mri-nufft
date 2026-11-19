@@ -1,20 +1,22 @@
 """Test the interfaces module."""
 
 import numpy as np
+import numpy.testing as npt
 import pytest
 from pytest import fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
 from helpers import (
+    backend_interfaces,
     case_id,
     cases_of,
-    kspace_from_op,
-    image_from_op,
-    to_interface,
     from_interface,
-    param_array_interface,
+    image_from_op,
+    kspace_from_op,
     param_backends,
+    parametrize_array_interface,
+    to_interface,
 )
 
 # #########################
@@ -47,7 +49,11 @@ def backend(request):
     return request.param
 
 
-@fixture(scope="module", params=cases_of(CasesTrajectories), ids=case_id)
+@fixture(
+    scope="module",
+    params=cases_of(CasesTrajectories),
+    ids=case_id,
+)
 def trajectory(request):
     """Sampling pattern and image shape."""
     return request.param()
@@ -111,7 +117,36 @@ def wrong_image_data(operator):
     return img
 
 
-@param_array_interface
+@parametrize_array_interface()
+def test_interfaces_array_types(
+    operator, backend, array_interface, image_data, kspace_data
+):
+    """Outputs follow the input array type and device, and match across types."""
+    ref_interface = backend_interfaces(backend)[0]
+    image = to_interface(image_data, array_interface)
+    kspace = to_interface(kspace_data, array_interface)
+    image_ref = to_interface(image_data, ref_interface)
+    kspace_ref = to_interface(kspace_data, ref_interface)
+    for out, ref in [
+        (operator.op(image), operator.op(image_ref)),
+        (operator.adj_op(kspace), operator.adj_op(kspace_ref)),
+        (
+            operator.data_consistency(image, kspace),
+            operator.data_consistency(image_ref, kspace_ref),
+        ),
+    ]:
+        assert type(out) is type(image)
+        assert getattr(out, "device", None) == getattr(image, "device", None)
+        ref = from_interface(ref, ref_interface)
+        npt.assert_allclose(
+            from_interface(out, array_interface),
+            ref,
+            rtol=1e-3,
+            atol=1e-3 * np.abs(ref).max(),
+        )
+
+
+@parametrize_array_interface("numpy", "cupy")
 def test_interfaces_accuracy_forward(
     operator, array_interface, image_data, ref_operator
 ):
@@ -124,7 +159,7 @@ def test_interfaces_accuracy_forward(
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_interfaces_accuracy_backward(
     operator, array_interface, kspace_data, ref_operator
 ):
@@ -138,7 +173,7 @@ def test_interfaces_accuracy_backward(
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_interfaces_autoadjoint(operator, array_interface):
     """Test the adjoint property of the operator."""
     reldiff = np.zeros(10)
@@ -179,33 +214,27 @@ def test_interface_lipschitz(operator):
     assert np.mean(L) < 1.1 * spec_rad
 
 
-@param_array_interface
-def test_check_shape_pass(operator, array_interface, image_data, kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    image_data_ = to_interface(image_data, array_interface)
-    try:
-        operator.check_shape(image=image_data_)
-        operator.check_shape(ksp=kspace_data)
-    except ValueError:
-        pytest.fail("Unexpected ValueError raised")
-
-
 ######################
 # Check shape tests  #
 ######################
 
 
-@param_array_interface
-def test_check_shape_fail_image(operator, array_interface, wrong_image_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    image_data_ = to_interface(wrong_image_data, array_interface)
-    with pytest.raises(ValueError):
-        operator.check_shape(image=image_data_)
+def test_check_shape_pass(operator, image_data, kspace_data):
+    """Correct shapes are accepted."""
+    try:
+        operator.check_shape(image=image_data)
+        operator.check_shape(ksp=kspace_data)
+    except ValueError:
+        pytest.fail("Unexpected ValueError raised")
 
 
-@param_array_interface
-def test_check_shape_fail_kspace(operator, array_interface, wrong_kspace_data):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(wrong_kspace_data, array_interface)
+def test_check_shape_fail_image(operator, wrong_image_data):
+    """A wrong image shape is rejected."""
     with pytest.raises(ValueError):
-        operator.check_shape(ksp=kspace_data_)
+        operator.check_shape(image=wrong_image_data)
+
+
+def test_check_shape_fail_kspace(operator, wrong_kspace_data):
+    """A wrong k-space shape is rejected."""
+    with pytest.raises(ValueError):
+        operator.check_shape(ksp=wrong_kspace_data)

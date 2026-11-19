@@ -5,13 +5,19 @@ the backend parameter with :func:`helpers.param_backends`.
 
 * ``--backend NAME`` keeps only the tests marked for ``NAME``.
 * ``-m "not backend"`` keeps only the tests not bound to a backend.
+* ``-m gpu`` / ``-m "not gpu"`` keeps or drops the tests needing a GPU.
 * Without options, everything runs and unavailable backends are skipped.
+
+Tests parametrized with :func:`helpers.parametrize_array_interface` are deselected
+for the array interfaces their backend does not accept.
 """
 
 import pytest
 from pytest import fixture, mark
 
 from mrinufft.operators import check_backend, list_backends
+
+from helpers import accepts_interface
 
 
 def pytest_addoption(parser):
@@ -30,10 +36,13 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """Register the backend marker and check the requested backends."""
-    config.addinivalue_line(
-        "markers", "backend(name): test exercising the NUFFT backend ``name``."
-    )
+    """Register the markers and check the requested backends."""
+    for marker in [
+        "backend(name): test exercising the NUFFT backend ``name``.",
+        "array_interface(name): test fed with arrays from ``name``.",
+        "gpu: test needing a GPU.",
+    ]:
+        config.addinivalue_line("markers", marker)
     for backend in config.getoption("backend"):
         try:
             available = check_backend(backend)
@@ -61,14 +70,21 @@ def ref_backend(request):
     return request.config.getoption("ref")
 
 
+def _marker_arg(item, name):
+    marker = item.get_closest_marker(name)
+    return marker.args[0] if marker else None
+
+
 def pytest_collection_modifyitems(config, items):
     """Deselect the tests of other backends, skip those of unavailable ones."""
     requested = set(config.getoption("backend"))
     selected, deselected = [], []
     for item in items:
-        marker = item.get_closest_marker("backend")
-        backend = marker.args[0] if marker else None
-        if requested and backend not in requested:
+        backend = _marker_arg(item, "backend")
+        interface = _marker_arg(item, "array_interface")
+        if (requested and backend not in requested) or (
+            backend and interface and not accepts_interface(backend, interface)
+        ):
             deselected.append(item)
             continue
         if backend is not None and not check_backend(backend):

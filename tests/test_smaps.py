@@ -6,7 +6,6 @@ import pytest
 from mrinufft import get_operator
 from mrinufft.extras import cartesian_espirit, cartesian_pisco, low_frequency
 from mrinufft.extras.cartesian import fft, ifft
-from mrinufft._array_compat import CUPY_AVAILABLE
 from mrinufft.extras.smaps import (
     _chc_exact,
     _chc_exact_gpu,
@@ -15,7 +14,7 @@ from mrinufft.extras.smaps import (
 )
 
 from case_trajectories import CasesTrajectories
-from helpers import assert_correlate
+from helpers import assert_correlate, parametrize_array_interface
 
 N = 32
 N_COILS = 4
@@ -182,16 +181,7 @@ def test_chc_exact_matches_calibration_matrix(kernel_shape):
     np.testing.assert_allclose(chc, C.conj().T @ C, rtol=1e-4, atol=1e-3)
 
 
-_array_modules = pytest.mark.parametrize(
-    "xp_name",
-    [
-        "numpy",
-        pytest.param(
-            "cupy",
-            marks=pytest.mark.skipif(not CUPY_AVAILABLE, reason="cupy not available"),
-        ),
-    ],
-)
+_array_modules = parametrize_array_interface("numpy", "cupy", argname="xp_name")
 
 
 def _array_module(name):

@@ -19,8 +19,7 @@ from mrinufft._array_compat import (
     TF_CUDA_AVAILABLE,
 )
 
-from helpers import to_interface
-from helpers.factories import _param_array_interface
+from helpers import parametrize_array_interface, to_interface
 
 if CUPY_AVAILABLE:
     import cupy as cp
@@ -70,7 +69,7 @@ def decorator_factory(request):
     return test_func
 
 
-@_param_array_interface
+@parametrize_array_interface()
 def test_decorators_outcome(decorator_factory, array_interface):
     decorated_function = decorator_factory
 
@@ -94,7 +93,7 @@ def test_decorators_outcome(decorator_factory, array_interface):
         ), f"Expected {expected_device} but got {_get_device(output)}"
 
 
-@_param_array_interface
+@parametrize_array_interface()
 def test_numpy_conversion(array_interface):
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
@@ -110,7 +109,7 @@ def test_numpy_conversion(array_interface):
         assert array.numpy.call_count == 3
 
 
-@_param_array_interface
+@parametrize_array_interface()
 def test_numpy_cupy_conversion(array_interface):
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
@@ -126,7 +125,7 @@ def test_numpy_cupy_conversion(array_interface):
             assert mock_fun.call_count == 3
 
 
-@_param_array_interface
+@parametrize_array_interface()
 def test_torch_conversion(array_interface):
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)
@@ -147,7 +146,7 @@ def test_torch_conversion(array_interface):
 
 
 @mark.skipif(TENSORFLOW_AVAILABLE is False, reason="tensorflow not available")
-@_param_array_interface
+@parametrize_array_interface()
 def test_tensorflow_conversion(array_interface):
     # Create input array
     array = to_interface(np.asarray([1.0, 2.0, 3.0]), array_interface)

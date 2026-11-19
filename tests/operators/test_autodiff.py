@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 from mrinufft._array_compat import _array_to_torch
 import pytest
-from pytest import fixture, mark
+from pytest import fixture
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator, MRIFourierCorrected
 
@@ -18,13 +18,13 @@ from helpers import (
     assert_almost_allclose,
     batched_smaps_from_op,
     param_backends,
+    parametrize_array_interface,
 )
 
-TORCH_AVAILABLE = True
 try:
     import torch
 except ImportError:
-    TORCH_AVAILABLE = False
+    pass
 
 
 @fixture(scope="module", params=param_backends("cufinufft", "finufft", "gpunufft"))
@@ -196,13 +196,9 @@ def _compare_grad(loss1, loss2, input, **kwargs):
     return grad1, grad2
 
 
-@mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-@mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+@parametrize_array_interface("torch-gpu", "torch-cpu", argname="interface")
 def test_adjoint_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
-    if operator.backend == "finufft" and "gpu" in interface:
-        pytest.skip("GPU not supported for finufft backend")
-
     if "gpu" in interface:
         operator.samples = operator.samples.to("cuda")
         if operator._grad_wrt_field_map:
@@ -311,13 +307,9 @@ def compute_forward_batched(operator, ksp_data_ref, img_data):
     return ksp_data, ksp_data_ndft
 
 
-@mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-@mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+@parametrize_array_interface("torch-gpu", "torch-cpu", argname="interface")
 def test_forward_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
-    if operator.backend == "finufft" and "gpu" in interface:
-        pytest.skip("GPU not supported for finufft backend")
-
     if "gpu" in interface:
         operator.samples = operator.samples.to("cuda")
         if operator._grad_wrt_field_map:

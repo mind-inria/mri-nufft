@@ -10,7 +10,7 @@ from pytest import fixture
 from helpers import (
     case_id,
     cases_of,
-    param_array_interface,
+    parametrize_array_interface,
     param_backends,
     to_interface,
     from_interface,
@@ -148,7 +148,7 @@ def new_smaps(operator):
     return smaps
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_op_samples(
     operator,
     array_interface,
@@ -166,7 +166,7 @@ def test_op_samples(
     npt.assert_array_almost_equal(kspace_changed, kspace_true)
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_adj_op_samples(
     operator,
     array_interface,
@@ -190,7 +190,7 @@ def test_adj_op_samples(
     )
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_adj_op_density(
     operator,
     array_interface,
@@ -227,7 +227,7 @@ def test_adj_op_density(
         )
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_op_smaps_update(
     operator,
     array_interface,
@@ -245,7 +245,7 @@ def test_op_smaps_update(
     npt.assert_array_almost_equal(kspace_changed, kspace_true)
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_adj_op_smaps_update(
     operator,
     array_interface,
