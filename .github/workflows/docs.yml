@@ -24,7 +24,7 @@ jobs:
 
       - name: Comment That docs building is starting
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && success()
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
@@ -37,7 +37,7 @@ jobs:
       #     # otherwise fall back to default (e.g. workflow_dispatch)
       #     ref: ${{ github.event.issue.pull_request && steps.pr.outputs.head_ref || github.ref }}
       #     fetch-depth: 0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: fetch PR from fork
         if: github.event.issue.pull_request
         run: gh pr checkout ${{ github.event.issue.number }}
@@ -63,14 +63,14 @@ jobs:
 
       - name: Upload artifact for pages
         if: ${{ github.event_name == 'workflow_run' }}
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs_build
           
           
       - name: Upload artifact
         id: artifact-upload-step
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           # Upload the docs
           name: docs
@@ -92,7 +92,7 @@ jobs:
 
       - name: Comment with artifact web link
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && success()
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
@@ -102,7 +102,7 @@ jobs:
 
       - name: Comment with failure
         if: contains(github.event.comment.body, '/build-docs') && github.event.issue.pull_request && failure()
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ github.event.comment.id }}
           body: |
@@ -125,7 +125,7 @@ jobs:
       
     steps:
       - name: Get the docs_build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docs
           path: docs_build
@@ -134,7 +134,7 @@ jobs:
       - name: Get the coverage badge from CI
         id: download-badge
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: coverage_badge
           path: docs_build/examples/_static
@@ -158,5 +158,5 @@ jobs:
           force_orphan: true
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
