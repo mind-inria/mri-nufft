@@ -71,10 +71,12 @@ so that positional calls keep their meaning.
 This is enforced by:
 
 - the *API check* CI job, which runs `griffe check <https://mkdocstrings.github.io/griffe/>`_
-  on each pull request against ``master``, and fails on removed objects, moved
-  parameters, changed defaults, etc. If the change is intended, add the
-  ``breaking`` label to the pull request. Run it locally with
-  ``uvx griffe check mrinufft -s src -a master``.
+  on each pull request against the latest release, and fails on removed objects,
+  moved parameters, changed defaults, etc. A breaking change that cannot go
+  through a deprecation (or that griffe misreports, like an object kept through
+  a module ``__getattr__``) is acknowledged by adding the line reported by the
+  job to ``.github/api-breaks.txt``, with a comment saying why. Run it locally
+  with ``.github/check_api.sh``.
 - ``tests/test_deprecation.py``, which fails once a ``removed_in`` version is
   reached. It runs before each release is published.
 
@@ -83,10 +85,14 @@ order, ...) are invisible to these checks: flag them in the commit message with
 ``fix!:`` / ``feat!:`` or a ``BREAKING CHANGE:`` footer, so they end up in the
 release notes.
 
-Before a release ``X.Y.Z``:
+Before a release ``X.Y.Z``, check the deprecation schedule and gather the breaking
+changes for the release notes, from ``.github/api-breaks.txt`` and from the commits:
 
 .. code-block:: bash
 
     MRINUFFT_RELEASE=X.Y.Z uv run pytest tests/test_deprecation.py
-    uvx griffe check mrinufft -s src -a $(git describe --tags --abbrev=0 --exclude '*-*')
     git log --grep 'BREAKING CHANGE' --grep '^[a-z]+(\(.*\))?!:' -E $(git describe --tags --abbrev=0 --exclude '*-*')..HEAD
+
+After the release, empty ``.github/api-breaks.txt`` (keeping its header): its
+entries no longer apply against the new release, and the API check warns about
+them.

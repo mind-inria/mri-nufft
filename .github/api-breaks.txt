@@ -1,0 +1,18 @@
+# Breaking changes of the public API acknowledged since the latest release.
+#
+# .github/check_api.sh fails on any change reported by `griffe check` against the
+# latest release tag that is not listed here. Lines are griffe's output without
+# line numbers; empty this file (keep the header) after each release.
+# Behaviour changes griffe cannot see go in commit messages (`fix!:`), not here.
+
+# Deprecated, still importable through a module __getattr__ that griffe cannot see.
+src/mrinufft/operators/autodiff.py: DeepInvPhyNufft: Public object was removed
+
+# The number of bins is now estimated from the field map and readout time.
+src/mrinufft/extras/field_map.py: compute_mfi_coefficients(n_bins): Parameter default was changed: 1024 -> -1
+src/mrinufft/extras/field_map.py: compute_mti_coefficients(n_bins): Parameter default was changed: 1024 -> -1
+src/mrinufft/extras/field_map.py: compute_svd_coefficients(n_bins): Parameter default was changed: 1024 -> -1
+
+# The power iterations of ESPIRiT are warm-started, fewer of them are needed.
+src/mrinufft/extras/smaps.py: cartesian_espirit(power_iter): Parameter default was changed: 30 -> 10
+src/mrinufft/extras/smaps.py: espirit(power_iter): Parameter default was changed: 30 -> 10

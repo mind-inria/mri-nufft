@@ -168,7 +168,7 @@ We recommend (but do not enforce) using the [Conventional Commits](https://www.c
 Changes of behavior that can break downstream code must be flagged with `!` (e.g. `fix!: ...`) or a `BREAKING CHANGE:` footer.
 
 ### Public API changes
-Removing, renaming or moving anything from the public API goes through a deprecation period, using the helpers of `mrinufft._deprecation`. See the [API stability section](https://mind-inria.github.io/mri-nufft/misc/development.html#api-stability-and-deprecations) of the documentation.
+Removing, renaming or moving anything from the public API goes through a deprecation period, using the helpers of `mrinufft._deprecation`. The API check CI job compares the public API with the latest release; intended breaking changes must be acknowledged in `.github/api-breaks.txt`. See the [API stability section](https://mind-inria.github.io/mri-nufft/misc/development.html#api-stability-and-deprecations) of the documentation.
 
 ## Attribution
 This guide is based on the [contributing.md](https://contributing.md/generator)!
