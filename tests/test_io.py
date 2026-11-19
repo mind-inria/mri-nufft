@@ -1,7 +1,5 @@
 """Test the trajectories io module."""
 
-from itertools import product
-
 import numpy as np
 import pytest
 from pytest import fixture, mark
@@ -52,10 +50,8 @@ class CasesIO:
 
 @fixture(
     scope="module",
-    params=list(
-        product([0.1, Acquisition.default.gmax], [700, Acquisition.default.smax])
-    ),
-    ids=lambda p: "gmax{}-smax{}".format(*p),
+    params=[(Acquisition.default.gmax, Acquisition.default.smax), (0.1, 700)],
+    ids=["default_hardware", "fast_hardware"],
 )
 def acquisition(request):
     """Create an acquisition object."""

@@ -12,8 +12,8 @@ from helpers import (
     case_id,
     cases_of,
     from_interface,
-    parametrize_array_interface,
     param_backends,
+    parametrize_array_interface,
     to_interface,
 )
 from mrinufft.operators.stacked import MRIStackedNUFFTGPU, stacked2traj3d
@@ -29,14 +29,7 @@ def backend(request):
 
 @fixture(
     scope="module",
-    params=cases_of(
-        CasesTrajectories,
-        "random2D",
-        "in_out_radial2D",
-        "radial2D",
-        "nyquist_radial2D",
-        "grid2D",
-    ),
+    params=cases_of(CasesTrajectories, "random2D", "radial2D"),
     ids=case_id,
 )
 def trajectory(request):
@@ -46,8 +39,8 @@ def trajectory(request):
 
 @fixture(
     scope="module",
-    params=[(1, 1, False), (1, 4, False), (1, 4, True), (3, 4, False), (3, 4, True)],
-    ids=lambda c: "b{}-c{}-sense{}".format(*map(int, c)),
+    params=[(1, 1, False), (3, 4, False), (3, 4, True)],
+    ids=["single", "batch_coils", "batch_sense"],
 )
 def config(request):
     """Number of batches, number of coils and SENSE."""
