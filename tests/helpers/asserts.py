@@ -49,7 +49,7 @@ def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
 
 def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
     """Assert the correlation between two arrays."""
-    # Concatenate real and imaginary parts so complex64/complex128 inputs work correctly.
+    # Concatenate real and imaginary parts, so complex64/complex128 inputs work.
     a_flat = np.concatenate([np.real(a).ravel(), np.imag(a).ravel()]).astype(np.float64)
     b_flat = np.concatenate([np.real(b).ravel(), np.imag(b).ravel()]).astype(np.float64)
 

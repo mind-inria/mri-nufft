@@ -32,4 +32,4 @@ jobs:
 
       - name: ruff Check
         shell: bash
-        run: uvx ruff check src
+        run: uvx ruff check src tests

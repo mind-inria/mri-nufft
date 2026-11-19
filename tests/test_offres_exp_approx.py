@@ -99,7 +99,7 @@ def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
     assert C.shape == (L, *b0_map.shape)
 
     if lazy:
-        C = np.stack([C[l] for l in range(len(C))])
+        C = np.stack([C[i] for i in range(len(C))])
     # Check that the approximation match the full matrix.
     B = from_interface(B, array_interface)
     C = from_interface(C, array_interface)
@@ -109,7 +109,7 @@ def test_b0map_coeff(b0_map, r2s_map, mask, method, L, lazy, array_interface):
 
 
 def test_b0_map_upsampling_warns_and_matches_shape(caplog):
-    """Test that MRIFourierCorrected upscales the b0_map and warns if shape mismatch exists."""
+    """Test that MRIFourierCorrected upscales a mismatched b0_map, and warns."""
     shape_target = (16, 16, 16)
     b0_shape = (8, 8, 8)
 
