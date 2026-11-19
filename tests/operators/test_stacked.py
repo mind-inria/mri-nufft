@@ -125,15 +125,15 @@ def test_stack_backward(operator, stacked_op, ref_op, kspace_data):
 def test_stacked2traj3d():
     """Test the conversion from stacked to 3d trajectory."""
     dimz = 64
-    traj2d = np.random.randn(100, 2)
+    traj2d = np.random.rand(100, 2) - 0.5
     z_index = np.random.choice(dimz, 20, replace=False)
 
     traj3d = stacked2traj3d(traj2d, z_index, dimz)
 
-    traj2d, z_index2 = traj3d2stacked(traj3d, dimz)
+    traj2d_back, z_index_back = traj3d2stacked(traj3d, dimz)
 
-    npt.assert_allclose(traj2d, traj2d)
-    npt.assert_allclose(z_index, z_index2)
+    npt.assert_allclose(traj2d_back, traj2d)
+    npt.assert_allclose(z_index_back, z_index)
 
 
 def test_stack_reuse(operator, stacked_op):
