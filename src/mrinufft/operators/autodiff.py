@@ -572,9 +572,15 @@ def complex_view_wrapper(in_space, out_space):
 
 
 def __getattr__(name):
-    """Keep the original DeepInverse import path available."""
+    """Keep the original DeepInverse import path available, with a warning."""
     if name == "DeepInvPhyNufft":
-        from .outerfaces import DeepInvPhyNufft
+        from mrinufft._deprecation import moved_attribute
 
-        return DeepInvPhyNufft
+        return moved_attribute(
+            __name__,
+            name,
+            "mrinufft.operators",
+            since="1.7.0",
+            removed_in="1.9.0",
+        )
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
