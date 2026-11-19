@@ -99,7 +99,17 @@ jobs:
         run: uv sync --extra test --extra finufft --extra mlx-nufft
 
       - name: Run MLX NUFFT tests
-        run: uv run pytest --backend mlx-nufft --ref finufft --disable-pytest-warnings
+        run: |
+          export COVERAGE_FILE=coverage_mlx-nufft
+          uv run pytest --backend mlx-nufft --ref finufft --disable-pytest-warnings
+
+      - name: Upload coverage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_mlx-nufft
+          path: coverage_mlx-nufft
+
 
   test-gpu:
     runs-on: gpu
@@ -208,7 +218,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
-    needs: [test-cpu, test-gpu, test-examples, test-other]
+    needs: [test-cpu, test-gpu, test-examples, test-other, test-mlx-nufft]
     if: ${{ always() }}
     steps:
       - name: Checkout
