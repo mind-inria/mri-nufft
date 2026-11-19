@@ -1,13 +1,18 @@
 """Helper functions for testing the operators."""
 
-from .asserts import assert_almost_allclose, assert_correlate, assert_allclose
+from .asserts import (
+    assert_adjoint,
+    assert_almost_allclose,
+    assert_correlate,
+    assert_allclose,
+)
 from .backends import (
     accepts_interface,
     backend_interfaces,
     param_backends,
     parametrize_array_interface,
 )
-from .cases import case_id, cases_of
+from .cases import CasesBatch, CasesTrajectories, case_id, cases_of
 from .factories import (
     kspace_from_op,
     image_from_op,
@@ -21,6 +26,7 @@ from .factories import (
 )
 
 __all__ = [
+    "assert_adjoint",
     "assert_almost_allclose",
     "assert_correlate",
     "assert_allclose",
@@ -28,6 +34,8 @@ __all__ = [
     "backend_interfaces",
     "param_backends",
     "parametrize_array_interface",
+    "CasesBatch",
+    "CasesTrajectories",
     "case_id",
     "cases_of",
     "kspace_from_op",

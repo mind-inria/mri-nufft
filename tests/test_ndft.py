@@ -11,9 +11,21 @@ from mrinufft.operators.interfaces.nudft_numpy import (
     RawNDFT,
 )
 
-from case_trajectories import CasesTrajectories, case_grid1D
-from helpers import assert_almost_allclose, case_id, cases_of
+from helpers import (
+    CasesTrajectories,
+    assert_almost_allclose,
+    case_id,
+    cases_of,
+    image_from_op,
+    kspace_from_op,
+)
 from mrinufft import get_operator
+
+
+def case_grid1D(N=256):
+    """Create a 1D cartesian grid of frequencies locations."""
+    freq_1d = sp.fft.fftfreq(N)
+    return freq_1d.reshape(-1, 1), (N,)
 
 
 @mark.parametrize(
@@ -71,3 +83,32 @@ def test_ndft_fft(case):
     kspace_fft = sp.fft.fftn(sp.fft.fftshift(img))
 
     assert_almost_allclose(kspace, kspace_fft, atol=1e-4, rtol=1e-4, mismatch=5)
+
+
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "random2D", "grid2D", "grid3D"),
+    ids=case_id,
+)
+def test_ref_nufft(case, ref_backend):
+    """The reference backend, used to check the others, matches the NDFT."""
+    samples, shape = case()
+    ref_operator = get_operator(ref_backend)(samples, shape)
+    ndft_operator = get_operator("numpy")(ref_operator.samples, ref_operator.shape)
+
+    image = image_from_op(ref_operator)
+    assert_almost_allclose(
+        ref_operator.op(image),
+        ndft_operator.op(image),
+        atol=1e-4,
+        rtol=1e-4,
+        mismatch=5,
+    )
+    kspace = kspace_from_op(ref_operator)
+    assert_almost_allclose(
+        ref_operator.adj_op(kspace),
+        ndft_operator.adj_op(kspace),
+        atol=1e-4,
+        rtol=1e-4,
+        mismatch=5,
+    )

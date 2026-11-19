@@ -13,8 +13,7 @@ from mrinufft.extras.smaps import (
     _kernel_mask,
 )
 
-from case_trajectories import CasesTrajectories
-from helpers import assert_correlate, parametrize_array_interface
+from helpers import CasesTrajectories, assert_correlate, parametrize_array_interface
 
 N = 32
 N_COILS = 4
