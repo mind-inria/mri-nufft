@@ -9,11 +9,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import param_array_interface, param_backends, from_interface, to_interface
-from mrinufft.operators.stacked import (
-    MRIStackedNUFFTGPU,
-    stacked2traj3d,
-    traj3d2stacked,
-)
+from mrinufft.operators.stacked import MRIStackedNUFFTGPU, stacked2traj3d
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
@@ -138,17 +134,3 @@ def test_stack_auto_adjoint(operator, stacked_op, kspace_data, image_data):
     rightadjoint = np.vdot(kspace, kspace_data)
 
     npt.assert_allclose(leftadjoint.conj(), rightadjoint, atol=1e-4, rtol=1e-4)
-
-
-def test_stacked2traj3d():
-    """Test the conversion from stacked to 3d trajectory."""
-    dimz = 64
-    traj2d = np.random.randn(100, 2)
-    z_index = np.random.choice(dimz, 20, replace=False)
-
-    traj3d = stacked2traj3d(traj2d, z_index, dimz)
-
-    traj2d, z_index2 = traj3d2stacked(traj3d, dimz)
-
-    npt.assert_allclose(traj2d, traj2d)
-    npt.assert_allclose(z_index, z_index2)
