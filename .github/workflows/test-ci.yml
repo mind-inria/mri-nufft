@@ -130,6 +130,13 @@ jobs:
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
           uv run pytest --backend ${{ matrix.backend }} --ref ${{ env.ref_backend }} --cov --cov-branch --cov-report=term --durations=10
 
+      - name: Run backend-agnostic GPU tests
+        if: ${{ matrix.backend == 'cufinufft' }}
+        shell: bash
+        run: |
+          export COVERAGE_FILE=coverage_${{ matrix.backend }}
+          uv run pytest -m "gpu and not backend" --cov --cov-append --cov-branch --cov-report=term --durations=10
+
       - name: Upload coverage
         if: success()
         uses: actions/upload-artifact@v4
@@ -138,7 +145,7 @@ jobs:
           path: coverage_${{ matrix.backend }}
 
   test-other:
-    runs-on: [gpu]
+    runs-on: cpu
     needs: get-commit-message
     if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     steps:
@@ -151,13 +158,14 @@ jobs:
         shell: bash
         run: |
           uv sync --extra test --extra autodiff --extra finufft --extra extra
-          uv pip install cupy-cuda13x[ctk]
 
       - name: Run backend-agnostic tests
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_other
-          uv run pytest -n=4 -m "not backend" --cov --cov-branch --cov-report=term --durations=10
+          # One BLAS thread pool per xdist worker, not one per core.
+          export OMP_NUM_THREADS=$(( $(nproc) > 4 ? $(nproc) / 4 : 1 ))
+          uv run pytest -n=4 -m "not backend and not gpu" --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
@@ -188,6 +196,7 @@ jobs:
         run: |
           export COVERAGE_FILE=coverage_plots
           export MRINUFFT_BACKEND=cufinufft
+          export OMP_NUM_THREADS=$(( $(nproc) > 4 ? $(nproc) / 4 : 1 ))
           uv run pytest examples -n=4 --cov --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
