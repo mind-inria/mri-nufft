@@ -101,7 +101,7 @@ jobs:
       - name: Run MLX NUFFT tests
         run: |
           export COVERAGE_FILE=coverage_mlx-nufft
-          uv run pytest --backend mlx-nufft --ref finufft --disable-pytest-warnings
+          uv run pytest --backend mlx-nufft --ref finufft --cov --cov-branch --cov-report=term --disable-pytest-warnings
 
       - name: Upload coverage
         if: success()
