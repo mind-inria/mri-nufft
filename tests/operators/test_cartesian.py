@@ -8,10 +8,10 @@ from helpers import (
     case_id,
     cases_of,
     image_from_op,
+    parametrize_array_interface,
     to_interface,
     from_interface,
 )
-from helpers.factories import _param_array_interface
 
 
 class CasesCartesian:
@@ -42,7 +42,7 @@ def operator(request):
     return get_operator("cartesian")(mask, shape)
 
 
-@_param_array_interface
+@parametrize_array_interface()
 def test_cartesian_autoadjoint(operator, array_interface):
     """Test the auto-adjoint property of the Cartesian operator."""
     reldiff = np.zeros(10)

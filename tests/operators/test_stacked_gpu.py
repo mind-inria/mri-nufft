@@ -12,7 +12,7 @@ from helpers import (
     case_id,
     cases_of,
     from_interface,
-    param_array_interface,
+    parametrize_array_interface,
     param_backends,
     to_interface,
 )
@@ -146,7 +146,7 @@ def kspace_data(stacked_op):
     return kspace
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_stack_forward(operator, array_interface, ref_op, stacked_op, image_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
     image_data_ = to_interface(image_data, array_interface)
@@ -157,7 +157,7 @@ def test_stack_forward(operator, array_interface, ref_op, stacked_op, image_data
     npt.assert_allclose(kspace_nufft, kspace_ref, atol=1e-4, rtol=1e-1)
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_stack_backward(operator, array_interface, stacked_op, ref_op, kspace_data):
     """Compare the stack interface to the 3D NUFFT implementation."""
     kspace_data_ = to_interface(kspace_data, array_interface)

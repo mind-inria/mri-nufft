@@ -7,7 +7,7 @@ import numpy.testing as npt
 from pytest import fixture
 
 from helpers import (
-    param_array_interface,
+    parametrize_array_interface,
     param_backends,
     to_interface,
     from_interface,
@@ -120,7 +120,7 @@ def kspace_data(operator):
     return np.ascontiguousarray(kspace.swapaxes(0, 1))
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_subspace_op(operator, array_interface, image_data):
     subspace_op, ref_op, subspace_basis = operator
 
@@ -143,7 +143,7 @@ def test_subspace_op(operator, array_interface, image_data):
     npt.assert_allclose(kspace, kspace_ref, rtol=1e-3, atol=1e-3)
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_subspace_op_adj(operator, array_interface, kspace_data):
     subspace_op, ref_op, subspace_basis = operator
 
@@ -167,7 +167,7 @@ def test_subspace_op_adj(operator, array_interface, kspace_data):
         npt.assert_allclose(image, image_ref, rtol=1e-3, atol=1e-3)
 
 
-@param_array_interface
+@parametrize_array_interface("numpy", "cupy")
 def test_data_consistency(
     operator,
     array_interface,
