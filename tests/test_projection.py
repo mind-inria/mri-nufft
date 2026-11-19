@@ -1,9 +1,6 @@
 import numpy as np
 import pytest
-from pytest import fixture, mark
-
-from case_trajectories import CasesTrajectories
-from helpers import case_id, cases_of
+from pytest import fixture
 from mrinufft.trajectories.projection import project_trajectory
 from mrinufft.trajectories.utils import (
     Acquisition,
@@ -16,9 +13,16 @@ def require_pyproximal():
     pytest.importorskip("pyproximal")
 
 
-@mark.parametrize("case", cases_of(CasesTrajectories, "projection2D"), ids=case_id)
-def test_project_trajectory_is_idempotent(case):
-    trajectory, _ = case()
+@fixture
+def trajectory():
+    """Small 2D trajectory, which violates the gradient constraints."""
+    trajectory = np.zeros((1, 12, 2))
+    trajectory[0, :, 0] = np.linspace(-0.1, 0.1, 12)
+    trajectory[0, :, 1] = 0.02 * np.sin(np.linspace(0, 2 * np.pi, 12))
+    return trajectory
+
+
+def test_project_trajectory_is_idempotent(trajectory):
     acq = Acquisition.default
 
     projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
@@ -29,9 +33,7 @@ def test_project_trajectory_is_idempotent(case):
     np.testing.assert_allclose(projected_twice, projected, atol=1e-4, rtol=1e-3)
 
 
-@mark.parametrize("case", cases_of(CasesTrajectories, "projection2D"), ids=case_id)
-def test_project_trajectory_satisfies_constraints(case):
-    trajectory, _ = case()
+def test_project_trajectory_satisfies_constraints(trajectory):
     acq = Acquisition.default
     projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
 

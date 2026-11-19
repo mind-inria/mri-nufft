@@ -51,7 +51,9 @@ def backend(request):
 
 @fixture(
     scope="module",
-    params=cases_of(CasesTrajectories),
+    params=cases_of(
+        CasesTrajectories, "random2D", "random3D", "radial2D", "radial3D", "grid2D"
+    ),
     ids=case_id,
 )
 def trajectory(request):

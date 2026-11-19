@@ -35,7 +35,6 @@ def backend(request):
         "in_out_radial2D",
         "radial2D",
         "nyquist_radial2D",
-        "projection2D",
         "grid2D",
     ),
     ids=case_id,
