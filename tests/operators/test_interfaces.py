@@ -12,6 +12,7 @@ from helpers import (
     to_interface,
     from_interface,
     param_array_interface,
+    param_backends,
 )
 
 # #########################
@@ -25,7 +26,7 @@ from helpers import (
 @fixture(scope="module")
 @parametrize(
     "backend",
-    [
+    param_backends(
         "bart",
         "pynfft",
         "pynufft-cpu",
@@ -38,7 +39,7 @@ from helpers import (
         "torchkbnufft-cpu",
         "torchkbnufft-gpu",
         "tensorflow",
-    ],
+    ),
 )
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
 def operator(

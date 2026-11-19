@@ -7,18 +7,21 @@ import pytest
 @pytest.mark.parametrize(
     "backend,name",
     [
-        ("finufft", "MRIfinufft"),
-        ("mlx-nufft", "MRIMlxNUFFT"),
-        ("cufinufft", "MRICufiNUFFT"),
-        ("ducc0", "MRIDUCC0"),
-        ("tensorflow", "MRITensorflowNUFFT"),
-        ("pynufft-cpu", "MRIPynufft"),
-        ("pynfft", "MRInfft"),
-        ("numpy", "MRInumpy"),
-        ("gpunufft", "MRIGpuNUFFT"),
-        ("torchkbnufft-cpu", "TorchKbNUFFTcpu"),
-        ("torchkbnufft-gpu", "TorchKbNUFFTgpu"),
-    ],
+        pytest.param(backend, name, marks=pytest.mark.backend(backend), id=backend)
+        for backend, name in [
+            ("finufft", "MRIfinufft"),
+            ("mlx-nufft", "MRIMlxNUFFT"),
+            ("cufinufft", "MRICufiNUFFT"),
+            ("ducc0", "MRIDUCC0"),
+            ("tensorflow", "MRITensorflowNUFFT"),
+            ("pynufft-cpu", "MRIPynufft"),
+            ("pynfft", "MRInfft"),
+            ("gpunufft", "MRIGpuNUFFT"),
+            ("torchkbnufft-cpu", "TorchKbNUFFTcpu"),
+            ("torchkbnufft-gpu", "TorchKbNUFFTgpu"),
+        ]
+    ]
+    + [("numpy", "MRInumpy")],
 )
 def test_get_operator(backend, name):
     """Test the get_operator function."""

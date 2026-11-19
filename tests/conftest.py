@@ -1,8 +1,16 @@
-"""Configuration for pytest."""
+"""Configuration for pytest.
+
+Tests exercising a NUFFT backend carry a ``backend(name)`` marker, usually set on
+the backend parameter with :func:`helpers.param_backends`.
+
+* ``--backend NAME`` keeps only the tests marked for ``NAME``.
+* ``-m "not backend"`` keeps only the tests not bound to a backend.
+* Without options, everything runs and unavailable backends are skipped.
+"""
 
 import pytest
 
-from mrinufft.operators import FourierOperatorBase, check_backend, list_backends
+from mrinufft.operators import check_backend, list_backends
 
 
 def pytest_addoption(parser):
@@ -11,7 +19,7 @@ def pytest_addoption(parser):
         "--backend",
         action="append",
         default=[],
-        help="NUFFT backend on which the tests are performed.",
+        help="Only run the tests marked for this NUFFT backend (repeatable).",
     )
     parser.addoption(
         "--ref",
@@ -21,70 +29,46 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """Configure hook for pytest."""
-    available = {b: FourierOperatorBase.interfaces[b][0] for b in list_backends()}
-
-    if selected := config.getoption("backend"):
-        # hijacks the availability of interfaces:
-        for backend in list_backends():
-            FourierOperatorBase.interfaces[backend] = (
-                backend in selected,
-                FourierOperatorBase.interfaces[backend][1],
-            )
-    # ensure the ref backend is available
-    ref_backend = config.getoption("ref")
-    FourierOperatorBase.interfaces[ref_backend] = (
-        True,
-        FourierOperatorBase.interfaces[ref_backend][1],
+    """Register the backend marker and check the requested backends."""
+    config.addinivalue_line(
+        "markers", "backend(name): test exercising the NUFFT backend ``name``."
     )
-    selected = {b: FourierOperatorBase.interfaces[b][0] for b in list_backends()}
-
-    available[ref_backend] = "REF"
-    selected[ref_backend] = "REF"
-    print(f"{'backends':>20}: {'avail':>5} {'select':<5}")
-    for b in list_backends():
-        print(f"{b:>20}: {str(available[b]):>5} {str(selected[b]):>5}")
-
-
-# # for test directly parametrized by a backend
-def pytest_runtest_setup(item):
-    """Skip tests based on the backend."""
-    if hasattr(item, "callspec"):
-        if "backend" in item.callspec.params:
-            backend = item.callspec.params["backend"]
-            if not check_backend(backend):
-                pytest.skip(f"Backend {backend} not available.")
+    for backend in config.getoption("backend"):
+        try:
+            available = check_backend(backend)
+        except ValueError as e:
+            raise pytest.UsageError(str(e)) from e
+        if not available:
+            raise pytest.UsageError(
+                f"--backend {backend} was requested, but its dependencies failed "
+                "to import."
+            )
 
 
-# for test parametrized by an operator fixture, depending on a backend.
-# This is more tricky.
-def pytest_generate_tests(metafunc):
-    """Generate the tests."""
-    if "operator" in metafunc.fixturenames:
-        for callspec in metafunc._calls:
-            try:
-                op_call = callspec.params["operator"]
-            except KeyError:
-                continue
-            # Complicated datastructure
-            # Acces the value for the backend parameter.
-            backend = op_call.argvalues[
-                [
-                    i
-                    for i, v in enumerate(op_call.param_defs)
-                    if v.argnames[0] == "backend"
-                ][0]
-            ]
-            # Only keep the callspec if the backend is available.
-            if not check_backend(backend):
-                callspec.marks.append(
-                    pytest.mark.skip(f"Backend {backend} not available.")
-                )
-            if (
-                metafunc.config.getoption("backend") != []
-                and backend != metafunc.config.getoption("backend")[0]
-            ):
-                # Skip tests if the backend does not match what we want to test.
-                callspec.marks.append(
-                    pytest.mark.skip(f"Not testing {backend} as not requested")
-                )
+def pytest_report_header(config):
+    """Report the available and requested backends."""
+    requested = ", ".join(config.getoption("backend")) or "all"
+    return [
+        f"backends available: {', '.join(list_backends(available_only=True))}",
+        f"backends requested: {requested}",
+    ]
+
+
+def pytest_collection_modifyitems(config, items):
+    """Deselect the tests of other backends, skip those of unavailable ones."""
+    requested = set(config.getoption("backend"))
+    selected, deselected = [], []
+    for item in items:
+        marker = item.get_closest_marker("backend")
+        backend = marker.args[0] if marker else None
+        if requested and backend not in requested:
+            deselected.append(item)
+            continue
+        if backend is not None and not check_backend(backend):
+            item.add_marker(
+                pytest.mark.skip(reason=f"Backend {backend} not available.")
+            )
+        selected.append(item)
+    if deselected:
+        config.hook.pytest_deselected(items=deselected)
+        items[:] = selected

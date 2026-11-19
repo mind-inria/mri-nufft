@@ -8,6 +8,7 @@ import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import (
     param_array_interface,
+    param_backends,
     to_interface,
     from_interface,
 )
@@ -24,7 +25,10 @@ from mrinufft.operators import MRISubspace
 )
 @parametrize_with_cases("kspace_locs, shape", cases=[case_multicontrast2D])
 @parametrize(
-    backend=["finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"]
+    "backend",
+    param_backends(
+        "finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"
+    ),
 )
 def operator(
     request,

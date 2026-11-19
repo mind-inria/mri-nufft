@@ -1,5 +1,6 @@
 """Helper functions for testing the operators."""
 
+from .backends import param_backends
 from .asserts import assert_almost_allclose, assert_correlate, assert_allclose
 from .factories import (
     kspace_from_op,
@@ -24,4 +25,5 @@ __all__ = [
     "TORCH_AVAILABLE",
     "param_array_interface",
     "batched_smaps_from_op",
+    "param_backends",
 ]

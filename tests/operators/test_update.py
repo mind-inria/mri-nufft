@@ -9,6 +9,7 @@ import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import (
     param_array_interface,
+    param_backends,
     to_interface,
     from_interface,
 )
@@ -38,7 +39,7 @@ from case_trajectories import CasesTrajectories
     cases=CasesTrajectories,
     glob="*random*",
 )
-@parametrize(backend=["finufft", "cufinufft", "gpunufft"])
+@parametrize("backend", param_backends("finufft", "cufinufft", "gpunufft"))
 @parametrize(density=[False, True])
 @parametrize(smaps_cached=[False, True])
 def operator(

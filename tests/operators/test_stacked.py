@@ -9,7 +9,7 @@ import numpy as np
 import numpy.testing as npt
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 
-from helpers import assert_correlate
+from helpers import assert_correlate, param_backends
 from mrinufft.operators.stacked import MRIStackedNUFFT, stacked2traj3d, traj3d2stacked
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
@@ -21,7 +21,7 @@ from case_trajectories import CasesTrajectories
     [(1, 1, False), (2, 3, False), (2, 3, True)],
 )
 @parametrize("z_index", ["random_mask"])
-@parametrize("backend", ["finufft"])
+@parametrize("backend", param_backends("finufft"))
 @parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_radial2D)
 def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
     """Initialize the stacked and non-stacked operators."""
