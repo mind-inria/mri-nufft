@@ -40,15 +40,24 @@ def test_scipy_linop_missing_cupy(monkeypatch):
         nufft.make_linops(cupy=True)
 
 
-def test_outerfaces_optional_imports_are_lazy():
+def test_outerfaces_without_optional_frameworks():
     code = """
-import sys
-import mrinufft.operators.outerfaces
-assert 'torch' not in sys.modules
-assert 'deepinv' not in sys.modules
-assert 'mrpro' not in sys.modules
+import numpy as np
+import mrinufft._array_compat as compat
+compat.DEEPINV_AVAILABLE = compat.MRPRO_AVAILABLE = False
+from mrinufft.operators import get_operator, outerfaces
+assert not hasattr(outerfaces, 'DeepInvPhyNufft')
+assert not hasattr(outerfaces, 'MRProNUFFT')
+get_operator('numpy')(np.zeros((3, 2), dtype=np.float32), (4, 4)).make_linops()
 """
     subprocess.run([sys.executable, "-c", code], check=True)
+
+
+def test_mrpro_missing_dependency(monkeypatch):
+    nufft = get_operator("numpy")(np.zeros((3, 2), dtype=np.float32), (4, 4))
+    monkeypatch.setattr("mrinufft.operators.base.MRPRO_AVAILABLE", False)
+    with pytest.raises(ImportError, match="pip install mrpro"):
+        nufft.make_mrpro()
 
 
 def test_autodiff_without_deepinv():

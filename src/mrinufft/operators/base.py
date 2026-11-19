@@ -24,6 +24,7 @@ from mrinufft._array_compat import (
     get_array_module,
     AUTOGRAD_AVAILABLE,
     DEEPINV_AVAILABLE,
+    MRPRO_AVAILABLE,
     CUPY_AVAILABLE,
     is_cuda_array,
     is_host_array,
@@ -35,7 +36,7 @@ from mrinufft.extras import get_smaps
 
 if TYPE_CHECKING:
     from mrinufft.operators.autodiff import MRINufftAutoGrad
-    from mrinufft.operators.deepinv import DeepInvPhyNufft
+    from mrinufft.operators.outerfaces import DeepInvPhyNufft, MRProNUFFT
     from mrinufft.operators.stacked import MRIStackedNUFFT, MRIStackedNUFFTGPU
     from mrinufft.operators.off_resonance import MRIFourierCorrected
 
@@ -511,7 +512,7 @@ class FourierOperatorBase(ABC):
         autograd_nufft = self.make_autograd(*args, **kwargs)
         return DeepInvPhyNufft(autograd_nufft, viewed_as_real=viewed_as_real)
 
-    def make_mrpro(self):
+    def make_mrpro(self) -> MRProNUFFT:
         """Wrap this operator as an MRPro linear operator.
 
         The operator accepts complex Torch tensors with image shape
@@ -537,6 +538,8 @@ class FourierOperatorBase(ABC):
         ValueError
             If density compensation is enabled.
         """
+        if not MRPRO_AVAILABLE:
+            raise ImportError("MRPro is required; install it with 'pip install mrpro'.")
         from mrinufft.operators.outerfaces import MRProNUFFT
 
         return MRProNUFFT(self)
