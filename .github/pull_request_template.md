@@ -23,3 +23,7 @@ Changes proposed in this pull request:
 
 -
 -
+
+<!-- If this PR breaks or deprecates part of the public API, add an entry to
+docs/changelog.rst, see https://mind-inria.github.io/mri-nufft/misc/development.html#api-stability-and-deprecations -->
+- [ ] Breaking changes and deprecations are listed in `docs/changelog.rst`.

@@ -41,6 +41,7 @@ extensions = [
     "sphinx_design",
     "sphinx_copybutton",
     "sphinx.ext.duration",
+    "sphinx.ext.extlinks",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
@@ -123,6 +124,8 @@ sphinx_gallery_conf = {
         "!pip install brainweb-dl fastmri"
     ),  # for binder and colab
 }
+
+extlinks = {"gh": ("https://github.com/mind-inria/mri-nufft/pull/%s", "#%s")}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

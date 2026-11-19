@@ -32,12 +32,15 @@ To view the html doc locally you can use ::
 
 And visit `localhost:8000` on your web browser.
 
+.. _api-stability:
+
 API stability and deprecations
 ------------------------------
 
 MRI-nufft follows `effort-based versioning <https://docs.jax.dev/en/latest/jep/25516-effver.html>`_
 rather than strict semantic versioning: a minor release may change the public API,
-but such changes go through a deprecation period whenever possible.
+but such changes go through a deprecation period whenever possible, and are always
+listed in the :doc:`changelog <../changelog>`.
 
 The public API is everything exported in the ``__all__`` of a public (not
 underscored) module. A deprecated part of it keeps working, and emits a
@@ -68,31 +71,18 @@ Use the helpers of ``mrinufft._deprecation``, which keep the messages consistent
 New parameters should be added after the existing ones, preferably as keyword-only,
 so that positional calls keep their meaning.
 
-This is enforced by:
+When a pull request breaks or deprecates part of the public API, including
+behaviour changes that leave the signatures untouched (a new default, a sign
+convention, an axis order...), add an entry to the *Unreleased* section of
+``docs/changelog.rst``.
 
-- the *API check* CI job, which runs `griffe check <https://mkdocstrings.github.io/griffe/>`_
-  on each pull request against the latest release, and fails on removed objects,
-  moved parameters, changed defaults, etc. A breaking change that cannot go
-  through a deprecation (or that griffe misreports, like an object kept through
-  a module ``__getattr__``) is acknowledged by adding the line reported by the
-  job to ``.github/api-breaks.txt``, with a comment saying why. Run it locally
-  with ``.github/check_api.sh``.
-- ``tests/test_deprecation.py``, which fails once a ``removed_in`` version is
-  reached. It runs before each release is published.
+Before a release ``X.Y.Z``:
 
-Behaviour changes that keep the signatures untouched (a sign convention, an axis
-order, ...) are invisible to these checks: flag them in the commit message with
-``fix!:`` / ``feat!:`` or a ``BREAKING CHANGE:`` footer, so they end up in the
-release notes.
+- remove the deprecated objects that are due, which ``tests/test_deprecation.py``
+  lists:
 
-Before a release ``X.Y.Z``, check the deprecation schedule and gather the breaking
-changes for the release notes, from ``.github/api-breaks.txt`` and from the commits:
+  .. code-block:: bash
 
-.. code-block:: bash
+      MRINUFFT_RELEASE=X.Y.Z uv run pytest tests/test_deprecation.py
 
-    MRINUFFT_RELEASE=X.Y.Z uv run pytest tests/test_deprecation.py
-    git log --grep 'BREAKING CHANGE' --grep '^[a-z]+(\(.*\))?!:' -E $(git describe --tags --abbrev=0 --exclude '*-*')..HEAD
-
-After the release, empty ``.github/api-breaks.txt`` (keeping its header): its
-entries no longer apply against the new release, and the API check warns about
-them.
+- rename the *Unreleased* section of ``docs/changelog.rst`` to ``X.Y.Z``.
