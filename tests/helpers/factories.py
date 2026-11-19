@@ -31,6 +31,13 @@ def kspace_from_op(operator):
     return kspace
 
 
+def random_smaps(n_coils, shape):
+    """Generate random sensitivity maps, normalized over the coils."""
+    smaps = np.random.rand(n_coils, *shape) + 1j * np.random.rand(n_coils, *shape)
+    smaps /= np.linalg.norm(smaps, axis=0)
+    return smaps.astype(np.complex64)
+
+
 def batched_smaps_from_op(operator):
     """Generate random batched smaps."""
     smaps = 1j * np.random.randn(

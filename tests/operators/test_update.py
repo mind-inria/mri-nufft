@@ -6,101 +6,70 @@ Only finufft, cufinufft and gpunufft support update.
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest import fixture
+from pytest import fixture, mark
 from helpers import (
     case_id,
     cases_of,
-    parametrize_array_interface,
-    param_backends,
-    to_interface,
     from_interface,
+    parametrize_array_interface,
+    random_smaps,
+    to_interface,
 )
 from mrinufft import get_operator
 from mrinufft._utils import get_array_module
+from case_batch import CasesBatch
 from case_trajectories import CasesTrajectories
 
 
-@fixture(scope="module", params=param_backends("finufft", "cufinufft", "gpunufft"))
-def backend(request):
-    """Backend under test."""
-    return request.param
+def _variant(backend, **kwargs):
+    name = "-".join([backend, *kwargs])
+    return pytest.param((backend, kwargs), marks=mark.backend(backend), id=name)
 
 
 @fixture(
-    scope="module",
-    params=cases_of(CasesTrajectories, "random2D", "random3D"),
-    ids=case_id,
+    params=[
+        _variant("finufft"),
+        _variant("cufinufft"),
+        _variant("cufinufft", smaps_cached=True),
+        _variant("gpunufft"),
+        _variant("gpunufft", density=True),
+    ]
 )
+def variant(request):
+    """Backend and its specific options."""
+    return request.param
+
+
+@fixture(params=cases_of(CasesTrajectories, "random2D", "random3D"), ids=case_id)
 def trajectory(request):
     """Sampling pattern and image shape."""
     return request.param()
 
 
-@fixture(scope="module", params=[False, True], ids=lambda d: f"density={d}")
-def density(request):
-    """Use density compensation."""
-    return request.param
-
-
-@fixture(scope="module", params=[False, True], ids=lambda c: f"smaps_cached={c}")
-def smaps_cached(request):
-    """Cache the sensitivity maps on the GPU."""
-    return request.param
-
-
 @fixture(
-    scope="module",
-    params=[
-        (1, 1, 1, False),
-        (3, 1, 1, False),
-        (1, 4, 1, True),
-        (1, 4, 1, False),
-        (1, 4, 2, True),
-        (1, 4, 2, False),
-        (3, 2, 1, True),
-        (3, 2, 1, False),
-        (3, 4, 2, True),
-        (3, 4, 2, False),
-    ],
-    ids=lambda c: "b{}-c{}-t{}-sense{}".format(*map(int, c)),
+    params=cases_of(CasesBatch, "single", "sense", "batch_sense", "batch_coils_ntrans"),
+    ids=case_id,
 )
 def config(request):
-    """Number of batches, coils and transforms, and SENSE."""
-    return request.param
+    """Batch, coils and SENSE configuration (n_trans is not used here)."""
+    return request.param()
 
 
-@fixture(scope="module")
-def operator(backend, trajectory, density, smaps_cached, config):
-    """Generate a batch operator."""
+@fixture
+def operator(variant, trajectory, config):
+    """Generate an operator, rebuilt for each test as the tests modify it."""
+    backend, options = variant
     kspace_locs, shape = trajectory
-    n_batch, n_coils, n_trans, sense = config
-    if n_trans != 1 and backend == "gpunufft":
-        pytest.skip("Duplicate case.")
-    if density and backend in ["cufinufft", "finufft"]:
-        pytest.skip("Density estimation not supported for cufinufft and finufft.")
-    if sense:
-        smaps = 1j * np.random.rand(n_coils, *shape)
-        smaps += np.random.rand(n_coils, *shape)
-        smaps = smaps.astype(np.complex64)
-        smaps /= np.linalg.norm(smaps, axis=0)
-    else:
-        smaps = None
-    kspace_locs = kspace_locs.astype(np.float32)
-    op_args = {
-        "samples": kspace_locs,
-        "shape": shape,
-        "n_coils": n_coils,
-        "n_batchs": n_batch,
-        "squeeze_dims": False,
-        "density": density,
-        "smaps": smaps,
-    }
-    if backend in ["cufinufft"]:
-        op_args["smaps_cached"] = smaps_cached
-    else:
-        if smaps_cached:
-            pytest.skip(f"Skip test cause we dont have smaps_cached in {backend}")
-    return get_operator(backend)(**op_args)
+    n_batchs, n_coils, _, sense = config
+    return get_operator(backend)(
+        samples=kspace_locs.astype(np.float32),
+        shape=shape,
+        n_coils=n_coils,
+        n_batchs=n_batchs,
+        squeeze_dims=False,
+        smaps=random_smaps(n_coils, shape) if sense else None,
+        **{"density": False, **options},
+    )
 
 
 def update_operator(operator):
@@ -117,7 +86,7 @@ def update_operator(operator):
     return get_operator(operator.backend)(**op_args)
 
 
-@fixture(scope="module")
+@fixture
 def image_data(operator):
     """Generate a random image."""
     if operator.uses_sense:
@@ -129,7 +98,7 @@ def image_data(operator):
     return img
 
 
-@fixture(scope="module")
+@fixture
 def kspace_data(operator):
     """Generate a random image."""
     shape = (operator.n_batchs, operator.n_coils, operator.n_samples)
@@ -138,14 +107,10 @@ def kspace_data(operator):
     return kspace
 
 
-@fixture(scope="module")
+@fixture
 def new_smaps(operator):
     """Generate a random new smaps."""
-    smaps = 1j * np.random.rand(operator.n_coils, *operator.shape)
-    smaps += np.random.rand(operator.n_coils, *operator.shape)
-    smaps = smaps.astype(np.complex64)
-    smaps /= np.linalg.norm(smaps, axis=0)
-    return smaps
+    return random_smaps(operator.n_coils, operator.shape)
 
 
 @parametrize_array_interface("numpy", "cupy")

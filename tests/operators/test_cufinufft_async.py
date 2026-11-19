@@ -7,7 +7,7 @@ from pytest import mark
 from mrinufft import get_operator
 from mrinufft.trajectories import initialize_2D_radial
 
-from helpers.factories import image_from_op, kspace_from_op
+from helpers import image_from_op, kspace_from_op, random_smaps
 
 pytestmark = mark.backend("cufinufft")
 
@@ -16,13 +16,7 @@ def _make_operators(n_batchs, n_coils, n_trans, sense):
     """Build a pair of identical operators, only differing by async_transfer."""
     samples = initialize_2D_radial(32 * 4, 16).astype(np.float32)
     shape = (32, 32)
-    if sense:
-        smaps = 1j * np.random.rand(n_coils, *shape)
-        smaps += np.random.rand(n_coils, *shape)
-        smaps = smaps.astype(np.complex64)
-        smaps /= np.linalg.norm(smaps, axis=0)
-    else:
-        smaps = None
+    smaps = random_smaps(n_coils, shape) if sense else None
 
     ops = [
         get_operator("cufinufft")(

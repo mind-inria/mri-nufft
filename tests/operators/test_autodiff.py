@@ -4,7 +4,6 @@ import numpy as np
 from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 from mrinufft._array_compat import _array_to_torch
-import pytest
 from pytest import fixture
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator, MRIFourierCorrected
@@ -19,12 +18,28 @@ from helpers import (
     batched_smaps_from_op,
     param_backends,
     parametrize_array_interface,
+    random_smaps,
 )
 
 try:
     import torch
 except ImportError:
     pass
+
+# n_batchs, n_coils, sense, field_map
+_CONFIGS = [
+    (1, 1, False, False),
+    (1, 4, True, False),
+    (1, 4, False, False),
+    (2, 4, True, False),
+    (2, 4, False, False),
+    (1, 4, True, True),
+    (2, 4, True, True),
+]
+# The paired batch is only relevant with SENSE, and without field map.
+CONFIGS = [(*c, 0) for c in _CONFIGS] + [
+    (*c, paired) for paired in (1, 3) for c in _CONFIGS if c[2] and not c[3]
+]
 
 
 @fixture(scope="module", params=param_backends("cufinufft", "finufft", "gpunufft"))
@@ -45,46 +60,22 @@ def trajectory(request):
     return request.param()
 
 
-@fixture(scope="module", params=[0, 1, 3], ids=lambda p: f"paired_batch_size={p}")
-def paired_batch_size(request):
-    """Size of the paired batch, 0 to disable it."""
-    return request.param
-
-
 @fixture(
     scope="module",
-    params=[
-        (1, 1, False, False),
-        (1, 4, True, False),
-        (1, 4, False, False),
-        (2, 4, True, False),
-        (2, 4, False, False),
-        (1, 4, True, True),
-        (2, 4, True, True),
-    ],
-    ids=lambda c: "b{}-c{}-sense{}-fmap{}".format(*map(int, c)),
+    params=CONFIGS,
+    ids=lambda c: "b{}-c{}-sense{}-fmap{}-paired{}".format(*map(int, c)),
 )
 def config(request):
-    """Number of batches and coils, SENSE and field map."""
+    """Batch, coils, SENSE, field map and paired batch configuration."""
     return request.param
 
 
 @fixture(scope="module")
-def operator(backend, trajectory, paired_batch_size, config):
+def operator(backend, trajectory, config):
     """Create NUFFT operator with autodiff capabilities."""
     kspace_loc, shape = trajectory
-    n_batchs, n_coils, sense, field_map = config
-    if not sense and paired_batch_size:
-        pytest.skip("Not relevant to test.")
-    if field_map and paired_batch_size:
-        pytest.skip("Not relevant to test.")
-    if sense:
-        smaps = 1j * np.random.rand(n_coils, *shape)
-        smaps += np.random.rand(n_coils, *shape)
-        smaps = smaps.astype(np.complex64)
-        smaps /= np.linalg.norm(smaps, axis=0)
-    else:
-        smaps = None
+    n_batchs, n_coils, sense, field_map, paired_batch_size = config
+    smaps = random_smaps(n_coils, shape) if sense else None
     kspace_loc = kspace_loc.astype(np.float32)
     nufft = get_operator(
         backend_name=backend,

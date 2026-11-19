@@ -10,12 +10,14 @@ from pytest import fixture, mark
 from helpers import (
     case_id,
     cases_of,
-    parametrize_array_interface,
-    param_backends,
-    to_interface,
     from_interface,
+    param_backends,
+    parametrize_array_interface,
+    random_smaps,
+    to_interface,
 )
 from mrinufft import get_operator
+from case_batch import CasesBatch
 from case_trajectories import CasesTrajectories
 
 
@@ -40,49 +42,25 @@ def trajectory(request):
     return request.param()
 
 
-@fixture(
-    scope="module",
-    params=[
-        (1, 1, 1, False),
-        (3, 1, 1, False),
-        (1, 4, 1, True),
-        (1, 4, 1, False),
-        (1, 4, 2, True),
-        (1, 4, 2, False),
-        (3, 2, 1, True),
-        (3, 2, 1, False),
-        (3, 4, 2, True),
-        (3, 4, 2, False),
-    ],
-    ids=lambda c: "b{}-c{}-t{}-sense{}".format(*map(int, c)),
-)
+@fixture(scope="module", params=cases_of(CasesBatch), ids=case_id)
 def config(request):
-    """Number of batches, coils and transforms, and SENSE."""
-    return request.param
+    """Batch, coils and SENSE configuration."""
+    return request.param()
 
 
 @fixture(scope="module")
 def operator(backend, trajectory, config):
     """Generate a batch operator."""
     kspace_locs, shape = trajectory
-    n_batch, n_coils, n_trans, sense = config
+    n_batchs, n_coils, n_trans, sense = config
     if n_trans != 1 and backend == "gpunufft":
         pytest.skip("Duplicate case.")
-    if sense:
-        smaps = 1j * np.random.rand(n_coils, *shape)
-        smaps += np.random.rand(n_coils, *shape)
-        smaps = smaps.astype(np.complex64)
-        smaps /= np.linalg.norm(smaps, axis=0)
-        smaps = smaps.astype(np.complex64)
-    else:
-        smaps = None
-    kspace_locs = kspace_locs.astype(np.float32)
     return get_operator(backend)(
-        kspace_locs,
+        kspace_locs.astype(np.float32),
         shape,
         n_coils=n_coils,
-        smaps=smaps,
-        n_batchs=n_batch,
+        smaps=random_smaps(n_coils, shape) if sense else None,
+        n_batchs=n_batchs,
         n_trans=n_trans,
         squeeze_dims=False,
     )
@@ -103,7 +81,7 @@ def flat_operator(operator):
 
 @fixture(scope="module")
 def image_data(operator):
-    """Generate a random image."""
+    """Generate a random image, with positive real and imaginary parts."""
     img = (1j * np.random.rand(*operator.img_full_shape)).astype(operator.cpx_dtype)
     img += np.random.rand(*operator.img_full_shape).astype(operator.cpx_dtype)
     return img
@@ -111,7 +89,7 @@ def image_data(operator):
 
 @fixture(scope="module")
 def kspace_data(operator):
-    """Generate a random image."""
+    """Generate a random kspace, with positive real and imaginary parts."""
     kspace = (1j * np.random.rand(*operator.ksp_full_shape)).astype(operator.cpx_dtype)
     kspace += np.random.rand(*operator.ksp_full_shape).astype(operator.cpx_dtype)
     return kspace
@@ -268,12 +246,8 @@ def test_gradient_lipschitz(operator, image_data, kspace_data):
 
 
 @mark.parametrize("optim", ["cg", "lsqr", "lsmr"])
-@parametrize_array_interface("numpy", "cupy")
-def test_pinv_solver(operator, array_interface, image_data, kspace_data, optim):
-    """Test pseudo inverse batch solver."""
-    image_data = to_interface(image_data, array_interface)
-    kspace_data = to_interface(kspace_data, array_interface)
-
+def test_pinv_solver(operator, kspace_data, optim):
+    """Test the shapes of the pseudo inverse batch solver outputs."""
     from mrinufft.extras import loss_l2_reg
 
     img, res = operator.pinv_solver(
