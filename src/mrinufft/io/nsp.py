@@ -500,10 +500,11 @@ def read_trajectory(
     num_adc_samples: int | None = None,
     gamma: Gammas | float = Gammas.HYDROGEN,
     raster_time: float = DEFAULT_RASTER_TIME,
-    read_pre_post_grad: bool = False,
     read_shots: bool = False,
     normalize_factor: float = KMAX,
     pre_skip: int = 0,
+    *,
+    read_pre_post_grad: bool = False,
 ):
     """Get k-space locations from gradient file.
 
@@ -522,9 +523,6 @@ def read_trajectory(
         Gyromagnetic ratio in kHz/T, by default 42.576e3
     raster_time : float, optional
         Gradient raster time in ms, by default 0.01
-    read_pre_post_grad : bool, optional
-        Whether to read pre/post gradients, by default False
-        This is useful for reading the gradients before and after the ADC window.
     read_shots : bool, optional
         Whether in read shots configuration which accepts an extra
         point at end, by default False
@@ -535,6 +533,9 @@ def read_trajectory(
         Number of samples to skip from the start of each shot,
         by default 0. This is useful when we want to avoid artifacts
         from ADC switching in UTE sequences.
+    read_pre_post_grad : bool, optional
+        Whether to read pre/post gradients, by default False
+        This is useful for reading the gradients before and after the ADC window.
 
     Returns
     -------
