@@ -1,121 +1,153 @@
-"""Tests for external operator interfaces."""
-
-import subprocess
-import sys
+"""Tests for the adapters exposing operators to external libraries."""
 
 import numpy as np
+import numpy.testing as npt
 import pytest
+from pytest import fixture, mark
 from scipy.sparse.linalg import LinearOperator
 
-from mrinufft.operators import check_backend, get_operator
-from mrinufft.operators import outerfaces
+from mrinufft import get_operator
+from mrinufft._array_compat import DEEPINV_AVAILABLE, MRPRO_AVAILABLE
+
+from helpers import (
+    CasesBatch,
+    CasesTrajectories,
+    case_id,
+    cases_of,
+    image_from_op,
+    kspace_from_op,
+    random_smaps,
+)
+
+try:
+    import torch
+except ImportError:
+    pass
 
 
-@pytest.mark.parametrize("sense", [False, True])
-@pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_scipy_linop(sense, dtype):
-    samples = np.zeros((5, 2), dtype=dtype)
-    smaps = np.ones((2, 4, 4), dtype=np.complex64) if sense else None
-    nufft = get_operator("numpy")(samples, (4, 4), n_coils=2, smaps=smaps)
+@fixture(
+    scope="module",
+    params=cases_of(CasesTrajectories, "grid2D", "nyquist_lowmem_radial3D"),
+    ids=case_id,
+)
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
+
+
+@fixture(
+    scope="module",
+    params=cases_of(CasesBatch, "single", "batch_coils", "batch_sense"),
+    ids=case_id,
+)
+def config(request):
+    """Batch, coils and SENSE configuration."""
+    return request.param()
+
+
+@fixture(scope="module", params=[True, False], ids=["squeeze", "full"])
+def squeeze_dims(request):
+    """Whether the operator squeezes its singleton dimensions."""
+    return request.param
+
+
+@fixture(scope="module")
+def nufft(trajectory, config, squeeze_dims):
+    """NUFFT operator, the adapters do not depend on the backend."""
+    samples, shape = trajectory
+    n_batchs, n_coils, n_trans, sense = config
+    return get_operator("finufft")(
+        samples.astype(np.float32),
+        shape,
+        n_batchs=n_batchs,
+        n_coils=n_coils,
+        n_trans=n_trans,
+        smaps=random_smaps(n_coils, shape) if sense else None,
+        squeeze_dims=squeeze_dims,
+    )
+
+
+def test_scipy_linop(nufft):
+    """The linear operator applies the NUFFT on flattened arrays."""
     linop = nufft.make_linops()
-    x = np.arange(np.prod(nufft.img_full_shape), dtype=nufft.cpx_dtype)
-    y = np.arange(np.prod(nufft.ksp_full_shape), dtype=nufft.cpx_dtype)
+    x, y = image_from_op(nufft), kspace_from_op(nufft)
 
     assert isinstance(linop, LinearOperator)
-    assert linop._nufft is nufft
     assert linop.shape == (y.size, x.size)
     assert linop.dtype == nufft.cpx_dtype
-    np.testing.assert_allclose(
-        linop @ x, nufft.op(x.reshape(nufft.img_full_shape)).ravel()
+    # finufft is not bitwise deterministic across calls.
+    tol = dict(rtol=1e-5, atol=1e-5)
+    npt.assert_allclose(linop @ x.ravel(), nufft.op(x).ravel(), **tol)
+    npt.assert_allclose(linop.H @ y.ravel(), nufft.adj_op(y).ravel(), **tol)
+
+
+@mark.skipif(not MRPRO_AVAILABLE, reason="mrpro not available")
+def test_mrpro(nufft):
+    """MRPro operator matches the NUFFT, and differentiates through its adjoint."""
+    from mrpro.operators import LinearOperator
+
+    operator = nufft.make_mrpro()
+    assert isinstance(operator, LinearOperator)
+
+    x = torch.from_numpy(image_from_op(nufft)).requires_grad_()
+    y = torch.from_numpy(kspace_from_op(nufft))
+    v = torch.randn_like(x)
+    (forward,) = operator(x)
+    (adjoint,) = operator.H(y)
+    torch.testing.assert_close(forward, nufft.op(x.detach()).reshape(forward.shape))
+    torch.testing.assert_close(adjoint, nufft.adj_op(y).reshape(adjoint.shape))
+
+    # grad ||Ax||^2 = 2 A^H A x, and its derivative along v is 2 A^H A v.
+    (grad,) = torch.autograd.grad(forward.abs().square().sum(), x, create_graph=True)
+    (hvp,) = torch.autograd.grad(grad, x, v)
+    torch.testing.assert_close(grad, 2 * operator.H(forward)[0])
+    torch.testing.assert_close(hvp, 2 * operator.H(operator(v)[0])[0])
+
+
+@mark.skipif(not MRPRO_AVAILABLE, reason="mrpro not available")
+def test_mrpro_errors():
+    """MRPro rejects density compensation and wrongly shaped inputs."""
+    nufft = get_operator("finufft")(
+        np.zeros((3, 2), dtype=np.float32), (4, 4), density=np.ones(3)
     )
-    np.testing.assert_allclose(
-        linop.H @ y, nufft.adj_op(y.reshape(nufft.ksp_full_shape)).ravel()
-    )
-
-
-def test_scipy_linop_missing_cupy(monkeypatch):
-    nufft = get_operator("numpy")(np.zeros((3, 2), dtype=np.float32), (4, 4))
-    monkeypatch.setattr(outerfaces, "CUPY_AVAILABLE", False)
-    with pytest.raises(ValueError, match="cupy is not available"):
-        nufft.make_linops(cupy=True)
-
-
-def test_outerfaces_without_optional_frameworks():
-    code = """
-import numpy as np
-import mrinufft._array_compat as compat
-compat.DEEPINV_AVAILABLE = compat.MRPRO_AVAILABLE = False
-from mrinufft.operators import get_operator, outerfaces
-assert not hasattr(outerfaces, 'DeepInvPhyNufft')
-assert not hasattr(outerfaces, 'MRProNUFFT')
-get_operator('numpy')(np.zeros((3, 2), dtype=np.float32), (4, 4)).make_linops()
-"""
-    subprocess.run([sys.executable, "-c", code], check=True)
-
-
-def test_mrpro_missing_dependency(monkeypatch):
-    nufft = get_operator("numpy")(np.zeros((3, 2), dtype=np.float32), (4, 4))
-    monkeypatch.setattr("mrinufft.operators.base.MRPRO_AVAILABLE", False)
-    with pytest.raises(ImportError, match="pip install mrpro"):
+    with pytest.raises(ValueError, match="density compensation"):
         nufft.make_mrpro()
 
+    nufft.density = None
+    operator = nufft.make_mrpro()
+    with pytest.raises(ValueError, match="image shape"):
+        operator(torch.zeros((4, 4), dtype=torch.complex64))
+    with pytest.raises(ValueError, match="k-space shape"):
+        operator.H(torch.zeros(3, dtype=torch.complex64))
 
-def test_autodiff_without_deepinv():
-    pytest.importorskip("torch")
-    code = """
-import builtins
-original_import = builtins.__import__
-def guarded_import(name, *args, **kwargs):
-    if name == 'deepinv' or name.startswith('deepinv.'):
-        raise ImportError('deepinv blocked')
-    return original_import(name, *args, **kwargs)
-builtins.__import__ = guarded_import
-from mrinufft.operators.autodiff import MRINufftAutoGrad, image_as_cpx
-from mrinufft.operators import image_as_real, check_backend, get_operator
-if check_backend('finufft'):
-    import numpy as np
-    import torch
-    nufft = get_operator('finufft')(
-        np.zeros((3, 2), dtype=np.float32), (4, 4), squeeze_dims=False
-    )
-    x = torch.randn(nufft.img_full_shape, dtype=torch.complex64, requires_grad=True)
-    nufft.make_autograd().op(x).abs().square().sum().backward()
-    assert x.grad is not None
-"""
-    subprocess.run([sys.executable, "-c", code], check=True)
+    nufft.density = np.ones(3)
+    with pytest.raises(ValueError, match="density compensation"):
+        operator(torch.zeros(nufft.img_full_shape, dtype=torch.complex64))
 
 
-@pytest.mark.skipif(not check_backend("finufft"), reason="finufft is not installed")
-@pytest.mark.parametrize("viewed_as_real", [False, True])
-def test_deepinv_interface(viewed_as_real, monkeypatch):
-    torch = pytest.importorskip("torch")
-    pytest.importorskip("deepinv")
-    from deepinv.physics.forward import LinearPhysics
-    from mrinufft.operators import DeepInvPhyNufft as exported
-    from mrinufft.operators.autodiff import (
-        DeepInvPhyNufft as legacy,
-        image_as_real,
-        kspace_as_real,
-    )
-    from mrinufft.operators.outerfaces import DeepInvPhyNufft
+@mark.skipif(not DEEPINV_AVAILABLE, reason="deepinv not available")
+@mark.parametrize("viewed_as_real", [False, True])
+def test_deepinv(nufft, viewed_as_real):
+    """DeepInv physics matches the NUFFT, in complex or real view."""
+    if nufft.squeeze_dims:
+        pytest.skip("Autodiff does not support squeeze_dims.")
+    from mrinufft.operators import DeepInvPhyNufft, image_as_real, kspace_as_real
+    from mrinufft.operators.autodiff import DeepInvPhyNufft as legacy
 
-    assert exported is legacy is DeepInvPhyNufft
-    samples = np.zeros((5, 2), dtype=np.float32)
-    nufft = get_operator("finufft")(samples, (4, 4), squeeze_dims=False)
+    assert legacy is DeepInvPhyNufft
     physics = nufft.make_deepinv_phy(viewed_as_real=viewed_as_real)
-    assert isinstance(physics, (DeepInvPhyNufft, LinearPhysics))
-    x = torch.randn(nufft.img_full_shape, dtype=torch.complex64)
-    y = torch.randn(nufft.ksp_full_shape, dtype=torch.complex64)
-    expected_forward = nufft.op(x)
-    expected_adjoint = nufft.adj_op(y)
-    monkeypatch.setattr(nufft, "pinv_solver", lambda data: nufft.adj_op(data))
+    assert isinstance(physics, DeepInvPhyNufft)
+
+    x = torch.from_numpy(image_from_op(nufft))
+    y = torch.from_numpy(kspace_from_op(nufft))
+    expected = nufft.op(x), nufft.adj_op(y), nufft.pinv_solver(y)
     if viewed_as_real:
         x, y = image_as_real(x), kspace_as_real(y)
-        expected_forward = kspace_as_real(expected_forward)
-        expected_adjoint = image_as_real(expected_adjoint)
+        expected = kspace_as_real(expected[0]), *map(image_as_real, expected[1:])
+
     x.requires_grad_()
-    torch.testing.assert_close(physics.A(x), expected_forward)
-    torch.testing.assert_close(physics.A_adjoint(y), expected_adjoint)
-    torch.testing.assert_close(physics.A_dagger(y), expected_adjoint)
+    torch.testing.assert_close(physics.A(x), expected[0])
+    torch.testing.assert_close(physics.A_adjoint(y), expected[1])
+    torch.testing.assert_close(physics.A_dagger(y), expected[2])
     physics.A(x).abs().square().sum().backward()
     assert x.grad is not None
