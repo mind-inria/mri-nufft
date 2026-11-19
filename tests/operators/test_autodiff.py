@@ -16,6 +16,7 @@ from helpers import (
     to_interface,
     assert_almost_allclose,
     batched_smaps_from_op,
+    param_backends,
 )
 
 TORCH_AVAILABLE = True
@@ -26,7 +27,7 @@ except ImportError:
 
 
 @fixture(scope="module")
-@parametrize(backend=["cufinufft", "finufft", "gpunufft"])
+@parametrize("backend", param_backends("cufinufft", "finufft", "gpunufft"))
 @parametrize(paired_batch_size=[0, 1, 3])
 @parametrize(
     "n_batchs, n_coils, sense, field_map",

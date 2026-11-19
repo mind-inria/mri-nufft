@@ -6,13 +6,11 @@ import pytest
 from pytest_cases import parametrize
 
 from mrinufft import get_operator
-from mrinufft.operators.base import check_backend
 from mrinufft.trajectories import initialize_2D_radial
 
 from helpers.factories import image_from_op, kspace_from_op
 
-if not check_backend("cufinufft"):
-    pytest.skip("cufinufft backend not available", allow_module_level=True)
+pytestmark = pytest.mark.backend("cufinufft")
 
 
 def _make_operators(n_batchs, n_coils, n_trans, sense):

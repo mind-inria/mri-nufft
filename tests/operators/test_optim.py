@@ -6,10 +6,7 @@ from pytest_cases import parametrize_with_cases, parametrize, fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
-from helpers import (
-    image_from_op,
-    param_array_interface,
-)
+from helpers import image_from_op, param_backends
 from helpers import assert_almost_allclose
 
 from mrinufft.extras import loss_l2_reg
@@ -18,7 +15,7 @@ from mrinufft.extras import loss_l2_reg
 @fixture(scope="module")
 @parametrize(
     "backend",
-    [
+    param_backends(
         "bart",
         "finufft",
         "cufinufft",
@@ -28,7 +25,7 @@ from mrinufft.extras import loss_l2_reg
         "torchkbnufft-cpu",
         "torchkbnufft-gpu",
         "tensorflow",
-    ],
+    ),
 )
 @parametrize_with_cases(
     "kspace_locs, shape",

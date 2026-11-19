@@ -8,8 +8,8 @@ import numpy.testing as npt
 import pytest
 from pytest_cases import parametrize_with_cases, parametrize, fixture
 from helpers import (
-    assert_correlate,
     param_array_interface,
+    param_backends,
     to_interface,
     from_interface,
 )
@@ -39,7 +39,10 @@ from case_trajectories import CasesTrajectories
     glob="*nyquist_radial*",
 )
 @parametrize(
-    backend=["finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"]
+    "backend",
+    param_backends(
+        "finufft", "cufinufft", "gpunufft", "torchkbnufft-cpu", "torchkbnufft-gpu"
+    ),
 )
 def operator(
     request,
@@ -210,6 +213,7 @@ def test_data_consistency_readonly(operator, image_data, kspace_data):
     npt.assert_equal(image_tmp, image_data)
 
 
+@pytest.mark.backend("finufft")
 def test_data_consistency_density_single_application():
     """Regression test: density compensation applied exactly once.
 

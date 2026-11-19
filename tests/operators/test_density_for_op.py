@@ -5,7 +5,7 @@ import pytest
 from pytest_cases import parametrize, parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
-from helpers import assert_correlate
+from helpers import assert_correlate, param_backends
 from mrinufft.density import pipe
 from mrinufft._utils import proper_trajectory
 
@@ -25,7 +25,9 @@ def radial_distance(traj, shape):
         CasesTrajectories.case_nyquist_radial3D,
     ],
 )
-@parametrize(backend=["gpunufft", "tensorflow", "cufinufft", "finufft"])
+@parametrize(
+    "backend", param_backends("gpunufft", "tensorflow", "cufinufft", "finufft")
+)
 def test_pipe(backend, traj, shape, osf):
     """Test the pipe method."""
     distance = radial_distance(traj, shape)

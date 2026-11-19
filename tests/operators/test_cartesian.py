@@ -34,13 +34,9 @@ def kspace_from_op(operator):
     return image_from_op(operator)[:, :, operator.mask]
 
 
-# the dummy parametrization for the backend is needed to trigger the
-# pytest_generate_tests hook in conftest.py, which will skip the test if the
-# backend is filtered out by the CLI options.
 @fixture(scope="module")
 @parametrize_with_cases("mask, shape", cases=CasesCartesian)
-@parametrize("backend", ["cartesian"])
-def operator(backend, mask, shape):
+def operator(mask, shape):
     """Generate a Cartesian operator."""
     return get_operator("cartesian")(mask, shape)
 
