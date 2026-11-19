@@ -42,7 +42,7 @@ def test_wave_caipi_gradients(wavegrad=8.8e-3, caipi_delta=2, nb_revolutions=11)
         f"Got rel std {rel_stds[readout_idx]:.3e} on axis {readout_idx}"
     )
 
-    # 2) Among the other two axes, find one whose max absolute amplitude matches wavegrad
+    # 2) Among the other two axes, find one whose max amplitude matches wavegrad
     other_idxs = [i for i in range(3) if i != readout_idx]
     max_abs_vals = [np.max(np.abs(axes[i])) for i in other_idxs]
     sin_axis_idx = other_idxs[int(np.argmax(max_abs_vals))]
