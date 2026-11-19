@@ -1,25 +1,32 @@
-"""Test off-resonance spatial coefficient and temporal interpolator estimation."""
+"""Test the off-resonance interpolators, and the corrected operator."""
 
 import logging
 
 import numpy as np
 import numpy.testing as npt
-from pytest import mark
+from pytest import fixture, mark
 from helpers import (
+    CasesTrajectories,
+    assert_correlate,
     case_id,
     cases_of,
     from_interface,
+    image_from_op,
+    kspace_from_op,
+    param_backends,
     parametrize_array_interface,
     to_interface,
 )
 
 from mrinufft import get_operator
+from mrinufft._array_compat import _array_to_numpy
 from mrinufft.extras import (
     get_complex_fieldmap_rad,
     get_orc_factorization,
     make_b0map,
     make_t2smap,
 )
+from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 from mrinufft.operators.off_resonance import MRIFourierCorrected
 
 
@@ -250,3 +257,43 @@ def test_constant_field_map(method):
     C = np.stack([np.asarray(C[ll]) for ll in range(len(C))]).reshape(len(C), -1)
     exact = np.exp(np.outer(t, 2j * np.pi * b0.ravel()))
     npt.assert_allclose(np.asarray(B) @ C, exact, atol=1e-4)
+
+
+@fixture(scope="module", params=param_backends("finufft", "cufinufft", "gpunufft"))
+def orc_operator(request):
+    """Off-resonance corrected operator, and its conjugate phase matrix."""
+    samples, shape = CasesTrajectories().case_random2D()
+    nufft = get_operator(request.param)(
+        samples, shape, n_coils=1, n_batchs=1, density=False, squeeze_dims=True
+    )
+    b0_map, mask = make_b0map(shape, b0range=(-300, 300))
+    readout_time = np.linspace(0, 5e-2, len(samples), dtype=np.float32)
+    cp_matrix = get_fourier_matrix(
+        _array_to_numpy(nufft.samples), shape, normalize=True
+    )
+    cp_matrix *= np.exp(
+        np.outer(readout_time, get_complex_fieldmap_rad(b0_map).ravel())
+    ).astype(nufft.cpx_dtype)
+    orc_nufft = nufft.with_off_resonance_correction(
+        b0_map=b0_map, mask=mask, readout_time=readout_time
+    )
+    return orc_nufft, cp_matrix
+
+
+def test_orc_forward(orc_operator):
+    """The corrected forward operator matches the conjugate phase expression."""
+    orc_nufft, cp_matrix = orc_operator
+    image = image_from_op(orc_nufft)
+    ksp = orc_nufft.op(image)
+    assert_correlate(
+        ksp.squeeze(), cp_matrix @ image.ravel(), slope_err=0.005, r_value_err=0.002
+    )
+
+
+def test_orc_adjoint(orc_operator):
+    """The corrected adjoint operator matches the conjugate phase expression."""
+    orc_nufft, cp_matrix = orc_operator
+    kspace = kspace_from_op(orc_nufft)
+    img = orc_nufft.adj_op(kspace)
+    img_ideal = (cp_matrix.conj().T @ kspace.ravel()).reshape(orc_nufft.shape)
+    assert_correlate(img.squeeze(), img_ideal, slope_err=0.005, r_value_err=0.002)

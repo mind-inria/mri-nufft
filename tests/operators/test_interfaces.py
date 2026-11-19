@@ -5,9 +5,10 @@ import numpy.testing as npt
 import pytest
 from pytest import fixture
 from mrinufft import get_operator
-from case_trajectories import CasesTrajectories
 
 from helpers import (
+    CasesTrajectories,
+    assert_adjoint,
     backend_interfaces,
     case_id,
     cases_of,
@@ -47,6 +48,12 @@ from helpers import (
 def backend(request):
     """Backend under test."""
     return request.param
+
+
+@fixture(scope="module")
+def native_interface(backend):
+    """First array interface accepted by the backend."""
+    return backend_interfaces(backend)[0]
 
 
 @fixture(
@@ -94,41 +101,48 @@ def kspace_data(operator):
     return kspace_from_op(operator)
 
 
-@fixture(scope="module")
-def wrong_kspace_data(operator):
-    """Generate a random image. Remains constant for the module."""
-    wrong_n_samples = operator.n_samples + 10
-    kspace = (1j * np.random.randn(operator.n_coils, wrong_n_samples)).astype(
-        operator.cpx_dtype
-    )
-    kspace += np.random.randn(operator.n_coils, wrong_n_samples).astype(
-        operator.cpx_dtype
-    )
-    return kspace
+@pytest.mark.parametrize(
+    "backend,name",
+    [
+        pytest.param(backend, name, marks=pytest.mark.backend(backend), id=backend)
+        for backend, name in [
+            ("finufft", "MRIfinufft"),
+            ("mlx-nufft", "MRIMlxNUFFT"),
+            ("cufinufft", "MRICufiNUFFT"),
+            ("ducc0", "MRIDUCC0"),
+            ("tensorflow", "MRITensorflowNUFFT"),
+            ("pynufft-cpu", "MRIPynufft"),
+            ("pynfft", "MRInfft"),
+            ("gpunufft", "MRIGpuNUFFT"),
+            ("torchkbnufft-cpu", "TorchKbNUFFTcpu"),
+            ("torchkbnufft-gpu", "TorchKbNUFFTgpu"),
+        ]
+    ]
+    + [("numpy", "MRInumpy")],
+)
+def test_get_operator(backend, name):
+    """Test the get_operator function."""
+    assert get_operator(backend).__name__ == name
 
 
-@fixture(scope="module")
-def wrong_image_data(operator):
-    """Generate a random image. Remains constant for the module."""
-    wrong_shape = (operator.shape[0] + 10, operator.shape[1] + 1)
-    if operator.smaps is None:
-        img = np.random.randn(operator.n_coils, *wrong_shape).astype(operator.cpx_dtype)
-    elif operator.smaps is not None and operator.n_coils > 1:
-        img = np.random.randn(*wrong_shape).astype(operator.cpx_dtype)
-    img += 1j * np.random.randn(*img.shape).astype(operator.cpx_dtype)
-    return img
+def test_get_operator_fail():
+    """Test the get_operator function."""
+    with pytest.raises(ValueError):
+        get_operator("unknown")
 
 
 @parametrize_array_interface()
 def test_interfaces_array_types(
-    operator, backend, array_interface, image_data, kspace_data
+    operator, native_interface, array_interface, image_data, kspace_data
 ):
-    """Outputs follow the input array type and device, and match across types."""
-    ref_interface = backend_interfaces(backend)[0]
+    """Outputs follow the input array type and device, and match across types.
+
+    The other tests only use the native interface of the backend.
+    """
     image = to_interface(image_data, array_interface)
     kspace = to_interface(kspace_data, array_interface)
-    image_ref = to_interface(image_data, ref_interface)
-    kspace_ref = to_interface(kspace_data, ref_interface)
+    image_ref = to_interface(image_data, native_interface)
+    kspace_ref = to_interface(kspace_data, native_interface)
     for out, ref in [
         (operator.op(image), operator.op(image_ref)),
         (operator.adj_op(kspace), operator.adj_op(kspace_ref)),
@@ -139,7 +153,7 @@ def test_interfaces_array_types(
     ]:
         assert type(out) is type(image)
         assert getattr(out, "device", None) == getattr(image, "device", None)
-        ref = from_interface(ref, ref_interface)
+        ref = from_interface(ref, native_interface)
         npt.assert_allclose(
             from_interface(out, array_interface),
             ref,
@@ -148,54 +162,29 @@ def test_interfaces_array_types(
         )
 
 
-@parametrize_array_interface("numpy", "cupy")
 def test_interfaces_accuracy_forward(
-    operator, array_interface, image_data, ref_operator
+    operator, native_interface, image_data, ref_operator
 ):
-    """Compare the interface to the raw NUDFT implementation."""
-    image_data_ = to_interface(image_data, array_interface)
-    kspace_nufft = operator.op(image_data_).squeeze()
+    """Compare the forward operator to the reference backend."""
+    kspace_nufft = operator.op(to_interface(image_data, native_interface))
+    kspace_nufft = from_interface(kspace_nufft, native_interface).squeeze()
     kspace_ref = ref_operator.op(image_data).squeeze()
-
-    kspace_nufft = from_interface(kspace_nufft, array_interface)
     assert np.percentile(abs(kspace_nufft - kspace_ref) / abs(kspace_ref), 95) < 1e-1
 
 
-@parametrize_array_interface("numpy", "cupy")
 def test_interfaces_accuracy_backward(
-    operator, array_interface, kspace_data, ref_operator
+    operator, native_interface, kspace_data, ref_operator
 ):
-    """Compare the interface to the raw NUDFT implementation."""
-    kspace_data_ = to_interface(kspace_data, array_interface)
-
-    image_nufft = operator.adj_op(kspace_data_).squeeze()
+    """Compare the adjoint operator to the reference backend."""
+    image_nufft = operator.adj_op(to_interface(kspace_data, native_interface))
+    image_nufft = from_interface(image_nufft, native_interface).squeeze()
     image_ref = ref_operator.adj_op(kspace_data).squeeze()
-
-    image_nufft = from_interface(image_nufft, array_interface)
     assert np.percentile(abs(image_nufft - image_ref) / abs(image_ref), 95) < 1e-1
 
 
-@parametrize_array_interface("numpy", "cupy")
-def test_interfaces_autoadjoint(operator, array_interface):
+def test_interfaces_autoadjoint(operator, native_interface):
     """Test the adjoint property of the operator."""
-    reldiff = np.zeros(10)
-    for i in range(10):
-        img_data = to_interface(image_from_op(operator), array_interface)
-        ksp_data = to_interface(kspace_from_op(operator), array_interface)
-        kspace = operator.op(img_data)
-
-        rightadjoint = np.vdot(
-            from_interface(kspace, array_interface),
-            from_interface(ksp_data, array_interface),
-        )
-
-        image = operator.adj_op(ksp_data)
-        leftadjoint = np.vdot(
-            from_interface(img_data, array_interface),
-            from_interface(image, array_interface),
-        )
-        reldiff[i] = abs(rightadjoint - leftadjoint) / abs(leftadjoint)
-    assert np.mean(reldiff) < 5e-5
+    assert_adjoint(operator, native_interface)
 
 
 def test_interface_lipschitz(operator):
@@ -216,27 +205,19 @@ def test_interface_lipschitz(operator):
     assert np.mean(L) < 1.1 * spec_rad
 
 
-######################
-# Check shape tests  #
-######################
+def test_check_shape():
+    """Image and k-space are checked on their trailing dimensions.
 
-
-def test_check_shape_pass(operator, image_data, kspace_data):
-    """Correct shapes are accepted."""
-    try:
-        operator.check_shape(image=image_data)
-        operator.check_shape(ksp=kspace_data)
-    except ValueError:
-        pytest.fail("Unexpected ValueError raised")
-
-
-def test_check_shape_fail_image(operator, wrong_image_data):
-    """A wrong image shape is rejected."""
+    ``check_shape`` is only implemented in the base class.
+    """
+    samples, shape = CasesTrajectories().case_grid2D()
+    operator = get_operator("numpy")(samples, shape)
+    operator.check_shape(
+        image=np.zeros((2, 3, *shape)), ksp=np.zeros((2, 3, operator.n_samples))
+    )
     with pytest.raises(ValueError):
-        operator.check_shape(image=wrong_image_data)
-
-
-def test_check_shape_fail_kspace(operator, wrong_kspace_data):
-    """A wrong k-space shape is rejected."""
+        operator.check_shape(image=np.zeros((shape[0] + 10, shape[1] + 1)))
     with pytest.raises(ValueError):
-        operator.check_shape(ksp=wrong_kspace_data)
+        operator.check_shape(ksp=np.zeros((1, operator.n_samples + 10)))
+    with pytest.raises(ValueError):
+        operator.check_shape()

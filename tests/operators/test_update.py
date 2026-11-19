@@ -8,6 +8,8 @@ import numpy.testing as npt
 import pytest
 from pytest import fixture, mark
 from helpers import (
+    CasesBatch,
+    CasesTrajectories,
     case_id,
     cases_of,
     from_interface,
@@ -17,8 +19,6 @@ from helpers import (
 )
 from mrinufft import get_operator
 from mrinufft._utils import get_array_module
-from case_batch import CasesBatch
-from case_trajectories import CasesTrajectories
 
 
 def _variant(backend, **kwargs):

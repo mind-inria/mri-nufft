@@ -5,10 +5,10 @@ from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 from mrinufft._array_compat import _array_to_torch
 from pytest import fixture
-from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator, MRIFourierCorrected
 
 from helpers import (
+    CasesTrajectories,
     case_id,
     cases_of,
     kspace_from_op,

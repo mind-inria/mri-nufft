@@ -3,7 +3,7 @@
 import numpy as np
 import numpy.testing as npt
 
-from .factories import from_interface
+from .factories import from_interface, image_from_op, kspace_from_op, to_interface
 
 
 def assert_almost_allclose(a, b, rtol, atol, mismatch, equal_nan=False):
@@ -68,6 +68,19 @@ def assert_correlate(a, b, slope=1.0, slope_err=1e-3, r_value_err=1e-3):
             f"Slope {abs_slope_reg} != {slope} ± {slope_err}\n r={rvalue}, "
             f"intercept={intercept}"
         )
+
+
+def assert_adjoint(operator, interface="numpy", n_draws=10, rtol=5e-5):
+    """Assert the dot test ``<A x, y> = <x, A^H y>``, averaged over random draws."""
+    reldiff = np.zeros(n_draws)
+    for i in range(n_draws):
+        img = image_from_op(operator)
+        ksp = kspace_from_op(operator)
+        Ax = from_interface(operator.op(to_interface(img, interface)), interface)
+        AHy = from_interface(operator.adj_op(to_interface(ksp, interface)), interface)
+        left, right = np.vdot(Ax, ksp), np.vdot(img, AHy)
+        reldiff[i] = abs(left - right) / abs(right)
+    assert np.mean(reldiff) < rtol, f"Mean relative dot-test error {np.mean(reldiff)}"
 
 
 def assert_allclose(actual, expected, atol, rtol, interface):

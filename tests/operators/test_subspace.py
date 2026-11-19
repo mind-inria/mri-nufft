@@ -11,10 +11,15 @@ from helpers import (
     random_smaps,
     to_interface,
 )
-from case_trajectories import case_multicontrast2D
-
 from mrinufft import get_operator
 from mrinufft.operators import MRISubspace
+from mrinufft.trajectories import initialize_2D_radial
+
+
+def case_multicontrast2D(Nt=48, Nc=8, Ns=256, N=64):
+    """Create a 2D radial trajectory, split in Nt contrasts."""
+    trajectory = initialize_2D_radial(Nc * Nt, Ns, tilt="mri-golden")
+    return trajectory.reshape(Nt, Nc, Ns, 2), (N, N)
 
 
 @fixture(scope="module", params=param_backends("finufft", "cufinufft", "gpunufft"))

@@ -8,17 +8,20 @@ import numpy.testing as npt
 import pytest
 from pytest import fixture, mark
 from helpers import (
+    CasesBatch,
+    CasesTrajectories,
     case_id,
     cases_of,
     from_interface,
+    image_from_op,
+    kspace_from_op,
     param_backends,
     parametrize_array_interface,
     random_smaps,
     to_interface,
 )
 from mrinufft import get_operator
-from case_batch import CasesBatch
-from case_trajectories import CasesTrajectories
+from mrinufft.extras import loss_l2_reg
 
 
 @fixture(
@@ -229,27 +232,18 @@ def test_data_consistency_density_single_application():
     npt.assert_allclose(res, res_manual, atol=1e-4, rtol=1e-3)
 
 
-def test_gradient_lipschitz(operator, image_data, kspace_data):
-    """Test the gradient lipschitz constant converges."""
-    C = 1 if operator.uses_sense else operator.n_coils
-    img = image_data.copy().reshape(operator.n_batchs, C, *operator.shape).squeeze()
-    for _ in range(10):
-        grad = operator.data_consistency(img, kspace_data)
-        norm = np.linalg.norm(grad)
-        grad /= norm
-        np.copyto(img, grad.squeeze())
-        norm_prev = norm
-
-    # TODO: check that the value is "not too far" from 1
-    # TODO: to do the same with density compensation
-    assert (norm - norm_prev) / norm_prev < 1e-3
+def test_lipschitz_cst(operator, flat_operator):
+    """The Lipschitz constant does not depend on the batch configuration."""
+    npt.assert_allclose(
+        float(operator.get_lipschitz_cst(20)),
+        float(flat_operator.get_lipschitz_cst(20)),
+        rtol=1e-3,
+    )
 
 
 @mark.parametrize("optim", ["cg", "lsqr", "lsmr"])
 def test_pinv_solver(operator, kspace_data, optim):
-    """Test the shapes of the pseudo inverse batch solver outputs."""
-    from mrinufft.extras import loss_l2_reg
-
+    """Test the shapes of the pseudo inverse solver outputs, and its convergence."""
     img, res = operator.pinv_solver(
         kspace_data, optim=optim, callback=loss_l2_reg, max_iter=5
     )
@@ -259,6 +253,7 @@ def test_pinv_solver(operator, kspace_data, optim):
         assert len(res[0]) == operator.n_batchs
     else:
         assert res[0].ndim == 0
+    assert np.all(res[-1] <= res[0])
 
 
 @parametrize_array_interface("numpy", "cupy")
@@ -284,3 +279,46 @@ def test_interface_gram(operator, array_interface, image_data):
     else:
         rtol = 2e-4
     npt.assert_allclose(AHA_img, G_img, rtol=rtol, atol=1e-4)
+
+
+@mark.backend("cufinufft")
+@mark.parametrize(
+    "config",
+    cases_of(
+        CasesBatch, "single", "batch_coils_ntrans", "batch_sense_ntrans", "batch_sense"
+    ),
+    ids=case_id,
+)
+def test_async_transfer_matches_sync(config):
+    """Host inputs give the same results with ``async_transfer`` on and off.
+
+    ``single`` has one transform and takes the fallback path, the others pipeline.
+    """
+    samples, shape = CasesTrajectories().case_nyquist_radial2D()
+    n_batchs, n_coils, n_trans, sense = config()
+    smaps = random_smaps(n_coils, shape) if sense else None
+    op_sync, op_async = (
+        get_operator("cufinufft")(
+            samples.astype(np.float32),
+            shape,
+            n_coils=n_coils,
+            smaps=smaps,
+            n_batchs=n_batchs,
+            n_trans=n_trans,
+            squeeze_dims=False,
+            async_transfer=async_transfer,
+        )
+        for async_transfer in (False, True)
+    )
+    image = image_from_op(op_sync)
+    kspace = kspace_from_op(op_sync)
+    image.setflags(write=False)
+    kspace.setflags(write=False)
+    image_ref, kspace_ref = image.copy(), kspace.copy()
+
+    npt.assert_allclose(op_sync.op(image), op_async.op(image), rtol=1e-6, atol=1e-6)
+    npt.assert_allclose(
+        op_sync.adj_op(kspace), op_async.adj_op(kspace), rtol=1e-6, atol=1e-6
+    )
+    npt.assert_equal(image, image_ref)
+    npt.assert_equal(kspace, kspace_ref)
