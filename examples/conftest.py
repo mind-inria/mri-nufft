@@ -14,7 +14,6 @@ https://stackoverflow.com/questions/56807698/how-to-run-script-as-pytest-test
 
 import runpy
 import sys
-from pathlib import Path
 
 import matplotlib as mpl
 import pytest
@@ -22,15 +21,14 @@ import pytest
 mpl.use("agg")
 
 
-def pytest_collect_file(path, parent):
+def pytest_collect_file(file_path, parent):
     """Pytest hook.
 
     Create a collector for the given path, or None if not relevant.
     The new node needs to have the specified parent as parent.
     """
-    p = Path(path)
-    if p.suffix == ".py" and "example" in p.name:
-        return Script.from_parent(parent, path=p, name=p.name)
+    if file_path.suffix == ".py" and "example" in file_path.name:
+        return Script.from_parent(parent, path=file_path, name=file_path.name)
 
 
 class Script(pytest.File):
