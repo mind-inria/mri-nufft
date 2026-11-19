@@ -1,0 +1,30 @@
+name: API check
+
+# Flags changes of the public API that can break downstream code (removed
+# objects, moved or reordered parameters, changed defaults...).
+# Fix them with a deprecation (see mrinufft/_deprecation.py), or add the
+# `breaking` label to the PR if the break is intended.
+
+on:
+  pull_request:
+    branches: [ "master" ]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  griffe-check:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Check for breaking changes against ${{ github.base_ref }}
+        run: uvx griffe check mrinufft -s src -a "origin/${{ github.base_ref }}" -f github
