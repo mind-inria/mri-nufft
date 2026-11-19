@@ -145,7 +145,7 @@ jobs:
         shell: bash
         run: |
           export COVERAGE_FILE=coverage_${{ matrix.backend }}
-          uv run pytest -m "gpu and not backend" --cov --cov-append --cov-branch --cov-report=term --durations=10
+          uv run --extra extra pytest -m "gpu and not backend" --cov --cov-append --cov-branch --cov-report=term --durations=10
 
       - name: Upload coverage
         if: success()
