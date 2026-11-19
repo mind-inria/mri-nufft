@@ -1,8 +1,8 @@
 """Test array libraries compatibility utils."""
 
 import pytest
+from pytest import fixture, mark
 
-from pytest_cases import parametrize, fixture
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -39,30 +39,30 @@ def dummy_func(*args):
     return args
 
 
-@fixture(scope="module")
-@parametrize(
-    "decorator",
-    [
+@fixture(
+    scope="module",
+    params=[
         with_numpy,
         pytest.param(
             with_numpy_cupy,
-            marks=pytest.mark.skipif(not CUPY_AVAILABLE, reason="cupy not available"),
+            marks=mark.skipif(not CUPY_AVAILABLE, reason="cupy not available"),
         ),
         pytest.param(
             with_torch,
-            marks=pytest.mark.skipif(
-                not AUTOGRAD_AVAILABLE, reason="torch not available"
-            ),
+            marks=mark.skipif(not AUTOGRAD_AVAILABLE, reason="torch not available"),
         ),
         pytest.param(
             with_tensorflow,
-            marks=pytest.mark.skipif(
+            marks=mark.skipif(
                 not TENSORFLOW_AVAILABLE, reason="tensorflow not available"
             ),
         ),
     ],
+    ids=lambda d: d.__name__,
 )
-def decorator_factory(request, decorator):
+def decorator_factory(request):
+    decorator = request.param
+
     @decorator
     def test_func(*args):
         return dummy_func(*args)
@@ -146,7 +146,7 @@ def test_torch_conversion(array_interface):
             assert mock_fun.call_count == 3
 
 
-@pytest.mark.skipif(TENSORFLOW_AVAILABLE is False, reason="tensorflow not available")
+@mark.skipif(TENSORFLOW_AVAILABLE is False, reason="tensorflow not available")
 @_param_array_interface
 def test_tensorflow_conversion(array_interface):
     # Create input array

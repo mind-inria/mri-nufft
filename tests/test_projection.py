@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
-from pytest_cases import parametrize_with_cases
+from pytest import fixture, mark
 
 from case_trajectories import CasesTrajectories
+from helpers import case_id, cases_of
 from mrinufft.trajectories.projection import project_trajectory
 from mrinufft.trajectories.utils import (
     Acquisition,
@@ -10,13 +11,14 @@ from mrinufft.trajectories.utils import (
 )
 
 
-@pytest.fixture(autouse=True)
+@fixture(autouse=True)
 def require_pyproximal():
     pytest.importorskip("pyproximal")
 
 
-@parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
-def test_project_trajectory_is_idempotent(trajectory, _):
+@mark.parametrize("case", cases_of(CasesTrajectories, "projection2D"), ids=case_id)
+def test_project_trajectory_is_idempotent(case):
+    trajectory, _ = case()
     acq = Acquisition.default
 
     projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
@@ -27,8 +29,9 @@ def test_project_trajectory_is_idempotent(trajectory, _):
     np.testing.assert_allclose(projected_twice, projected, atol=1e-4, rtol=1e-3)
 
 
-@parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
-def test_project_trajectory_satisfies_constraints(trajectory, _):
+@mark.parametrize("case", cases_of(CasesTrajectories, "projection2D"), ids=case_id)
+def test_project_trajectory_satisfies_constraints(case):
+    trajectory, _ = case()
     acq = Acquisition.default
     projected = project_trajectory(trajectory, acq, max_iter=3000, TE_pos=0, verbose=0)
 

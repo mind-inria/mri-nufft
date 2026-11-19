@@ -6,8 +6,10 @@ Only finufft, cufinufft and gpunufft support update.
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture
 from helpers import (
+    case_id,
+    cases_of,
     param_array_interface,
     param_backends,
     to_interface,
@@ -18,10 +20,37 @@ from mrinufft._utils import get_array_module
 from case_trajectories import CasesTrajectories
 
 
-@fixture(scope="module")
-@parametrize(
-    "n_batch, n_coils, n_trans, sense",
-    [
+@fixture(scope="module", params=param_backends("finufft", "cufinufft", "gpunufft"))
+def backend(request):
+    """Backend under test."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=cases_of(CasesTrajectories, "random2D", "random3D"),
+    ids=case_id,
+)
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
+
+
+@fixture(scope="module", params=[False, True], ids=lambda d: f"density={d}")
+def density(request):
+    """Use density compensation."""
+    return request.param
+
+
+@fixture(scope="module", params=[False, True], ids=lambda c: f"smaps_cached={c}")
+def smaps_cached(request):
+    """Cache the sensitivity maps on the GPU."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=[
         (1, 1, 1, False),
         (3, 1, 1, False),
         (1, 4, 1, True),
@@ -33,28 +62,18 @@ from case_trajectories import CasesTrajectories
         (3, 4, 2, True),
         (3, 4, 2, False),
     ],
+    ids=lambda c: "b{}-c{}-t{}-sense{}".format(*map(int, c)),
 )
-@parametrize_with_cases(
-    "kspace_locs, shape",
-    cases=CasesTrajectories,
-    glob="*random*",
-)
-@parametrize("backend", param_backends("finufft", "cufinufft", "gpunufft"))
-@parametrize(density=[False, True])
-@parametrize(smaps_cached=[False, True])
-def operator(
-    request,
-    kspace_locs,
-    shape,
-    n_coils=1,
-    sense=None,
-    n_batch=1,
-    n_trans=1,
-    density=False,
-    backend="finufft",
-    smaps_cached=False,
-):
+def config(request):
+    """Number of batches, coils and transforms, and SENSE."""
+    return request.param
+
+
+@fixture(scope="module")
+def operator(backend, trajectory, density, smaps_cached, config):
     """Generate a batch operator."""
+    kspace_locs, shape = trajectory
+    n_batch, n_coils, n_trans, sense = config
     if n_trans != 1 and backend == "gpunufft":
         pytest.skip("Duplicate case.")
     if density and backend in ["cufinufft", "finufft"]:

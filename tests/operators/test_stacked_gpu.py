@@ -7,23 +7,65 @@ and the fully 3D ones.
 import numpy as np
 
 import numpy.testing as npt
-from pytest_cases import parametrize_with_cases, parametrize, fixture
-from helpers import param_array_interface, param_backends, from_interface, to_interface
+from pytest import fixture
+from helpers import (
+    case_id,
+    cases_of,
+    from_interface,
+    param_array_interface,
+    param_backends,
+    to_interface,
+)
 from mrinufft.operators.stacked import MRIStackedNUFFTGPU, stacked2traj3d
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
 
-@fixture(scope="module")
-@parametrize(
-    "n_batchs, n_coils, sense",
-    [(1, 1, False), (1, 4, False), (1, 4, True), (3, 4, False), (3, 4, True)],
+@fixture(scope="module", params=param_backends("cufinufft"))
+def backend(request):
+    """Backend under test."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=cases_of(
+        CasesTrajectories,
+        "random2D",
+        "in_out_radial2D",
+        "radial2D",
+        "nyquist_radial2D",
+        "projection2D",
+        "grid2D",
+    ),
+    ids=case_id,
 )
-@parametrize("z_index", ["full", "random_mask"])
-@parametrize("backend", param_backends("cufinufft"))
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories, glob="*2D")
-def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
+
+
+@fixture(
+    scope="module",
+    params=[(1, 1, False), (1, 4, False), (1, 4, True), (3, 4, False), (3, 4, True)],
+    ids=lambda c: "b{}-c{}-sense{}".format(*map(int, c)),
+)
+def config(request):
+    """Number of batches, number of coils and SENSE."""
+    return request.param
+
+
+@fixture(scope="module", params=["full", "random_mask"])
+def z_index(request):
+    """Kind of z_index: all partitions or a random subset."""
+    return request.param
+
+
+@fixture(scope="module")
+def operator(backend, trajectory, config, z_index):
     """Initialize the stacked and non-stacked operators."""
+    kspace_locs, shape = trajectory
+    n_batchs, n_coils, sense = config
     shape3d = (*shape, shape[-1] - 2)  # add a 3rd dimension
 
     if z_index == "full":

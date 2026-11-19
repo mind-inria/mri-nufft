@@ -1,16 +1,17 @@
 """Test the autodiff functionnality."""
 
 import numpy as np
-from numpy.typing import NDArray
 from numpy.testing import assert_allclose
 from mrinufft.operators.interfaces.nudft_numpy import get_fourier_matrix
 from mrinufft._array_compat import _array_to_torch
 import pytest
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture, mark
 from case_trajectories import CasesTrajectories
 from mrinufft.operators import get_operator, MRIFourierCorrected
 
 from helpers import (
+    case_id,
+    cases_of,
     kspace_from_op,
     image_from_op,
     to_interface,
@@ -26,12 +27,33 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-@fixture(scope="module")
-@parametrize("backend", param_backends("cufinufft", "finufft", "gpunufft"))
-@parametrize(paired_batch_size=[0, 1, 3])
-@parametrize(
-    "n_batchs, n_coils, sense, field_map",
-    [
+@fixture(scope="module", params=param_backends("cufinufft", "finufft", "gpunufft"))
+def backend(request):
+    """Backend under test."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=cases_of(
+        CasesTrajectories, "grid2D", "nyquist_radial2D", "nyquist_lowmem_radial3D"
+    ),
+    ids=case_id,
+)
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
+
+
+@fixture(scope="module", params=[0, 1, 3], ids=lambda p: f"paired_batch_size={p}")
+def paired_batch_size(request):
+    """Size of the paired batch, 0 to disable it."""
+    return request.param
+
+
+@fixture(
+    scope="module",
+    params=[
         (1, 1, False, False),
         (1, 4, True, False),
         (1, 4, False, False),
@@ -40,27 +62,18 @@ except ImportError:
         (1, 4, True, True),
         (2, 4, True, True),
     ],
+    ids=lambda c: "b{}-c{}-sense{}-fmap{}".format(*map(int, c)),
 )
-@parametrize_with_cases(
-    "kspace_loc, shape",
-    cases=[
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_nyquist_radial2D,
-        CasesTrajectories.case_nyquist_lowmem_radial3D,
-    ],
-)
-def operator(
-    request,
-    kspace_loc: NDArray,
-    shape: tuple[int, ...],
-    n_coils: int,
-    sense: bool,
-    field_map: bool,
-    n_batchs: int,
-    backend: str,
-    paired_batch_size: bool,
-):
+def config(request):
+    """Number of batches and coils, SENSE and field map."""
+    return request.param
+
+
+@fixture(scope="module")
+def operator(backend, trajectory, paired_batch_size, config):
     """Create NUFFT operator with autodiff capabilities."""
+    kspace_loc, shape = trajectory
+    n_batchs, n_coils, sense, field_map = config
     if not sense and paired_batch_size:
         pytest.skip("Not relevant to test.")
     if field_map and paired_batch_size:
@@ -183,8 +196,8 @@ def _compare_grad(loss1, loss2, input, **kwargs):
     return grad1, grad2
 
 
-@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-@pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+@mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
+@mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_adjoint_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
     if operator.backend == "finufft" and "gpu" in interface:
@@ -298,8 +311,8 @@ def compute_forward_batched(operator, ksp_data_ref, img_data):
     return ksp_data, ksp_data_ndft
 
 
-@pytest.mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
-@pytest.mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
+@mark.parametrize("interface", ["torch-gpu", "torch-cpu"])
+@mark.skipif(not TORCH_AVAILABLE, reason="Pytorch is not installed")
 def test_forward_and_grad(operator, interface):
     """Test the adjoint and gradient of the operator."""
     if operator.backend == "finufft" and "gpu" in interface:

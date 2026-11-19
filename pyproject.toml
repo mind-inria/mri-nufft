@@ -35,7 +35,7 @@ io = ["turbotwix>=0.2.0", "pypulseq"]
 extra = ["turbotwix>=0.2.0", "scikit-image", "scikit-learn", "pywavelets", "osqp", "pyproximal"]
 autodiff = ["torch>=2.12.0","torchvision>=0.27.0", "deepinv>=0.4.0"]
 
-test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
+test = ["pytest>=8", "pytest-cov", "pytest-xdist", "pytest-sugar"]
 dev = ["black", "isort", "ruff"]
 doc = ["sphinx-book-theme","sphinx-copybutton", "sphinx-design", "sphinxcontrib-video", "sphinx-gallery", "matplotlib", "pooch", "ptwt", "brainweb-dl", "coverage", "fastmri"]
 # pooch is for scipy.datasets

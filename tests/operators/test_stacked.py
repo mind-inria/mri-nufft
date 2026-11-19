@@ -7,7 +7,7 @@ and the fully 3D ones.
 import numpy as np
 
 import numpy.testing as npt
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture
 
 from helpers import assert_correlate, param_backends
 from mrinufft.operators.stacked import MRIStackedNUFFT, stacked2traj3d, traj3d2stacked
@@ -15,22 +15,24 @@ from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
 
-@fixture(scope="module")
-@parametrize(
-    "n_batchs, n_coils, sense",
-    [(1, 1, False), (2, 3, False), (2, 3, True)],
+@fixture(
+    scope="module",
+    params=[(1, 1, False), (2, 3, False), (2, 3, True)],
+    ids=["single", "batch_coils", "batch_sense"],
 )
-@parametrize("z_index", ["random_mask"])
-@parametrize("backend", param_backends("finufft"))
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories.case_radial2D)
-def operator(request, backend, kspace_locs, shape, z_index, n_batchs, n_coils, sense):
-    """Initialize the stacked and non-stacked operators."""
-    shape3d = (*shape, shape[-1])  # add a 3rd dimension
+def config(request):
+    """Number of batches, number of coils and SENSE."""
+    return request.param
 
-    if z_index == "full":
-        z_index = np.arange(shape3d[-1])
-    elif z_index == "random_mask":
-        z_index = np.random.choice(shape3d[-1], shape3d[-1] // 2, replace=False)
+
+@fixture(scope="module", params=param_backends("finufft"))
+def operator(request, config):
+    """Initialize the stacked and non-stacked operators."""
+    backend = request.param
+    n_batchs, n_coils, sense = config
+    kspace_locs, shape = CasesTrajectories().case_radial2D()
+    shape3d = (*shape, shape[-1])  # add a 3rd dimension
+    z_index = np.random.choice(shape3d[-1], shape3d[-1] // 2, replace=False)
 
     kspace_locs3d = stacked2traj3d(kspace_locs, z_index, shape[-1])
     # smaps support

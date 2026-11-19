@@ -1,9 +1,12 @@
 """Test the trajectories io module."""
 
+from itertools import product
+
 import numpy as np
 import pytest
+from pytest import fixture, mark
 from case_trajectories import CasesTrajectories
-from pytest_cases import fixture, parametrize, parametrize_with_cases
+from helpers import case_id, cases_of
 
 from scipy.io import savemat
 
@@ -47,11 +50,16 @@ class CasesIO:
         )
 
 
-@fixture(scope="module")
-@parametrize("gmax", [0.1, Acquisition.default.gmax])
-@parametrize("smax", [700, Acquisition.default.smax])
-def acquisition(gmax, smax):
-    """Create a default acquisition object."""
+@fixture(
+    scope="module",
+    params=list(
+        product([0.1, Acquisition.default.gmax], [700, Acquisition.default.smax])
+    ),
+    ids=lambda p: "gmax{}-smax{}".format(*p),
+)
+def acquisition(request):
+    """Create an acquisition object."""
+    gmax, smax = request.param
     return Acquisition(
         hardware=Hardware(
             gmax=gmax,
@@ -64,23 +72,13 @@ def acquisition(gmax, smax):
     )
 
 
-@parametrize_with_cases(
-    "name, trajectory, FOV, img_size, TE_pos, min_osf, gamma, recon_tag",
-    cases=CasesIO,
-)
-@parametrize("version", [4.2, 5.0, 5.1])
-@parametrize("postgrad", [None, "slowdown_to_center", "slowdown_to_edge"])
-@parametrize("pregrad", [None, "prephase"])
-@parametrize("grad_method", ["lp", "lp-minslew", "osqp"])
+@mark.parametrize("case", cases_of(CasesIO), ids=case_id)
+@mark.parametrize("version", [4.2, 5.0, 5.1])
+@mark.parametrize("postgrad", [None, "slowdown_to_center", "slowdown_to_edge"])
+@mark.parametrize("pregrad", [None, "prephase"])
+@mark.parametrize("grad_method", ["lp", "lp-minslew", "osqp"])
 def test_write_n_read(
-    name,
-    trajectory,
-    FOV,
-    img_size,
-    TE_pos,
-    min_osf,
-    gamma,
-    recon_tag,
+    case,
     tmp_path,
     version,
     postgrad,
@@ -88,6 +86,7 @@ def test_write_n_read(
     grad_method,
 ):
     """Write the trajectory to a file and read it back."""
+    name, trajectory, FOV, img_size, TE_pos, min_osf, gamma, recon_tag = case()
     if version < 5.1 and (postgrad is not None or pregrad is not None):
         pytest.skip("postgrad 'slowdown_to_edge' is not supported in version < 5.0")
     if (postgrad is None or pregrad is None) and grad_method != "lp":
@@ -126,9 +125,7 @@ def test_write_n_read(
     np.testing.assert_almost_equal(read_traj, trajectory, decimal=3.5)
 
 
-@pytest.mark.parametrize(
-    "pad_to_multiple_of_4, expected_samples", [(True, 8), (False, 5)]
-)
+@mark.parametrize("pad_to_multiple_of_4, expected_samples", [(True, 8), (False, 5)])
 def test_write_trajectory_pad_samples(
     caplog, tmp_path, pad_to_multiple_of_4, expected_samples
 ):
@@ -155,12 +152,12 @@ def test_write_trajectory_pad_samples(
         assert "not a multiple of 4" in caplog.text
 
 
-@parametrize_with_cases(
-    "kspace_loc, shape",
-    cases=[CasesTrajectories.case_random2D, CasesTrajectories.case_random3D],
+@mark.parametrize(
+    "case", cases_of(CasesTrajectories, "random2D", "random3D"), ids=case_id
 )
-def test_add_shift(kspace_loc, shape):
+def test_add_shift(case):
     """Test the add_phase_to_kspace_with_shifts function."""
+    kspace_loc, shape = case()
     n_samples = np.prod(kspace_loc.shape[:-1])
     kspace_data = np.random.randn(n_samples) + 1j * np.random.randn(n_samples)
     shifts = np.random.rand(kspace_loc.shape[-1])
@@ -173,17 +170,15 @@ def test_add_shift(kspace_loc, shape):
     np.testing.assert_almost_equal(shifted_data / phase, kspace_data, decimal=5)
 
 
-@parametrize_with_cases(
-    "kspace_loc, shape",
-    cases=[
-        CasesTrajectories.case_radial2D,
-        CasesTrajectories.case_radial3D,
-        CasesTrajectories.case_in_out_radial2D,
-    ],
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "radial2D", "radial3D", "in_out_radial2D"),
+    ids=case_id,
 )
-@parametrize("method", ["lp", "lp-minslew", "osqp"])
-def test_prephasors(kspace_loc, shape, acquisition, method):
+@mark.parametrize("method", ["lp", "lp-minslew", "osqp"])
+def test_prephasors(case, acquisition, method):
     """Test that the prephasors satisfies the gradients constraints."""
+    kspace_loc, shape = case()
     acq = acquisition
     grad, init_points = convert_trajectory_to_gradients(kspace_loc, acq)
     prephasors = get_prephasors_and_spoilers(
@@ -202,17 +197,15 @@ def test_prephasors(kspace_loc, shape, acquisition, method):
     )
 
 
-@parametrize_with_cases(
-    "kspace_loc, shape",
-    cases=[
-        CasesTrajectories.case_radial2D,
-        CasesTrajectories.case_radial3D,
-        CasesTrajectories.case_in_out_radial2D,
-    ],
+@mark.parametrize(
+    "case",
+    cases_of(CasesTrajectories, "radial2D", "radial3D", "in_out_radial2D"),
+    ids=case_id,
 )
-@parametrize("method", ["lp", "lp-minslew", "osqp"])
-def test_spoilers(kspace_loc, shape, acquisition, method):
+@mark.parametrize("method", ["lp", "lp-minslew", "osqp"])
+def test_spoilers(case, acquisition, method):
     """Test that the prephasors satisfies the gradients constraints."""
+    kspace_loc, shape = case()
     acq = acquisition
     grad, _, end_points = convert_trajectory_to_gradients(
         kspace_loc, acq, get_final_positions=True

@@ -1,30 +1,27 @@
 """Tests for the reference backend."""
 
-from pytest_cases import parametrize_with_cases, fixture
+from pytest import fixture
 from case_trajectories import CasesTrajectories
 
 from mrinufft import get_operator
 from mrinufft.operators.interfaces.nudft_numpy import MRInumpy
-from helpers import assert_almost_allclose, kspace_from_op, image_from_op
-
-
-@fixture(scope="session", autouse=True)
-def ref_backend(request):
-    """Get the reference backend from the CLI."""
-    return request.config.getoption("ref")
-
-
-@fixture(scope="module")
-@parametrize_with_cases(
-    "kspace, shape",
-    cases=[
-        CasesTrajectories.case_random2D,
-        CasesTrajectories.case_grid2D,
-        CasesTrajectories.case_grid3D,
-    ],
+from helpers import (
+    assert_almost_allclose,
+    case_id,
+    cases_of,
+    kspace_from_op,
+    image_from_op,
 )
-def ref_operator(request, ref_backend, kspace, shape):
+
+
+@fixture(
+    scope="module",
+    params=cases_of(CasesTrajectories, "random2D", "grid2D", "grid3D"),
+    ids=case_id,
+)
+def ref_operator(request, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
+    kspace, shape = request.param()
     return get_operator(ref_backend)(kspace, shape)
 
 

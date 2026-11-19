@@ -2,11 +2,13 @@
 
 import numpy as np
 import pytest
-from pytest_cases import parametrize_with_cases, parametrize, fixture
+from pytest import fixture
 from mrinufft import get_operator
 from case_trajectories import CasesTrajectories
 
 from helpers import (
+    case_id,
+    cases_of,
     kspace_from_op,
     image_from_op,
     to_interface,
@@ -23,10 +25,9 @@ from helpers import (
 # All the test below will be perform on those operators.
 
 
-@fixture(scope="module")
-@parametrize(
-    "backend",
-    param_backends(
+@fixture(
+    scope="module",
+    params=param_backends(
         "bart",
         "pynfft",
         "pynufft-cpu",
@@ -41,28 +42,28 @@ from helpers import (
         "tensorflow",
     ),
 )
-@parametrize_with_cases("kspace_locs, shape", cases=CasesTrajectories)
-def operator(
-    request,
-    backend="pynfft",
-    kspace_locs=None,
-    shape=None,
-    n_coils=1,
-):
-    """Generate an operator."""
-    if backend in ["pynfft", "sigpy"] and kspace_locs.shape[-1] == 3:
-        pytest.skip("3D for slow cpu is not tested")
-    return get_operator(backend)(kspace_locs, shape, n_coils=n_coils, smaps=None)
+def backend(request):
+    """Backend under test."""
+    return request.param
 
 
-@fixture(scope="session", autouse=True)
-def ref_backend(request):
-    """Get the reference backend from the CLI."""
-    return request.config.getoption("ref")
+@fixture(scope="module", params=cases_of(CasesTrajectories), ids=case_id)
+def trajectory(request):
+    """Sampling pattern and image shape."""
+    return request.param()
 
 
 @fixture(scope="module")
-def ref_operator(request, operator, ref_backend):
+def operator(backend, trajectory):
+    """Generate an operator."""
+    kspace_locs, shape = trajectory
+    if backend in ["pynfft", "sigpy"] and kspace_locs.shape[-1] == 3:
+        pytest.skip("3D for slow cpu is not tested")
+    return get_operator(backend)(kspace_locs, shape, n_coils=1, smaps=None)
+
+
+@fixture(scope="module")
+def ref_operator(operator, ref_backend):
     """Generate a NFFT operator, matching the property of the first operator."""
     samples = operator.samples
     if operator.backend == "torchkbnufft-cpu" or operator.backend == "torchkbnufft-gpu":
