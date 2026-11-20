@@ -332,8 +332,6 @@ class _GramOpGpuMixin(FourierOperatorBase):
 
     def _gram_op_raw_device(self, in_d, out_d, padded_array=None):
         """Apply the Toeplitz Gram operator on device to a (batched) image."""
-        from mrinufft.operators.toeplitz import apply_toeplitz_kernel
-
         if self._toeplitz_kernel is None:
             raise ValueError(
                 "Toeplitz Kernel not available. Use ``.compute_toeplitz_kernel``"

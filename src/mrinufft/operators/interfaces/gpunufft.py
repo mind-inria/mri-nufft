@@ -172,13 +172,13 @@ class RawGpuNUFFT:
         if not use_gpu_direct:
             # We dont need pinned allocations if we are using direct GPU arrays
             if pinned_image is None:
-                pinned_image: NDArray = cx.empty_pinned(
+                pinned_image = cx.empty_pinned(
                     (np.prod(shape), (1 if self.uses_sense else n_coils)),
                     dtype=np.complex64,
                     order="F",
                 )
             if pinned_kspace is None:
-                pinned_kspace: NDArray = cx.empty_pinned(
+                pinned_kspace = cx.empty_pinned(
                     (n_coils, len(samples)),
                     dtype=np.complex64,
                 )

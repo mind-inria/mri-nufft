@@ -103,7 +103,7 @@ class displayConfig:
         elif isinstance(cls.palette, mpl.colors.Colormap):
             cm = cls.palette
         elif isinstance(cls.palette, list):
-            cm = mpl.cm.ListedColormap(cls.palette)
+            cm = mpl.colors.ListedColormap(cls.palette)
         colorlist = []
         colors = getattr(cm, "colors", [])
         if 0 < len(colors) < cls.nb_colors:
