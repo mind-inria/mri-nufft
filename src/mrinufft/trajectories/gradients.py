@@ -225,7 +225,7 @@ def _preprocess(solver):
     @wraps(solver)
     def wrapper(
         N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
-    ) -> tuple[NDArray, bool]:
+    ) -> tuple[NDArray | None, bool]:
         """Wrap solver."""
         # Croping for safety
         if abs(ge) > gmax:
@@ -480,7 +480,7 @@ def _solve_auto(*arg, **kwargs):
 
 
 def _binary_search_int(
-    f: Callable[[int], tuple[NDArray, bool]], low: int, high: int
+    f: Callable[[int], tuple[NDArray | None, bool]], low: int, high: int
 ) -> tuple[NDArray, int]:
     """Perfom a binary search to get best integer that makes f success."""
     x = None
@@ -501,7 +501,7 @@ def _binary_search_int(
 
 
 def _binary_search_float(
-    f: Callable[[float], tuple[NDArray, bool]], low: float, high: float
+    f: Callable[[float], tuple[NDArray | None, bool]], low: float, high: float
 ) -> tuple[NDArray, float]:
     """Perfom a binary search to get best float that makes f success."""
     x = None

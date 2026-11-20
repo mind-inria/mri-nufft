@@ -1,6 +1,7 @@
 """Finufft interface."""
 
 import numpy as np
+from numpy.typing import NDArray
 
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import (
@@ -53,7 +54,7 @@ class RawFinufftPlan:
         self._set_pts(samples)
 
     def _set_pts(self, samples, typ=2):
-        fpts_axes = [None, None, None]
+        fpts_axes: list[NDArray | None] = [None, None, None]
         for i in range(self.ndim):
             fpts_axes[i] = np.array(samples[:, i], dtype=samples.dtype)
         if typ == 2:

@@ -87,7 +87,7 @@ def _image_frame(
 
 
 # Monomial coefficients {(px, py, pz): c} of the terms of `spherical_harmonics`.
-_MONOMIALS = (
+_MONOMIALS: tuple[dict[tuple[int, ...], int], ...] = (
     {(0, 0, 0): 1},
     {(1, 0, 0): 1},
     {(0, 1, 0): 1},
