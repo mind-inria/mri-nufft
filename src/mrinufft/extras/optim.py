@@ -210,7 +210,9 @@ def loss_l2_AHreg(
     return norm_res
 
 
-def _sym_ortho(a: NDArray, b: NDArray) -> tuple[NDArray, NDArray, NDArray]:
+def _sym_ortho(
+    a: float | NDArray, b: float | NDArray
+) -> tuple[float | NDArray, float | NDArray, float | NDArray]:
     """
     Stable implementation of Givens rotation.
 
@@ -230,10 +232,10 @@ def _sym_ortho(a: NDArray, b: NDArray) -> tuple[NDArray, NDArray, NDArray]:
     """
     xp = get_array_module(a)
     if xp.any(b == 0):
-        return xp.sign(a), 0, abs(a)
+        return xp.sign(a), 0, xp.abs(a)
     elif xp.any(a == 0):
-        return 0, xp.sign(b), abs(b)
-    elif xp.any(abs(b) > abs(a)):
+        return 0, xp.sign(b), xp.abs(b)
+    elif xp.any(xp.abs(b) > xp.abs(a)):
         tau = a / b
         s = xp.sign(b) / xp.sqrt(1 + tau * tau)
         c = s * tau
@@ -841,7 +843,7 @@ def cg(
     """
     lipschitz_cst = operator.get_lipschitz_cst()
     if operator.backend == "cufinufft":
-        lipschitz_cst = float(lipschitz_cst.get())
+        lipschitz_cst = float(lipschitz_cst.get())  # ty: ignore[missing-attribute]
     xp = get_array_module(kspace_data)
     old_density = None
     if operator.uses_density:

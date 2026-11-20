@@ -135,7 +135,7 @@ def _cosine_window(distance_ratio, kind, xp):
 def _extract_kspace_center(
     kspace_data: NDArray,
     kspace_loc: NDArray,
-    threshold: float | NDArray | None = None,
+    threshold: float | tuple[float, ...] | NDArray | None = None,
     density: NDArray | None = None,
     window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
 ) -> tuple[NDArray, NDArray, NDArray | None]:

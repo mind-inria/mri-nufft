@@ -100,7 +100,7 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
         nice_key = key[2:]  # strip prefix "al" / "ad"
         if not isinstance(vals, list):
             vals = [vals]
-        hdr[nice_key] = vals[0] if len(vals) == 1 else vals  # type: ignore
+        hdr[nice_key] = vals[0] if len(vals) == 1 else vals
 
     refscan = twixObj.lines.refscan
     if len(refscan) > 0:
