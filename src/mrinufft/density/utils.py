@@ -3,6 +3,7 @@
 import inspect
 from functools import wraps
 from collections.abc import Callable
+from typing import Literal, overload
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,6 +15,12 @@ get_density: Callable[[str], Callable[..., NDArray[np.floating]]] = (
 )
 
 
+@overload
+def flat_traj[**P, R](normalize: Callable[P, R]) -> Callable[P, R]: ...
+@overload
+def flat_traj[**P, R](
+    normalize: Literal["unit", "pi"] = "unit",
+) -> Callable[[Callable[P, R]], Callable[P, R]]: ...
 def flat_traj(normalize="unit"):
     """Decorate function to ensure that the trajectory is flatten before calling."""
 
