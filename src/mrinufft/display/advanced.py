@@ -166,4 +166,6 @@ def get_gridded_trajectory(
         data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten()) / (
             gridded_ones + np.finfo(np.float32).eps
         )
+    else:
+        raise ValueError(f"Unknown grid_type: {grid_type}")
     return np.squeeze(np.abs(data))

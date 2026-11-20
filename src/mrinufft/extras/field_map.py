@@ -81,6 +81,8 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
         radial_mask, fieldmap = _make_disk(shape)
     elif ndim == 3:
         radial_mask, fieldmap = _make_sphere(shape)
+    else:
+        raise ValueError("shape should be 2D or 3D.")
     if mask is None:
         mask = radial_mask
 
@@ -122,6 +124,8 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
         radial_mask, fieldmap = _make_disk(shape)
     elif ndim == 3:
         radial_mask, fieldmap = _make_sphere(shape)
+    else:
+        raise ValueError("shape should be 2D or 3D.")
     if mask is None:
         mask = radial_mask
 
