@@ -5,6 +5,7 @@ This module contains the main entry points for the package, including the
 submodules and utility functions.
 """
 
+from importlib.metadata import version, PackageNotFoundError
 import importlib as _importlib
 from typing import TYPE_CHECKING
 
@@ -44,8 +45,6 @@ if TYPE_CHECKING:
     # are real packages and resolve without help.
     from mrinufft.operators import get_operator
 
-
-from importlib.metadata import version, PackageNotFoundError
 
 try:
     __version__ = version("mri-nufft")
