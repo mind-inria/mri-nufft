@@ -769,6 +769,8 @@ def get_prephasors_and_spoilers(
     gends = gradients[:, -1, :]
     if not isinstance(N, tuple):
         N_pre = N_spoil = N
+    else:
+        N_pre, N_spoil = N
     if prephase_loc is not None:
         prephase_loc = unnormalize_trajectory(np.array(prephase_loc), acq)
         prephase_start_locations = np.tile(prephase_loc[:ndim], (nshots, 1))
