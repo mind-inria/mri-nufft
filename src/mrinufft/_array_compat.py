@@ -5,15 +5,28 @@ from __future__ import annotations
 import importlib.util
 import inspect
 import logging
+from collections.abc import Callable
 from functools import partial, wraps
 from inspect import cleandoc
 from numbers import Number  # abstract base type for python numeric type
-from typing import Any
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
+if TYPE_CHECKING:
+    import torch
+
 logger = logging.getLogger(__name__)
+
+#: Any array type accepted by the multi-backend entry points.
+# Cupy does not (yet) provide Type stubs, so we just use NDArray from numpy.
+type Array = NDArray[Any] | torch.Tensor
+
+#: Array of the same library at input and output, e.g. for functions decorated
+#: with ``with_numpy_cupy``. Cupy arrays have no type stubs, so they match too.
+ArrayT = TypeVar("ArrayT", NDArray[Any], "torch.Tensor")
 
 
 def _module_available(name: str) -> bool:
@@ -84,7 +97,7 @@ def _get_array_module_name(array) -> str:
     return type(array).__module__.partition(".")[0]
 
 
-def get_array_module(array):
+def get_array_module(array: Any) -> ModuleType:
     """Get the array module (numpy/cupy/torch/tnp) of an array."""
     if isinstance(array, Number | np.generic):
         return np
@@ -181,7 +194,7 @@ TF_NOTE = """
 """
 
 
-def _with(fun, _to_inner_xp, note):
+def _with[**P, R](fun: Callable[P, R], _to_inner_xp, note: str) -> Callable[P, R]:
     """Create a decorator to convert to a given array interface."""
 
     @wraps(fun)
@@ -208,22 +221,22 @@ def _with(fun, _to_inner_xp, note):
     return wrapper
 
 
-def with_numpy(fun):
+def with_numpy[**P, R](fun: Callable[P, R]) -> Callable[P, R]:
     """Ensure the function works internally with numpy array."""
     return _with(fun, _to_numpy, NUMPY_NOTE)
 
 
-def with_tensorflow(fun):
+def with_tensorflow[**P, R](fun: Callable[P, R]) -> Callable[P, R]:
     """Ensure the function works internally with tensorflow array."""
     return _with(fun, _to_tensorflow, TF_NOTE)
 
 
-def with_numpy_cupy(fun):
+def with_numpy_cupy[**P, R](fun: Callable[P, R]) -> Callable[P, R]:
     """Ensure the function works internally with numpy or cupy array."""
     return _with(fun, _to_numpy_cupy, NUMPY_CUPY_NOTE)
 
 
-def with_torch(fun):
+def with_torch[**P, R](fun: Callable[P, R]) -> Callable[P, R]:
     """Ensure the function works internally with Torch."""
     return _with(fun, _to_torch, TORCH_NOTE)
 
@@ -349,7 +362,7 @@ def _array_to_tensorflow(_arg):
             logger.warning("data is on gpu, it will be moved to CPU.")
             _arg = tf.convert_to_tensor(cp.asnumpy(_arg))
     elif xp.__name__ == "torch":
-        import torch
+        import torch.utils.dlpack
 
         if _arg.requires_grad:
             _arg = _arg.detach()
@@ -394,7 +407,7 @@ def _to_numpy(args, kwargs=None, device=None):
     return _convert(_array_to_numpy, args, kwargs)
 
 
-def _to_cupy(args, kwargs=None, device=None):
+def _to_cupy(args, kwargs=None, device: Any = None):
     """Convert a sequence of arguments to cupy.
 
     Non-arrays are ignored.
