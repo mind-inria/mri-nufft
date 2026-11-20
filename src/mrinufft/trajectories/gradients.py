@@ -505,6 +505,7 @@ def _binary_search_float(
 ) -> tuple[NDArray, float]:
     """Perfom a binary search to get best float that makes f success."""
     x = None
+    mid = low
     while (high - low) / (high + low) > 1e-3:  # relative tolerance
         mid = low + (high - low) * 0.5
         new_x, success = f(mid)
