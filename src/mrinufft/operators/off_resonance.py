@@ -90,6 +90,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
     ):
         self._fourier_op = fourier_op
+        self.autograd_available = fourier_op.autograd_available
         self.squeeze_dims = self._fourier_op.squeeze_dims
         self._fourier_op.squeeze_dims = False  # we will manage shapes here.
 
@@ -220,10 +221,6 @@ class MRIFourierCorrected(FourierOperatorBase):
         """Get the full readout time for all samples."""
         xp = get_array_module(self.readout_time)
         return xp.tile(self.readout_time, self.n_shots)
-
-    def autograd_available(self) -> bool:
-        """Whether the operator supports autograd differentiation."""
-        return self._fourier_op.autograd_available
 
     @property
     def n_samples(self) -> int:
