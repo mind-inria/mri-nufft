@@ -81,6 +81,7 @@ def get_gridded_trajectory(
     ndarray
         The gridded trajectory of shape `shape`.
     """
+    acq = acq or Acquisition.default
     shape = acq.img_size
     samples = trajectory.reshape(-1, trajectory.shape[-1])
     dcomp = get_density("pipe")(trajectory, shape, backend=backend)

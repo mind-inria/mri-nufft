@@ -6,6 +6,9 @@ from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import FigureBase
+from mpl_toolkits.mplot3d import Axes3D
 from numpy.typing import NDArray
 
 from .config import displayConfig
@@ -17,16 +20,16 @@ from mrinufft.trajectories.utils import (
 
 def _setup_2D_ticks(
     figsize: float,
-    fig: plt.Figure | None = None,
+    fig: FigureBase | Axes | None = None,
     acq: Acquisition | None = None,
     scale_fov: bool = False,
-) -> plt.Axes:
+) -> Axes:
     """Add ticks to 2D plot."""
     acq = acq or Acquisition.default
     KMAX = acq.norm_factor * (2 * np.array(acq.res) if scale_fov else np.array([1, 1]))
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-    ax = fig if (isinstance(fig, plt.Axes)) else fig.subplots()
+    ax = fig if isinstance(fig, Axes) else fig.subplots()
     ax.grid(True)
     ax.set_xticks([-KMAX[0], -KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
     ax.set_yticks([-KMAX[1], -KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
@@ -39,10 +42,10 @@ def _setup_2D_ticks(
 
 def _setup_3D_ticks(
     figsize: float,
-    fig: plt.FigureBase | None = None,
-    acq: Acquisition = None,
+    fig: FigureBase | Axes | None = None,
+    acq: Acquisition | None = None,
     scale_fov: bool = False,
-) -> plt.Axes:
+) -> Axes3D:
     """Add ticks to 3D plot."""
     acq = acq or Acquisition.default
     KMAX = acq.norm_factor * (
@@ -50,13 +53,15 @@ def _setup_3D_ticks(
     )
     if fig is None:
         fig = plt.figure(figsize=(figsize, figsize))
-    ax = fig if (isinstance(fig, plt.Axes)) else fig.add_subplot(projection="3d")
+    ax = fig if isinstance(fig, Axes) else fig.add_subplot(projection="3d")
+    if not isinstance(ax, Axes3D):
+        raise TypeError("A 3D projection is required to display 3D trajectories.")
     ax.set_xticks([-KMAX[0] - KMAX[0] / 2, 0, KMAX[0] / 2, KMAX[0]])
     ax.set_yticks([-KMAX[1] - KMAX[1] / 2, 0, KMAX[1] / 2, KMAX[1]])
-    ax.set_zticks([-KMAX[2] - KMAX[2] / 2, 0, KMAX[2] / 2, KMAX[2]])
-    ax.axes.set_xlim3d(left=-KMAX[0], right=KMAX[0])
-    ax.axes.set_ylim3d(bottom=-KMAX[1], top=KMAX[1])
-    ax.axes.set_zlim3d(bottom=-KMAX[2], top=KMAX[2])
+    ax.zaxis.set_ticks([-KMAX[2] - KMAX[2] / 2, 0, KMAX[2] / 2, KMAX[2]])
+    ax.set_xlim3d(left=-KMAX[0], right=KMAX[0])
+    ax.set_ylim3d(bottom=-KMAX[1], top=KMAX[1])
+    ax.set_zlim3d(bottom=-KMAX[2], top=KMAX[2])
     ax.set_box_aspect((2 * KMAX[0], 2 * KMAX[1], 2 * KMAX[2]))
     ax.set_xlabel("kx", fontsize=displayConfig.fontsize)
     ax.set_ylabel("ky", fontsize=displayConfig.fontsize)
@@ -182,8 +187,8 @@ def display_3D_trajectory(
     subfigure: plt.Figure | plt.Axes | None = None,
     show_constraints: bool = False,
     acq: Acquisition | None = None,
-    constraints_order: int | str | None = None,
-) -> plt.Axes:
+    constraints_order: float | Literal["fro"] | None = None,
+) -> Axes3D:
     """Display 3D trajectories.
 
     Parameters
@@ -234,7 +239,7 @@ def display_3D_trajectory(
         trajectory = np.concatenate(
             [trajectory, np.zeros((*(trajectory.shape[:2]), 1))], axis=-1
         )
-    trajectory = trajectory.reshape((nb_repetitions, -1, trajectory.shape[-2], 3))
+    trajectory = trajectory.reshape(nb_repetitions, -1, trajectory.shape[-2], 3)
     Nc, Ns = trajectory.shape[1:3]
 
     colors = displayConfig.get_colorlist()
