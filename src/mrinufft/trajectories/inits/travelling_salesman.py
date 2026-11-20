@@ -1,6 +1,6 @@
 """Trajectories based on the Travelling Salesman Problem."""
 
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal
 
 import numpy as np
 import numpy.linalg as nl
@@ -11,7 +11,7 @@ from tqdm.auto import tqdm
 from mrinufft.trajectories.sampling import sample_from_density
 from mrinufft.trajectories.tools.transforms import oversample
 
-Coordinate: TypeAlias = Literal["x", "y", "z", "r", "phi", "theta"]
+type Coordinate = Literal["x", "y", "z", "r", "phi", "theta"]
 
 
 def _solve_tsp_with_2opt(
@@ -87,22 +87,22 @@ def _sort_by_coordinate(array: NDArray, coord: Coordinate) -> NDArray:
         )
 
     if coord == "x":
-        coord = array[..., 0]
+        values = array[..., 0]
     elif coord == "y":
-        coord = array[..., 1]
+        values = array[..., 1]
     elif coord == "z":
-        coord = array[..., 2]
+        values = array[..., 2]
     elif coord == "r":
-        coord = np.linalg.norm(array, axis=-1)
+        values = np.linalg.norm(array, axis=-1)
     elif coord == "phi":
-        coord = np.sign(array[..., 1]) * np.arccos(
+        values = np.sign(array[..., 1]) * np.arccos(
             array[..., 0] / nl.norm(array[..., :2], axis=-1)
         )
     elif coord == "theta":
-        coord = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
+        values = np.arccos(array[..., 2] / nl.norm(array, axis=-1))
     else:
         raise ValueError(f"Unknown coordinate `{coord}`")
-    order = np.argsort(coord)
+    order = np.argsort(values)
     return array[order]
 
 
@@ -116,7 +116,7 @@ def _cluster_by_coordinate(
     # Cluster approximately a list of N-D locations by Cartesian/spherical coordinates
     # Gather dimension variables
     nb_dims = locations.shape[-1]
-    locations = locations.reshape((-1, nb_dims))
+    locations = locations.reshape(-1, nb_dims)
     nb_locations = locations.shape[0]
 
     # Check arguments validity

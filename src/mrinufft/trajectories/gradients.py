@@ -81,10 +81,11 @@ def patch_center_anomaly(
         if params, or cubic spline parameterization as an array of
         floats between 0 and 1 otherwise.
     """
+    parameters: tuple
     if update_shot is None or update_parameters is None:
-        single_shot = shot_or_params
+        single_shot = np.asarray(shot_or_params)
     else:
-        parameters = shot_or_params
+        parameters = tuple(shot_or_params)
         single_shot = update_shot(*parameters)
     Ns = single_shot.shape[0]
 
@@ -94,11 +95,11 @@ def patch_center_anomaly(
 
     if update_shot is None or update_parameters is None:
 
-        def _default_update_parameters(_: NDArray, *parameters: list) -> list:
+        def _default_update_parameters(_: NDArray, *parameters: NDArray) -> tuple:
             return parameters
 
         update_parameters = _default_update_parameters
-        parameters = [x_axis]
+        parameters = (x_axis,)
         update_shot = CubicSpline(x_axis, single_shot)
 
     while nl.norm(x_axis - old_x_axis) / Ns > 1e-10:
@@ -193,6 +194,7 @@ method: str, optional
 """,
 )
 
+type GradientSolver = Literal["lp", "osqp", "auto"]
 _solvers = MethodRegister("gradient_connection_solver", _solver_docs)
 _get_solver_grad = _solvers.make_getter()
 
@@ -586,7 +588,7 @@ def min_length_connection(
     gstarts: NDArray,
     gends: NDArray,
     acq: Acquisition | None = None,
-    method: Literal["lp", "osqp"] = "lp",
+    method: GradientSolver = "lp",
 ) -> int:
     """
     Get the minimum length of gradient connection for a trajectory.
@@ -662,7 +664,7 @@ def connect_gradient(
     gstarts: NDArray,
     gends: NDArray,
     acq: Acquisition | None = None,
-    method: str = "lp",
+    method: GradientSolver = "lp",
     N: int | None = None,
 ) -> NDArray:
     """
@@ -724,7 +726,7 @@ def get_prephasors_and_spoilers(
     prephase_grad=(0, 0, 0),
     acq: Acquisition | None = None,
     N: int | None | tuple[int, int] = None,
-    method: str = "lp",
+    method: GradientSolver = "lp",
 ) -> NDArray | tuple[NDArray, NDArray]:
     """
     Get the prephasors and spoiler gradients for a trajectory.

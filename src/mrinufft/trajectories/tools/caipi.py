@@ -1,6 +1,7 @@
 """CAIPI trajectory tools: get_grappa_caipi_positions, get_packing_spacing_positions."""
 
 from functools import partial
+from typing import overload
 
 import numpy as np
 import numpy.linalg as nl
@@ -14,12 +15,34 @@ from mrinufft.trajectories.utils import KMAX, Packings, initialize_shape_norm
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
 
 
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int = 0,
+    acs_region: None = None,
+) -> NDArray: ...
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int = 0,
+    *,
+    acs_region: tuple,
+) -> tuple[NDArray, NDArray]: ...
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int,
+    acs_region: tuple,
+) -> tuple[NDArray, NDArray]: ...
 def get_grappa_caipi_positions(
     img_size: tuple,
     grappa_factors: tuple,
     caipi_delta: int = 0,
     acs_region: tuple | None = None,
-) -> NDArray | tuple:
+) -> NDArray | tuple[NDArray, NDArray]:
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
 
@@ -83,7 +106,7 @@ def get_grappa_caipi_positions(
             np.asarray(
                 np.meshgrid(
                     *[
-                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)  # type: ignore
+                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
                         for num, max_loc in zip(acs_region, acs_max_loc)
                     ],
                     indexing="ij",
