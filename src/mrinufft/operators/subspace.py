@@ -108,8 +108,15 @@ class MRISubspace(FourierOperatorBase):
         else:
             data_d = xp.ascontiguousarray(data_d)
 
-        # perform computation
-        y = 0.0
+        # perform computation: accumulate (B, C, n_samples_per_frame, n_frames),
+        # squeezed like the wrapped operator output.
+        *ksp_batch, n_samples = self._fourier_op.ksp_full_shape
+        y = self._fourier_op._safe_squeeze(
+            xp.zeros(
+                (*ksp_batch, n_samples // self.n_frames, self.n_frames),
+                dtype=data_d.dtype,
+            )
+        )
         for idx in range(self.n_coeffs):
             # select basis element
             basis_element = subspace_basis[idx]
@@ -124,8 +131,7 @@ class MRISubspace(FourierOperatorBase):
             contrib *= basis_element.conj()
             y += contrib
 
-        # n_coeffs >= 1, so y is an array by now.
-        y = y[None, ...].swapaxes(0, -1)[..., 0]  # ty: ignore[not-subscriptable]
+        y = y[None, ...].swapaxes(0, -1)[..., 0]
 
         # bring back time/contrast axis to original position (B, T, ...)
         if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
@@ -160,7 +166,11 @@ class MRISubspace(FourierOperatorBase):
 
         coeffs_d = coeffs_d[..., None].swapaxes(0, -1)[0, ...]
 
-        y = None
+        # one image per coefficient, squeezed like the wrapped operator output.
+        y = xp.empty(
+            (self.n_coeffs, *self._fourier_op.img_full_shape), dtype=coeffs.dtype
+        )
+        y = y.reshape(self.n_coeffs, *self._fourier_op._safe_squeeze(y[0]).shape)
         for idx in range(self.n_coeffs):
             # select basis element
             basis_element = subspace_basis[idx]
@@ -176,17 +186,11 @@ class MRISubspace(FourierOperatorBase):
                 _coeffs_d = xp.ascontiguousarray(_coeffs_d)
 
             # actual transform
-            res = self._fourier_op.adj_op(_coeffs_d, *args)
-            if y is None:
-                # shape of res depends on the wrapped operator's squeezing,
-                # so it is only known once the first transform has run.
-                y = xp.empty((self.n_coeffs, *res.shape), dtype=res.dtype)
-            y[idx] = res
+            y[idx] = self._fourier_op.adj_op(_coeffs_d, *args)
 
         # bring back subspace index to original position (B, S, ...)
         if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
-            # n_coeffs >= 1, so y is an array by now.
-            y = y.swapaxes(0, 1)  # ty: ignore[missing-union-attribute]
+            y = y.swapaxes(0, 1)
 
         return y
 
