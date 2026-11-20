@@ -124,7 +124,8 @@ class MRISubspace(FourierOperatorBase):
             contrib *= basis_element.conj()
             y += contrib
 
-        y = y[None, ...].swapaxes(0, -1)[..., 0]
+        # n_coeffs >= 1, so y is an array by now.
+        y = y[None, ...].swapaxes(0, -1)[..., 0]  # ty: ignore[not-subscriptable]
 
         # bring back time/contrast axis to original position (B, T, ...)
         if self.n_batchs != 1 or data.shape[0] == 1:  # non-squeezed data
@@ -184,7 +185,8 @@ class MRISubspace(FourierOperatorBase):
 
         # bring back subspace index to original position (B, S, ...)
         if self.n_batchs != 1 or coeffs.shape[0] == 1:  # non-squeezed data
-            y = y.swapaxes(0, 1)
+            # n_coeffs >= 1, so y is an array by now.
+            y = y.swapaxes(0, 1)  # ty: ignore[missing-union-attribute]
 
         return y
 

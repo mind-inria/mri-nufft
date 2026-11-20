@@ -1,5 +1,7 @@
 """Tensorflow MRI Nufft Operators."""
 
+from functools import cached_property
+
 import numpy as np
 
 from mrinufft.operators.base import FourierOperatorBase
@@ -128,7 +130,7 @@ class MRITensorflowNUFFT(FourierOperatorBase):
         else:
             return img
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Norm factor of the operator."""
         return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))

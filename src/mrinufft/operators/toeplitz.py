@@ -284,6 +284,8 @@ class _GramOpGpuMixin(FourierOperatorBase):
     ``_safe_squeeze``.
     """
 
+    smaps_cached: bool
+
     def _coil_slice(self, i):
         """Return the coil ``slice`` for chunk ``i`` of the ``(B*C)//T`` loop.
 

@@ -120,7 +120,7 @@ class _NUFFT_OP(torch.autograd.Function):
         return nufft_op.op(x)
 
     @staticmethod
-    def backward(ctx, dy):
+    def backward(ctx, dy):  # ty: ignore[incompatible-method-override]  # torch idiom
         """Backward image -> k-space."""
         x = ctx.saved_tensors[0]
         return (
@@ -142,7 +142,7 @@ class _NUFFT_ADJOP(torch.autograd.Function):
         return nufft_op.adj_op(y)
 
     @staticmethod
-    def backward(ctx, dx):
+    def backward(ctx, dx):  # ty: ignore[incompatible-method-override]  # torch idiom
         """Backward image -> k-space."""
         y = ctx.saved_tensors[0]
         return (
@@ -205,7 +205,9 @@ class MRINufftAutoGrad(torch.nn.Module):
         self.nufft_op._grad_wrt_field_map = wrt_field_map
         if wrt_traj:
             if self.nufft_op.backend in ["finufft", "cufinufft"]:
-                self.nufft_op._make_plan_grad()
+                # Defined by the backend, or forwarded by wrappers through
+                # __getattr__ (e.g. MRIFourierCorrected).
+                self.nufft_op._make_plan_grad()  # ty: ignore[missing-attribute]
             # We initialize the samples as a torch tensor purely for autodiff purposes.
             # It can also be converted later to nn.Parameter, in which case it is
             # used for update also.

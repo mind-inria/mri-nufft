@@ -8,6 +8,7 @@ import numpy as np
 
 from mrinufft._utils import proper_trajectory, sizeof_fmt
 from mrinufft._array_compat import (
+    Array,
     get_array_module,
     auto_cast,
     is_cuda_array,
@@ -134,10 +135,10 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     @staticmethod
     def _init_samples(
-        samples: NDArray,
+        samples: Array,
         z_index: Literal["auto"] | NDArray | None,
         shape: tuple[int, ...],
-    ) -> tuple[NDArray, NDArray]:
+    ) -> tuple[Array, NDArray]:
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
         if samples_dim == 3 and auto_z:
@@ -483,7 +484,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Norm factor of the operator."""
         return self.operator.norm_factor * np.sqrt(2)
