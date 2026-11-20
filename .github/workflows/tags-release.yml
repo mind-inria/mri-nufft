@@ -5,8 +5,27 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
+  gh-release:
+    name: Draft the GitHub release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Extract the release notes from the changelog
+      run: python3 tools/release.py notes "${GITHUB_REF_NAME#v}" > release-notes.md
+    - name: Create the draft release
+      run: >
+        gh release create "$GITHUB_REF_NAME" --draft --verify-tag
+        --notes-file release-notes.md --generate-notes
+
   build-n-publish:
     name: Build and publish to PyPI
+    # Without a changelog section for the tag, nothing is published.
+    needs: gh-release
     runs-on: ubuntu-latest
     environment: pypi-release
     permissions:
@@ -24,9 +43,7 @@ jobs:
         python-version: "3.10"
 
     - name: Install pypa/build
-      run: |
-        python -m pip install build
-        python -m pip install .
+      run: python -m pip install build
 
     - name: Build a binary wheel and a source tarball
       run: |
@@ -34,16 +51,3 @@ jobs:
 
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-
-  gh-release:
-     name: Create release
-     env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-     runs-on: ubuntu-latest
-     steps: 
-     - name: Checkout
-       uses: actions/checkout@v6
-       with:
-        fetch-depth: 100
-     - name: Create Relase
-       run: gh release create "$GITHUB_REF_NAME"  --generate-notes -d
