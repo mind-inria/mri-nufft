@@ -20,6 +20,8 @@ import importlib
 import pkgutil
 import pathlib
 
+from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
+
 from .base import (
     FourierOperatorBase,
     get_operator,
@@ -59,8 +61,6 @@ for v in FourierOperatorBase.interfaces.values():
     globals()[v[1].__name__] = v[1]  # add the interface to the module namespace
 
 # Expose optional Torch and DeepInverse helpers lazily.
-from mrinufft._array_compat import AUTOGRAD_AVAILABLE, DEEPINV_AVAILABLE
-
 _AUTODIFF_HELPERS = ("kspace_as_real", "kspace_as_cpx", "image_as_real", "image_as_cpx")
 
 if AUTOGRAD_AVAILABLE:

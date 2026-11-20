@@ -85,10 +85,12 @@ ignore = [
 "B028", # No explicit stacklevel keyword argument found
 "F401", # Using ``try: import ... except:`` is nice.
 ]
+
 [tool.ruff.lint.per-file-ignores]
 "examples/**" = ["D", "E731"]
 "tests/**" = ["D"]
-"__init__.py" = ["E402"] # ignore module order
+"src/mrinufft/trajectories/__init__.py" = ["E402"] # ignore module order
+
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
 
