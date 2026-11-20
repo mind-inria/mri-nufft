@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field
-from enum import Enum, EnumMeta
+from enum import Enum, EnumMeta, StrEnum
 from numbers import Real
 from typing import Any, ClassVar, Literal
 
@@ -43,12 +43,6 @@ class CaseInsensitiveEnumMeta(EnumMeta):
 
 class FloatEnum(float, Enum, metaclass=CaseInsensitiveEnumMeta):
     """An Enum for float that is case insensitive for ist attributes."""
-
-    pass
-
-
-class StrEnum(str, Enum, metaclass=CaseInsensitiveEnumMeta):
-    """An Enum for str that is case insensitive for its attributes."""
 
     pass
 
