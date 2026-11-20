@@ -4,8 +4,11 @@ The SigPy NUFFT is fully implemented in Python.
 """
 
 import warnings
-from mrinufft._array_compat import _module_available
+from functools import cached_property
+
 import numpy as np
+
+from mrinufft._array_compat import _module_available
 from mrinufft._utils import proper_trajectory
 from mrinufft.operators.base import FourierOperatorCPU
 
@@ -124,7 +127,7 @@ class MRISigpyNUFFT(FourierOperatorCPU):
             squeeze_dims=squeeze_dims,
         )
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Normalization factor of the operator."""
         return np.sqrt(2 ** len(self.shape))

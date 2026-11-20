@@ -1,5 +1,9 @@
 """Pytorch MRI Nufft Operators."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, override
+
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
@@ -11,6 +15,9 @@ from mrinufft._array_compat import (
     TORCH_AVAILABLE,
     _module_available,
 )
+
+if TYPE_CHECKING:
+    import torch
 
 TORCHKBNUFFT_AVAILABLE = _module_available("torchkbnufft") and TORCH_AVAILABLE
 
@@ -58,6 +65,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     available = TORCHKBNUFFT_AVAILABLE
     autograd_available = False
+    _samples: torch.Tensor
 
     def __init__(
         self,
@@ -159,19 +167,19 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = self.smaps.to(data.dtype, copy=False)
 
         kdata = self._tkb_op.forward(
-            image=data, omega=self.samples.t(), smaps=self.smaps
+            image=data, omega=self._samples.t(), smaps=self.smaps
         )
         kdata *= self.inv_norm_factor
         return self._safe_squeeze(kdata)
 
     @with_torch
     def _op(self, data, out):
-        self._tkb_op.forward(data, omega=self.samples.t())
+        self._tkb_op.forward(data, omega=self._samples.t())
         return out
 
     @with_torch
     def _adj_op(self, coeffs, out):
-        self._tkb_adj_op.forward(data=coeffs, omega=self.samples.t())
+        self._tkb_adj_op.forward(data=coeffs, omega=self._samples.t())
         return out
 
     @with_torch
@@ -197,7 +205,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             coeffs = coeffs * self.density
 
         img = self._tkb_adj_op.forward(
-            data=coeffs, omega=self.samples.t(), smaps=self.smaps
+            data=coeffs, omega=self._samples.t(), smaps=self.smaps
         )
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img *= self.inv_norm_factor
@@ -234,7 +242,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             # initialize the toeplitz approximation for the gram operator.
             self._gram_op = tkbn.ToepNufft()
             self._gram_op_kernel = tkbn.calc_toeplitz_kernel(
-                self.samples.t(), self.shape
+                self._samples.t(), self.shape
             )
 
         data = data.to(dtype=self._gram_op_kernel.dtype, copy=False)

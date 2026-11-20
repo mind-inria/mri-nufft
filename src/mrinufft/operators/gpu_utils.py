@@ -1,6 +1,7 @@
 """Utils for GPU."""
 
 import numpy as np
+from collections.abc import Callable
 from pathlib import Path
 from hashlib import md5
 from functools import wraps
@@ -49,7 +50,9 @@ CSS4_COLORS_CODE = [
     4251856, 15631086, 16113331, 16777215, 16119285, 16776960, 10145074,
 ]
 # fmt: on
-def nvtx_mark(color=-1):
+def nvtx_mark[**P, R](
+    color: int = -1,
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Decorate to annotate function for profiling."""
 
     def decorator(func):
@@ -60,9 +63,11 @@ def nvtx_mark(color=-1):
 
         @wraps(func)
         def new_func(*args, **kwargs):
-            cp.cuda.nvtx.RangePush(name, id_color=CSS4_COLORS_CODE[id_col])
+            cp.cuda.nvtx.RangePush(  # ty: ignore[missing-union-attribute]
+                name, id_color=CSS4_COLORS_CODE[id_col]
+            )
             ret = func(*args, **kwargs)
-            cp.cuda.nvtx.RangePop()
+            cp.cuda.nvtx.RangePop()  # ty: ignore[missing-union-attribute]
             return ret
 
         return new_func
