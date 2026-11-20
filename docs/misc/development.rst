@@ -76,13 +76,38 @@ behaviour changes that leave the signatures untouched (a new default, a sign
 convention, an axis order...), add an entry to the *Unreleased* section of
 ``docs/changelog.rst``.
 
-Before a release ``X.Y.Z``:
+Making a release
+----------------
 
-- remove the deprecated objects that are due, which ``tests/test_deprecation.py``
-  lists:
+The version number comes from the git tag, through ``setuptools_scm``: there is
+nothing to bump.
 
-  .. code-block:: bash
+1. Prepare the release in a pull request:
 
-      MRINUFFT_RELEASE=X.Y.Z uv run pytest tests/test_deprecation.py
+   .. code-block:: bash
 
-- rename the *Unreleased* section of ``docs/changelog.rst`` to ``X.Y.Z``.
+       git fetch origin
+       git switch -c release-X.Y.Z origin/master
+       uv run --extra test tools/release.py prepare X.Y.Z
+       git commit -am "chore: release X.Y.Z"
+       gh pr create --fill
+
+   ``prepare`` stops if a deprecated object is due for removal in ``X.Y.Z``: remove
+   it first. It then renames the *Unreleased* section of ``docs/changelog.rst`` to
+   ``X.Y.Z (date)``, and opens a new *Unreleased* section. Check that this section
+   is complete before merging.
+
+2. Tag the merged commit and push the tag:
+
+   .. code-block:: bash
+
+       git switch master && git pull
+       git tag -a vX.Y.Z -m "vX.Y.Z"
+       git push origin vX.Y.Z
+
+3. The ``tags-release.yml`` workflow drafts the GitHub release, with the changelog
+   section followed by the list of pull requests and new contributors, then
+   publishes the package on PyPI. It publishes nothing if the changelog has no
+   ``X.Y.Z`` section.
+
+4. Proofread and publish the draft release, which also archives it on Zenodo.
