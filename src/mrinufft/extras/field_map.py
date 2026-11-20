@@ -10,10 +10,13 @@ explanation).
 
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
 from itertools import combinations_with_replacement
 from math import factorial
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -25,8 +28,11 @@ from mrinufft._array_compat import (
     with_numpy_cupy,
 )
 from mrinufft._utils import MethodRegister
-from mrinufft.trajectories.girf import spherical_harmonics
-from mrinufft.trajectories.utils import Acquisition
+
+# `mrinufft.operators` imports this module, and `mrinufft.trajectories` imports
+# pyproximal, pylops and torch: import it only where it is needed.
+if TYPE_CHECKING:
+    from mrinufft.trajectories.utils import Acquisition
 
 logger = logging.getLogger(__name__)
 
@@ -824,6 +830,8 @@ def compute_girf_interpolators(
         If ``skip`` is out of range, or if ``interpolators`` does not match the
         samples.
     """
+    from mrinufft.trajectories.girf import spherical_harmonics
+
     fields = np.asarray(fields, dtype=float)
     n_shots, n_terms = fields.shape[0], fields.shape[2]
     if not 0 <= skip <= fields.shape[1]:
