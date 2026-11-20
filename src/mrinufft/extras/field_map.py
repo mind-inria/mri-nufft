@@ -24,6 +24,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from mrinufft._array_compat import (
     Array,
+    ArrayT,
     get_array_module,
     with_numpy,
     with_numpy_cupy,
@@ -229,8 +230,8 @@ get_orc_factorization = register_orc.make_getter()
 
 @with_numpy_cupy
 def get_complex_fieldmap_rad(
-    b0_map: NDArray, r2star_map: NDArray | None = None
-) -> NDArray[np.complex64]:
+    b0_map: ArrayT, r2star_map: ArrayT | None = None
+) -> ArrayT:
     r"""Create a complex-valued field-map in rad/s.
 
     Parameters
