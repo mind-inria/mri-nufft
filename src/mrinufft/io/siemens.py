@@ -5,8 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
-from typing import TypedDict, overload, TYPE_CHECKING, Literal
-from typing_extensions import NotRequired  # backport for Python < 3.11
+from typing import NotRequired, TypedDict, overload, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from turbotwix import Measurement as TwixObj
