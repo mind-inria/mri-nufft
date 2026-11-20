@@ -274,7 +274,7 @@ class Acquisition:
         Image size in pixels (x, y, z).
     hardware : Hardware
         Hardware configuration for the acquisition.
-    gamma : Gammas, optional
+    gamma : Gammas | float, optional
         Gyromagnetic ratio in Hz/T for the nucleus being imaged.
         Defaults to `Gammas.HYDROGEN`.
     adc_dwell_time: float
@@ -311,7 +311,7 @@ class Acquisition:
     fov: tuple[float, float, float]  # Field of View in m
     img_size: tuple[int, int, int]  # Image size in pixels
     hardware: Hardware = SiemensGradient.TERRA  # Hardware configuration
-    gamma: Gammas = Gammas.HYDROGEN  # Hz/T
+    gamma: Gammas | float = Gammas.HYDROGEN  # Hz/T
     adc_dwell_time: float = 5 * SI.micro  # us
     norm_factor: float = 0.5
     affine: NDArray | None = field(default=None, compare=False)
@@ -321,10 +321,13 @@ class Acquisition:
 
     def __post_init__(self):
         """Validate parameters after initialization."""
+        # frozen dataclass: normalize scalar shorthands via object.__setattr__
         if isinstance(self.fov, Real):
-            self.fov = (self.fov, self.fov, self.fov)
+            object.__setattr__(self, "fov", (self.fov, self.fov, self.fov))
         if isinstance(self.img_size, int):
-            self.img_size = (self.img_size, self.img_size, self.img_size)
+            object.__setattr__(
+                self, "img_size", (self.img_size, self.img_size, self.img_size)
+            )
 
         if not (2 <= len(self.fov) <= 3):
             raise ValueError("fov must be a tuple of 3 elements (x, y, z).")
@@ -374,7 +377,8 @@ class Acquisition:
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Exit Context Manager and reset default."""
-        self._old_default.set_default()
+        if self._old_default is not None:
+            self._old_default.set_default()
         object.__setattr__(self, "_old_default", None)  # bypass frozen
 
 

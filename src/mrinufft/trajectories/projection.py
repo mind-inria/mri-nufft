@@ -17,6 +17,7 @@ from mrinufft.trajectories.utils import Acquisition
 # imported by `project_trajectory`, and `GroupL2SoftThresholding` on first access.
 if TYPE_CHECKING:
     from pylops import LinearOperator
+    from pyproximal import ProxOperator
 
     from mrinufft.trajectories._proximal import (
         _GroupL2SoftThresholding,
@@ -151,13 +152,12 @@ def _linear_projection(
     """
     if A is not None and mask is not None:
         raise ValueError("Provide either a linear operator A or a mask")
-    elif A is None and mask is None:
-        return x
-    elif mask is not None:
+    if mask is not None:
         x[mask] = target
         return x
-    else:
-        return A.div(target - A * x)
+    if A is None:
+        return x
+    return A.div(target - A * x)  # ty: ignore[invalid-explicit-return]
 
 
 @_fill_doc(_proj_docs)
@@ -253,7 +253,11 @@ def project_trajectory(
     prox_slew = _GroupL2SoftThresholding(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
-    prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
+    # pyproximal annotates VStack(ops) as LinearOperators instead of ProxOperators.
+    prox = pyproximal.VStack(
+        [prox_grad, prox_slew],  # ty: ignore[invalid-argument-type]
+        nn=[Nc * Ns * Nd] * 2,
+    )
 
     if TE_pos == -1:
         # detect the position of the original k-space center and

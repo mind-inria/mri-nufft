@@ -338,8 +338,8 @@ def initialize_2D_vds_spiral(
 
         if i == len(radius):
             logger.warning("Increasing size of allocated trajectory array")
-            radius.resize(2 * len(radius), refcheck=False)
-            thetas.resize(2 * len(thetas), refcheck=False)
+            radius = np.resize(radius, 2 * len(radius))
+            thetas = np.resize(thetas, 2 * len(thetas))
 
     # Trim arrays to the actual number of points
     valid_points = np.where(radius > 0)[0]

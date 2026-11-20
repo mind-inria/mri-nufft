@@ -241,7 +241,7 @@ def create_energy_density(dataset: NDArray) -> NDArray:
 
 def create_chauffert_density(
     shape: tuple[int, ...],
-    wavelet_basis: str | pw.Wavelet,
+    wavelet_basis: str | pw.Wavelet,  # ty: ignore[missing-attribute]
     nb_wavelet_scales: int,
     *,
     verbose: bool = False,
@@ -316,7 +316,7 @@ def create_chauffert_density(
 
 def create_fast_chauffert_density(
     shape: tuple[int, ...],
-    wavelet_basis: str | pw.Wavelet,
+    wavelet_basis: str | pw.Wavelet,  # ty: ignore[missing-attribute]
     nb_wavelet_scales: int,
 ) -> NDArray:
     """Create a density based on an approximated Chauffert method.

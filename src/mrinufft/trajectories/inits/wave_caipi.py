@@ -87,22 +87,30 @@ def initialize_3D_wave_caipi(
        Magnetic resonance in medicine 73, no. 6 (2015): 2152-2162.
     """
     acq = acq if acq is not None else Acquisition.default
-    if not np.isscalar(Nc_or_R):
-        R = Nc_or_R
+    widths: tuple
+    if not isinstance(Nc_or_R, int | np.integer):
         sample_axis = tuple(
             im for i, im in enumerate(acq.img_size) if i != readout_axis
         )
         positions = (
-            get_grappa_caipi_positions(sample_axis, R, caipi_delta) / acq.norm_factor
+            get_grappa_caipi_positions(sample_axis, tuple(Nc_or_R), caipi_delta)
+            / acq.norm_factor
         )
-        wavegrad = np.array(
-            [[[wavegrad]]] if np.isscalar(wavegrad) else [[list(wavegrad)]], np.float32
+        if wavegrad is None:
+            raise ValueError("`wavegrad` is required when GRAPPA factors are given.")
+        wavegrad_arr = np.array(
+            (
+                [[[wavegrad]]]
+                if isinstance(wavegrad, int | float | np.number)
+                else [[list(wavegrad)]]
+            ),
+            np.float32,
         )
         # Get the trajectory for the gradient wave.
         # Normalize back to -1, 1 as thats how we start defining trajectory
-        width = (
+        wave_width = (
             (
-                np.squeeze(convert_gradients_to_trajectory(wavegrad, acq=acq))[-1]
+                np.squeeze(convert_gradients_to_trajectory(wavegrad_arr, acq=acq))[-1]
                 / acq.norm_factor
             )
             * Ns
@@ -110,16 +118,24 @@ def initialize_3D_wave_caipi(
             / np.pi
             / nb_revolutions
         )  # Extra factor from angles
-        if np.isscalar(width):
-            width = (width, width, width)
-        width = tuple(w for i, w in enumerate(width) if i != readout_axis)
+        if np.isscalar(wave_width):
+            wave_width = (wave_width, wave_width, wave_width)
+        widths = tuple(w for i, w in enumerate(wave_width) if i != readout_axis)
     else:
-        width = (width, width) if np.isscalar(width) else width
-        positions = get_packing_spacing_positions(Nc_or_R, packing, shape, spacing)
+        widths = (
+            (width, width)
+            if isinstance(width, int | float | np.number)
+            else tuple(width)
+        )
+        positions = get_packing_spacing_positions(int(Nc_or_R), packing, shape, spacing)
     # Initialize first shot
     angles = nb_revolutions * 2 * np.pi * np.arange(0, Ns) / Ns
     initial_shot = np.stack(
-        [width[0] * np.cos(angles), width[1] * np.sin(angles), np.linspace(-1, 1, Ns)],
+        [
+            widths[0] * np.cos(angles),
+            widths[1] * np.sin(angles),
+            np.linspace(-1, 1, Ns),
+        ],
         axis=-1,
     )
     # reorder based on readout axis
@@ -131,6 +147,6 @@ def initialize_3D_wave_caipi(
     trajectory = initial_shot[None] + positions[:, None]
 
     axes = [[1, 2], [0, 2], [0, 1]][readout_axis]
-    if np.isscalar(Nc_or_R):
+    if isinstance(Nc_or_R, int | np.integer):
         trajectory[..., axes] /= np.max(np.abs(trajectory))
     return KMAX * trajectory
