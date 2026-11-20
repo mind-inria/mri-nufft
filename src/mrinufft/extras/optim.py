@@ -4,14 +4,19 @@
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol
 from collections.abc import Callable
 
 import numpy as np
 from numpy.typing import NDArray
 from tqdm.auto import tqdm
 
-from mrinufft._array_compat import CUPY_AVAILABLE, get_array_module, with_numpy_cupy
+from mrinufft._array_compat import (
+    CUPY_AVAILABLE,
+    ArrayT,
+    get_array_module,
+    with_numpy_cupy,
+)
 from mrinufft._utils import MethodRegister, _progressbar
 
 if TYPE_CHECKING:
@@ -50,7 +55,24 @@ NDArray:
 )
 
 
-register_optim = MethodRegister("optimizer", _optim_docs)
+class OptimMethod(Protocol):
+    """Signature shared by the least-squares solvers.
+
+    The callback results are returned alongside the solution when there are any.
+    """
+
+    def __call__(
+        self,
+        operator: FourierOperatorBase,
+        kspace_data: ArrayT,
+        *args: Any,
+        **kwargs: Any,
+    ) -> ArrayT | tuple[ArrayT, list[Any]]:
+        """Solve the least-squares problem ``operator(x) = kspace_data``."""
+        ...
+
+
+register_optim = MethodRegister[OptimMethod]("optimizer", _optim_docs)
 get_optimizer = register_optim.make_getter()
 
 

@@ -8,7 +8,7 @@ from inspect import cleandoc
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, Protocol, overload
 from tqdm.auto import tqdm
 
 import numpy as np
@@ -175,7 +175,16 @@ def _fill_doc[F: Callable[..., Any]](
     return wrapper
 
 
-class MethodRegister:
+class RegistryGetter[F](Protocol):
+    """``get_<registry>`` function returned by :py:meth:`MethodRegister.make_getter`."""
+
+    @overload
+    def __call__(self, method_name: str, /) -> F: ...
+    @overload
+    def __call__(self, method_name: str, /, *args: Any, **kwargs: Any) -> Any: ...
+
+
+class MethodRegister[F: Callable[..., Any]]:
     """
     A Decorator to register methods of the same type in dictionnaries.
 
@@ -187,7 +196,7 @@ class MethodRegister:
         List of potential subsititutions to apply to the docstring.
     """
 
-    registry_global = defaultdict(dict)
+    registry_global: defaultdict[str, dict[str, Any]] = defaultdict(dict)
 
     def __init__(
         self, register_name: str, docstring_subs: dict[str, str] | None = None
@@ -197,7 +206,11 @@ class MethodRegister:
             docstring_subs = {}
         self.docstring_subs = docstring_subs
 
-    def __call__(self, method_name=None):
+    @overload
+    def __call__[G: Callable[..., Any]](self, method_name: G) -> G: ...
+    @overload
+    def __call__[G: Callable[..., Any]](self, method_name: str) -> Callable[[G], G]: ...
+    def __call__(self, method_name: Any = None):
         """Register the function in the registry.
 
         It also substitute placeholder in docstrings.
@@ -217,7 +230,7 @@ class MethodRegister:
         else:
             return decorator
 
-    def make_getter(self) -> Callable:
+    def make_getter(self) -> RegistryGetter[F]:
         """Create a `get_{register_name}` function to get methods from the registry."""
 
         def getter(method_name, *args, **kwargs):
@@ -239,7 +252,7 @@ class MethodRegister:
         return getter
 
     @property
-    def registry(self):
+    def registry(self) -> dict[str, F]:
         """Get the registry dictionary."""
         return self.registry_global[self.register_name]
 

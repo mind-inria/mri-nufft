@@ -16,13 +16,14 @@ import logging
 from collections.abc import Callable
 from itertools import combinations_with_replacement
 from math import factorial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
 from mrinufft._array_compat import (
+    Array,
     get_array_module,
     with_numpy,
     with_numpy_cupy,
@@ -203,7 +204,26 @@ See Also
 )
 
 
-register_orc = MethodRegister("orc_factorization", _field_map_docs)
+class OrcMethod(Protocol):
+    """Signature shared by the off-resonance factorization methods.
+
+    Returns the temporal and spatial interpolators ``B`` and ``C``, and the
+    exponential ``E`` they approximate.
+    """
+
+    def __call__(
+        self,
+        field_map: Array,
+        readout_time: Array,
+        mask: Array | None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> tuple[Array, "Array | _C_lazy", Array]:
+        """Factorize the off-resonance exponential."""
+        ...
+
+
+register_orc = MethodRegister[OrcMethod]("orc_factorization", _field_map_docs)
 get_orc_factorization = register_orc.make_getter()
 
 

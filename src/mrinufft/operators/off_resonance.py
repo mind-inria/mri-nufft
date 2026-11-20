@@ -14,6 +14,7 @@ from mrinufft.extras import get_orc_factorization, get_complex_fieldmap_rad
 from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
 
 if TYPE_CHECKING:
+    from mrinufft.extras.field_map import OrcMethod
     from mrinufft.operators.autodiff import MRINufftAutoGrad
 
 if CUPY_AVAILABLE:
@@ -106,7 +107,7 @@ class MRIFourierCorrected(FourierOperatorBase):
     @with_numpy_cupy
     def compute_interpolator(
         self,
-        interpolators: str | dict | tuple[NDArray, NDArray],
+        interpolators: str | dict | tuple[NDArray, NDArray] | OrcMethod,
         field_map: NDArray,
         readout_time: NDArray,
         mask: NDArray | None,
