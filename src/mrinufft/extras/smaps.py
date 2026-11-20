@@ -1253,7 +1253,7 @@ def espirit(
 @_fill_doc(_smap_docs)
 @with_numpy_cupy
 def cartesian_espirit(
-    kspace: NDArray,
+    kspace: ArrayT,
     shape: tuple[int, ...],
     calib_width: int | tuple[int, ...] = 24,
     kernel_size: int | tuple[int, ...] = 7,
@@ -1262,7 +1262,7 @@ def cartesian_espirit(
     crop: float = 0.08,
     decim: int = 1,
     power_iter: int = 10,
-) -> NDArray:
+) -> ArrayT:
     """ESPIRIT algorithm on Cartesian data.
 
     Parameters
@@ -1376,7 +1376,7 @@ def pisco(
 @_fill_doc(_smap_docs)
 @with_numpy_cupy
 def cartesian_pisco(
-    kspace: NDArray,
+    kspace: ArrayT,
     shape: tuple[int, ...],
     calib_width: int | tuple[int, ...] = 24,
     kernel_size: int | tuple[int, ...] = 7,
@@ -1385,7 +1385,7 @@ def cartesian_pisco(
     crop: float = 0.08,
     decim: int = 1,
     power_iter: int = 30,
-) -> NDArray:
+) -> ArrayT:
     """PISCO algorithm on Cartesian data.
 
     Nullspace-based estimation of sensitivity maps: nullspace vectors of a
@@ -1460,11 +1460,11 @@ def cartesian_pisco(
 
 @with_numpy_cupy
 def coil_compression(
-    kspace_data: NDArray,
+    kspace_data: ArrayT,
     K: int | float,
-    traj: NDArray | None = None,
+    traj: ArrayT | None = None,
     krad_thresh: float | None = None,
-) -> tuple[NDArray, NDArray]:
+) -> tuple[ArrayT, ArrayT]:
     """
     Coil compression using principal component analysis on k-space data.
 
