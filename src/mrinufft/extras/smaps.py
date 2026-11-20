@@ -9,11 +9,12 @@ from __future__ import annotations
 import gc
 import logging
 from collections.abc import Callable
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import get_array_module, with_numpy_cupy
+from mrinufft._array_compat import ArrayT, get_array_module, with_numpy_cupy
 from mrinufft._utils import MethodRegister, _fill_doc
 from mrinufft.density.utils import flat_traj
 
@@ -217,9 +218,24 @@ def _extract_kspace_center(
         return data_thresholded, kspace_loc, density
 
 
-register_smaps = MethodRegister("smaps", docstring_subs=_smap_docs)
+class SmapsMethod(Protocol):
+    """Signature shared by the sensitivity maps estimation methods."""
 
-get_smaps: Callable[[str], Callable[..., NDArray]] = register_smaps.make_getter()
+    def __call__(
+        self,
+        traj: ArrayT,
+        shape: tuple[int, ...],
+        kspace_data: ArrayT,
+        backend: str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> ArrayT:
+        """Estimate the sensitivity maps from ``kspace_data``."""
+        ...
+
+
+register_smaps = MethodRegister[SmapsMethod]("smaps", docstring_subs=_smap_docs)
+get_smaps = register_smaps.make_getter()
 
 
 def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):

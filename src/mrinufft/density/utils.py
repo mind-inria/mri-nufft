@@ -3,16 +3,26 @@
 import inspect
 from functools import wraps
 from collections.abc import Callable
-from typing import Literal, overload
+from typing import Any, Literal, Protocol, overload
 
 import numpy as np
 from numpy.typing import NDArray
+from mrinufft._array_compat import Array
 from mrinufft._utils import MethodRegister, proper_trajectory
 
-register_density = MethodRegister("density")
-get_density: Callable[[str], Callable[..., NDArray[np.floating]]] = (
-    register_density.make_getter()
-)
+
+class DensityMethod(Protocol):
+    """Signature shared by the density compensation methods."""
+
+    def __call__(
+        self, traj: Array, shape: tuple[int, ...], *args: Any, **kwargs: Any
+    ) -> NDArray[np.floating]:
+        """Compute the density compensation weights of ``traj``."""
+        ...
+
+
+register_density = MethodRegister[DensityMethod]("density")
+get_density = register_density.make_getter()
 
 
 @overload
