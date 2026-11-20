@@ -407,7 +407,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
-        backend="cufinufft",
+        backend: MRICufiNUFFT | None | Literal["cufinufft"] = None,
         async_transfer=False,
         **kwargs,
     ):
@@ -423,12 +423,13 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
         self.async_transfer = async_transfer
+        self.operator: MRICufiNUFFT
 
-        if isinstance(backend, str):
+        if backend is None or backend == "cufinufft":
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
             self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
-            self.operator: MRICufiNUFFT = get_operator(backend)(
+            self.operator = MRICufiNUFFT(
                 self._samples2d,
                 shape[:-1],
                 n_coils=self.n_trans * len(self.z_index),
@@ -438,7 +439,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 density=density,
                 **kwargs,
             )
-        elif isinstance(backend, FourierOperatorBase):
+        elif isinstance(backend, MRICufiNUFFT):
             # get all the interesting values from the operator
             if backend.shape != shape[:-1]:
                 raise ValueError("Backend operator should have compatible shape")
@@ -459,10 +460,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             self.operator = backend
         else:
             raise ValueError(
-                "backend should either be a 2D nufft operator,"
-                " or a str specifying which nufft library to use."
+                "backend should either be a 2D cufinufft operator or None."
             )
-
         # Smaps support
         self.smaps = smaps
         self.smaps_cached = False
