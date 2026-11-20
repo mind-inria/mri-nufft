@@ -485,6 +485,7 @@ def _binary_search_int(
     """Perfom a binary search to get best integer that makes f success."""
     x = None
     val = 0
+    mid = low
     while low <= high:
         mid = int(low + (high - low) * 0.8)
         new_x, success = f(mid)
