@@ -8,7 +8,7 @@ sequences. Requires the `pypulseq` package to be installed.
 
 import logging
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,7 +19,10 @@ from mrinufft.trajectories.utils import (
     convert_trajectory_to_gradients,
 )
 
-from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
+from mrinufft.trajectories.gradients import (
+    GradientSolver,
+    get_prephasors_and_spoilers,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,16 +103,19 @@ def read_pulseq_traj(
         kspace_shots.append(kspace_adc[:, idx_next:].T)  # add remaining gradients.
     # convert to KMAX standard.
     #
+    # pypulseq annotates definitions as ``str`` and system limits as
+    # ``float | None``; here they hold the parsed lists / floats.
+    system: Any = seq.system
     acq = Acquisition(
-        fov=seq.get_definition("FOV"),
-        img_size=seq.get_definition("ImgSize"),
-        adc_dwell_time=seq.system.adc_raster_time,
+        fov=seq.get_definition("FOV"),  # ty: ignore[invalid-argument-type]
+        img_size=seq.get_definition("ImgSize"),  # ty: ignore[invalid-argument-type]
+        adc_dwell_time=system.adc_raster_time,
         hardware=Hardware(
-            grad_raster_time=seq.system.grad_raster_time,
-            gmax=seq.system.max_grad / 1e3,  # FIXME: assumes mT/m in pulseq
-            smax=seq.system.max_slew,
+            grad_raster_time=system.grad_raster_time,
+            gmax=system.max_grad / 1e3,  # FIXME: assumes mT/m in pulseq
+            smax=system.max_slew,
         ),
-        gamma=seq.system.gamma / (2 * np.pi),
+        gamma=system.gamma / (2 * np.pi),
     )
     kspace_shots = np.ascontiguousarray(kspace_shots)
     return kspace_shots, seq.definitions, acq
@@ -160,7 +166,7 @@ def pulseq_gre(
     rf_spoiling_inc: float = 0.0,
     grad_spoil_factor: float = 2.0,
     acq: Acquisition | None = None,
-    connect_method: str = "auto",
+    connect_method: GradientSolver = "auto",
 ):
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.
 

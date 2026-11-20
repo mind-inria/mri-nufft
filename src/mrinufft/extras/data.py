@@ -5,7 +5,7 @@ import numpy as np
 from collections.abc import Sequence
 
 
-def get_brainweb_map(sub_id: int) -> np.ndarray:
+def get_brainweb_map(sub_id: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Get M0, T1 and T2 parametric maps from a brainweb crisp segmentation.
 
@@ -41,7 +41,8 @@ def get_brainweb_map(sub_id: int) -> np.ndarray:
         ) from err
 
     # get segmentation
-    segmentation = brainweb_dl.get_mri(sub_id, "crisp") / 455
+    # brainweb_dl annotates `contrast` as an enum but also accepts its value.
+    segmentation = brainweb_dl.get_mri(sub_id, brainweb_dl.Segmentation.CRISP) / 455
     segmentation = segmentation.astype(int)
 
     # get properties
@@ -82,8 +83,8 @@ def fse_simulation(
     M0: np.ndarray,
     T1: np.ndarray,
     T2: np.ndarray,
-    TE: float | Sequence[float],
-    TR: float | Sequence[float],
+    TE: float | Sequence[float] | np.ndarray,
+    TR: float | Sequence[float] | np.ndarray,
 ) -> np.ndarray:
     """Perform simple analytical Fast Spin Echo simulation.
 
