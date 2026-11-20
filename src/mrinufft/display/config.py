@@ -80,7 +80,7 @@ class displayConfig:
         self.reset()
 
     @classmethod
-    def get_colorlist(cls) -> list[str | NDArray]:
+    def get_colorlist(cls) -> list[str | NDArray] | NDArray:
         """Extract a list of colors from a matplotlib palette.
 
         If the palette is continuous, the colors will be sampled from it.
@@ -108,7 +108,7 @@ class displayConfig:
         colors = getattr(cm, "colors", [])
         if 0 < len(colors) < cls.nb_colors:
             colorlist = [
-                c for _, c in zip(range(cls.nb_colors), itertools.cycle(cm.colors))
+                c for _, c in zip(range(cls.nb_colors), itertools.cycle(colors))
             ]
         else:
             colorlist = cm(np.linspace(0, 1, cls.nb_colors))
