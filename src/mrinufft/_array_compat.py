@@ -465,7 +465,7 @@ def _to_tensorflow(args, kwargs=None):
     return _convert(_array_to_tensorflow, args, kwargs)
 
 
-def _to_interface(args, array_interface, device=None):
+def _to_interface(args, array_interface, device=None) -> Any:
     """
     Convert a list of arguments to a given array interface.
 

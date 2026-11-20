@@ -209,7 +209,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         )
 
     @property
-    def field_map(self) -> Array:
+    def field_map(self) -> Array | None:
         """Get the field map used for off-resonance correction."""
         return self._field_map
 
