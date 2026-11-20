@@ -198,7 +198,7 @@ def _with[**P, R](fun: Callable[P, R], _to_inner_xp, note: str) -> Callable[P, R
     """Create a decorator to convert to a given array interface."""
 
     @wraps(fun)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
 
         leading_arg = _get_leading_argument(args, kwargs)
 
