@@ -231,6 +231,13 @@ class MRITorchKbNufft(FourierOperatorBase):
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
 
+    def compute_toeplitz_kernel(self) -> torch.Tensor:
+        """Compute the Toeplitz kernel for the Gram operator."""
+        import torchkbnufft as tkbn
+
+        self._toeplitz_kernel = tkbn.calc_toeplitz_kernel(self._samples.t(), self.shape)
+        return self._toeplitz_kernel
+
     @with_torch
     def gram_op(self, data, toeplitz=True):
         """Compute the Gram operator."""
@@ -241,11 +248,8 @@ class MRITorchKbNufft(FourierOperatorBase):
         if not hasattr(self, "_gram_op"):
             # initialize the toeplitz approximation for the gram operator.
             self._gram_op = tkbn.ToepNufft()
-            self._gram_op_kernel = tkbn.calc_toeplitz_kernel(
-                self._samples.t(), self.shape
-            )
-
-        data = data.to(dtype=self._gram_op_kernel.dtype, copy=False)
+            self.compute_toeplitz_kernel()
+        data = data.to(dtype=self.cpx_dtype, copy=False)
         smaps = self.smaps
         if smaps is not None:
             smaps = smaps.to(data.dtype, copy=False)
@@ -254,7 +258,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         img = self._gram_op(
             data,
-            self._gram_op_kernel,
+            self._toeplitz_kernel,
             smaps=smaps,
             norm="ortho",
         ).reshape(data.shape)

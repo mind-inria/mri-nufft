@@ -5,11 +5,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from mrinufft._array_compat import (
+    Array,
     with_numpy_cupy,
     get_array_module,
     is_cuda_array,
     is_host_array,
     CUPY_AVAILABLE,
+    _to_numpy_cupy,
 )
 from mrinufft._utils import proper_trajectory
 
@@ -95,6 +97,7 @@ def compute_toeplitz_kernel(
     return irfftn(xp.conj(kernel) * scale, s=full_shape, norm="ortho")
 
 
+@with_numpy_cupy
 def _modulated_weights(
     weights: NDArray, omega: NDArray, shifts: tuple[int, ...], cpx_dtype
 ) -> NDArray:
@@ -129,11 +132,13 @@ def _compute_toep_2d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     result is never stored past this function, so the full (2N0, 2N1) array is
     never materialized.
     """
-    xp = get_array_module(nufft.samples)
+    (samples, weights), _ = _to_numpy_cupy((nufft.samples, weights))
+    samples: NDArray
+    xp = get_array_module(samples)
     _check_even_shape(nufft.shape)
     N0, N1 = nufft.shape
     h0, h1 = N0 // 2, N1 // 2
-    omega = proper_trajectory(nufft.samples, normalize="pi")
+    omega = proper_trajectory(samples, normalize="pi")
 
     kernel = xp.zeros((2 * N0, N1 + 1), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
@@ -167,11 +172,13 @@ def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     results are never stored past this function, so the full (2N0, 2N1, 2N2)
     array is never materialized.
     """
-    xp = get_array_module(nufft.samples)
+    (samples, weights), _ = _to_numpy_cupy((nufft.samples, weights))
+    samples: NDArray
+    xp = get_array_module(samples)
     _check_even_shape(nufft.shape)
     N0, N1, N2 = nufft.shape
     h0, h1, h2 = N0 // 2, N1 // 2, N2 // 2
-    omega = proper_trajectory(nufft.samples, normalize="pi")
+    omega = proper_trajectory(samples, normalize="pi")
 
     kernel = xp.zeros((2 * N0, 2 * N1, N2 + 1), dtype=nufft.cpx_dtype)
     tmp = xp.empty(nufft.shape, dtype=nufft.cpx_dtype)
@@ -200,9 +207,10 @@ def _compute_toep_3d(nufft: FourierOperatorBase, weights: NDArray) -> NDArray:
     return kernel
 
 
+@with_numpy_cupy
 def apply_toeplitz_kernel(
-    image: NDArray,
-    toeplitz_kernel: NDArray,
+    image: Array,
+    toeplitz_kernel: Array,
     padded_array: NDArray | None = None,
     paired_batch: bool = False,
 ) -> NDArray:
