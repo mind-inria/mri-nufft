@@ -66,6 +66,8 @@ class MRITorchKbNufft(FourierOperatorBase):
     available = TORCHKBNUFFT_AVAILABLE
     autograd_available = False
     _samples: torch.Tensor
+    # Unlike the numpy base operator, smaps are kept as a tensor.
+    _smaps: torch.Tensor | None  # ty: ignore[incompatible-attribute-override]
 
     def __init__(
         self,
@@ -116,7 +118,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(self.device)
         self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(self.device)
 
-    @FourierOperatorBase.smaps.setter
+    @property
+    def smaps(self) -> torch.Tensor | None:
+        """Sensitivity maps of the operator."""
+        return self._smaps
+
+    @smaps.setter
     def smaps(self, new_smaps):
         """Update smaps.
 
