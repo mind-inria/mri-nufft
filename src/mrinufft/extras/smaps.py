@@ -14,7 +14,7 @@ from typing import Any, Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import ArrayT, get_array_module, with_numpy_cupy
+from mrinufft._array_compat import Array, ArrayT, get_array_module, with_numpy_cupy
 from mrinufft._utils import MethodRegister, _fill_doc
 from mrinufft.density.utils import flat_traj
 
@@ -223,7 +223,7 @@ class SmapsMethod(Protocol):
 
     def __call__(
         self,
-        traj: ArrayT,
+        traj: Array,
         shape: tuple[int, ...],
         kspace_data: ArrayT,
         backend: str,
