@@ -690,6 +690,24 @@ class FourierOperatorBase(ABC):
 
         return lipschitz_cst
 
+    @overload
+    def pinv_solver(
+        self,
+        kspace_data: ArrayT,
+        optim: str = "lsqr",
+        *,
+        callback: None = None,
+        **kwargs: Any,
+    ) -> ArrayT: ...
+    @overload
+    def pinv_solver(
+        self,
+        kspace_data: ArrayT,
+        optim: str = "lsqr",
+        *,
+        callback: Callable[..., Any],
+        **kwargs: Any,
+    ) -> tuple[ArrayT, list[Any]]: ...
     def pinv_solver(self, kspace_data, optim="lsqr", **kwargs):
         """
         Solves the linear system Ax = y.
