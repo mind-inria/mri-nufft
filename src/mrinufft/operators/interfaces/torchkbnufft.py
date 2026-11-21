@@ -255,8 +255,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         if not hasattr(self, "_gram_op"):
             # initialize the toeplitz approximation for the gram operator.
             self._gram_op = tkbn.ToepNufft()
-            self.compute_toeplitz_kernel()
-        data = data.to(dtype=self.cpx_dtype, copy=False)
+        kernel = self._toeplitz_kernel
+        if kernel is None:
+            kernel = self.compute_toeplitz_kernel()
+        data = data.to(dtype=kernel.dtype, copy=False)
         smaps = self.smaps
         if smaps is not None:
             smaps = smaps.to(data.dtype, copy=False)
@@ -265,7 +267,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         img = self._gram_op(
             data,
-            self._toeplitz_kernel,
+            kernel,
             smaps=smaps,
             norm="ortho",
         ).reshape(data.shape)
