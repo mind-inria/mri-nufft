@@ -3,11 +3,14 @@
 See also the trajectories examples: :ref:`sphx_glr_generated_autoexamples_trajectories`
 """
 
+from typing import TYPE_CHECKING
+
 ##########
 # maths  #
 ##########
 
 from mrinufft.trajectories.maths.fibonacci import get_closest_fibonacci_number
+from mrinufft.trajectories.maths.primes import compute_coprime_factors
 from mrinufft.trajectories.maths.rotations import R2D, Ra, Rv, Rx, Ry, Rz
 
 __all__ = [
@@ -142,7 +145,6 @@ from .gradients import (
 )
 from .projection import (
     GradientLinearProjection,
-    GroupL2SoftThresholding,
     parameterize_by_arc_length,
     project_trajectory,
 )
@@ -155,6 +157,7 @@ from .sampling import (
     sample_from_density,
 )
 from .utils import (
+    KMAX,
     Acquisition,
     FloatEnum,
     Gammas,
@@ -214,7 +217,6 @@ __all__ += [
     "initialize_algebraic_spiral",
     "initialize_shape_norm",
     "initialize_tilt",
-    "linear_projection",
     "min_length_connection",
     "normalize_trajectory",
     "parameterize_by_arc_length",
@@ -223,3 +225,21 @@ __all__ += [
     "sample_from_density",
     "unnormalize_trajectory",
 ]
+
+
+# `GroupL2SoftThresholding` subclasses a pyproximal class, and pyproximal is slow
+# to import: it is imported on first access.
+if TYPE_CHECKING:
+    from .projection import GroupL2SoftThresholding
+
+
+def __getattr__(name):
+    if name == "GroupL2SoftThresholding":
+        from .projection import GroupL2SoftThresholding
+
+        return GroupL2SoftThresholding
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted([*globals(), "GroupL2SoftThresholding"])

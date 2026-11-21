@@ -11,15 +11,42 @@ import sys
 import pytest
 
 HEAVY = ["torch", "pylops", "pyproximal", "matplotlib", "sigpy"]
+MODULES = [
+    "mrinufft",
+    "mrinufft.operators",
+    "mrinufft.trajectories",
+    "mrinufft.io",
+    "mrinufft.display",
+    "mrinufft.extras",
+    "mrinufft.density",
+]
+ALLOWED = {"mrinufft.display": ["matplotlib"]}
 
 
-@pytest.mark.parametrize("module", ["mrinufft", "mrinufft.operators"])
+@pytest.mark.parametrize("module", MODULES)
 def test_lazy_imports(module):
+    heavy = [name for name in HEAVY if name not in ALLOWED.get(module, [])]
     code = (
         f"import sys, {module}; "
-        f"print(*(name for name in {HEAVY!r} if name in sys.modules))"
+        f"print(*(name for name in {heavy!r} if name in sys.modules))"
     )
     loaded = subprocess.run(
         [sys.executable, "-c", code], capture_output=True, text=True, check=True
     ).stdout.split()
     assert not loaded, f"`import {module}` imports {loaded}"
+
+
+@pytest.mark.parametrize("module", MODULES)
+def test_all(module):
+    exec(f"from {module} import *", {})
+
+
+def test_lazy_attribute():
+    import mrinufft.trajectories
+    from mrinufft.trajectories import projection
+
+    assert "GroupL2SoftThresholding" in dir(mrinufft.trajectories)
+    assert (
+        mrinufft.trajectories.GroupL2SoftThresholding
+        is projection.GroupL2SoftThresholding
+    )
