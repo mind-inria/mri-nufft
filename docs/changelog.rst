@@ -52,6 +52,11 @@ New features
 - ``write_trajectory(pad_to_multiple_of_4=True)`` pads the gradient waveforms to a
   multiple of four samples (:gh:`423`).
 - The API stability and deprecation policy, and this changelog.
+- The package ships its type annotations (``py.typed``). The ``op``, ``adj_op``,
+  ``gram_op``, ``data_consistency`` and ``pinv_solver`` methods of the operators
+  return the array library they are given (NumPy or PyTorch), and ``get_density``,
+  ``get_smaps``, ``get_optimizer`` and ``get_orc_factorization`` return functions
+  typed with the signature shared by their methods (:gh:`435`).
 
 Improvements
 ^^^^^^^^^^^^
@@ -61,6 +66,8 @@ Improvements
   :mod:`mrinufft.display` no longer imports pyproximal, pylops and torch, or
   pypulseq and matplotlib: the functions that need them import them. Importing
   :mod:`mrinufft.trajectories` takes about a third of the time it did.
+- ``get_gridded_trajectory`` builds its gridding operator once instead of twice
+  (:gh:`435`).
 
 Fixes
 ^^^^^
@@ -80,6 +87,24 @@ Fixes
   ``compute_coprime_factors`` can now be imported from
   :mod:`mrinufft.trajectories`, and ``twix2nifti_affine`` is exported by
   :mod:`mrinufft.io`.
+- The ``tensorflow`` operator, ``MRITensorflowNUFFT``, can be instantiated
+  (:gh:`435`).
+- The off-resonance operator, ``MRIFourierCorrected``, reports the autograd
+  support of the operator it wraps; it always reported it as available
+  (:gh:`435`).
+- ``MRIStackedNUFFT`` with 2D samples and ``z_index=None`` uses every slice
+  (:gh:`435`).
+- With cufinufft and gpunufft, ``gram_op`` takes ``toeplitz`` as its second
+  argument, as with the other backends: ``gram_op(x, False)`` passed ``False`` as
+  the output array, which is now the third argument (:gh:`435`).
+- The ``norm_factor`` and ``inv_norm_factor`` of the operators are Python floats,
+  so that they keep single precision data in single precision: the Toeplitz kernel
+  of a single precision operator was computed in double precision (:gh:`435`).
+- ``get_prephasors_and_spoilers`` accepts ``N`` as a ``(prephasor, spoiler)``
+  tuple of lengths, as documented (:gh:`435`).
+- ``make_b0map``, ``make_t2smap``, ``get_gridded_trajectory``,
+  ``connect_gradient`` and ``min_length_connection`` raise a clear error instead
+  of an ``UnboundLocalError`` on unsupported inputs (:gh:`435`).
 
 1.6.0 (2026-10-29)
 ------------------
