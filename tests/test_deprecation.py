@@ -47,6 +47,11 @@ def _scheduled_removals():
 
 def test_no_expired_deprecation():
     current = Version(os.environ.get("MRINUFFT_RELEASE", mrinufft.__version__))
+    if current.major == 99:
+        pytest.skip(
+            "mri-nufft was installed without its git tags, with the fallback version "
+            f"{current} of setuptools_scm: fetch the tags, or set MRINUFFT_RELEASE."
+        )
     current = Version(current.base_version)
     scheduled = list(_scheduled_removals())
     malformed = [loc for loc, since, removed_in in scheduled if since >= removed_in]
