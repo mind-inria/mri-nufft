@@ -52,6 +52,10 @@ Improvements
 ^^^^^^^^^^^^
 
 - The trajectory projection supports pyproximal 0.13 (:gh:`410`).
+- Importing :mod:`mrinufft.trajectories`, :mod:`mrinufft.io` or
+  :mod:`mrinufft.display` no longer imports pyproximal, pylops and torch, or
+  pypulseq and matplotlib: the functions that need them import them. Importing
+  :mod:`mrinufft.trajectories` takes about a third of the time it did.
 
 Fixes
 ^^^^^
@@ -66,6 +70,11 @@ Fixes
 - The phase accrual of prephasors, and direct off-resonance interpolators, are
   handled correctly (:gh:`414`).
 - ``mrinufft.__version__`` returns the installed version; it was not set.
+- ``from mrinufft.trajectories import *`` and ``from mrinufft.io import *`` work:
+  their ``__all__`` listed names the modules did not define. ``KMAX`` and
+  ``compute_coprime_factors`` can now be imported from
+  :mod:`mrinufft.trajectories`, and ``twix2nifti_affine`` is exported by
+  :mod:`mrinufft.io`.
 
 1.6.0 (2026-10-29)
 ------------------
