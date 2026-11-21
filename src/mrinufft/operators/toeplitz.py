@@ -380,6 +380,8 @@ class _GramOpGpuMixin(FourierOperatorBase):
         return self._safe_squeeze(ret)
 
     def _gram_op_sense_host(self, data, img_d):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         XYZ = self.shape
         image_dataf = np.reshape(data, (B, *XYZ))
@@ -411,6 +413,8 @@ class _GramOpGpuMixin(FourierOperatorBase):
         return img
 
     def _gram_op_sense_device(self, data, img_d):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         XYZ = self.shape
 
