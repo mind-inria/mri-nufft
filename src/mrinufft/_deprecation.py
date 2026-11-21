@@ -15,9 +15,8 @@ import functools
 import importlib
 import warnings
 from collections.abc import Callable
-from typing import Any, TypeVar, cast
+from typing import Any, LiteralString, TypeVar, cast
 
-from typing_extensions import LiteralString
 from typing_extensions import deprecated as _deprecated
 
 T = TypeVar("T")

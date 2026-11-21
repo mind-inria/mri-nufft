@@ -105,10 +105,12 @@ def read_pulseq_traj(
     #
     # pypulseq annotates definitions as ``str`` and system limits as
     # ``float | None``; here they hold the parsed lists / floats.
+    fov: Any = seq.get_definition("FOV")
+    img_size: Any = seq.get_definition("ImgSize")
     system: Any = seq.system
     acq = Acquisition(
-        fov=seq.get_definition("FOV"),  # ty: ignore[invalid-argument-type]
-        img_size=seq.get_definition("ImgSize"),  # ty: ignore[invalid-argument-type]
+        fov=fov,
+        img_size=img_size,
         adc_dwell_time=system.adc_raster_time,
         hardware=Hardware(
             grad_raster_time=system.grad_raster_time,
