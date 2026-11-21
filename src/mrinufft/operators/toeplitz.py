@@ -343,18 +343,18 @@ class _GramOpGpuMixin(FourierOperatorBase):
         return out_d
 
     @with_numpy_cupy
-    def gram_op(self, data, img_d=None, toeplitz=True):
+    def gram_op(self, data, toeplitz=True, img_d=None):
         """Compute the Gram operator of the NUFFT.
 
         Parameters
         ----------
         data: array
             Input data array.
-        img_d: array, optional
-            Preallocated output array.
         toeplitz: bool, default True
             If True, use the Toeplitz method to compute the Gram operator.
             If False, use the direct method.
+        img_d: array, optional
+            Preallocated output array.
 
         Returns
         -------
