@@ -8,6 +8,7 @@ sequences. Requires the `pypulseq` package to be installed.
 
 import logging
 from types import SimpleNamespace
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
@@ -22,12 +23,21 @@ from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
 
 logger = logging.getLogger(__name__)
 
-PULSEQ_AVAILABLE = True
-try:
+if TYPE_CHECKING:
     import pypulseq as pp
-except ImportError:
-    PULSEQ_AVAILABLE = False
-    pp = None
+
+
+def _import_pypulseq():
+    # pypulseq imports matplotlib, which is slow: import it only where it is used.
+    try:
+        import pypulseq
+    except ImportError as exc:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` or "
+            "`pip install mri-nufft[io]`."
+        ) from exc
+    return pypulseq
 
 
 def read_pulseq_traj(
@@ -59,12 +69,7 @@ def read_pulseq_traj(
         The acquisition parameters extracted from the sequence.
 
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` or "
-            "`pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
     if not isinstance(seq, pp.Sequence):
         filename = seq
         seq = pp.Sequence()
@@ -132,12 +137,7 @@ def _acq2opts(acq: Acquisition) -> "pp.Opts":
     pp.Opts
         The corresponding pypulseq Opts object.
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` or "
-            "`pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
     system = pp.Opts(
         max_grad=acq.gmax * 1e3,  # convert to mT/m
         grad_unit="mT/m",
@@ -222,12 +222,7 @@ def pulseq_gre(
     pp.Sequence
         A Pulseq sequence object with the specified arbitrary gradient waveform.
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` "
-            "or `pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
 
     acq = acq or Acquisition.default
 
