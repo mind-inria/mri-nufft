@@ -85,9 +85,6 @@ def get_gridded_trajectory(
     shape = acq.img_size
     samples = trajectory.reshape(-1, trajectory.shape[-1])
     dcomp = get_density("pipe")(trajectory, shape, backend=backend)
-    gridder = get_operator(backend)(
-        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
-    )
     if backend == "gpunufft":
         # For gpunufft, we need to interface directly with the raw operator
         gridder = get_operator(backend)(
