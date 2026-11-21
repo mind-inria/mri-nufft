@@ -223,7 +223,7 @@ class OrcMethod(Protocol):
         mask: Array | None,
         *args: Any,
         **kwargs: Any,
-    ) -> tuple[Array, "Array | _C_lazy", Array]:
+    ) -> tuple[Array, Array | _C_lazy, Array]:
         """Factorize the off-resonance exponential."""
         ...
 
