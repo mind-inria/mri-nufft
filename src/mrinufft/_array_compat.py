@@ -84,7 +84,7 @@ def _tf_cuda_is_available():
     return _TF_CUDA_AVAILABLE
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     """Expose lazily-computed values as module attributes (PEP 562)."""
     if name == "NP2TORCH":
         return _np2torch()
