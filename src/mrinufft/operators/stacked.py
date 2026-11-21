@@ -150,7 +150,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
             # samples describes a 2D trajectory
             samples2d = samples
             if z_index is None:
-                z_index_ = np.ones(shape[-1], dtype=bool)
+                z_index = np.ones(shape[-1], dtype=bool)
             try:
                 z_index_ = np.arange(shape[-1])[z_index]
             except IndexError as e:
