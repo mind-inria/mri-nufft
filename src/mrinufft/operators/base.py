@@ -312,11 +312,11 @@ class FourierOperatorBase(ABC):
         pass
 
     @abstractmethod
-    def _op(self, image: NDArray, coeffs: NDArray) -> NDArray:
+    def _op(self, image: NDArray, coeffs: NDArray) -> None:
         """Low level operator implementation."""
 
     @abstractmethod
-    def _adj_op(self, coeffs: NDArray, image: NDArray) -> NDArray:
+    def _adj_op(self, coeffs: NDArray, image: NDArray) -> None:
         """Low level adjoint operator implementation."""
 
     @with_numpy_cupy
