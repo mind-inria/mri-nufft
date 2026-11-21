@@ -488,9 +488,9 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
     @cached_property
-    def norm_factor(self):
+    def norm_factor(self) -> float:
         """Norm factor of the operator."""
-        return self.operator.norm_factor * np.sqrt(2)
+        return float(self.operator.norm_factor * np.sqrt(2))
 
     @cached_property
     def _bc_chunks(self):

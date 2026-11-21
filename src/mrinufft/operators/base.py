@@ -877,12 +877,13 @@ class FourierOperatorBase(ABC):
         return np.prod(self.samples.shape[:-1])
 
     @cached_property
-    def norm_factor(self) -> np.floating:
+    def norm_factor(self) -> float:
         """Normalization factor of the operator."""
-        return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+        # A Python float, so that scaling float32 data does not promote it.
+        return float(np.sqrt(np.prod(self.shape) * (2 ** len(self.shape))))
 
     @cached_property
-    def inv_norm_factor(self) -> np.floating:
+    def inv_norm_factor(self) -> float:
         """Reciprocal of :attr:`norm_factor`, cached for the operator lifetime.
 
         ``shape`` is fixed at construction, so the normalization is constant;
