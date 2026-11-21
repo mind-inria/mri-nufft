@@ -489,6 +489,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         return contig.reshape(shape) if shape is not None else contig
 
     def _op_sense_device(self, data, ksp_d=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         data = cp.asarray(data)
@@ -513,6 +515,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         return ksp_d.reshape((B, C, K))
 
     def _op_sense_host(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         if ksp is None:
@@ -581,6 +585,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         inv_norm = 1.0 / self.norm_factor
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 # buffer slot b is still being read by the compute
@@ -755,6 +761,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
         """Perform sense reconstruction when data is on device."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         # Define short name
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -791,6 +799,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         - smaps_batched(S, T, X,Y,Z)
 
         """
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         # Define short name
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -852,6 +862,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 # buffer slot b is still being read by the compute
@@ -1049,6 +1061,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _dc_sense_host(self, image_data, obs_data):
         """Gradient computation when all data is on host."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
@@ -1096,6 +1110,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _dc_sense_device(self, image_data, obs_data):
         """Gradient computation when all data is on device."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 

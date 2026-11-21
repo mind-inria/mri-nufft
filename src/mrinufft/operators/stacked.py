@@ -198,6 +198,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -254,6 +256,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
         return self._safe_squeeze(self._adj_op_calibless(coeffs, img))
 
     def _adj_op_sense(self, coeffs, img):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -546,6 +550,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return self._safe_squeeze(ret)
 
     def _op_sense_host(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -636,6 +642,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 h2d_stream.wait_event(compute_done[b])
@@ -668,6 +676,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return ksp.reshape((B, C, NZ * NS))
 
     def _op_sense_device(self, data, ksp):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
         data = cp.asarray(data)
@@ -830,6 +840,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_host(self, coeffs, img_d=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -916,6 +928,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 h2d_stream.wait_event(compute_done[b])
@@ -946,6 +960,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return img
 
     def _adj_op_sense_device(self, coeffs, img):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs = cp.asarray(coeffs)

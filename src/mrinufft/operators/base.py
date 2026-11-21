@@ -350,6 +350,8 @@ class FourierOperatorBase(ABC):
 
     def _gram_op_sense(self, data):
         """Compute the Gram operator with sensitivity maps."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         xp = get_array_module(data)
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape(B, *XYZ)
@@ -1000,6 +1002,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return ret
 
     def _op_sense(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         dataf = data.reshape((B, *XYZ))
@@ -1056,6 +1060,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         xp = get_array_module(coeffs)
@@ -1114,6 +1120,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return self._safe_squeeze(self._grad_calibless(image_data, obs_data))
 
     def _grad_sense(self, image_data, obs_data):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
