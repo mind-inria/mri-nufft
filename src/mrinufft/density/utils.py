@@ -42,13 +42,12 @@ def flat_traj(normalize="unit"):
             args = list(args)
             if len(args) == 0:
                 # use the trajectory kwarg instead
-                first_key = first_param
-                first_arg = kwargs[first_key]
+                first_arg = kwargs[first_param]
             else:
                 first_arg = args[0]
             first_arg = proper_trajectory(first_arg, normalize=normalize)
             if len(args) == 0:
-                kwargs[first_key] = first_arg
+                kwargs[first_param] = first_arg
             else:
                 args[0] = first_arg
             return func(*args, **kwargs)

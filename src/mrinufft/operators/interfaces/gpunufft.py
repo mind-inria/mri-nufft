@@ -603,7 +603,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
         """
         # calling the parent setter
-        FourierOperatorBase.smaps.fset(self, new_smaps)
+        FourierOperatorBase.smaps.__set__(self, new_smaps)
         if self._smaps is not None and hasattr(self, "raw_op"):
             self.raw_op.set_smaps(smaps=new_smaps)
 

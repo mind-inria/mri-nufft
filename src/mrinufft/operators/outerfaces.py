@@ -43,6 +43,8 @@ if DEEPINV_AVAILABLE:
     class DeepInvPhyNufft(LinearPhysics):
         """Expose an MRINufftAutoGrad as a DeepInv Physics Operator."""
 
+        _operator: MRINufftAutoGrad
+
         def __init__(self, autograd_nufft, viewed_as_real=False):
             if not isinstance(autograd_nufft, MRINufftAutoGrad):
                 raise ValueError(
