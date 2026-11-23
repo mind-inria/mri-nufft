@@ -334,17 +334,17 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
         Built from the 2D samples and the z_index normalized to [-0.5, 0.5).
         """
+        samples2d = np.asarray(self._samples2d)
         samples = np.zeros(
-            (len(self.z_index), len(self._samples2d), 3), dtype=self._samples2d.dtype
+            (len(self.z_index), len(samples2d), 3), dtype=samples2d.dtype
         )
 
         for i, idx in enumerate(self.z_index):
             z_coord = idx / self.shape[-1] - 0.5
             samples[i] = np.concatenate(
                 [
-                    self._samples2d,
-                    z_coord
-                    * np.ones((len(self._samples2d), 1), dtype=self._samples2d.dtype),
+                    samples2d,
+                    z_coord * np.ones((len(samples2d), 1), dtype=samples2d.dtype),
                 ],
                 axis=1,
             )
