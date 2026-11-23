@@ -153,7 +153,8 @@ def get_packing_spacing_positions(
         The Non-Cartesian coordinates of the sampled k-space points in 2D plane.
     """
     # Choose the helix positions according to packing
-    packing_enum = Packings[packing]
+    # StrEnum name lookup is case-sensitive and member names are upper case.
+    packing_enum = Packings[packing.upper()]
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
     if packing_enum == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)
