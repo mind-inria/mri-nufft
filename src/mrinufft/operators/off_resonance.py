@@ -9,11 +9,12 @@ from mrinufft._array_compat import with_numpy_cupy, CUPY_AVAILABLE
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import get_array_module, is_host_array, is_cuda_array
+from mrinufft._array_compat import Array, get_array_module, is_host_array, is_cuda_array
 from mrinufft.extras import get_orc_factorization, get_complex_fieldmap_rad
 from .base import FourierOperatorBase, power_method, get_operator, AUTOGRAD_AVAILABLE
 
 if TYPE_CHECKING:
+    from mrinufft.extras.field_map import OrcMethod
     from mrinufft.operators.autodiff import MRINufftAutoGrad
 
 if CUPY_AVAILABLE:
@@ -89,6 +90,7 @@ class MRIFourierCorrected(FourierOperatorBase):
         interpolator: str | dict | tuple[NDArray, NDArray] = "svd",
     ):
         self._fourier_op = fourier_op
+        self.autograd_available = fourier_op.autograd_available
         self.squeeze_dims = self._fourier_op.squeeze_dims
         self._fourier_op.squeeze_dims = False  # we will manage shapes here.
 
@@ -106,9 +108,9 @@ class MRIFourierCorrected(FourierOperatorBase):
     @with_numpy_cupy
     def compute_interpolator(
         self,
-        interpolators: str | dict | tuple[NDArray, NDArray],
-        field_map: NDArray,
-        readout_time: NDArray,
+        interpolators: str | dict | tuple[NDArray, NDArray] | OrcMethod,
+        field_map: Array | None,
+        readout_time: NDArray | None,
         mask: NDArray | None,
     ):
         """Decompose the field-map in space and time-wise interpolators.
@@ -141,6 +143,8 @@ class MRIFourierCorrected(FourierOperatorBase):
             self.B = B.astype(self.cpx_dtype, copy=False)
             self.C = C.astype(self.cpx_dtype, copy=False)
             return
+        if field_map is None or readout_time is None:
+            raise ValueError("field_map and readout_time are required.")
 
         xp = get_array_module(field_map)
         # Resize to match fourier shape
@@ -195,7 +199,7 @@ class MRIFourierCorrected(FourierOperatorBase):
             field_map=field_map, readout_time=readout_time, mask=mask, **kwargs
         )
 
-    def update_field_map(self, new_field_map: NDArray):
+    def update_field_map(self, new_field_map: Array):
         """Update the field map and recompute the interpolators."""
         self.compute_interpolator(
             interpolators=self.interpolator_method,
@@ -205,12 +209,12 @@ class MRIFourierCorrected(FourierOperatorBase):
         )
 
     @property
-    def field_map(self) -> NDArray:
+    def field_map(self) -> Array | None:
         """Get the field map used for off-resonance correction."""
         return self._field_map
 
     @field_map.setter
-    def field_map(self, new_field_map: NDArray):
+    def field_map(self, new_field_map: Array):
         """Update the field map and recompute the interpolators."""
         self.update_field_map(new_field_map)
 
@@ -219,10 +223,6 @@ class MRIFourierCorrected(FourierOperatorBase):
         """Get the full readout time for all samples."""
         xp = get_array_module(self.readout_time)
         return xp.tile(self.readout_time, self.n_shots)
-
-    def autograd_available(self) -> bool:
-        """Whether the operator supports autograd differentiation."""
-        return self._fourier_op.autograd_available
 
     @property
     def n_samples(self) -> int:

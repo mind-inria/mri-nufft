@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from functools import partial
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import numpy.linalg as nl
@@ -12,17 +13,16 @@ from mrinufft._array_compat import get_array_module, with_numpy_cupy
 from mrinufft._utils import _fill_doc, _progressbar
 from mrinufft.trajectories.utils import Acquisition
 
-PYPROXIMAL_AVAILABLE = True
-
-try:
-    import pylops
-    import pyproximal
-    from pylops import FirstDerivative, LinearOperator
+# pyproximal and pylops (which imports torch) are slow to import: they are only
+# imported by `project_trajectory`, and `GroupL2SoftThresholding` on first access.
+if TYPE_CHECKING:
+    from pylops import LinearOperator
     from pyproximal import ProxOperator
-except ImportError:
-    ProxOperator = object
-    LinearOperator = object
-    PYPROXIMAL_AVAILABLE = False
+
+    from mrinufft.trajectories._proximal import (
+        _GroupL2SoftThresholding,
+        _GradientLinearProjection,
+    )
 
 
 def parameterize_by_arc_length(
@@ -95,64 +95,6 @@ def parameterize_by_arc_length(
 #################################
 
 
-class GroupL2SoftThresholding(ProxOperator):
-    r"""
-    Group L2 Soft Thresholding (Shrinkage) Operator.
-
-    This operator applies a soft-thresholding on the L2 norm of vectors
-    grouped along the last dimension. It is effectively the proximal operator
-    of the Group Lasso (L2,1) penalty.
-
-    The logic follows: :math:`y = x * max(0, ||x|| - alpha) / ||x||`
-
-    Parameters
-    ----------
-    shape : tuple[int, ...]
-        The shape of the input vector, expected to be (Nc, Ns, D).
-    alphas : NDArray or float
-        The threshold parameter(s). Can be a scalar or a vector of shape (D,).
-        If a vector is provided, the thresholding is applied per-channel
-        broadcasting against the joint L2 norm.
-    """
-
-    def __init__(self, shape: tuple[int, ...], alphas: NDArray):
-        # We pass None as the function value evaluator for now,
-        # or we could implement the L21 norm evaluation.
-        super().__init__(None, False)
-        self.shape = shape
-        # Ensure alphas is the correct shape/type
-        self.alphas = alphas
-
-    @with_numpy_cupy
-    def __call__(self, x: NDArray) -> bool:
-        """
-        Evaluate the regularization function value (L2,1 norm weighted by alphas).
-
-        Note: This returns the penalty value, not a boolean check.
-        """
-        xp = get_array_module(x)
-        norms = xp.linalg.norm(x.reshape(self.shape), axis=-1)
-        return xp.sum(norms * np.mean(self.alphas))
-
-    @with_numpy_cupy
-    def prox(self, x: NDArray, tau: float, eps: float = 1e-10) -> NDArray:
-        """
-        Apply the Group L2 Soft Thresholding.
-
-        y = x * ( ||x||_2 - (alphas * tau) )_+ / ||x||_2
-        """
-        xp = get_array_module(x)
-        x_mat = x.reshape(self.shape)
-        thresholds = self.alphas * tau
-        norm2_vec = xp.linalg.norm(x_mat, axis=-1)
-        denom = xp.maximum(norm2_vec, eps)[..., None]
-        norm_minus_alpha = norm2_vec[..., None] - thresholds
-        numer = xp.maximum(0, norm_minus_alpha)
-        scaling_factor = numer / denom
-        y = x_mat * scaling_factor
-        return y.flatten()
-
-
 _proj_docs = dict(
     proj_ref="""
 References
@@ -170,7 +112,7 @@ References
 def _linear_projection(
     x: NDArray,
     target: NDArray,
-    A: LinearOperator | None = None,
+    A: "LinearOperator | None" = None,
     mask: NDArray | tuple | None = None,
 ) -> NDArray:
     r"""Implement the projection on linear constraints set given by Eq 10 in_[Proj].
@@ -210,72 +152,13 @@ def _linear_projection(
     """
     if A is not None and mask is not None:
         raise ValueError("Provide either a linear operator A or a mask")
-    elif A is None and mask is None:
-        return x
-    elif mask is not None:
+    if mask is not None:
         x[mask] = target
         return x
-    else:
-        return A.div(target - A * x)
-
-
-@_fill_doc(_proj_docs)
-class GradientLinearProjection:
-    r"""
-    Implements the gradient of F(q1, q2) given by Eq 11 in_[Proj].
-
-    The gradient is given by:
-    .. math::
-
-       \nabla F(q) = - A s^*
-
-    where :math:`s^*` is the projection of the primal variable :math:`z = c - M^H q`
-    onto the linear constraint set defined by :math:`A` and :math:`v`.
-
-    Parameters
-    ----------
-    M: LinearOperator
-        The kinetic operator M.
-    c: NDArray
-        The initial trajectory c.
-    linear_projector: LinearProjection, optional
-        An instance of the LinearProjection class to perform the projection
-        onto the constraint set. If not provided, the projection will be
-        performed without any constraints (i.e., :math:`s^* = z`).
-
-    ${proj_ref}
-    """
-
-    def __init__(
-        self,
-        initial_trajectory: NDArray,
-        kinetic_op: LinearOperator,
-        linear_projector: Callable | None = None,
-    ):
-        self.M = kinetic_op
-        self.c = initial_trajectory
-        self.linear_projector = linear_projector
-
-    def get_primal_variables(self, q: NDArray) -> NDArray:
-        """Compute the primal variables z = c - M^H q."""
-        return self.c - (self.M.H * q)
-
-    def __call__(self, q: NDArray) -> float:
-        """Evaluate the objective function."""
-        z = self.get_primal_variables(q)
-        s_star = self.linear_projector(z) if self.linear_projector is not None else z
-        xp = get_array_module(s_star)
-        return 0.5 * xp.linalg.norm(s_star) ** 2
-
-    def grad(self, q: NDArray) -> NDArray:
-        """
-        Compute the gradient of the objective function w.r.t q.
-
-        grad F(q) = - M * s_star
-        """
-        z = self.get_primal_variables(q)
-        s_star = self.linear_projector(z) if self.linear_projector is not None else z
-        return -(self.M * s_star).flatten()
+    if A is None:
+        return x
+    # pylops>=2.9 types div as NDArray | LinearOperator; an array input gives an array.
+    return cast(NDArray, A.div(target - A * x))
 
 
 @_fill_doc(_proj_docs)
@@ -328,12 +211,21 @@ def project_trajectory(
 
     ${proj_ref}
     """
-    acq = acq or Acquisition.default
-    if not PYPROXIMAL_AVAILABLE:
+    try:
+        import pylops
+        import pyproximal
+        from pylops import FirstDerivative
+    except ImportError as exc:
         raise ImportError(
             "pyproximal is required for trajectory projection. "
             "Please install it to use this function."
-        )
+        ) from exc
+    from mrinufft.trajectories._proximal import (
+        _GroupL2SoftThresholding,
+        _GradientLinearProjection,
+    )
+
+    acq = acq or Acquisition.default
     if trajectory.ndim == 2:
         trajectory = trajectory[None]
     xp = get_array_module(trajectory)
@@ -358,11 +250,15 @@ def project_trajectory(
         / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
         / 2
     )
-    prox_grad = GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
-    prox_slew = GroupL2SoftThresholding(
+    prox_grad = _GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
+    prox_slew = _GroupL2SoftThresholding(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
-    prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
+    # pyproximal annotates VStack(ops) as LinearOperators instead of ProxOperators.
+    prox = pyproximal.VStack(
+        [prox_grad, prox_slew],  # ty: ignore[invalid-argument-type]
+        nn=[Nc * Ns * Nd] * 2,
+    )
 
     if TE_pos == -1:
         # detect the position of the original k-space center and
@@ -377,7 +273,7 @@ def project_trajectory(
         )
     else:
         linear_projector_ = linear_projector
-    f = GradientLinearProjection(
+    f = _GradientLinearProjection(
         initial_trajectory=trajectory,
         kinetic_op=M,
         linear_projector=linear_projector_,

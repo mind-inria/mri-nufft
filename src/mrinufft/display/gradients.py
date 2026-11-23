@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import FigureBase
 from numpy.typing import NDArray
 
 from .config import displayConfig
@@ -25,8 +27,8 @@ def display_gradients_simply(
     fill_area: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
-    subfigure: plt.Figure | Sequence = None,
-) -> tuple:
+    subfigure: FigureBase | Sequence[Axes] | None = None,
+) -> Sequence[Axes] | NDArray:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
@@ -66,11 +68,14 @@ def display_gradients_simply(
     if subfigure is None:
         fig = plt.figure(figsize=(figsize, figsize * nb_axes / (nb_axes - 1)))
         axes = fig.subplots(nb_axes, 1)
-    elif isinstance(subfigure, Sequence) and len(subfigure) == nb_axes:
+    elif isinstance(subfigure, FigureBase):
+        axes = subfigure.subplots(nb_axes, 1)
+    elif len(subfigure) == nb_axes:
         axes = subfigure
     else:
-        fig = subfigure
-        axes = fig.subplots(nb_axes, 1)
+        raise ValueError(
+            f"subfigure should be a figure or a sequence of {nb_axes} axes"
+        )
     for i, ax in enumerate(axes[: nb_axes - 1]):
         ax.set_ylabel("G{}".format(["x", "y", "z"][i]), fontsize=displayConfig.fontsize)
 
@@ -131,12 +136,12 @@ def display_gradients(
     show_norm: bool = True,
     uni_signal: str | None = "gray",
     uni_gradient: str | None = None,
-    subfigure: plt.Figure | plt.Axes | None = None,
+    subfigure: FigureBase | Sequence[Axes] | None = None,
     data_type: str = "grad",
     show_constraints: bool = False,
     acq: Acquisition | None = None,
-    constraints_order: int | str | None = None,
-) -> tuple:
+    constraints_order: float | Literal["fro"] | None = None,
+) -> Sequence[Axes] | NDArray:
     """Display gradients based on trajectory of any dimension.
 
     Parameters
@@ -222,7 +227,7 @@ def display_gradients(
             ax.xaxis.set_tick_params(labelbottom=True)
             ticks = ax.get_xticks()
             scale = acq.raster_time * 1e3
-            locator = mticker.FixedLocator(ticks)
+            locator = mticker.FixedLocator(ticks.tolist())
             formatter = mticker.FixedFormatter(np.around(scale * ticks, 2))
             ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(formatter)
@@ -245,7 +250,7 @@ def display_gradients(
         scale = scale * (
             1e3 if data_type == "grad" else 1e5
         )  # Convert from T/m to mT/m
-        locator = mticker.FixedLocator(ticks)
+        locator = mticker.FixedLocator(ticks.tolist())
         formatter = mticker.FixedFormatter(np.around(scale * ticks, 1))
         if not show_norm or ax != axes[-1]:
             ax.yaxis.set_major_locator(locator)

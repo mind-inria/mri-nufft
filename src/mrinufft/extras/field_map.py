@@ -10,23 +10,31 @@ explanation).
 
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Callable
 from itertools import combinations_with_replacement
 from math import factorial
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
 from mrinufft._array_compat import (
+    Array,
+    ArrayT,
     get_array_module,
     with_numpy,
     with_numpy_cupy,
 )
 from mrinufft._utils import MethodRegister
-from mrinufft.trajectories.girf import spherical_harmonics
-from mrinufft.trajectories.utils import Acquisition
+
+# `mrinufft.operators` imports this module, and `mrinufft.trajectories` imports
+# pyproximal, pylops and torch: import it only where it is needed.
+if TYPE_CHECKING:
+    from mrinufft.trajectories.utils import Acquisition
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +81,8 @@ def make_b0map(shape, b0range=(-300, 300), mask=None):
         radial_mask, fieldmap = _make_disk(shape)
     elif ndim == 3:
         radial_mask, fieldmap = _make_sphere(shape)
+    else:
+        raise ValueError("shape should be 2D or 3D.")
     if mask is None:
         mask = radial_mask
 
@@ -114,6 +124,8 @@ def make_t2smap(shape, t2svalue=15.0, mask=None):
         radial_mask, fieldmap = _make_disk(shape)
     elif ndim == 3:
         radial_mask, fieldmap = _make_sphere(shape)
+    else:
+        raise ValueError("shape should be 2D or 3D.")
     if mask is None:
         mask = radial_mask
 
@@ -197,14 +209,33 @@ See Also
 )
 
 
-register_orc = MethodRegister("orc_factorization", _field_map_docs)
+class OrcMethod(Protocol):
+    """Signature shared by the off-resonance factorization methods.
+
+    Returns the temporal and spatial interpolators ``B`` and ``C``, and the
+    exponential ``E`` they approximate.
+    """
+
+    def __call__(
+        self,
+        field_map: Array,
+        readout_time: Array,
+        mask: Array | None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> tuple[Array, Array | _C_lazy, Array]:
+        """Factorize the off-resonance exponential."""
+        ...
+
+
+register_orc = MethodRegister[OrcMethod]("orc_factorization", _field_map_docs)
 get_orc_factorization = register_orc.make_getter()
 
 
 @with_numpy_cupy
 def get_complex_fieldmap_rad(
-    b0_map: NDArray, r2star_map: NDArray | None = None
-) -> NDArray[np.complex64]:
+    b0_map: ArrayT, r2star_map: ArrayT | None = None
+) -> ArrayT:
     r"""Create a complex-valued field-map in rad/s.
 
     Parameters
@@ -255,16 +286,21 @@ def _resolve_n_bins(
         # |z - z_k| <= sqrt(n_dims) * width / 2, and exp(z t) is then off by
         # ~|z - z_k| |t| <= _BIN_TOL.
         width = 2 * _BIN_TOL / (np.sqrt(n_dims) * t_max)
-        return tuple(max(1, int(np.ceil(s / width))) for s in span)
+        n_r, n_b = (max(1, int(np.ceil(s / width))) for s in span)
+        return (n_r, n_b)
     if isinstance(n_bins, int):
         if span[1] == 0:
             return (n_bins, 1)
         return (max(1, int(np.ceil(n_bins * span[0] / span[1]))), n_bins)
-    return tuple(int(n) if s > 0 else 1 for n, s in zip(n_bins, span, strict=True))
+    n_r, n_b = (int(n) if s > 0 else 1 for n, s in zip(n_bins, span, strict=True))
+    return (n_r, n_b)
 
 
 def _bin_index(
-    z: NDArray, lo: tuple[float, float], span: tuple[float, float], n_bins
+    z: NDArray,
+    lo: tuple[float, float],
+    span: tuple[float, float],
+    n_bins: tuple[int, int],
 ) -> NDArray:
     """Flat index of the bin of each value, on a regular grid over ``lo + span``.
 
@@ -319,23 +355,23 @@ def _create_histogram(
     xp = get_array_module(field_map)
     z = field_map.ravel()
     zm = z if mask is None else field_map[mask].ravel()
-    lo = (float(zm.real.min()), float(zm.imag.min()))
-    span = (float(zm.real.max()) - lo[0], float(zm.imag.max()) - lo[1])
+    lo = (float(xp.min(zm.real)), float(xp.min(zm.imag)))
+    span = (float(xp.max(zm.real)) - lo[0], float(xp.max(zm.imag)) - lo[1])
     t_max = float(xp.abs(readout_time).max())
 
     auto = n_bins == -1
-    n_bins = _resolve_n_bins(n_bins, span, t_max)
-    uniq, inverse = xp.unique(_bin_index(z, lo, span, n_bins), return_inverse=True)
+    bins = _resolve_n_bins(n_bins, span, t_max)
+    uniq, inverse = xp.unique(_bin_index(z, lo, span, bins), return_inverse=True)
     max_bins = max(1, _MAX_E_SIZE // readout_time.size)
     while auto and uniq.size > max_bins:
         # Exact if all bins of the grid are occupied, too little otherwise: loop.
-        scale = (max_bins / uniq.size) ** (1 / sum(n > 1 for n in n_bins))
-        n_bins = tuple(max(1, int(n * scale)) for n in n_bins)
-        uniq, inverse = xp.unique(_bin_index(z, lo, span, n_bins), return_inverse=True)
+        scale = (max_bins / uniq.size) ** (1 / sum(n > 1 for n in bins))
+        bins = (max(1, int(bins[0] * scale)), max(1, int(bins[1] * scale)))
+        uniq, inverse = xp.unique(_bin_index(z, lo, span, bins), return_inverse=True)
     inverse = inverse.ravel()
 
-    width = [s / n for s, n in zip(span, n_bins, strict=True)]
-    ir, ii = xp.divmod(uniq, n_bins[1])
+    width = (span[0] / bins[0], span[1] / bins[1])
+    ir, ii = xp.divmod(uniq, bins[1])
     centers = (lo[0] + (ir + 0.5) * width[0]) + 1j * (lo[1] + (ii + 0.5) * width[1])
     counts = xp.bincount(
         inverse if mask is None else inverse[mask.ravel().astype(bool)],
@@ -349,12 +385,12 @@ def _create_histogram(
             "off-resonance: binning the field map on %d x %d (R2* x B0) bins "
             "changes exp(Delta t) by up to %.1f%%; pass a larger n_bins to reduce "
             "it, at the cost of memory.",
-            *n_bins,
+            *bins,
             100 * max_err,
         )
     logger.debug(
         "off-resonance: %d x %d bins, %d occupied, binning error <= %.2f%%",
-        *n_bins,
+        *bins,
         uniq.size,
         100 * max_err,
     )
@@ -824,6 +860,8 @@ def compute_girf_interpolators(
         If ``skip`` is out of range, or if ``interpolators`` does not match the
         samples.
     """
+    from mrinufft.trajectories.girf import spherical_harmonics
+
     fields = np.asarray(fields, dtype=float)
     n_shots, n_terms = fields.shape[0], fields.shape[2]
     if not 0 <= skip <= fields.shape[1]:

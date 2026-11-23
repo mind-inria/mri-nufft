@@ -1,21 +1,24 @@
 """Interface to the GPU NUFFT library."""
 
-import numpy as np
 import warnings
+from functools import cached_property
+from typing import Any
+
+import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
-from mrinufft.operators.toeplitz import _GramOpGpuMixin
-from mrinufft._utils import proper_trajectory
 from mrinufft._array_compat import (
-    get_array_module,
+    _array_to_numpy,
     auto_cast,
+    get_array_module,
     is_cuda_array,
     is_host_array,
-    with_numpy_cupy,
     with_numpy,
-    _array_to_numpy,
+    with_numpy_cupy,
 )
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorBase, _ToggleGradPlanMixin
+from mrinufft.operators.toeplitz import _GramOpGpuMixin
 
 GPUNUFFT_AVAILABLE = True
 try:
@@ -25,8 +28,8 @@ except ImportError:
 
 CUPY_AVAILABLE = True
 try:
-    import cupyx as cx
     import cupy as cp
+    import cupyx as cx
 except ImportError:
     CUPY_AVAILABLE = False
 
@@ -38,7 +41,7 @@ def _allocator(size):
     return cp.cuda.PinnedMemoryPointer(mem, offset=0)
 
 
-def make_pinned_smaps(smaps):
+def make_pinned_smaps(smaps: NDArray) -> NDArray:
     """Make pinned smaps from smaps.
 
     Parameters
@@ -51,8 +54,6 @@ def make_pinned_smaps(smaps):
     np.ndarray or None
         the pinned sensitivity maps
     """
-    if smaps is None:
-        return None
     smaps_ = smaps.T.reshape(-1, smaps.shape[0])
     cp.cuda.set_pinned_memory_allocator(_allocator)
     pinned_smaps = cx.empty_pinned(smaps_.shape, dtype=np.complex64, order="F")
@@ -79,20 +80,20 @@ class RawGpuNUFFT:
 
     def __init__(
         self,
-        samples,
-        shape,
-        n_coils=1,
-        density_comp=None,
-        kernel_width=3,
-        sector_width=8,
-        osf=2,
-        upsampfac=None,
-        balance_workload=True,
-        smaps=None,
-        pinned_smaps=None,
-        pinned_image=None,
-        pinned_kspace=None,
-        use_gpu_direct=False,
+        samples: NDArray,
+        shape: tuple[int, ...],
+        n_coils: int = 1,
+        density_comp: NDArray | None = None,
+        kernel_width: int = 3,
+        sector_width: int = 8,
+        osf: int = 2,
+        upsampfac: int | None = None,
+        balance_workload: bool = True,
+        smaps: NDArray | None = None,
+        pinned_smaps: NDArray | None = None,
+        pinned_image: NDArray | None = None,
+        pinned_kspace: NDArray | None = None,
+        use_gpu_direct: bool = False,
         **kwargs,
     ):
         """Initialize the 'NUFFT' class.
@@ -181,6 +182,7 @@ class RawGpuNUFFT:
                     (n_coils, len(samples)),
                     dtype=np.complex64,
                 )
+        # Pinned host buffers (None when unused, e.g. with use_gpu_direct).
         self.pinned_image = pinned_image
         self.pinned_kspace = pinned_kspace
         self.osf = osf
@@ -228,7 +230,10 @@ class RawGpuNUFFT:
             sensittivity maps
         """
         smaps_ = smaps.T.reshape(-1, smaps.shape[0])
-        np.copyto(self.pinned_smaps, smaps_)
+        if self.pinned_smaps is not None:
+            np.copyto(self.pinned_smaps, smaps_)
+        else:
+            raise ValueError("Pinned smaps is None, cannot update smaps.")
 
     def set_pts(self, samples, density=None):
         """Update the kspace locations and density compensation.
@@ -305,7 +310,10 @@ class RawGpuNUFFT:
         if kspace is None:
             kspace = self.pinned_kspace
             make_copy_back = True
-        np.copyto(self.pinned_image, self._reshape_image(image))
+        if self.pinned_image is not None:
+            np.copyto(self.pinned_image, self._reshape_image(image))
+        else:
+            raise ValueError("Pinned image is not initialized.")
         new_ksp = self.operator.op(
             self.pinned_image,
             kspace,
@@ -336,7 +344,10 @@ class RawGpuNUFFT:
         if image is None:
             image = self.pinned_image
             make_copy_back = True
-        np.copyto(self.pinned_kspace, coeffs)
+        if self.pinned_kspace is not None:
+            np.copyto(self.pinned_kspace, coeffs)
+        else:
+            raise ValueError("Pinned kspace is not initialized.")
         new_image = self.operator.adj_op(self.pinned_kspace, image, grid_data)
         if make_copy_back:
             new_image = np.copy(new_image)
@@ -409,6 +420,8 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
     available = GPUNUFFT_AVAILABLE and CUPY_AVAILABLE
     autograd_available = True
 
+    _samples: NDArray
+
     def __init__(
         self,
         samples,
@@ -445,7 +458,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         self.compute_density(density)
         self.compute_smaps(smaps)
         self.raw_op = RawGpuNUFFT(
-            samples=self.samples,
+            samples=self._samples,
             shape=self.shape,
             n_coils=self.n_coils,
             density_comp=self.density,
@@ -552,7 +565,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         """
         if getattr(self, "_raw_op_single", None) is None:
             self._raw_op_single = RawGpuNUFFT(
-                samples=self.samples,
+                samples=self._samples,
                 shape=self.shape,
                 n_coils=1,
                 density_comp=self.density,
@@ -590,7 +603,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
         """
         # calling the parent setter
-        FourierOperatorBase.smaps.fset(self, new_smaps)
+        FourierOperatorBase.smaps.__set__(self, new_smaps)
         if self._smaps is not None and hasattr(self, "raw_op"):
             self.raw_op.set_smaps(smaps=new_smaps)
 
@@ -650,7 +663,7 @@ class MRIGpuNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
                 density=new_density,
             )
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Return the normalization factor for the operator."""
         # gpuNUFFT is already normalized at the C++ level,

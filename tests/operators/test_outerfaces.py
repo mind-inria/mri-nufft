@@ -132,9 +132,7 @@ def test_deepinv(nufft, viewed_as_real):
     if nufft.squeeze_dims:
         pytest.skip("Autodiff does not support squeeze_dims.")
     from mrinufft.operators import DeepInvPhyNufft, image_as_real, kspace_as_real
-    from mrinufft.operators.autodiff import DeepInvPhyNufft as legacy
 
-    assert legacy is DeepInvPhyNufft
     physics = nufft.make_deepinv_phy(viewed_as_real=viewed_as_real)
     assert isinstance(physics, DeepInvPhyNufft)
 

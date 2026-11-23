@@ -33,3 +33,24 @@ jobs:
       - name: ruff Check
         shell: bash
         run: uvx ruff check src tests
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      # Backends whose packages install on a CPU runner; the others are listed in
+      # [tool.ty.analysis] allowed-unresolved-imports.
+      - name: Install dependencies
+        shell: bash
+        run: uv sync --extra finufft --extra cufinufft --extra autodiff --extra torchkbnufft --extra sigpy --extra pynufft --extra io --extra extra
+
+      - name: ty Check
+        shell: bash
+        run: uvx ty check --output-format github

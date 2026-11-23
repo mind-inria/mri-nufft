@@ -1,5 +1,9 @@
 """Pytorch MRI Nufft Operators."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, override
+
 import numpy as np
 from mrinufft.operators.base import FourierOperatorBase
 from mrinufft._utils import proper_trajectory
@@ -11,6 +15,9 @@ from mrinufft._array_compat import (
     TORCH_AVAILABLE,
     _module_available,
 )
+
+if TYPE_CHECKING:
+    import torch
 
 TORCHKBNUFFT_AVAILABLE = _module_available("torchkbnufft") and TORCH_AVAILABLE
 
@@ -58,6 +65,9 @@ class MRITorchKbNufft(FourierOperatorBase):
 
     available = TORCHKBNUFFT_AVAILABLE
     autograd_available = False
+    _samples: torch.Tensor
+    # Unlike the numpy base operator, smaps are kept as a tensor.
+    _smaps: torch.Tensor | None  # ty: ignore[incompatible-attribute-override]
 
     def __init__(
         self,
@@ -108,7 +118,12 @@ class MRITorchKbNufft(FourierOperatorBase):
         self._tkb_op = tkbn.KbNufft(im_size=self.shape).to(self.device)
         self._tkb_adj_op = tkbn.KbNufftAdjoint(im_size=self.shape).to(self.device)
 
-    @FourierOperatorBase.smaps.setter
+    @property
+    def smaps(self) -> torch.Tensor | None:
+        """Sensitivity maps of the operator."""
+        return self._smaps
+
+    @smaps.setter
     def smaps(self, new_smaps):
         """Update smaps.
 
@@ -159,19 +174,19 @@ class MRITorchKbNufft(FourierOperatorBase):
             self.smaps = self.smaps.to(data.dtype, copy=False)
 
         kdata = self._tkb_op.forward(
-            image=data, omega=self.samples.t(), smaps=self.smaps
+            image=data, omega=self._samples.t(), smaps=self.smaps
         )
         kdata *= self.inv_norm_factor
         return self._safe_squeeze(kdata)
 
     @with_torch
     def _op(self, data, out):
-        self._tkb_op.forward(data, omega=self.samples.t())
+        self._tkb_op.forward(data, omega=self._samples.t())
         return out
 
     @with_torch
     def _adj_op(self, coeffs, out):
-        self._tkb_adj_op.forward(data=coeffs, omega=self.samples.t())
+        self._tkb_adj_op.forward(data=coeffs, omega=self._samples.t())
         return out
 
     @with_torch
@@ -197,7 +212,7 @@ class MRITorchKbNufft(FourierOperatorBase):
             coeffs = coeffs * self.density
 
         img = self._tkb_adj_op.forward(
-            data=coeffs, omega=self.samples.t(), smaps=self.smaps
+            data=coeffs, omega=self._samples.t(), smaps=self.smaps
         )
         img = img.reshape((B, 1 if self.uses_sense else C, *XYZ))
         img *= self.inv_norm_factor
@@ -223,6 +238,13 @@ class MRITorchKbNufft(FourierOperatorBase):
         ret = self.adj_op(self.op(data) - obs_data)
         return ret
 
+    def compute_toeplitz_kernel(self) -> torch.Tensor:
+        """Compute the Toeplitz kernel for the Gram operator."""
+        import torchkbnufft as tkbn
+
+        self._toeplitz_kernel = tkbn.calc_toeplitz_kernel(self._samples.t(), self.shape)
+        return self._toeplitz_kernel
+
     @with_torch
     def gram_op(self, data, toeplitz=True):
         """Compute the Gram operator."""
@@ -233,11 +255,10 @@ class MRITorchKbNufft(FourierOperatorBase):
         if not hasattr(self, "_gram_op"):
             # initialize the toeplitz approximation for the gram operator.
             self._gram_op = tkbn.ToepNufft()
-            self._gram_op_kernel = tkbn.calc_toeplitz_kernel(
-                self.samples.t(), self.shape
-            )
-
-        data = data.to(dtype=self._gram_op_kernel.dtype, copy=False)
+        kernel = self._toeplitz_kernel
+        if kernel is None:
+            kernel = self.compute_toeplitz_kernel()
+        data = data.to(dtype=kernel.dtype, copy=False)
         smaps = self.smaps
         if smaps is not None:
             smaps = smaps.to(data.dtype, copy=False)
@@ -246,7 +267,7 @@ class MRITorchKbNufft(FourierOperatorBase):
 
         img = self._gram_op(
             data,
-            self._gram_op_kernel,
+            kernel,
             smaps=smaps,
             norm="ortho",
         ).reshape(data.shape)

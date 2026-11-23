@@ -8,6 +8,7 @@ import numpy as np
 
 from mrinufft._utils import proper_trajectory, sizeof_fmt
 from mrinufft._array_compat import (
+    Array,
     get_array_module,
     auto_cast,
     is_cuda_array,
@@ -134,10 +135,10 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     @staticmethod
     def _init_samples(
-        samples: NDArray,
+        samples: Array,
         z_index: Literal["auto"] | NDArray | None,
         shape: tuple[int, ...],
-    ) -> tuple[NDArray, NDArray]:
+    ) -> tuple[Array, NDArray]:
         samples_dim = samples.shape[-1]
         auto_z = isinstance(z_index, str) and z_index == "auto"
         if samples_dim == 3 and auto_z:
@@ -149,7 +150,7 @@ class MRIStackedNUFFT(FourierOperatorBase):
             # samples describes a 2D trajectory
             samples2d = samples
             if z_index is None:
-                z_index_ = np.ones(shape[-1], dtype=bool)
+                z_index = np.ones(shape[-1], dtype=bool)
             try:
                 z_index_ = np.arange(shape[-1])[z_index]
             except IndexError as e:
@@ -197,6 +198,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
     def _op_sense(self, data, ksp=None):
         """Apply SENSE operator."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -253,6 +256,8 @@ class MRIStackedNUFFT(FourierOperatorBase):
         return self._safe_squeeze(self._adj_op_calibless(coeffs, img))
 
     def _adj_op_sense(self, coeffs, img):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -329,17 +334,17 @@ class MRIStackedNUFFT(FourierOperatorBase):
 
         Built from the 2D samples and the z_index normalized to [-0.5, 0.5).
         """
+        samples2d = np.asarray(self._samples2d)
         samples = np.zeros(
-            (len(self.z_index), len(self._samples2d), 3), dtype=self._samples2d.dtype
+            (len(self.z_index), len(samples2d), 3), dtype=samples2d.dtype
         )
 
         for i, idx in enumerate(self.z_index):
             z_coord = idx / self.shape[-1] - 0.5
             samples[i] = np.concatenate(
                 [
-                    self._samples2d,
-                    z_coord
-                    * np.ones((len(self._samples2d), 1), dtype=self._samples2d.dtype),
+                    samples2d,
+                    z_coord * np.ones((len(samples2d), 1), dtype=samples2d.dtype),
                 ],
                 axis=1,
             )
@@ -406,7 +411,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         squeeze_dims=False,
         smaps_cached=False,
         density=False,
-        backend="cufinufft",
+        backend: MRICufiNUFFT | None | Literal["cufinufft"] = None,
         async_transfer=False,
         **kwargs,
     ):
@@ -422,12 +427,13 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         self.n_trans = n_trans
         self.squeeze_dims = squeeze_dims
         self.async_transfer = async_transfer
+        self.operator: MRICufiNUFFT
 
-        if isinstance(backend, str):
+        if backend is None or backend == "cufinufft":
             samples2d, z_index_ = self._init_samples(samples, z_index, shape)
             self._samples2d = samples2d.reshape(-1, 2)
             self.z_index = z_index_
-            self.operator: MRICufiNUFFT = get_operator(backend)(
+            self.operator = MRICufiNUFFT(
                 self._samples2d,
                 shape[:-1],
                 n_coils=self.n_trans * len(self.z_index),
@@ -437,7 +443,7 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 density=density,
                 **kwargs,
             )
-        elif isinstance(backend, FourierOperatorBase):
+        elif isinstance(backend, MRICufiNUFFT):
             # get all the interesting values from the operator
             if backend.shape != shape[:-1]:
                 raise ValueError("Backend operator should have compatible shape")
@@ -458,10 +464,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
             self.operator = backend
         else:
             raise ValueError(
-                "backend should either be a 2D nufft operator,"
-                " or a str specifying which nufft library to use."
+                "backend should either be a 2D cufinufft operator or None."
             )
-
         # Smaps support
         self.smaps = smaps
         self.smaps_cached = False
@@ -483,10 +487,10 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
                 self.smaps = pin_memory(smaps.astype(self.cpx_dtype))
                 self._smap_d = cp.empty(self.shape, dtype=self.cpx_dtype)
 
-    @property
-    def norm_factor(self):
+    @cached_property
+    def norm_factor(self) -> float:
         """Norm factor of the operator."""
-        return self.operator.norm_factor * np.sqrt(2)
+        return float(self.operator.norm_factor * np.sqrt(2))
 
     @cached_property
     def _bc_chunks(self):
@@ -546,6 +550,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return self._safe_squeeze(ret)
 
     def _op_sense_host(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -636,6 +642,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 h2d_stream.wait_event(compute_done[b])
@@ -668,6 +676,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return ksp.reshape((B, C, NZ * NS))
 
     def _op_sense_device(self, data, ksp):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
         data = cp.asarray(data)
@@ -830,6 +840,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return self._safe_squeeze(ret)
 
     def _adj_op_sense_host(self, coeffs, img_d=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
 
@@ -916,6 +928,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 h2d_stream.wait_event(compute_done[b])
@@ -946,6 +960,8 @@ class MRIStackedNUFFTGPU(MRIStackedNUFFT):
         return img
 
     def _adj_op_sense_device(self, coeffs, img):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         B, C, T, XYZ = self.n_batchs, self.n_coils, self.n_trans, self.shape
         NS, NZ = len(self._samples2d), len(self.z_index)
         coeffs = cp.asarray(coeffs)

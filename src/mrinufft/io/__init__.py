@@ -30,7 +30,6 @@ __all__ = [
     "add_phase_to_kspace_with_shifts",
     "cfl2traj",
     "discard_frequency_outliers",
-    "nifti_affine",
     "pulseq_gre",
     "read_arbgrad_rawdat",
     "read_girf",
@@ -40,6 +39,7 @@ __all__ = [
     "read_trajectory",
     "remove_extra_kspace_samples",
     "traj2cfl",
+    "twix2nifti_affine",
     "write_gradients",
     "write_trajectory",
 ]

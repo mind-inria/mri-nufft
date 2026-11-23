@@ -43,7 +43,7 @@ def get_random_loc_1d(
     order = VDSorder(order)
     pdf = VDSpdf(pdf) if isinstance(pdf, str) else pdf
     if accel == 0 or accel == 1:
-        return np.arange(dim_size)  # type: ignore
+        return np.arange(dim_size)
     elif accel < 0:
         raise ValueError("acceleration factor should be positive.")
     elif isinstance(accel, float):
@@ -57,7 +57,7 @@ def get_random_loc_1d(
     center_start = (dim_size - center_prop) // 2
     center_stop = (dim_size + center_prop) // 2
     center_indexes = indexes[center_start:center_stop]
-    borders = np.asarray([*indexes[:center_start], *indexes[center_stop:]])
+    borders = np.asarray([*indexes[:center_start], *indexes[center_stop:]], dtype=int)
 
     n_samples_borders = (dim_size - len(center_indexes)) // accel
     if n_samples_borders < 1:

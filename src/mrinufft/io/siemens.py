@@ -5,8 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
-from typing import TypedDict, overload, TYPE_CHECKING, Literal
-from typing_extensions import NotRequired  # backport for Python < 3.11
+from typing import NotRequired, TypedDict, overload, TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from turbotwix import Measurement as TwixObj
@@ -101,7 +100,7 @@ def _parse_twix_header(twixObj: TwixObj) -> TwixHeaderDict:
         nice_key = key[2:]  # strip prefix "al" / "ad"
         if not isinstance(vals, list):
             vals = [vals]
-        hdr[nice_key] = vals[0] if len(vals) == 1 else vals  # type: ignore
+        hdr[nice_key] = vals[0] if len(vals) == 1 else vals
 
     refscan = twixObj.lines.refscan
     if len(refscan) > 0:

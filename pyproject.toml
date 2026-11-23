@@ -5,7 +5,7 @@ authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}
 
 readme = "README.rst"
 dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "typing_extensions"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 
 dynamic = ["version"]
 
@@ -85,10 +85,12 @@ ignore = [
 "B028", # No explicit stacklevel keyword argument found
 "F401", # Using ``try: import ... except:`` is nice.
 ]
+
 [tool.ruff.lint.per-file-ignores]
 "examples/**" = ["D", "E731"]
 "tests/**" = ["D"]
-"__init__.py" = ["E402"] # ignore module order
+"src/mrinufft/trajectories/__init__.py" = ["E402"] # ignore module order
+
 [tool.ruff.lint.pydocstyle]
 convention="numpy"
 
@@ -100,15 +102,20 @@ minversion = "6.0"
 norecursedirs = ["tests/helpers"]
 testpaths=["tests"]
 
-[tool.pylsp-mypy]
-enabled = false
-live_mode = false
+[tool.ty.src]
+include = ["src"]
 
-[tool.mypy]
-ignore_missing_imports = true
-
-[tool.pyright]
-reportPossiblyUnboundVariable = false
-typeCheckingMode = "basic"
-reportOptionalSubscript = false
-reportOptionalMemberAccess = false
+[tool.ty.analysis]
+# Optional backends that cannot be installed everywhere (platform/CUDA-bound,
+# or compiled modules without stubs). Anything not listed must resolve.
+allowed-unresolved-imports = [
+    "tensorflow.**",
+    "tensorflow_mri.**",
+    "tensorflow_nufft.**",
+    "gpuNUFFT.**",
+    "ducc0",
+    "mlx_nufft.**",
+    "mrpro.**",
+    "pyNFFT3.**",
+    "brainweb_dl.**",  # documentation extra only
+]

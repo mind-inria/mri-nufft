@@ -1,28 +1,30 @@
 """Provides Operator for MR Image processing on GPU."""
 
 import weakref
+from functools import cached_property
+
 import numpy as np
 from numpy.typing import NDArray
-from mrinufft.operators.base import (
-    FourierOperatorBase,
-    with_numpy_cupy,
-    power_method,
-    _ToggleGradPlanMixin,
+
+from mrinufft._array_compat import (
+    CUPY_AVAILABLE,
+    _array_to_cupy,
+    _array_to_numpy,
+    auto_cast,
+    get_array_module,
+    is_cuda_array,
+    is_host_array,
+    pin_memory,
 )
 from mrinufft._utils import (
     proper_trajectory,
     sizeof_fmt,
 )
-
-from mrinufft._array_compat import (
-    CUPY_AVAILABLE,
-    is_cuda_array,
-    is_host_array,
-    pin_memory,
-    get_array_module,
-    auto_cast,
-    _array_to_cupy,
-    _array_to_numpy,
+from mrinufft.operators.base import (
+    FourierOperatorBase,
+    _ToggleGradPlanMixin,
+    power_method,
+    with_numpy_cupy,
 )
 from mrinufft.operators.gpu_utils import nvtx_mark
 from mrinufft.operators.toeplitz import _GramOpGpuMixin
@@ -76,10 +78,16 @@ class RawCufinufftPlan:
     @property
     def dtype(self):
         """Return the dtype (precision) of the transform."""
-        try:
-            return self.plans[1].dtype
-        except AttributeError:
+        plan = self.plans[1]
+        if plan is None:
             return DTYPE_R2C[str(self._dtype)]
+        return plan.dtype
+
+    def _get_plan(self, typ: int) -> "Plan":
+        plan = self.plans[typ]
+        if plan is None:
+            raise RuntimeError(f"cufinufft type {typ} plan is not initialized.")
+        return plan
 
     def _make_plan(self, typ, **kwargs):
         self.plans[typ] = Plan(
@@ -127,11 +135,11 @@ class RawCufinufftPlan:
 
     def type1(self, coeff_data, grid_data):
         """Type 1 transform. Non Uniform to Uniform."""
-        return self.plans[1].execute(coeff_data, grid_data)
+        return self._get_plan(1).execute(coeff_data, grid_data)
 
     def type2(self, grid_data, coeff_data):
         """Type 2 transform. Uniform to non-uniform."""
-        return self.plans[2].execute(grid_data, coeff_data)
+        return self._get_plan(2).execute(grid_data, coeff_data)
 
     def toggle_grad_traj(self):
         """Toggle between the gradient trajectory and the plan for type 1 transform."""
@@ -481,6 +489,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         return contig.reshape(shape) if shape is not None else contig
 
     def _op_sense_device(self, data, ksp_d=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         data = cp.asarray(data)
@@ -505,6 +515,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         return ksp_d.reshape((B, C, K))
 
     def _op_sense_host(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         if ksp is None:
@@ -573,6 +585,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         inv_norm = 1.0 / self.norm_factor
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 # buffer slot b is still being read by the compute
@@ -747,6 +761,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _adj_op_sense_device(self, coeffs, img_d=None):
         """Perform sense reconstruction when data is on device."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         # Define short name
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -783,6 +799,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         - smaps_batched(S, T, X,Y,Z)
 
         """
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         # Define short name
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
@@ -844,6 +862,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         compute_done = [cp.cuda.Event() for _ in range(2)]
 
         def prefetch(i):
+            if self.smaps is None:
+                raise RuntimeError("SENSE path called without smaps.")
             b = i % 2
             if i >= 2:
                 # buffer slot b is still being read by the compute
@@ -1041,6 +1061,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _dc_sense_host(self, image_data, obs_data):
         """Gradient computation when all data is on host."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
@@ -1088,6 +1110,8 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
 
     def _dc_sense_device(self, image_data, obs_data):
         """Gradient computation when all data is on device."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 
@@ -1207,7 +1231,7 @@ class MRICufiNUFFT(_GramOpGpuMixin, FourierOperatorBase, _ToggleGradPlanMixin):
         """k-space size in bytes."""
         return int(self.n_samples * np.dtype(self.cpx_dtype).itemsize)
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Norm factor of the operator."""
         return np.sqrt(np.prod(self.shape) * 2 ** len(self.shape))

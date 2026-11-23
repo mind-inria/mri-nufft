@@ -8,6 +8,7 @@ sequences. Requires the `pypulseq` package to be installed.
 
 import logging
 from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -18,16 +19,28 @@ from mrinufft.trajectories.utils import (
     convert_trajectory_to_gradients,
 )
 
-from mrinufft.trajectories.gradients import get_prephasors_and_spoilers
+from mrinufft.trajectories.gradients import (
+    GradientSolver,
+    get_prephasors_and_spoilers,
+)
 
 logger = logging.getLogger(__name__)
 
-PULSEQ_AVAILABLE = True
-try:
+if TYPE_CHECKING:
     import pypulseq as pp
-except ImportError:
-    PULSEQ_AVAILABLE = False
-    pp = None
+
+
+def _import_pypulseq():
+    # pypulseq imports matplotlib, which is slow: import it only where it is used.
+    try:
+        import pypulseq
+    except ImportError as exc:
+        raise ImportError(
+            "The `pypulseq` package is required for this function. "
+            "Please install it via `pip install pypulseq` or "
+            "`pip install mri-nufft[io]`."
+        ) from exc
+    return pypulseq
 
 
 def read_pulseq_traj(
@@ -59,12 +72,7 @@ def read_pulseq_traj(
         The acquisition parameters extracted from the sequence.
 
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` or "
-            "`pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
     if not isinstance(seq, pp.Sequence):
         filename = seq
         seq = pp.Sequence()
@@ -95,16 +103,21 @@ def read_pulseq_traj(
         kspace_shots.append(kspace_adc[:, idx_next:].T)  # add remaining gradients.
     # convert to KMAX standard.
     #
+    # pypulseq annotates definitions as ``str`` and system limits as
+    # ``float | None``; here they hold the parsed lists / floats.
+    fov: Any = seq.get_definition("FOV")
+    img_size: Any = seq.get_definition("ImgSize")
+    system: Any = seq.system
     acq = Acquisition(
-        fov=seq.get_definition("FOV"),
-        img_size=seq.get_definition("ImgSize"),
-        adc_dwell_time=seq.system.adc_raster_time,
+        fov=fov,
+        img_size=img_size,
+        adc_dwell_time=system.adc_raster_time,
         hardware=Hardware(
-            grad_raster_time=seq.system.grad_raster_time,
-            gmax=seq.system.max_grad / 1e3,  # FIXME: assumes mT/m in pulseq
-            smax=seq.system.max_slew,
+            grad_raster_time=system.grad_raster_time,
+            gmax=system.max_grad / 1e3,  # FIXME: assumes mT/m in pulseq
+            smax=system.max_slew,
         ),
-        gamma=seq.system.gamma / (2 * np.pi),
+        gamma=system.gamma / (2 * np.pi),
     )
     kspace_shots = np.ascontiguousarray(kspace_shots)
     return kspace_shots, seq.definitions, acq
@@ -132,12 +145,7 @@ def _acq2opts(acq: Acquisition) -> "pp.Opts":
     pp.Opts
         The corresponding pypulseq Opts object.
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` or "
-            "`pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
     system = pp.Opts(
         max_grad=acq.gmax * 1e3,  # convert to mT/m
         grad_unit="mT/m",
@@ -160,7 +168,7 @@ def pulseq_gre(
     rf_spoiling_inc: float = 0.0,
     grad_spoil_factor: float = 2.0,
     acq: Acquisition | None = None,
-    connect_method: str = "auto",
+    connect_method: GradientSolver = "auto",
 ):
     """Create a Pulseq 3D-GRE sequence for arbitrary trajectories.
 
@@ -222,12 +230,7 @@ def pulseq_gre(
     pp.Sequence
         A Pulseq sequence object with the specified arbitrary gradient waveform.
     """
-    if not PULSEQ_AVAILABLE:
-        raise ImportError(
-            "The `pypulseq` package is required for this function. "
-            "Please install it via `pip install pypulseq` "
-            "or `pip install mri-nufft[io]`."
-        )
+    pp = _import_pypulseq()
 
     acq = acq or Acquisition.default
 

@@ -19,6 +19,8 @@ from numpy.typing import NDArray
 import warnings
 
 from mrinufft._array_compat import (
+    Array,
+    ArrayT,
     with_numpy,
     with_numpy_cupy,
     get_array_module,
@@ -189,23 +191,26 @@ class FourierOperatorBase(ABC):
     """
 
     interfaces: dict[str, tuple[bool, type[FourierOperatorBase]]] = {}
-    autograd_available = False
+    autograd_available: bool = False
 
     backend: ClassVar[str]
     available: ClassVar[bool]
 
+    #: Backend-specific low-level NUFFT object, when the backend has one.
+    raw_op: Any
+
     def __init__(self, *args, **kwargs):
         if not self.available:
             raise RuntimeError(f"'{self.backend}' backend is not available.")
-        self._smaps = None
-        self._density = None
-        self._toeplitz_kernel = None
+        self._smaps: NDArray | None = None
+        self._density: NDArray[np.floating] | None = None
+        self._toeplitz_kernel: Array | None = None
         self._n_coils = 1
         self._n_batchs = 1
         self.n_trans = 1
         self.squeeze_dims = False
 
-        self._density_method = None
+        self._density_method: Callable[..., NDArray] | None = None
         self._grad_wrt_data = False
         self._grad_wrt_traj = False
         self._grad_wrt_field_map = False
@@ -275,7 +280,7 @@ class FourierOperatorBase(ABC):
         return arr
 
     @abstractmethod
-    def op(self, data: NDArray) -> NDArray:
+    def op(self, data: ArrayT) -> ArrayT:
         """Compute operator transform.
 
         Parameters
@@ -291,7 +296,7 @@ class FourierOperatorBase(ABC):
         pass
 
     @abstractmethod
-    def adj_op(self, coeffs: NDArray) -> NDArray:
+    def adj_op(self, coeffs: ArrayT) -> ArrayT:
         """Compute adjoint operator transform.
 
         Parameters
@@ -307,15 +312,15 @@ class FourierOperatorBase(ABC):
         pass
 
     @abstractmethod
-    def _op(self, image: NDArray, coeffs: NDArray) -> NDArray:
+    def _op(self, image: NDArray, coeffs: NDArray) -> None:
         """Low level operator implementation."""
 
     @abstractmethod
-    def _adj_op(self, coeffs: NDArray, image: NDArray) -> NDArray:
+    def _adj_op(self, coeffs: NDArray, image: NDArray) -> None:
         """Low level adjoint operator implementation."""
 
     @with_numpy_cupy
-    def gram_op(self, data: NDArray, toeplitz: bool = True) -> NDArray:
+    def gram_op(self, data: ArrayT, toeplitz: bool = True) -> ArrayT:
         """Compute the Gram operator of the NUFFT.
 
         Parameters
@@ -345,6 +350,8 @@ class FourierOperatorBase(ABC):
 
     def _gram_op_sense(self, data):
         """Compute the Gram operator with sensitivity maps."""
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         xp = get_array_module(data)
         B, C, XYZ = self.n_batchs, self.n_coils, self.shape
         data = data.reshape(B, *XYZ)
@@ -376,13 +383,15 @@ class FourierOperatorBase(ABC):
             self.compute_toeplitz_kernel()
         return apply_toeplitz_kernel(data, self._toeplitz_kernel)  # type: ignore
 
-    def data_consistency(self, image_data: NDArray, obs_data: NDArray) -> NDArray:
+    def data_consistency(self, image_data: ArrayT, obs_data: ArrayT) -> ArrayT:
         """Compute the gradient data consistency.
 
         This is the naive implementation using adj_op(op(x)-y).
         Specific backend can (and should!) implement a more efficient version.
         """
-        return self.adj_op(self.op(image_data) - obs_data)
+        # ty does not yet check the body once per ArrayT constraint.
+        residual = self.op(image_data) - obs_data
+        return self.adj_op(residual)  # ty: ignore[invalid-explicit-return]
 
     def with_off_resonance_correction(
         self,
@@ -399,7 +408,7 @@ class FourierOperatorBase(ABC):
             self, b0_map, readout_time, r2star_map, mask, interpolator
         )
 
-    def compute_toeplitz_kernel(self) -> NDArray:
+    def compute_toeplitz_kernel(self) -> Array:
         """Compute the Toeplitz kernel and set it."""
         from .toeplitz import compute_toeplitz_kernel
 
@@ -423,7 +432,9 @@ class FourierOperatorBase(ABC):
             Note that this callable function should also hold the k-space data
             (use funtools.partial)
         """
-        kwargs = {}
+        # ty does not narrow the captures below precisely enough.
+        kwargs: dict[str, Any] = {}
+        method_: Callable[..., NDArray]
         match method:
             case None:
                 self.smaps = None
@@ -432,11 +443,11 @@ class FourierOperatorBase(ABC):
                 arr = _to_numpy_cupy([arr])[0][0]
                 self.smaps = arr.reshape(self.n_coils, *self.shape)
                 return
-            case {"name": str(name), **kwargs}:
+            case {"name": str(name), **kwargs}:  # ty: ignore[invalid-assignment]
                 method_ = get_smaps(name)
             case str():
                 method_ = get_smaps(method)
-            case method_ if callable(method_):
+            case method_ if callable(method_):  # ty: ignore[invalid-assignment]
                 pass
             case _:
                 raise ValueError(f"Unknown smaps method: {method}")
@@ -607,11 +618,12 @@ class FourierOperatorBase(ABC):
         `tensorflow`, `finufft`, `cufinufft`, `gpunufft`, `torchkbnufft-cpu`
         and `torchkbnufft-gpu`.
         """
-        kwargs = {}
-
+        # ty does not narrow the captures below precisely enough.
+        kwargs: dict[str, Any] = {}
+        method_: Callable[..., NDArray]
         match method:
             case arr if is_host_array(arr) or (CUPY_AVAILABLE and is_cuda_array(arr)):
-                self._density = arr
+                self._density = arr  # ty: ignore[invalid-assignment]
                 return
             case None | False:
                 self._density = None
@@ -619,13 +631,13 @@ class FourierOperatorBase(ABC):
             case True | "pipe":
                 method_ = get_density("pipe")
                 kwargs["backend"] = self.backend
-            case {"name": str(name), **kwargs}:
+            case {"name": str(name), **kwargs}:  # ty: ignore[invalid-assignment]
                 if name == "pipe" and "backend" not in kwargs:
                     kwargs["backend"] = self.backend
                 method_ = get_density(name)
             case str():
                 method_ = get_density(method)
-            case method_ if callable(method_):
+            case method_ if callable(method_):  # ty: ignore[invalid-assignment]
                 pass
             case _:
                 raise ValueError(f"Unknown density method: {method}")
@@ -678,6 +690,24 @@ class FourierOperatorBase(ABC):
 
         return lipschitz_cst
 
+    @overload
+    def pinv_solver(
+        self,
+        kspace_data: ArrayT,
+        optim: str = "lsqr",
+        *,
+        callback: None = None,
+        **kwargs: Any,
+    ) -> ArrayT: ...
+    @overload
+    def pinv_solver(
+        self,
+        kspace_data: ArrayT,
+        optim: str = "lsqr",
+        *,
+        callback: Callable[..., Any],
+        **kwargs: Any,
+    ) -> tuple[ArrayT, list[Any]]: ...
     def pinv_solver(self, kspace_data, optim="lsqr", **kwargs):
         """
         Solves the linear system Ax = y.
@@ -812,17 +842,15 @@ class FourierOperatorBase(ABC):
         return np.dtype(DTYPE_R2C[str(self.dtype)])
 
     @property
-    def samples(self) -> NDArray:
+    def samples(self) -> Array:
         """Return the samples used by the operator."""
         return self._samples
 
     @samples.setter
-    def samples(self, new_samples: NDArray[np.floating]):
+    def samples(self, new_samples: Array):
         self.update_samples(new_samples)
 
-    def update_samples(
-        self, new_samples: NDArray[np.floating], *, unsafe: bool = False
-    ):
+    def update_samples(self, new_samples: Array, *, unsafe: bool = False):
         """Update the samples of the NUFFT operator.
 
         Parameters
@@ -849,12 +877,13 @@ class FourierOperatorBase(ABC):
         return np.prod(self.samples.shape[:-1])
 
     @cached_property
-    def norm_factor(self) -> np.floating:
+    def norm_factor(self) -> float:
         """Normalization factor of the operator."""
-        return np.sqrt(np.prod(self.shape) * (2 ** len(self.shape)))
+        # A Python float, so that scaling float32 data does not promote it.
+        return float(np.sqrt(np.prod(self.shape) * (2 ** len(self.shape))))
 
     @cached_property
-    def inv_norm_factor(self) -> np.floating:
+    def inv_norm_factor(self) -> float:
         """Reciprocal of :attr:`norm_factor`, cached for the operator lifetime.
 
         ``shape`` is fixed at construction, so the normalization is constant;
@@ -992,6 +1021,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return ret
 
     def _op_sense(self, data, ksp=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         dataf = data.reshape((B, *XYZ))
@@ -1048,6 +1079,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return self._safe_squeeze(ret)
 
     def _adj_op_sense(self, coeffs, img=None):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
         xp = get_array_module(coeffs)
@@ -1106,6 +1139,8 @@ class FourierOperatorSimple(FourierOperatorBase):
         return self._safe_squeeze(self._grad_calibless(image_data, obs_data))
 
     def _grad_sense(self, image_data, obs_data):
+        if self.smaps is None:
+            raise RuntimeError("SENSE path called without smaps.")
         T, B, C = self.n_trans, self.n_batchs, self.n_coils
         K, XYZ = self.n_samples, self.shape
 

@@ -1,17 +1,23 @@
 """General utility functions for MRI-NUFFT."""
 
+from __future__ import annotations
+
 import inspect
 import logging
 from inspect import cleandoc
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING, Any, Literal, Protocol, overload
 from tqdm.auto import tqdm
 
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
-from mrinufft._array_compat import get_array_module
+from mrinufft._array_compat import get_array_module, Array
+
+if TYPE_CHECKING:
+    import torch
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +61,17 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 
-def proper_trajectory(trajectory, normalize="pi"):
+@overload
+def proper_trajectory[S: np.floating](
+    trajectory: NDArray[S], normalize: Literal["pi", "unit"] = "pi"
+) -> NDArray[S]: ...
+@overload
+def proper_trajectory(
+    trajectory: torch.Tensor, normalize: Literal["pi", "unit"] = "pi"
+) -> torch.Tensor: ...
+def proper_trajectory(
+    trajectory: Array, normalize: Literal["pi", "unit"] = "pi"
+) -> Array:
     """Normalize the trajectory to be used by NUFFT operators.
 
     Parameters
@@ -75,7 +91,6 @@ def proper_trajectory(trajectory, normalize="pi"):
     # flatten to a list of point
     xp = get_array_module(trajectory)  # check if the trajectory is a tensor
     new_traj = trajectory.reshape(-1, trajectory.shape[-1])
-
     max_abs_val = xp.max(xp.abs(new_traj))
 
     caller_logger = logger
@@ -94,7 +109,6 @@ def proper_trajectory(trajectory, normalize="pi"):
             "Samples will be rescaled to [-0.5, 0.5), assuming they were in [-pi, pi)"
         )
         new_traj = new_traj * 1 / (2 * xp.pi)
-
     if normalize == "unit" and max_abs_val >= 0.5:
         new_traj = (new_traj + 0.5) % 1 - 0.5
     return new_traj
@@ -136,9 +150,9 @@ ValueError
 """
 
 
-def _apply_docstring_subs(
-    func: Callable, docstring_subs: dict[str, str], registry: str = ""
-) -> Callable:
+def _apply_docstring_subs[F: Callable[..., Any]](
+    func: F, docstring_subs: dict[str, str], registry: str = ""
+) -> F:
     if func.__doc__:
         docstring = cleandoc(func.__doc__)
         for key, sub in docstring_subs.items():
@@ -149,17 +163,28 @@ def _apply_docstring_subs(
     return func
 
 
-def _fill_doc(docstring_subs: dict[str, str]) -> Callable:
+def _fill_doc[F: Callable[..., Any]](
+    docstring_subs: dict[str, str],
+) -> Callable[[F], F]:
     """Fill in docstrings with substitutions."""
 
     @wraps(_fill_doc)
-    def wrapper(func: Callable) -> Callable:
+    def wrapper(func: F) -> F:
         return _apply_docstring_subs(func, docstring_subs)
 
     return wrapper
 
 
-class MethodRegister:
+class RegistryGetter[F](Protocol):
+    """``get_<registry>`` function returned by :py:meth:`MethodRegister.make_getter`."""
+
+    @overload
+    def __call__(self, method_name: str, /) -> F: ...
+    @overload
+    def __call__(self, method_name: str, /, *args: Any, **kwargs: Any) -> Any: ...
+
+
+class MethodRegister[F: Callable[..., Any]]:
     """
     A Decorator to register methods of the same type in dictionnaries.
 
@@ -171,7 +196,7 @@ class MethodRegister:
         List of potential subsititutions to apply to the docstring.
     """
 
-    registry_global = defaultdict(dict)
+    registry_global: defaultdict[str, dict[str, Any]] = defaultdict(dict)
 
     def __init__(
         self, register_name: str, docstring_subs: dict[str, str] | None = None
@@ -181,7 +206,11 @@ class MethodRegister:
             docstring_subs = {}
         self.docstring_subs = docstring_subs
 
-    def __call__(self, method_name=None):
+    @overload
+    def __call__[G: Callable[..., Any]](self, method_name: G) -> G: ...
+    @overload
+    def __call__[G: Callable[..., Any]](self, method_name: str) -> Callable[[G], G]: ...
+    def __call__(self, method_name: Any = None):
         """Register the function in the registry.
 
         It also substitute placeholder in docstrings.
@@ -201,7 +230,7 @@ class MethodRegister:
         else:
             return decorator
 
-    def make_getter(self) -> Callable:
+    def make_getter(self) -> RegistryGetter[F]:
         """Create a `get_{register_name}` function to get methods from the registry."""
 
         def getter(method_name, *args, **kwargs):
@@ -223,7 +252,7 @@ class MethodRegister:
         return getter
 
     @property
-    def registry(self):
+    def registry(self) -> dict[str, F]:
         """Get the registry dictionary."""
         return self.registry_global[self.register_name]
 

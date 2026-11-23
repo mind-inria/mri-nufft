@@ -1,6 +1,7 @@
 """CAIPI trajectory tools: get_grappa_caipi_positions, get_packing_spacing_positions."""
 
 from functools import partial
+from typing import overload
 
 import numpy as np
 import numpy.linalg as nl
@@ -14,12 +15,34 @@ from mrinufft.trajectories.utils import KMAX, Packings, initialize_shape_norm
 CIRCLE_PACKING_DENSITY = np.pi / (2 * np.sqrt(3))
 
 
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int = 0,
+    acs_region: None = None,
+) -> NDArray: ...
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int = 0,
+    *,
+    acs_region: tuple,
+) -> tuple[NDArray, NDArray]: ...
+@overload
+def get_grappa_caipi_positions(
+    img_size: tuple,
+    grappa_factors: tuple,
+    caipi_delta: int,
+    acs_region: tuple,
+) -> tuple[NDArray, NDArray]: ...
 def get_grappa_caipi_positions(
     img_size: tuple,
     grappa_factors: tuple,
     caipi_delta: int = 0,
     acs_region: tuple | None = None,
-) -> NDArray | tuple:
+) -> NDArray | tuple[NDArray, NDArray]:
     """
     Generate a Cartesian k-space sampling mask for GRAPPA with optional CAIPI shifts.
 
@@ -83,7 +106,7 @@ def get_grappa_caipi_positions(
             np.asarray(
                 np.meshgrid(
                     *[
-                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)  # type: ignore
+                        np.linspace(-max_loc, max_loc, num, endpoint=num % 2)
                         for num, max_loc in zip(acs_region, acs_max_loc)
                     ],
                     indexing="ij",
@@ -130,7 +153,8 @@ def get_packing_spacing_positions(
         The Non-Cartesian coordinates of the sampled k-space points in 2D plane.
     """
     # Choose the helix positions according to packing
-    packing_enum = Packings[packing]
+    # StrEnum name lookup is case-sensitive and member names are upper case.
+    packing_enum = Packings[packing.upper()]
     side = 2 * int(np.ceil(np.sqrt(Nc))) * np.max(spacing)
     if packing_enum == Packings.RANDOM:
         positions = 2 * side * (np.random.random((side * side, 2)) - 0.5)

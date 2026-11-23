@@ -160,6 +160,11 @@ jobs:
     if: ${{ !contains(needs.get-commit-message.outputs.message, '[style]') || github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The tags give the version that the deprecation schedule is checked
+          # against; without them it is the 99.0.0 fallback.
+          fetch-depth: 0
+          filter: blob:none
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}

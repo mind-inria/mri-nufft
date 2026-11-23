@@ -81,12 +81,10 @@ def get_gridded_trajectory(
     ndarray
         The gridded trajectory of shape `shape`.
     """
+    acq = acq or Acquisition.default
     shape = acq.img_size
     samples = trajectory.reshape(-1, trajectory.shape[-1])
     dcomp = get_density("pipe")(trajectory, shape, backend=backend)
-    gridder = get_operator(backend)(
-        trajectory, [sh * osf for sh in shape], density=dcomp, upsampfac=osf
-    )
     if backend == "gpunufft":
         # For gpunufft, we need to interface directly with the raw operator
         gridder = get_operator(backend)(
@@ -165,4 +163,6 @@ def get_gridded_trajectory(
         data = _gridder_adj_op(np.linalg.norm(data, axis=-1).flatten()) / (
             gridded_ones + np.finfo(np.float32).eps
         )
+    else:
+        raise ValueError(f"Unknown grid_type: {grid_type}")
     return np.squeeze(np.abs(data))

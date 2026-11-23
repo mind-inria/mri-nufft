@@ -9,11 +9,12 @@ from __future__ import annotations
 import gc
 import logging
 from collections.abc import Callable
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
 
-from mrinufft._array_compat import get_array_module, with_numpy_cupy
+from mrinufft._array_compat import Array, ArrayT, get_array_module, with_numpy_cupy
 from mrinufft._utils import MethodRegister, _fill_doc
 from mrinufft.density.utils import flat_traj
 
@@ -135,7 +136,7 @@ def _cosine_window(distance_ratio, kind, xp):
 def _extract_kspace_center(
     kspace_data: NDArray,
     kspace_loc: NDArray,
-    threshold: float | NDArray | None = None,
+    threshold: float | tuple[float, ...] | NDArray | None = None,
     density: NDArray | None = None,
     window_fun: str | Callable[[NDArray], NDArray] = "ellipse",
 ) -> tuple[NDArray, NDArray, NDArray | None]:
@@ -217,9 +218,24 @@ def _extract_kspace_center(
         return data_thresholded, kspace_loc, density
 
 
-register_smaps = MethodRegister("smaps", docstring_subs=_smap_docs)
+class SmapsMethod(Protocol):
+    """Signature shared by the sensitivity maps estimation methods."""
 
-get_smaps: Callable[[str], Callable[..., NDArray]] = register_smaps.make_getter()
+    def __call__(
+        self,
+        traj: Array,
+        shape: tuple[int, ...],
+        kspace_data: ArrayT,
+        backend: str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> ArrayT:
+        """Estimate the sensitivity maps from ``kspace_data``."""
+        ...
+
+
+register_smaps = MethodRegister[SmapsMethod]("smaps", docstring_subs=_smap_docs)
+get_smaps = register_smaps.make_getter()
 
 
 def _crop_or_pad(arr, target_shape, mode="constant", constant_values=0):
@@ -1237,7 +1253,7 @@ def espirit(
 @_fill_doc(_smap_docs)
 @with_numpy_cupy
 def cartesian_espirit(
-    kspace: NDArray,
+    kspace: ArrayT,
     shape: tuple[int, ...],
     calib_width: int | tuple[int, ...] = 24,
     kernel_size: int | tuple[int, ...] = 7,
@@ -1246,7 +1262,7 @@ def cartesian_espirit(
     crop: float = 0.08,
     decim: int = 1,
     power_iter: int = 10,
-) -> NDArray:
+) -> ArrayT:
     """ESPIRIT algorithm on Cartesian data.
 
     Parameters
@@ -1360,7 +1376,7 @@ def pisco(
 @_fill_doc(_smap_docs)
 @with_numpy_cupy
 def cartesian_pisco(
-    kspace: NDArray,
+    kspace: ArrayT,
     shape: tuple[int, ...],
     calib_width: int | tuple[int, ...] = 24,
     kernel_size: int | tuple[int, ...] = 7,
@@ -1369,7 +1385,7 @@ def cartesian_pisco(
     crop: float = 0.08,
     decim: int = 1,
     power_iter: int = 30,
-) -> NDArray:
+) -> ArrayT:
     """PISCO algorithm on Cartesian data.
 
     Nullspace-based estimation of sensitivity maps: nullspace vectors of a
@@ -1444,11 +1460,11 @@ def cartesian_pisco(
 
 @with_numpy_cupy
 def coil_compression(
-    kspace_data: NDArray,
+    kspace_data: ArrayT,
     K: int | float,
-    traj: NDArray | None = None,
+    traj: ArrayT | None = None,
     krad_thresh: float | None = None,
-) -> tuple[NDArray, NDArray]:
+) -> tuple[ArrayT, ArrayT]:
     """
     Coil compression using principal component analysis on k-space data.
 

@@ -9,11 +9,14 @@ The file format is described here: https://bart-doc.readthedocs.io/en/latest/dat
 import os
 import subprocess as subp
 import tempfile
+import uuid
+from functools import cached_property
 from pathlib import Path
-from mrinufft._utils import proper_trajectory
-from mrinufft.operators.base import FourierOperatorCPU
 
 import numpy as np
+
+from mrinufft._utils import proper_trajectory
+from mrinufft.operators.base import FourierOperatorCPU
 
 # available if return code is 0
 try:
@@ -29,7 +32,7 @@ class RawBartNUFFT:
 
     def __init__(self, samples, shape, extra_op_args=None, extra_adj_op_args=None):
 
-        from mrinufft.io.cfl import traj2cfl, _writecfl, _readcfl
+        from mrinufft.io.cfl import _readcfl, _writecfl, traj2cfl
 
         self._writecfl = _writecfl
         self._readcfl = _readcfl
@@ -52,7 +55,7 @@ class RawBartNUFFT:
 
     def _tmp_file(self):
         """Return a temporary file name."""
-        return os.path.join(self._temp_dir.name, next(tempfile._get_candidate_names()))
+        return os.path.join(self._temp_dir.name, uuid.uuid4().hex)
 
     def __del__(self):
         """Delete also the temporary files."""
@@ -160,7 +163,7 @@ class MRIBartNUFFT(FourierOperatorCPU):
             squeeze_dims=squeeze_dims,
         )
 
-    @property
+    @cached_property
     def norm_factor(self):
         """Normalization factor of the operator."""
         # return 1.0

@@ -15,6 +15,7 @@
    Examples <generated/autoexamples/index>
    API <api>
    Explanations <explanations/index>
+   Changelog <changelog>
    
 
    misc/related

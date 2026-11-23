@@ -81,10 +81,11 @@ def patch_center_anomaly(
         if params, or cubic spline parameterization as an array of
         floats between 0 and 1 otherwise.
     """
+    parameters: tuple
     if update_shot is None or update_parameters is None:
-        single_shot = shot_or_params
+        single_shot = np.asarray(shot_or_params)
     else:
-        parameters = shot_or_params
+        parameters = tuple(shot_or_params)
         single_shot = update_shot(*parameters)
     Ns = single_shot.shape[0]
 
@@ -94,11 +95,11 @@ def patch_center_anomaly(
 
     if update_shot is None or update_parameters is None:
 
-        def _default_update_parameters(_: NDArray, *parameters: list) -> list:
+        def _default_update_parameters(_: NDArray, *parameters: NDArray) -> tuple:
             return parameters
 
         update_parameters = _default_update_parameters
-        parameters = [x_axis]
+        parameters = (x_axis,)
         update_shot = CubicSpline(x_axis, single_shot)
 
     while nl.norm(x_axis - old_x_axis) / Ns > 1e-10:
@@ -193,6 +194,7 @@ method: str, optional
 """,
 )
 
+type GradientSolver = Literal["lp", "osqp", "auto"]
 _solvers = MethodRegister("gradient_connection_solver", _solver_docs)
 _get_solver_grad = _solvers.make_getter()
 
@@ -223,7 +225,7 @@ def _preprocess(solver):
     @wraps(solver)
     def wrapper(
         N: int, deltak: float, gmax: float, smax: float, gs: float, ge: float
-    ) -> tuple[NDArray, bool]:
+    ) -> tuple[NDArray | None, bool]:
         """Wrap solver."""
         # Croping for safety
         if abs(ge) > gmax:
@@ -478,11 +480,12 @@ def _solve_auto(*arg, **kwargs):
 
 
 def _binary_search_int(
-    f: Callable[[int], tuple[NDArray, bool]], low: int, high: int
+    f: Callable[[int], tuple[NDArray | None, bool]], low: int, high: int
 ) -> tuple[NDArray, int]:
     """Perfom a binary search to get best integer that makes f success."""
     x = None
     val = 0
+    mid = low
     while low <= high:
         mid = int(low + (high - low) * 0.8)
         new_x, success = f(mid)
@@ -498,10 +501,11 @@ def _binary_search_int(
 
 
 def _binary_search_float(
-    f: Callable[[float], tuple[NDArray, bool]], low: float, high: float
+    f: Callable[[float], tuple[NDArray | None, bool]], low: float, high: float
 ) -> tuple[NDArray, float]:
     """Perfom a binary search to get best float that makes f success."""
     x = None
+    mid = low
     while (high - low) / (high + low) > 1e-3:  # relative tolerance
         mid = low + (high - low) * 0.5
         new_x, success = f(mid)
@@ -586,7 +590,7 @@ def min_length_connection(
     gstarts: NDArray,
     gends: NDArray,
     acq: Acquisition | None = None,
-    method: Literal["lp", "osqp"] = "lp",
+    method: GradientSolver = "lp",
 ) -> int:
     """
     Get the minimum length of gradient connection for a trajectory.
@@ -662,7 +666,7 @@ def connect_gradient(
     gstarts: NDArray,
     gends: NDArray,
     acq: Acquisition | None = None,
-    method: str = "lp",
+    method: GradientSolver = "lp",
     N: int | None = None,
 ) -> NDArray:
     """
@@ -724,7 +728,7 @@ def get_prephasors_and_spoilers(
     prephase_grad=(0, 0, 0),
     acq: Acquisition | None = None,
     N: int | None | tuple[int, int] = None,
-    method: str = "lp",
+    method: GradientSolver = "lp",
 ) -> NDArray | tuple[NDArray, NDArray]:
     """
     Get the prephasors and spoiler gradients for a trajectory.
@@ -767,6 +771,8 @@ def get_prephasors_and_spoilers(
     gends = gradients[:, -1, :]
     if not isinstance(N, tuple):
         N_pre = N_spoil = N
+    else:
+        N_pre, N_spoil = N
     if prephase_loc is not None:
         prephase_loc = unnormalize_trajectory(np.array(prephase_loc), acq)
         prephase_start_locations = np.tile(prephase_loc[:ndim], (nshots, 1))

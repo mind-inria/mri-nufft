@@ -3,11 +3,14 @@
 See also the trajectories examples: :ref:`sphx_glr_generated_autoexamples_trajectories`
 """
 
+from typing import TYPE_CHECKING
+
 ##########
 # maths  #
 ##########
 
 from mrinufft.trajectories.maths.fibonacci import get_closest_fibonacci_number
+from mrinufft.trajectories.maths.primes import compute_coprime_factors
 from mrinufft.trajectories.maths.rotations import R2D, Ra, Rv, Rx, Ry, Rz
 
 __all__ = [
@@ -141,8 +144,6 @@ from .gradients import (
     patch_center_anomaly,
 )
 from .projection import (
-    GradientLinearProjection,
-    GroupL2SoftThresholding,
     parameterize_by_arc_length,
     project_trajectory,
 )
@@ -155,6 +156,7 @@ from .sampling import (
     sample_from_density,
 )
 from .utils import (
+    KMAX,
     Acquisition,
     FloatEnum,
     Gammas,
@@ -184,8 +186,6 @@ __all__ += [
     "Acquisition",
     "FloatEnum",
     "Gammas",
-    "GradientLinearProjection",
-    "GroupL2SoftThresholding",
     "Hardware",
     "KMAX",
     "NormShapes",
@@ -214,7 +214,6 @@ __all__ += [
     "initialize_algebraic_spiral",
     "initialize_shape_norm",
     "initialize_tilt",
-    "linear_projection",
     "min_length_connection",
     "normalize_trajectory",
     "parameterize_by_arc_length",

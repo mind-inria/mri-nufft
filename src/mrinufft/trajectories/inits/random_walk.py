@@ -1,6 +1,6 @@
 """Trajectories based on random walks."""
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -9,11 +9,11 @@ from mrinufft.trajectories.sampling import sample_from_density
 from mrinufft.trajectories.utils import KMAX
 
 
-def _get_adjacent_neighbors_offsets(nb_dims: int) -> NDArray:
+def _get_adjacent_neighbors_offsets(nb_dims: int) -> NDArray[np.integer]:
     return np.concatenate([np.eye(nb_dims), -np.eye(nb_dims)], axis=0).astype(int)
 
 
-def _get_neighbors_offsets(nb_dims: int) -> NDArray:
+def _get_neighbors_offsets(nb_dims: int) -> NDArray[np.integer]:
     neighbors = (np.indices([3] * nb_dims) - 1).reshape((nb_dims, -1)).T
     nb_half = neighbors.shape[0] // 2
     # Remove full zero entry
@@ -55,7 +55,7 @@ def _initialize_ND_random_walk(
     # Walk
     for i in range(1, Ns):
         # Express indices back to multi-dim coordinates to check bounds
-        neighbors = np.array(np.unravel_index(choices, shape))
+        neighbors = np.array(np.unravel_index(choices, shape), dtype=np.int64)
         neighbors = neighbors[:, None] + offsets.T[..., None]
 
         # Find out-of-bound neighbors and ignore them
@@ -66,8 +66,7 @@ def _initialize_ND_random_walk(
         invalids = invalids.T
 
         # Flatten indices to use np.random.choice
-        neighbors = np.ravel_multi_index(neighbors, shape).T
-
+        neighbors = cast(NDArray[np.int64], np.ravel_multi_index(neighbors, shape).T)
         # Set walk probabilities
         walk_probs = flat_density[neighbors]
         walk_probs[invalids] = 0
