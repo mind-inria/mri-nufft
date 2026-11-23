@@ -504,6 +504,7 @@ def read_trajectory(
     read_shots: bool = False,
     normalize_factor: float = KMAX,
     pre_skip: int = 0,
+    clip: bool = True,
 ):
     """Get k-space locations from gradient file.
 
@@ -535,6 +536,11 @@ def read_trajectory(
         Number of samples to skip from the start of each shot,
         by default 0. This is useful when we want to avoid artifacts
         from ADC switching in UTE sequences.
+    clip : bool, optional
+        Whether to clip normalized k-space coordinates to
+        [-normalize_factor, normalize_factor], by default True. Set to False
+        to preserve out-of-range values when computing gradients or slews.
+        Has no effect when normalize_factor is None.
 
     Returns
     -------
@@ -623,7 +629,7 @@ def read_trajectory(
     if normalize_factor is not None:
         Kmax = params["img_size"] / 2 / params["FOV"]
         kspace_loc = kspace_loc / Kmax * normalize_factor
-        if np.abs(kspace_loc).max() > normalize_factor:
+        if clip and np.abs(kspace_loc).max() > normalize_factor:
             logger.warning(
                 "K-space locations exceed the normalization factor after "
                 "normalization! Clipping the values."
