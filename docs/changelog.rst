@@ -23,6 +23,11 @@ Breaking changes
 - The default ``power_iter`` of :func:`~mrinufft.extras.espirit` and
   :func:`~mrinufft.extras.cartesian_espirit` changed from ``30`` to ``10``, as the
   power iterations are now warm-started (:gh:`424`).
+- The `GroupL2SoftThresholding` and `GradientLinearProjection` pyproximal operators are made private and
+   refactored in :mod:`mrinufft.trajectories._proximal` (:gh:`434`).
+- MRI-nufft requires Python 3.12 or later (:gh:`435`).
+- ``MRIStackedNUFFTGPU`` takes an ``MRICufiNUFFT`` instance as ``backend``, or
+  ``None`` to create one. A backend name raises a ``ValueError`` (:gh:`435`).
 
 Deprecations
 ^^^^^^^^^^^^

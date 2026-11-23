@@ -144,7 +144,6 @@ from .gradients import (
     patch_center_anomaly,
 )
 from .projection import (
-    GradientLinearProjection,
     parameterize_by_arc_length,
     project_trajectory,
 )
@@ -187,8 +186,6 @@ __all__ += [
     "Acquisition",
     "FloatEnum",
     "Gammas",
-    "GradientLinearProjection",
-    "GroupL2SoftThresholding",
     "Hardware",
     "KMAX",
     "NormShapes",
@@ -225,21 +222,3 @@ __all__ += [
     "sample_from_density",
     "unnormalize_trajectory",
 ]
-
-
-# `GroupL2SoftThresholding` subclasses a pyproximal class, and pyproximal is slow
-# to import: it is imported on first access.
-if TYPE_CHECKING:
-    from .projection import GroupL2SoftThresholding
-
-
-def __getattr__(name):
-    if name == "GroupL2SoftThresholding":
-        from .projection import GroupL2SoftThresholding
-
-        return GroupL2SoftThresholding
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def __dir__():
-    return sorted([*globals(), "GroupL2SoftThresholding"])

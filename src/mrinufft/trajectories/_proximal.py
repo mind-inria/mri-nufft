@@ -5,18 +5,24 @@ pylops through it, which are slow to import: `mrinufft.trajectories.projection`
 loads it on first use.
 """
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from collections.abc import Callable
+
 import numpy as np
 from numpy.typing import NDArray
+from pyproximal import ProxOperator
 
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
+from mrinufft._utils import _fill_doc
 
-try:
-    from pyproximal import ProxOperator
-except ImportError:
-    ProxOperator = object
+from .projection import _proj_docs
+
+if TYPE_CHECKING:
+    from pylops import LinearOperator
 
 
-class GroupL2SoftThresholding(ProxOperator):
+class _GroupL2SoftThresholding(ProxOperator):
     r"""
     Group L2 Soft Thresholding (Shrinkage) Operator.
 
@@ -75,3 +81,62 @@ class GroupL2SoftThresholding(ProxOperator):
         scaling_factor = numer / denom
         y = x_mat * scaling_factor
         return y.flatten()
+
+
+@_fill_doc(_proj_docs)
+class _GradientLinearProjection(ProxOperator):
+    r"""
+    Implements the gradient of F(q1, q2) given by Eq 11 in_[Proj].
+
+    The gradient is given by:
+    .. math::
+
+       \nabla F(q) = - A s^*
+
+    where :math:`s^*` is the projection of the primal variable :math:`z = c - M^H q`
+    onto the linear constraint set defined by :math:`A` and :math:`v`.
+
+    Parameters
+    ----------
+    M: LinearOperator
+        The kinetic operator M.
+    c: NDArray
+        The initial trajectory c.
+    linear_projector: LinearProjection, optional
+        An instance of the LinearProjection class to perform the projection
+        onto the constraint set. If not provided, the projection will be
+        performed without any constraints (i.e., :math:`s^* = z`).
+
+    ${proj_ref}
+    """
+
+    def __init__(
+        self,
+        initial_trajectory: NDArray,
+        kinetic_op: LinearOperator,
+        linear_projector: Callable | None = None,
+    ):
+        self.M = kinetic_op
+        self.c = initial_trajectory
+        self.linear_projector = linear_projector
+
+    def get_primal_variables(self, q: NDArray) -> NDArray:
+        """Compute the primal variables z = c - M^H q."""
+        return self.c - (self.M.H * q)
+
+    def __call__(self, x: NDArray) -> float:
+        """Evaluate the objective function."""
+        z = self.get_primal_variables(x)
+        s_star = self.linear_projector(z) if self.linear_projector is not None else z
+        xp = get_array_module(s_star)
+        return 0.5 * xp.linalg.norm(s_star) ** 2
+
+    def grad(self, x: NDArray) -> NDArray:
+        """
+        Compute the gradient of the objective function w.r.t q.
+
+        grad F(q) = - M * s_star
+        """
+        z = self.get_primal_variables(x)
+        s_star = self.linear_projector(z) if self.linear_projector is not None else z
+        return -(self.M * s_star).flatten()

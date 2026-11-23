@@ -39,14 +39,3 @@ def test_lazy_imports(module):
 @pytest.mark.parametrize("module", MODULES)
 def test_all(module):
     exec(f"from {module} import *", {})
-
-
-def test_lazy_attribute():
-    import mrinufft.trajectories
-    from mrinufft.trajectories import projection
-
-    assert "GroupL2SoftThresholding" in dir(mrinufft.trajectories)
-    assert (
-        mrinufft.trajectories.GroupL2SoftThresholding
-        is projection.GroupL2SoftThresholding
-    )

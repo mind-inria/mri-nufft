@@ -18,15 +18,10 @@ from mrinufft.trajectories.utils import Acquisition
 if TYPE_CHECKING:
     from pylops import LinearOperator
 
-    from mrinufft.trajectories._proximal import GroupL2SoftThresholding
-
-
-def __getattr__(name):
-    if name == "GroupL2SoftThresholding":
-        from mrinufft.trajectories._proximal import GroupL2SoftThresholding
-
-        return GroupL2SoftThresholding
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from mrinufft.trajectories._proximal import (
+        _GroupL2SoftThresholding,
+        _GradientLinearProjection,
+    )
 
 
 def parameterize_by_arc_length(
@@ -166,65 +161,6 @@ def _linear_projection(
 
 
 @_fill_doc(_proj_docs)
-class GradientLinearProjection:
-    r"""
-    Implements the gradient of F(q1, q2) given by Eq 11 in_[Proj].
-
-    The gradient is given by:
-    .. math::
-
-       \nabla F(q) = - A s^*
-
-    where :math:`s^*` is the projection of the primal variable :math:`z = c - M^H q`
-    onto the linear constraint set defined by :math:`A` and :math:`v`.
-
-    Parameters
-    ----------
-    M: LinearOperator
-        The kinetic operator M.
-    c: NDArray
-        The initial trajectory c.
-    linear_projector: LinearProjection, optional
-        An instance of the LinearProjection class to perform the projection
-        onto the constraint set. If not provided, the projection will be
-        performed without any constraints (i.e., :math:`s^* = z`).
-
-    ${proj_ref}
-    """
-
-    def __init__(
-        self,
-        initial_trajectory: NDArray,
-        kinetic_op: "LinearOperator",
-        linear_projector: Callable | None = None,
-    ):
-        self.M = kinetic_op
-        self.c = initial_trajectory
-        self.linear_projector = linear_projector
-
-    def get_primal_variables(self, q: NDArray) -> NDArray:
-        """Compute the primal variables z = c - M^H q."""
-        return self.c - (self.M.H * q)
-
-    def __call__(self, q: NDArray) -> float:
-        """Evaluate the objective function."""
-        z = self.get_primal_variables(q)
-        s_star = self.linear_projector(z) if self.linear_projector is not None else z
-        xp = get_array_module(s_star)
-        return 0.5 * xp.linalg.norm(s_star) ** 2
-
-    def grad(self, q: NDArray) -> NDArray:
-        """
-        Compute the gradient of the objective function w.r.t q.
-
-        grad F(q) = - M * s_star
-        """
-        z = self.get_primal_variables(q)
-        s_star = self.linear_projector(z) if self.linear_projector is not None else z
-        return -(self.M * s_star).flatten()
-
-
-@_fill_doc(_proj_docs)
 @with_numpy_cupy
 def project_trajectory(
     trajectory: NDArray,
@@ -283,7 +219,10 @@ def project_trajectory(
             "pyproximal is required for trajectory projection. "
             "Please install it to use this function."
         ) from exc
-    from mrinufft.trajectories._proximal import GroupL2SoftThresholding
+    from mrinufft.trajectories._proximal import (
+        _GroupL2SoftThresholding,
+        _GradientLinearProjection,
+    )
 
     acq = acq or Acquisition.default
     if trajectory.ndim == 2:
@@ -310,8 +249,8 @@ def project_trajectory(
         / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
         / 2
     )
-    prox_grad = GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
-    prox_slew = GroupL2SoftThresholding(
+    prox_grad = _GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
+    prox_slew = _GroupL2SoftThresholding(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)
@@ -329,7 +268,7 @@ def project_trajectory(
         )
     else:
         linear_projector_ = linear_projector
-    f = GradientLinearProjection(
+    f = _GradientLinearProjection(
         initial_trajectory=trajectory,
         kinetic_op=M,
         linear_projector=linear_projector_,
