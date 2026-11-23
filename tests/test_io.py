@@ -148,6 +148,78 @@ def test_write_trajectory_pad_samples(
         assert "not a multiple of 4" in caplog.text
 
 
+@mark.parametrize("case", cases_of(CasesIO), ids=case_id)
+@mark.parametrize("version", [4.2, 5.0, 5.1])
+def test_read_trajectory_acquisition_and_rewrite(case, tmp_path, version):
+    """Read acquisition metadata and pass the complete parameter dict to the writer."""
+    _, trajectory, fov, img_size, _, _, _, _ = case()
+    gamma = Gammas.Na / 1e3
+    write_trajectory(
+        trajectory,
+        FOV=fov,
+        img_size=img_size,
+        grad_filename=str(tmp_path / "original"),
+        gamma=gamma,
+        raster_time=0.02,
+        norm_factor=0.4,
+        min_osf=4,
+        version=version,
+        check_constraints=False,
+    )
+    trajectory, params = read_trajectory(
+        str(tmp_path / "original.bin"),
+        raster_time=0.02,
+        dwell_time=0.02,
+        normalize_factor=0.4,
+        read_shots=True,
+    )
+    acq = params["acq"]
+    assert isinstance(acq, Acquisition)
+    np.testing.assert_allclose(acq.fov, fov)
+    np.testing.assert_equal(acq.img_size, img_size)
+    assert acq.gamma == pytest.approx(Gammas.Na)
+    assert acq.adc_dwell_time == pytest.approx(20e-6)
+    assert acq.raster_time == pytest.approx(20e-6)
+    assert acq.norm_factor == 0.4
+    assert acq.hardware.gmax == Hardware().gmax
+    assert acq.hardware.smax == Hardware().smax
+
+    _, oversampled_params = read_trajectory(
+        str(tmp_path / "original.bin"), raster_time=0.02, dwell_time="min_osf"
+    )
+    assert oversampled_params["acq"].adc_dwell_time == pytest.approx(5e-6)
+
+    write_trajectory(trajectory, grad_filename=str(tmp_path / "rewritten"), **params)
+    rewritten, rewritten_params = read_trajectory(
+        str(tmp_path / "rewritten.bin"),
+        raster_time=0.02,
+        dwell_time=0.02,
+        normalize_factor=0.4,
+        read_shots=True,
+    )
+    np.testing.assert_allclose(rewritten, trajectory, atol=1e-5)
+    assert rewritten_params["acq"].gamma == pytest.approx(acq.gamma)
+
+
+@mark.parametrize("version", [4.0, 4.2])
+def test_read_trajectory_acquisition_unnormalized(tmp_path, version):
+    """Unnormalized legacy files remain readable without geometry metadata."""
+    trajectory = initialize_2D_radial(Nc=2, Ns=8).astype(np.float32)
+    write_trajectory(
+        trajectory,
+        FOV=(0.23, 0.24),
+        img_size=(64, 80),
+        grad_filename=str(tmp_path / "trajectory"),
+        version=version,
+        check_constraints=False,
+    )
+    _, params = read_trajectory(str(tmp_path / "trajectory.bin"), normalize_factor=None)
+    if version < 4.1:
+        assert params["acq"] is None
+    else:
+        assert params["acq"].norm_factor == Acquisition.default.norm_factor
+
+
 @mark.parametrize(
     "case", cases_of(CasesTrajectories, "random2D", "random3D"), ids=case_id
 )
