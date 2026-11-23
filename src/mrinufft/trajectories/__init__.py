@@ -144,7 +144,6 @@ from .gradients import (
     patch_center_anomaly,
 )
 from .projection import (
-    GradientLinearProjection,
     parameterize_by_arc_length,
     project_trajectory,
 )
@@ -187,7 +186,6 @@ __all__ += [
     "Acquisition",
     "FloatEnum",
     "Gammas",
-    "GradientLinearProjection",
     "Hardware",
     "KMAX",
     "NormShapes",
