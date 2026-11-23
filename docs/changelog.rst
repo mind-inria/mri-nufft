@@ -23,6 +23,8 @@ Breaking changes
 - The default ``power_iter`` of :func:`~mrinufft.extras.espirit` and
   :func:`~mrinufft.extras.cartesian_espirit` changed from ``30`` to ``10``, as the
   power iterations are now warm-started (:gh:`424`).
+- The `GroupL2SoftThresholding` pyproximal operator is made private and
+  refactored in :mod:`mrinufft.trajectories._proximal` (:gh:`434`).
 
 Deprecations
 ^^^^^^^^^^^^

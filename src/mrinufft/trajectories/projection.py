@@ -18,15 +18,7 @@ from mrinufft.trajectories.utils import Acquisition
 if TYPE_CHECKING:
     from pylops import LinearOperator
 
-    from mrinufft.trajectories._proximal import GroupL2SoftThresholding
-
-
-def __getattr__(name):
-    if name == "GroupL2SoftThresholding":
-        from mrinufft.trajectories._proximal import GroupL2SoftThresholding
-
-        return GroupL2SoftThresholding
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from mrinufft.trajectories._proximal import _GroupL2SoftThresholding
 
 
 def parameterize_by_arc_length(
@@ -283,7 +275,7 @@ def project_trajectory(
             "pyproximal is required for trajectory projection. "
             "Please install it to use this function."
         ) from exc
-    from mrinufft.trajectories._proximal import GroupL2SoftThresholding
+    from mrinufft.trajectories._proximal import _GroupL2SoftThresholding
 
     acq = acq or Acquisition.default
     if trajectory.ndim == 2:
@@ -310,8 +302,8 @@ def project_trajectory(
         / xp.asarray(acq.kmax[:Nd], dtype=trajectory.dtype)
         / 2
     )
-    prox_grad = GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
-    prox_slew = GroupL2SoftThresholding(
+    prox_grad = _GroupL2SoftThresholding((Nc, Ns, Nd), c1 * maxstep * acq.gmax)
+    prox_slew = _GroupL2SoftThresholding(
         (Nc, Ns, Nd), c2 * maxstep * acq.smax * acq.raster_time
     )
     prox = pyproximal.VStack([prox_grad, prox_slew], nn=[Nc * Ns * Nd] * 2)

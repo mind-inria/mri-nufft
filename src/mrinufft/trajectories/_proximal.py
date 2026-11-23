@@ -10,13 +10,10 @@ from numpy.typing import NDArray
 
 from mrinufft._array_compat import get_array_module, with_numpy_cupy
 
-try:
-    from pyproximal import ProxOperator
-except ImportError:
-    ProxOperator = object
+from pyproximal import ProxOperator
 
 
-class GroupL2SoftThresholding(ProxOperator):
+class _GroupL2SoftThresholding(ProxOperator):
     r"""
     Group L2 Soft Thresholding (Shrinkage) Operator.
 
