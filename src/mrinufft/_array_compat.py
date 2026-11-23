@@ -47,7 +47,8 @@ _ARRAY_NAMESPACES = ("numpy", "cupy", "torch", "tensorflow")
 def is_array(x: Any) -> bool:
     """Return True if x is a numpy/cupy/torch/tensorflow array (not a np scalar)."""
     return (
-        not isinstance(x, np.generic) and _get_array_module_name(x) in _ARRAY_NAMESPACES
+        not isinstance(x, np.generic | np.dtype)
+        and _get_array_module_name(x) in _ARRAY_NAMESPACES
     )
 
 
