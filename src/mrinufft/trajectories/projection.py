@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import numpy.linalg as nl
@@ -157,7 +157,8 @@ def _linear_projection(
         return x
     if A is None:
         return x
-    return A.div(target - A * x)  # ty: ignore[invalid-explicit-return]
+    # pylops>=2.9 types div as NDArray | LinearOperator; an array input gives an array.
+    return cast(NDArray, A.div(target - A * x))
 
 
 @_fill_doc(_proj_docs)
