@@ -10,6 +10,7 @@ from mrinufft.extras.smaps import (
     _chc_exact,
     _chc_exact_gpu,
     _crop_or_pad,
+    _extract_kspace_center,
     _kernel_mask,
 )
 
@@ -323,3 +324,20 @@ def test_noncartesian_low_frequency_matches_ground_truth(
         slope_err=SLOPE_ERR,
         r_value_err=R_VALUE_ERR,
     )
+
+
+@pytest.mark.parametrize("window_fun", ["hann", "hanning", "hamming"])
+def test_extract_kspace_center_cosine_window_zeros_outside_threshold(window_fun):
+    """Hann/Hamming windows must vanish for samples outside the threshold radius."""
+    kspace_loc = np.array(
+        [[0.0, 0.0], [0.05, 0.0], [0.1, 0.0], [0.2, 0.0], [0.4, 0.0]],
+        dtype=np.float32,
+    )
+    kspace_data = np.ones((1, 5), dtype=np.complex64)
+    out, _, _ = _extract_kspace_center(
+        kspace_data, kspace_loc, threshold=0.1, window_fun=window_fun
+    )
+    a_0 = 0.5 if window_fun in ("hann", "hanning") else 0.53836
+    expected = np.array([1.0, a_0, 2 * a_0 - 1.0, 0.0, 0.0], dtype=np.complex64)[None]
+    np.testing.assert_allclose(out, expected, atol=1e-6)
+    assert out.dtype == np.complex64

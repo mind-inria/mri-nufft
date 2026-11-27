@@ -206,7 +206,11 @@ def _extract_kspace_center(
         else:
             if window_fun in ["hann", "hanning", "hamming"]:
                 radius = xp.linalg.norm(kspace_loc, axis=1)
-                window = _cosine_window(radius / threshold[0], window_fun, xp)
+                window = xp.where(
+                    radius <= threshold[0],
+                    _cosine_window(radius / threshold[0], window_fun, xp),
+                    0,
+                )
             elif window_fun == "ellipse":
                 window = xp.sum(kspace_loc**2 / xp.asarray(threshold) ** 2, axis=1) <= 1
             else:
