@@ -238,6 +238,7 @@ def write_trajectory(
     grad_method: str = "auto",
     version: float = 5,
     pad_to_multiple_of_4: bool = False,
+    acq: Acquisition | None = None,
     **kwargs,
 ):
     """Calculate gradients from k-space points and write to file.
@@ -285,6 +286,9 @@ def write_trajectory(
         Trajectory versioning, by default 5
     pad_to_multiple_of_4 : bool, optional
         Pad the gradient samples with zeros to a multiple of four, by default False.
+    acq : Acquisition, optional
+        Acquisition metadata returned by :func:`read_trajectory`. The explicit
+        writing parameters are used instead.
     kwargs : dict, optional
         Additional arguments for writing the gradient file.
         These are arguments passed to write_gradients function above.
@@ -385,6 +389,17 @@ def write_trajectory(
                 )
 
     # Write gradients in file
+    for key in (
+        "dimension",
+        "num_shots",
+        "num_samples_per_shot",
+        "num_adc_samples",
+        "start_skip_samples",
+        "end_skip_samples",
+    ):
+        kwargs.pop(key, None)
+    if isinstance(kwargs.get("timestamp"), datetime):
+        kwargs["timestamp"] = kwargs["timestamp"].timestamp()
     write_gradients(
         gradients=gradients,
         initial_positions=initial_positions,
@@ -547,6 +562,12 @@ def read_trajectory(
     -------
     kspace_loc : np.ndarray
         K-space locations. Shape (num_shots, num_adc_samples, dimension).
+    params : dict
+        File metadata and ``acq``, an Acquisition with geometry, gamma, ADC dwell
+        time and gradient raster time in SI units. Hardware limits are defaults,
+        since they are not stored in the file. For files older than version 4.1,
+        which do not store geometry, ``acq`` is None. When normalization is
+        disabled, its normalization factor is the Acquisition default.
 
     See Also
     --------
@@ -562,6 +583,23 @@ def read_trajectory(
     end_skip_samples = params["end_skip_samples"]
     if dwell_time == "min_osf":
         dwell_time = raster_time / params["min_osf"]
+    params["raster_time"] = raster_time
+    if normalize_factor is not None:
+        params["norm_factor"] = normalize_factor
+    params["acq"] = None
+    if "FOV" in params:
+        adc_dwell_time = dwell_time * 1e-3
+        params["acq"] = Acquisition(
+            fov=tuple(params["FOV"]),
+            img_size=tuple(params["img_size"]),
+            gamma=gamma * 1e3,
+            adc_dwell_time=adc_dwell_time,
+            norm_factor=normalize_factor if normalize_factor is not None else KMAX,
+            hardware=Hardware(
+                grad_raster_time=raster_time * 1e-3,
+                min_dwell_time=min(Hardware().min_dwell_time, adc_dwell_time),
+            ),
+        )
     dwell_time_ns = dwell_time * 1e6
     gradient_raster_time_ns = raster_time * 1e6
     # Handle skipped samples
