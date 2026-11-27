@@ -110,6 +110,7 @@ def kspace_data(operator):
             ("mlx-nufft", "MRIMlxNUFFT"),
             ("cufinufft", "MRICufiNUFFT"),
             ("ducc0", "MRIDUCC0"),
+            ("grog", "MRIGrog"),
             ("tensorflow", "MRITensorflowNUFFT"),
             ("pynufft-cpu", "MRIPynufft"),
             ("pynfft", "MRInfft"),
