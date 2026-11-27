@@ -17,6 +17,7 @@ Backend              Hardward     Batch computation   Precision        Array Int
 cufinufft_           GPU (CUDA)   ✔                   single           cupy/torch/numpy
 finufft_             CPU          ✔                   single/double    numpy/torch
 gpunufft_            GPU          ✔                   single/double    numpy/torch/cupy
+grog_                CPU/GPU      ✔                   single           numpy/torch/cupy
 tensorflow-nufft_    GPU (CUDA)   ✘                   single           tensorflow
 pynufft-cpu_         CPU          ✘                   single/double    numpy
 pynfft_              CPU          ✘                   single/double    numpy
@@ -38,6 +39,7 @@ stacked (*)          CPU/GPU      ✔                   single/double    numpy
 .. _sigpy: https://github.com/sigpy/sigpy
 .. _ducc0: https://github.com/mreineck/ducc
 .. _mlx-nufft: https://github.com/martinlachaine/mlx-nufft
+.. _grog: https://github.com/FiRMLAB-Pisa/pygrog
 
 * mlx-nufft accepts double-precision inputs but computes at single-precision
   accuracy.
@@ -122,6 +124,23 @@ from source instead of using binary wheels:
 .. code-block:: sh
 
     pip install --no-binary ducc0 ducc0
+
+
+GROG
+~~~~
+
+The GROG backend wraps PyGROG's geometric sparse Fourier operator. It does not
+apply calibration-derived GRAPPA interpolation; that separate PyGROG gridding
+path is intended for data-driven gridding workflows. Install the backend with
+``pip install "mri-nufft[grog]"``:
+
+.. code-block:: python
+
+    nufft = get_operator("grog")(
+        samples,
+        shape,
+        n_coils=1,
+    )
 
 
 Which backend to use

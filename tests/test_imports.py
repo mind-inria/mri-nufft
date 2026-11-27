@@ -10,7 +10,7 @@ import sys
 
 import pytest
 
-HEAVY = ["torch", "pylops", "pyproximal", "matplotlib", "sigpy"]
+HEAVY = ["torch", "pylops", "pyproximal", "matplotlib", "sigpy", "pygrog"]
 MODULES = [
     "mrinufft",
     "mrinufft.operators",
