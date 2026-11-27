@@ -243,7 +243,8 @@ class GradientLinearProjection:
         onto the constraint set. If not provided, the projection will be
         performed without any constraints (i.e., :math:`s^* = z`).
     offset: NDArray, optional
-        Constant offset of the affine kinetic operator.
+        Constant term in the affine kinetic operator ``M @ s + offset``.
+        For trajectory projection, this encodes the prescribed boundary gradients.
 
     ${proj_ref}
     """
@@ -276,7 +277,7 @@ class GradientLinearProjection:
         """
         Compute the gradient of the objective function w.r.t q.
 
-        grad F(q) = - M * s_star
+        grad F(q) = - (M * s_star + offset)
         """
         z = self.get_primal_variables(q)
         s_star = self.linear_projector(z) if self.linear_projector is not None else z
@@ -358,8 +359,8 @@ def project_trajectory(
         xp.asarray(start_grad, dtype=trajectory.dtype), (Nc, Nd)
     )
     end_grad = xp.broadcast_to(xp.asarray(end_grad, dtype=trajectory.dtype), (Nc, Nd))
-    c1 = 1 / 8
-    c2 = 1 / 4
+    c1 = 1 / 8  # Weight of the first derivative, reduced to improve convergence.
+    c2 = 1 / 4  # Weight of the second derivative.
     D1 = FirstDerivative(
         (Nc, Ns, Nd),
         axis=1,
@@ -377,6 +378,7 @@ def project_trajectory(
         (Nc, Ns, Nd), axis=1, kind="backward", dtype=trajectory.dtype
     )
     last = pylops.Restriction((Nc, Ns, Nd), [Ns - 1], axis=1, dtype=trajectory.dtype)
+    # The extra row is the transition from the last trajectory gradient to end_grad.
     D2 = pylops.VStack([derivative * D1, -last * D1], dtype=trajectory.dtype)
     M = pylops.VStack([c1 * D1, c2 * D2], dtype=trajectory.dtype)
     lipchitz_constant = (2 * c1) ** 2 + (4 * c2) ** 2
@@ -388,6 +390,7 @@ def project_trajectory(
     prox = pyproximal.VStack(
         [prox_grad, prox_slew], nn=[Nc * Ns * Nd, Nc * (Ns + 1) * Nd]
     )
+    # Add the fixed boundary gradients to the first and last slew differences.
     offset_slew = xp.zeros((Nc, Ns, Nd), dtype=trajectory.dtype)
     grad_scale = acq.gamma * acq.raster_time * acq.norm_factor / kmax_scale
     offset_slew[:, 1, :] = -start_grad * grad_scale

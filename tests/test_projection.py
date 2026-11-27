@@ -3,7 +3,10 @@ import pytest
 from pytest_cases import parametrize_with_cases
 
 from case_trajectories import CasesTrajectories
-from mrinufft.trajectories.projection import project_trajectory
+from mrinufft.trajectories.projection import (
+    GradientLinearProjection,
+    project_trajectory,
+)
 from mrinufft.trajectories.utils import (
     Acquisition,
     compute_gradients_and_slew_rates,
@@ -13,6 +16,27 @@ from mrinufft.trajectories.utils import (
 @pytest.fixture(autouse=True)
 def require_pyproximal():
     pytest.importorskip("pyproximal")
+
+
+def test_gradient_linear_projection_with_offset():
+    from pylops import MatrixMult
+
+    matrix = np.array([[1.0, -1.0], [0.0, 2.0], [1.0, 1.0]])
+    trajectory = np.array([0.3, -0.5])
+    offset = np.array([0.2, 0.1, -0.4])
+    q = np.array([0.1, 0.2, 0.3])
+    f = GradientLinearProjection(trajectory, MatrixMult(matrix), offset=offset)
+    primal = trajectory - matrix.T @ q
+
+    np.testing.assert_allclose(f.grad(q), -(matrix @ primal + offset))
+    eps = 1e-6
+    numeric_grad = np.array(
+        [
+            (f(q + eps * direction) - f(q - eps * direction)) / (2 * eps)
+            for direction in np.eye(q.size)
+        ]
+    )
+    np.testing.assert_allclose(f.grad(q), numeric_grad, atol=1e-9)
 
 
 @parametrize_with_cases("trajectory, _", cases=CasesTrajectories.case_projection2D)
