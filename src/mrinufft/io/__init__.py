@@ -13,6 +13,7 @@ from mrinufft.io.nsp import (
     write_trajectory,
 )
 from mrinufft.io.pulseq import (
+    detect_trajectory_rotations,
     pulseq_gre,
     read_pulseq_traj,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "add_phase_to_kspace_with_shifts",
     "cfl2traj",
     "discard_frequency_outliers",
+    "detect_trajectory_rotations",
     "pulseq_gre",
     "read_arbgrad_rawdat",
     "read_girf",
